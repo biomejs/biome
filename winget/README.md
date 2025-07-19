@@ -37,10 +37,21 @@ The recommended approach is to use `wingetcreate.exe` to automatically generate 
    wingetcreate.exe update --out ./manifests --urls https://github.com/biomejs/biome/releases/download/@biomejs/biome@VERSION/biome-win32-x64.exe https://github.com/biomejs/biome/releases/download/@biomejs/biome@VERSION/biome-win32-arm64.exe --version VERSION BiomeJS.Biome
    ```
 
+4. **For submitting locally generated manifests** (once the team is happy with the manifests):
+   ```bash
+   # Submit manifests that were generated locally
+   wingetcreate.exe submit --prtitle <PullRequestTitle> --token <GitHubPersonalAccessToken>
+   
+   # Use --replace to replace an existing manifest from the Windows Package Manager repo
+   wingetcreate.exe submit --prtitle <PullRequestTitle> --token <GitHubPersonalAccessToken> --replace
+   ```
+
 
 ## Automated Updates
 
 Once the initial package is submitted and merged, the automated workflow in `.github/workflows/winget.yml` will handle future updates automatically when new releases are published.
+
+> **Note**: The automation is already set up and working! New CLI releases tagged with `@biomejs/biome@*` will automatically trigger WinGet package updates.
 
 ### Setting up the Automation
 
