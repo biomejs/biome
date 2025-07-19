@@ -194,7 +194,7 @@ impl TypeResolver for HardcodedSymbolResolver {
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() == 1 && qualifier.path[0] == self.name {
+        if qualifier.path.is_identifier(self.name) {
             Some(ResolvedTypeId::new(self.level(), TypeId::new(0)))
         } else {
             self.globals.resolve_qualifier(qualifier)

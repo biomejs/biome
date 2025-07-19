@@ -163,7 +163,7 @@ impl TypeData {
         index: usize,
     ) -> Option<ResolvedTypeData<'a>> {
         match self {
-            Self::Tuple(tuple) => Some(tuple.get_ty(resolver, index)),
+            Self::Tuple(tuple) => tuple.get_ty(resolver, index),
             _ => {
                 let resolved = ResolvedTypeData::from((resolver_id, self));
                 if resolved.is_instance_of(resolver, GLOBAL_ARRAY_ID) {

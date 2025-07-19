@@ -345,12 +345,16 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@193..195 "::" [] [],
-                            element: CssPseudoElementFunctionIdentifier {
-                                name: PART_KW@195..199 "part" [] [],
-                                l_paren_token: L_PAREN@199..200 "(" [] [],
-                                ident: CssIdentifier {
-                                    value_token: IDENT@200..203 "tab" [] [],
+                            element: CssPseudoElementFunction {
+                                name: CssIdentifier {
+                                    value_token: IDENT@195..199 "part" [] [],
                                 },
+                                l_paren_token: L_PAREN@199..200 "(" [] [],
+                                items: CssPseudoElementFunctionParameterList [
+                                    CssIdentifier {
+                                        value_token: IDENT@200..203 "tab" [] [],
+                                    },
+                                ],
                                 r_paren_token: R_PAREN@203..205 ")" [] [Whitespace(" ")],
                             },
                         },
@@ -840,11 +844,13 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@193..205
             0: CSS_PSEUDO_ELEMENT_SELECTOR@193..205
               0: COLON2@193..195 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@195..205
-                0: PART_KW@195..199 "part" [] []
+              1: CSS_PSEUDO_ELEMENT_FUNCTION@195..205
+                0: CSS_IDENTIFIER@195..199
+                  0: IDENT@195..199 "part" [] []
                 1: L_PAREN@199..200 "(" [] []
-                2: CSS_IDENTIFIER@200..203
-                  0: IDENT@200..203 "tab" [] []
+                2: CSS_PSEUDO_ELEMENT_FUNCTION_PARAMETER_LIST@200..203
+                  0: CSS_IDENTIFIER@200..203
+                    0: IDENT@200..203 "tab" [] []
                 3: R_PAREN@203..205 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@205..207
         0: L_CURLY@205..206 "{" [] []

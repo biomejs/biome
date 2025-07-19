@@ -22,11 +22,11 @@ export = shared;
 
 ```
 Exports {
-  "default" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(3))
-  }
   "foo" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1))
+  }
+  "default" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(3))
   }
 }
 Imports {
@@ -55,11 +55,11 @@ Module TypeId(2) => Object {
 Module TypeId(3) => Module(0) TypeId(2)
 
 Module TypeId(4) => Namespace {
-    path: [
+    path: Identifier(
         Borrowed(
             "shared",
         ),
-    ],
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(

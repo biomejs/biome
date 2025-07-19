@@ -11,34 +11,43 @@
 
 use std::path::PathBuf;
 
-use biome_fs::PathKind;
-use camino::{Utf8Path, Utf8PathBuf};
-use papaya::{Compute, Operation};
-
-use crate::{WorkspaceError, workspace_watcher::WatcherSignalKind};
-
 use super::{
     ScanKind, ScanProjectFolderParams, ServiceDataNotification, Workspace, WorkspaceServer,
     document::Document,
 };
+use crate::{
+    WatcherInstruction, WorkspaceError, workspace::IgnoreKind, workspace_watcher::WatcherSignalKind,
+};
+use biome_fs::{BiomePath, PathKind};
+use camino::{Utf8Path, Utf8PathBuf};
+use papaya::{Compute, Operation};
 
 impl WorkspaceServer {
     /// Filters the given `paths` and returns only those the watcher is
     /// interested in.
-    pub fn filter_paths_for_watcher(&self, paths: Vec<PathBuf>) -> Vec<Utf8PathBuf> {
+    pub fn filter_paths_for_watcher(
+        &self,
+        paths: Vec<PathBuf>,
+        scan_kind: &ScanKind,
+    ) -> Vec<Utf8PathBuf> {
         paths
             .into_iter()
             .filter_map(|path| {
                 let path = Utf8PathBuf::from_path_buf(path).ok()?;
                 self.projects
                     .find_project_for_path(&path)
-                    .and_then(|project_key| {
-                        if self.is_ignored_by_scanner(project_key, &path) {
-                            None
-                        } else {
-                            Some(path)
+                    .filter(|project_key| {
+                        match self.is_ignored_by_scanner(
+                            *project_key,
+                            scan_kind,
+                            &BiomePath::new(&path),
+                            IgnoreKind::Ancestors,
+                        ) {
+                            Ok(is_ignored) => !is_ignored,
+                            Err(_) => true,
                         }
                     })
+                    .map(|_| path)
             })
             .collect()
     }
@@ -50,9 +59,10 @@ impl WorkspaceServer {
     pub fn open_paths_through_watcher(
         &self,
         paths: Vec<Utf8PathBuf>,
+        scan_kind: &ScanKind,
     ) -> Result<(), WorkspaceError> {
         for path in paths {
-            self.open_path_through_watcher(&path)?;
+            self.open_path_through_watcher(&path, scan_kind)?;
         }
 
         Ok(())
@@ -62,9 +72,10 @@ impl WorkspaceServer {
     pub fn open_folders_through_watcher(
         &self,
         paths: Vec<Utf8PathBuf>,
+        scan_kind: &ScanKind,
     ) -> Result<(), WorkspaceError> {
         for path in paths {
-            self.open_folder_through_watcher(&path)?;
+            self.open_folder_through_watcher(&path, scan_kind)?;
         }
 
         Ok(())
@@ -73,25 +84,30 @@ impl WorkspaceServer {
     /// Used indirectly by the watcher to open an individual file or folder.
     ///
     /// If you already know the path is a folder, use
-    /// `Self::open_folder_through_watcher()` instead.
-    pub fn open_path_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    /// [`Self::open_folder_through_watcher()`] instead. If you know it is a
+    /// file, you can directly call [`Self::open_file_by_watcher()`] instead.
+    pub fn open_path_through_watcher(
+        &self,
+        path: &Utf8Path,
+        scan_kind: &ScanKind,
+    ) -> Result<(), WorkspaceError> {
         if let PathKind::Directory { .. } = self.fs.path_kind(path)? {
-            return self.open_folder_through_watcher(path);
+            self.open_folder_through_watcher(path, scan_kind)
+        } else {
+            let Some(project_key) = self.projects.find_project_for_path(path) else {
+                return Ok(()); // file events outside our projects can be safely ignored.
+            };
+
+            self.open_file_by_watcher(project_key, scan_kind, path)
         }
-
-        let Some(project_key) = self.projects.find_project_for_path(path) else {
-            return Ok(()); // file events outside our projects can be safely ignored.
-        };
-
-        if self.is_ignored_by_scanner(project_key, path) {
-            return Ok(());
-        }
-
-        self.open_file_by_watcher(project_key, path)
     }
 
     /// Used indirectly by the watcher to open an individual folder.
-    fn open_folder_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn open_folder_through_watcher(
+        &self,
+        path: &Utf8Path,
+        scan_kind: &ScanKind,
+    ) -> Result<(), WorkspaceError> {
         let Some(project_key) = self.projects.find_project_for_path(path) else {
             return Ok(()); // file events outside our projects can be safely ignored.
         };
@@ -99,9 +115,10 @@ impl WorkspaceServer {
         self.scan_project_folder(ScanProjectFolderParams {
             project_key,
             path: Some(path.into()),
-            watch: false, // It's already being watched.
+            watch: true,
             force: true,
-            scan_kind: ScanKind::Project,
+            scan_kind: scan_kind.clone(),
+            verbose: false,
         })
         .map(|_| ())
     }
@@ -162,15 +179,20 @@ impl WorkspaceServer {
     /// Used indirectly by the watcher to close an individual file or folder.
     ///
     /// Note that we don't really have a concept of open folders in the
-    /// workspace, so instead we just iterate the documents to find paths that
-    /// would be inside the closed folder.
+    /// workspace, so we send a [`WatcherInstruction::UnwatchFolder`] just in
+    /// case and iterate the documents to find paths that would be inside the
+    /// closed folder.
     ///
     /// If you already know the path is a file, use
     /// [Self::close_file_through_watcher()] instead.
     fn close_path_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         // Note that we cannot check the kind of the path, because the watcher
         // would only attempt to close a file or folder after it has been
-        // removed. So asking the file system wouldn't work anymore.
+        // removed. So asking the file system wouldn't work anymore. If it turns
+        // the path didn't belong to a folder, the watcher will ignore it.
+        let _ = self
+            .watcher_tx
+            .try_send(WatcherInstruction::UnwatchFolder(path.to_path_buf()));
 
         for document_path in self.documents.pin().keys() {
             if document_path.starts_with(path) {
@@ -187,11 +209,37 @@ impl WorkspaceServer {
         &self,
         from: &Utf8Path,
         to: &Utf8Path,
+        scan_kind: &ScanKind,
     ) -> Result<(), WorkspaceError> {
         self.close_path_through_watcher(from)?;
-        self.open_path_through_watcher(to)?;
+        self.open_path_through_watcher(to, scan_kind)?;
 
         Ok(())
+    }
+
+    /// Reopens an individual file if the watcher (still) has interest in it.
+    pub fn resync_file_through_watcher(
+        &self,
+        path: &Utf8Path,
+        scan_kind: &ScanKind,
+    ) -> Result<(), WorkspaceError> {
+        let Some(project_key) = self.projects.find_project_for_path(path) else {
+            return Ok(()); // file events outside our projects can be safely ignored.
+        };
+
+        if self
+            .is_ignored_by_scanner(
+                project_key,
+                scan_kind,
+                &BiomePath::new(path),
+                IgnoreKind::Ancestors,
+            )
+            .unwrap_or(true)
+        {
+            return Ok(());
+        }
+
+        self.open_path_through_watcher(path, scan_kind)
     }
 
     /// Used by the watcher to indicate it has stopped.

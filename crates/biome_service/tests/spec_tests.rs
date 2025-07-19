@@ -55,6 +55,7 @@ fn test_scanner_only_loads_type_definitions_from_node_modules() {
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
@@ -144,6 +145,7 @@ fn test_scanner_ignored_files_are_not_loaded() {
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
@@ -212,6 +214,7 @@ fn test_scanner_required_files_are_only_ignored_in_ignored_directories() {
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 

@@ -681,6 +681,7 @@ impl Session {
                     watch: true,
                     force: false,
                     scan_kind,
+                    verbose: false,
                 });
 
             match result {

@@ -1,7 +1,7 @@
 use biome_rowan::Text;
 
 use crate::{
-    Class, Function, Interface, Intersection, Literal, Namespace, Object, ResolvedTypeData,
+    Class, Function, Interface, Intersection, Literal, Namespace, Object, Path, ResolvedTypeData,
     ReturnType, TypeData, TypeMember, TypeMemberKind, TypeResolver,
 };
 
@@ -274,7 +274,7 @@ impl MergedType {
             }),
             Self::Namespace(members) => TypeData::from(Namespace {
                 members: members.into_iter().collect(),
-                path: [].into(),
+                path: Path::from(Text::Static("")),
             }),
             Self::Never => TypeData::NeverKeyword,
             Self::Object(members) => TypeData::from(Object {

@@ -433,7 +433,7 @@ impl From<TypeofValue> for TypeData {
 impl TypeData {
     pub fn array_of(scope_id: ScopeId, ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::from(
-            TypeReferenceQualifier::from_name(scope_id, Text::Static("Array"))
+            TypeReferenceQualifier::from_path(scope_id, Text::Static("Array"))
                 .with_type_parameters([ty]),
         ))
     }
@@ -855,7 +855,7 @@ pub struct Module {
 /// A namespace definition.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct Namespace {
-    pub path: Box<[Text]>,
+    pub path: Path,
     pub members: Box<[TypeMember]>,
 }
 
@@ -883,6 +883,98 @@ impl ObjectLiteral {
 
     pub fn members(&self) -> &[TypeMember] {
         &self.0
+    }
+}
+
+/// Path used to identify a type.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub enum Path {
+    /// Path consisting of a single identifier.
+    Identifier(Text),
+
+    /// Qualified path of identifiers, such as `foo.bar`.
+    Qualified(Box<[Text]>),
+}
+
+impl From<Text> for Path {
+    fn from(identifier: Text) -> Self {
+        Self::Identifier(identifier)
+    }
+}
+
+impl Path {
+    /// Creates a new path from its path in reverse order.
+    ///
+    /// For example, if you wish to create the path for `foo.bar`, the parts
+    /// should be `["bar", "foo"]`. This is an optimisation used during local
+    /// inference from the CST.TokenText
+    pub fn from_reversed_parts(mut parts: Vec<Text>) -> Self {
+        match parts.len() {
+            0 => Self::Identifier(Text::Static("")),
+            1 => Self::Identifier(parts.remove(0)),
+            _ => {
+                parts.reverse();
+                Self::Qualified(parts.into())
+            }
+        }
+    }
+
+    #[inline]
+    pub fn identifier(&self) -> Option<&Text> {
+        match self {
+            Self::Identifier(identifier) => Some(identifier),
+            _ => None,
+        }
+    }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    #[inline]
+    pub fn is_identifier(&self, ident: &str) -> bool {
+        match self {
+            Self::Identifier(identifier) => identifier.text() == ident,
+            _ => false,
+        }
+    }
+
+    #[inline]
+    pub fn iter(&self) -> impl Iterator<Item = &Text> {
+        PathIterator {
+            path: self,
+            index: 0,
+        }
+    }
+
+    #[inline]
+    pub fn len(&self) -> usize {
+        match self {
+            Self::Identifier(_) => 1,
+            Self::Qualified(identifiers) => identifiers.len(),
+        }
+    }
+}
+
+struct PathIterator<'a> {
+    path: &'a Path,
+    index: usize,
+}
+
+impl<'a> Iterator for PathIterator<'a> {
+    type Item = &'a Text;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.path {
+            Path::Identifier(identifier) => (self.index == 0).then(|| {
+                self.index = 1;
+                identifier
+            }),
+            Path::Qualified(identifiers) => identifiers.get(self.index).inspect(|_| {
+                self.index += 1;
+            }),
+        }
     }
 }
 
@@ -944,28 +1036,26 @@ impl Tuple {
         &'a self,
         resolver: &'a mut dyn TypeResolver,
         index: usize,
-    ) -> ResolvedTypeData<'a> {
-        let resolved_id = if let Some(elem_type) = self.0.get(index) {
-            let ty = elem_type.ty.clone();
-            let id = if elem_type.is_optional {
-                resolver.optional(ty)
+    ) -> Option<ResolvedTypeData<'a>> {
+        if let Some(elem_type) = self.0.get(index) {
+            let ty = &elem_type.ty;
+            if elem_type.is_optional {
+                let id = resolver.optional(ty.clone());
+                resolver.get_by_resolved_id(ResolvedTypeId::new(resolver.level(), id))
             } else {
-                resolver.register_type(Cow::Owned(TypeData::reference(ty)))
-            };
-            ResolvedTypeId::new(resolver.level(), id)
+                resolver.resolve_and_get(ty)
+            }
         } else {
-            self.0
+            let resolved_id = self
+                .0
                 .last()
                 .filter(|last| last.is_rest)
                 .map(|last| resolver.optional(last.ty.clone()))
                 .map_or(GLOBAL_UNKNOWN_ID, |id| {
                     ResolvedTypeId::new(resolver.level(), id)
-                })
-        };
-
-        resolver
-            .get_by_resolved_id(resolved_id)
-            .expect("tuple element type must be registered")
+                });
+            resolver.get_by_resolved_id(resolved_id)
+        }
     }
 
     /// Returns a new tuple starting at the given index.
@@ -1129,6 +1219,7 @@ pub enum TypeofExpression {
     Call(TypeofCallExpression),
     Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
+    Index(TypeofIndexExpression),
     IterableValueOf(TypeofIterableValueOfExpression),
     LogicalAnd(TypeofLogicalAndExpression),
     LogicalOr(TypeofLogicalOrExpression),
@@ -1216,6 +1307,12 @@ pub struct TypeofNewExpression {
 pub enum CallArgumentType {
     Argument(TypeReference),
     Spread(TypeReference),
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofIndexExpression {
+    pub object: TypeReference,
+    pub index: usize,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
@@ -1419,7 +1516,7 @@ impl From<&'static str> for ImportSymbol {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeReferenceQualifier {
     /// The identifier path.
-    pub path: Box<[Text]>,
+    pub path: Path,
 
     /// Generic type parameters specified in the reference.
     pub type_parameters: Box<[TypeReference]>,
@@ -1449,7 +1546,7 @@ impl TypeReferenceQualifier {
     /// `Array` symbol in scope, but should not be used _instead of_ such type
     /// resolution.
     pub fn is_array(&self) -> bool {
-        self.path.len() == 1 && self.path[0] == "Array"
+        self.path.is_identifier("Array")
     }
 
     /// Checks whether this type qualifier references a `Promise` type.
@@ -1460,7 +1557,7 @@ impl TypeReferenceQualifier {
     /// `Promise` symbol in scope, but should not be used _instead of_ such type
     /// resolution.
     pub fn is_promise(&self) -> bool {
-        self.path.len() == 1 && self.path[0] == "Promise"
+        self.path.is_identifier("Promise")
     }
 
     pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {

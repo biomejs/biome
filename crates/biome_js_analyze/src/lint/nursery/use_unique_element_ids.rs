@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsxAttributeValue, JsCallExpression, JsPropertyObjectMember, JsxAttribute,
     jsx_ext::AnyJsxElement,
 };
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, TokenText, declare_node_union};
 use biome_rule_options::use_unique_element_ids::UseUniqueElementIdsOptions;
 
 use crate::react::{ReactApiCall, ReactCreateElementCall};
@@ -44,6 +44,37 @@ declare_lint_rule! {
     /// React.createElement("div", { id });
     /// ```
     ///
+    /// ## Options
+    ///
+    /// The following option is available
+    ///
+    /// ### `excludedComponents`
+    ///
+    /// List of unqualified component names to ignore.
+    /// Use it to list components expecting an `id` attribute that does not represent
+    /// a DOM element ID.
+    ///
+    /// **Default**: empty list.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "excludedComponents": [
+    ///             "FormattedMessage"
+    ///         ]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <FormattedMessage id="static" />
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <Library.FormattedMessage id="static" />
+    /// ```
+    ///
+    ///
     pub UseUniqueElementIds {
         version: "2.0.0",
         name: "useUniqueElementIds",
@@ -63,16 +94,37 @@ declare_node_union! {
 }
 
 impl UseUniqueElementIdsQuery {
+    fn create_element_call(&self, model: &SemanticModel) -> Option<ReactCreateElementCall> {
+        match self {
+            Self::JsCallExpression(expression) => {
+                ReactCreateElementCall::from_call_expression(expression, model)
+            }
+            &Self::AnyJsxElement(_) => None,
+        }
+    }
+
+    fn element_name(&self, model: &SemanticModel) -> Option<TokenText> {
+        match self {
+            Self::AnyJsxElement(jsx) => jsx
+                .name_value_token()
+                .ok()
+                .map(|tok| tok.token_text_trimmed()),
+            Self::JsCallExpression(_) => self
+                .create_element_call(model)?
+                .element_type
+                .as_any_js_expression()?
+                .get_callee_member_name()
+                .map(|tok| tok.token_text_trimmed()),
+        }
+    }
+
     fn find_id_attribute(&self, model: &SemanticModel) -> Option<IdProp> {
         match self {
             Self::AnyJsxElement(jsx) => jsx.find_attribute_by_name("id").map(IdProp::from),
-            Self::JsCallExpression(expression) => {
-                let react_create_element =
-                    ReactCreateElementCall::from_call_expression(expression, model)?;
-                react_create_element
-                    .find_prop_by_name("id")
-                    .map(IdProp::from)
-            }
+            Self::JsCallExpression(_) => self
+                .create_element_call(model)?
+                .find_prop_by_name("id")
+                .map(IdProp::from),
         }
     }
 }
@@ -86,6 +138,13 @@ impl Rule for UseUniqueElementIds {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
+        let options = ctx.options();
+        if node
+            .element_name(model)
+            .is_some_and(|name| options.excluded_components.contains(name.text()))
+        {
+            return None;
+        }
         let id_attribute = node.find_id_attribute(model)?;
 
         match id_attribute {

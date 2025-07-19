@@ -31,11 +31,11 @@ Imports {
 
 ```
 Module TypeId(0) => Namespace {
-    path: [
+    path: Identifier(
         Borrowed(
             "Foo",
         ),
-    ],
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(
