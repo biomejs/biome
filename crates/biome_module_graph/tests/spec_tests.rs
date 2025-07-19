@@ -966,7 +966,7 @@ fn class_this_test_helper(case_name: &str, prefix: &str) {
         let name = format!("foo{i}");
         let foo_id = resolver
             .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
-            .expect(&format!("{name} variable not found"));
+            .unwrap_or_else(|| panic!("{name} variable not found"));
         let foo_ty = resolver.resolved_type_for_id(foo_id);
         assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
     }
@@ -1041,7 +1041,7 @@ fn test_resolve_type_of_this_in_object() {
         let name = format!("foo{i}");
         let foo_id = resolver
             .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
-            .expect(&format!("{name} variable not found"));
+            .unwrap_or_else(|| panic!("{name} variable not found"));
         let foo_ty = resolver.resolved_type_for_id(foo_id);
         assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
     }
@@ -1049,7 +1049,7 @@ fn test_resolve_type_of_this_in_object() {
         let name = format!("notFoo{i}");
         let foo_id = resolver
             .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
-            .expect(&format!("{name} variable not found"));
+            .unwrap_or_else(|| panic!("{name} variable not found"));
         let foo_ty = resolver.resolved_type_for_id(foo_id);
         assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
     }
@@ -1133,7 +1133,7 @@ fn test_resolve_type_of_this_in_class_wrong_scope() {
         let name = format!("notFoo{i}");
         let foo_id = resolver
             .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
-            .expect(&format!("{name} variable not found"));
+            .unwrap_or_else(|| panic!("{name} variable not found"));
         let foo_ty = resolver.resolved_type_for_id(foo_id);
         assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
     }
