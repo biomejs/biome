@@ -116,6 +116,8 @@ impl<'src> HtmlLexer<'src> {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'<' => self.consume_byte(T![<]),
             b'>' => self.consume_byte(T![>]),
+            b'{' => self.consume_byte(T!['{']),
+            b'}' => self.consume_byte(T!['}']),
             b'\'' | b'"' => self.consume_string_literal(current),
             _ => self.consume_unquoted_string_literal(),
         }
@@ -168,6 +170,28 @@ impl<'src> HtmlLexer<'src> {
             // if the element is empty, we will immediately hit the closing tag.
             // we HAVE to consume something, so we start consuming the closing tag.
             self.consume_byte(T![<])
+        }
+    }
+
+    fn consume_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'}' if self.is_at_r_text_expression() => self.consume_r_text_expression(),
+            b'}' => self.consume_byte(T!['}']),
+            b'<' => self.consume_byte(T![<]),
+            _ => {
+                while let Some(current) = self.current_byte() {
+                    match current {
+                        b'\n' | b'\r' | b'\t' | b' ' => break,
+                        b'}' if self.is_at_r_text_expression() => break,
+                        b'}' | b'<' | b'>' | b'/' => break,
+                        _ => {
+                            self.advance(1);
+                        }
+                    }
+                }
+                HTML_LITERAL
+            }
         }
     }
 
@@ -680,6 +704,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang, context)
                     }
+                    HtmlLexContext::TextExpression => self.consume_text_expression(current),
                     HtmlLexContext::Comment => self.consume_inside_comment(current),
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                     HtmlLexContext::AstroFencedCodeBlock => {

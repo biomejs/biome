@@ -48,6 +48,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_CDATA_SECTION",
         "HTML_TEXT_EXPRESSION",
         "SVELTE_TEXT_EXPRESSION",
+        "ASTRO_EXPRESSION",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",

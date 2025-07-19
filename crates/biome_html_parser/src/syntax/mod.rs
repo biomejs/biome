@@ -2,7 +2,7 @@ mod astro;
 mod parse_error;
 
 use crate::parser::HtmlParser;
-use crate::syntax::astro::parse_astro_fence;
+use crate::syntax::astro::{parse_astro_expression, parse_astro_fence};
 use crate::syntax::parse_error::*;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext};
 use biome_console::markup;
@@ -16,8 +16,8 @@ use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
 
 pub(crate) enum HtmlSyntaxFeatures {
-    /// Exclusive to those documents that support front matter at the top of the file
-    Frontmatter,
+    /// Exclusive to those documents that support Astro
+    Astro,
     /// Exclusive to those documents that support text expressions
     TextExpressions,
 }
@@ -27,7 +27,7 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
 
     fn is_supported(&self, p: &HtmlParser) -> bool {
         match self {
-            Self::Frontmatter => p.file_source().is_astro(),
+            Self::Astro => p.file_source().is_astro(),
             Self::TextExpressions => match p.file_source().variant() {
                 HtmlVariant::Standard | HtmlVariant::Astro | HtmlVariant::Svelte => false,
                 HtmlVariant::Vue => true,
@@ -53,7 +53,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     p.eat(UNICODE_BOM);
 
     if p.at(T![---]) {
-        HtmlSyntaxFeatures::Frontmatter
+        HtmlSyntaxFeatures::Astro
             .parse_exclusive_syntax(
                 p,
                 |p| parse_astro_fence(p),
@@ -318,7 +318,25 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
-    parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
+    if p.at(T!['{']) {
+        HtmlSyntaxFeatures::Astro
+            .parse_exclusive_syntax(
+                p,
+                |p| parse_astro_expression(p),
+                |p, m| {
+                    p.err_builder("Expressions are only valid inside Astro files.", m.range(p))
+                        .with_hint("Remove it or rename the file to have the .astro extension.")
+                },
+            )
+            .or_recover_with_token_set(
+                p,
+                &ParseRecoveryTokenSet::new(HTML_BOGUS_ATTRIBUTE, RECOVER_ATTRIBUTE_LIST),
+                expected_attribute,
+            )
+            .ok();
+    } else {
+        parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
+    }
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
 }
 
@@ -362,10 +380,10 @@ fn parse_text_expression(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
     let range = p.cur_range();
-    p.bump_with_context(T!["{{"], HtmlLexContext::OutsideTag);
+    p.bump_with_context(T!["{{"], HtmlLexContext::TextExpression);
 
     while p.at(HTML_LITERAL) {
-        p.bump_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::TextExpression);
     }
     if p.at(T![<]) && !p.at(EOF) {
         p.error(
@@ -375,7 +393,7 @@ fn parse_text_expression(p: &mut HtmlParser) -> ParsedSyntax {
         m.abandon(p);
         return Absent;
     }
-    p.expect_with_context(T!["}}"], HtmlLexContext::OutsideTag);
+    p.expect_with_context(T!["}}"], HtmlLexContext::TextExpression);
     Present(m.complete(p, HTML_TEXT_EXPRESSION))
 }
 
