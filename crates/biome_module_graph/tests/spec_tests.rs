@@ -891,7 +891,7 @@ macro_rules! class_tests {
     }
 }
 
-class_tests!{
+class_tests! {
     test_resolve_type_of_this_in_class_plain: "class Foo",
     test_resolve_type_of_this_in_class_assign: "const Foo = class",
     test_resolve_type_of_this_in_class_export: "export default class Foo",
@@ -901,7 +901,9 @@ fn class_this_test_helper(case_name: &str, prefix: &str) {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
-        format!("{prefix} {}", r#"
+        format!(
+            "{prefix} {}",
+            r#"
         {
             x = 'foo';
             y = this.x;
@@ -942,7 +944,8 @@ fn class_this_test_helper(case_name: &str, prefix: &str) {
         const foo5 = obj.meth();
         const foo6 = obj.nestedArrow();
         const foo7 = obj.inObject();
-        "#)
+        "#
+        ),
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
@@ -1017,7 +1020,7 @@ fn test_resolve_type_of_this_in_object() {
 
         const notFoo1 = obj.y;
         const notFoo2 = obj.arrow();
-        "#
+        "#,
     );
 
     let added_paths = [BiomePath::new("/src/index.ts")];
