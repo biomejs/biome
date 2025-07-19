@@ -44,9 +44,12 @@ declare_lint_rule! {
     ///
     /// ```js
     /// const TAX_RATE = 1.23;
-    /// const TAX_RATE_REDUCED = 1 as const;
     /// let total = price * TAX_RATE;
-    /// let reducedTotal = price * TAX_RATE_REDUCED;
+    /// ```
+    ///
+    /// ```ts
+    /// const TAX_RATE = 1.23 as const;
+    /// let total = price * TAX_RATE;
     /// ```
     pub NoMagicNumbers {
         version: "2.1.0",
