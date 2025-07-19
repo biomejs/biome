@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed `prefer-for` rule name of `eslint-plugin-solid`.
+Fixed ESLint migration for the rule `prefer-for` from `eslint-plugin-solid` to Biome's `useForComponent`.
