@@ -10,8 +10,8 @@ use biome_js_syntax::{
     JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxNode, JsUnaryExpression,
     JsUnaryOperator, JsxExpressionAttributeValue, JsxExpressionChild, TsAsExpression,
     TsEnumMemberList, TsIndexedAccessType, TsNonNullAssertionExpression, TsNumberLiteralType,
-    TsReturnTypeAnnotation, TsSatisfiesExpression, TsTypeAnnotation, TsTypeAssertionExpression,
-    TsUnionTypeVariantList,
+    TsPredicateReturnType, TsReturnTypeAnnotation, TsSatisfiesExpression, TsTypeAnnotation,
+    TsTypeAssertionExpression, TsUnionTypeVariantList,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_magic_numbers::NoMagicNumbersOptions;
@@ -384,6 +384,7 @@ fn get_sanitized_parent_node(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
             || TsNonNullAssertionExpression::can_cast(parent.kind())
             || TsSatisfiesExpression::can_cast(parent.kind())
             || TsTypeAssertionExpression::can_cast(parent.kind())
+            || TsPredicateReturnType::can_cast(parent.kind())
             || JsParenthesizedExpression::can_cast(parent.kind())
         {
             false
