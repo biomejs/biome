@@ -56,16 +56,12 @@ Module TypeId(3) => Module(0) TypeId(2)
 
 Module TypeId(4) => Namespace {
     path: Identifier(
-        Borrowed(
-            "shared",
-        ),
+        "shared",
     ),
     members: [
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Result",
-                ),
+                "Result",
             ),
             ty: Resolved(
                 string,

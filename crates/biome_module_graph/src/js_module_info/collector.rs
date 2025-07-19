@@ -826,7 +826,7 @@ impl JsModuleInfoCollector {
                     let resolved = self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID);
 
                     let export = JsExport::Own(JsOwnExport::Type(resolved));
-                    finalised_exports.insert(Text::Static("default"), export);
+                    finalised_exports.insert(Text::new_static("default"), export);
                 }
                 JsCollectedExport::ExportDefaultAssignment { ty } => {
                     let resolved = self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID);
@@ -853,7 +853,7 @@ impl JsModuleInfoCollector {
                     }
 
                     let export = JsExport::Own(JsOwnExport::Type(resolved));
-                    finalised_exports.insert(Text::Static("default"), export);
+                    finalised_exports.insert(Text::new_static("default"), export);
                 }
                 JsCollectedExport::Reexport {
                     export_name,

@@ -3,7 +3,7 @@ use crate::{JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport};
 use biome_formatter::prelude::*;
 use biome_formatter::{format_args, write};
 use biome_js_type_info::FormatTypeContext;
-use biome_rowan::{Text, TextSize};
+use biome_rowan::TextSize;
 use std::fmt::Formatter;
 use std::ops::Deref;
 
@@ -67,31 +67,14 @@ impl Format<FormatTypeContext> for Exports {
     ) -> FormatResult<()> {
         let mut joiner = f.join();
         for (export_name, export) in self.deref() {
-            let name = format_with(|f| match export_name {
-                Text::Borrowed(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(
-                            &std::format!("{:?}", t.text()),
-                            TextSize::default()
-                        ),]
-                    )
-                }
-                Text::Owned(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(
-                            &std::format!("{:?}", t.as_str()),
-                            TextSize::default()
-                        ),]
-                    )
-                }
-                Text::Static(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(&std::format!("{t:?}"), TextSize::default()),]
-                    )
-                }
+            let name = format_with(|f| {
+                write!(
+                    f,
+                    [dynamic_text(
+                        &std::format!("{:?}", export_name.text()),
+                        TextSize::default()
+                    ),]
+                )
             });
             let arrow = format_with(|f| write!(f, [&format_args![space(), text("=>"), space()]]));
 
@@ -126,31 +109,14 @@ impl Format<FormatTypeContext> for Imports {
         let mut joiner = f.join();
 
         for (import_name, import) in &self.0 {
-            let name = format_with(|f| match import_name {
-                Text::Borrowed(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(
-                            &std::format!("{:?}", t.text()),
-                            TextSize::default()
-                        )]
-                    )
-                }
-                Text::Owned(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(
-                            &std::format!("{:?}", t.as_str()),
-                            TextSize::default()
-                        )]
-                    )
-                }
-                Text::Static(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(&std::format!("{t:?}"), TextSize::default()),]
-                    )
-                }
+            let name = format_with(|f| {
+                write!(
+                    f,
+                    [dynamic_text(
+                        &std::format!("{:?}", import_name.text()),
+                        TextSize::default()
+                    ),]
+                )
             });
             let arrow = format_with(|f| {
                 write!(

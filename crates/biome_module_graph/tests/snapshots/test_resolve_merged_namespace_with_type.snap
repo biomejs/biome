@@ -32,16 +32,12 @@ Imports {
 ```
 Module TypeId(0) => Namespace {
     path: Identifier(
-        Borrowed(
-            "Foo",
-        ),
+        "Foo",
     ),
     members: [
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Bar",
-                ),
+                "Bar",
             ),
             ty: Resolved(
                 Module(0) TypeId(1),

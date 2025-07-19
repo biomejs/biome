@@ -576,7 +576,7 @@ fn contains_this_or_static_member_kind(
 
                     return this_aliases.iter().any(
                         |ThisAliasesAndTheirScope { aliases, scope }| {
-                            aliases.contains(&Text::Borrowed(value_token.token_text_trimmed()))
+                            aliases.contains(&Text::from(value_token.token_text_trimmed()))
                                 && name_syntax
                                     .ancestors()
                                     .any(|ancestor| ancestor.key() == scope.syntax().key())

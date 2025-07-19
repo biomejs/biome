@@ -267,12 +267,14 @@ pub fn reference_to_falsy_subset_of(
     resolver: &mut dyn TypeResolver,
 ) -> Option<TypeReference> {
     let filter = |ty: &TypeData| match ty {
-        TypeData::BigInt => FilteredData::Mapped(Literal::BigInt(Text::Static("0n")).into()),
+        TypeData::BigInt => FilteredData::Mapped(Literal::BigInt(Text::new_static("0n")).into()),
         TypeData::Boolean => FilteredData::Mapped(Literal::Boolean(false.into()).into()),
         TypeData::Number => {
-            FilteredData::Mapped(Literal::Number(NumberLiteral::new(Text::Static("0"))).into())
+            FilteredData::Mapped(Literal::Number(NumberLiteral::new(Text::new_static("0"))).into())
         }
-        TypeData::String => FilteredData::Mapped(Literal::String(Text::Static("").into()).into()),
+        TypeData::String => {
+            FilteredData::Mapped(Literal::String(Text::new_static("").into()).into())
+        }
         other => {
             if ConditionalType::from_data_shallow(other)
                 .is_none_or(|conditional| !conditional.is_truthy())
