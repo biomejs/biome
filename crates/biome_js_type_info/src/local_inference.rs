@@ -3,25 +3,23 @@ use std::str::FromStr;
 
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsDeclaration,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClass, AnyJsClassMember, AnyJsDeclaration,
     AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
     AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
     AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
-    JsConstructorClassMember, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
-    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterClassMember, JsGetterObjectMember, JsLogicalExpression, JsLogicalOperator,
-    JsMethodClassMember, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsForInStatement,
+    JsForOfStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
+    JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsLogicalExpression,
+    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
     JsObjectExpression, JsParameters, JsReferenceIdentifier, JsReturnStatement,
-    JsSetterClassMember, JsSetterObjectMember, JsStaticInitializationBlockClassMember,
-    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
-    TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
-    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    JsSetterObjectMember, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
+    TsExternalModuleDeclaration, TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType,
+    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
+    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
@@ -2279,31 +2277,67 @@ impl TypeReferenceQualifier {
     }
 }
 
-impl TypeofThisOrSuperExpression {
-    fn from_any_js_expression(scope_id: ScopeId, expr: &AnyJsExpression) -> Self {
-        let binds_this = |node: &JsSyntaxNode| {
-            JsConstructorClassMember::can_cast(node.kind())
-                || JsFunctionExpression::can_cast(node.kind())
-                || JsGetterClassMember::can_cast(node.kind())
-                || JsGetterObjectMember::can_cast(node.kind())
-                || JsMethodClassMember::can_cast(node.kind())
-                || JsMethodObjectMember::can_cast(node.kind())
-                || JsSetterClassMember::can_cast(node.kind())
-                || JsSetterObjectMember::can_cast(node.kind())
-                || JsStaticInitializationBlockClassMember::can_cast(node.kind())
-        };
+fn is_direct_class_or_object_member(node: &JsSyntaxNode) -> bool {
+    node.ancestors()
+        .skip(1)
+        .find_map(|node| {
+            if let Some(node) = AnyJsExpression::cast_ref(&node) {
+                let node = node.omit_parentheses();
+                if matches!(
+                    node,
+                    AnyJsExpression::TsAsExpression(_)
+                        | AnyJsExpression::TsNonNullAssertionExpression(_)
+                        | AnyJsExpression::TsSatisfiesExpression(_)
+                        | AnyJsExpression::TsTypeAssertionExpression(_)
+                ) {
+                    None
+                } else {
+                    Some(matches!(
+                        node,
+                        AnyJsExpression::JsObjectExpression(_)
+                            | AnyJsExpression::JsClassExpression(_)
+                    ))
+                }
+            } else if AnyJsClass::can_cast(node.kind()) {
+                Some(true)
+            } else {
+                None
+            }
+        })
+        .unwrap_or_default()
+}
 
+impl TypeofThisOrSuperExpression {
+    /// Detect a nearest parent that can be used as type of `this`.
+    fn from_any_js_expression(scope_id: ScopeId, expr: &AnyJsExpression) -> Self {
+        // The rules are as follows:
+        //
+        // 1. If we reached a class node, that class is `this`.
+        // 2. If we reached a function, `this` is unknown, unless that function
+        //    is a direct descendant of a class or an object, ignoring non-exprs and
+        //    typescript extras (like `as typ`).
+        // 3. If we reached an object literal *and* have already traversed past
+        //    a function or an object method, this object is `this`.
+
+        let binds_this_to_object = |node: &JsSyntaxNode| {
+            JsFunctionExpression::can_cast(node.kind())
+                || JsGetterObjectMember::can_cast(node.kind())
+                || JsMethodObjectMember::can_cast(node.kind())
+                || JsSetterObjectMember::can_cast(node.kind())
+        };
+        let mut may_bind_to_object = false;
         let parent = expr
             .syntax()
             .ancestors()
             .skip(1)
-            .skip_while(|node| !binds_this(node))
-            .skip(1)
             .find_map(|node| {
-                if binds_this(&node) {
-                    // Nested function, map `this` to unknown.
+                if JsFunctionExpression::can_cast(node.kind())
+                    && !is_direct_class_or_object_member(&node)
+                {
                     return Some(Err(()));
                 }
+
+                may_bind_to_object = may_bind_to_object || binds_this_to_object(&node);
 
                 let binding = if let Some(class) = JsClassDeclaration::cast_ref(&node) {
                     class.id().ok()
@@ -2327,6 +2361,8 @@ impl TypeofThisOrSuperExpression {
                     }
                 } else if let Some(class) = JsClassExportDefaultDeclaration::cast_ref(&node) {
                     class.id()
+                } else if !may_bind_to_object {
+                    None
                 } else if let Some(object) = JsObjectExpression::cast(node) {
                     object
                         .syntax()

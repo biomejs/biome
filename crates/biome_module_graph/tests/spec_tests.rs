@@ -880,6 +880,258 @@ fn test_resolve_type_of_property_with_getter() {
     snapshot.assert_snapshot("test_resolve_type_of_property_with_getter");
 }
 
+macro_rules! class_tests {
+    ($($name:ident: $prefix:expr,)*) => {
+    $(
+        #[test]
+        fn $name() {
+            class_this_test_helper(stringify!($name), $prefix);
+        }
+    )*
+    }
+}
+
+class_tests!{
+    test_resolve_type_of_this_in_class_plain: "class Foo",
+    test_resolve_type_of_this_in_class_assign: "const Foo = class",
+    test_resolve_type_of_this_in_class_export: "export default class Foo",
+}
+
+fn class_this_test_helper(case_name: &str, prefix: &str) {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        format!("{prefix} {}", r#"
+        {
+            x = 'foo';
+            y = this.x;
+
+            get fooGetter() {
+                return this.x
+            }
+
+            arrow = () => this.x
+
+            func = function() {
+                return this.x
+            }
+
+            meth() {
+                return this.x
+            }
+
+            nestedArrow() {
+                const fn = () => this.x;
+                return fn();
+            }
+
+            inObject() {
+                const inner = {
+                    x: this.x
+                };
+                return inner.x;
+            }
+        }
+
+        const obj = new Foo();
+
+        const foo1 = obj.y;
+        const foo2 = obj.fooGetter;
+        const foo3 = obj.arrow();
+        const foo4 = obj.func();
+        const foo5 = obj.meth();
+        const foo6 = obj.nestedArrow();
+        const foo7 = obj.inObject();
+        "#)
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    for i in 1..=7 {
+        let name = format!("foo{i}");
+        let foo_id = resolver
+            .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
+            .expect(&format!("{name} variable not found"));
+        let foo_ty = resolver.resolved_type_for_id(foo_id);
+        assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
+    }
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+    snapshot.assert_snapshot(case_name);
+}
+
+#[test]
+fn test_resolve_type_of_this_in_object() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        const obj = {
+            x: 'foo',
+            y: this.x,
+
+            get fooGetter() {
+                return this.x
+            },
+
+            arrow: () => this.x,
+
+            func: function() {
+                return this.x
+            },
+
+            meth() {
+                return this.x
+            },
+
+            nestedArrow() {
+                const fn = () => this.x;
+                return fn();
+            },
+
+            inObject() {
+                const inner = {
+                    x: this.x
+                };
+                return inner.x;
+            },
+        };
+
+        const foo1 = obj.fooGetter;
+        const foo2 = obj.func();
+        const foo3 = obj.meth();
+        const foo4 = obj.nestedArrow();
+        const foo5 = obj.inObject();
+
+        const notFoo1 = obj.y;
+        const notFoo2 = obj.arrow();
+        "#
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    for i in 1..=5 {
+        let name = format!("foo{i}");
+        let foo_id = resolver
+            .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
+            .expect(&format!("{name} variable not found"));
+        let foo_ty = resolver.resolved_type_for_id(foo_id);
+        assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
+    }
+    for i in 1..=2 {
+        let name = format!("notFoo{i}");
+        let foo_id = resolver
+            .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
+            .expect(&format!("{name} variable not found"));
+        let foo_ty = resolver.resolved_type_for_id(foo_id);
+        assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
+    }
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+    snapshot.assert_snapshot("test_resolve_type_of_this_in_object");
+}
+
+#[test]
+fn test_resolve_type_of_this_in_class_wrong_scope() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        class Foo {
+            x = 'foo';
+
+            nested() {
+                const fn = function() {
+                    return this.x;
+                }
+                return fn();
+            }
+
+            nestedObject() {
+                const inner = {
+                    fn: function() {
+                        return this.x;
+                    }
+                };
+                return inner.fn();
+            }
+            nestedObject2() {
+                const inner = {
+                    fn() {
+                        return this.x;
+                    }
+                };
+                return inner.fn();
+            }
+
+            nestedInArrow = () => {
+                const fn = function() {
+                    return this.x;
+                }
+                return fn();
+            }
+        }
+
+        const obj = new Foo();
+
+        const notFoo1 = obj.nested();
+        const notFoo2 = obj.nestedInArrow();
+        const notFoo3 = obj.nestedObject();
+        const notFoo4 = obj.nestedObject2();
+        "#,
+    );
+
+    let added_paths = [BiomePath::new("/src/index.ts")];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    for i in 1..=4 {
+        let name = format!("notFoo{i}");
+        let foo_id = resolver
+            .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
+            .expect(&format!("{name} variable not found"));
+        let foo_ty = resolver.resolved_type_for_id(foo_id);
+        assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
+    }
+
+    let snapshot = ModuleGraphSnapshot::new(&module_graph, &fs);
+    snapshot.assert_snapshot("test_resolve_type_of_this_in_class_wrong_scope");
+}
+
 #[test]
 fn test_resolve_promise_export() {
     let fs = MemoryFileSystem::default();
@@ -1547,7 +1799,7 @@ fn test_resolve_type_of_destructured_field_of_intersection_of_interfaces() {
     fs.insert(
         "/src/index.ts".into(),
         r#"
-        
+
 type FullConfiguration = InternalConfiguration & PublicConfiguration;
 
 type ScopedMutator<Data = any, T = Data> = (key: Arguments, data?: T | Promise<T> | MutatorCallback<T>, opts?: boolean | MutatorOptions<Data, T>) => Promise<T | undefined>;
@@ -1624,7 +1876,7 @@ interface Bar {
     foo(): number;
     bar(): boolean;
 }
-    
+
 type Intersection = Foo & Bar;"#,
     );
 
