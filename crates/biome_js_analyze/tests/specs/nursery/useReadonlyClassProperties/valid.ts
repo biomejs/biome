@@ -610,3 +610,19 @@ class Counter2 {
 		const counterString = `${this.counter++}`
 	}
 }
+
+class Counter3 {
+	private counter: number
+	async count() {
+		this.counter = 1
+		const counterString = `${this.counter++}`
+	}
+}
+
+class Counter4 {
+	private counter: number
+	async count() {
+		await console.log(this.counter++)
+		const counterString = await `${this.counter++}`
+	}
+}
