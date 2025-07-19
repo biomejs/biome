@@ -1,5 +1,15 @@
 # @biomejs/biome
 
+## 2.1.3
+
+### Patch Changes
+
+- [#6463](https://github.com/biomejs/biome/pull/6463) [`0a16d54`](https://github.com/biomejs/biome/commit/0a16d54c2cffbf13c5144b53021923734f1c234e) Thanks [@JamBalaya56562](https://github.com/JamBalaya56562)! - Fixed a website link for the `useComponentExportOnlyModules` linter rule to point to the correct URL.
+
+- [#6924](https://github.com/biomejs/biome/pull/6924) [`2d21be9`](https://github.com/biomejs/biome/commit/2d21be9437fd77a1c534a1ea156d9a9421c17d30) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#113](https://github.com/biomejs/biome-zed/issues/113), where the Biome Language Server didn't correctly update the diagnostics when the configuration file is modified in the editor. Now the diagnostics are correctly updated every time the configuration file is modified and saved.
+
+- [#6931](https://github.com/biomejs/biome/pull/6931) [`e6b2380`](https://github.com/biomejs/biome/commit/e6b238063f92bc95d951e3a78dac42408d0814c0) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#6915](https://github.com/biomejs/biome/issues/6915): `useHookAtTopLevel` no longer hangs when rules call themselves recursively.
+
 ## 2.1.2
 
 ### Patch Changes
