@@ -100,4 +100,4 @@ winget install --manifest manifests/b/BiomeJS/Biome/VERSION/
 - [WinGet Package Manager Documentation](https://docs.microsoft.com/en-us/windows/package-manager/)
 - [WinGet Manifest Schema](https://github.com/microsoft/winget-cli/tree/master/schemas)
 - [WinGet Community Repository](https://github.com/microsoft/winget-pkgs)
-- [WinGet Create Tool](https://github.com/microsoft/winget-create) 
+- [WinGet Create Tool](https://github.com/microsoft/winget-create)
