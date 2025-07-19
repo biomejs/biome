@@ -1,0 +1,12 @@
+# Created using wingetcreate 1.10.2.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.1.1
+PackageLocale: en-US
+Publisher: BiomeJS
+PackageName: Biome
+License: MIT OR Apache-2.0
+ShortDescription: A toolchain for web projects, aimed to provide functionalities to maintain them. Biome offers formatter and linter, usable via CLI and LSP.
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
