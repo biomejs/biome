@@ -8,6 +8,12 @@ const MY_NUMBER = +42;
 const foo = 42;
 let foo = 42;
 let foo = -42;
+const foo = 42 as const;
+const foo = 42 as number;
+const foo = 42 satisfies number;
+const foo = (42 satisfies number) as const;
+const foo = ((42 satisfies number) as const);
+const foo = (42 satisfies number)!;
 
 // jsx
 let jsx = (<div>{5}</div>);

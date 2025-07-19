@@ -8,8 +8,9 @@ use biome_js_syntax::{
     JsComputedMemberAssignment, JsComputedMemberExpression, JsFormalParameter, JsInitializerClause,
     JsNumberLiteralExpression, JsObjectBindingPatternShorthandProperty, JsParenthesizedExpression,
     JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxNode, JsUnaryExpression,
-    JsUnaryOperator, JsxExpressionAttributeValue, JsxExpressionChild, TsEnumMemberList,
-    TsIndexedAccessType, TsNumberLiteralType, TsReturnTypeAnnotation, TsTypeAnnotation,
+    JsUnaryOperator, JsxExpressionAttributeValue, JsxExpressionChild, TsAsExpression,
+    TsEnumMemberList, TsIndexedAccessType, TsNonNullAssertionExpression, TsNumberLiteralType,
+    TsReturnTypeAnnotation, TsSatisfiesExpression, TsTypeAnnotation, TsTypeAssertionExpression,
     TsUnionTypeVariantList,
 };
 use biome_rowan::{AstNode, declare_node_union};
@@ -43,7 +44,9 @@ declare_lint_rule! {
     ///
     /// ```js
     /// const TAX_RATE = 1.23;
+    /// const TAX_RATE_REDUCED = 1 as const;
     /// let total = price * TAX_RATE;
+    /// let reducedTotal = price * TAX_RATE_REDUCED;
     /// ```
     pub NoMagicNumbers {
         version: "2.1.0",
@@ -372,43 +375,27 @@ fn is_ts_numeric_literal_return_type(numeric_literal: &TsNumberLiteralType) -> b
         .is_some_and(|parent| TsReturnTypeAnnotation::can_cast(parent.kind()))
 }
 
-/// Omits unary plus or minus expressions by returning the parent node if
-/// the current node is a unary expression with a plus or minus operator.
-/// Example: `-5` or `+3` will return the parent node, effectively skipping the unary operator parent node.
-fn omit_unary_plus_minus_parent(node: JsSyntaxNode) -> Option<JsSyntaxNode> {
-    let unary_expression_plus_or_minus =
-        JsUnaryExpression::cast(node.clone()).and_then(|unary_node| {
-            if unary_node.operator().is_ok_and(|operator| {
-                operator == JsUnaryOperator::Plus || operator == JsUnaryOperator::Minus
-            }) {
-                Some(unary_node)
-            } else {
-                None
-            }
-        });
-
-    if unary_expression_plus_or_minus.is_some() {
-        node.parent()
-    } else {
-        Some(node)
-    }
-}
-
-/// Omits the parenthesized expression if the node is wrapped in parentheses.
-/// Example: `(5)` will return the parent node, effectively skipping the parenthesized expression.
-fn omit_parenthesized_parent(node: JsSyntaxNode) -> Option<JsSyntaxNode> {
-    if JsParenthesizedExpression::can_cast(node.kind()) {
-        node.parent()
-    } else {
-        Some(node)
-    }
-}
-
-/// Returns the parent node of the given node, skipping over any unary plus/minus or parenthesized expression wrappers.
+/// Returns the parent node of the given node, skipping over any unary plus/minus or parenthesized expression wrappers,
+/// as well as all type-level wrappers (casts and `satisfies`).
 /// It helps determine the true syntactic context of the node by ignoring these common, but semantically insignificant, wrappers.
 fn get_sanitized_parent_node(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
-    node.parent()
-        .and_then(|parent| omit_unary_plus_minus_parent(parent).and_then(omit_parenthesized_parent))
+    node.ancestors().skip(1).find(|parent| {
+        if TsAsExpression::can_cast(parent.kind())
+            || TsNonNullAssertionExpression::can_cast(parent.kind())
+            || TsSatisfiesExpression::can_cast(parent.kind())
+            || TsTypeAssertionExpression::can_cast(parent.kind())
+            || JsParenthesizedExpression::can_cast(parent.kind())
+        {
+            false
+        } else if let Some(parent) = JsUnaryExpression::cast_ref(parent) {
+            match parent.operator() {
+                Err(_) => true,
+                Ok(op) => !matches!(op, JsUnaryOperator::Plus | JsUnaryOperator::Minus),
+            }
+        } else {
+            true
+        }
+    })
 }
 
 const ALWAYS_IGNORED_IN_ARITHMETIC_OPERATIONS: &[&str] = &[
