@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-2.jsx
+---
+# Input
+```jsx
+// should not generate diagnostics
+<a href="https://example.com" target="_blank">External</a> 
+```

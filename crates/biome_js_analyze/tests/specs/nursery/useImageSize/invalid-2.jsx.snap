@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-2.jsx
+---
+# Input
+```jsx
+// Invalid: missing width and height
+<img src="https://example.com/image.png" /> 
+```
+
+# Diagnostics
+```
+invalid-2.jsx:2:1 lint/nursery/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! <Emphasis>img</Emphasis> elements should always have both width and height attributes to prevent layout shifts and improve performance.
+  
+    1 │ // Invalid: missing width and height
+  > 2 │ <img src="https://example.com/image.png" />·
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+```

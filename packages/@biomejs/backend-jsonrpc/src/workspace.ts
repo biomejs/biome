@@ -896,6 +896,7 @@ export type RuleDomain =
 	| "test"
 	| "solid"
 	| "next"
+	| "qwik"
 	| "vue"
 	| "project";
 export type RuleDomainValue = "all" | "none" | "recommended";
@@ -1610,6 +1611,10 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_NoProcessGlobalOptions;
 	/**
+	 * Disallow useVisibleTask$() functions in Qwik components.
+	 */
+	noQwikUseVisibleTask?: RuleConfiguration_for_NoQwikUseVisibleTaskOptions;
+	/**
 	 * Disallow assigning to React component props.
 	 */
 	noReactPropAssign?: RuleConfiguration_for_NoReactPropAssignOptions;
@@ -1670,6 +1675,10 @@ export interface Nursery {
 	 */
 	useAdjacentGetterSetter?: RuleConfiguration_for_UseAdjacentGetterSetterOptions;
 	/**
+	 * Require href attribute for \<a> elements in JSX.
+	 */
+	useAnchorHref?: RuleConfiguration_for_UseAnchorHrefOptions;
+	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
@@ -1697,6 +1706,10 @@ export interface Nursery {
 	 * Ensure the preconnect attribute is used when using Google Fonts.
 	 */
 	useGoogleFontPreconnect?: RuleFixConfiguration_for_UseGoogleFontPreconnectOptions;
+	/**
+	 * Enforces that \<img> elements have both width and height attributes.
+	 */
+	useImageSize?: RuleConfiguration_for_UseImageSizeOptions;
 	/**
 	 * Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.
 	 */
@@ -1729,6 +1742,10 @@ export interface Nursery {
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_UseParseIntRadixOptions;
+	/**
+	 * Prefer using the class prop as a classlist over the classnames helper.
+	 */
+	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
 	/**
 	 * Enforce marking members as readonly if they are never modified outside the constructor.
 	 */
@@ -2883,6 +2900,9 @@ export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoProcessGlobalOptions;
+export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
 export type RuleConfiguration_for_NoReactPropAssignOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoReactPropAssignOptions;
@@ -2925,6 +2945,9 @@ export type RuleConfiguration_for_NoVueReservedPropsOptions =
 export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAdjacentGetterSetterOptions;
+export type RuleConfiguration_for_UseAnchorHrefOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseAnchorHrefOptions;
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
@@ -2946,6 +2969,9 @@ export type RuleConfiguration_for_UseForComponentOptions =
 export type RuleFixConfiguration_for_UseGoogleFontPreconnectOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseGoogleFontPreconnectOptions;
+export type RuleConfiguration_for_UseImageSizeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseImageSizeOptions;
 export type RuleFixConfiguration_for_UseIndexOfOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseIndexOfOptions;
@@ -2970,6 +2996,9 @@ export type RuleFixConfiguration_for_UseObjectSpreadOptions =
 export type RuleFixConfiguration_for_UseParseIntRadixOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseParseIntRadixOptions;
+export type RuleConfiguration_for_UseQwikClasslistOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikClasslistOptions;
 export type RuleFixConfiguration_for_UseReadonlyClassPropertiesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions;
@@ -5168,6 +5197,16 @@ export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
 	 */
 	options: NoProcessGlobalOptions;
 }
+export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoQwikUseVisibleTaskOptions;
+}
 export interface RuleWithOptions_for_NoReactPropAssignOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5320,6 +5359,16 @@ export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
 	 */
 	options: UseAdjacentGetterSetterOptions;
 }
+export interface RuleWithOptions_for_UseAnchorHrefOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseAnchorHrefOptions;
+}
 export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5405,6 +5454,16 @@ export interface RuleWithFixOptions_for_UseGoogleFontPreconnectOptions {
 	 * Rule's options
 	 */
 	options: UseGoogleFontPreconnectOptions;
+}
+export interface RuleWithOptions_for_UseImageSizeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseImageSizeOptions;
 }
 export interface RuleWithFixOptions_for_UseIndexOfOptions {
 	/**
@@ -5509,6 +5568,16 @@ export interface RuleWithFixOptions_for_UseParseIntRadixOptions {
 	 * Rule's options
 	 */
 	options: UseParseIntRadixOptions;
+}
+export interface RuleWithOptions_for_UseQwikClasslistOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikClasslistOptions;
 }
 export interface RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions {
 	/**
@@ -7666,6 +7735,7 @@ export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
+export interface NoQwikUseVisibleTaskOptions {}
 export interface NoReactPropAssignOptions {}
 export interface NoRestrictedElementsOptions {
 	/**
@@ -7690,6 +7760,7 @@ export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
 export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
+export type UseAnchorHrefOptions = null;
 export interface UseConsistentObjectDefinitionOptions {
 	/**
 	 * The preferred syntax to enforce.
@@ -7702,6 +7773,7 @@ export interface UseExplicitTypeOptions {}
 export interface UseExportsLastOptions {}
 export interface UseForComponentOptions {}
 export interface UseGoogleFontPreconnectOptions {}
+export type UseImageSizeOptions = null;
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
@@ -7726,6 +7798,7 @@ export interface UseNamingConventionOptions {
 export interface UseNumericSeparatorsOptions {}
 export interface UseObjectSpreadOptions {}
 export interface UseParseIntRadixOptions {}
+export interface UseQwikClasslistOptions {}
 export interface UseReadonlyClassPropertiesOptions {
 	/**
 	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
@@ -8371,9 +8444,11 @@ export type Category =
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
+	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -8388,8 +8463,10 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
+	| "lint/nursery/useImageSize"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
