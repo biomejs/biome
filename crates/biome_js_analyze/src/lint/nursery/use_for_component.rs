@@ -58,7 +58,7 @@ declare_lint_rule! {
         language: "js",
         domains: &[RuleDomain::Solid],
         recommended: false,
-        sources: &[RuleSource::EslintSolid("perfer-for").inspired()],
+        sources: &[RuleSource::EslintSolid("prefer-for").inspired()],
     }
 }
 
