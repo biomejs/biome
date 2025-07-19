@@ -101,9 +101,9 @@ function f(x: string): 100 {
 }
 
 // bitwise operations
-let bitwiseOr = 1 | 2;
-let bitwiseAnd = 1 & 2;
-let bitwiseXor = 1 ^ 2;
+let bitwiseOr = 1 | 42;
+let bitwiseAnd = 1 & 42;
+let bitwiseXor = 1 ^ 42;
 
 let a = ~5;
 let a = -5;
