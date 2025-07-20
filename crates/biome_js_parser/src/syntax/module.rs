@@ -344,9 +344,7 @@ fn parse_import_bare_clause(p: &mut JsParser) -> ParsedSyntax {
 }
 
 fn parse_import_namespace_clause_rest(p: &mut JsParser, m: Marker) -> CompletedMarker {
-    if p.at(T![defer]) {
-        p.expect(T![defer]);
-    }
+    p.eat(T![defer]);
     parse_namespace_import_specifier(p).or_add_diagnostic(p, expected_namespace_import);
     p.expect(T![from]);
     parse_module_source(p).or_add_diagnostic(p, expected_module_source);
