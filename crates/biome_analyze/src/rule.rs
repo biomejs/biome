@@ -336,7 +336,7 @@ impl RuleSource {
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
-            Self::EslintVitest(rule_name) => format!("https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rule/{rule_name}.md"),
+            Self::EslintVitest(rule_name) => format!("https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
         }
     }
