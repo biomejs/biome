@@ -278,10 +278,7 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
     let clause = match p.cur() {
         T![*] => parse_import_namespace_clause_rest(p, m),
         T!['{'] => parse_import_named_clause_rest(p, m),
-        T![defer] if matches!(p.nth(1), T![*]) => {
-            // defer 修饰符的命名空间导入
-            parse_import_namespace_clause_rest(p, m)
-        }
+        T![defer] if matches!(p.nth(1), T![*]) => parse_import_namespace_clause_rest(p, m),
         _ if is_at_identifier_binding(p) => {
             let default_specifier = p.start();
             parse_identifier_binding(p).unwrap();
