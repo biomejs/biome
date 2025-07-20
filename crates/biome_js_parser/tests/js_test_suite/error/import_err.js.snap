@@ -36,7 +36,7 @@ JsModule {
             import_token: IMPORT_KW@7..15 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportNamespaceClause {
                 type_token: missing (optional),
-                defer_token: missing (optional),
+                phase_token: missing (optional),
                 namespace_specifier: JsNamespaceImportSpecifier {
                     star_token: STAR@15..16 "*" [] [],
                     as_token: missing (required),
@@ -52,7 +52,7 @@ JsModule {
             import_token: IMPORT_KW@17..25 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportNamespaceClause {
                 type_token: missing (optional),
-                defer_token: missing (optional),
+                phase_token: missing (optional),
                 namespace_specifier: JsNamespaceImportSpecifier {
                     star_token: STAR@25..27 "*" [] [Whitespace(" ")],
                     as_token: AS_KW@27..30 "as" [] [Whitespace(" ")],

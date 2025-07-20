@@ -3897,7 +3897,7 @@ impl JsImportNamespaceClause {
     pub fn as_fields(&self) -> JsImportNamespaceClauseFields {
         JsImportNamespaceClauseFields {
             type_token: self.type_token(),
-            defer_token: self.defer_token(),
+            phase_token: self.phase_token(),
             namespace_specifier: self.namespace_specifier(),
             from_token: self.from_token(),
             source: self.source(),
@@ -3907,7 +3907,7 @@ impl JsImportNamespaceClause {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn defer_token(&self) -> Option<SyntaxToken> {
+    pub fn phase_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 1usize)
     }
     pub fn namespace_specifier(&self) -> SyntaxResult<JsNamespaceImportSpecifier> {
@@ -3934,7 +3934,7 @@ impl Serialize for JsImportNamespaceClause {
 #[derive(Serialize)]
 pub struct JsImportNamespaceClauseFields {
     pub type_token: Option<SyntaxToken>,
-    pub defer_token: Option<SyntaxToken>,
+    pub phase_token: Option<SyntaxToken>,
     pub namespace_specifier: SyntaxResult<JsNamespaceImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
     pub source: SyntaxResult<AnyJsModuleSource>,
@@ -20898,8 +20898,8 @@ impl std::fmt::Debug for JsImportNamespaceClause {
                     &support::DebugOptionalElement(self.type_token()),
                 )
                 .field(
-                    "defer_token",
-                    &support::DebugOptionalElement(self.defer_token()),
+                    "phase_token",
+                    &support::DebugOptionalElement(self.phase_token()),
                 )
                 .field(
                     "namespace_specifier",

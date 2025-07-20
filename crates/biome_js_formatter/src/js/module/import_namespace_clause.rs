@@ -11,7 +11,7 @@ impl FormatNodeRule<JsImportNamespaceClause> for FormatJsImportNamespaceClause {
     fn fmt_fields(&self, node: &JsImportNamespaceClause, f: &mut JsFormatter) -> FormatResult<()> {
         let JsImportNamespaceClauseFields {
             type_token,
-            defer_token,
+            phase_token,
             namespace_specifier,
             from_token,
             source,
@@ -22,8 +22,8 @@ impl FormatNodeRule<JsImportNamespaceClause> for FormatJsImportNamespaceClause {
             write!(f, [type_token.format(), space()])?;
         }
 
-        if let Some(defer_token) = defer_token {
-            write!(f, [defer_token.format(), space()])?;
+        if let Some(phase_token) = phase_token {
+            write!(f, [phase_token.format(), space()])?;
         }
 
         write![

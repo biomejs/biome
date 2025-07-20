@@ -60,7 +60,7 @@ JsModule {
             import_token: IMPORT_KW@69..77 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportNamespaceClause {
                 type_token: TYPE_KW@77..82 "type" [] [Whitespace(" ")],
-                defer_token: missing (optional),
+                phase_token: missing (optional),
                 namespace_specifier: JsNamespaceImportSpecifier {
                     star_token: STAR@82..84 "*" [] [Whitespace(" ")],
                     as_token: AS_KW@84..87 "as" [] [Whitespace(" ")],

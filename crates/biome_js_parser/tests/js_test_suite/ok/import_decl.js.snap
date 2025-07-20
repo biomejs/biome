@@ -22,7 +22,7 @@ JsModule {
             import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
             import_clause: JsImportNamespaceClause {
                 type_token: missing (optional),
-                defer_token: missing (optional),
+                phase_token: missing (optional),
                 namespace_specifier: JsNamespaceImportSpecifier {
                     star_token: STAR@7..9 "*" [] [Whitespace(" ")],
                     as_token: AS_KW@9..12 "as" [] [Whitespace(" ")],

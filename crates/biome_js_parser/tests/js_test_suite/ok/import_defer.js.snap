@@ -21,7 +21,7 @@ JsModule {
             import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
             import_clause: JsImportNamespaceClause {
                 type_token: missing (optional),
-                defer_token: DEFER_KW@7..13 "defer" [] [Whitespace(" ")],
+                phase_token: DEFER_KW@7..13 "defer" [] [Whitespace(" ")],
                 namespace_specifier: JsNamespaceImportSpecifier {
                     star_token: STAR@13..15 "*" [] [Whitespace(" ")],
                     as_token: AS_KW@15..18 "as" [] [Whitespace(" ")],
