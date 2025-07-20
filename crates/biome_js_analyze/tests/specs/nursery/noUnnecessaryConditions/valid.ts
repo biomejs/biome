@@ -1,11 +1,53 @@
 /* should not generate diagnostics */
 
-Incorrect
+
+declare const b1: boolean;
+declare const b2: boolean;
+const t1 = b1 && b2;
+const t2 = b1 || b2;
+if (b1 && b2) {
+}
+while (b1 && b2) { }
+for (let i = 0; b1 && b2; i++) {
+	break;
+}
+const t1 = b1 && b2 ? 'yes' : 'no';
+if (b1 && b2) {
+}
+while (b1 && b2) { }
+for (let i = 0; b1 && b2; i++) {
+	break;
+}
+const t1 = b1 && b2 ? 'yes' : 'no';
+for (; ;) { }
+switch (b1) {
+	case true:
+	default:
+}
+
+declare const b1: boolean;
+declare const b2: true;
+const x = b1 && b2;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Incorrect
 
 function head<T>(items: T[]) {
 	// items can never be nullable, so this is unnecessary
 	if (items) {
-		~~~~~ Unnecessary conditional, value is always truthy.
 			return items[0].toUpperCase();
 	}
 }
@@ -13,14 +55,12 @@ function head<T>(items: T[]) {
 function foo(arg: 'bar' | 'baz') {
 	// arg is never nullable or empty string, so this is unnecessary
 	if (arg) {
-		~~~ Unnecessary conditional, value is always truthy.
 	}
 }
 
 function bar<T>(arg: string) {
 	// arg can never be nullish, so ?. is unnecessary
 	return arg?.length;
-	~~ Unnecessary optional chain on a non-nullish value.
 }
 
 // Checks array predicate return types, where possible
@@ -28,9 +68,8 @@ function bar<T>(arg: string) {
 	[1, 2],
 	[3, 4],
 ].filter(t => t); // number[] is always truthy
-~ Unnecessary conditional, value is always truthy.
 
-	Correct
+//	Correct
 
 function head<T>(items: T[]) {
 	// Necessary, since items.length might be 0
@@ -55,19 +94,16 @@ function bar(arg?: string | null) {
 Options: { "allowConstantLoopConditions": "never" }
 
 while (true) {
-	~~~~ Unnecessary conditional, value is always truthy.
 	// ...
 }
 
 for (; true; ) {
-	~~~~ Unnecessary conditional, value is always truthy.
 	// ...
 }
 
 do {
 	// ...
 } while (true);
-~~~~ Unnecessary conditional, value is always truthy.
 
 	Options: { "allowConstantLoopConditions": "always" }
 
@@ -97,7 +133,6 @@ Options: { "allowConstantLoopConditions": "only-allowed-literals" }
 declare const alwaysTrue: true;
 
 while (alwaysTrue) {
-	~~~~~~~~~~ Unnecessary conditional, value is always truthy.
 	// ...
 }
 
@@ -107,7 +142,6 @@ while (alwaysTrue) {
 const thisIsTrue = true;
 
 while (thisIsTrue) {
-	~~~~~~~~~~ Unnecessary conditional, value is always truthy.
 	// ...
 }
 
@@ -120,7 +154,6 @@ function assert(condition: unknown): asserts condition {
 }
 
 assert(false); // Unnecessary; condition is always falsy.
-~~~~~ Unnecessary conditional, value is always falsy.
 
 	const neverNull = {};
 assert(neverNull); // Unnecessary; condition is always truthy.
@@ -134,7 +167,6 @@ declare const s: string;
 
 // Unnecessary; s is always a string.
 if (isString(s)) {
-	~ Unnecessary conditional, expression already has the type being checked by the type guard.
 }
 
 function assertIsString(value: unknown): asserts value is string {
@@ -144,15 +176,11 @@ function assertIsString(value: unknown): asserts value is string {
 }
 
 assertIsString(s); // Unnecessary; s is always a string.
-~ Unnecessary conditional, expression already has the type being checked by the assertion function.
-
-
 
 const array: string[] = [];
 const firstElement = array[0];
 // false positive
 if (firstElement != null) {
-	~~~~~~~~~~~~~~~~~~~~ Unnecessary conditional, the types have no overlap.
 	// ...
 }
 
@@ -160,7 +188,6 @@ const record: Record<string, string> = {};
 const someValue = record.someKey;
 // false positive
 if (someValue != null) {
-	~~~~~~~~~~~~~~~~~ Unnecessary conditional, the types have no overlap.
 	// ...
 }
 
@@ -174,7 +201,6 @@ const f = () => {
 f();
 
 if (condition) {
-	~~~~~~~~~ Unnecessary conditional, value is always falsy.
 	// ...
 }
 

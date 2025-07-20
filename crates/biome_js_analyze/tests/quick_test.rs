@@ -33,7 +33,11 @@ fn quick_test() {
 // }
 //
 // switch check both case and switch are static values, fail
-const t1 = 2 && 6 ? (7 && 10) ? '33' : 'no' : 'no';
+
+
+declare const b1: (string | number) & ("foo" | 123) & { __brand: string };
+declare const b2: null;
+const t1 = b1 && b2;
     "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
