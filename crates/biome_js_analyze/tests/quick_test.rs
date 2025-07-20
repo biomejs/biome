@@ -27,25 +27,25 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
     const SOURCE: &str = r#"
-function foo(arg: 'one' | 'two') {
-  if (arg && true && false && false || 6 || "fdgsd") {
-  }
+// function foo(arg: 'one' | 'two') {
+//   if (arg && (true && false) && false || 6 || "fdgsd") {
+//   }
+// }
+//
+// switch check both case and switch are static values, fail
+switch ('red') {
+  case 'one':
+    break;
+      case 'two':
+    break;
 }
 
-// let barg: 'One' | 'two';
-// 
-// if(barg) {
-// }
-    // let a = 1;
-    //  let t2 = a === 1;
-     // const t1 = '1' == 1;
-     // const t1 = 1 === 1;
-
-    // x.a.b?.c
-    // assert(...[], {})
-    // if(true){}
-    // while (b1 && b2) {}
-    // for (let i = 0; b1 && b2; i++) {break;}
+switch ('red' > 33) {
+  case 'one':
+    break;
+      case 'two':
+    break;
+}
     "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());

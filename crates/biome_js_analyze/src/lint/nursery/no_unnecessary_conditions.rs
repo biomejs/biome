@@ -5,13 +5,13 @@ use biome_js_syntax::AnyJsStatement::{
     JsDoWhileStatement, JsExpressionStatement, JsForStatement, JsIfStatement, JsSwitchStatement,
     JsVariableStatement, JsWhileStatement,
 };
-use biome_js_syntax::JsSyntaxKind::QUESTIONDOT;
+use biome_js_syntax::static_value::StaticValue;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsBinaryExpression, JsBooleanLiteralExpression,
-    JsFormalParameter, JsLogicalExpression, JsReferenceIdentifier, JsSyntaxNode,
-    JsVariableDeclarator, TextRange,
+    JsFormalParameter, JsIdentifierExpression, JsLogicalExpression, JsParenthesizedExpression,
+    JsSyntaxNode, JsVariableDeclaration, JsVariableDeclarator, TextRange,
 };
-use biome_rowan::{AstNode, SyntaxError, SyntaxNodeCast};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text, declare_node_union};
 use biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions;
 
 declare_lint_rule! {
@@ -56,7 +56,7 @@ impl Rule for NoUnnecessaryConditions {
         let model = ctx.model();
         println!("binding is {:?}", expression.syntax());
 
-        match_js_statement(expression, model);
+        match_any_js_statement(expression, model);
         Some(())
     }
 
@@ -81,210 +81,298 @@ impl Rule for NoUnnecessaryConditions {
         None
     }
 }
-
-fn match_js_statement(expression: &AnyJsStatement, model: &SemanticModel) {
-    match expression {
+// TODO move in favour of pure expression matching later !!!
+fn match_any_js_statement(any_js_statement: &AnyJsStatement, model: &SemanticModel) {
+    match any_js_statement {
         JsVariableStatement(statement) => {
-            println!("js variable statement: {:?}", statement);
-            // let expression = statement
-            //     .declaration()
-            //     .ok()?
-            //     .declarators()
-            //     .iter()
-            //     .find_map(|declarator| declarator.ok()?.initializer()?.expression().ok())?;
-            // match_expression(&expression, model);
-            println!(
-                "js variable statement cover me {:?}",
-                statement.declaration()
-            );
+            println!("js variable declaration {:?}", statement.declaration());
+
+            let expression = statement.declaration().ok().and_then(|declaration| {
+                JsVariableDeclaration::cast_ref(declaration.syntax()).and_then(|declaration| {
+                    declaration.declarators().iter().find_map(|declarator| {
+                        declarator
+                            .ok()?
+                            .initializer()
+                            .and_then(|initializer| initializer.expression().ok())
+                    })
+                })
+            });
+
+            // println!("expression in variable declaration: {:?}", expression);
+            if let Some(expression) = expression {
+                // Process the expression
+                match_expression(&expression, model);
+            }
+
             ()
         }
+        // TODO this
         // x.a.b?.c -> member is c
         JsExpressionStatement(statement) => {
             println!("expression: {:?}", statement.expression());
             if let Ok(expression) = statement.expression() {
-                match_expression(&expression, model)
+                match_expression(&expression, model);
             }
             ()
         }
         JsDoWhileStatement(statement) => {
             println!("do while: {:?}", statement);
+            statement.test().ok().and_then(|expression| {
+                println!("do while: {:?}", expression);
+                match_expression(&expression, model);
+
+                None::<&str>
+            });
             ()
         }
         JsForStatement(statement) => {
             println!("for: {:?}", statement);
+            if let Some(expression) = statement.test() {
+                match_expression(&expression, model);
+            }
             ()
         }
         JsIfStatement(statement) => {
             println!("if: {:?}", statement);
-            statement.test().ok().and_then(|test| {
-                println!("if test statement {:?}", test);
-                // single if (arg) {}
-                test.as_js_reference_identifier().and_then(|identifier| {
-                    // find definition
-                    if let Some(binding) = model.binding(&identifier.clone()) {
-                        if let Some(parent) = &binding.syntax().parent() {
-                            println!("if test statement parent {:?}", binding.syntax().parent());
-                            // let param: 'One' | 'two';
-                            if let Some(parameter) = JsFormalParameter::cast_ref(parent) {
-                                //todo extract all possible typs in union and pass to this method instead
-                                TsUtil::process_definition(parameter.syntax());
-                            }
-
-                            if let Some(parameter) = JsVariableDeclarator::cast_ref(parent) {
-                                //todo extract all possible typs in union and pass to this method instead
-                                TsUtil::process_definition(parameter.syntax());
-                            }
-                        }
-                    }
-
-                    Some(identifier.value_token())
-                });
-
-                // if (arg1, arg2, ...) {}
-                test.as_js_logical_expression()
-                    .and_then(|js_logical_expression| {
-                        let mut matches: Vec<TextRange> = Vec::new();
-                        collect_boolean_literals_from_logical_expression(
-                            js_logical_expression,
-                            &mut matches,
-                        );
-                        matches.iter().for_each(|matched| {
-                            println!("matched ${:?}", matched);
-                        });
-                        None::<&str>
-                    });
-
-                None::<&str>
-            });
+            if let Some(expression) = statement.test().ok() {
+                match_expression(&expression, model);
+            }
 
             ()
         }
         // corresponds to Switch Case
         JsSwitchStatement(statement) => {
             println!("switch: {:?}", statement);
+            if let Some(discriminant) = statement.discriminant().ok() {
+                // also cover if NON static value, but its binding is either static or matches non null type ts
+                if discriminant.as_static_value().is_some() {
+                    statement.cases().iter().for_each(|case| {
+                        if let Some(case_clause) = case.as_js_case_clause()
+                            && let Some(test) = case_clause.test().ok()
+                        {
+                            match_expression(&test, model);
+                        }
+                    });
+                } else {
+                    // TODO check if discriminant is 2>3 or has error
+                    match_expression(&discriminant, model);
+                }
+                // match_expression(&discriminant, model);
+            }
             ()
         }
         JsWhileStatement(statement) => {
             println!("while: {:?}", statement);
+            if let Some(expression) = statement.test().ok() {
+                match_expression(&expression, model);
+            }
             ()
         }
         _ => (),
     }
 }
 
-fn check_if_bool_expression_is_necessary_conditional(
-    expression: &JsBinaryExpression,
-    model: &SemanticModel,
-) -> Option<String> {
-    let left = expression.left().ok()?;
-    let right = expression.right().ok()?;
-
-    let left_value = left.as_static_value()?;
-    let right_value = right.as_static_value()?;
-
-    let arguments_reference = expression
-        .syntax()
-        .descendants()
-        .filter_map(|x| x.cast::<JsReferenceIdentifier>())
-        .find(|x| x.to_trimmed_string() == "arguments")
-        .unwrap();
-    let binding = model.binding(&arguments_reference);
-
-    println!("model binding left: {:?}", binding);
-
-    Some(format!(
-        "Unnecessary conditional: Values for left `{}` and right `{}` never change.",
-        left_value.text(),
-        right_value.text()
-    ))
-}
-
+// pass third optional parameter to match a value - for case statement for instance
 fn match_expression(expression: &AnyJsExpression, model: &SemanticModel) {
-    match expression {
-        AnyJsExpression::JsAssignmentExpression(expression) => {
-            println!("assignment expression: {:?}", expression);
-        }
-        AnyJsExpression::JsBinaryExpression(expression) => {
-            if expression.is_comparison_operator() {
-                let message: Result<_, SyntaxError> = Ok(
-                    check_if_bool_expression_is_necessary_conditional(&expression, model),
-                );
-                println!("binary expression: {:?}", message);
-            }
-        }
-        AnyJsExpression::JsCallExpression(expression) => {
-            println!("call expression: {:?}", expression);
-        }
-        AnyJsExpression::JsConditionalExpression(expression) => {
-            println!("conditional expression: {:?}", expression);
-        }
-        AnyJsExpression::JsLogicalExpression(expression) => {
-            println!("logical expression: {:?}", expression);
-        }
-        AnyJsExpression::JsStaticMemberExpression(expression) => {
-            if expression
-                .operator_token()
-                .is_ok_and(|token| token.kind().eq(&QUESTIONDOT))
-            {
-                println!("elvis member rules .?: {:?}", expression.member());
-            }
-            println!("static member expression: {:?}", expression);
-        }
-        // todo maybe not needed
-        AnyJsExpression::JsComputedMemberExpression(expression) => {
-            println!("computed member need??? expression: {:?}", expression);
-        }
-        _ => (),
-    }
-}
+    println!("match_expression {:?}", expression);
 
-pub struct TsUtil;
+    let mut visitor = |expression: &AnyJsExpression| {
+        // Do something with expression
+        let mut matches: Vec<DiagnosticMessageRange> = Vec::new();
+        println!("Visited: {:?}", expression.syntax().text_trimmed_range());
 
-impl TsUtil {
-    // check type for 'one' | 'two' or Any[], etc, possibly just check negation - undefined, null, etc
-    pub fn process_definition(argument: &JsSyntaxNode) {
-        println!("process definition of: {:?}", argument);
-    }
-}
-
-/// Recursively collects the text ranges of all boolean literal expressions and static values
-/// from a given `JsLogicalExpression`.
-///
-/// This function traverses both the left and right sides of a logical expression.
-/// It collects:
-/// - Boolean literals like `true` or `false`.
-/// - Any static value expressions (e.g., string, number literals).
-/// - Nested logical expressions are visited recursively.
-///
-/// # Arguments
-/// * `expression` - A reference to the `JsLogicalExpression` to search within.
-/// * `booleans` - A mutable vector where the found `TextRange` values will be pushed.
-///
-/// # Example
-/// ```rust
-/// // For an input like:  if (arg && true && false && false || 1 || 'a' ...)
-/// // This function will collect the ranges for: arg, true, false, 1, and 'a'. <- arg if it matches tsResolved
-/// ```
-fn collect_boolean_literals_from_logical_expression(
-    expression: &JsLogicalExpression,
-    booleans: &mut Vec<TextRange>,
-) {
-    let mut check = |expr: &AnyJsExpression| {
-        if let Some(bool_expr) = JsBooleanLiteralExpression::cast_ref(expr.syntax()) {
-            booleans.push(bool_expr.syntax().text_trimmed_range());
-        } else if let Some(static_value) = expr.as_static_value() {
-            booleans.push(static_value.range());
-        } else if let Some(logical_expr) = JsLogicalExpression::cast_ref(expr.syntax()) {
-            collect_boolean_literals_from_logical_expression(&logical_expr, booleans);
+        if let Some(static_value) = expression.as_static_value() {
+            matches.push(DiagnosticMessageRange {
+                range: static_value.range(),
+                message: Text::Owned(static_value.text().to_string()),
+            });
         }
+
+        if let Some(binding) = JsIdentifierExpression::cast_ref(expression.syntax())
+            .and_then(|expression| {
+                let name = expression.name().ok()?;
+                Some(name)
+            })
+            .and_then(|js_reference_identifier| model.binding(&js_reference_identifier))
+            && let Some(parent) = binding.syntax().parent()
+        {
+            JsParameterOrVariableDeclarator::try_cast_ref_and_process(&parent);
+            // todo push diagnostic message
+            // parenthesized expressions, proceed with the inner expression
+        }
+
+        matches.iter().for_each(|matched| {
+            println!("matched ${:?}", matched);
+        });
     };
 
-    if let Ok(left) = expression.left() {
-        check(&left);
+    if expression.as_static_value().is_some() {
+        visitor(&expression);
     }
 
-    if let Ok(right) = expression.right() {
-        check(&right);
+    // single if (arg) {}
+    expression
+        .as_js_reference_identifier()
+        .and_then(|identifier| {
+            println!("if test as_js_reference_identifier {:?}", identifier);
+            // find definition
+
+            // if let Some(binding) = model.binding(&identifier.clone()) {
+            //     if let Some(parent) = &binding.syntax().parent() {
+            //         println!("if test statement parent {:?}", binding.syntax().parent());
+            //         visitor(&binding.syntax().parent());
+            //         JsParameterOrVariableDeclarator::try_cast_ref_and_process(parent);
+            //     }
+            // }
+
+            Some(identifier.value_token())
+        });
+
+    // if (arg1, arg2, ...) {}
+    expression
+        .as_js_logical_expression()
+        .and_then(|js_logical_expression| {
+            if let Some(any_js_binary_expression) =
+                AnyJsBinaryOrLogicalExpression::cast_ref(js_logical_expression.syntax())
+            {
+                AnyJsBinaryOrLogicalExpression::visit(&any_js_binary_expression, &mut visitor);
+            }
+            None::<&str>
+        });
+
+    expression
+        .as_js_binary_expression()
+        .and_then(|js_binary_expression| {
+            if let Some(any_js_binary_expression) =
+                AnyJsBinaryOrLogicalExpression::cast_ref(js_binary_expression.syntax())
+            {
+                println!(
+                    "if test any_js_binary_expression {:?}",
+                    any_js_binary_expression
+                );
+
+                AnyJsBinaryOrLogicalExpression::visit(&any_js_binary_expression, &mut visitor);
+            }
+            None::<&str>
+        });
+}
+
+declare_node_union! {
+    pub JsParameterOrVariableDeclarator = JsFormalParameter | JsVariableDeclarator
+}
+
+impl JsParameterOrVariableDeclarator {
+    // todo clean up return type!!
+    pub fn try_cast_ref_and_process(argument: &JsSyntaxNode) -> Option<()> {
+        // println!("try cast and process with argument: {:?}", argument);
+        if let Some(parameter) = JsParameterOrVariableDeclarator::cast_ref(argument) {
+            // println!("try cast success: {:?}", parameter);
+            Self::process_argument_or_variable_initialization(&parameter);
+            Some(())
+        } else {
+            None
+        }
+    }
+
+    // check type for 'one' | 'two' or Any[], etc, possibly just check negation - undefined, null, etc
+    // cover classes here!!!
+    fn process_argument_or_variable_initialization(argument: &JsParameterOrVariableDeclarator) {
+        // println!("enter process_initialization with argument: {:?}", argument);
+        if let Some(statement) = JsVariableDeclarator::cast_ref(argument.syntax()) {
+            // println!("variable declarator: {:?}", statement);
+            let declaration_option = statement.declaration();
+
+            let expression = declaration_option.and_then(|declaration| {
+                if declaration.is_const().eq(&false) {
+                    return None;
+                }
+                let declaration = JsVariableDeclaration::cast_ref(declaration.syntax())?;
+                let declarators = declaration.declarators();
+
+                declarators.iter().find_map(|declarator| {
+                    declarator
+                        .ok()?
+                        .initializer()
+                        .and_then(|initializer| initializer.expression().ok())
+                })
+            });
+
+            if let Some(expr) = expression {
+                println!("Found expression in variable declaration: {:?}", expr);
+                // should return name of variable and type
+                // match_any_js_expression(&expr, model);
+            }
+        } else if let Some(statement) = JsFormalParameter::cast_ref(argument.syntax()) {
+            println!("processing JsFormalParameter: {:?}", statement);
+        }
+
+        // println!(
+        //     "process definition of: {:?}",
+        //     DiagnosticMessageRange {
+        //         message: Text::from("Processing definition..."),
+        //         range: argument.text_trimmed_range(),
+        //     }
+        // );
+    }
+}
+
+#[derive(Debug)]
+pub struct DiagnosticMessageRange {
+    pub message: Text,
+    pub range: TextRange,
+}
+
+declare_node_union! {
+    pub AnyJsBinaryOrLogicalExpression = JsLogicalExpression | JsBinaryExpression
+}
+
+#[derive(Debug, Clone)]
+pub enum AnyJsBinaryOrLogicalCallbackArgument {
+    Identifier(JsIdentifierExpression),
+    BooleanLiteral(JsBooleanLiteralExpression),
+    Static(StaticValue),
+}
+
+impl AnyJsBinaryOrLogicalExpression {
+    fn left(&self) -> SyntaxResult<AnyJsExpression> {
+        match self {
+            Self::JsLogicalExpression(logical) => logical.left(),
+            Self::JsBinaryExpression(binary) => binary.left(),
+        }
+    }
+
+    fn right(&self) -> SyntaxResult<AnyJsExpression> {
+        match self {
+            Self::JsLogicalExpression(logical) => logical.right(),
+            Self::JsBinaryExpression(binary) => binary.right(),
+        }
+    }
+
+    fn visit_descendant(expr: &AnyJsExpression, callback: &mut dyn FnMut(&AnyJsExpression)) {
+        if let Some(logical_expr) = Self::cast_ref(expr.syntax()) {
+            Self::visit(&logical_expr, callback);
+        } else if JsIdentifierExpression::cast_ref(expr.syntax()).is_some()
+            || JsBooleanLiteralExpression::cast_ref(expr.syntax()).is_some()
+            || expr.as_static_value().is_some()
+        {
+            callback(&expr);
+        } else if let Some(paren_expr) = JsParenthesizedExpression::cast_ref(expr.syntax()) {
+            if let Ok(inner_expr) = paren_expr.expression() {
+                Self::visit_descendant(&inner_expr, callback);
+            }
+        }
+    }
+    // todo tighten the callback fn type to just AnyJsBinaryOrLogicalCallbackArgument
+    pub fn visit(
+        expression: &AnyJsBinaryOrLogicalExpression,
+        callback: &mut dyn FnMut(&AnyJsExpression),
+    ) {
+        if let Ok(left) = expression.left() {
+            Self::visit_descendant(&left, callback);
+        }
+
+        if let Ok(right) = expression.right() {
+            Self::visit_descendant(&right, callback);
+        }
     }
 }

@@ -842,6 +842,7 @@ dependencies = [
  "enumflags2",
  "globset",
  "insta",
+ "log",
  "mimalloc",
  "regex",
  "roaring",
