@@ -33,19 +33,7 @@ fn quick_test() {
 // }
 //
 // switch check both case and switch are static values, fail
-switch ('red') {
-  case 'one':
-    break;
-      case 'two':
-    break;
-}
-
-switch ('red' > 33) {
-  case 'one':
-    break;
-      case 'two':
-    break;
-}
+const t1 = 2 && 6 ? (7 && 10) ? '33' : 'no' : 'no';
     "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());

@@ -8,8 +8,9 @@ use biome_js_syntax::AnyJsStatement::{
 use biome_js_syntax::static_value::StaticValue;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsBinaryExpression, JsBooleanLiteralExpression,
-    JsFormalParameter, JsIdentifierExpression, JsLogicalExpression, JsParenthesizedExpression,
-    JsSyntaxNode, JsVariableDeclaration, JsVariableDeclarator, TextRange,
+    JsConditionalExpression, JsFormalParameter, JsIdentifierExpression, JsLogicalExpression,
+    JsParenthesizedExpression, JsSyntaxNode, JsVariableDeclaration, JsVariableDeclarator,
+    TextRange,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text, declare_node_union};
 use biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions;
@@ -176,10 +177,11 @@ fn match_any_js_statement(any_js_statement: &AnyJsStatement, model: &SemanticMod
 fn match_expression(expression: &AnyJsExpression, model: &SemanticModel) {
     println!("match_expression {:?}", expression);
 
-    let mut visitor = |expression: &AnyJsExpression| {
+    // should not allow anything but static values, identifiers, and expressions - add hard type check
+    let mut collect_static_values_or_identifiers = |expression: &AnyJsExpression| {
         // Do something with expression
         let mut matches: Vec<DiagnosticMessageRange> = Vec::new();
-        println!("Visited: {:?}", expression.syntax().text_trimmed_range());
+        println!("Visited: {:?}", expression.syntax());
 
         if let Some(static_value) = expression.as_static_value() {
             matches.push(DiagnosticMessageRange {
@@ -206,8 +208,17 @@ fn match_expression(expression: &AnyJsExpression, model: &SemanticModel) {
         });
     };
 
+    if let Some(conditional_expression) = expression.as_js_conditional_expression() {
+        // if (arg) {} else {}
+        println!("conditional expression: {:?}", conditional_expression);
+        JsConditionalExpressionVisit::visit(
+            &conditional_expression,
+            &mut collect_static_values_or_identifiers,
+        );
+    }
+
     if expression.as_static_value().is_some() {
-        visitor(&expression);
+        collect_static_values_or_identifiers(&expression);
     }
 
     // single if (arg) {}
@@ -235,7 +246,10 @@ fn match_expression(expression: &AnyJsExpression, model: &SemanticModel) {
             if let Some(any_js_binary_expression) =
                 AnyJsBinaryOrLogicalExpression::cast_ref(js_logical_expression.syntax())
             {
-                AnyJsBinaryOrLogicalExpression::visit(&any_js_binary_expression, &mut visitor);
+                AnyJsBinaryOrLogicalExpression::visit(
+                    &any_js_binary_expression,
+                    &mut collect_static_values_or_identifiers,
+                );
             }
             None::<&str>
         });
@@ -251,7 +265,10 @@ fn match_expression(expression: &AnyJsExpression, model: &SemanticModel) {
                     any_js_binary_expression
                 );
 
-                AnyJsBinaryOrLogicalExpression::visit(&any_js_binary_expression, &mut visitor);
+                AnyJsBinaryOrLogicalExpression::visit(
+                    &any_js_binary_expression,
+                    &mut collect_static_values_or_identifiers,
+                );
             }
             None::<&str>
         });
@@ -333,6 +350,38 @@ pub enum AnyJsBinaryOrLogicalCallbackArgument {
     Static(StaticValue),
 }
 
+pub struct JsConditionalExpressionVisit;
+impl JsConditionalExpressionVisit {
+    pub fn visit(expression: &JsConditionalExpression, callback: &mut dyn FnMut(&AnyJsExpression)) {
+        // Visit test
+        if let Ok(test) = expression.test() {
+            Self::visit_descendant(&test, callback);
+        }
+
+        // Visit consequent
+        if let Ok(consequent) = expression.consequent() {
+            Self::visit_descendant(&consequent, callback);
+        }
+
+        // Visit alternate
+        if let Ok(alternate) = expression.alternate() {
+            Self::visit_descendant(&alternate, callback);
+        }
+    }
+
+    fn visit_descendant(expr: &AnyJsExpression, callback: &mut dyn FnMut(&AnyJsExpression)) {
+        if let Some(logical_or_binary) = AnyJsBinaryOrLogicalExpression::cast_ref(expr.syntax()) {
+            AnyJsBinaryOrLogicalExpression::visit(&logical_or_binary, callback);
+        } else if let Some(nested_conditional) = JsConditionalExpression::cast_ref(expr.syntax()) {
+            Self::visit(&nested_conditional, callback);
+        } else if let Some(paren_expr) = JsParenthesizedExpression::cast_ref(expr.syntax()) {
+            if let Ok(inner) = paren_expr.expression() {
+                Self::visit_descendant(&inner, callback);
+            }
+        }
+    }
+}
+
 impl AnyJsBinaryOrLogicalExpression {
     fn left(&self) -> SyntaxResult<AnyJsExpression> {
         match self {
@@ -349,6 +398,7 @@ impl AnyJsBinaryOrLogicalExpression {
     }
 
     fn visit_descendant(expr: &AnyJsExpression, callback: &mut dyn FnMut(&AnyJsExpression)) {
+        println!("visit descendant: {:?}", expr.syntax());
         if let Some(logical_expr) = Self::cast_ref(expr.syntax()) {
             Self::visit(&logical_expr, callback);
         } else if JsIdentifierExpression::cast_ref(expr.syntax()).is_some()
@@ -360,9 +410,12 @@ impl AnyJsBinaryOrLogicalExpression {
             if let Ok(inner_expr) = paren_expr.expression() {
                 Self::visit_descendant(&inner_expr, callback);
             }
+        } else if let Some(expr) = JsConditionalExpression::cast_ref(expr.syntax()) {
+            println!("must visit conditional expression: {:?}", expr);
+            JsConditionalExpressionVisit::visit(&expr, callback);
         }
     }
-    // todo tighten the callback fn type to just AnyJsBinaryOrLogicalCallbackArgument
+
     pub fn visit(
         expression: &AnyJsBinaryOrLogicalExpression,
         callback: &mut dyn FnMut(&AnyJsExpression),
