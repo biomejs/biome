@@ -218,9 +218,7 @@ Module TypeId(6) => Tuple(
                 Module(0) TypeId(7),
             ),
             name: Some(
-                Borrowed(
-                    "first",
-                ),
+                "first",
             ),
             is_optional: false,
             is_rest: false,
@@ -230,9 +228,7 @@ Module TypeId(6) => Tuple(
                 Module(0) TypeId(8),
             ),
             name: Some(
-                Borrowed(
-                    "last",
-                ),
+                "last",
             ),
             is_optional: false,
             is_rest: false,

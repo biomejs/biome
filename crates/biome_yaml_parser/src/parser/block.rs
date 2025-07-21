@@ -11,10 +11,14 @@ use biome_yaml_syntax::{
     YamlSyntaxKind::{self, *},
 };
 
+use crate::parser::flow::parse_any_flow_node;
+
 use super::{
     YamlParser,
-    flow::{is_at_flow_yaml_node, parse_flow_yaml_node},
-    parse_error::expected_block_mapping,
+    flow::{
+        is_at_flow_json_node, is_at_flow_yaml_node, parse_flow_json_node, parse_flow_yaml_node,
+    },
+    parse_error::{expected_block_mapping_entry, expected_block_sequence_entry},
 };
 
 pub(crate) fn parse_any_block_node(p: &mut YamlParser) -> ParsedSyntax {
@@ -92,7 +96,7 @@ impl ParseNodeList for BlockMapEntryList {
         parsed_element.or_recover(
             p,
             &BlockMapEntryListParseRecovery::new(),
-            expected_block_mapping,
+            expected_block_mapping_entry,
         )
     }
 }
@@ -143,54 +147,39 @@ fn parse_block_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    parse_block_map_explicit_key(p);
-    // Value can be omitted in an explicit entry
-    parse_block_map_explicit_value(p).ok();
-    Present(m.complete(p, YAML_BLOCK_MAP_EXPLICIT_ENTRY))
-}
-
-fn parse_block_map_explicit_key(p: &mut YamlParser) -> CompletedMarker {
-    debug_assert!(p.at(T![?]));
-    let m = p.start();
     p.bump(T![?]);
     // Explicit mapping key can be omitted as long as `?` exists
     parse_any_block_node(p).ok();
-    m.complete(p, YAML_BLOCK_MAP_EXPLICIT_KEY)
-}
 
-fn parse_block_map_explicit_value(p: &mut YamlParser) -> ParsedSyntax {
-    if !p.at(T![:]) {
-        return Absent;
+    // Value can be omitted in an explicit entry
+    if p.at(T![:]) {
+        p.bump(T![:]);
+        parse_any_block_node(p).ok();
     }
-    let m = p.start();
-    p.bump(T![:]);
-    parse_any_block_node(p).ok();
-    Present(m.complete(p, YAML_BLOCK_MAP_EXPLICIT_VALUE))
+
+    Present(m.complete(p, YAML_BLOCK_MAP_EXPLICIT_ENTRY))
 }
 
 fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
-    if !is_at_flow_yaml_node(p) {
-        return Absent;
-    }
-    let m = p.start();
-    parse_block_map_implicit_key(p);
-    parse_block_map_implicit_value(p);
-    Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
-}
+    if is_at_flow_yaml_node(p) {
+        let m = p.start();
+        parse_flow_yaml_node(p);
 
-fn parse_block_map_implicit_key(p: &mut YamlParser) -> CompletedMarker {
-    parse_flow_yaml_node(p)
-}
+        p.bump(COLON);
+        // Value can be completely empty according to the spec
+        parse_any_block_node(p).ok();
+        Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
+    } else if is_at_flow_json_node(p) {
+        let m = p.start();
+        parse_flow_json_node(p);
 
-fn parse_block_map_implicit_value(p: &mut YamlParser) -> CompletedMarker {
-    let m = p.start();
-    p.bump(COLON);
-    // Value can be completely empty according to the spec
-    let value = parse_any_block_node(p);
-    if value.is_absent() {
-        p.eat(NEWLINE);
+        p.bump(COLON);
+        // Value can be completely empty according to the spec
+        parse_any_block_node(p).ok();
+        Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
+    } else {
+        Absent
     }
-    m.complete(p, YAML_BLOCK_MAP_IMPLICIT_VALUE)
 }
 
 fn parse_block_sequence(p: &mut YamlParser) -> CompletedMarker {
@@ -228,7 +217,7 @@ impl ParseNodeList for BlockSequenceEntryList {
         parsed_element.or_recover(
             p,
             &BlockSequenceEntryListParseRecovery::new(),
-            expected_block_mapping,
+            expected_block_sequence_entry,
         )
     }
 }
@@ -282,7 +271,7 @@ fn parse_flow_in_block_node(p: &mut YamlParser) -> CompletedMarker {
     debug_assert!(p.at(FLOW_START));
     let m = p.start();
     p.expect(FLOW_START);
-    parse_flow_yaml_node(p);
+    parse_any_flow_node(p).ok();
     p.expect(FLOW_END);
     m.complete(p, YAML_FLOW_IN_BLOCK_NODE)
 }

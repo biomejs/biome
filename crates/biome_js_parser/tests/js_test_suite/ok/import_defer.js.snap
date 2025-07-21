@@ -1,0 +1,125 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+import defer * as feature from "some-module";
+import defer * as ns from "x" with { attr: "val" };
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsImport {
+            import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+            import_clause: JsImportNamespaceClause {
+                type_token: missing (optional),
+                phase_token: DEFER_KW@7..13 "defer" [] [Whitespace(" ")],
+                namespace_specifier: JsNamespaceImportSpecifier {
+                    star_token: STAR@13..15 "*" [] [Whitespace(" ")],
+                    as_token: AS_KW@15..18 "as" [] [Whitespace(" ")],
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@18..26 "feature" [] [Whitespace(" ")],
+                    },
+                },
+                from_token: FROM_KW@26..31 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@31..44 "\"some-module\"" [] [],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: SEMICOLON@44..45 ";" [] [],
+        },
+        JsImport {
+            import_token: IMPORT_KW@45..53 "import" [Newline("\n")] [Whitespace(" ")],
+            import_clause: JsImportNamespaceClause {
+                type_token: missing (optional),
+                phase_token: DEFER_KW@53..59 "defer" [] [Whitespace(" ")],
+                namespace_specifier: JsNamespaceImportSpecifier {
+                    star_token: STAR@59..61 "*" [] [Whitespace(" ")],
+                    as_token: AS_KW@61..64 "as" [] [Whitespace(" ")],
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@64..67 "ns" [] [Whitespace(" ")],
+                    },
+                },
+                from_token: FROM_KW@67..72 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@72..76 "\"x\"" [] [Whitespace(" ")],
+                },
+                assertion: JsImportAssertion {
+                    with_token: WITH_KW@76..81 "with" [] [Whitespace(" ")],
+                    l_curly_token: L_CURLY@81..83 "{" [] [Whitespace(" ")],
+                    assertions: JsImportAssertionEntryList [
+                        JsImportAssertionEntry {
+                            key: IDENT@83..87 "attr" [] [],
+                            colon_token: COLON@87..89 ":" [] [Whitespace(" ")],
+                            value_token: JS_STRING_LITERAL@89..95 "\"val\"" [] [Whitespace(" ")],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@95..96 "}" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@96..97 ";" [] [],
+        },
+    ],
+    eof_token: EOF@97..97 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..97
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..97
+    0: JS_IMPORT@0..45
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: JS_IMPORT_NAMESPACE_CLAUSE@7..44
+        0: (empty)
+        1: DEFER_KW@7..13 "defer" [] [Whitespace(" ")]
+        2: JS_NAMESPACE_IMPORT_SPECIFIER@13..26
+          0: STAR@13..15 "*" [] [Whitespace(" ")]
+          1: AS_KW@15..18 "as" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_BINDING@18..26
+            0: IDENT@18..26 "feature" [] [Whitespace(" ")]
+        3: FROM_KW@26..31 "from" [] [Whitespace(" ")]
+        4: JS_MODULE_SOURCE@31..44
+          0: JS_STRING_LITERAL@31..44 "\"some-module\"" [] []
+        5: (empty)
+      2: SEMICOLON@44..45 ";" [] []
+    1: JS_IMPORT@45..97
+      0: IMPORT_KW@45..53 "import" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IMPORT_NAMESPACE_CLAUSE@53..96
+        0: (empty)
+        1: DEFER_KW@53..59 "defer" [] [Whitespace(" ")]
+        2: JS_NAMESPACE_IMPORT_SPECIFIER@59..67
+          0: STAR@59..61 "*" [] [Whitespace(" ")]
+          1: AS_KW@61..64 "as" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_BINDING@64..67
+            0: IDENT@64..67 "ns" [] [Whitespace(" ")]
+        3: FROM_KW@67..72 "from" [] [Whitespace(" ")]
+        4: JS_MODULE_SOURCE@72..76
+          0: JS_STRING_LITERAL@72..76 "\"x\"" [] [Whitespace(" ")]
+        5: JS_IMPORT_ASSERTION@76..96
+          0: WITH_KW@76..81 "with" [] [Whitespace(" ")]
+          1: L_CURLY@81..83 "{" [] [Whitespace(" ")]
+          2: JS_IMPORT_ASSERTION_ENTRY_LIST@83..95
+            0: JS_IMPORT_ASSERTION_ENTRY@83..95
+              0: IDENT@83..87 "attr" [] []
+              1: COLON@87..89 ":" [] [Whitespace(" ")]
+              2: JS_STRING_LITERAL@89..95 "\"val\"" [] [Whitespace(" ")]
+          3: R_CURLY@95..96 "}" [] []
+      2: SEMICOLON@96..97 ";" [] []
+  4: EOF@97..97 "" [] []
+
+```

@@ -20,20 +20,6 @@ impl YamlAnchorProperty {
     }
 }
 impl YamlBlockMapExplicitEntry {
-    pub fn with_key(self, element: YamlBlockMapExplicitKey) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-    pub fn with_value(self, element: Option<YamlBlockMapExplicitValue>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            1usize..=1usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
-}
-impl YamlBlockMapExplicitKey {
     pub fn with_question_mark_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -46,45 +32,35 @@ impl YamlBlockMapExplicitKey {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-}
-impl YamlBlockMapExplicitValue {
-    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_colon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
         )
     }
     pub fn with_value(self, element: Option<AnyYamlBlockNode>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
-            1usize..=1usize,
+            3usize..=3usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
 }
 impl YamlBlockMapImplicitEntry {
-    pub fn with_key(self, element: Option<AnyYamlBlockMapImplicitKey>) -> Self {
+    pub fn with_key(self, element: Option<AnyYamlMappingImplicitKey>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             0usize..=0usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_value(self, element: YamlBlockMapImplicitValue) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl YamlBlockMapImplicitValue {
     pub fn with_colon_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
     pub fn with_value(self, element: Option<AnyYamlBlockNode>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
-            1usize..=1usize,
+            2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
@@ -258,31 +234,43 @@ impl YamlFlowMapExplicitEntry {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_entry(self, element: Option<YamlFlowMapImplicitEntry>) -> Self {
+    pub fn with_key(self, element: Option<AnyYamlMappingImplicitKey>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
+    pub fn with_colon_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_value(self, element: Option<AnyYamlFlowNode>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
 }
 impl YamlFlowMapImplicitEntry {
-    pub fn with_key(self, element: Option<AnyYamlFlowMapImplicitKey>) -> Self {
+    pub fn with_key(self, element: Option<AnyYamlMappingImplicitKey>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             0usize..=0usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+    pub fn with_colon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+                .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_value(self, element: AnyYamlFlowNode) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_value(self, element: Option<AnyYamlFlowNode>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }
 impl YamlFlowMapping {

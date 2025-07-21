@@ -38,6 +38,7 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
         match self {
             kind if AnyYamlBlockMapEntry::can_cast(*kind) => Self::YAML_BOGUS_BLOCK_MAP_ENTRY,
             kind if AnyYamlBlockNode::can_cast(*kind) => Self::YAML_BOGUS_BLOCK_NODE,
+            kind if AnyYamlFlowNode::can_cast(*kind) => Self::YAML_BOGUS_FLOW_NODE,
             _ => Self::YAML_BOGUS,
         }
     }

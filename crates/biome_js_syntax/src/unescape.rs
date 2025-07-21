@@ -160,9 +160,9 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                     }
                 }
             }
-            Text::Owned(string)
+            string.into()
         }
-        None => Text::Borrowed(text),
+        None => text.into(),
     }
 }
 
