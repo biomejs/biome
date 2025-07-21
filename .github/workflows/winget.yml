@@ -27,7 +27,7 @@ jobs:
       - name: Install .NET Runtime
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.x'
+          dotnet-version: '8.x'
 
       - name: Download and install wingetcreate
         run: |
