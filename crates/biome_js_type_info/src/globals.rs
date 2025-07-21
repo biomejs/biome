@@ -12,12 +12,13 @@ use biome_rowan::Text;
 
 use crate::{
     Class, Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
-    Resolvable, ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId,
-    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
+    Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType, ScopeId, TypeData,
+    TypeId, TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
 };
 
-const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
+pub(super) const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
+pub(super) const GLOBAL_RESOLVER_ID: ResolverId = ResolverId::from_level(GLOBAL_LEVEL);
 
 pub static GLOBAL_RESOLVER: LazyLock<Arc<GlobalsResolver>> =
     LazyLock::new(|| Arc::new(GlobalsResolver::default()));
@@ -330,13 +331,13 @@ impl Default for GlobalsResolver {
             ])))),
             TypeData::from(GenericTypeParameter {
                 name: Text::new_static("T"),
-                constraint: TypeReference::Unknown,
-                default: TypeReference::Unknown,
+                constraint: TypeReference::unknown(),
+                default: TypeReference::unknown(),
             }),
             TypeData::from(GenericTypeParameter {
                 name: Text::new_static("U"),
-                constraint: TypeReference::Unknown,
-                default: TypeReference::Unknown,
+                constraint: TypeReference::unknown(),
+                default: TypeReference::unknown(),
             }),
             TypeData::from(Function {
                 is_async: false,
@@ -445,7 +446,6 @@ impl TypeResolver for GlobalsResolver {
                 (resolved_id.level() == GLOBAL_LEVEL).then_some(*resolved_id)
             }
             TypeReference::Import(_) => None,
-            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
         }
     }
 

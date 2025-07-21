@@ -7,7 +7,15 @@ use crate::{
 
 use super::MAX_FLATTEN_DEPTH;
 
-/// Provides semantic information about [`TypeData`] for use in conditionals.
+/// Provides semantic information about types for use in conditionals.
+///
+/// If you want to know whether a type is truthy, falsy, nullish, or
+/// non-nullish, see the [`Self::is_truthy()`], [`Self::is_falsy()`],
+/// [`Self::is_nullish()`] and [`Self::is_non_nullish()`] methods. Please
+/// refrain from matching the enum variants directly.
+///
+/// You can access the conditional information from a [`Type`](crate::Type)
+/// instance using its [`conditional()`](crate::Type::conditional) method.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ConditionalType {
     /// A type for which no semantic value can be determined statically.
