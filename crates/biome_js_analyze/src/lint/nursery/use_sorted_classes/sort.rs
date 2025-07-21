@@ -128,13 +128,16 @@ fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
 }
 
 /// Sort the given class string according to the given sort config.
-/// ignore_prefix and ignore_postfix are used to ignore the first and last class respectively.
+/// `template_context` is used to determine if the class string is part of a template literal and how to handle spaces.
 pub fn sort_class_name(
     class_name: &TokenText,
     sort_config: &SortConfig,
-    ignore_prefix: bool,
-    ignore_postfix: bool,
+    template_context: &Option<TemplateLiteralSpaceContext>,
 ) -> String {
+    // Extract ignore flags from template context
+    let ignore_prefix = template_context.is_some_and(|ctx| ctx.should_ignore_prefix());
+    let ignore_postfix = template_context.is_some_and(|ctx| ctx.should_ignore_postfix());
+
     // Obtain classes by splitting the class string by whitespace.
     let mut classes_iter = class_name.split_whitespace();
     let class_str_prefix = if ignore_prefix {
@@ -150,7 +153,6 @@ pub fn sort_class_name(
 
     // Collect the remaining classes into a vector if needed.
     let classes: Vec<&str> = classes_iter.collect();
-    let classes_len = classes.len();
 
     // Separate custom classes from recognized classes, and compute the recognized classes' info.
     // Custom classes always go first, in the order that they appear in.
@@ -195,14 +197,12 @@ pub fn sort_class_name(
 
     let mut result = sorted_classes.join(" ");
 
-    if classes_len > 0 || ignore_postfix || ignore_prefix {
-        // restore front space
-        if class_name.starts_with(' ') {
+    // Edge space handling for template literals only
+    if let Some(ctx) = template_context {
+        if ctx.should_preserve_leading_space() {
             result.insert(0, ' ');
         }
-
-        // restore final space
-        if class_name.ends_with(' ') {
+        if ctx.should_preserve_trailing_space() {
             result.push(' ');
         }
     }
@@ -214,12 +214,16 @@ pub fn sort_class_name(
 pub fn get_sort_class_name_range(
     class_name: &TokenText,
     range: &TextRange,
-    ignore_prefix: bool,
-    ignore_postfix: bool,
+    template_context: &Option<TemplateLiteralSpaceContext>,
+    // ignore_prefix: bool,
+    // ignore_postfix: bool,
 ) -> Option<TextRange> {
     let mut class_iter = class_name.split_whitespace();
     let first_class_len = class_iter.next().map_or(0, |s| s.len()) as u32;
     let last_class_len = class_iter.next_back().map_or(0, |s| s.len()) as u32;
+
+    let ignore_prefix = template_context.is_some_and(|ctx| ctx.should_ignore_prefix());
+    let ignore_postfix = template_context.is_some_and(|ctx| ctx.should_ignore_postfix());
     let offset_prefix = if ignore_prefix { first_class_len } else { 0 };
     let offset_postfix = if ignore_postfix { last_class_len } else { 0 };
 
@@ -233,38 +237,113 @@ pub fn get_sort_class_name_range(
     Some(TextRange::new(start, end))
 }
 
-// Returns whether the given node should be ignored prefix when sorting.
-pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
-    if let Some(value) = node.value() {
-        // For example, for <div class={`${variable}mx-2 m-5`} />, we should ignore "${variable}mx-2" as a sorting item because it is an indivisible whole.
-        if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
-            !value.starts_with(' ')
-                && node
-                    .syntax()
-                    .prev_sibling()
-                    .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
-        } else {
-            false
-        }
-    } else {
-        false
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum TemplateLiteralSpaceContext {
+    /// Template literal with variables on both sides: `${var} p-2 ${var}`
+    BothSides {
+        prefix_space: bool,
+        postfix_space: bool,
+    },
+    /// Template literal with variable only before: `${var} p-2`
+    PrefixOnly { has_space: bool },
+    /// Template literal with variable only after: `p-2 ${var}`
+    PostfixOnly { has_space: bool },
+    /// Template literal without any variables: `p-2`
+    NoVariables,
+}
+
+impl TemplateLiteralSpaceContext {
+    /// Should ignore the first class when sorting
+    pub fn should_ignore_prefix(&self) -> bool {
+        matches!(
+            self,
+            Self::BothSides {
+                prefix_space: false,
+                ..
+            } | Self::PrefixOnly { has_space: false }
+        )
+    }
+
+    /// Should ignore the last class when sorting
+    pub fn should_ignore_postfix(&self) -> bool {
+        matches!(
+            self,
+            Self::BothSides {
+                postfix_space: false,
+                ..
+            } | Self::PostfixOnly { has_space: false }
+        )
+    }
+
+    /// Should preserve leading space
+    pub fn should_preserve_leading_space(&self) -> bool {
+        matches!(
+            self,
+            Self::BothSides {
+                prefix_space: true,
+                ..
+            } | Self::PrefixOnly { has_space: true }
+        )
+    }
+
+    /// Should preserve trailing space
+    pub fn should_preserve_trailing_space(&self) -> bool {
+        matches!(
+            self,
+            Self::BothSides {
+                postfix_space: true,
+                ..
+            } | Self::PostfixOnly { has_space: true }
+        )
     }
 }
 
-// Returns whether the given node should be ignored postfix when sorting.
-pub fn should_ignore_postfix(node: &AnyClassStringLike) -> bool {
-    if let Some(value) = node.value() {
-        // For example, for <div class={`mx-2 m-5${variable}`} />, we should ignore "m-5${variable}" as a sorting item because it is an indivisible whole.
-        if let AnyClassStringLike::JsTemplateChunkElement(_template) = node {
-            !value.ends_with(' ')
-                && node
-                    .syntax()
-                    .next_sibling()
-                    .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
-        } else {
-            false
-        }
-    } else {
-        false
+/// Returns the template context for the given node, analyzing variable positions and spaces.
+pub fn get_template_context(node: &AnyClassStringLike) -> Option<TemplateLiteralSpaceContext> {
+    if !matches!(node, AnyClassStringLike::JsTemplateChunkElement(_)) {
+        return None;
     }
+
+    let Some(value) = node.value() else {
+        return Some(TemplateLiteralSpaceContext::NoVariables);
+    };
+
+    let syntax = node.syntax();
+    let prefix_is_var = syntax
+        .prev_sibling()
+        .is_some_and(|s| JsTemplateElement::can_cast(s.kind()));
+    let postfix_is_var = syntax
+        .next_sibling()
+        .is_some_and(|s| JsTemplateElement::can_cast(s.kind()));
+
+    // if the value is only whitespace, don't process it like `${test} ${test}`
+    if value.trim().is_empty() {
+        return None;
+    }
+
+    let context = match (prefix_is_var, postfix_is_var) {
+        (true, true) => TemplateLiteralSpaceContext::BothSides {
+            prefix_space: value.starts_with(' '),
+            postfix_space: value.ends_with(' '),
+        },
+        (true, false) => TemplateLiteralSpaceContext::PrefixOnly {
+            has_space: value.starts_with(' '),
+        },
+        (false, true) => TemplateLiteralSpaceContext::PostfixOnly {
+            has_space: value.ends_with(' '),
+        },
+        (false, false) => TemplateLiteralSpaceContext::NoVariables,
+    };
+
+    Some(context)
 }
+
+// // Returns whether the given node should be ignored prefix when sorting.
+// pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
+//     get_template_context(node).is_some_and(|ctx| ctx.should_ignore_prefix())
+// }
+
+// // Returns whether the given node should be ignored postfix when sorting.
+// pub fn should_ignore_postfix(node: &AnyClassStringLike) -> bool {
+//     get_template_context(node).is_some_and(|ctx| ctx.should_ignore_postfix())
+// }
