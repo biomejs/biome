@@ -7,8 +7,8 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter,
     AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsArrayAssignmentPattern,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsBlockStatement, JsCallArgumentList,
-    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassMemberList,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsAwaitExpression, JsBlockStatement,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassMemberList,
     JsConditionalExpression, JsConstructorClassMember, JsElseClause, JsExpressionStatement,
     JsFunctionBody, JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsIfStatement,
     JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
@@ -310,7 +310,8 @@ declare_node_union! {
     JsTemplateExpression |
     JsVariableDeclaration |
     JsVariableDeclarator |
-    JsVariableStatement
+    JsVariableStatement |
+    JsAwaitExpression
 }
 
 enum MethodBodyElementOrStatementList {
