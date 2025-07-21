@@ -8,7 +8,7 @@ use crate::{
     GLOBAL_UNKNOWN_ID, NUM_PREDEFINED_TYPES, ScopeId, TypeData, TypeId, TypeImportQualifier,
     TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeofValue,
     Union,
-    globals::{GLOBAL_UNDEFINED_ID, global_type_name},
+    globals::{GLOBAL_RESOLVER_ID, GLOBAL_UNDEFINED_ID, UNKNOWN_ID, global_type_name},
 };
 
 const NUM_MODULE_ID_BITS: i32 = 30;
@@ -76,12 +76,17 @@ impl ResolvedTypeId {
 
     #[inline]
     pub const fn is_global(self) -> bool {
-        matches!(self.level(), TypeResolverLevel::Global)
+        matches!(self.0, GLOBAL_RESOLVER_ID)
     }
 
     #[inline]
     pub const fn is_at_module_level(self) -> bool {
         matches!(self.level(), TypeResolverLevel::Thin)
+    }
+
+    #[inline]
+    pub const fn is_unknown(self) -> bool {
+        matches!((self.0, self.1), (GLOBAL_RESOLVER_ID, UNKNOWN_ID))
     }
 
     #[inline]
@@ -779,7 +784,7 @@ impl Resolvable for TypeReference {
 
 impl Resolvable for TypeofValue {
     fn resolved(&self, resolver: &mut dyn TypeResolver) -> Option<Self> {
-        let ty = if self.ty == TypeReference::Unknown {
+        let ty = if self.ty.is_unknown() {
             let resolved_id = resolver
                 .resolve_type_of(&self.identifier, self.scope_id.unwrap_or(ScopeId::GLOBAL))?;
             TypeReference::Resolved(resolved_id)

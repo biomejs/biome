@@ -30,17 +30,16 @@ use crate::globals::{
 use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
-    FunctionParameter, FunctionParameterBinding, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
-    Interface, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
-    TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind, TypeOperator,
-    TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
-    TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Interface, Literal, Module,
+    NamedFunctionParameter, Namespace, Object, Path, PatternFunctionParameter, PredicateReturnType,
+    ResolvedTypeId, ReturnType, ScopeId, Tuple, TupleElementType, TypeData, TypeInstance,
+    TypeMember, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
+    TypeReferenceQualifier, TypeResolver, TypeofAdditionExpression, TypeofAwaitExpression,
+    TypeofBitwiseNotExpression, TypeofCallExpression, TypeofConditionalExpression,
+    TypeofDestructureExpression, TypeofExpression, TypeofIndexExpression,
+    TypeofIterableValueOfExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression,
+    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
 
 impl TypeData {
@@ -452,7 +451,7 @@ impl TypeData {
                                 is_rest: true,
                             }),
                         Ok(AnyJsArrayElement::JsArrayHole(_)) | Err(_) => Some(TupleElementType {
-                            ty: TypeReference::Unknown,
+                            ty: TypeReference::unknown(),
                             name: None,
                             is_optional: false,
                             is_rest: false,
@@ -831,7 +830,7 @@ impl TypeData {
                         .unwrap_or_default();
                     Box::new([FunctionParameter::Named(NamedFunctionParameter {
                         name,
-                        ty: TypeReference::Unknown,
+                        ty: TypeReference::unknown(),
                         is_optional: false,
                     })])
                 }
@@ -1111,14 +1110,11 @@ impl TypeData {
     }
 
     pub fn from_js_reference_identifier(scope_id: ScopeId, id: &JsReferenceIdentifier) -> Self {
-        id.name().map_or(
-            Self::Reference(GLOBAL_UNKNOWN_ID.into()),
-            |name| match name.text() {
-                "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
-                "undefined" => Self::Undefined,
-                _ => Self::reference(TypeReference::from_name(scope_id, name)),
-            },
-        )
+        id.name().map_or(Self::unknown(), |name| match name.text() {
+            "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
+            "undefined" => Self::Undefined,
+            _ => Self::reference(TypeReference::from_name(scope_id, name)),
+        })
     }
 
     pub fn from_js_unary_expression(
@@ -1475,7 +1471,7 @@ impl FunctionParameter {
                 param,
             )) => Self::from_js_formal_parameter(resolver, scope_id, param),
             AnyJsParameter::AnyJsFormalParameter(_) => Self::Pattern(PatternFunctionParameter {
-                ty: TypeReference::Unknown,
+                ty: TypeReference::unknown(),
                 bindings: [].into(),
                 is_optional: false,
                 is_rest: false,
@@ -1968,7 +1964,7 @@ impl TypeMember {
                     kind: TypeMemberKind::Named(name.clone()),
                     ty: resolver.reference_to_owned_data(TypeData::from(TypeofValue {
                         identifier: name,
-                        ty: TypeReference::Unknown,
+                        ty: TypeReference::unknown(),
                         scope_id: None,
                     })),
                 }),
@@ -2220,7 +2216,7 @@ impl TypeReference {
                         .map(Self::from)
                         .unwrap_or_default()
                 }
-                Err(_) => Self::Unknown,
+                Err(_) => Self::unknown(),
             })
             .collect()
     }
@@ -2434,7 +2430,7 @@ fn function_return_type(
         None => {
             return ReturnType::Type(match is_async {
                 true => GLOBAL_INSTANCEOF_PROMISE_ID.into(),
-                false => TypeReference::Unknown,
+                false => TypeReference::unknown(),
             });
         }
     };
@@ -2458,7 +2454,7 @@ fn getter_return_type(
 
     let return_ty = match body {
         Some(body) => type_from_function_body(resolver, scope_id, body),
-        None => return TypeReference::Unknown,
+        None => return TypeReference::unknown(),
     };
 
     resolver.reference_to_owned_data(return_ty)

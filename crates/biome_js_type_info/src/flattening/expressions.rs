@@ -9,7 +9,7 @@ use crate::{
     Resolvable, ResolvedTypeData, ResolvedTypeMember, ResolverId, TypeData, TypeMember,
     TypeReference, TypeResolver, TypeofCallExpression, TypeofExpression,
     TypeofStaticMemberExpression,
-    flattening::conditionals::{
+    conditionals::{
         ConditionalType, reference_to_falsy_subset_of, reference_to_non_nullish_subset_of,
         reference_to_truthy_subset_of,
     },

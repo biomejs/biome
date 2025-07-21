@@ -169,7 +169,7 @@ Module TypeId(4) => instanceof Import Symbol: PromisedResult from "/src/reexport
 Module TypeId(5) => sync Function {
   accepts: {
     params: [
-      required resolve: unknown reference
+      required resolve: unknown
     ]
     type_args: []
   }

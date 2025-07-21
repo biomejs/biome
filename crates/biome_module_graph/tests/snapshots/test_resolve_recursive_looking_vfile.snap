@@ -366,7 +366,7 @@ Module TypeId(22) => interface "Settings" {
   members: []
 }
 
-Module TypeId(23) => T = unknown reference
+Module TypeId(23) => T = unknown
 
 Module TypeId(24) => instanceof Module(0) TypeId(21)<Module(0) TypeId(23)>
 

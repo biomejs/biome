@@ -431,7 +431,7 @@ impl JsModuleInfoCollector {
                     references: Vec::new(),
                     scope_id,
                     declaration_kind,
-                    ty: TypeReference::Unknown,
+                    ty: TypeReference::unknown(),
                     jsdoc: node.as_ref().and_then(find_jsdoc),
                     export_ranges: Vec::new(),
                     range,
@@ -595,12 +595,12 @@ impl JsModuleInfoCollector {
             } else if let Some(param) = TsTypeParameter::cast_ref(&ancestor) {
                 return match GenericTypeParameter::from_ts_type_parameter(self, scope_id, &param) {
                     Some(generic) => self.reference_to_owned_data(TypeData::from(generic)),
-                    None => TypeReference::Unknown,
+                    None => TypeReference::unknown(),
                 };
             }
         }
 
-        TypeReference::Unknown
+        TypeReference::unknown()
     }
 
     /// After the first pass of the collector, import references have been
@@ -653,7 +653,7 @@ impl JsModuleInfoCollector {
                 {
                     let binding = &self.bindings[resolved.index()];
                     *reference = self.static_imports.get(&binding.name).map_or(
-                        TypeReference::Unknown,
+                        TypeReference::unknown(),
                         |import| {
                             TypeReference::from(TypeImportQualifier {
                                 symbol: import.symbol.clone(),
@@ -666,7 +666,7 @@ impl JsModuleInfoCollector {
                 TypeReference::Qualifier(_) => {
                     // Qualifiers that haven't been resolved yet will never
                     // be resolved.
-                    *reference = TypeReference::Unknown;
+                    *reference = TypeReference::unknown();
                 }
                 _ => {}
             });
@@ -915,7 +915,6 @@ impl TypeResolver for JsModuleInfoCollector {
             TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
             TypeReference::Resolved(resolved_id) => Some(*resolved_id),
             TypeReference::Import(_) => None,
-            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
         }
     }
 
