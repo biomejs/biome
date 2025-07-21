@@ -896,6 +896,7 @@ export type RuleDomain =
 	| "test"
 	| "solid"
 	| "next"
+	| "qwik"
 	| "vue"
 	| "project";
 export type RuleDomainValue = "all" | "none" | "recommended";
