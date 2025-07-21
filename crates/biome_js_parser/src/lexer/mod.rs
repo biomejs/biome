@@ -969,6 +969,7 @@ impl<'src> JsLexer<'src> {
             b"continue" => CONTINUE_KW,
             b"debugger" => DEBUGGER_KW,
             b"default" => DEFAULT_KW,
+            b"defer" => DEFER_KW,
             b"delete" => DELETE_KW,
             b"do" => DO_KW,
             b"else" => ELSE_KW,

@@ -130,6 +130,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "boolean",
         "constructor",
         "declare",
+        "defer",
         "get",
         "infer",
         "is",
