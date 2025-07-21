@@ -2,11 +2,51 @@
 
 This directory contains WinGet manifest templates for submitting Biome to the Windows Package Manager Community Repository.
 
-## Initial Setup
+## Prerequisites
 
-Before you can use the automated WinGet workflow, you need to manually submit the initial package to the WinGet Community Repository. This is a one-time process.
+Before using the automated WinGet workflow, you need:
 
-### Prerequisites
+1. **Fork the winget-pkgs repository**:
+   - Fork [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) under the same GitHub account/organization as this repository
+   - This is required by GitHub's pull request model and Microsoft's submission process
+
+2. **Create a Personal Access Token (PAT)**:
+   - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Create a classic token with `public_repo` scope
+   - Add it as a repository secret named `WINGET_TOKEN`
+
+3. **Initial package submission**:
+   - At least one version of BiomeJS.Biome must already exist in the WinGet Community Repository
+   - This is a one-time manual process (see Manual Submission section below)
+
+## Automated Updates
+
+The automated workflow in `.github/workflows/winget.yml` handles updates automatically when new releases are published.
+
+### How It Works
+
+The automation will:
+- Trigger on new releases tagged with `@biomejs/biome@*`
+- Extract the version from the release tag  
+- Use the [winget-releaser](https://github.com/vedantmgoyal9/winget-releaser) action to:
+  - Automatically detect release assets (biome-win32-x64.exe and biome-win32-arm64.exe)
+  - Create/update the WinGet manifest
+  - Submit a pull request from your fork to microsoft/winget-pkgs
+
+### Current Workflow Configuration
+
+```yaml
+- name: Publish to WinGet
+  uses: vedantmgoyal9/winget-releaser@v2
+  with:
+    identifier: BiomeJS.Biome
+    version: ${{ steps.extract-version.outputs.version }}
+    token: ${{ secrets.WINGET_TOKEN }}
+```
+
+## Manual Submission Process (One-time Setup)
+
+### Prerequisites for Manual Submission
 
 1. Install the [WinGet CLI](https://github.com/microsoft/winget-cli)
 2. Install [winget-create](https://github.com/microsoft/winget-create) tool:
@@ -14,9 +54,7 @@ Before you can use the automated WinGet workflow, you need to manually submit th
    winget install Microsoft.WingetCreate
    ```
 
-### Manual Submission Process
-
-#### Method 1: Using wingetcreate.exe
+### Method 1: Using wingetcreate.exe
 
 The recommended approach is to use `wingetcreate.exe` to automatically generate and submit the manifests:
 
@@ -46,28 +84,7 @@ The recommended approach is to use `wingetcreate.exe` to automatically generate 
    wingetcreate.exe submit --prtitle <PullRequestTitle> --token <GitHubPersonalAccessToken> --replace
    ```
 
-
-## Automated Updates
-
-Once the initial package is submitted and merged, the automated workflow in `.github/workflows/winget.yml` will handle future updates automatically when new releases are published.
-
-> **Note**: The automation is already set up and working! New CLI releases tagged with `@biomejs/biome@*` will automatically trigger WinGet package updates.
-
-### Setting up the Automation
-
-1. **Create a Personal Access Token (PAT)**:
-   - Go to GitHub Settings → Developer settings → Personal access tokens
-   - Create a classic token with `public_repo` scope
-   - Add it as a repository secret named `WINGET_TOKEN`
-
-2. **The automation will**:
-   - Trigger on new releases tagged with `@biomejs/biome@*`
-   - Extract the version from the release tag
-   - Download and install the latest `wingetcreate.exe` tool
-   - Submit the package update to WinGet automatically using Microsoft's official tooling
-   - Support both x64 and ARM64 architectures automatically
-
-**Note**: Unlike third-party actions, using the official `wingetcreate.exe` tool eliminates the need to maintain a fork of the winget-pkgs repository.
+**Important Note**: All WinGet submission methods (including wingetcreate.exe and winget-releaser) require a fork of microsoft/winget-pkgs due to GitHub's pull request model. The tools automatically create branches in your fork and submit pull requests to the upstream repository.
 
 ## Package Information
 
@@ -101,3 +118,4 @@ winget install --manifest manifests/b/BiomeJS/Biome/VERSION/
 - [WinGet Manifest Schema](https://github.com/microsoft/winget-cli/tree/master/schemas)
 - [WinGet Community Repository](https://github.com/microsoft/winget-pkgs)
 - [WinGet Create Tool](https://github.com/microsoft/winget-create)
+- [WinGet Releaser Action](https://github.com/vedantmgoyal9/winget-releaser)
