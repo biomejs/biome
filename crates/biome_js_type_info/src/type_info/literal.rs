@@ -106,13 +106,13 @@ impl From<Text> for StringLiteral {
 
 impl From<String> for StringLiteral {
     fn from(value: String) -> Self {
-        Self(Text::Owned(value))
+        Self(value.into())
     }
 }
 
 impl From<&str> for StringLiteral {
     fn from(value: &str) -> Self {
-        Self(Text::Owned(value.to_string()))
+        Self(value.to_string().into())
     }
 }
 
@@ -135,51 +135,78 @@ mod tests {
     #[test]
     fn parse_number_basic() {
         assert_eq!(
-            NumberLiteral(Text::Static("1234567890")).to_f64(),
+            NumberLiteral(Text::new_static("1234567890")).to_f64(),
             Some(1_234_567_890.0)
         );
-        assert_eq!(NumberLiteral(Text::Static("42")).to_f64(), Some(42.0));
-        assert_eq!(NumberLiteral(Text::Static("0")).to_f64(), Some(0.0));
+        assert_eq!(NumberLiteral(Text::new_static("42")).to_f64(), Some(42.0));
+        assert_eq!(NumberLiteral(Text::new_static("0")).to_f64(), Some(0.0));
     }
 
     #[test]
     fn parse_number_legacy_octal() {
-        assert_eq!(NumberLiteral(Text::Static("0888")).to_f64(), Some(888.0));
-        assert_eq!(NumberLiteral(Text::Static("0788")).to_f64(), Some(788.0));
-        assert_eq!(NumberLiteral(Text::Static("0777")).to_f64(), Some(511.0));
+        assert_eq!(
+            NumberLiteral(Text::new_static("0888")).to_f64(),
+            Some(888.0)
+        );
+        assert_eq!(
+            NumberLiteral(Text::new_static("0788")).to_f64(),
+            Some(788.0)
+        );
+        assert_eq!(
+            NumberLiteral(Text::new_static("0777")).to_f64(),
+            Some(511.0)
+        );
     }
 
     #[test]
     fn parse_number_exponential() {
-        assert_eq!(NumberLiteral(Text::Static("0e-5")).to_f64(), Some(0.0));
-        assert_eq!(NumberLiteral(Text::Static("0e+5")).to_f64(), Some(0.0));
-        assert_eq!(NumberLiteral(Text::Static("5e1")).to_f64(), Some(50.0));
-        assert_eq!(NumberLiteral(Text::Static("175e-2")).to_f64(), Some(1.75));
-        assert_eq!(NumberLiteral(Text::Static("1e3")).to_f64(), Some(1000.0));
-        assert_eq!(NumberLiteral(Text::Static("1e-3")).to_f64(), Some(0.001));
-        assert_eq!(NumberLiteral(Text::Static("1E3")).to_f64(), Some(1000.0));
+        assert_eq!(NumberLiteral(Text::new_static("0e-5")).to_f64(), Some(0.0));
+        assert_eq!(NumberLiteral(Text::new_static("0e+5")).to_f64(), Some(0.0));
+        assert_eq!(NumberLiteral(Text::new_static("5e1")).to_f64(), Some(50.0));
+        assert_eq!(
+            NumberLiteral(Text::new_static("175e-2")).to_f64(),
+            Some(1.75)
+        );
+        assert_eq!(
+            NumberLiteral(Text::new_static("1e3")).to_f64(),
+            Some(1000.0)
+        );
+        assert_eq!(
+            NumberLiteral(Text::new_static("1e-3")).to_f64(),
+            Some(0.001)
+        );
+        assert_eq!(
+            NumberLiteral(Text::new_static("1E3")).to_f64(),
+            Some(1000.0)
+        );
     }
 
     #[test]
     fn parse_number_binary() {
         assert_eq!(
-            NumberLiteral(Text::Static("0b10000000000000000000000000000000")).to_f64(),
+            NumberLiteral(Text::new_static("0b10000000000000000000000000000000")).to_f64(),
             Some(2_147_483_648.0)
         );
         assert_eq!(
-            NumberLiteral(Text::Static("0b01111111100000000000000000000000")).to_f64(),
+            NumberLiteral(Text::new_static("0b01111111100000000000000000000000")).to_f64(),
             Some(2_139_095_040.0)
         );
         assert_eq!(
-            NumberLiteral(Text::Static("0B00000000011111111111111111111111")).to_f64(),
+            NumberLiteral(Text::new_static("0B00000000011111111111111111111111")).to_f64(),
             Some(8_388_607.0)
         );
     }
 
     #[test]
     fn parse_number_octal() {
-        assert_eq!(NumberLiteral(Text::Static("0O755")).to_f64(), Some(493.0));
-        assert_eq!(NumberLiteral(Text::Static("0o644")).to_f64(), Some(420.0));
+        assert_eq!(
+            NumberLiteral(Text::new_static("0O755")).to_f64(),
+            Some(493.0)
+        );
+        assert_eq!(
+            NumberLiteral(Text::new_static("0o644")).to_f64(),
+            Some(420.0)
+        );
     }
 
     #[test]
@@ -188,36 +215,36 @@ mod tests {
         //       However it's a valid number literal in ECMAScript, though it will be truncated
         //       to the precision of f64.
         // assert_eq!(
-        //     NumberLiteral(Text::Static("0xFFFFFFFFFFFFFFFFF"),
+        //     NumberLiteral(Text::new_static("0xFFFFFFFFFFFFFFFFF"),
         //     Some(295147905179352830000.0)
         // );
         assert_eq!(
-            NumberLiteral(Text::Static("0x123456789ABCDEF")).to_f64(),
+            NumberLiteral(Text::new_static("0x123456789ABCDEF")).to_f64(),
             Some(81_985_529_216_486_900.0)
         );
-        assert_eq!(NumberLiteral(Text::Static("0XA")).to_f64(), Some(10.0));
+        assert_eq!(NumberLiteral(Text::new_static("0XA")).to_f64(), Some(10.0));
     }
 
     #[test]
     fn parse_number_separators() {
         assert_eq!(
-            NumberLiteral(Text::Static("1_000_000_000_000")).to_f64(),
+            NumberLiteral(Text::new_static("1_000_000_000_000")).to_f64(),
             Some(1_000_000_000_000.0)
         );
         assert_eq!(
-            NumberLiteral(Text::Static("1_050.95")).to_f64(),
+            NumberLiteral(Text::new_static("1_050.95")).to_f64(),
             Some(1050.95)
         );
         assert_eq!(
-            NumberLiteral(Text::Static("0b1010_0001_1000_0101")).to_f64(),
+            NumberLiteral(Text::new_static("0b1010_0001_1000_0101")).to_f64(),
             Some(41349.0)
         );
         assert_eq!(
-            NumberLiteral(Text::Static("0o2_2_5_6")).to_f64(),
+            NumberLiteral(Text::new_static("0o2_2_5_6")).to_f64(),
             Some(1198.0)
         );
         assert_eq!(
-            NumberLiteral(Text::Static("0xA0_B0_C0")).to_f64(),
+            NumberLiteral(Text::new_static("0xA0_B0_C0")).to_f64(),
             Some(10_531_008.0)
         );
     }

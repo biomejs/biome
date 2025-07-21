@@ -269,12 +269,12 @@ impl MergedType {
             Self::Interface(members) => TypeData::from(Interface {
                 extends: [].into(),
                 members: members.into_iter().collect(),
-                name: Text::Static("(merged)"),
+                name: Text::new_static("(merged)"),
                 type_parameters: [].into(),
             }),
             Self::Namespace(members) => TypeData::from(Namespace {
                 members: members.into_iter().collect(),
-                path: Path::from(Text::Static("")),
+                path: Path::from(Text::new_static("")),
             }),
             Self::Never => TypeData::NeverKeyword,
             Self::Object(members) => TypeData::from(Object {

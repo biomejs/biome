@@ -247,7 +247,7 @@ fn get_unresolved_imports_from_module_source(
     let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
         Some(AnyJsImportClause::JsImportCombinedClause(node)) => {
             let range = node.default_specifier()?.range();
-            (!has_exported_symbol(&Text::Static("default"), options))
+            (!has_exported_symbol(&Text::new_static("default"), options))
                 .then(|| NoUnresolvedImportsState::UnresolvedSymbol {
                     range,
                     specifier: options.specifier.as_ref().into(),
@@ -263,24 +263,19 @@ fn get_unresolved_imports_from_module_source(
                         .flatten()
                         .filter_map(get_named_specifier_import_name)
                         .filter_map(|name| {
-                            (!has_exported_symbol(
-                                &Text::Borrowed(name.token_text_trimmed()),
-                                options,
-                            ))
-                            .then(|| {
-                                NoUnresolvedImportsState::UnresolvedSymbol {
+                            (!has_exported_symbol(&Text::from(name.token_text_trimmed()), options))
+                                .then(|| NoUnresolvedImportsState::UnresolvedSymbol {
                                     range: name.text_trimmed_range(),
                                     specifier: options.specifier.as_ref().into(),
                                     export_name: name.text_trimmed().into(),
-                                }
-                            })
+                                })
                         }),
                 )
                 .collect()
         }
         Some(AnyJsImportClause::JsImportDefaultClause(node)) => {
             let range = node.default_specifier()?.range();
-            (!has_exported_symbol(&Text::Static("default"), options))
+            (!has_exported_symbol(&Text::new_static("default"), options))
                 .then(|| NoUnresolvedImportsState::UnresolvedSymbol {
                     range,
                     specifier: options.specifier.as_ref().into(),
@@ -289,22 +284,22 @@ fn get_unresolved_imports_from_module_source(
                 .into_iter()
                 .collect()
         }
-        Some(AnyJsImportClause::JsImportNamedClause(node)) => {
-            node.named_specifiers()?
-                .specifiers()
-                .into_iter()
-                .flatten()
-                .filter_map(get_named_specifier_import_name)
-                .filter_map(|name| {
-                    (!has_exported_symbol(&Text::Borrowed(name.token_text_trimmed()), options))
-                        .then(|| NoUnresolvedImportsState::UnresolvedSymbol {
-                            range: name.text_trimmed_range(),
-                            specifier: options.specifier.as_ref().into(),
-                            export_name: name.text_trimmed().into(),
-                        })
+        Some(AnyJsImportClause::JsImportNamedClause(node)) => node
+            .named_specifiers()?
+            .specifiers()
+            .into_iter()
+            .flatten()
+            .filter_map(get_named_specifier_import_name)
+            .filter_map(|name| {
+                (!has_exported_symbol(&Text::from(name.token_text_trimmed()), options)).then(|| {
+                    NoUnresolvedImportsState::UnresolvedSymbol {
+                        range: name.text_trimmed_range(),
+                        specifier: options.specifier.as_ref().into(),
+                        export_name: name.text_trimmed().into(),
+                    }
                 })
-                .collect()
-        }
+            })
+            .collect(),
         Some(
             AnyJsImportClause::JsImportBareClause(_)
             | AnyJsImportClause::JsImportNamespaceClause(_),

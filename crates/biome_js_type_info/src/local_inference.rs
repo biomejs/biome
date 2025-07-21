@@ -617,7 +617,7 @@ impl TypeData {
                 Literal::RegExp(text_from_token(expr.value_token())?)
             }
             AnyJsLiteralExpression::JsStringLiteralExpression(expr) => Literal::String(
-                StringLiteral::from(Text::Borrowed(expr.inner_string_text().ok()?)),
+                StringLiteral::from(Text::from(expr.inner_string_text().ok()?)),
             ),
         };
 
@@ -640,7 +640,7 @@ impl TypeData {
             ),
             AnyTsType::TsBigintLiteralType(ty) => match (ty.minus_token(), ty.literal_token()) {
                 (Some(minus_token), Ok(literal_token)) => Self::Literal(Box::new(Literal::BigInt(
-                    Text::Owned(format!("{minus_token}{literal_token}")),
+                    format!("{minus_token}{literal_token}").into(),
                 ))),
                 (None, Ok(literal_token)) => Self::Literal(Box::new(Literal::BigInt(
                     literal_token.token_text_trimmed().into(),
@@ -751,7 +751,7 @@ impl TypeData {
             AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_ID),
             AnyTsType::TsSymbolType(_) => Self::Symbol,
             AnyTsType::TsTemplateLiteralType(ty) => {
-                Self::Literal(Box::new(Literal::Template(Text::Owned(ty.to_string()))))
+                Self::Literal(Box::new(Literal::Template(ty.to_string().into())))
             }
             AnyTsType::TsThisType(_) => Self::ThisKeyword,
             AnyTsType::TsTupleType(ty) => {
@@ -1336,7 +1336,7 @@ impl TypeData {
 
     pub fn promise_of(scope_id: ScopeId, ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::from(
-            TypeReferenceQualifier::from_path(scope_id, Text::Static("Promise"))
+            TypeReferenceQualifier::from_path(scope_id, Text::new_static("Promise"))
                 .with_type_parameters([ty]),
         ))
     }
@@ -1503,7 +1503,7 @@ impl FunctionParameter {
                 })
             }
             AnyJsParameter::TsThisParameter(param) => Self::Named(NamedFunctionParameter {
-                name: Text::Static("this"),
+                name: Text::new_static("this"),
                 ty: param
                     .type_annotation()
                     .and_then(|annotation| annotation.ty().ok())
@@ -1670,7 +1670,9 @@ impl ReturnType {
                             AnyTsTypePredicateParameterName::JsReferenceIdentifier(identifier) => {
                                 text_from_token(identifier.value_token())?
                             }
-                            AnyTsTypePredicateParameterName::TsThisType(_) => Text::Static("text"),
+                            AnyTsTypePredicateParameterName::TsThisType(_) => {
+                                Text::new_static("text")
+                            }
                         },
                         ty: ty
                             .predicate()
@@ -1687,7 +1689,9 @@ impl ReturnType {
                             AnyTsTypePredicateParameterName::JsReferenceIdentifier(identifier) => {
                                 text_from_token(identifier.value_token())?
                             }
-                            AnyTsTypePredicateParameterName::TsThisType(_) => Text::Static("text"),
+                            AnyTsTypePredicateParameterName::TsThisType(_) => {
+                                Text::new_static("text")
+                            }
                         },
                         ty: ty
                             .ty()
@@ -2513,15 +2517,15 @@ fn text_from_any_js_name(name: AnyJsName) -> Option<Text> {
         AnyJsName::JsPrivateName(name) => name
             .value_token()
             .ok()
-            .map(|token| Text::Owned(format!("#{}", token.token_text_trimmed()))),
+            .map(|token| format!("#{}", token.token_text_trimmed()).into()),
     }
 }
 
 #[inline]
 fn text_from_class_member_name(name: ClassMemberName) -> Text {
     match name {
-        ClassMemberName::Private(name) => Text::Owned(format!("#{name}")),
-        ClassMemberName::Public(name) => Text::Borrowed(name),
+        ClassMemberName::Private(name) => format!("#{name}").into(),
+        ClassMemberName::Public(name) => name.into(),
     }
 }
 

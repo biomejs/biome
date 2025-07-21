@@ -368,10 +368,9 @@ impl TypeResolver for ModuleResolver {
     ) -> Option<ResolvedTypeId> {
         self.resolve_import_internal(
             module_id,
-            Cow::Owned(ImportSymbol::Named(Text::Borrowed(TokenText::new_raw(
-                RawSyntaxKind(0),
-                name,
-            )))),
+            Cow::Owned(ImportSymbol::Named(
+                TokenText::new_raw(RawSyntaxKind(0), name).into(),
+            )),
             false,
             FxHashSet::default(),
         )

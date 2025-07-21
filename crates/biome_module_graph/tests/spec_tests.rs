@@ -454,7 +454,7 @@ fn test_resolve_exports() {
 
     // Remove this entry, or the Windows tests fail on the path in the snapshot below:
     assert_eq!(
-        exports.swap_remove(&Text::Static("oh\nno")),
+        exports.swap_remove(&Text::new_static("oh\nno")),
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
@@ -465,7 +465,7 @@ fn test_resolve_exports() {
         }))
     );
     assert_eq!(
-        exports.swap_remove(&Text::Static("renamed2")),
+        exports.swap_remove(&Text::new_static("renamed2")),
         Some(JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
@@ -495,7 +495,7 @@ fn test_resolve_exports() {
         .unwrap();
     assert_eq!(data.exports.len(), 1);
     assert_eq!(
-        data.exports.get(&Text::Static("renamed")),
+        data.exports.get(&Text::new_static("renamed")),
         Some(&JsExport::Reexport(JsReexport {
             import: JsImport {
                 specifier: "./renamed-reexports".into(),
@@ -593,7 +593,7 @@ export const promise = makePromiseCb();
     ));
 
     let promise_id = resolver
-        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
     let promise_ty = resolver.resolved_type_for_id(promise_id);
     assert!(promise_ty.is_promise_instance());
@@ -626,7 +626,7 @@ fn test_resolve_generic_mapped_value() {
     ));
 
     let mapped_id = resolver
-        .resolve_type_of(&Text::Static("mapped"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("mapped"), ScopeId::GLOBAL)
         .expect("mapped variable not found");
     let mapped_ty = resolver.resolved_type_for_id(mapped_id);
     let _mapped_ty_string = format!("{:?}", mapped_ty.deref()); // for debugging
@@ -688,7 +688,7 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
     ));
 
     let result_id = resolver
-        .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
         .expect("result variable not found");
     let result_ty = resolver.resolved_type_for_id(result_id);
     assert!(result_ty.is_string());
@@ -735,7 +735,7 @@ fn test_resolve_import_as_namespace() {
     ));
 
     let result_id = resolver
-        .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
         .expect("result variable not found");
     let result_ty = resolver.resolved_type_for_id(result_id);
     assert!(result_ty.is_number());
@@ -812,7 +812,7 @@ fn test_resolve_return_value_of_function() {
     ));
 
     let foo_id = resolver
-        .resolve_type_of(&Text::Static("foo"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
         .expect("foo variable not found");
     let foo_ty = resolver.resolved_type_for_id(foo_id);
     let _foo_string_ty = format!("{foo_ty:?}");
@@ -870,7 +870,7 @@ fn test_resolve_type_of_property_with_getter() {
     ));
 
     let foo_id = resolver
-        .resolve_type_of(&Text::Static("foo"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("foo"), ScopeId::GLOBAL)
         .expect("foo variable not found");
     let foo_ty = resolver.resolved_type_for_id(foo_id);
     let _foo_string_ty = format!("{foo_ty:?}");
@@ -965,7 +965,7 @@ fn class_this_test_helper(case_name: &str, prefix: &str) {
     for i in 1..=7 {
         let name = format!("foo{i}");
         let foo_id = resolver
-            .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
+            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
             .unwrap_or_else(|| panic!("{name} variable not found"));
         let foo_ty = resolver.resolved_type_for_id(foo_id);
         assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
@@ -1040,7 +1040,7 @@ fn test_resolve_type_of_this_in_object() {
     for i in 1..=5 {
         let name = format!("foo{i}");
         let foo_id = resolver
-            .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
+            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
             .unwrap_or_else(|| panic!("{name} variable not found"));
         let foo_ty = resolver.resolved_type_for_id(foo_id);
         assert!(foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
@@ -1048,7 +1048,7 @@ fn test_resolve_type_of_this_in_object() {
     for i in 1..=2 {
         let name = format!("notFoo{i}");
         let foo_id = resolver
-            .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
+            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
             .unwrap_or_else(|| panic!("{name} variable not found"));
         let foo_ty = resolver.resolved_type_for_id(foo_id);
         assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
@@ -1132,7 +1132,7 @@ fn test_resolve_type_of_this_in_class_wrong_scope() {
     for i in 1..=5 {
         let name = format!("notFoo{i}");
         let foo_id = resolver
-            .resolve_type_of(&Text::Owned(name.clone()), ScopeId::GLOBAL)
+            .resolve_type_of(&Text::from(name.clone()), ScopeId::GLOBAL)
             .unwrap_or_else(|| panic!("{name} variable not found"));
         let foo_ty = resolver.resolved_type_for_id(foo_id);
         assert!(!foo_ty.is_string_literal("foo"), "{name}: {foo_ty:?}");
@@ -1512,13 +1512,13 @@ fn test_resolve_react_types() {
     ));
 
     let use_callback_id = resolver
-        .resolve_type_of(&Text::Static("useCallback"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("useCallback"), ScopeId::GLOBAL)
         .expect("useCallback variable not found");
     let use_callback_ty = resolver.resolved_type_for_id(use_callback_id);
     assert!(use_callback_ty.is_function());
 
     let promise_id = resolver
-        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
     let promise_ty = resolver.resolved_type_for_id(promise_id);
     assert!(promise_ty.is_promise_instance());
@@ -1568,7 +1568,7 @@ fn test_resolve_single_reexport() {
     ));
 
     let result_id = resolver
-        .resolve_type_of(&Text::Static("result"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
         .expect("result variable not found");
     let ty = resolver.resolved_type_for_id(result_id);
     assert!(ty.is_number());
@@ -1633,13 +1633,13 @@ fn test_resolve_multiple_reexports() {
     ));
 
     let result1_id = resolver
-        .resolve_type_of(&Text::Static("result1"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("result1"), ScopeId::GLOBAL)
         .expect("result1 variable not found");
     let ty = resolver.resolved_type_for_id(result1_id);
     assert!(ty.is_number());
 
     let result2_id = resolver
-        .resolve_type_of(&Text::Static("result2"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("result2"), ScopeId::GLOBAL)
         .expect("result2 variable not found");
     let ty = resolver.resolved_type_for_id(result2_id);
     assert!(ty.is_string());
@@ -1725,7 +1725,7 @@ fn test_resolve_promise_from_imported_function_returning_imported_promise_type()
     ));
 
     let resolved_id = resolver
-        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
 
     let ty = resolver.resolved_type_for_id(resolved_id);
@@ -1789,7 +1789,7 @@ fn test_resolve_promise_from_imported_function_returning_reexported_promise_type
     ));
 
     let resolved_id = resolver
-        .resolve_type_of(&Text::Static("promise"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("promise"), ScopeId::GLOBAL)
         .expect("promise variable not found");
 
     let ty = resolver.resolved_type_for_id(resolved_id);
@@ -1844,7 +1844,7 @@ const { mutate } = useSWRConfig();
     ));
 
     let use_swr_config_id = resolver
-        .resolve_type_of(&Text::Static("useSWRConfig"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("useSWRConfig"), ScopeId::GLOBAL)
         .expect("mutate variable not found");
     let use_swr_config_ty = resolver.resolved_type_for_id(use_swr_config_id);
     let _use_swr_config_ty_string = format!("{:?}", use_swr_config_ty.deref()); // for debugging
@@ -1854,7 +1854,7 @@ const { mutate } = useSWRConfig();
     }));
 
     let mutate_id = resolver
-        .resolve_type_of(&Text::Static("mutate"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("mutate"), ScopeId::GLOBAL)
         .expect("mutate variable not found");
     let mutate_ty = resolver.resolved_type_for_id(mutate_id);
     let _mutate_ty_string = format!("{:?}", mutate_ty.deref()); // for debugging
@@ -1905,7 +1905,7 @@ type Intersection = Foo & Bar;"#,
     ));
 
     let intersection_id = resolver
-        .resolve_type_of(&Text::Static("Intersection"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("Intersection"), ScopeId::GLOBAL)
         .expect("Intersection type not found");
     let intersection_ty = resolver.resolved_type_for_id(intersection_id);
     let _intersection_ty = format!("{:?}", intersection_ty.deref()); // for debugging
@@ -1997,7 +1997,7 @@ fn test_resolve_swr_types() {
     ));
 
     let mutate_id = resolver
-        .resolve_type_of(&Text::Static("mutate"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("mutate"), ScopeId::GLOBAL)
         .expect("mutate variable not found");
 
     let mutate_ty = resolver.resolved_type_for_id(mutate_id);
@@ -2005,7 +2005,7 @@ fn test_resolve_swr_types() {
     assert!(mutate_ty.is_interface_with_member(|member| member.kind().is_call_signature()));
 
     let mutate_result_id = resolver
-        .resolve_type_of(&Text::Static("mutateResult"), ScopeId::GLOBAL)
+        .resolve_type_of(&Text::new_static("mutateResult"), ScopeId::GLOBAL)
         .expect("mutateResult variable not found");
 
     let mutate_result_ty = resolver.resolved_type_for_id(mutate_result_id);

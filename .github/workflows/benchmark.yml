@@ -14,10 +14,13 @@ on:
       - 'crates/**_parser/**/*.rs'
       - 'crates/biome_configuration/**/*.rs'
       - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_module_graph/**/*.rs'
       - 'crates/biome_package/**/*.rs'
+      - 'crates/biome_rowan/**/*.rs'
   push:
     branches:
       - main
+      - next
     paths:
       - 'Cargo.lock'
       - 'crates/**_analyze/**/*.rs'
@@ -25,7 +28,9 @@ on:
       - 'crates/**_parser/**/*.rs'
       - 'crates/biome_configuration/**/*.rs'
       - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_module_graph/**/*.rs'
       - 'crates/biome_package/**/*.rs'
+      - 'crates/biome_rowan/**/*.rs'
 
 env:
   RUST_LOG: info
