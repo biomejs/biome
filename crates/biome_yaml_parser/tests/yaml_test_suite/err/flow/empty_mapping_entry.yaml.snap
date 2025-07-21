@@ -1,0 +1,86 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+{ , }
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@0..0 "" [] [],
+                flow: YamlFlowJsonNode {
+                    properties: missing (optional),
+                    content: YamlFlowMapping {
+                        l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+                        entries: YamlFlowMapEntryList [
+                            missing element,
+                            COMMA@2..4 "," [] [Whitespace(" ")],
+                            missing element,
+                        ],
+                        r_curly_token: R_CURLY@4..5 "}" [] [],
+                    },
+                },
+                flow_end_token: FLOW_END@5..5 "" [] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@5..6 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..6
+  0: YAML_DOCUMENT_LIST@0..5
+    0: YAML_DOCUMENT@0..5
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_FLOW_IN_BLOCK_NODE@0..5
+        0: FLOW_START@0..0 "" [] []
+        1: YAML_FLOW_JSON_NODE@0..5
+          0: (empty)
+          1: YAML_FLOW_MAPPING@0..5
+            0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+            1: YAML_FLOW_MAP_ENTRY_LIST@2..4
+              0: (empty)
+              1: COMMA@2..4 "," [] [Whitespace(" ")]
+              2: (empty)
+            2: R_CURLY@4..5 "}" [] []
+        2: FLOW_END@5..5 "" [] []
+      4: (empty)
+  1: EOF@5..6 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+empty_mapping_entry.yaml:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a flow mapping entry but instead found ','.
+  
+  > 1 │ { , }
+      │   ^
+    2 │ 
+  
+  i Expected a flow mapping entry here.
+  
+  > 1 │ { , }
+      │   ^
+    2 │ 
+  
+```

@@ -29,6 +29,7 @@ SyntaxElement = SyntaxElement
 YamlBogus = SyntaxElement*
 YamlBogusBlockNode = SyntaxElement*
 YamlBogusBlockMapEntry = SyntaxElement*
+YamlBogusFlowNode = SyntaxElement*
 
 // https://yaml.org/spec/1.2.2/#92-streams
 YamlRoot =
@@ -79,6 +80,7 @@ AnyYamlFlowNode =
 	YamlFlowJsonNode
 	| YamlFlowYamlNode
 	| YamlAliasNode
+	| YamlBogusFlowNode
 
 // *abc
 // https://yaml.org/spec/1.2.2/#rule-c-ns-alias-node
@@ -140,18 +142,16 @@ AnyYamlFlowMapEntry =
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-map-explicit-entry
 YamlFlowMapExplicitEntry =
 	'?'
-	entry: YamlFlowMapImplicitEntry?
+	key: AnyYamlMappingImplicitKey?
+	':'?
+	value: AnyYamlFlowNode?
 
 // a: b
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-map-implicit-entry
 YamlFlowMapImplicitEntry =
-	key: AnyYamlFlowMapImplicitKey?
-	':'
-	value: AnyYamlFlowNode
-
-AnyYamlFlowMapImplicitKey =
-	YamlFlowYamlNode
-	| YamlFlowJsonNode
+	key: AnyYamlMappingImplicitKey?
+	':'?
+	value: AnyYamlFlowNode?
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-in-block
 AnyYamlBlockInBlockNode =
@@ -215,35 +215,21 @@ AnyYamlBlockMapEntry =
 // : 10
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-entry
 YamlBlockMapExplicitEntry =
-	key: YamlBlockMapExplicitKey
-	value: YamlBlockMapExplicitValue?
-
-// ? y
-// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
-YamlBlockMapExplicitKey =
 	'?'
 	key: AnyYamlBlockNode?
-
-// : 10
-// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
-YamlBlockMapExplicitValue =
-	':'
+	':'?
 	value: AnyYamlBlockNode?
 
 // https://yaml.org/spec/1.2.2/#rule-ns-l-block-map-implicit-entry
 YamlBlockMapImplicitEntry =
-	key: AnyYamlBlockMapImplicitKey?
-	value: YamlBlockMapImplicitValue
-
-// https://yaml.org/spec/1.2.2/#rule-ns-s-block-map-implicit-key
-AnyYamlBlockMapImplicitKey =
-	YamlFlowJsonNode
-	| YamlFlowYamlNode
-
-// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-implicit-value
-YamlBlockMapImplicitValue =
+	key: AnyYamlMappingImplicitKey?
 	':'
 	value: AnyYamlBlockNode?
+
+// https://yaml.org/spec/1.2.2/#rule-ns-s-block-map-implicit-key
+AnyYamlMappingImplicitKey =
+	YamlFlowJsonNode
+	| YamlFlowYamlNode
 
 // https://yaml.org/spec/1.2.2/#rule-c-ns-properties
 AnyYamlPropertiesCombination =

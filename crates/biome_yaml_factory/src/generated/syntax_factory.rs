@@ -14,9 +14,10 @@ impl SyntaxFactory for YamlSyntaxFactory {
         children: ParsedChildren<Self::Kind>,
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
-            YAML_BOGUS | YAML_BOGUS_BLOCK_MAP_ENTRY | YAML_BOGUS_BLOCK_NODE => {
-                RawSyntaxNode::new(kind, children.into_iter().map(Some))
-            }
+            YAML_BOGUS
+            | YAML_BOGUS_BLOCK_MAP_ENTRY
+            | YAML_BOGUS_BLOCK_NODE
+            | YAML_BOGUS_FLOW_NODE => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
             YAML_ALIAS_NODE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -57,33 +58,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
             }
             YAML_BLOCK_MAP_EXPLICIT_ENTRY => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if YamlBlockMapExplicitKey::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if YamlBlockMapExplicitValue::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        YAML_BLOCK_MAP_EXPLICIT_ENTRY.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(YAML_BLOCK_MAP_EXPLICIT_ENTRY, children)
-            }
-            YAML_BLOCK_MAP_EXPLICIT_KEY => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T ! [?] {
@@ -99,18 +74,6 @@ impl SyntaxFactory for YamlSyntaxFactory {
                     }
                 }
                 slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        YAML_BLOCK_MAP_EXPLICIT_KEY.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(YAML_BLOCK_MAP_EXPLICIT_KEY, children)
-            }
-            YAML_BLOCK_MAP_EXPLICIT_VALUE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T ! [:] {
                         slots.mark_present();
@@ -127,25 +90,32 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        YAML_BLOCK_MAP_EXPLICIT_VALUE.to_bogus(),
+                        YAML_BLOCK_MAP_EXPLICIT_ENTRY.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(YAML_BLOCK_MAP_EXPLICIT_VALUE, children)
+                slots.into_node(YAML_BLOCK_MAP_EXPLICIT_ENTRY, children)
             }
             YAML_BLOCK_MAP_IMPLICIT_ENTRY => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if AnyYamlBlockMapImplicitKey::can_cast(element.kind()) {
+                    if AnyYamlMappingImplicitKey::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if YamlBlockMapImplicitValue::can_cast(element.kind()) {
+                    if element.kind() == T ! [:] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyYamlBlockNode::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -158,32 +128,6 @@ impl SyntaxFactory for YamlSyntaxFactory {
                     );
                 }
                 slots.into_node(YAML_BLOCK_MAP_IMPLICIT_ENTRY, children)
-            }
-            YAML_BLOCK_MAP_IMPLICIT_VALUE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [:] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyYamlBlockNode::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        YAML_BLOCK_MAP_IMPLICIT_VALUE.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(YAML_BLOCK_MAP_IMPLICIT_VALUE, children)
             }
             YAML_BLOCK_MAPPING => {
                 let mut elements = (&children).into_iter();
@@ -463,7 +407,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
             }
             YAML_FLOW_MAP_EXPLICIT_ENTRY => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T ! [?] {
@@ -473,7 +417,21 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if YamlFlowMapImplicitEntry::can_cast(element.kind()) {
+                    if AnyYamlMappingImplicitKey::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [:] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyYamlFlowNode::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -492,7 +450,7 @@ impl SyntaxFactory for YamlSyntaxFactory {
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if AnyYamlFlowMapImplicitKey::can_cast(element.kind()) {
+                    if AnyYamlMappingImplicitKey::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
