@@ -1881,7 +1881,7 @@ fn vcs_absolute_path() {
         "vcs": {
             "enabled": true,
             "clientKind": "git",
-            "useIgnoreFile": true
+            "useIgnoreFile": false
         }
     }"#;
     let files = [("/symbolic/link/to/path.js", true)];
@@ -2189,12 +2189,6 @@ fn format_json_trailing_commas_all() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(
-        &fs,
-        Utf8Path::new(file_path),
-        "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n",
-    );
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_json_trailing_commas_all",
@@ -2235,12 +2229,6 @@ fn format_json_trailing_commas_overrides_all() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(
-        &fs,
-        Utf8Path::new(file_path),
-        "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n",
-    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

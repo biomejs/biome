@@ -16,11 +16,11 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
-use biome_service::workspace::ServiceDataNotification;
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, SupportsFeatureParams,
 };
+use biome_service::workspace::{FileFeaturesResult, ServiceDataNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::workspace::{ScanKind, ScanProjectFolderParams};
 use camino::Utf8Path;
@@ -401,7 +401,9 @@ impl Session {
             }
         }
 
-        let file_features = self.workspace.file_features(SupportsFeatureParams {
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = self.workspace.file_features(SupportsFeatureParams {
             project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
@@ -679,6 +681,7 @@ impl Session {
                     watch: true,
                     force: false,
                     scan_kind,
+                    verbose: false,
                 });
 
             match result {

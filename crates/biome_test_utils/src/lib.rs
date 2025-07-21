@@ -18,7 +18,7 @@ use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
-use biome_service::settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle};
+use biome_service::settings::{ServiceLanguage, Settings};
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
@@ -163,9 +163,8 @@ where
             .merge_with_configuration(configuration, None)
             .unwrap();
 
-        let handle = WorkspaceSettingsHandle::from(settings);
         let document_file_source = DocumentFileSource::from_path(input_file);
-        handle.format_options::<L>(&input_file.into(), &document_file_source)
+        settings.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
 
@@ -587,22 +586,18 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
     match diagnostic_comment {
         Some(Diagnostics::ShouldNotGenerateDiagnostics) => {
             if has_diagnostics {
-                panic!(
-                    "This test should not generate diagnostics\nFile: {}",
-                    file_path
-                );
+                panic!("This test should not generate diagnostics\nFile: {file_path}",);
             }
         }
         Some(Diagnostics::ShouldGenerateDiagnostics) => {
             if !has_diagnostics {
-                panic!("This test should generate diagnostics\nFile: {}", file_path);
+                panic!("This test should generate diagnostics\nFile: {file_path}",);
             }
         }
         None => {
             if is_valid_test_file {
                 panic!(
-                    "Valid test files should contain comment `{}`\nFile: {}",
-                    no_diagnostics_comment_text, file_path
+                    "Valid test files should contain comment `{no_diagnostics_comment_text}`\nFile: {file_path}",
                 );
             }
         }

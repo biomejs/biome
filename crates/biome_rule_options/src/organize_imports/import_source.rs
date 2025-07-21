@@ -81,7 +81,7 @@ pub enum ImportSourceKind {
     ProtocolPackage,
     /// `package`
     Package,
-    /// Import sources that start with `@/`, `#`, `~`, or `%`
+    /// Import sources that start with `@/`, `#`, `~`, `$`, or `%`
     /// Node.js subpath imports and TypeScript aliases.
     Alias,
     /// Import sources that start with `/`, `./`, or `../`
@@ -102,7 +102,7 @@ impl ImportSourceKind {
                 }
             }
             // Node.js subpath imports
-            Some(b'#' | b'~' | b'%') => Self::Alias,
+            Some(b'#' | b'~' | b'$' | b'%') => Self::Alias,
             Some(b'/') => Self::Path,
             Some(b'.') => match iter.next() {
                 Some(b'.') => {
@@ -373,7 +373,7 @@ mod test {
         ];
         for items in sorted.windows(2) {
             let (x, y) = (&items[0], &items[1]);
-            assert!(x < y, "'{:?}' < '{:?}'", x, y);
+            assert!(x < y, "'{x:?}' < '{y:?}'");
         }
     }
 }

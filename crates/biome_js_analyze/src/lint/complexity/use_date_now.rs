@@ -82,7 +82,7 @@ impl Rule for UseDateNow {
 
     fn diagnostic(_: &RuleContext<Self>, (node, kind): &Self::State) -> Option<RuleDiagnostic> {
         let message = match kind {
-            UseDateNowIssueKind::ReplaceMethod(method) => format!("new Date().{method}"),
+            UseDateNowIssueKind::ReplaceMethod(method) => format!("new Date().{method}()"),
             UseDateNowIssueKind::ReplaceConstructor => "new Date()".to_string(),
             UseDateNowIssueKind::ReplaceNumberConstructor => "Number(new Date())".to_string(),
         };

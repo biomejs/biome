@@ -90,6 +90,12 @@ declare_lint_rule! {
     ///     return new A(arg);
     /// }
     /// ```
+    ///
+    /// One notable exception is when the import is intended to be used for type augmentation.
+    ///
+    /// ```ts
+    /// import type {} from '@mui/lab/themeAugmentation';
+    /// ```
     pub NoUnusedImports {
         version: "1.3.0",
         name: "noUnusedImports",
@@ -308,6 +314,15 @@ impl Rule for NoUnusedImports {
                 is_unused(ctx, &local_name).then_some(Unused::AllImports(local_name.range()))
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
+                // exception: allow type augmentation imports
+                // eg. `import type {} from ...`
+                // https://github.com/biomejs/biome/issues/6669
+                if clause.type_token().is_some()
+                    && clause.named_specifiers().ok()?.specifiers().is_empty()
+                {
+                    return None;
+                }
+
                 unused_named_specifiers(ctx, &clause.named_specifiers().ok()?)
             }
             AnyJsImportClause::JsImportNamespaceClause(clause) => {

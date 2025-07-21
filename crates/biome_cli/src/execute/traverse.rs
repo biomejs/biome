@@ -11,7 +11,9 @@ use biome_diagnostics::{DiagnosticExt, Error, Resource, Severity, category};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::projects::ProjectKey;
-use biome_service::workspace::{DocumentFileSource, DropPatternParams, IsPathIgnoredParams};
+use biome_service::workspace::{
+    DocumentFileSource, DropPatternParams, FileFeaturesResult, IgnoreKind, IsPathIgnoredParams,
+};
 use biome_service::{Workspace, WorkspaceError, extension_error, workspace::SupportsFeatureParams};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{Receiver, Sender, unbounded};
@@ -539,6 +541,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
                     project_key: self.project_key,
                     path: biome_path.clone(),
                     features: self.execution.to_feature(),
+                    ignore_kind: IgnoreKind::Path,
                 })
                 .unwrap_or_else(|err| {
                     self.push_diagnostic(err.into());
@@ -562,7 +565,9 @@ impl TraversalContext for TraversalOptions<'_, '_> {
         let can_read = DocumentFileSource::can_read(biome_path);
 
         let file_features = match file_features {
-            Ok(file_features) => {
+            Ok(FileFeaturesResult {
+                features_supported: file_features,
+            }) => {
                 if file_features.is_protected() {
                     self.protected_file(biome_path);
                     return false;

@@ -1,5 +1,6 @@
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
 use biome_html_parser::{parse_html, parse_html_with_cache};
+use biome_html_syntax::HtmlFileSource;
 use biome_rowan::NodeCache;
 use biome_test_utils::BenchCase;
 use criterion::{
@@ -36,12 +37,13 @@ fn bench_parser(criterion: &mut Criterion) {
                 let code = test_case.code();
                 let mut diagnostics = vec![];
                 group.throughput(Throughput::Bytes(code.len() as u64));
+                let file_source = HtmlFileSource::try_from(test_case.path()).unwrap_or_default();
                 group.bench_with_input(
                     BenchmarkId::new(test_case.filename(), "uncached"),
                     &code,
                     |b, _| {
                         b.iter(|| {
-                            let result = black_box(parse_html(code));
+                            let result = black_box(parse_html(code, file_source));
                             diagnostics.extend(result.into_diagnostics());
                         })
                     },
@@ -59,11 +61,11 @@ fn bench_parser(criterion: &mut Criterion) {
                         b.iter_batched(
                             || {
                                 let mut cache = NodeCache::default();
-                                parse_html_with_cache(code, &mut cache);
+                                parse_html_with_cache(code, file_source, &mut cache);
                                 cache
                             },
                             |mut cache| {
-                                parse_html_with_cache(code, &mut cache);
+                                parse_html_with_cache(code, file_source, &mut cache);
                             },
                             BatchSize::SmallInput,
                         )

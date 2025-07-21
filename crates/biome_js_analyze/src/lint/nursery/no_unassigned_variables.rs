@@ -59,7 +59,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnassignedVariables {
-        version: "next",
+        version: "2.1.0",
         name: "noUnassignedVariables",
         language: "js",
         sources: &[RuleSource::Eslint("no-unassigned-vars").same()],

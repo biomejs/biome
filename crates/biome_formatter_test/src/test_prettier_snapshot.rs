@@ -28,8 +28,7 @@ impl<'a> PrettierTestFile<'a> {
 
         assert!(
             input_file.is_file(),
-            "The input '{}' must exist and be a file.",
-            input_file
+            "The input '{input_file}' must exist and be a file.",
         );
 
         let mut input_code = read_to_string(input_file)

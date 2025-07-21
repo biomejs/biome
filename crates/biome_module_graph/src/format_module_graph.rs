@@ -89,7 +89,7 @@ impl Format<FormatTypeContext> for Exports {
                 Text::Static(t) => {
                     write!(
                         f,
-                        [dynamic_text(&std::format!("{:?}", t), TextSize::default()),]
+                        [dynamic_text(&std::format!("{t:?}"), TextSize::default()),]
                     )
                 }
             });
@@ -148,7 +148,7 @@ impl Format<FormatTypeContext> for Imports {
                 Text::Static(t) => {
                     write!(
                         f,
-                        [dynamic_text(&std::format!("{:?}", t), TextSize::default()),]
+                        [dynamic_text(&std::format!("{t:?}"), TextSize::default()),]
                     )
                 }
             });

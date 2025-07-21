@@ -118,6 +118,7 @@ impl WorkspaceError {
         Self::NotFound(NotFound)
     }
 
+    #[inline]
     pub fn no_project() -> Self {
         Self::NoProject(NoProject)
     }
@@ -249,6 +250,7 @@ impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
      ),
  )]
 pub struct NonUtf8Path {
+    #[location(resource)]
     path: String,
 }
 
@@ -401,17 +403,38 @@ impl Diagnostic for SourceFileNotSupported {
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         if self.file_source != DocumentFileSource::Unknown {
             fmt.write_markup(markup! {
-                "Biome doesn't support this feature for the language "{{&self.file_source}}
+                "Biome doesn't support this feature for the language "<Emphasis>{{&self.file_source}}</Emphasis>
             })
         } else if let Some(ext) = self.extension.as_ref() {
             fmt.write_markup(markup! {
-                "Biome could not determine the language for the file extension "{{ext}}
+                "Biome could not determine the language for the file extension "<Emphasis>{{ext}}</Emphasis>
             })
         } else {
             fmt.write_markup(
                 markup!{
-                    "Biome could not determine the language for the file "{self.path}" because it doesn't have a clear extension"
+                    "Biome could not determine the language for the file"<Emphasis>{self.path}</Emphasis>" because it doesn't have a clear extension"
                 }
+            )
+        }
+    }
+
+    fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
+        if self.file_source != DocumentFileSource::Unknown {
+            write!(
+                fmt,
+                "Biome doesn't support this feature for the language {}",
+                &self.file_source
+            )
+        } else if let Some(ext) = self.extension.as_ref() {
+            write!(
+                fmt,
+                "Biome could not determine the language for the file extension {ext}"
+            )
+        } else {
+            write!(
+                fmt,
+                "Biome could not determine the language for the file {} because it doesn't have a clear extension",
+                &self.path
             )
         }
     }
@@ -554,8 +577,8 @@ impl Diagnostic for TransportError {
 
 #[derive(Debug, Deserialize, Diagnostic, Serialize)]
 pub enum VcsDiagnostic {
-    /// When the VCS folder couldn't be found
-    NoVcsFolderFound(NoVcsFolderFound),
+    /// When the VCS ignore file can't be found
+    NoIgnoreFileFound(NoIgnoreFileFound),
     /// VCS is disabled
     DisabledVcs(DisabledVcs),
 }
@@ -585,11 +608,11 @@ impl From<CompileError> for WorkspaceError {
     category = "internalError/fs",
     severity = Error,
     message(
-        description = "Biome couldn't find the VCS folder at the following path: {path}",
-        message("Biome couldn't find the VCS folder at the following path: "<Emphasis>{self.path}</Emphasis>),
+        description = "Biome couldn't find an ignore file in the following folder: {path}",
+        message("Biome couldn't find an ignore file in the following folder: "<Emphasis>{self.path}</Emphasis>),
     )
 )]
-pub struct NoVcsFolderFound {
+pub struct NoIgnoreFileFound {
     #[location(resource)]
     pub path: String,
 }
@@ -598,7 +621,7 @@ pub struct NoVcsFolderFound {
 #[diagnostic(
     category = "internalError/fs",
     severity = Warning,
-    message = "Biome couldn't determine a directory for the VCS integration. VCS integration will be disabled."
+    message = "Biome couldn't determine a folder for the VCS integration. VCS integration will be disabled."
 )]
 pub struct DisabledVcs {}
 
@@ -675,6 +698,7 @@ mod test {
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
+    use std::ffi::OsString;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
@@ -771,6 +795,14 @@ mod test {
         snap_diagnostic(
             "formatter_syntax_error",
             WorkspaceError::FormatError(FormatError::SyntaxError).with_file_path("example.js"),
+        )
+    }
+
+    #[test]
+    fn non_utf8_path() {
+        snap_diagnostic(
+            "non_utf8_path",
+            Error::from(WorkspaceError::non_utf8_path(OsString::from("path.js"))),
         )
     }
 }

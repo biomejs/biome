@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: valid-define-props-type-alias.vue
+---
+# Input
+```ts
+<script setup lang="ts">
+type Props = {
+    foo: String;
+};
+defineProps<Props>();
+</script>
+
+```

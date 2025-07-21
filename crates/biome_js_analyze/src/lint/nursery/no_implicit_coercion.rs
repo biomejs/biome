@@ -104,7 +104,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoImplicitCoercion {
-        version: "next",
+        version: "2.1.0",
         name: "noImplicitCoercion",
         language: "js",
         recommended: false,
@@ -207,8 +207,8 @@ impl Rule for NoImplicitCoercion {
                             None
                         }
                     }
-                    // arg * 1 | arg / 1
-                    JsBinaryOperator::Times | JsBinaryOperator::Divide => {
+                    // arg * 1
+                    JsBinaryOperator::Times => {
                         let argument =
                             binary_expression.get_another_arg_if_one_matches(|arg| arg.is_one())?;
 
@@ -216,6 +216,23 @@ impl Rule for NoImplicitCoercion {
                             Some(RuleState::ExpressionToTypeCall(ExpressionToTypeCall {
                                 expression: binary_expression.clone().into(),
                                 argument,
+                                type_name: "Number",
+                            }))
+                        } else {
+                            None
+                        }
+                    }
+                    // arg / 1
+                    JsBinaryOperator::Divide => {
+                        let (left, right) = (
+                            binary_expression.left().ok()?,
+                            binary_expression.right().ok()?,
+                        );
+
+                        if !left.is_number() && right.is_one() {
+                            Some(RuleState::ExpressionToTypeCall(ExpressionToTypeCall {
+                                expression: binary_expression.clone().into(),
+                                argument: left,
                                 type_name: "Number",
                             }))
                         } else {
@@ -565,16 +582,7 @@ trait ExpressionExt {
 
 impl ExpressionExt for AnyJsExpression {
     fn inner_expression(&self) -> Option<Self> {
-        (match self {
-            Self::JsParenthesizedExpression(expression) => expression.expression().ok(),
-            Self::TsAsExpression(expression) => expression.expression().ok(),
-            Self::TsSatisfiesExpression(expression) => expression.expression().ok(),
-            Self::TsNonNullAssertionExpression(expression) => expression.expression().ok(),
-            Self::TsTypeAssertionExpression(expression) => expression.expression().ok(),
-            _ => return Some(self.clone()),
-        })
-        .as_ref()
-        .and_then(Self::inner_expression)
+        Self::inner_expression(self)
     }
 
     fn wrap_in_type_converter(&self, name: &'static str) -> Self {

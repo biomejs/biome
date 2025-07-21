@@ -9,19 +9,23 @@ on:
       - next
     paths:
       - 'Cargo.lock'
-      - 'crates/**_parser/**/*.rs'
-      - 'crates/**_formatter/**/*.rs'
       - 'crates/**_analyze/**/*.rs'
+      - 'crates/**_formatter/**/*.rs'
+      - 'crates/**_parser/**/*.rs'
+      - 'crates/biome_configuration/**/*.rs'
       - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_package/**/*.rs'
   push:
     branches:
       - main
     paths:
       - 'Cargo.lock'
-      - 'crates/**_parser/**/*.rs'
-      - 'crates/**_formatter/**/*.rs'
       - 'crates/**_analyze/**/*.rs'
+      - 'crates/**_formatter/**/*.rs'
+      - 'crates/**_parser/**/*.rs'
+      - 'crates/biome_configuration/**/*.rs'
       - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_package/**/*.rs'
 
 env:
   RUST_LOG: info
@@ -76,7 +80,7 @@ jobs:
           CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@0010eb0ca6e89b80c88e8edaaa07cfe5f3e6664d # v3.5.0
+        uses: CodSpeedHQ/action@c28fe9fbe7d57a3da1b7834ae3761c1d8217612d # v3.7.0
         timeout-minutes: 50
         with:
           run: cargo codspeed run

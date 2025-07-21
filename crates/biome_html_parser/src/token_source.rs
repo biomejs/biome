@@ -14,7 +14,7 @@ pub(crate) struct HtmlTokenSource<'source> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[derive(Copy, Clone, Debug, Default)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 pub(crate) enum HtmlLexContext {
     /// The default state. This state is used for a majority of the lexing, which is inside html tags.
     #[default]
@@ -32,21 +32,23 @@ pub(crate) enum HtmlLexContext {
     /// When the parser has encounters the sequence `<!DOCTYPE`, it switches to this context. It will remain in this context until the next `>` token is encountered.
     Doctype,
     /// Treat everything as text until the closing tag is encountered.
-    EmbeddedLanguage(HtmlEmbededLanguage),
+    EmbeddedLanguage(HtmlEmbeddedLanguage),
     /// Comments are treated as text until the closing comment tag is encountered.
     Comment,
     /// CDATA Sections are treated as text until the closing CDATA token is encountered.
     CdataSection,
+    /// Lexing the Astro frontmatter
+    AstroFencedCodeBlock,
 }
 
-#[derive(Copy, Clone, Debug)]
-pub(crate) enum HtmlEmbededLanguage {
+#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord, Hash)]
+pub(crate) enum HtmlEmbeddedLanguage {
     Script,
     Style,
     Preformatted,
 }
 
-impl HtmlEmbededLanguage {
+impl HtmlEmbeddedLanguage {
     pub fn end_tag(&self) -> &'static str {
         match self {
             Self::Script => "</script>",

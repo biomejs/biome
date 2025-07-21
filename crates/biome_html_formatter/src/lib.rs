@@ -10,12 +10,14 @@ use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
 use cst::FormatHtmlSyntaxNode;
 
+mod astro;
 mod comments;
 pub mod context;
 mod cst;
 mod generated;
 mod html;
 pub(crate) mod prelude;
+mod svelte;
 pub mod utils;
 
 /// Formats a Html file based on its features.

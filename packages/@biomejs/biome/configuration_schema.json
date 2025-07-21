@@ -3921,7 +3921,19 @@
 				{ "$ref": "#/definitions/RuleWithNoSecretsOptions" }
 			]
 		},
-		"NoSecretsOptions": { "type": "object", "additionalProperties": false },
+		"NoSecretsOptions": {
+			"type": "object",
+			"properties": {
+				"entropyThreshold": {
+					"description": "Set entropy threshold (default is 41).",
+					"default": null,
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"minimum": 0.0
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoSelfAssignConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4320,6 +4332,13 @@
 		},
 		"NoUnusedFunctionParametersOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreRestSiblings": {
+					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
+					"default": false,
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnusedImportsConfiguration": {
@@ -4629,6 +4648,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueReservedPropsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueReservedPropsOptions" }
+			]
+		},
+		"NoVueReservedPropsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4846,6 +4875,13 @@
 					"description": "Disallow the use of useless undefined.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUselessUndefinedConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueReservedProps": {
+					"description": "Disallow reserved names to be used as props.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueReservedPropsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9256,6 +9292,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoVueReservedPropsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueReservedPropsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoWithOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -11451,6 +11502,12 @@
 						"minimum": 0.0
 					},
 					"minItems": 1
+				},
+				{
+					"description": "Used to indicate the hook returns an object and some of its properties have stable identities.",
+					"type": "array",
+					"items": { "type": "string" },
+					"minItems": 1
 				}
 			]
 		},
@@ -12545,7 +12602,7 @@
 					"enum": ["none"]
 				},
 				{
-					"description": "The trailing commas are allowed and advised only in JSONC files. Trailing commas are removed from JSON files.",
+					"description": "The trailing commas are allowed and advised in JSON and JSONC files.",
 					"type": "string",
 					"enum": ["all"]
 				}

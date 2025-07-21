@@ -227,17 +227,6 @@ pub(crate) fn parse_import_or_import_equals_declaration(p: &mut JsParser) -> Par
             ts_only_syntax_error(p, "'import =' declarations", decl.range(p))
         })
     } else {
-        // test_err js import_err
-        // import;
-        // import *;
-        // import * as c, { a, b } from "c";
-        // import { aa + bb, dd } from "c";
-        // import { ab, ac } from "c";
-        // import { default } from "c";
-        // import { "a" } from "c";
-        // import { as x } from "c";
-        // import 4 from "c";
-        // import y from 4;
         parse_import_clause(p).or_add_diagnostic(p, |p, range| {
             expected_any(
                 &["default import", "namespace import", "named import"],
@@ -258,22 +247,14 @@ pub(crate) fn parse_import_or_import_equals_declaration(p: &mut JsParser) -> Par
     statement
 }
 
-// test js import_default_clause
-// import foo from "test";
 fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
-    if p.at(JS_STRING_LITERAL) {
+    if p.at(JS_STRING_LITERAL) || p.cur().is_metavariable() && !p.nth_at(1, T![from]) {
         return parse_import_bare_clause(p);
     }
 
     let pos = p.source().position();
     let m = p.start();
 
-    // test ts ts_import_clause_types
-    // import type from "./mod"; // not a type
-    // import type foo from "./mod";
-    // import type * as foo2 from "./mod";
-    // import type { foo3 } from "mod";
-    // import type from from "./mod";
     let is_typed = 'is_typed: {
         if !p.at(T![type]) {
             break 'is_typed false;
@@ -321,10 +302,6 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
     }
 }
 
-// test js import_default_clauses
-// import e, { f } from "b";
-
-// import g, * as lorem from "c";
 /// Parses the rest of a default clause or default named clause.
 /// Rest meaning, everything after `type binding`
 fn parse_import_default_clauses_rest(
@@ -344,8 +321,6 @@ fn parse_import_default_clauses_rest(
                 let start = m.start();
                 let end = p.last_end().unwrap_or_else(|| p.cur_range().start());
 
-                // test_err ts ts_typed_default_import_with_named
-                // import type A, { B, C } from './a';
                 p.error(p.err_builder("A type-only import can specify a default import or named bindings, but not both.",
                     start..end,))
             }
@@ -359,9 +334,6 @@ fn parse_import_default_clauses_rest(
     m.complete(p, syntax_type)
 }
 
-// test js import_bare_clause
-// import "test";
-// import "no_semicolon"
 fn parse_import_bare_clause(p: &mut JsParser) -> ParsedSyntax {
     parse_module_source(p).map(|module_source| {
         let m = module_source.precede(p);
@@ -370,8 +342,6 @@ fn parse_import_bare_clause(p: &mut JsParser) -> ParsedSyntax {
     })
 }
 
-// test js import_decl
-// import * as foo from "bla";
 fn parse_import_namespace_clause_rest(p: &mut JsParser, m: Marker) -> CompletedMarker {
     parse_namespace_import_specifier(p).or_add_diagnostic(p, expected_namespace_import);
     p.expect(T![from]);
@@ -381,10 +351,6 @@ fn parse_import_namespace_clause_rest(p: &mut JsParser, m: Marker) -> CompletedM
     m.complete(p, JS_IMPORT_NAMESPACE_CLAUSE)
 }
 
-// test js import_named_clause
-// import {} from "a";
-// import { a, b, c, } from "b";
-// import { f as x, default as w, "a-b-c" as y } from "b";
 fn parse_import_named_clause_rest(p: &mut JsParser, m: Marker) -> CompletedMarker {
     parse_named_import_specifier_list(p).or_add_diagnostic(p, expected_named_import);
     p.expect(T![from]);

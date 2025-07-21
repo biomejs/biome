@@ -4,6 +4,7 @@ mod ast;
 mod css_kinds_src;
 mod formatter;
 mod generate_analyzer;
+pub mod generate_analyzer_rule_options;
 mod generate_macros;
 pub mod generate_new_analyzer_rule;
 mod generate_node_factory;
@@ -35,6 +36,9 @@ use xtask::{Mode, Result, glue::fs2};
 pub use self::ast::generate_ast;
 pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
+pub use self::generate_analyzer_rule_options::{
+    generate_analyzer_rule_options, get_analyzer_rule_options_path,
+};
 pub use self::generate_new_analyzer_rule::{LanguageKind, generate_new_analyzer_rule};
 pub use self::unicode::generate_tables;
 

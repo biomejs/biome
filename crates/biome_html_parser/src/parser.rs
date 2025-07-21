@@ -1,6 +1,6 @@
 use crate::token_source::HtmlTokenSource;
 use biome_html_factory::HtmlSyntaxFactory;
-use biome_html_syntax::{HtmlLanguage, HtmlSyntaxKind};
+use biome_html_syntax::{HtmlFileSource, HtmlLanguage, HtmlSyntaxKind};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
@@ -13,14 +13,20 @@ pub(crate) type HtmlLosslessTreeSink<'source> =
 pub(crate) struct HtmlParser<'source> {
     context: ParserContext<HtmlSyntaxKind>,
     source: HtmlTokenSource<'source>,
+    file_source: HtmlFileSource,
 }
 
 impl<'source> HtmlParser<'source> {
-    pub fn new(source: &'source str) -> Self {
+    pub fn new(source: &'source str, file_source: HtmlFileSource) -> Self {
         Self {
             context: ParserContext::default(),
             source: HtmlTokenSource::from_str(source),
+            file_source,
         }
+    }
+
+    pub(crate) fn file_source(&self) -> &HtmlFileSource {
+        &self.file_source
     }
 
     pub fn finish(

@@ -565,7 +565,7 @@ class PriceTernaryMatchBranch {
 	#price: string;
 
 	set some(value: string | number) {
-		value !== undefined ? this.#price = value : consoe.info("ignore undefined value");
+		value !== undefined ? this.#price = value : console.info("ignore undefined value");
 	}
 }
 
@@ -573,7 +573,40 @@ class PriceTernaryNonMatchBranch {
 	#price: string;
 
 	set some(value: string | number) {
-		value !== undefined ? consoe.info("ignore non undefined value") : this.#price = value;
+		value !== undefined ? console.info("ignore non undefined value") : this.#price = value;
 	}
 }
 
+class GetterWithMutationValue {
+	#value: string;
+
+	get value() {
+		if (!this.#value) {
+			this.#value = "defaultValue";
+		}
+
+		return this.#value;
+	}
+}
+
+class ArrowFunctionWithMutation {
+	private bar: string | null = null;
+
+	readonly action = () => {
+		this.bar = "init";
+	};
+}
+
+class Counter {
+	private counter: number
+	count() {
+		console.log(this.counter++);
+	}
+}
+
+class Counter2 {
+	private counter: number
+	count() {
+		const counterString = `${this.counter++}`
+	}
+}

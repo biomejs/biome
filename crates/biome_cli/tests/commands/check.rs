@@ -3175,3 +3175,50 @@ fn doesnt_check_file_when_assist_is_disabled() {
         result,
     ));
 }
+
+#[test]
+fn check_returns_error_for_css_sorting() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "useSortedProperties": "on"
+      }
+    }
+  }
+}"#,
+    );
+
+    let file_path = Utf8Path::new("src/file.css");
+    fs.insert(
+        file_path.into(),
+        r#"body {
+  padding: 1em;
+  color: red;
+  display: block;
+}
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_returns_error_for_css_sorting",
+        fs,
+        console,
+        result,
+    ));
+}

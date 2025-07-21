@@ -25,6 +25,7 @@ foo>bar</div>
 ```
 HtmlRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -310,7 +311,8 @@ HtmlRoot {
 0: HTML_ROOT@0..207
   0: (empty)
   1: (empty)
-  2: HTML_ELEMENT_LIST@0..206
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..206
     0: HTML_ELEMENT@0..206
       0: HTML_OPENING_ELEMENT@0..5
         0: L_ANGLE@0..1 "<" [] []
@@ -491,6 +493,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@202..205
           0: HTML_LITERAL@202..205 "div" [] []
         3: R_ANGLE@205..206 ">" [] []
-  3: EOF@206..207 "" [Newline("\n")] []
+  4: EOF@206..207 "" [Newline("\n")] []
 
 ```

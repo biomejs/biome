@@ -1,0 +1,150 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: suppression.js
+---
+# Input
+```js
+/* biome-ignore lint/suspicious/noDoubleEquals: <explanation> */
+1 == 'a'
+
+/** biome-ignore lint/suspicious/noDoubleEquals: <explanation> */
+1 == 'a'
+
+/**     biome-ignore lint/suspicious/noDoubleEquals: <explanation> */
+1 == 'a'
+
+/** biome-ignore     lint/suspicious/noDoubleEquals: <explanation> */
+1 == 'a'
+
+/** biome-ignore lint/suspicious/noDoubleEquals:    <explanation> */
+1 == 'a'
+
+//     biome-ignore lint/suspicious/noDoubleEquals: <explanation>
+1 == 'a'
+
+// biome-ignore     lint/suspicious/noDoubleEquals: <explanation>
+1 == 'a'
+
+// biome-ignore lint/suspicious/noDoubleEquals:    <explanation>
+1 == 'a'
+
+```
+
+# Diagnostics
+```
+suppression.js:1:49 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+  > 1 │ /* biome-ignore lint/suspicious/noDoubleEquals: <explanation> */
+      │                                                 ^^^^^^^^^^^^^
+    2 │ 1 == 'a'
+    3 │ 
+  
+
+```
+
+```
+suppression.js:4:50 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+    2 │ 1 == 'a'
+    3 │ 
+  > 4 │ /** biome-ignore lint/suspicious/noDoubleEquals: <explanation> */
+      │                                                  ^^^^^^^^^^^^^
+    5 │ 1 == 'a'
+    6 │ 
+  
+
+```
+
+```
+suppression.js:7:54 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+    5 │ 1 == 'a'
+    6 │ 
+  > 7 │ /**     biome-ignore lint/suspicious/noDoubleEquals: <explanation> */
+      │                                                      ^^^^^^^^^^^^^
+    8 │ 1 == 'a'
+    9 │ 
+  
+
+```
+
+```
+suppression.js:10:54 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+     8 │ 1 == 'a'
+     9 │ 
+  > 10 │ /** biome-ignore     lint/suspicious/noDoubleEquals: <explanation> */
+       │                                                      ^^^^^^^^^^^^^
+    11 │ 1 == 'a'
+    12 │ 
+  
+
+```
+
+```
+suppression.js:13:53 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+    11 │ 1 == 'a'
+    12 │ 
+  > 13 │ /** biome-ignore lint/suspicious/noDoubleEquals:    <explanation> */
+       │                                                     ^^^^^^^^^^^^^
+    14 │ 1 == 'a'
+    15 │ 
+  
+
+```
+
+```
+suppression.js:16:53 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+    14 │ 1 == 'a'
+    15 │ 
+  > 16 │ //     biome-ignore lint/suspicious/noDoubleEquals: <explanation>
+       │                                                     ^^^^^^^^^^^^^
+    17 │ 1 == 'a'
+    18 │ 
+  
+
+```
+
+```
+suppression.js:19:53 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+    17 │ 1 == 'a'
+    18 │ 
+  > 19 │ // biome-ignore     lint/suspicious/noDoubleEquals: <explanation>
+       │                                                     ^^^^^^^^^^^^^
+    20 │ 1 == 'a'
+    21 │ 
+  
+
+```
+
+```
+suppression.js:22:52 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A suppression shouldn't have an <explanation> placeholder. Example of suppression: // biome-ignore lint: false positive
+  
+    20 │ 1 == 'a'
+    21 │ 
+  > 22 │ // biome-ignore lint/suspicious/noDoubleEquals:    <explanation>
+       │                                                    ^^^^^^^^^^^^^
+    23 │ 1 == 'a'
+    24 │ 
+  
+
+```

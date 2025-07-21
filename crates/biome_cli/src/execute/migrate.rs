@@ -211,7 +211,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
             let old_biome_config = biome_config.clone();
             let prettier_biome_config = prettier_config.try_into().map_err(|err| {
                 CliDiagnostic::MigrateError(MigrationDiagnostic {
-                    reason: format!("{:#}", err),
+                    reason: format!("{err:#}",),
                 })
             })?;
             biome_config.merge_with(prettier_biome_config);

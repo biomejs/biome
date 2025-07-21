@@ -428,8 +428,8 @@ impl Debug for RuleSelector {
 impl Display for RuleSelector {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Group(group) => write!(f, "{}", group),
-            Self::Rule(group, rule) => write!(f, "{}/{}", group, rule),
+            Self::Group(group) => write!(f, "{group}",),
+            Self::Rule(group, rule) => write!(f, "{group}/{rule}",),
         }
     }
 }

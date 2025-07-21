@@ -194,11 +194,10 @@ impl SemanticEventExtractor {
         let mut syntax = None;
         let mut inherits = None;
 
-        for declaration in decls
-            .declarations()
-            .into_iter()
-            .filter_map(|d| d.declaration().ok())
-        {
+        for declaration in decls.declarations().into_iter().filter_map(|d| {
+            d.as_css_declaration_with_semicolon()
+                .and_then(|d| d.declaration().ok())
+        }) {
             if let Ok(biome_css_syntax::AnyCssProperty::CssGenericProperty(prop)) =
                 declaration.property()
             {

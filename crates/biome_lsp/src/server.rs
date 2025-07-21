@@ -262,6 +262,15 @@ impl LSPServer {
             Err(err) => Err(into_lsp_error(err)),
         }
     }
+
+    async fn notify_error(&self, err: LspError) {
+        if let Err(err) = handle_lsp_error::<()>(err, &self.session.client).await {
+            self.session
+                .client
+                .log_message(MessageType::ERROR, err)
+                .await;
+        }
+    }
 }
 
 impl LanguageServer for LSPServer {
@@ -400,14 +409,11 @@ impl LanguageServer for LSPServer {
                     .session
                     .workspace
                     .close_project(CloseProjectParams { project_key })
-                    .map_err(into_lsp_error);
+                    .map_err(LspError::from);
 
                 if let Err(err) = result {
                     error!("Failed to remove project from the workspace: {}", err);
-                    self.session
-                        .client
-                        .log_message(MessageType::ERROR, err)
-                        .await;
+                    self.notify_error(err).await;
                 }
             }
         }
@@ -423,7 +429,7 @@ impl LanguageServer for LSPServer {
                         only_rules: None,
                         skip_rules: None,
                     })
-                    .map_err(into_lsp_error);
+                    .map_err(LspError::from);
 
                 match result {
                     Ok(result) => {
@@ -444,10 +450,7 @@ impl LanguageServer for LSPServer {
                     }
                     Err(err) => {
                         error!("Failed to add project to the workspace: {err}");
-                        self.session
-                            .client
-                            .log_message(MessageType::ERROR, err)
-                            .await;
+                        self.notify_error(err).await;
                     }
                 }
             }
@@ -455,10 +458,11 @@ impl LanguageServer for LSPServer {
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
-        biome_diagnostics::panic::catch_unwind(move || {
-            handlers::analysis::code_actions(&self.session, params).map_err(into_lsp_error)
-        })
-        .map_err(into_lsp_error)?
+        let result = biome_diagnostics::panic::catch_unwind(move || {
+            handlers::analysis::code_actions(&self.session, params)
+        });
+
+        self.map_op_error(result).await
     }
 
     async fn formatting(

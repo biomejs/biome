@@ -178,14 +178,14 @@ pub enum EditorConfigErrorKind {
 }
 impl biome_console::fmt::Display for EditorConfigErrorKind {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        write!(fmt, "{}", self)
+        write!(fmt, "{self}",)
     }
 }
 impl std::fmt::Display for EditorConfigErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::ParseFormatNumberError(error) => {
-                write!(f, "{}", error)
+                write!(f, "{error}",)
             }
             Self::MissingSectionEnd => f.write_str("A section must be closed with `]`."),
             Self::InvalidBooleanValue => {
@@ -198,7 +198,7 @@ impl std::fmt::Display for EditorConfigErrorKind {
                 f.write_str("Invalid `ident_style` value: `space` or `tab` is expected.")
             }
             Self::InvalidIndentSizeValue(error) => {
-                write!(f, "{}", error)
+                write!(f, "{error}",)
             }
         }
     }

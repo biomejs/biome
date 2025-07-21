@@ -1,6 +1,6 @@
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_json_parser::JsonParserOptions;
-use biome_package::PackageJson;
+use biome_package::TsConfigJson;
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 
 #[cfg(target_os = "windows")]
@@ -28,7 +28,7 @@ fn bench_tsconfig(criterion: &mut Criterion) {
         &code,
         |b, _| {
             b.iter(|| {
-                black_box(deserialize_from_json_str::<PackageJson>(
+                black_box(deserialize_from_json_str::<TsConfigJson>(
                     code,
                     JsonParserOptions::default(),
                     "tsconfig.json",

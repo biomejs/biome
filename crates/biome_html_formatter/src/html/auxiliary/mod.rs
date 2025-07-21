@@ -14,3 +14,4 @@ pub(crate) mod root;
 pub(crate) mod self_closing_element;
 pub(crate) mod string;
 pub(crate) mod tag_name;
+pub(crate) mod text_expression;

@@ -37,15 +37,13 @@ struct Errors(String);
 impl Errors {
     fn style_rule_error(rule_name: impl Display) -> Self {
         Self(format!(
-            "The rule '{}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",
-            rule_name
+            "The rule '{rule_name}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",
         ))
     }
 
     fn action_error(rule_name: impl Display) -> Self {
         Self(format!(
-            "The rule '{}' is an action, and it must have Severity::Information. Lower down the severity.",
-            rule_name
+            "The rule '{rule_name}' is an action, and it must have Severity::Information. Lower down the severity.",
         ))
     }
 }
@@ -324,16 +322,15 @@ where
     let file_source = &test.document_file_source();
     let supression_reason = None;
 
-    let settings = workspace_settings.get_root_settings(project_key);
-    let language_settings = settings
-        .as_ref()
-        .map(|s| L::lookup_settings(&s.languages))
-        .map(|result| &result.linter);
+    let Some(settings) = workspace_settings.get_root_settings(project_key) else {
+        return AnalyzerOptions::default();
+    };
+    let language_settings = &L::lookup_settings(&settings.languages).linter;
 
-    let environment = L::resolve_environment(settings.as_ref());
+    let environment = L::resolve_environment(&settings);
 
     L::resolve_analyzer_options(
-        settings.as_ref(),
+        &settings,
         language_settings,
         environment,
         &path,

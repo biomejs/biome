@@ -718,20 +718,48 @@ impl Function {
 
 /// Definition of a function argument.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
-pub struct FunctionParameter {
-    /// Name of the argument, if specified in the definition.
-    pub name: Option<Text>,
+pub enum FunctionParameter {
+    Named(NamedFunctionParameter),
+    Pattern(PatternFunctionParameter),
+}
 
-    /// Type of the argument.
+impl FunctionParameter {
+    pub fn ty(&self) -> &TypeReference {
+        match self {
+            Self::Named(named) => &named.ty,
+            Self::Pattern(pattern) => &pattern.ty,
+        }
+    }
+}
+
+/// A plain function parameter where the name of the parameter is also the name
+/// of the binding.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct NamedFunctionParameter {
+    /// Name of the parameter.
+    pub name: Text,
+
+    /// Type of the parameter.
     pub ty: TypeReference,
 
+    /// Whether the parameter is optional or not.
+    pub is_optional: bool,
+}
+
+/// A function parameter that is bound to either one or more positional
+/// parameters, and which may or may not be destructured into multiple bindings.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct PatternFunctionParameter {
     /// Bindings created for the parameter within the function body.
     pub bindings: Box<[FunctionParameterBinding]>,
 
-    /// Whether the argument is optional or not.
+    /// Type of the parameter.
+    pub ty: TypeReference,
+
+    /// Whether the parameter is optional or not.
     pub is_optional: bool,
 
-    /// Whether this is a rest argument (`...`) or not.
+    /// Whether this is a rest parameter (`...`) or not.
     pub is_rest: bool,
 }
 
@@ -916,28 +944,26 @@ impl Tuple {
         &'a self,
         resolver: &'a mut dyn TypeResolver,
         index: usize,
-    ) -> ResolvedTypeData<'a> {
-        let resolved_id = if let Some(elem_type) = self.0.get(index) {
-            let ty = elem_type.ty.clone();
-            let id = if elem_type.is_optional {
-                resolver.optional(ty)
+    ) -> Option<ResolvedTypeData<'a>> {
+        if let Some(elem_type) = self.0.get(index) {
+            let ty = &elem_type.ty;
+            if elem_type.is_optional {
+                let id = resolver.optional(ty.clone());
+                resolver.get_by_resolved_id(ResolvedTypeId::new(resolver.level(), id))
             } else {
-                resolver.register_type(Cow::Owned(TypeData::reference(ty)))
-            };
-            ResolvedTypeId::new(resolver.level(), id)
+                resolver.resolve_and_get(ty)
+            }
         } else {
-            self.0
+            let resolved_id = self
+                .0
                 .last()
                 .filter(|last| last.is_rest)
                 .map(|last| resolver.optional(last.ty.clone()))
                 .map_or(GLOBAL_UNKNOWN_ID, |id| {
                     ResolvedTypeId::new(resolver.level(), id)
-                })
-        };
-
-        resolver
-            .get_by_resolved_id(resolved_id)
-            .expect("tuple element type must be registered")
+                });
+            resolver.get_by_resolved_id(resolved_id)
+        }
     }
 
     /// Returns a new tuple starting at the given index.
@@ -1101,6 +1127,8 @@ pub enum TypeofExpression {
     Call(TypeofCallExpression),
     Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
+    Index(TypeofIndexExpression),
+    IterableValueOf(TypeofIterableValueOfExpression),
     LogicalAnd(TypeofLogicalAndExpression),
     LogicalOr(TypeofLogicalOrExpression),
     New(TypeofNewExpression),
@@ -1160,6 +1188,12 @@ pub enum DestructureField {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofIterableValueOfExpression {
+    /// The type being iterated over.
+    pub ty: TypeReference,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub struct TypeofLogicalAndExpression {
     pub left: TypeReference,
     pub right: TypeReference,
@@ -1181,6 +1215,12 @@ pub struct TypeofNewExpression {
 pub enum CallArgumentType {
     Argument(TypeReference),
     Spread(TypeReference),
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
+pub struct TypeofIndexExpression {
+    pub object: TypeReference,
+    pub index: usize,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]

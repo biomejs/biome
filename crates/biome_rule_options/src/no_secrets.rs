@@ -3,4 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoSecretsOptions {}
+pub struct NoSecretsOptions {
+    /// Set entropy threshold (default is 41).
+    pub entropy_threshold: Option<u16>,
+}

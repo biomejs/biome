@@ -165,7 +165,21 @@ declare_lint_rule! {
     /// ```
     ///
     /// If you wish to ignore multiple dependencies, you can add multiple
-    /// comments and add a reason for each.
+    /// comments and add a reason for each:
+    ///
+    /// ```js
+    /// import { useEffect } from "react";
+    ///
+    /// function component() {
+    ///     let a = 1;
+    ///     let b = 1;
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(b): suppress dependency b
+    ///     useEffect(() => {
+    ///         console.log(a, b);
+    ///     }, []);
+    /// }
+    /// ```
     ///
     /// ## Options
     ///
@@ -209,7 +223,7 @@ declare_lint_rule! {
     /// hook always have the same identity and should be omitted as such.
     ///
     /// You can configure custom hooks that return stable results in one of
-    /// three ways:
+    /// four ways:
     ///
     /// * `"stableResult": true` -- marks the return value as stable. An example
     ///   of a React hook that would be configured like this is `useRef()`.
@@ -217,6 +231,8 @@ declare_lint_rule! {
     ///   marks the given index or indices to be stable. An example of a React
     ///   hook that would be configured like this is `useState()`.
     /// * `"stableResult": 1` -- shorthand for `"stableResult": [1]`.
+    /// * `"stableResult": ["setValue"]` -- expects the return value to be an
+    ///   object and marks the given property or properties to be stable.
     ///
     /// #### Example
     ///
@@ -624,7 +640,7 @@ fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> + use<>
         }
     }
 
-    // elemnsts are inserted in reverse, thus we have to reverse the iteration.
+    // elements are inserted in reverse, thus we have to reverse the iteration.
     vec.into_iter().rev()
 }
 

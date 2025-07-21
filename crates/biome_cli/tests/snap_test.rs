@@ -444,7 +444,6 @@ pub fn assert_file_contents(fs: &MemoryFileSystem, path: &Utf8Path, expected_con
 
     assert_eq!(
         content, expected_content,
-        "file {} doesn't match the expected content (right)",
-        path
+        "file {path} doesn't match the expected content (right)",
     );
 }

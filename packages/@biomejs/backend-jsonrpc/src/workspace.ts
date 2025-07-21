@@ -10,8 +10,9 @@ export type BiomePath = string;
 export type ProjectKey = number;
 export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
 export interface FileFeaturesResult {
-	featuresSupported: Map<FeatureKind, SupportKind>;
+	featuresSupported: FeaturesSupported;
 }
+export type FeaturesSupported = { [K in FeatureKind]?: SupportKind };
 export type SupportKind =
 	| "supported"
 	| "ignored"
@@ -1657,6 +1658,10 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
 	/**
+	 * Disallow reserved names to be used as props.
+	 */
+	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -2914,6 +2919,9 @@ export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
+export type RuleConfiguration_for_NoVueReservedPropsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoVueReservedPropsOptions;
 export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAdjacentGetterSetterOptions;
@@ -5297,6 +5305,16 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	 */
 	options: NoUselessUndefinedOptions;
 }
+export interface RuleWithOptions_for_NoVueReservedPropsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueReservedPropsOptions;
+}
 export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -7573,7 +7591,12 @@ export interface NoUnreachableOptions {}
 export interface NoUnreachableSuperOptions {}
 export interface NoUnsafeFinallyOptions {}
 export interface NoUnsafeOptionalChainingOptions {}
-export interface NoUnusedFunctionParametersOptions {}
+export interface NoUnusedFunctionParametersOptions {
+	/**
+	 * Whether to ignore unused variables from an object destructuring with a spread.
+	 */
+	ignoreRestSiblings?: boolean;
+}
 export interface NoUnusedImportsOptions {}
 export interface NoUnusedLabelsOptions {}
 export interface NoUnusedPrivateClassMembersOptions {}
@@ -7656,7 +7679,12 @@ export interface NoRestrictedElementsOptions {
 	 */
 	elements: CustomRestrictedElements;
 }
-export interface NoSecretsOptions {}
+export interface NoSecretsOptions {
+	/**
+	 * Set entropy threshold (default is 41).
+	 */
+	entropyThreshold?: number;
+}
 export interface NoShadowOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
@@ -7666,6 +7694,7 @@ export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
+export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
 export interface UseConsistentObjectDefinitionOptions {
 	/**
@@ -8020,7 +8049,7 @@ export type Regex = string;
  */
 export type Style2 = "auto" | "inlineType" | "separatedType";
 export type GroupMatcher = ImportMatcher | SourceMatcher;
-export type StableHookResult = boolean | number[];
+export type StableHookResult = boolean | number[] | string[];
 export type Formats = Format[];
 export interface Selector {
 	/**
@@ -8346,6 +8375,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
@@ -8796,7 +8826,7 @@ export type CssVariant = "standard";
  * The style of GraphQL contained in the file.
  */
 export type GraphqlVariant = "standard";
-export type HtmlVariant = "Standard" | "Astro";
+export type HtmlVariant = "Standard" | "Astro" | "Vue" | "Svelte";
 export type GritVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;

@@ -143,7 +143,7 @@ Module TypeId(4) => instanceof Import Symbol: PromisedResult from "/src/promised
 Module TypeId(5) => sync Function {
   accepts: {
     params: [
-      required resolve: unknown reference (bindings: resolve:unknown reference)
+      required resolve: unknown reference
     ]
     type_args: []
   }

@@ -1101,7 +1101,7 @@ mod test {
             // Test each valid exported item
             for (index, item) in exported_items.iter().enumerate().take(4) {
                 let component_info = ReactComponentInfo::from_exported_item(item);
-                assert!(component_info.is_some(), "Failed on item {}", index);
+                assert!(component_info.is_some(), "Failed on item {index}");
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -1113,7 +1113,7 @@ mod test {
                         if let ReactComponentKind::Function(func_info) = &component_info.kind {
                             assert_eq!(func_info.wrappers.len(), 0);
                         } else {
-                            panic!("Expected function component for index {}", index);
+                            panic!("Expected function component for index {index}");
                         }
                     }
                     2 => {
@@ -2289,7 +2289,7 @@ mod test {
 
             for (index, property) in class_properties.iter().enumerate() {
                 let component_info = ReactComponentInfo::from_declaration(property.syntax());
-                assert!(component_info.is_some(), "Failed on property {}", index);
+                assert!(component_info.is_some(), "Failed on property {index}");
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -2322,7 +2322,7 @@ mod test {
                         _ => unreachable!(),
                     }
                 } else {
-                    panic!("Expected function component for property {}", index);
+                    panic!("Expected function component for property {index}",);
                 }
             }
         }
@@ -2417,7 +2417,7 @@ mod test {
 
             for (index, method) in class_methods.iter().enumerate() {
                 let component_info = ReactComponentInfo::from_declaration(method.syntax());
-                assert!(component_info.is_some(), "Failed on method {}", index);
+                assert!(component_info.is_some(), "Failed on method {index}");
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -2425,7 +2425,7 @@ mod test {
                 if let ReactComponentKind::Function(func_info) = &component_info.kind {
                     assert_eq!(func_info.wrappers.len(), 0);
                 } else {
-                    panic!("Expected function component for method {}", index);
+                    panic!("Expected function component for method {index}",);
                 }
             }
         }
@@ -2504,7 +2504,7 @@ mod test {
 
             for (index, property) in object_properties.iter().enumerate() {
                 let component_info = ReactComponentInfo::from_declaration(property.syntax());
-                assert!(component_info.is_some(), "Failed on property {}", index);
+                assert!(component_info.is_some(), "Failed on property {index}",);
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -2537,7 +2537,7 @@ mod test {
                         _ => unreachable!(),
                     }
                 } else {
-                    panic!("Expected function component for property {}", index);
+                    panic!("Expected function component for property {index}",);
                 }
             }
         }
@@ -2636,7 +2636,7 @@ mod test {
 
             for (index, method) in object_methods.iter().enumerate() {
                 let component_info = ReactComponentInfo::from_declaration(method.syntax());
-                assert!(component_info.is_some(), "Failed on method {}", index);
+                assert!(component_info.is_some(), "Failed on method {index}",);
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -2644,7 +2644,7 @@ mod test {
                 if let ReactComponentKind::Function(func_info) = &component_info.kind {
                     assert_eq!(func_info.wrappers.len(), 0);
                 } else {
-                    panic!("Expected function component for method {}", index);
+                    panic!("Expected function component for method {index}",);
                 }
             }
         }

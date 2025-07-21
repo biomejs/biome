@@ -1,0 +1,111 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<f:link.external uri="https://domain.de/" class="underline hover:text-primary-text">Text</f:link.external>
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..17 "f:link.external" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@17..20 "uri" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@20..21 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@21..42 "\"https://domain.de/\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@42..47 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@47..48 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@48..83 "\"underline hover:text-primary-text\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@83..84 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@84..88 "Text" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@88..89 "<" [] [],
+                slash_token: SLASH@89..90 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@90..105 "f:link.external" [] [],
+                },
+                r_angle_token: R_ANGLE@105..106 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@106..106 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..106
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..106
+    0: HTML_ELEMENT@0..106
+      0: HTML_OPENING_ELEMENT@0..84
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..17
+          0: HTML_LITERAL@1..17 "f:link.external" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@17..83
+          0: HTML_ATTRIBUTE@17..42
+            0: HTML_ATTRIBUTE_NAME@17..20
+              0: HTML_LITERAL@17..20 "uri" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@20..42
+              0: EQ@20..21 "=" [] []
+              1: HTML_STRING@21..42
+                0: HTML_STRING_LITERAL@21..42 "\"https://domain.de/\"" [] [Whitespace(" ")]
+          1: HTML_ATTRIBUTE@42..83
+            0: HTML_ATTRIBUTE_NAME@42..47
+              0: HTML_LITERAL@42..47 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@47..83
+              0: EQ@47..48 "=" [] []
+              1: HTML_STRING@48..83
+                0: HTML_STRING_LITERAL@48..83 "\"underline hover:text-primary-text\"" [] []
+        3: R_ANGLE@83..84 ">" [] []
+      1: HTML_ELEMENT_LIST@84..88
+        0: HTML_CONTENT@84..88
+          0: HTML_LITERAL@84..88 "Text" [] []
+      2: HTML_CLOSING_ELEMENT@88..106
+        0: L_ANGLE@88..89 "<" [] []
+        1: SLASH@89..90 "/" [] []
+        2: HTML_TAG_NAME@90..105
+          0: HTML_LITERAL@90..105 "f:link.external" [] []
+        3: R_ANGLE@105..106 ">" [] []
+  4: EOF@106..106 "" [] []
+
+```

@@ -2,11 +2,10 @@
 
 use biome_console::markup;
 use biome_parser::AnyParse;
-use std::cmp::Ordering;
+use rustc_hash::FxHashSet;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
-use std::ops::Sub;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -58,8 +57,8 @@ pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
-    AstNode, BatchMutation, Direction, Language, SyntaxToken, TextRange, TextSize, TokenAtOffset,
-    TriviaPieceKind,
+    AstNode, BatchMutation, Direction, Language, SyntaxKind as _, SyntaxToken, TextRange, TextSize,
+    TokenAtOffset, TriviaPieceKind,
 };
 use biome_suppression::{Suppression, SuppressionKind};
 pub use suppression_action::{ApplySuppression, SuppressionAction};
@@ -173,6 +172,7 @@ where
                 options: ctx.options,
                 suppressions: &mut suppressions,
                 categories,
+                deny_top_level_suppressions: false,
             };
 
             // The first phase being run will inspect the tokens and parse the
@@ -225,41 +225,19 @@ where
                     //    processed, thus all range suppressions are cleared.
 
                     // 3. Check for line suppression:
-                    let suppression = {
-                        let index =
-                            suppressions
-                                .line_suppressions
-                                .binary_search_by(|suppression| {
-                                    if suppression.text_range.end() < text_range.start() {
-                                        Ordering::Less
-                                    } else if text_range.end() < suppression.text_range.start() {
-                                        Ordering::Greater
-                                    } else {
-                                        Ordering::Equal
-                                    }
-                                });
-
-                        index
-                            .ok()
-                            .map(|index| &mut suppressions.line_suppressions[index])
-                    };
-
-                    suppression.filter(|suppression| {
-                        suppression
-                            .suppressed_categories
-                            .contains(RuleCategory::Lint)
-                            || suppression.suppress_all_plugins
-                            || suppression.suppressed_plugins.contains(&name)
-                    })
+                    suppressions
+                        .overlapping_line_suppressions(&text_range)
+                        .iter_mut()
+                        .find(|s| {
+                            s.text_range.contains(text_range.start())
+                                && (s.suppressed_categories.contains(RuleCategory::Lint)
+                                    || s.suppress_all_plugins
+                                    || s.suppressed_plugins.contains(&name))
+                        })
                 });
 
                 if let Some(suppression) = suppression {
-                    if suppression
-                        .suppressed_categories
-                        .contains(RuleCategory::Lint)
-                    {
-                        suppression.did_suppress_signal = true;
-                    }
+                    suppression.did_suppress_signal = true;
                 } else {
                     let signal = DiagnosticSignal::new(|| diagnostic.clone());
                     if let ControlFlow::Break(br) = (emit_signal)(&signal) {
@@ -353,6 +331,8 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     suppressions: &'phase mut Suppressions<'analyzer>,
     /// The current categories
     categories: RuleCategories,
+    /// Whether we have already encountered a token that can't precede top level suppressions
+    deny_top_level_suppressions: bool,
 }
 
 impl<L, Matcher, Break, Diag> PhaseRunner<'_, '_, L, Matcher, Break, Diag>
@@ -432,7 +412,7 @@ where
     /// whose position is less than the end of the token within the file
     fn handle_token(&mut self, token: SyntaxToken<L>) -> ControlFlow<Break> {
         // Process the content of the token for comments and newline
-        for (index, piece) in token.leading_trivia().pieces().enumerate() {
+        for piece in token.leading_trivia().pieces() {
             if matches!(
                 piece.kind(),
                 TriviaPieceKind::Newline
@@ -443,13 +423,16 @@ where
             }
 
             if let Some(comment) = piece.as_comments() {
-                self.handle_comment(&token, true, index, comment.text(), piece.text_range())?;
+                self.handle_comment(comment.text(), piece.text_range())?;
             }
         }
 
         self.bump_line_index(token.text_trimmed(), token.text_trimmed_range());
+        if !self.deny_top_level_suppressions {
+            self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
+        }
 
-        for (index, piece) in token.trailing_trivia().pieces().enumerate() {
+        for piece in token.trailing_trivia().pieces() {
             if matches!(
                 piece.kind(),
                 TriviaPieceKind::Newline
@@ -460,7 +443,7 @@ where
             }
 
             if let Some(comment) = piece.as_comments() {
-                self.handle_comment(&token, false, index, comment.text(), piece.text_range())?;
+                self.handle_comment(comment.text(), piece.text_range())?;
             }
         }
 
@@ -506,67 +489,49 @@ where
             // if it matches the current line index, otherwise perform a binary
             // search over all the previously seen suppressions to find one
             // with a matching range
-            let suppression =
-                self.suppressions
-                    .line_suppressions
-                    .last_mut()
-                    .filter(|suppression| {
-                        suppression.line_index == *self.line_index
-                            && suppression.text_range.start() <= start
-                    });
-            let suppression = match suppression {
-                Some(suppression) => Some(suppression),
-                None => {
-                    let index = self
-                        .suppressions
-                        .line_suppressions
-                        .binary_search_by(|suppression| {
-                            if suppression.text_range.end() < entry.text_range.start() {
-                                Ordering::Less
-                            } else if entry.text_range.end() < suppression.text_range.start() {
-                                Ordering::Greater
-                            } else {
-                                Ordering::Equal
-                            }
-                        })
-                        .ok();
-
-                    if let Some(index) = index {
-                        let line_suppression = &mut self.suppressions.line_suppressions[index];
-                        if line_suppression.text_range.start() <= entry.text_range.start()
-                            && line_suppression.text_range.end() >= entry.text_range.start()
-                        {
-                            Some(line_suppression)
-                        } else {
-                            None
-                        }
+            let mut is_fully_suppressed = false;
+            // Check that instance-based comments do indeed suppress all instances
+            // Every match is discarded from this set. Use `Option` for lazy init,
+            // because most of the rules do not use instances.
+            let mut instances: Option<FxHashSet<&Box<str>>> = None;
+            for suppression in self
+                .suppressions
+                .overlapping_line_suppressions(&entry.text_range)
+                .iter_mut()
+            {
+                if !suppression.text_range.contains(start) {
+                    continue;
+                }
+                let (is_match, is_exhaustive) =
+                    if suppression.suppressed_categories.contains(entry.category) {
+                        (true, true)
+                    } else if !suppression.matches_rule(&entry.category, &entry.rule) {
+                        (false, false)
                     } else {
-                        None
+                        match suppression.suppressed_instance.as_ref() {
+                            None => (true, true),
+                            Some(v) => {
+                                let matches_instance = instances
+                                    .get_or_insert_with(|| entry.instances.iter().collect())
+                                    .remove(v);
+                                (matches_instance, false)
+                            }
+                        }
+                    };
+                if is_match {
+                    suppression.did_suppress_signal = true;
+                    is_fully_suppressed =
+                        is_exhaustive || instances.as_ref().is_some_and(|v| v.is_empty());
+                    if is_fully_suppressed {
+                        break;
                     }
                 }
-            };
-
-            let suppression = suppression.filter(|suppression| {
-                if suppression.suppressed_categories.contains(entry.category) {
-                    return true;
-                }
-                if suppression.suppressed_instances.is_empty() {
-                    suppression.matches_rule(&entry.category, &entry.rule)
-                } else {
-                    entry.instances.iter().all(|value| {
-                        suppression
-                            .suppressed_instances
-                            .iter()
-                            .any(|(v, filter)| *filter == entry.rule && v == value.as_ref())
-                    })
-                }
-            });
+            }
 
             // If the signal is being suppressed, mark the line suppression as
             // hit, otherwise emit the signal
-            if let Some(suppression) = suppression {
-                suppression.did_suppress_signal = true;
-            } else if range_match(self.range, entry.text_range) {
+            if !is_fully_suppressed && range_match(self.range, entry.text_range) {
+                // TODO: would be nice to remove suppressed instances, if any, before emitting
                 (self.emit_signal)(&*entry.signal)?;
             }
 
@@ -579,14 +544,7 @@ where
 
     /// Parse the text content of a comment trivia piece for suppression
     /// comments, and create line suppression entries accordingly
-    fn handle_comment(
-        &mut self,
-        token: &SyntaxToken<L>,
-        _is_leading: bool,
-        _index: usize,
-        text: &str,
-        range: TextRange,
-    ) -> ControlFlow<Break> {
+    fn handle_comment(&mut self, text: &str, range: TextRange) -> ControlFlow<Break> {
         for result in (self.parse_suppression_comment)(text, range) {
             let suppression: AnalyzerSuppression = match result {
                 Ok(kind) => kind,
@@ -627,21 +585,20 @@ where
                 continue;
             }
 
-            if let Err(diagnostic) =
-                self.suppressions
-                    .push_suppression(&suppression, range, token.text_range())
-            {
+            if let Err(diagnostic) = self.suppressions.push_suppression(
+                &suppression,
+                range,
+                !self.deny_top_level_suppressions,
+            ) {
                 let signal = DiagnosticSignal::new(|| diagnostic.clone());
                 (self.emit_signal)(&signal)?;
                 continue;
             }
 
             if let AnalyzerSuppressionVariant::Line = suppression.variant {
-                // Legacy varient - add the next line to a line comment
-                let line_index = *self.line_index + 1;
-
+                // Expand scope of preceding line comments
                 self.suppressions
-                    .overlap_last_suppression(line_index, range);
+                    .overlap_last_suppression(*self.line_index + 1, range);
             }
         }
 
@@ -815,16 +772,12 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().start()).start(),
         piece_range.add_start(suppression.range().end()).start(),
     );
+    let reason_range_rel = suppression.reason_range();
     let reason = (
         suppression.reason,
         TextRange::new(
-            piece_range.end().sub(
-                suppression
-                    .reason_range()
-                    .end()
-                    .sub(suppression.reason_range().start()),
-            ),
-            piece_range.end(),
+            piece_range.add_start(reason_range_rel.start()).start(),
+            piece_range.add_start(reason_range_rel.end()).start(),
         ),
     );
     for (key, subcategory, value) in suppression.categories {
