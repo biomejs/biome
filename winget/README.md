@@ -49,10 +49,9 @@ The automation will:
 ### Prerequisites for Manual Submission
 
 1. Install the [WinGet CLI](https://github.com/microsoft/winget-cli)
-2. Install [winget-create](https://github.com/microsoft/winget-create) tool:
-   ```bash
-   winget install Microsoft.WingetCreate
-   ```
+2. Install one of the manifest creation tools:
+   - [winget-create](https://github.com/microsoft/winget-create) - Microsoft's official tool
+   - [Komac](https://github.com/russellbanks/komac) - Community tool with enhanced features
 
 ### Method 1: Using wingetcreate.exe
 
@@ -83,6 +82,41 @@ The recommended approach is to use `wingetcreate.exe` to automatically generate 
    # Use --replace to replace an existing manifest from the Windows Package Manager repo
    wingetcreate.exe submit --prtitle <PullRequestTitle> --token <GitHubPersonalAccessToken> --replace
    ```
+
+### Method 2: Using Komac (Recommended Alternative)
+
+[Komac](https://github.com/russellbanks/komac) is a powerful community-developed alternative that offers several advantages over the official tools:
+
+**Why choose Komac:**
+- 🔄 **Advanced installer analysis** - Better detection and metadata extraction from Inno Setup, Nullsoft, MSI, and Burn installers
+- 🌍 **Cross-platform support** - Works on Windows, Linux, and macOS
+- ⚡ **Better user experience** - Download progress bars, faster processing, and more intelligent automation
+- 📊 **Enhanced GitHub integration** - Automatically extracts release notes, dates, and metadata from GitHub releases
+- 🔒 **Privacy-focused** - No telemetry (unlike wingetcreate which has telemetry enabled by default)
+
+**Installation:**
+```bash
+# Install via WinGet
+winget install komac
+
+# Or via Cargo (cross-platform)
+cargo install --locked komac
+```
+
+**Usage:**
+```bash
+# 1. Set up your GitHub token (one-time setup)
+komac token add
+
+# 2. Create a new package
+komac new
+
+# 3. Update an existing package with automatic submission
+komac update BiomeJS.Biome --version VERSION --urls https://github.com/biomejs/biome/releases/download/@biomejs/biome@VERSION/biome-win32-x64.exe https://github.com/biomejs/biome/releases/download/@biomejs/biome@VERSION/biome-win32-arm64.exe --submit
+
+# 4. Update package without submitting (for review)
+komac update BiomeJS.Biome --version VERSION --urls https://github.com/biomejs/biome/releases/download/@biomejs/biome@VERSION/biome-win32-x64.exe https://github.com/biomejs/biome/releases/download/@biomejs/biome@VERSION/biome-win32-arm64.exe
+```
 
 **Important Note**: All WinGet submission methods (including wingetcreate.exe and winget-releaser) require a fork of microsoft/winget-pkgs due to GitHub's pull request model. The tools automatically create branches in your fork and submit pull requests to the upstream repository.
 
