@@ -1,20 +1,22 @@
 #![deny(clippy::use_self)]
 
+pub mod configuration;
+pub mod diagnostics;
 pub mod documentation;
 pub mod file_handlers;
-
 pub mod projects;
 pub mod settings;
 pub mod workspace;
-mod workspace_watcher;
 
-pub mod configuration;
-pub mod diagnostics;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
+mod scanner;
+
+#[cfg(test)]
+mod test_utils;
+
 use camino::Utf8Path;
-use serde::{Deserialize, Serialize};
 use std::ops::Deref;
 use std::sync::Arc;
 
@@ -24,8 +26,8 @@ use biome_resolver::FsWithResolverProxy;
 
 pub use diagnostics::{TransportError, WorkspaceError, extension_error};
 pub use file_handlers::JsFormatterSettings;
+pub use scanner::{Watcher, WatcherInstruction};
 pub use workspace::{Workspace, WorkspaceServer};
-pub use workspace_watcher::{WatcherInstruction, WorkspaceWatcher};
 
 /// This is the main entrypoint of the application.
 pub struct App<'app> {

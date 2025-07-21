@@ -12,7 +12,7 @@ use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::workspace::{
     CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult, ScanKind,
-    ServiceDataNotification,
+    ServiceNotification,
 };
 use biome_service::{WatcherInstruction, WorkspaceServer};
 use crossbeam::channel::{Sender, bounded};
@@ -567,11 +567,11 @@ pub struct ServerFactory {
     /// initialized on this server instance
     is_initialized: Arc<AtomicBool>,
 
-    /// Receiver for service data notifications.
+    /// Receiver for service notifications.
     ///
     /// If we receive a notification here, diagnostics for open documents are
     /// all refreshed.
-    service_data_rx: watch::Receiver<ServiceDataNotification>,
+    service_rx: watch::Receiver<ServiceNotification>,
 }
 
 impl Default for ServerFactory {
@@ -583,35 +583,35 @@ impl Default for ServerFactory {
 impl ServerFactory {
     /// Regular constructor for use in the daemon.
     pub fn new(stop_on_disconnect: bool, instruction_tx: Sender<WatcherInstruction>) -> Self {
-        let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
+        let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
             cancellation: Arc::default(),
             workspace: Arc::new(WorkspaceServer::new(
                 Arc::new(OsFileSystem::default()),
                 instruction_tx,
-                service_data_tx,
+                service_tx,
                 None,
             )),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect,
             is_initialized: Arc::default(),
-            service_data_rx,
+            service_rx,
         }
     }
 
     /// Constructor for use in tests.
     pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         let (watcher_tx, _) = bounded(0);
-        let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
+        let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
             cancellation: Arc::default(),
-            workspace: Arc::new(WorkspaceServer::new(fs, watcher_tx, service_data_tx, None)),
+            workspace: Arc::new(WorkspaceServer::new(fs, watcher_tx, service_tx, None)),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect: true,
             is_initialized: Arc::default(),
-            service_data_rx,
+            service_rx,
         }
     }
 
@@ -627,7 +627,7 @@ impl ServerFactory {
                 client,
                 workspace,
                 self.cancellation.clone(),
-                self.service_data_rx.clone(),
+                self.service_rx.clone(),
             );
             let handle = Arc::new(session);
 
@@ -657,7 +657,7 @@ impl ServerFactory {
         workspace_method!(builder, is_path_ignored);
         workspace_method!(builder, update_settings);
         workspace_method!(builder, open_project);
-        workspace_method!(builder, scan_project_folder);
+        workspace_method!(builder, scan_project);
         workspace_method!(builder, close_project);
         workspace_method!(builder, open_file);
         workspace_method!(builder, file_exists);

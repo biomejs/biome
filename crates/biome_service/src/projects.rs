@@ -262,7 +262,7 @@ impl Projects {
         path: Utf8PathBuf,
         settings: Settings,
     ) {
-        debug!("Set nested settings for {}", path.as_str());
+        debug!("Set nested settings for {path}");
         self.0.pin().update(project_key, |data| {
             let mut nested_settings = data.nested_settings.clone();
             nested_settings.insert(path.clone(), settings.clone());

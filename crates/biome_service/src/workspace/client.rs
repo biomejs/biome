@@ -110,11 +110,11 @@ where
         self.request("biome/open_project", params)
     }
 
-    fn scan_project_folder(
+    fn scan_project(
         &self,
         params: ScanProjectFolderParams,
     ) -> Result<ScanProjectFolderResult, WorkspaceError> {
-        self.request("biome/scan_project_folder", params)
+        self.request("biome/scan_project", params)
     }
 
     #[instrument(level = "info", skip_all)]
