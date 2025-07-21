@@ -49,7 +49,7 @@ declare_source_rule! {
     ///     "val2": 1,
     ///     "val21": 1,
     ///     "val11": 1,
-    /// };
+    /// }
     /// ```
     ///
     /// Following will apply the lexicographic sort order.
@@ -68,7 +68,7 @@ declare_source_rule! {
     ///     "val2": 1,
     ///     "val21": 1,
     ///     "val11": 1,
-    /// };
+    /// }
     /// ```
     ///
     pub UseSortedKeys {
