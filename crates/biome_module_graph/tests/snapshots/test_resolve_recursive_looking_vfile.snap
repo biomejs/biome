@@ -253,16 +253,12 @@ Module TypeId(6) => Module(0) TypeId(42)
 
 Module TypeId(7) => Namespace {
     path: Identifier(
-        Borrowed(
-            "vfile",
-        ),
+        "vfile",
     ),
     members: [
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "BufferEncoding",
-                ),
+                "BufferEncoding",
             ),
             ty: Resolved(
                 Module(0) TypeId(51),
@@ -270,9 +266,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "VFileContents",
-                ),
+                "VFileContents",
             ),
             ty: Resolved(
                 Module(0) TypeId(44),
@@ -280,9 +274,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "VFileCompatible",
-                ),
+                "VFileCompatible",
             ),
             ty: Resolved(
                 Module(0) TypeId(18),
@@ -290,9 +282,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Settings",
-                ),
+                "Settings",
             ),
             ty: Resolved(
                 Module(0) TypeId(22),
@@ -300,9 +290,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "VFileReporter",
-                ),
+                "VFileReporter",
             ),
             ty: Resolved(
                 Module(0) TypeId(24),
@@ -310,9 +298,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "T",
-                ),
+                "T",
             ),
             ty: Resolved(
                 Module(0) TypeId(23),
@@ -320,9 +306,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "VFileOptions",
-                ),
+                "VFileOptions",
             ),
             ty: Resolved(
                 Module(0) TypeId(46),
@@ -330,9 +314,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "VFile",
-                ),
+                "VFile",
             ),
             ty: Resolved(
                 Module(0) TypeId(42),

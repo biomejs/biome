@@ -433,7 +433,7 @@ impl From<TypeofValue> for TypeData {
 impl TypeData {
     pub fn array_of(scope_id: ScopeId, ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::from(
-            TypeReferenceQualifier::from_path(scope_id, Text::Static("Array"))
+            TypeReferenceQualifier::from_path(scope_id, Text::new_static("Array"))
                 .with_type_parameters([ty]),
         ))
     }
@@ -910,7 +910,7 @@ impl Path {
     /// inference from the CST.TokenText
     pub fn from_reversed_parts(mut parts: Vec<Text>) -> Self {
         match parts.len() {
-            0 => Self::Identifier(Text::Static("")),
+            0 => Self::Identifier(Text::new_static("")),
             1 => Self::Identifier(parts.remove(0)),
             _ => {
                 parts.reverse();
@@ -1178,7 +1178,7 @@ impl TypeMemberKind {
     pub fn name(&self) -> Option<Text> {
         match self {
             Self::CallSignature => None,
-            Self::Constructor => Some(Text::Static("constructor")),
+            Self::Constructor => Some(Text::new_static("constructor")),
             Self::Getter(name) | Self::Named(name) | Self::NamedStatic(name) => Some(name.clone()),
         }
     }

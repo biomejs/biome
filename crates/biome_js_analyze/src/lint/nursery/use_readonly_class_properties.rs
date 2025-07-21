@@ -7,8 +7,8 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter,
     AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsArrayAssignmentPattern,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsBlockStatement, JsCallArgumentList,
-    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassMemberList,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsAwaitExpression, JsBlockStatement,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassMemberList,
     JsConditionalExpression, JsConstructorClassMember, JsElseClause, JsExpressionStatement,
     JsFunctionBody, JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsIfStatement,
     JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
@@ -310,7 +310,8 @@ declare_node_union! {
     JsTemplateExpression |
     JsVariableDeclaration |
     JsVariableDeclarator |
-    JsVariableStatement
+    JsVariableStatement |
+    JsAwaitExpression
 }
 
 enum MethodBodyElementOrStatementList {
@@ -576,7 +577,7 @@ fn contains_this_or_static_member_kind(
 
                     return this_aliases.iter().any(
                         |ThisAliasesAndTheirScope { aliases, scope }| {
-                            aliases.contains(&Text::Borrowed(value_token.token_text_trimmed()))
+                            aliases.contains(&Text::from(value_token.token_text_trimmed()))
                                 && name_syntax
                                     .ancestors()
                                     .any(|ancestor| ancestor.key() == scope.syntax().key())

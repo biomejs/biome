@@ -1,0 +1,169 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts`
+
+## Source
+
+```ts
+const obj = {
+	x: "foo",
+	y: this.x,
+
+	get fooGetter() {
+		return this.x;
+	},
+
+	arrow: () => this.x,
+
+	func: function () {
+		return this.x;
+	},
+
+	meth() {
+		return this.x;
+	},
+
+	nestedArrow() {
+		const fn = () => this.x;
+		return fn();
+	},
+
+	inObject() {
+		const inner = {
+			x: this.x,
+		};
+		return inner.x;
+	},
+};
+
+const foo1 = obj.fooGetter;
+const foo2 = obj.func();
+const foo3 = obj.meth();
+const foo4 = obj.nestedArrow();
+const foo5 = obj.inObject();
+
+const notFoo1 = obj.y;
+const notFoo2 = obj.arrow();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => unknown
+
+Module TypeId(1) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(23)
+}
+
+Module TypeId(2) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(6)
+}
+
+Module TypeId(3) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(6)
+}
+
+Module TypeId(4) => Module(0) TypeId(3)
+
+Module TypeId(5) => Object {
+  prototype: No prototype
+  members: [
+    "x": Module(0) TypeId(20),
+    "y": Module(0) TypeId(23),
+    get "fooGetter": Module(0) TypeId(10),
+    "arrow": Module(0) TypeId(1),
+    "func": Module(0) TypeId(2),
+    "meth": Module(0) TypeId(11),
+    "nestedArrow": Module(0) TypeId(12),
+    "inObject": Module(0) TypeId(13)
+  ]
+}
+
+Module TypeId(6) => Module(0) TypeId(20)
+
+Module TypeId(7) => Object {
+  prototype: No prototype
+  members: ["x": Module(0) TypeId(6)]
+}
+
+Module TypeId(8) => Module(0) TypeId(7)
+
+Module TypeId(9) => Module(0) TypeId(6)
+
+Module TypeId(10) => sync Function "fooGetter" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(6)
+}
+
+Module TypeId(11) => sync Function "meth" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(6)
+}
+
+Module TypeId(12) => sync Function "nestedArrow" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(20)
+}
+
+Module TypeId(13) => sync Function "inObject" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(9)
+}
+
+Module TypeId(14) => Module(0) TypeId(5)
+
+Module TypeId(15) => Module(0) TypeId(6)
+
+Module TypeId(16) => Module(0) TypeId(2)
+
+Module TypeId(17) => Module(0) TypeId(11)
+
+Module TypeId(18) => Module(0) TypeId(12)
+
+Module TypeId(19) => Module(0) TypeId(13)
+
+Module TypeId(20) => value: foo
+
+Module TypeId(21) => Module(0) TypeId(23)
+
+Module TypeId(22) => Module(0) TypeId(1)
+
+Module TypeId(23) => Module(0) TypeId(0).x
+```

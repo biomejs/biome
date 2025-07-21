@@ -8,6 +8,12 @@ const MY_NUMBER = +42;
 const foo = 42;
 let foo = 42;
 let foo = -42;
+const foo = 42 as const;
+const foo = 42 as number;
+const foo = 42 satisfies number;
+const foo = (42 satisfies number) as const;
+const foo = ((42 satisfies number) as const);
+const foo = (42 satisfies number)!;
 
 // jsx
 let jsx = (<div>{5}</div>);
@@ -95,9 +101,9 @@ function f(x: string): 100 {
 }
 
 // bitwise operations
-let bitwiseOr = 1 | 2;
-let bitwiseAnd = 1 & 2;
-let bitwiseXor = 1 ^ 2;
+let bitwiseOr = 1 | 42;
+let bitwiseAnd = 1 & 42;
+let bitwiseXor = 1 ^ 42;
 
 let a = ~5;
 let a = -5;
@@ -141,3 +147,8 @@ f(1n)
 f(-1n)
 f(1)
 f((-1))
+
+// type predicate
+function isFourtyTwo(num): num is 42 {
+	return true;
+}
