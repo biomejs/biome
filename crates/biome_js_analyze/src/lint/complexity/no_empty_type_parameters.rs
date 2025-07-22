@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsSyntaxKind, TsTypeParameters};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeOptionExt};
+use biome_rule_options::no_empty_type_parameters::NoEmptyTypeParametersOptions;
 
 declare_lint_rule! {
     /// Disallow empty type parameters in type aliases and interfaces.
@@ -48,7 +49,7 @@ impl Rule for NoEmptyTypeParameters {
     type Query = Ast<TsTypeParameters>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoEmptyTypeParametersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -6,6 +6,7 @@ use biome_analyze::{
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_useless_backref_in_regex::NoUselessBackrefInRegexOptions;
 
 declare_lint_rule! {
     /// Disallow useless backreferences in regular expression literals that always match an empty string.
@@ -85,8 +86,8 @@ declare_lint_rule! {
         name: "noUselessBackrefInRegex",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-useless-backreference"),
-            RuleSource::EslintRegexp("no-useless-backreference"),
+            RuleSource::Eslint("no-useless-backreference").same(),
+            RuleSource::EslintRegexp("no-useless-backreference").same(),
         ],
         recommended: true,
         severity: Severity::Warning,
@@ -97,7 +98,7 @@ impl Rule for NoUselessBackrefInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = BackRefIssue;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessBackrefInRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

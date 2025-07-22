@@ -4,6 +4,7 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, AnyJsSwitchClause, JsSwitchStatement};
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_duplicate_case::NoDuplicateCaseOptions;
 
 declare_lint_rule! {
     /// Disallow duplicate case labels.
@@ -85,7 +86,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDuplicateCase",
         language: "js",
-        sources: &[RuleSource::Eslint("no-duplicate-case")],
+        sources: &[RuleSource::Eslint("no-duplicate-case").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -95,7 +96,7 @@ impl Rule for NoDuplicateCase {
     type Query = Ast<JsSwitchStatement>;
     type State = (TextRange, TextRange);
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDuplicateCaseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

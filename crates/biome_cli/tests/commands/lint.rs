@@ -74,7 +74,7 @@ fn lint_help() {
 
 #[test]
 fn ok() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -91,7 +91,7 @@ fn ok() {
 
 #[test]
 fn ok_read_only() {
-    let mut fs = MemoryFileSystem::new_read_only();
+    let fs = MemoryFileSystem::new_read_only();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -108,7 +108,7 @@ fn ok_read_only() {
 
 #[test]
 fn parse_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -132,7 +132,7 @@ fn parse_error() {
 
 #[test]
 fn maximum_diagnostics() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), ERRORS.as_bytes());
@@ -178,7 +178,7 @@ fn maximum_diagnostics() {
 
 #[test]
 fn apply_ok() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -211,7 +211,7 @@ fn apply_ok() {
 
 #[test]
 fn apply_noop() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -236,7 +236,7 @@ fn apply_noop() {
 
 #[test]
 fn apply_suggested_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -261,7 +261,7 @@ fn apply_suggested_error() {
 
 #[test]
 fn apply_suggested() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -294,7 +294,7 @@ fn apply_suggested() {
 
 #[test]
 fn apply_unsafe_with_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     // last line doesn't have code fix
@@ -346,7 +346,7 @@ function _f() { arguments; }
 
 #[test]
 fn no_lint_if_linter_is_disabled_when_run_apply() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -382,7 +382,7 @@ fn no_lint_if_linter_is_disabled_when_run_apply() {
 
 #[test]
 fn no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -418,7 +418,7 @@ fn no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc() {
 
 #[test]
 fn no_lint_if_linter_is_disabled() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -454,7 +454,7 @@ fn no_lint_if_linter_is_disabled() {
 
 #[test]
 fn should_disable_a_rule() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -490,7 +490,7 @@ fn should_disable_a_rule() {
 
 #[test]
 fn should_disable_a_rule_group() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -529,7 +529,7 @@ fn should_disable_a_rule_group() {
 
 #[test]
 fn downgrade_severity() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
@@ -575,7 +575,7 @@ fn downgrade_severity() {
 
 #[test]
 fn downgrade_severity_info() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
@@ -619,7 +619,7 @@ fn downgrade_severity_info() {
 
 #[test]
 fn upgrade_severity() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
@@ -666,7 +666,7 @@ fn upgrade_severity() {
 
 #[test]
 fn no_lint_when_file_is_ignored() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -705,7 +705,7 @@ fn no_lint_when_file_is_ignored() {
 
 #[test]
 fn no_lint_if_files_are_listed_in_ignore_option() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -948,13 +948,13 @@ fn fs_error_infinite_symlink_expansion_to_files() {
 
 #[test]
 fn fs_error_read_only() {
-    let mut fs = MemoryFileSystem::new_read_only();
+    let fs = MemoryFileSystem::new_read_only();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("test.js");
     fs.insert(file_path.into(), *b"content");
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["lint", "--write", file_path.as_str()].as_slice()),
@@ -1298,13 +1298,13 @@ fn ignore_file_in_subdir_in_symlinked_dir() {
 
 #[test]
 fn file_too_large() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), "statement();\n".repeat(80660).as_bytes());
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["lint", file_path.as_str()].as_slice()),
@@ -1326,7 +1326,7 @@ fn file_too_large() {
 
 #[test]
 fn file_too_large_config_limit() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     fs.insert(Utf8PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
@@ -1353,7 +1353,7 @@ fn file_too_large_config_limit() {
 
 #[test]
 fn file_too_large_cli_limit() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -1378,7 +1378,7 @@ fn file_too_large_cli_limit() {
 
 #[test]
 fn files_max_size_parse_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -1403,7 +1403,7 @@ fn files_max_size_parse_error() {
 
 #[test]
 fn max_diagnostics_default() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     // Creates 40 diagnostics.
@@ -1442,7 +1442,7 @@ fn max_diagnostics_default() {
 
 #[test]
 fn max_diagnostics() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     for i in 0..20 {
@@ -1509,7 +1509,7 @@ fn no_supported_file_found() {
 
 #[test]
 fn print_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -1534,7 +1534,7 @@ fn print_verbose() {
 
 #[test]
 fn unsupported_file() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.txt");
@@ -1558,7 +1558,7 @@ fn unsupported_file() {
 
 #[test]
 fn unsupported_file_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.txt");
@@ -1582,7 +1582,7 @@ fn unsupported_file_verbose() {
 
 #[test]
 fn suppression_syntax_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -1607,7 +1607,7 @@ fn suppression_syntax_error() {
 
 #[test]
 fn config_recommended_group() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -1633,7 +1633,7 @@ fn config_recommended_group() {
 
 #[test]
 fn nursery_unstable() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -1658,7 +1658,7 @@ fn nursery_unstable() {
 
 #[test]
 fn group_level_recommended_false_enable_specific() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     // useButtonType should be enabled.
@@ -1704,7 +1704,7 @@ fn group_level_recommended_false_enable_specific() {
 
 #[test]
 fn ignore_configured_globals() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let rome_json = r#"{
@@ -1866,7 +1866,7 @@ fn check_stdin_write_unsafe_successfully() {
 
 #[test]
 fn should_apply_correct_file_source() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.ts");
@@ -1916,7 +1916,7 @@ fn should_apply_correct_file_source() {
 
 #[test]
 fn should_not_enable_all_recommended_rules() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
@@ -1973,7 +1973,7 @@ fn should_not_enable_all_recommended_rules() {
 
 #[test]
 fn should_not_disable_recommended_rules_for_a_group() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
@@ -2020,7 +2020,7 @@ array.map((sentence) => sentence.split(" ")).flat();
 
 #[test]
 fn apply_bogus_argument() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -2048,7 +2048,7 @@ fn apply_bogus_argument() {
 
 #[test]
 fn ignores_unknown_file() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("test.txt");
@@ -2082,7 +2082,7 @@ fn ignores_unknown_file() {
 
 #[test]
 fn check_json_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("test.json");
@@ -2148,7 +2148,7 @@ fn doesnt_error_if_no_files_were_processed() {
 #[test]
 fn should_pass_if_there_are_only_warnings() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
@@ -2197,7 +2197,7 @@ A = 0;
 #[test]
 fn does_error_with_only_warnings() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
@@ -2511,7 +2511,7 @@ fn should_not_process_ignored_file_even_if_its_changed() {
 #[test]
 fn should_not_error_for_no_changed_files_with_no_errors_on_unmatched() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), r#"console.log('file');"#.as_bytes());
@@ -2707,7 +2707,7 @@ fn should_not_process_ignored_file_even_if_its_staged() {
 
 #[test]
 fn lint_syntax_rules() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -2732,7 +2732,7 @@ fn lint_syntax_rules() {
 
 #[test]
 fn should_lint_error_without_file_paths() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -2753,7 +2753,7 @@ fn should_lint_error_without_file_paths() {
 
 #[test]
 fn lint_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -2778,7 +2778,7 @@ fn lint_error() {
 
 #[test]
 fn lint_only_rule_doesnt_exist() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -2803,7 +2803,7 @@ fn lint_only_rule_doesnt_exist() {
 
 #[test]
 fn lint_only_missing_group() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("check.js");
@@ -2828,7 +2828,7 @@ fn lint_only_missing_group() {
 
 #[test]
 fn lint_only_rule() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = "debugger; delete obj.prop;";
 
@@ -2852,7 +2852,7 @@ fn lint_only_rule() {
 
 #[test]
 fn lint_only_multiple_rules() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = "debugger; delete obj.prop; a === -0;";
 
@@ -2884,7 +2884,7 @@ fn lint_only_multiple_rules() {
 
 #[test]
 fn lint_only_rule_and_group() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = "debugger; delete obj.prop; a === -0;";
 
@@ -2916,7 +2916,7 @@ fn lint_only_rule_and_group() {
 
 #[test]
 fn lint_only_rule_ignore_suppression_comments() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = r#"debugger;
 // biome-ignore lint/performance/noDelete: <explanation>
@@ -2943,7 +2943,7 @@ delete obj.prop;
 
 #[test]
 fn lint_only_rule_with_config() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{
         "linter": {
@@ -2993,7 +2993,7 @@ fn lint_only_rule_with_config() {
 
 #[test]
 fn lint_only_rule_with_recommended_disabled() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{
         "linter": {
@@ -3035,7 +3035,7 @@ fn lint_only_rule_with_recommended_disabled() {
 
 #[test]
 fn lint_only_rule_with_linter_disabled() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{
         "linter": {
@@ -3075,7 +3075,7 @@ fn lint_only_rule_with_linter_disabled() {
 
 #[test]
 fn lint_only_group() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{
         "linter": {
@@ -3114,7 +3114,7 @@ fn lint_only_group() {
 
 #[test]
 fn lint_only_group_with_disabled_rule() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{
         "linter": {
@@ -3153,7 +3153,7 @@ fn lint_only_group_with_disabled_rule() {
 
 #[test]
 fn lint_only_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{}"#;
     let content = r#"
@@ -3193,7 +3193,7 @@ fn lint_only_write() {
 
 #[test]
 fn lint_skip_rule() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = "debugger; delete obj.prop; a === -0;";
 
@@ -3217,7 +3217,7 @@ fn lint_skip_rule() {
 
 #[test]
 fn lint_skip_group_with_enabled_rule() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{
         "linter": {
@@ -3252,7 +3252,7 @@ fn lint_skip_group_with_enabled_rule() {
 
 #[test]
 fn lint_skip_multiple_rules() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = "debugger; delete obj.prop; a === -0;";
 
@@ -3284,7 +3284,7 @@ fn lint_skip_multiple_rules() {
 
 #[test]
 fn lint_skip_rule_and_group() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = "debugger; delete obj.prop; a === -0;";
 
@@ -3316,7 +3316,7 @@ fn lint_skip_rule_and_group() {
 
 #[test]
 fn lint_skip_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let config = r#"{}"#;
     let content = r#"
@@ -3356,7 +3356,7 @@ fn lint_skip_write() {
 
 #[test]
 fn lint_only_group_skip_rule() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = "debugger; delete obj.prop; a === -0;";
 
@@ -3388,7 +3388,7 @@ fn lint_only_group_skip_rule() {
 
 #[test]
 fn lint_only_rule_skip_group() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = "debugger; delete obj.prop; a === -0;";
 
@@ -3420,7 +3420,7 @@ fn lint_only_rule_skip_group() {
 
 #[test]
 fn lint_only_skip_rule() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = "";
 
@@ -3452,7 +3452,7 @@ fn lint_only_skip_rule() {
 
 #[test]
 fn lint_only_skip_group() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let content = "";
 
@@ -3484,7 +3484,7 @@ fn lint_only_skip_group() {
 
 #[test]
 fn fix_ok() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
@@ -3512,7 +3512,7 @@ fn fix_ok() {
 
 #[test]
 fn fix_noop() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_AFTER.as_bytes());
@@ -3533,7 +3533,7 @@ fn fix_noop() {
 
 #[test]
 fn fix_suggested_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
@@ -3554,7 +3554,7 @@ fn fix_suggested_error() {
 
 #[test]
 fn fix_suggested() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
@@ -3582,7 +3582,7 @@ fn fix_suggested() {
 
 #[test]
 fn fix_unsafe_with_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     // last line doesn't have code fix
     let source = "let a = 4;
@@ -3619,7 +3619,7 @@ function _f() { arguments; }
 #[test]
 fn should_error_if_unstaged_files_only_with_staged_flag() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     // Unstaged
     fs.insert(
         Utf8Path::new("file1.js").into(),
@@ -3644,7 +3644,7 @@ fn should_error_if_unstaged_files_only_with_staged_flag() {
 #[test]
 fn should_error_if_unchanged_files_only_with_changed_flag() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     // Unchanged
     fs.insert(
         Utf8Path::new("file1.js").into(),
@@ -3668,7 +3668,7 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
 #[test]
 fn linter_shows_the_default_severity_of_rule_on() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     fs.insert(
         Utf8Path::new("biome.json").into(),
@@ -3704,7 +3704,7 @@ fn linter_shows_the_default_severity_of_rule_on() {
 #[test]
 fn linter_finds_package_json_for_no_undeclared_dependencies() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     fs.insert(
         Utf8Path::new("biome.json").into(),
@@ -3752,7 +3752,7 @@ fn linter_finds_package_json_for_no_undeclared_dependencies() {
 #[test]
 fn linter_finds_nested_package_json_for_no_undeclared_dependencies() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     fs.insert(
         Utf8Path::new("biome.json").into(),
@@ -3810,7 +3810,7 @@ fn linter_finds_nested_package_json_for_no_undeclared_dependencies() {
 #[test]
 fn linter_finds_nested_package_json_for_no_undeclared_dependencies_inversed() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     fs.insert(
         Utf8Path::new("biome.json").into(),
@@ -3865,7 +3865,7 @@ fn linter_finds_nested_package_json_for_no_undeclared_dependencies_inversed() {
 #[test]
 fn linter_doesnt_crash_on_malformed_code_from_issue_4623() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     fs.insert(
         Utf8Path::new("biome.json").into(),
@@ -3907,7 +3907,7 @@ fn linter_doesnt_crash_on_malformed_code_from_issue_4623() {
 #[test]
 fn linter_doesnt_crash_on_malformed_code_from_issue_4723() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     fs.insert(
         Utf8PathBuf::from("issue4723.js"),
@@ -3934,7 +3934,7 @@ fn linter_doesnt_crash_on_malformed_code_from_issue_4723() {
 #[test]
 fn should_report_when_schema_version_mismatch() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     let biome_json = Utf8Path::new("biome.json");
     fs.insert(
@@ -3993,7 +3993,7 @@ var a = foo;
 
 #[test]
 fn lint_skip_parse_errors() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let valid = Utf8Path::new("valid.js");
@@ -4021,6 +4021,217 @@ fn lint_skip_parse_errors() {
         module_path!(),
         "lint_skip_parse_errors",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_can_resolve_imported_symbols() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noFloatingPromises": "on"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/foo.ts");
+    fs.insert(
+        file.into(),
+        r#"export function foo(): Foo {}
+
+export async function bar() {}"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/index.ts");
+    fs.insert(
+        file.into(),
+        r#"import { foo, bar } from "./foo.ts";
+
+fn(foo());
+
+bar();"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_can_resolve_imported_symbols",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_root_settings_with_stdin_file_path() {
+    let mut fs = TemporaryFs::new("should_apply_root_settings_with_stdin_file_path");
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+            "semicolons": "always",
+        }
+    }
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    console.in_buffer.push("let a = \"a\"".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--stdin-file-path=file.js", "--write", "--unsafe"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_root_settings_with_stdin_file_path",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_root_settings_with_stdin_file_path_and_extended_config() {
+    let mut fs =
+        TemporaryFs::new("should_apply_root_settings_with_stdin_file_path_and_extended_config");
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "extends": ["base-config/biome"],
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+        }
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/package.json",
+        r#"{
+  "exports": {
+    "./biome": "./configs/biome.jsonc"
+  }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/configs/biome.jsonc",
+        r#"{
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 3,
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double",
+        }
+    }
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    console
+        .in_buffer
+        .push("let a = \"a\"; if (true) { a = \"b\" }".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--stdin-file-path=file.js", "--write", "--unsafe"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_root_settings_with_stdin_file_path_and_extended_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config() {
+    let mut fs = TemporaryFs::new(
+        "should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config",
+    );
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "extends": ["base-config/biome"],
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+        }
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/package.json",
+        r#"{
+  "exports": {
+    "./biome": "./configs/biome.jsonc"
+  }
+}"#,
+    );
+
+    fs.create_file(
+        "node_modules/base-config/configs/biome.jsonc",
+        r#"{
+    "root": false,
+    "formatter": {
+        "indentStyle": "space",
+        "indentWidth": 3,
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "double",
+        }
+    }
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    console
+        .in_buffer
+        .push("let a = \"a\"; if (true) { a = \"b\" }".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--stdin-file-path=file.js", "--write", "--unsafe"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config",
+        fs.create_mem(),
         console,
         result,
     ));

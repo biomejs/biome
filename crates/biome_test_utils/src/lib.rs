@@ -9,7 +9,7 @@ use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
-use biome_js_type_info::TypeResolver;
+use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
@@ -18,7 +18,7 @@ use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
-use biome_service::settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle};
+use biome_service::settings::{ServiceLanguage, Settings};
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
@@ -26,6 +26,10 @@ use similar::{DiffableStr, TextDiff};
 use std::ffi::c_int;
 use std::fmt::Write;
 use std::sync::{Arc, Once};
+
+mod bench_case;
+
+pub use bench_case::BenchCase;
 
 pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
@@ -159,9 +163,8 @@ where
             .merge_with_configuration(configuration, None)
             .unwrap();
 
-        let handle = WorkspaceSettingsHandle::from(settings);
         let document_file_source = DocumentFileSource::from_path(input_file);
-        handle.format_options::<L>(&input_file.into(), &document_file_source)
+        settings.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
 
@@ -303,6 +306,21 @@ pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) 
         content.push_str(&registered_types);
         content.push_str("```\n");
     }
+}
+
+pub fn dump_registered_module_types(content: &mut String, types: &[&TypeData]) {
+    if types.is_empty() {
+        return;
+    }
+
+    content.push_str("## Registered types\n\n");
+    content.push_str("```");
+
+    for (i, ty) in types.iter().enumerate() {
+        content.push_str(&format!("\nModule TypeId({i}) => {ty}\n"));
+    }
+
+    content.push_str("```\n");
 }
 
 // Check that all red / green nodes have correctly been released on exit
@@ -568,22 +586,18 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
     match diagnostic_comment {
         Some(Diagnostics::ShouldNotGenerateDiagnostics) => {
             if has_diagnostics {
-                panic!(
-                    "This test should not generate diagnostics\nFile: {}",
-                    file_path
-                );
+                panic!("This test should not generate diagnostics\nFile: {file_path}",);
             }
         }
         Some(Diagnostics::ShouldGenerateDiagnostics) => {
             if !has_diagnostics {
-                panic!("This test should generate diagnostics\nFile: {}", file_path);
+                panic!("This test should generate diagnostics\nFile: {file_path}",);
             }
         }
         None => {
             if is_valid_test_file {
                 panic!(
-                    "Valid test files should contain comment `{}`\nFile: {}",
-                    no_diagnostics_comment_text, file_path
+                    "Valid test files should contain comment `{no_diagnostics_comment_text}`\nFile: {file_path}",
                 );
             }
         }

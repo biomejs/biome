@@ -12,7 +12,8 @@ use std::collections::BTreeSet;
 
 use biome_fs::BiomePath;
 use biome_js_syntax::AnyJsRoot;
-use biome_js_type_info::{ImportSymbol, TypeReference};
+use biome_js_type_info::ImportSymbol;
+use biome_jsdoc_comment::JsdocComment;
 use biome_project_layout::ProjectLayout;
 use biome_resolver::{FsWithResolverProxy, PathInfo};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -24,11 +25,7 @@ use crate::{JsExport, JsModuleInfo, JsOwnExport, js_module_info::JsModuleVisitor
 pub(crate) use fs_proxy::ModuleGraphFsProxy;
 
 pub const SUPPORTED_EXTENSIONS: &[&str] = &[
-    "js", "jsx", "mjs", "cjs", "ts", "tsx", "mts", "cts", "json", "node",
-];
-
-pub const SUPPORTED_TYPE_EXTENSIONS: &[&str] = &[
-    "d.ts", "d.mts", "d.cts", "js", "jsx", "mjs", "cjs", "ts", "tsx", "mts", "cts", "json",
+    "ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs", "json", "node",
 ];
 
 /// Data structure for tracking imports and exports across files.
@@ -96,8 +93,8 @@ impl ModuleGraph {
 
         let fs_proxy = ModuleGraphFsProxy::new(fs, self, project_layout);
 
-        // Traverse all the added and updated paths and insert their resolved
-        // imports.
+        // Traverse all the added and updated paths and insert their module
+        // info.
         let imports = self.data.pin();
         for (path, root) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);
@@ -134,59 +131,62 @@ impl ModuleGraph {
         let data = self.data.pin();
         let mut seen_paths = BTreeSet::new();
 
-        fn find_exported_symbol_with_seen_paths<'a>(
-            data: &'a HashMapRef<Utf8PathBuf, JsModuleInfo, FxBuildHasher, LocalGuard>,
-            module: &'a JsModuleInfo,
-            symbol_name: &str,
-            seen_paths: &mut BTreeSet<&'a Utf8Path>,
-        ) -> Option<JsOwnExport> {
-            match module.exports.get(symbol_name) {
-                Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
-                    Some(own_export.clone())
+        find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths)
+            .map(|(_, export)| export.clone())
+    }
+
+    /// Finds an exported symbol by `symbol_name` as exported by `module`.
+    ///
+    /// Follows re-exports if necessary.
+    pub(crate) fn find_jsdoc_for_exported_symbol(
+        &self,
+        module: &JsModuleInfo,
+        symbol_name: &str,
+    ) -> Option<JsdocComment> {
+        let data = self.data.pin();
+        let mut seen_paths = BTreeSet::new();
+
+        find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths).and_then(
+            |(module, export)| match export {
+                JsOwnExport::Binding(binding_id) => {
+                    module.bindings[binding_id.index()].jsdoc.clone()
                 }
-                Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
-                    if reexport.import.symbol == ImportSymbol::All {
-                        Some(JsOwnExport {
-                            jsdoc_comment: reexport.jsdoc_comment.clone(),
-                            local_name: None,
-                            // TODO: Register namespace
-                            // TypeData::Namespace(Box::new(Namespace::from_type_members(
-                            //    Box::new([...]),
-                            // )))
-                            ty: TypeReference::Unknown,
-                        })
-                    } else {
-                        match reexport.import.resolved_path.as_deref() {
-                            Ok(path) if seen_paths.insert(path) => {
-                                data.get(path).and_then(|module| {
-                                    find_exported_symbol_with_seen_paths(
-                                        data,
-                                        module,
-                                        symbol_name,
-                                        seen_paths,
-                                    )
-                                })
-                            }
-                            _ => None,
-                        }
-                    }
+                JsOwnExport::Type(_) => None,
+            },
+        )
+    }
+}
+
+fn find_exported_symbol_with_seen_paths<'a>(
+    data: &'a HashMapRef<Utf8PathBuf, JsModuleInfo, FxBuildHasher, LocalGuard>,
+    module: &'a JsModuleInfo,
+    symbol_name: &str,
+    seen_paths: &mut BTreeSet<&'a Utf8Path>,
+) -> Option<(&'a JsModuleInfo, &'a JsOwnExport)> {
+    match module.exports.get(symbol_name) {
+        Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
+            Some((module, own_export))
+        }
+        Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+            if reexport.import.symbol == ImportSymbol::All {
+                // TODO: Follow namespace exports.
+                None
+            } else {
+                match reexport.import.resolved_path.as_deref() {
+                    Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
+                        find_exported_symbol_with_seen_paths(data, module, symbol_name, seen_paths)
+                    }),
+                    _ => None,
                 }
-                None => module.blanket_reexports.iter().find_map(|reexport| {
-                    match reexport.import.resolved_path.as_deref() {
-                        Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
-                            find_exported_symbol_with_seen_paths(
-                                data,
-                                module,
-                                symbol_name,
-                                seen_paths,
-                            )
-                        }),
-                        _ => None,
-                    }
-                }),
             }
         }
-
-        find_exported_symbol_with_seen_paths(&data, module, symbol_name, &mut seen_paths)
+        None => module.blanket_reexports.iter().find_map(|reexport| {
+            match reexport.import.resolved_path.as_deref() {
+                Ok(path) if seen_paths.insert(path) => data.get(path).and_then(|module| {
+                    find_exported_symbol_with_seen_paths(data, module, symbol_name, seen_paths)
+                }),
+                _ => None,
+            }
+        }),
     }
 }

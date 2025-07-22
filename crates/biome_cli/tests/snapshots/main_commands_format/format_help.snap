@@ -107,6 +107,7 @@ Global options applied to all commands
         --config-path=PATH    Set the file path to the configuration file, or the directory path to
                               find `biome.json` or `biome.jsonc`. If used, it disables the default
                               configuration file resolution.
+                              [env:BIOME_CONFIG_PATH: N/A]
         --max-diagnostics=<none|<NUMBER>>  Cap the amount of diagnostics displayed. When `none` is
                               provided, the limit is lifted.
                               [default: 20]

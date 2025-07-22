@@ -445,46 +445,7 @@ pub fn generate_type<'a>(
                     property = property.with_leading_trivia(trivia);
                 }
 
-                let type_annotation = if let Some((container_type, key_type, value_type)) =
-                    match property_str.as_str() {
-                        "featuresSupported" => Some(("Map", "FeatureKind", "SupportKind")),
-                        _ => None,
-                    } {
-                    // HACK: force the `featuresSupported` property to be a Map<FeatureKind, SupportKind>
-                    // This is a temporary workaround to fix the type annotation for this property. The
-                    // better fix would be to use the `transform` feature that is available in `schemars` 1.0 to
-                    // add a metadata field that we can pick up here to generate the correct type annotation.
-                    // Alternatively, we could generate these types based on the actual rust types instead of the
-                    // json schema.
-                    //
-                    // We also manually fix the types for some other properties as well.
-                    let full_type = make::ts_reference_type(
-                        make::js_reference_identifier(make::ident(container_type)).into(),
-                    )
-                    .with_type_arguments(make::ts_type_arguments(
-                        make::token(T![<]),
-                        make::ts_type_argument_list(
-                            [
-                                make::ts_reference_type(
-                                    make::js_reference_identifier(make::ident(key_type)).into(),
-                                )
-                                .build()
-                                .into(),
-                                make::ts_reference_type(
-                                    make::js_reference_identifier(make::ident(value_type)).into(),
-                                )
-                                .build()
-                                .into(),
-                            ],
-                            [make::token(T![,])],
-                        ),
-                        make::token(T![>]),
-                    ))
-                    .build();
-                    make::ts_type_annotation(make::token(T![:]), full_type.into())
-                } else {
-                    make::ts_type_annotation(make::token(T![:]), ts_type)
-                };
+                let type_annotation = make::ts_type_annotation(make::token(T![:]), ts_type);
 
                 let mut builder = make::ts_property_signature_type_member(
                     AnyJsObjectMemberName::from(make::js_literal_member_name(property)),
@@ -587,7 +548,7 @@ macro_rules! workspace_method {
 }
 
 /// Returns a list of signature for all the methods in the [Workspace] trait
-pub fn methods() -> [WorkspaceMethod; 24] {
+pub fn methods() -> [WorkspaceMethod; 25] {
     [
         workspace_method!(file_features),
         workspace_method!(update_settings),
@@ -596,6 +557,7 @@ pub fn methods() -> [WorkspaceMethod; 24] {
         workspace_method!(change_file),
         workspace_method!(close_file),
         workspace_method!(get_syntax_tree),
+        workspace_method!(file_exists),
         workspace_method!(check_file_size),
         workspace_method!(get_file_content),
         workspace_method!(get_control_flow_graph),

@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mergeable-with_header.js
+---
+# Input
+```js
+// Header comment
+
+import moment from 'moment';
+import { Moment } from 'moment';
+
+```
+
+# Diagnostics
+```
+mergeable-with_header.js:3:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+    1 │ // Header comment
+    2 │ 
+  > 3 │ import moment from 'moment';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ import { Moment } from 'moment';
+    5 │ 
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1 1 │   // Header comment
+    2 2 │   
+    3   │ - import·moment·from·'moment';
+    4   │ - import·{·Moment·}·from·'moment';
+      3 │ + import·moment,·{·Moment·}·from·'moment';
+    5 4 │   
+  
+
+```

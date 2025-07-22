@@ -8,6 +8,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make::{js_directive, js_directive_list, token};
 use biome_js_syntax::{JsScript, JsSyntaxKind, JsSyntaxToken, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::use_strict_mode::UseStrictModeOptions;
 
 declare_lint_rule! {
     /// Enforce the use of the directive `"use strict"` in script files.
@@ -49,7 +50,7 @@ impl Rule for UseStrictMode {
     type Query = Ast<JsScript>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseStrictModeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

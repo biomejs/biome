@@ -41,12 +41,6 @@ check.txt files/missingHandler  VERBOSE  ━━━━━━━━━━━━━
 ```
 
 ```block
-Scanned project folder in <TIME>.
-Checked 0 files in <TIME>. No fixes applied.
-Found 1 warning.
-```
-
-```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Files processed:
@@ -64,4 +58,10 @@ Found 1 warning.
   ! The list is empty.
   
 
+```
+
+```block
+Scanned project folder in <TIME>.
+Checked 0 files in <TIME>. No fixes applied.
+Found 1 warning.
 ```

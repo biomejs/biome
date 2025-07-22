@@ -46,7 +46,7 @@ fn ok() {
 
 #[test]
 fn with_configuration() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
         Utf8Path::new("biome.json").to_path_buf(),
@@ -90,7 +90,7 @@ fn with_no_configuration() {
 
 #[test]
 fn with_jsonc_configuration() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
         Utf8Path::new("biome.jsonc").to_path_buf(),
@@ -117,7 +117,7 @@ fn with_jsonc_configuration() {
 
 #[test]
 fn with_malformed_configuration() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
         Utf8Path::new("biome.json").to_path_buf(),
@@ -211,7 +211,7 @@ Not most recent log file
 
 #[test]
 fn with_formatter_configuration() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
         Utf8Path::new("biome.json").to_path_buf(),
@@ -278,7 +278,7 @@ fn with_formatter_configuration() {
 
 #[test]
 fn with_linter_configuration() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
         Utf8Path::new("biome.json").to_path_buf(),

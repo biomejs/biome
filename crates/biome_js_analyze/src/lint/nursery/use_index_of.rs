@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsReturnStatement, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken, Text};
+use biome_rule_options::use_index_of::UseIndexOfOptions;
 
 declare_lint_rule! {
     /// Prefer `Array#{indexOf,lastIndexOf}()` over `Array#{findIndex,findLastIndex}()` when looking for the index of an item.
@@ -123,7 +124,7 @@ declare_lint_rule! {
         name: "useIndexOf",
         language: "js",
         recommended: true,
-        sources: &[RuleSource::EslintUnicorn("prefer-array-index-of")],
+        sources: &[RuleSource::EslintUnicorn("prefer-array-index-of").same()],
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
@@ -133,7 +134,7 @@ impl Rule for UseIndexOf {
     type Query = Ast<JsCallExpression>;
     type State = JsSyntaxMatchPair;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIndexOfOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();

@@ -11,6 +11,7 @@ use biome_js_syntax::{
     numbers::split_into_radix_and_number,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_approximative_numeric_constant::NoApproximativeNumericConstantOptions;
 
 use crate::JsRuleAction;
 
@@ -46,7 +47,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noApproximativeNumericConstant",
         language: "js",
-        sources: &[RuleSource::Clippy("approx_constant")],
+        sources: &[RuleSource::Clippy("approx_constant").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -57,7 +58,7 @@ impl Rule for NoApproximativeNumericConstant {
     type Query = Ast<JsNumberLiteralExpression>;
     type State = &'static str;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoApproximativeNumericConstantOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let token = ctx.query().value_token().ok()?;

@@ -55,7 +55,7 @@ impl From<&'static str> for Text {
 
 impl Hash for Text {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        state.write(self.text().as_bytes());
+        self.text().hash(state);
     }
 }
 

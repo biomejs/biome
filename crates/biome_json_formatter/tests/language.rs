@@ -21,7 +21,13 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
     type FormatLanguage = JsonFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {
-        parse_json(text, JsonParserOptions::default().with_allow_comments()).into()
+        parse_json(
+            text,
+            JsonParserOptions::default()
+                .with_allow_comments()
+                .with_allow_trailing_commas(),
+        )
+        .into()
     }
 
     fn to_format_language(
@@ -31,9 +37,9 @@ impl TestFormatLanguage for JsonTestFormatLanguage {
     ) -> Self::FormatLanguage {
         let language_settings = &settings.languages.json.formatter;
         let options = Self::ServiceLanguage::resolve_format_options(
-            Some(&settings.formatter),
-            Some(&settings.override_settings),
-            Some(language_settings),
+            &settings.formatter,
+            &settings.override_settings,
+            language_settings,
             &BiomePath::new(""),
             file_source,
         );

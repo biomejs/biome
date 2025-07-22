@@ -1,4 +1,3 @@
-use biome_analyze::RuleSourceKind;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::JsxOpeningElement;
 use biome_rowan::AstNode;
 use biome_rowan::TextRange;
+use biome_rule_options::no_head_element::NoHeadElementOptions;
 
 declare_lint_rule! {
     /// Prevent usage of `<head>` element in a Next.js project.
@@ -48,8 +48,7 @@ declare_lint_rule! {
         version: "1.9.4",
         name: "noHeadElement",
         language: "jsx",
-        sources: &[RuleSource::EslintNext("no-head-element")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintNext("no-head-element").same()],
         recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Next],
@@ -60,7 +59,7 @@ impl Rule for NoHeadElement {
     type Query = Ast<JsxOpeningElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoHeadElementOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

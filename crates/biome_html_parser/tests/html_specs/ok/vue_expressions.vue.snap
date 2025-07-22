@@ -1,0 +1,81 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```vue
+<template>
+	{{xyz}}
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@10..14 "{{" [Newline("\n"), Whitespace("\t")] [],
+                    expression_token: HTML_LITERAL@14..17 "xyz" [] [],
+                    r_double_curly_token: R_DOUBLE_CURLY@17..19 "}}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@19..21 "<" [Newline("\n")] [],
+                slash_token: SLASH@21..22 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@22..30 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@30..31 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@31..32 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..32
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..31
+    0: HTML_ELEMENT@0..31
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: HTML_LITERAL@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..19
+        0: HTML_TEXT_EXPRESSION@10..19
+          0: L_DOUBLE_CURLY@10..14 "{{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_LITERAL@14..17 "xyz" [] []
+          2: R_DOUBLE_CURLY@17..19 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@19..31
+        0: L_ANGLE@19..21 "<" [Newline("\n")] []
+        1: SLASH@21..22 "/" [] []
+        2: HTML_TAG_NAME@22..30
+          0: HTML_LITERAL@22..30 "template" [] []
+        3: R_ANGLE@30..31 ">" [] []
+  4: EOF@31..32 "" [Newline("\n")] []
+
+```

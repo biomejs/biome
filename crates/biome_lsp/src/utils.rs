@@ -9,7 +9,7 @@ use biome_diagnostics::{
     Applicability, LogCategory,
     {Diagnostic, DiagnosticTags, Location, PrintDescription, Severity, Visit},
 };
-use biome_lsp_converters::line_index::LineIndex;
+use biome_line_index::LineIndex;
 use biome_lsp_converters::{PositionEncoding, from_proto, to_proto};
 use biome_rowan::{TextRange, TextSize};
 use biome_service::workspace::CodeAction;
@@ -414,8 +414,8 @@ pub(crate) fn apply_document_changes(
 #[cfg(test)]
 mod tests {
     use super::apply_document_changes;
-    use biome_lsp_converters::line_index::LineIndex;
-    use biome_lsp_converters::{PositionEncoding, WideEncoding};
+    use biome_line_index::{LineIndex, WideEncoding};
+    use biome_lsp_converters::PositionEncoding;
     use biome_text_edit::TextEdit;
     use tower_lsp_server::lsp_types as lsp;
     use tower_lsp_server::lsp_types::{Position, Range, TextDocumentContentChangeEvent};

@@ -1650,16 +1650,32 @@ pub fn css_pseudo_class_selector(
         ],
     ))
 }
-pub fn css_pseudo_element_function_identifier(
-    name_token: SyntaxToken,
+pub fn css_pseudo_element_function(
+    name: CssIdentifier,
     l_paren_token: SyntaxToken,
-    ident: CssIdentifier,
+    items: CssPseudoElementFunctionParameterList,
     r_paren_token: SyntaxToken,
-) -> CssPseudoElementFunctionIdentifier {
-    CssPseudoElementFunctionIdentifier::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER,
+) -> CssPseudoElementFunction {
+    CssPseudoElementFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION,
         [
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_element_function_custom_identifier(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    ident: CssCustomIdentifier,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoElementFunctionCustomIdentifier {
+    CssPseudoElementFunctionCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_CUSTOM_IDENTIFIER,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(ident.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
@@ -1957,7 +1973,7 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
 }
 pub fn css_starting_style_at_rule(
     starting_style_token: SyntaxToken,
-    block: AnyCssStartingStyleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssStartingStyleAtRule {
     CssStartingStyleAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE,
@@ -2403,7 +2419,7 @@ where
 }
 pub fn css_declaration_list<I>(items: I) -> CssDeclarationList
 where
-    I: IntoIterator<Item = CssDeclarationWithSemicolon>,
+    I: IntoIterator<Item = AnyCssDeclaration>,
     I::IntoIter: ExactSizeIterator,
 {
     CssDeclarationList::unwrap_cast(SyntaxNode::new_detached(
@@ -2675,6 +2691,20 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn css_pseudo_element_function_parameter_list<I>(
+    items: I,
+) -> CssPseudoElementFunctionParameterList
+where
+    I: IntoIterator<Item = CssIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssPseudoElementFunctionParameterList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_PARAMETER_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_pseudo_value_list<I, S>(items: I, separators: S) -> CssPseudoValueList

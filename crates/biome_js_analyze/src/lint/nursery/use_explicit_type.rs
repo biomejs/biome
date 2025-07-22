@@ -1,25 +1,27 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::{Markup, markup};
 use biome_diagnostics::Severity;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody,
-    AnyJsLiteralExpression, AnyJsStatement, AnyTsType, JsArrowFunctionExpression, JsCallExpression,
-    JsConstructorClassMember, JsFileSource, JsFormalParameter, JsFunctionDeclaration,
-    JsGetterClassMember, JsGetterObjectMember, JsInitializerClause, JsLanguage,
-    JsMethodClassMember, JsMethodObjectMember, JsModuleItemList, JsObjectExpression, JsParameters,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsReturnStatement,
-    JsSetterClassMember, JsSetterObjectMember, JsStatementList, JsSyntaxKind,
-    JsVariableDeclaration, JsVariableDeclarationClause, JsVariableDeclarator,
-    JsVariableDeclaratorList, JsVariableStatement, TsCallSignatureTypeMember,
+    AnyJsLiteralExpression, AnyJsObjectMember, AnyJsStatement, AnyTsType,
+    JsArrowFunctionExpression, JsCallExpression, JsConstructorClassMember, JsFileSource,
+    JsFormalParameter, JsFunctionDeclaration, JsGetterClassMember, JsGetterObjectMember,
+    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsModuleItemList,
+    JsObjectExpression, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
+    JsPropertyObjectMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
+    JsStatementList, JsSyntaxKind, JsVariableDeclaration, JsVariableDeclarationClause,
+    JsVariableDeclarator, JsVariableDeclaratorList, JsVariableStatement, TsCallSignatureTypeMember,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration,
     TsGetterSignatureClassMember, TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
+    static_value::StaticValue,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union,
 };
+use biome_rule_options::use_explicit_type::UseExplicitTypeOptions;
 
 declare_lint_rule! {
     /// Enforce types in functions, methods, variables, and parameters.
@@ -30,6 +32,10 @@ declare_lint_rule! {
     /// However, explicit return types do make it visually clearer what type is returned by a function.
     /// They can also speed up TypeScript type-checking performance in large codebases with many large functions.
     /// Explicit return types also reduce the chance of bugs by asserting the return type, and it avoids surprising "action at a distance," where changing the body of one function may cause failures inside another function.
+    ///
+    /// Annotating module-level variables serves a similar purpose. This rule only allows assignment of literals and some objects to untyped variables.
+    /// Objects that are allowed must not contain spread syntax and values that aren't literals.
+    /// Additionally, `let` and `var` variables with `null` or `undefined` as value require explicit annotation.
     ///
     /// This rule enforces that functions do have an explicit return type annotation.
     ///
@@ -75,6 +81,27 @@ declare_lint_rule! {
     /// ```ts,expect_diagnostic
     /// // Should use const assertions
     /// var func = (value: number) => ({ type: 'X', value }) as any;
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// // Unspecified variable type
+    /// function fn(): string {
+    ///     return "Not inline";
+    /// }
+    /// const direct = fn();
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// // Unspecified object member type
+    /// function fn(): string {
+    ///     return "Not inline";
+    /// }
+    /// const nested = { result: fn() };
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// // let bindings of null and undefined are usually overwritten by other code
+    /// let foo = null;
     /// ```
     ///
     /// The following example is considered incorrect for a higher-order function, as the returned function does not specify a return type:
@@ -167,12 +194,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// The following example is considered incorrect because `resolve` doesn't have a type annotation.
-    ///
-    /// ```ts,expect_diagnostic
-    /// new Promise((resolve) => resolve(1));
-    /// ```
-    ///
     /// The following example is considered incorrect because `arg` has `any` type.
     ///
     /// ```ts,expect_diagnostic
@@ -200,6 +221,19 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```ts
+    /// // A literal value
+    /// const PREFIX = "/prefix";
+    /// ```
+    ///
+    /// ```ts
+    /// // Explicit variable annotation
+    /// function func(): string {
+    ///     return "";
+    /// }
+    /// let something: string = func();
+    /// ```
+    ///
+    /// ```ts
     /// class Test {
     ///   // No return value should be expected (void)
     ///   method(): void {
@@ -208,10 +242,20 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// The following examples are considered correct code for a function immediately returning a value with `as const`:
+    /// The following example is considered correct code for a function immediately returning a value with `as const`:
     ///
     /// ```ts
     /// var func = (value: number) => ({ foo: 'bar', value }) as const;
+    /// ```
+    ///
+    /// The following example is considered correct code for a value assigned using type assertion:
+    ///
+    /// ```ts
+    /// function fn(): string {
+    ///     return "Not inline";
+    /// }
+    /// const direct = fn() as string;
+    /// const nested = { result: fn() as string };
     /// ```
     ///
     /// The following examples are considered correct code for a function allowed within specific expression contexts, such as an IIFE, a function passed as an argument, or a function inside an array:
@@ -220,14 +264,15 @@ declare_lint_rule! {
     /// // Callbacks without return types
     /// setTimeout(function() { console.log("Hello!"); }, 1000);
     /// ```
+    ///
     /// ```ts
-    /// // IIFE
-    /// (() => {})();
+    /// // Callbacks without argument types (immediately nested in a function call)
+    /// new Promise((resolve) => resolve(1));
     /// ```
     ///
     /// ```ts
-    /// // a function inside an array
-    /// [function () {}, () => {}];
+    /// // IIFE
+    /// (() => {})();
     /// ```
     ///
     /// The following example is considered correct code for a higher-order function, where the returned function explicitly specifies a return type and the function body contains only one statement:
@@ -282,8 +327,10 @@ declare_lint_rule! {
         language: "ts",
         recommended: false,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintTypeScript("explicit-function-return-type"), RuleSource::EslintTypeScript("explicit-module-boundary-types")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[
+            RuleSource::EslintTypeScript("explicit-function-return-type").inspired(),
+            RuleSource::EslintTypeScript("explicit-module-boundary-types").inspired(),
+        ],
     }
 }
 
@@ -369,7 +416,7 @@ impl Rule for UseExplicitType {
     type Query = Ast<AnyEntityWithTypes>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExplicitTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>().language();
@@ -380,6 +427,10 @@ impl Rule for UseExplicitType {
         let node = ctx.query();
         match node {
             AnyEntityWithTypes::AnyJsFunction(func) => {
+                if is_function_used_in_argument(func) {
+                    // Inline callbacks are usually inferred
+                    return None;
+                }
                 if let Some(state) = handle_any_function(func) {
                     Some(state)
                 } else {
@@ -588,10 +639,10 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
 /// JS_ARRAY_ELEMENT_LIST:
 /// - `[function () {}, () => {}];`
 ///
-fn is_function_used_in_argument_or_array(func: &AnyJsFunction) -> bool {
+fn is_function_used_in_argument(func: &AnyJsFunction) -> bool {
     matches!(
         func.syntax().parent().kind(),
-        Some(JsSyntaxKind::JS_CALL_ARGUMENT_LIST | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST)
+        Some(JsSyntaxKind::JS_CALL_ARGUMENT_LIST)
     )
 }
 
@@ -879,10 +930,8 @@ fn handle_any_function(func: &AnyJsFunction) -> Option<State> {
         return None;
     }
 
-    if is_function_used_in_argument_or_array(func) {
-        return None;
-    }
-
+    // TODO: why only arrow functions are ignored inside typed return?
+    // see getObjectWithFunction in valid.ts test
     if is_arrow_func(func) && (can_inline_function(func) || is_function_inside_typed_return(func)) {
         return None;
     }
@@ -908,6 +957,14 @@ fn handle_any_function(func: &AnyJsFunction) -> Option<State> {
 
 /// Checks if a variable declarator needs to have an explicit type.
 fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<State> {
+    // Explicit annotation is always sufficient
+    let has_explicit_type = declarator
+        .variable_annotation()
+        .is_some_and(|ty| ty.as_ts_type_annotation().is_some_and(|ty| ty.ty().is_ok()));
+    if has_explicit_type {
+        return None;
+    }
+
     let variable_declaration = declarator
         .parent::<JsVariableDeclaratorList>()?
         .parent::<JsVariableDeclaration>()?;
@@ -936,40 +993,86 @@ fn handle_variable_declarator(declarator: &JsVariableDeclarator) -> Option<State
 
     let is_const = variable_declaration.is_const();
 
-    if !is_const {
-        return None;
-    }
-
-    let ty = declarator
-        .variable_annotation()
-        .and_then(|ty| ty.as_ts_type_annotation().cloned())
-        .and_then(|ty| ty.ty().ok());
-
-    if let Some(ty) = ty {
-        if let Some(initializer_expression) = initializer_expression {
-            if initializer_expression.has_trivially_inferrable_type() {
-                return None;
-            }
-
-            if (is_const && ty.is_non_null_literal_type())
-                || (!is_const
-                    && ty.is_primitive_type()
-                    && !matches!(
-                        initializer_expression,
-                        AnyJsExpression::AnyJsLiteralExpression(
-                            AnyJsLiteralExpression::JsNullLiteralExpression(_)
-                        )
-                    ))
-            {
-                return None;
-            }
+    if let Some(initializer_expression) = initializer_expression {
+        if is_allowed_in_untyped_expression(&initializer_expression, is_const) {
+            return None;
         }
+    } else if is_const {
+        // `const` without RHS is invalid anyway and should be reported elsewhere.
+        return None;
     }
 
     Some((
         declarator.id().ok()?.syntax().text_trimmed_range(),
         ViolationKind::UntypedVariable,
     ))
+}
+
+/// Checks if an expression can be part of an untyped expression or will be checked separately.
+///
+/// This returns true for constructs that are trivially understood by the reader and the compiler
+/// without following any other definitions, such as literals and objects built of literals,
+/// as well as type assertions.
+///
+/// If `allow_placeholders` is false, excludes `null` and `undefined`.
+fn is_allowed_in_untyped_expression(expr: &AnyJsExpression, allow_placeholders: bool) -> bool {
+    // `undefined` is not a trivially inferrable type for some reason
+    let is_undefined_literal = matches!(expr.as_static_value(), Some(StaticValue::Undefined(_)));
+    let rhs_is_null = matches!(
+        expr,
+        AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsNullLiteralExpression(_))
+    );
+    let is_trivial_rhs = expr.has_trivially_inferrable_type()
+        || matches!(
+            expr,
+            // Casts are already fine, no less clear than annotations.
+            AnyJsExpression::TsAsExpression(_) | AnyJsExpression::TsTypeAssertionExpression(_)
+        );
+
+    if matches!(
+        expr,
+        AnyJsExpression::JsArrowFunctionExpression(_) | AnyJsExpression::JsFunctionExpression(_)
+    ) {
+        // We'll check functions separately
+        return true;
+    }
+
+    // Allow assignment of some trivial object literals.
+    if let AnyJsExpression::JsObjectExpression(object_expr) = expr {
+        let has_only_allowed_members = object_expr.members().iter().all(|member| {
+            let Ok(member) = member else { return true };
+            match member {
+                // Functions are checked separately, do not produce a bogus
+                // diagnostic that will be resolved by adding types to that function
+                AnyJsObjectMember::JsGetterObjectMember(_)
+                | AnyJsObjectMember::JsSetterObjectMember(_)
+                | AnyJsObjectMember::JsMethodObjectMember(_) => true,
+                AnyJsObjectMember::JsBogusMember(_) => true,
+                AnyJsObjectMember::JsPropertyObjectMember(prop) => match prop.value() {
+                    // Recurse into regular properties
+                    Ok(value) => is_allowed_in_untyped_expression(&value, allow_placeholders),
+                    Err(_) => true,
+                },
+                // Anything else is too complicated to mentally parse without types
+                _ => false,
+            }
+        });
+        if has_only_allowed_members {
+            return true;
+        }
+    }
+
+    // Const assignments of trivial expressions such as literals
+    // can remain unannotated.
+    // Let assignments are slightly different: init-less, null and
+    // undefined usually indicate "we'll assign this value elsewhere".
+    // Require types in those cases, but still allow other literals
+    // as assignments of other types to those won't compile.
+    if allow_placeholders {
+        is_trivial_rhs || is_undefined_literal
+    } else {
+        is_trivial_rhs && !rhs_is_null
+    }
 }
 
 fn has_untyped_parameter(parameters: &JsParameters) -> Option<State> {

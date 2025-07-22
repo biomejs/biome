@@ -4,8 +4,8 @@ use crate::{
     services::semantic::Semantic,
 };
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule, options::JsxRuntime,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    options::JsxRuntime,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -22,6 +22,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
     TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
 };
+use biome_rule_options::use_import_type::{Style, UseImportTypeOptions};
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -154,8 +155,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "useImportType",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("consistent-type-imports")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintTypeScript("consistent-type-imports").inspired()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -166,7 +166,7 @@ impl Rule for UseImportType {
     type Query = Semantic<JsImport>;
     type State = ImportTypeFix;
     type Signals = Option<Self::State>;
-    type Options = ImportTypeOptions;
+    type Options = UseImportTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>();
@@ -775,25 +775,7 @@ impl Rule for UseImportType {
 )]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct ImportTypeOptions {
-    pub style: Style,
-}
-
-/// Rule's options.
-#[derive(
-    Debug, Default, Copy, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
-)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub enum Style {
-    /// Use the best fitting style according to the situation
-    #[default]
-    Auto,
-    /// Always use inline type keywords
-    InlineType,
-    /// Always separate types in a dedicated `import type`
-    SeparatedType,
-}
+pub struct ImportTypeOptions {}
 
 #[derive(Debug)]
 pub enum ImportTypeFix {

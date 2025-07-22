@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6211.js
+---
+# Input
+```js
+import { B } from "bc";
+import { C } from "bc";
+import { A } from "a";
+
+
+```
+
+# Diagnostics
+```
+issue6211.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+  > 1 │ import { B } from "bc";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { C } from "bc";
+    3 │ import { A } from "a";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1   │ - import·{·B·}·from·"bc";
+    2   │ - import·{·C·}·from·"bc";
+    3   │ - import·{·A·}·from·"a";
+      1 │ + import·{·A·}·from·"a";
+      2 │ + import·{·B,·C·}·from·"bc";
+    4 3 │   
+    5 4 │   
+  
+
+```

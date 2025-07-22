@@ -30,7 +30,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 file.vue:5:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable foo is unused.
   
     3 │ delete a.c;
     4 │ 

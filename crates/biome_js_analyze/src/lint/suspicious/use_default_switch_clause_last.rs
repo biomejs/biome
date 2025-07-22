@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCaseClause, JsDefaultClause};
 use biome_rowan::{AstNode, Direction};
+use biome_rule_options::use_default_switch_clause_last::UseDefaultSwitchClauseLastOptions;
 
 declare_lint_rule! {
     /// Enforce default clauses in switch statements to be last
@@ -74,7 +75,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useDefaultSwitchClauseLast",
         language: "js",
-        sources: &[RuleSource::Eslint("default-case-last")],
+        sources: &[RuleSource::Eslint("default-case-last").same()],
         recommended: true,
         severity: Severity::Warning,
     }
@@ -84,7 +85,7 @@ impl Rule for UseDefaultSwitchClauseLast {
     type Query = Ast<JsDefaultClause>;
     type State = JsCaseClause;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseDefaultSwitchClauseLastOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let default_clause = ctx.query();

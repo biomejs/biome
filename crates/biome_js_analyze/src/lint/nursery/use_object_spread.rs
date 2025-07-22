@@ -10,6 +10,7 @@ use biome_js_syntax::{
     JsLanguage, JsSyntaxKind, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange};
+use biome_rule_options::use_object_spread::UseObjectSpreadOptions;
 
 declare_lint_rule! {
     /// Prefer object spread over `Object.assign()` when constructing new objects.
@@ -57,9 +58,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "useObjectSpread",
         language: "js",
-        sources: &[
-            RuleSource::Eslint("prefer-object-spread"),
-        ],
+        sources: &[RuleSource::Eslint("prefer-object-spread").same()],
         recommended: false,
         fix_kind: FixKind::Safe,
     }
@@ -69,7 +68,7 @@ impl Rule for UseObjectSpread {
     type Query = Semantic<JsCallExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseObjectSpreadOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

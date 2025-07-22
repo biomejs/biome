@@ -19,32 +19,38 @@ function bar({ foo }: Foo) {}
 sync Function "bar" {
   accepts: {
     params: [
-      required (unnamed): Module(0) TypeId(1) (bindings: foo:Module(0) TypeId(1).foo)
+      required (bindings: foo: Module(0) TypeId(2)): Module(0) TypeId(1)
     ]
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(3)
 }
 ```
 
 ## Registered types
 
 ```
-Module TypeId(0) => interface "Foo" {
+Thin TypeId(0) => interface "Foo" {
   extends: []
   type_args: []
   members: ["foo": Global TypeId(0)]
 }
 
-Module TypeId(1) => instanceof Module(0) TypeId(0)
+Thin TypeId(1) => interface "Foo" {
+  extends: []
+  type_args: []
+  members: ["foo": Global TypeId(0)]
+}
 
-Module TypeId(2) => sync Function "foo" {
+Thin TypeId(2) => sync Function "foo" {
   accepts: {
     params: []
     type_args: []
   }
   returns: string
 }
+
+Thin TypeId(3) => void
 
 Global TypeId(0) => sync Function "foo" {
   accepts: {

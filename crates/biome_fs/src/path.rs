@@ -166,10 +166,11 @@ impl BiomePath {
     }
 
     /// Returns `true` if the path is inside `node_modules`
+    #[inline(always)]
     pub fn is_dependency(&self) -> bool {
         self.path
             .components()
-            .any(|component| component.as_str() == "node_modules")
+            .any(|component| component.as_str().as_bytes() == b"node_modules")
     }
 
     /// Whether this is a file named `package.json`

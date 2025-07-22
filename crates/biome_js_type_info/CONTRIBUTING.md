@@ -1,7 +1,7 @@
 # Biome Type Architecture
 
 In order to contribute to Biome's type inference, it's good to understand our
-type architecture. 
+type architecture.
 
 ## Architecture Constraints
 
@@ -124,7 +124,7 @@ enum TypeReference {
 ```
 
 The reason for these variants is that _type resolution_, the process of
-resolving type references, works in multiple phases. 
+resolving type references, works in multiple phases.
 
 Biome recognises three levels of type inference, and has different resolution
 phases to support those...
@@ -223,7 +223,7 @@ Full inference is implemented in
 The thing about having all these type references all over the place is that you
 need to perform explicit type resolution to follow these references. That's why
 we have _type resolvers_. There's a `TypeResolver` trait, defined in
-[`resolver.rs`](src/resolver.rs). As of today, we have 6 implementations of it:
+[`resolver.rs`](src/resolver.rs). As of today, we have 4 implementations of it:
 
 * **`HardcodedSymbolResolver`**. This one is purely for test purposes.
 * **`GlobalsResolver`**. This is the one that is responsible for resolving
@@ -233,27 +233,17 @@ we have _type resolvers_. There's a `TypeResolver` trait, defined in
   [`es2023.array.d.ts`](https://github.com/microsoft/TypeScript/blob/main/src/lib/es2023.array.d.ts),
   directly.
 * **`JsModuleInfoCollector`**. This one is responsible for collecting
-  information about a module, and for performing our module-level inference.
-* **`JsModuleInfo`**. Once the `JsModuleInfoCollector` has done its job, a
-  `JsModuleInfo` instance is created, which is stored as an entry in our module
-  graph. But this data structure also implements `TypeResolver` so that our full
-  inference can access the module's types too.
-* **`ScopedResolver`**. This is the one that is responsible for our actual full
-  inference. It's named as it is because it is the only resolver that can really
-  resolve things in any arbitrary scope. Compare this to the
-  `JsModuleInfoCollector` which only cares about the global scope of a module,
-  because at least so far that's all we need to determine types of exports
-  (we don't determine the return type of functions without annotations yet, and
-  it's not yet decided when or if we'll do this).
-* **`ScopeRestrictedRegistrationResolver`** may sound impressive, but is but a
-  helper for `ScopedResolver` to conveniently set the correct scope ID on
-  certain references, so that when the time comes for the `ScopedResolver` to
-  resolve it, it will still know which scope should be used for resolving it.
+  information about a module, and for performing thin inference on it.
+* **`ModuleResolver`**. This is the one that is responsible for our actual full
+  inference, that is able to infer _across_ modules. Compare this to the
+  `JsModuleInfoCollector` which only collects information inside a single
+  module.
 
 I've mentioned before that types are stored in vectors. Those type vectors are
-stored inside the structures that implement `TypeResolver`, and with the
-exception of `ScopeRestrictedRegistrationResolver`, they all have their own
-internal storage for types.
+stored inside `TypeStore` structures which are kept inside the various
+`TypeResolver` implementations. The nice thing about `TypeStore` is that it
+provides lookups that are as fast as a vector when the `TypeId` is known, while
+also maintaining a hash table for when the `TypeId` is not known.
 
 ## Flattening
 

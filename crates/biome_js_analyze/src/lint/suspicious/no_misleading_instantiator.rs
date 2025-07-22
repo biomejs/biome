@@ -9,6 +9,7 @@ use biome_js_syntax::{
     TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_misleading_instantiator::NoMisleadingInstantiatorOptions;
 
 declare_lint_rule! {
     /// Enforce proper usage of `new` and `constructor`.
@@ -53,7 +54,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noMisleadingInstantiator",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-misused-new")],
+        sources: &[RuleSource::EslintTypeScript("no-misused-new").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -127,7 +128,7 @@ impl Rule for NoMisleadingInstantiator {
     type Query = Ast<DeclarationQuery>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMisleadingInstantiatorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

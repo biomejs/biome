@@ -3337,12 +3337,12 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_PSEUDO_CLASS_SELECTOR, children)
             }
-            CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER => {
+            CSS_PSEUDO_ELEMENT_FUNCTION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if matches!(element.kind(), T![highlight] | T![part]) {
+                    if CssIdentifier::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3356,7 +3356,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if CssPseudoElementFunctionParameterList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3371,11 +3371,51 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER.to_bogus(),
+                        CSS_PSEUDO_ELEMENT_FUNCTION.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER, children)
+                slots.into_node(CSS_PSEUDO_ELEMENT_FUNCTION, children)
+            }
+            CSS_PSEUDO_ELEMENT_FUNCTION_CUSTOM_IDENTIFIER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T!['('] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssCustomIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![')'] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_ELEMENT_FUNCTION_CUSTOM_IDENTIFIER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_ELEMENT_FUNCTION_CUSTOM_IDENTIFIER, children)
             }
             CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR => {
                 let mut elements = (&children).into_iter();
@@ -3979,7 +4019,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyCssStartingStyleBlock::can_cast(element.kind()) {
+                    if AnyCssConditionalBlock::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -4785,7 +4825,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 Self::make_node_list_syntax(kind, children, AnyCssCustomIdentifier::can_cast)
             }
             CSS_DECLARATION_LIST => {
-                Self::make_node_list_syntax(kind, children, CssDeclarationWithSemicolon::can_cast)
+                Self::make_node_list_syntax(kind, children, AnyCssDeclaration::can_cast)
             }
             CSS_DECLARATION_OR_AT_RULE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssDeclarationOrAtRule::can_cast)
@@ -4867,6 +4907,9 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 true,
             ),
+            CSS_PSEUDO_ELEMENT_FUNCTION_PARAMETER_LIST => {
+                Self::make_node_list_syntax(kind, children, CssIdentifier::can_cast)
+            }
             CSS_PSEUDO_VALUE_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

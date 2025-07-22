@@ -12,6 +12,7 @@ use biome_js_syntax::{
     JsComputedMemberName, JsExport,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
+use biome_rule_options::no_then_property::NoThenPropertyOptions;
 
 declare_lint_rule! {
     /// Disallow `then` property.
@@ -87,7 +88,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noThenProperty",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-thenable")],
+        sources: &[RuleSource::EslintUnicorn("no-thenable").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -133,7 +134,7 @@ impl Rule for NoThenProperty {
     type Query = Ast<NoThenPropertyQuery>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoThenPropertyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();

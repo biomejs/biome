@@ -59,18 +59,6 @@ impl ExtensionSettings {
         Ok(())
     }
 
-    pub(crate) fn rename_enabled(&self) -> bool {
-        let new_setting = self
-            .settings
-            .experimental
-            .as_ref()
-            .is_some_and(|experimental| experimental.rename.unwrap_or(false));
-
-        let old_setting = self.settings.rename.unwrap_or(false);
-
-        new_setting | old_setting
-    }
-
     pub(crate) fn requires_configuration(&self) -> bool {
         self.settings.require_configuration.unwrap_or_default()
     }

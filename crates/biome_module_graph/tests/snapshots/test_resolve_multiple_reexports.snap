@@ -1,0 +1,192 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/bar.ts` (Module 3)
+
+## Source
+
+```ts
+export function bar(): string {
+	return "bar";
+}
+```
+
+## Module Info
+
+```
+Exports {
+  "bar" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: bar,
+  Type: Module(0) TypeId(1),
+  Declaration kind: HoistedValue
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => value: bar
+
+Module TypeId(1) => sync Function "bar" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+```
+
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import { foo } from "./reexports.ts";
+import * as reexports from "./reexports.ts";
+
+const result1 = foo();
+const result2 = reexports.bar();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  "foo" => {
+    Specifier: "./reexports.ts"
+    Resolved path: "/src/reexports.ts"
+    Import Symbol: foo
+  }
+  "reexports" => {
+    Specifier: "./reexports.ts"
+    Resolved path: "/src/reexports.ts"
+    Import Symbol: All
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Import Symbol: foo from "/src/reexports.ts"
+
+Module TypeId(1) => Call Module(0) TypeId(0)(No parameters)
+
+Module TypeId(2) => Import Symbol: All from "/src/reexports.ts"
+
+Module TypeId(3) => Module(0) TypeId(2).bar
+
+Module TypeId(4) => Call Module(0) TypeId(3)(No parameters)
+```
+
+# `/src/foo.ts` (Module 2)
+
+## Source
+
+```ts
+export function foo(): number {
+	return 1;
+}
+```
+
+## Module Info
+
+```
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: foo,
+  Type: Module(0) TypeId(1),
+  Declaration kind: HoistedValue
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => value: 1
+
+Module TypeId(1) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+```
+
+# `/src/reexports.ts` (Module 1)
+
+## Source
+
+```ts
+export * from "./foo.ts";
+export * from "./bar.ts";
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+
+# Module Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => namespace for ModuleId(1)
+
+Full TypeId(1) => namespace for ModuleId(2)
+
+Full TypeId(2) => namespace for ModuleId(3)
+
+Full TypeId(3) => Module(2) TypeId(1)
+
+Full TypeId(4) => number
+
+Full TypeId(5) => Import TypeId(1)
+
+Full TypeId(6) => sync Function "bar" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+
+Full TypeId(7) => string
+```

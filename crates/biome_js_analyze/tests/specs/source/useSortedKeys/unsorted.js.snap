@@ -32,7 +32,7 @@ const obj = {
 ```
 unsorted.js:3:2 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The keys are not sorted.
+  i The object properties are not sorted by key.
   
      1 │ const obj = {
      2 │ 	// Comment b
@@ -46,66 +46,38 @@ unsorted.js:3:2 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━�
     21 │ };
     22 │ 
   
-  i Safe fix: Sort the object properties.
+  i Safe fix: Sort the object properties by key.
   
      1  1 │   const obj = {
      2    │ - → //·Comment·b
      3    │ - → b:·1,
      4    │ - → //·Comment·a
      5    │ - → a:·1,
+     6    │ - → ...g,
+     7    │ - → ba:·2,
+     8    │ - → ab:·1,
         2 │ + → //·Comment·a
         3 │ + → a:·1,
         4 │ + → //·Comment·b
         5 │ + → b:·1,
-     6  6 │   	...g,
-     7  7 │   	ba: 2,
-  
-
-```
-
-```
-unsorted.js:3:2 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The keys are not sorted.
-  
-     1 │ const obj = {
-     2 │ 	// Comment b
-   > 3 │ 	b: 1,
-       │ 	^^^^^
-   > 4 │ 	// Comment a
-        ...
-  > 19 │ 		return "";
-  > 20 │ 	},
-       │ 	^^
-    21 │ };
-    22 │ 
-  
-  i Safe fix: Sort the object properties.
-  
-     5  5 │   	a: 1,
-     6  6 │   	...g,
-     7    │ - → ba:·2,
-        7 │ + → set·aab(v)·{
-        8 │ + → → this._aab·=·v;
-        9 │ + → },
-     8 10 │   	ab: 1,
-     9    │ - → set·aab(v)·{
-    10    │ - → → this._aab·=·v;
-    11    │ - → },
-       11 │ + → ba:·2,
-    12 12 │   	[getProp()]: 2,
+        6 │ + → ...g,
+     9  7 │   	set aab(v) {
+    10  8 │   		this._aab = v;
+    11  9 │   	},
+    12    │ - → [getProp()]:·2,
     13    │ - → aba:·2,
     14    │ - → abc:·3,
     15    │ - → abb:·3,
     16    │ - → a10:·0,
     17    │ - → 19:·0,
-    18    │ - → get·aaa()·{
-    19    │ - → → return·"";
-    20    │ - → },
+       10 │ + → ab:·1,
+       11 │ + → ba:·2,
+       12 │ + → [getProp()]:·2,
        13 │ + → 19:·0,
        14 │ + → a10:·0,
-       15 │ + → get·aaa()·{
-       16 │ + → → return·"";
+    18 15 │   	get aaa() {
+    19 16 │   		return "";
+    20    │ - → },
        17 │ + → },
        18 │ + → aba:·2,
        19 │ + → abb:·3,

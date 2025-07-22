@@ -1,0 +1,233 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```astro
+---
+const hello = "hello world";
+---
+<html>
+	<head>
+		<title>Hello World!</title>
+	</head>
+	<body>
+	 	<h1>Hello World!</h1>
+	</body>
+</html>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content_token: HTML_LITERAL@3..33 "const hello = \"hello world\";\n" [Newline("\n")] [],
+        r_fence_token: FENCE@33..36 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@36..38 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@38..42 "html" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@42..43 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@43..46 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@46..50 "head" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@50..51 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@51..55 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@55..60 "title" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@60..61 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@61..73 "Hello World!" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@73..74 "<" [] [],
+                                slash_token: SLASH@74..75 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@75..80 "title" [] [],
+                                },
+                                r_angle_token: R_ANGLE@80..81 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@81..84 "<" [Newline("\n"), Whitespace("\t")] [],
+                        slash_token: SLASH@84..85 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@85..89 "head" [] [],
+                        },
+                        r_angle_token: R_ANGLE@89..90 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@90..93 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@93..97 "body" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@97..98 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@98..103 "<" [Newline("\n"), Whitespace("\t \t")] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@103..105 "h1" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@105..106 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@106..118 "Hello World!" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@118..119 "<" [] [],
+                                slash_token: SLASH@119..120 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@120..122 "h1" [] [],
+                                },
+                                r_angle_token: R_ANGLE@122..123 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@123..126 "<" [Newline("\n"), Whitespace("\t")] [],
+                        slash_token: SLASH@126..127 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@127..131 "body" [] [],
+                        },
+                        r_angle_token: R_ANGLE@131..132 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@132..134 "<" [Newline("\n")] [],
+                slash_token: SLASH@134..135 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@135..139 "html" [] [],
+                },
+                r_angle_token: R_ANGLE@139..140 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@140..141 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..141
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..36
+    0: FENCE@0..3 "---" [] []
+    1: HTML_LITERAL@3..33 "const hello = \"hello world\";\n" [Newline("\n")] []
+    2: FENCE@33..36 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@36..140
+    0: HTML_ELEMENT@36..140
+      0: HTML_OPENING_ELEMENT@36..43
+        0: L_ANGLE@36..38 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@38..42
+          0: HTML_LITERAL@38..42 "html" [] []
+        2: HTML_ATTRIBUTE_LIST@42..42
+        3: R_ANGLE@42..43 ">" [] []
+      1: HTML_ELEMENT_LIST@43..132
+        0: HTML_ELEMENT@43..90
+          0: HTML_OPENING_ELEMENT@43..51
+            0: L_ANGLE@43..46 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@46..50
+              0: HTML_LITERAL@46..50 "head" [] []
+            2: HTML_ATTRIBUTE_LIST@50..50
+            3: R_ANGLE@50..51 ">" [] []
+          1: HTML_ELEMENT_LIST@51..81
+            0: HTML_ELEMENT@51..81
+              0: HTML_OPENING_ELEMENT@51..61
+                0: L_ANGLE@51..55 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TAG_NAME@55..60
+                  0: HTML_LITERAL@55..60 "title" [] []
+                2: HTML_ATTRIBUTE_LIST@60..60
+                3: R_ANGLE@60..61 ">" [] []
+              1: HTML_ELEMENT_LIST@61..73
+                0: HTML_CONTENT@61..73
+                  0: HTML_LITERAL@61..73 "Hello World!" [] []
+              2: HTML_CLOSING_ELEMENT@73..81
+                0: L_ANGLE@73..74 "<" [] []
+                1: SLASH@74..75 "/" [] []
+                2: HTML_TAG_NAME@75..80
+                  0: HTML_LITERAL@75..80 "title" [] []
+                3: R_ANGLE@80..81 ">" [] []
+          2: HTML_CLOSING_ELEMENT@81..90
+            0: L_ANGLE@81..84 "<" [Newline("\n"), Whitespace("\t")] []
+            1: SLASH@84..85 "/" [] []
+            2: HTML_TAG_NAME@85..89
+              0: HTML_LITERAL@85..89 "head" [] []
+            3: R_ANGLE@89..90 ">" [] []
+        1: HTML_ELEMENT@90..132
+          0: HTML_OPENING_ELEMENT@90..98
+            0: L_ANGLE@90..93 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@93..97
+              0: HTML_LITERAL@93..97 "body" [] []
+            2: HTML_ATTRIBUTE_LIST@97..97
+            3: R_ANGLE@97..98 ">" [] []
+          1: HTML_ELEMENT_LIST@98..123
+            0: HTML_ELEMENT@98..123
+              0: HTML_OPENING_ELEMENT@98..106
+                0: L_ANGLE@98..103 "<" [Newline("\n"), Whitespace("\t \t")] []
+                1: HTML_TAG_NAME@103..105
+                  0: HTML_LITERAL@103..105 "h1" [] []
+                2: HTML_ATTRIBUTE_LIST@105..105
+                3: R_ANGLE@105..106 ">" [] []
+              1: HTML_ELEMENT_LIST@106..118
+                0: HTML_CONTENT@106..118
+                  0: HTML_LITERAL@106..118 "Hello World!" [] []
+              2: HTML_CLOSING_ELEMENT@118..123
+                0: L_ANGLE@118..119 "<" [] []
+                1: SLASH@119..120 "/" [] []
+                2: HTML_TAG_NAME@120..122
+                  0: HTML_LITERAL@120..122 "h1" [] []
+                3: R_ANGLE@122..123 ">" [] []
+          2: HTML_CLOSING_ELEMENT@123..132
+            0: L_ANGLE@123..126 "<" [Newline("\n"), Whitespace("\t")] []
+            1: SLASH@126..127 "/" [] []
+            2: HTML_TAG_NAME@127..131
+              0: HTML_LITERAL@127..131 "body" [] []
+            3: R_ANGLE@131..132 ">" [] []
+      2: HTML_CLOSING_ELEMENT@132..140
+        0: L_ANGLE@132..134 "<" [Newline("\n")] []
+        1: SLASH@134..135 "/" [] []
+        2: HTML_TAG_NAME@135..139
+          0: HTML_LITERAL@135..139 "html" [] []
+        3: R_ANGLE@139..140 ">" [] []
+  4: EOF@140..141 "" [Newline("\n")] []
+
+```

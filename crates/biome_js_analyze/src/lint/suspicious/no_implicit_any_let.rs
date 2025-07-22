@@ -2,6 +2,7 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lin
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
+use biome_rule_options::no_implicit_any_let::NoImplicitAnyLetOptions;
 
 declare_lint_rule! {
     /// Disallow use of implicit `any` type on variable declarations.
@@ -47,7 +48,7 @@ impl Rule for NoImplicitAnyLet {
     type Query = Ast<JsVariableDeclaration>;
     type State = JsVariableDeclarator;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImplicitAnyLetOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>().language();

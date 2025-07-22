@@ -123,7 +123,7 @@ impl CssLinterConfiguration {
     }
 }
 
-pub type CssAssistEnabled = Bool<false>;
+pub type CssAssistEnabled = Bool<true>;
 
 /// Options that changes how the CSS assist behaves
 #[derive(

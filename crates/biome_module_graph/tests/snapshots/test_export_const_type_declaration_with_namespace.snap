@@ -22,11 +22,11 @@ export = shared;
 
 ```
 Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1))
+  }
   "default" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(0)
-      Local name: None
-    )
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(3))
   }
 }
 Imports {
@@ -37,12 +37,24 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => Object {
-  prototype: No prototype
-  members: ["foo": Module(0) TypeId(3)]
+Module TypeId(0) => string
+
+Module TypeId(1) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
 }
 
-Module TypeId(1) => Namespace {
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: ["foo": Module(0) TypeId(1)]
+}
+
+Module TypeId(3) => Module(0) TypeId(2)
+
+Module TypeId(4) => Namespace {
     path: [
         Borrowed(
             "shared",
@@ -50,36 +62,15 @@ Module TypeId(1) => Namespace {
     ],
     members: [
         TypeMember {
-            kind: Named(
+            kind: NamedStatic(
                 Borrowed(
                     "Result",
                 ),
             ),
-            is_static: true,
             ty: Resolved(
                 string,
             ),
         },
     ],
-}
-
-Module TypeId(2) => instanceof string
-
-Module TypeId(3) => sync Function "foo" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(2)
-}
-
-Module TypeId(4) => Object {
-  prototype: No prototype
-  members: ["foo": Module(0) TypeId(3)]
-}
-
-Module TypeId(5) => Object {
-  prototype: No prototype
-  members: ["foo": Module(0) TypeId(3)]
 }
 ```

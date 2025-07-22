@@ -9,9 +9,10 @@ use biome_string_case::Case;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use pulldown_cmark::{Event, Parser, Tag, TagEnd};
 use quote::{format_ident, quote};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use xtask::*;
+use xtask_codegen::{generate_analyzer_rule_options, get_analyzer_rule_options_path};
 use xtask_codegen::{to_capitalized, update};
 
 // ======= LINT ======
@@ -174,6 +175,61 @@ impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
             .or_default()
             .insert(R::METADATA.name, R::METADATA);
     }
+}
+
+pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
+    let rule_options_root = get_analyzer_rule_options_path();
+    let lib_root = rule_options_root.join("lib.rs");
+    let mut lint_visitor = LintRulesVisitor::default();
+    let mut assist_visitor = AssistActionsVisitor::default();
+    biome_js_analyze::visit_registry(&mut lint_visitor);
+    biome_js_analyze::visit_registry(&mut assist_visitor);
+    biome_json_analyze::visit_registry(&mut lint_visitor);
+    biome_json_analyze::visit_registry(&mut assist_visitor);
+    biome_css_analyze::visit_registry(&mut lint_visitor);
+    biome_css_analyze::visit_registry(&mut assist_visitor);
+    biome_graphql_analyze::visit_registry(&mut lint_visitor);
+    biome_graphql_analyze::visit_registry(&mut assist_visitor);
+
+    let mut rule_names = BTreeSet::default();
+    let mut lib_exports = vec![quote! {
+        mod shared;
+        pub use shared::*;
+    }];
+
+    for group in lint_visitor.groups.values() {
+        for (rule_name, _) in group {
+            rule_names.insert(rule_name);
+        }
+    }
+
+    for group in assist_visitor.groups.values() {
+        for (rule_name, _) in group {
+            rule_names.insert(rule_name);
+        }
+    }
+
+    for rule_name in rule_names.iter() {
+        let snake_rule_name = Case::Snake.convert(rule_name);
+        let ident = Ident::new(&snake_rule_name, Span::call_site());
+        lib_exports.push(quote! {
+           pub mod #ident;
+        });
+
+        let file_name = format!("{}.rs", snake_rule_name);
+        let file_path = rule_options_root.join(file_name);
+        if file_path.exists() {
+            continue;
+        }
+        generate_analyzer_rule_options(rule_name, mode, false)?;
+    }
+
+    let content = quote! {
+        #( #lib_exports )*
+    };
+    update(lib_root.as_path(), &xtask::reformat(content)?, &mode)?;
+
+    Ok(())
 }
 
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
@@ -797,7 +853,11 @@ fn generate_group_struct(
                 "RuleConfiguration"
             }
         );
-        let rule_name = Ident::new(&to_capitalized(rule), Span::call_site());
+        let rule_base_name = Ident::new(&Case::Snake.convert(&rule), Span::call_site());
+        let rule_name = Ident::new(
+            &format!("{}Options", &to_capitalized(rule)),
+            Span::call_site(),
+        );
         if metadata.recommended && metadata.domains.is_empty() {
             lines_recommended_rule_as_filter.push(quote! {
                 RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
@@ -813,20 +873,8 @@ fn generate_group_struct(
         lines_rule.push(quote! {
              #rule
         });
-        let rule_option_type = match metadata.language {
-            "css" => quote! {
-                biome_css_analyze::options::#rule_name
-            },
-            "graphql" => quote! {
-                biome_graphql_analyze::options::#rule_name
-            },
-            "json" => quote! {
-                biome_json_analyze::options::#rule_name
-            },
-            "ts" | "js" | "jsx" | "tsx" => quote! {
-                biome_js_analyze::options::#rule_name
-            },
-            _ => panic!("Language not supported"),
+        let rule_option_type = quote! {
+            biome_rule_options::#rule_base_name::#rule_name
         };
         let rule_option = if kind == RuleCategory::Action {
             quote! { Option<#rule_config_type<#rule_option_type>> }

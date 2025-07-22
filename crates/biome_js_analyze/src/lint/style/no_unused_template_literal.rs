@@ -8,6 +8,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, JsTemplateExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::no_unused_template_literal::NoUnusedTemplateLiteralOptions;
 
 declare_lint_rule! {
     /// Disallow template literals if interpolation and special-character handling are not needed
@@ -52,7 +53,7 @@ impl Rule for NoUnusedTemplateLiteral {
     type Query = Ast<JsTemplateExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnusedTemplateLiteralOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

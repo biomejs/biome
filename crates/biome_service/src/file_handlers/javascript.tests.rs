@@ -34,7 +34,7 @@ const f = <T1>(arg1: T1) => <T2>(arg2: T2) => {
         &BiomePath::new("file.test"),
         DocumentFileSource::Js(JsFileSource::ts()),
         source,
-        settings.into(),
+        &settings,
         &mut NodeCache::default(),
     );
     assert!(!result.any_parse.has_errors());

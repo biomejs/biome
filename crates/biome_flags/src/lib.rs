@@ -18,8 +18,9 @@ pub static BIOME_VERSION: LazyLock<Option<&str>> = LazyLock::new(|| option_env!(
 
 pub struct BiomeEnv {
     pub biome_log_path: BiomeEnvVariable,
-    pub biome_log_prefix: BiomeEnvVariable,
+    pub biome_log_prefix_name: BiomeEnvVariable,
     pub biome_config_path: BiomeEnvVariable,
+    pub biome_threads: BiomeEnvVariable,
 }
 
 pub static BIOME_ENV: OnceLock<BiomeEnv> = OnceLock::new();
@@ -31,13 +32,17 @@ impl BiomeEnv {
                 "BIOME_LOG_PATH",
                 "The directory where the Daemon logs will be saved.",
             ),
-            biome_log_prefix: BiomeEnvVariable::new(
+            biome_log_prefix_name: BiomeEnvVariable::new(
                 "BIOME_LOG_PREFIX_NAME",
                 "A prefix that's added to the name of the log. Default: `server.log.`",
             ),
             biome_config_path: BiomeEnvVariable::new(
                 "BIOME_CONFIG_PATH",
                 "A path to the configuration file",
+            ),
+            biome_threads: BiomeEnvVariable::new(
+                "BIOME_THREADS",
+                "The number of threads to use in CI.",
             ),
         }
     }
@@ -86,14 +91,20 @@ impl Display for BiomeEnv {
                 KeyValuePair(self.biome_log_path.name, markup! {{DebugDisplay(value)}}).fmt(fmt)?;
             }
         };
-        match self.biome_log_prefix.value() {
+        match self.biome_log_prefix_name.value() {
             None => {
-                KeyValuePair(self.biome_log_prefix.name, markup! { <Dim>"unset"</Dim> })
-                    .fmt(fmt)?;
+                KeyValuePair(
+                    self.biome_log_prefix_name.name,
+                    markup! { <Dim>"unset"</Dim> },
+                )
+                .fmt(fmt)?;
             }
             Some(value) => {
-                KeyValuePair(self.biome_log_prefix.name, markup! {{DebugDisplay(value)}})
-                    .fmt(fmt)?;
+                KeyValuePair(
+                    self.biome_log_prefix_name.name,
+                    markup! {{DebugDisplay(value)}},
+                )
+                .fmt(fmt)?;
             }
         };
 
@@ -107,6 +118,15 @@ impl Display for BiomeEnv {
                     .fmt(fmt)?;
             }
         };
+
+        match self.biome_threads.value() {
+            None => {
+                KeyValuePair(self.biome_threads.name, markup! { <Dim>"unset"</Dim> }).fmt(fmt)?;
+            }
+            Some(value) => {
+                KeyValuePair(self.biome_threads.name, markup! {{DebugDisplay(value)}}).fmt(fmt)?;
+            }
+        }
 
         Ok(())
     }

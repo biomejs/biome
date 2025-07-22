@@ -7,6 +7,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunction, JsNewExpression, JsNewExpressionFields,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rule_options::no_async_promise_executor::NoAsyncPromiseExecutorOptions;
 
 declare_lint_rule! {
     /// Disallows using an async function as a Promise executor.
@@ -43,7 +44,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noAsyncPromiseExecutor",
         language: "js",
-        sources: &[RuleSource::Eslint("no-async-promise-executor")],
+        sources: &[RuleSource::Eslint("no-async-promise-executor").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -53,7 +54,7 @@ impl Rule for NoAsyncPromiseExecutor {
     type Query = Ast<JsNewExpression>;
     type State = AnyJsFunction;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAsyncPromiseExecutorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

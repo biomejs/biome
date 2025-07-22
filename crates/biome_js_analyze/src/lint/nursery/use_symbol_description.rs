@@ -2,6 +2,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, global_identifier};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use biome_rule_options::use_symbol_description::UseSymbolDescriptionOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -35,9 +36,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "useSymbolDescription",
         language: "js",
-        sources: &[
-            RuleSource::Eslint("symbol-description"),
-        ],
+        sources: &[RuleSource::Eslint("symbol-description").same()],
         recommended: false,
     }
 }
@@ -46,7 +45,7 @@ impl Rule for UseSymbolDescription {
     type Query = Semantic<JsCallExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSymbolDescriptionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expression = ctx.query();

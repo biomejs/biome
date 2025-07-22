@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsIfStatement, JsLogicalOperator};
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
+use biome_rule_options::no_duplicate_else_if::NoDuplicateElseIfOptions;
 
 use crate::utils::is_node_equal;
 
@@ -53,7 +54,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Eslint("no-dupe-else-if")],
+        sources: &[RuleSource::Eslint("no-dupe-else-if").same()],
     }
 }
 
@@ -61,7 +62,7 @@ impl Rule for NoDuplicateElseIf {
     type Query = Ast<JsIfStatement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateElseIfOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

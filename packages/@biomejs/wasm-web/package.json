@@ -5,7 +5,7 @@
     "Biome Developers and Contributors"
   ],
   "description": "WebAssembly bindings to the Biome workspace API",
-  "version": "1.9.4",
+  "version": "2.1.2",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
@@ -27,5 +27,8 @@
     "linter",
     "formatter",
     "wasm"
-  ]
+  ],
+  "publishConfig": {
+    "provenance": true
+  }
 }

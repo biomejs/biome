@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::*;
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::no_unsafe_finally::NoUnsafeFinallyOptions;
 
 declare_lint_rule! {
     /// Disallow control flow statements in finally blocks.
@@ -129,7 +130,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnsafeFinally",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unsafe-finally")],
+        sources: &[RuleSource::Eslint("no-unsafe-finally").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -143,7 +144,7 @@ impl Rule for NoUnsafeFinally {
     type Query = Ast<ControlFlowStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnsafeFinallyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

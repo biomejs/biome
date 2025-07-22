@@ -1,12 +1,17 @@
 mod any_class_string_like;
 mod class_info;
 mod class_lexer;
-mod options;
 mod presets;
 mod sort;
 mod sort_config;
 mod tailwind_preset;
 
+use self::{
+    any_class_string_like::AnyClassStringLike, presets::UseSortedClassesPreset,
+    sort::get_sort_class_name_range, sort::should_ignore_postfix, sort::should_ignore_prefix,
+    sort::sort_class_name, sort_config::SortConfig,
+};
+use crate::JsRuleAction;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make::{
@@ -14,17 +19,9 @@ use biome_js_factory::make::{
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 use presets::get_config_preset;
 use std::sync::LazyLock;
-
-use crate::JsRuleAction;
-
-pub use self::options::UtilityClassSortingOptions;
-use self::{
-    any_class_string_like::AnyClassStringLike, presets::UseSortedClassesPreset,
-    sort::get_sort_class_name_range, sort::should_ignore_postfix, sort::should_ignore_prefix,
-    sort::sort_class_name, sort_config::SortConfig,
-};
 
 declare_lint_rule! {
     /// Enforce the sorting of CSS utility classes.
@@ -170,7 +167,7 @@ impl Rule for UseSortedClasses {
     type Query = Ast<AnyClassStringLike>;
     type State = Box<str>;
     type Signals = Option<Self::State>;
-    type Options = Box<UtilityClassSortingOptions>;
+    type Options = UseSortedClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let options = ctx.options();
@@ -220,12 +217,15 @@ impl Rule for UseSortedClasses {
         let mut mutation = ctx.root().begin();
         match ctx.query() {
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
-                let replacement =
-                    js_string_literal_expression(if ctx.as_preferred_quote().is_double() {
-                        js_string_literal(state)
-                    } else {
-                        js_string_literal_single_quotes(state)
-                    });
+                let is_double_quote = string_literal
+                    .value_token()
+                    .map(|token| token.text_trimmed().starts_with('"'))
+                    .unwrap_or(ctx.as_preferred_quote().is_double());
+                let replacement = js_string_literal_expression(if is_double_quote {
+                    js_string_literal(state)
+                } else {
+                    js_string_literal_single_quotes(state)
+                });
                 mutation.replace_node(string_literal.clone(), replacement);
             }
             AnyClassStringLike::JsLiteralMemberName(string_literal) => {

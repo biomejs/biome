@@ -103,7 +103,7 @@ fn not_process_file_from_stdin_verbose_lint() {
 
 #[test]
 fn not_process_file_from_cli() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("package-lock.json");
@@ -128,7 +128,7 @@ fn not_process_file_from_cli() {
 
 #[test]
 fn not_process_file_from_cli_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("package-lock.json");
@@ -153,7 +153,7 @@ fn not_process_file_from_cli_verbose() {
 
 #[test]
 fn not_process_ignored_file_from_cli_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("package.json");
@@ -187,7 +187,7 @@ fn not_process_ignored_file_from_cli_verbose() {
 
 #[test]
 fn not_process_file_linter_disabled_from_cli_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("package.json");

@@ -7,27 +7,22 @@ use biome_analyze::{
 };
 use biome_analyze::{RuleDomain, RuleSource};
 use biome_console::markup;
-use biome_deserialize::{
-    Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor, Text,
-};
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsBinding, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction,
     AnyJsObjectMemberName, JsArrayAssignmentPatternElement, JsArrayBindingPatternElement,
-    JsCallExpression, JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression,
-    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPatternShorthandProperty,
-    JsReturnStatement, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
+    JsCallExpression, JsConditionalExpression, JsGetterClassMember, JsGetterObjectMember,
+    JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember,
+    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
+    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
 };
-use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent, declare_node_union};
+use biome_rowan::{AstNode, Language, SyntaxNode, Text, WalkEvent, declare_node_union};
 use rustc_hash::FxHashMap;
-use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
-use crate::react::components::is_react_component_name;
+use crate::react::components::ReactComponentInfo;
 use biome_diagnostics::Severity;
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
+use biome_rule_options::use_hook_at_top_level::UseHookAtTopLevelOptions;
 
 declare_lint_rule! {
     /// Enforce that all React hooks are being called from the Top Level component functions.
@@ -70,7 +65,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useHookAtTopLevel",
         language: "jsx",
-        sources: &[RuleSource::EslintReactHooks("rules-of-hooks")],
+        sources: &[RuleSource::EslintReactHooks("rules-of-hooks").same()],
         recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Next],
@@ -83,10 +78,11 @@ declare_node_union! {
 
 impl AnyJsFunctionOrMethod {
     fn is_react_component_or_hook(&self) -> bool {
+        if ReactComponentInfo::from_function(self.syntax()).is_some() {
+            return true;
+        }
         if let Some(name) = self.name() {
-            if is_react_component_name(&name) || is_react_hook_name(&name) {
-                return true;
-            }
+            return is_react_hook_name(&name);
         }
 
         false
@@ -290,13 +286,17 @@ impl Visitor for EarlyReturnDetectionVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if AnyFunctionLike::can_cast(node.kind()) {
+                if AnyFunctionLike::can_cast(node.kind())
+                    || AnyPropertyAccessor::can_cast(node.kind())
+                {
                     self.stack
                         .push(EarlyReturnDetectionVisitorStackEntry::default());
                 }
             }
             WalkEvent::Leave(node) => {
-                if AnyFunctionLike::can_cast(node.kind()) {
+                if AnyFunctionLike::can_cast(node.kind())
+                    || AnyPropertyAccessor::can_cast(node.kind())
+                {
                     self.stack.pop();
                     return;
                 }
@@ -317,6 +317,14 @@ impl Visitor for EarlyReturnDetectionVisitor {
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
         ctx.services.insert_service(self.early_returns);
     }
+}
+
+declare_node_union! {
+    AnyPropertyAccessor =
+        JsGetterObjectMember
+        | JsSetterObjectMember
+        | JsGetterClassMember
+        | JsSetterClassMember
 }
 
 #[derive(Default)]
@@ -417,7 +425,7 @@ impl Rule for UseHookAtTopLevel {
     type Query = FunctionCall;
     type State = Suggestion;
     type Signals = Option<Self::State>;
-    type Options = DeprecatedHooksOptions;
+    type Options = UseHookAtTopLevelOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let FunctionCall(call) = ctx.query();
@@ -558,65 +566,5 @@ impl Rule for UseHookAtTopLevel {
                 Some(diag)
             }
         }
-    }
-}
-
-/// Options for the `useHookAtTopLevel` rule have been deprecated, since we now
-/// use the React hook naming convention to determine whether a function is a
-/// hook.
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct DeprecatedHooksOptions {}
-
-impl Deserializable for DeprecatedHooksOptions {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
-        name: &str,
-    ) -> Option<Self> {
-        value.deserialize(ctx, DeprecatedHooksOptionsVisitor, name)
-    }
-}
-
-// TODO: remove in Biome 2.0
-struct DeprecatedHooksOptionsVisitor;
-impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
-    type Output = DeprecatedHooksOptions;
-
-    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
-
-    fn visit_map(
-        self,
-        ctx: &mut impl DeserializationContext,
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
-        _range: TextRange,
-        _name: &str,
-    ) -> Option<Self::Output> {
-        const ALLOWED_KEYS: &[&str] = &["hooks"];
-        for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(ctx, &key, "") else {
-                continue;
-            };
-            match key_text.text() {
-                "hooks" => {
-                    ctx.report(
-                        DeserializationDiagnostic::new_deprecated(
-                            key_text.text(),
-                            value.range()
-                        ).with_note(
-                            markup! {
-                            <Emphasis>"useHookAtTopLevel"</Emphasis>" now uses the React hook naming convention to determine hook calls."
-                        })
-                    );
-                }
-                text => ctx.report(DeserializationDiagnostic::new_unknown_key(
-                    text,
-                    key.range(),
-                    ALLOWED_KEYS,
-                )),
-            }
-        }
-        Some(Self::Output::default())
     }
 }

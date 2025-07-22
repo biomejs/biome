@@ -1,0 +1,203 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+type FullConfiguration = InternalConfiguration & PublicConfiguration;
+
+type ScopedMutator<Data = any, T = Data> = (
+	key: Arguments,
+	data?: T | Promise<T> | MutatorCallback<T>,
+	opts?: boolean | MutatorOptions<Data, T>,
+) => Promise<T | undefined>;
+
+interface InternalConfiguration {
+	cache: Cache;
+	mutate: ScopedMutator;
+}
+
+interface PublicConfiguration {
+	errorRetryInterval: number;
+}
+
+declare const useSWRConfig: () => FullConfiguration;
+
+const { mutate } = useSWRConfig();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof Promise<Module(0) TypeId(10)>
+
+Module TypeId(1) => Module(0) TypeId(10) | Module(0) TypeId(0) | Module(0) TypeId(22)
+
+Module TypeId(2) => boolean
+
+Module TypeId(3) => Module(0) TypeId(2) | Module(0) TypeId(22)
+
+Module TypeId(4) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(6)
+}
+
+Module TypeId(5) => Module(0) TypeId(4)
+
+Module TypeId(6) => interface "(merged)" {
+  extends: []
+  type_args: []
+  members: [
+    "cache": Module(0) TypeId(22),
+    "mutate": Module(0) TypeId(7),
+    "errorRetryInterval": number
+  ]
+}
+
+Module TypeId(7) => instanceof Module(0) TypeId(18)<Module(0) TypeId(20), Module(0) TypeId(21)>
+
+Module TypeId(8) => interface "InternalConfiguration" {
+  extends: []
+  type_args: []
+  members: ["cache": Module(0) TypeId(22), "mutate": Module(0) TypeId(7)]
+}
+
+Module TypeId(9) => interface "PublicConfiguration" {
+  extends: []
+  type_args: []
+  members: ["errorRetryInterval": number]
+}
+
+Module TypeId(10) => instanceof Module(0) TypeId(21)
+
+Module TypeId(11) => instanceof Promise<Module(0) TypeId(10)>
+
+Module TypeId(12) => Module(0) TypeId(10) | Module(0) TypeId(11) | Module(0) TypeId(22)
+
+Module TypeId(13) => instanceof Module(0) TypeId(20)
+
+Module TypeId(14) => Module(0) TypeId(2) | Module(0) TypeId(22)
+
+Module TypeId(15) => undefined
+
+Module TypeId(16) => Module(0) TypeId(10) | Module(0) TypeId(15)
+
+Module TypeId(17) => instanceof Promise<Module(0) TypeId(16)>
+
+Module TypeId(18) => sync Function {
+  accepts: {
+    params: [
+      required key: Module(0) TypeId(22)
+      optional data: Module(0) TypeId(12)
+      optional opts: Module(0) TypeId(14)
+    ]
+    type_args: []
+  }
+  returns: Module(0) TypeId(17)
+}
+
+Module TypeId(19) => any
+
+Module TypeId(20) => Data = unknown reference
+
+Module TypeId(21) => T = unknown reference
+
+Module TypeId(22) => unknown
+```
+
+# Module Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => instanceof Promise<Module(0) TypeId(10)>
+
+Full TypeId(1) => Module(0) TypeId(10) | Module(0) TypeId(0) | Module(0) TypeId(22)
+
+Full TypeId(2) => boolean
+
+Full TypeId(3) => Module(0) TypeId(2) | Module(0) TypeId(22)
+
+Full TypeId(4) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(6)
+}
+
+Full TypeId(5) => Module(0) TypeId(4)
+
+Full TypeId(6) => interface "(merged)" {
+  extends: []
+  type_args: []
+  members: [
+    "cache": Module(0) TypeId(22),
+    "mutate": Module(0) TypeId(7),
+    "errorRetryInterval": number
+  ]
+}
+
+Full TypeId(7) => instanceof Module(0) TypeId(18)<Module(0) TypeId(20), Module(0) TypeId(21)>
+
+Full TypeId(8) => interface "InternalConfiguration" {
+  extends: []
+  type_args: []
+  members: ["cache": Module(0) TypeId(22), "mutate": Module(0) TypeId(7)]
+}
+
+Full TypeId(9) => interface "PublicConfiguration" {
+  extends: []
+  type_args: []
+  members: ["errorRetryInterval": number]
+}
+
+Full TypeId(10) => instanceof Module(0) TypeId(21)
+
+Full TypeId(11) => Module(0) TypeId(10) | Module(0) TypeId(11) | Module(0) TypeId(22)
+
+Full TypeId(12) => instanceof Module(0) TypeId(20)
+
+Full TypeId(13) => undefined
+
+Full TypeId(14) => Module(0) TypeId(10) | Module(0) TypeId(15)
+
+Full TypeId(15) => instanceof Promise<Module(0) TypeId(16)>
+
+Full TypeId(16) => sync Function {
+  accepts: {
+    params: [
+      required key: Module(0) TypeId(22)
+      optional data: Module(0) TypeId(12)
+      optional opts: Module(0) TypeId(14)
+    ]
+    type_args: []
+  }
+  returns: Module(0) TypeId(17)
+}
+
+Full TypeId(17) => any
+
+Full TypeId(18) => Data = unknown reference
+
+Full TypeId(19) => T = unknown reference
+
+Full TypeId(20) => unknown
+```

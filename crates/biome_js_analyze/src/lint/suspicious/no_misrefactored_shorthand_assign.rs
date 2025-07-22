@@ -7,6 +7,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_misrefactored_shorthand_assign::NoMisrefactoredShorthandAssignOptions;
 
 use crate::{
     JsRuleAction,
@@ -52,7 +53,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noMisrefactoredShorthandAssign",
         language: "js",
-        sources: &[RuleSource::Clippy("misrefactored_assign_op")],
+        sources: &[RuleSource::Clippy("misrefactored_assign_op").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -63,7 +64,7 @@ impl Rule for NoMisrefactoredShorthandAssign {
     type Query = Ast<JsAssignmentExpression>;
     type State = AnyJsExpression;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMisrefactoredShorthandAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

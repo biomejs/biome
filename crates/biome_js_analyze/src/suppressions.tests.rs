@@ -18,8 +18,7 @@ fn quick_test() {
     let options = AnalyzerOptions::default();
     let rule_filter = RuleFilter::Rule("nursery", "useExplicitType");
 
-    let mut dependencies = Dependencies::default();
-    dependencies.add("buffer", "latest");
+    let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
     let services = crate::JsAnalyzerServices::from((
         Default::default(),
@@ -498,6 +497,99 @@ fn top_level_suppression_with_block_comment() {
 * Top level comment here. It could be a banner or a license comment
 * MIT
 */
+/**
+* biome-ignore-all lint/style/useConst: reason
+*/
+
+let foo = 2;
+let bar = 33;
+        ";
+
+    let parsed = parse(
+        SOURCE,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default().with_lint().build(),
+        enabled_rules: Some(&[RuleFilter::Rule("style", "useConst")]),
+        ..AnalysisFilter::default()
+    };
+
+    let options = AnalyzerOptions::default();
+    crate::analyze(
+        &parsed.tree(),
+        filter,
+        &options,
+        &[],
+        Default::default(),
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let error = diag
+                    .with_file_path("dummyFile")
+                    .with_file_source_code(SOURCE);
+                let text = print_diagnostic_to_string(&error);
+                eprintln!("{text}");
+                panic!("Unexpected diagnostic");
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+}
+
+#[test]
+fn top_level_suppression_with_shebang() {
+    const SOURCE: &str = "#!/usr/bin/env bun
+/**
+* biome-ignore-all lint/style/useConst: reason
+*/
+
+let foo = 2;
+let bar = 33;
+        ";
+
+    let parsed = parse(
+        SOURCE,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default().with_lint().build(),
+        enabled_rules: Some(&[RuleFilter::Rule("style", "useConst")]),
+        ..AnalysisFilter::default()
+    };
+
+    let options = AnalyzerOptions::default();
+    crate::analyze(
+        &parsed.tree(),
+        filter,
+        &options,
+        &[],
+        Default::default(),
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let error = diag
+                    .with_file_path("dummyFile")
+                    .with_file_source_code(SOURCE);
+                let text = print_diagnostic_to_string(&error);
+                eprintln!("{text}");
+                panic!("Unexpected diagnostic");
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+}
+
+#[test]
+fn top_level_suppression_with_shebang_and_comment() {
+    const SOURCE: &str = "#!/usr/bin/env bun
+
+/* Arbitrary comment here
+ */
 /**
 * biome-ignore-all lint/style/useConst: reason
 */

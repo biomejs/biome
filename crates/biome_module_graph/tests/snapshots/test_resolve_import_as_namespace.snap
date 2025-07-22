@@ -1,0 +1,105 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+import * as fooNs from "./foo.ts";
+
+const result = fooNs.foo();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  "fooNs" => {
+    Specifier: "./foo.ts"
+    Resolved path: "/src/foo.ts"
+    Import Symbol: All
+  }
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Import Symbol: All from "/src/foo.ts"
+
+Module TypeId(1) => Module(0) TypeId(0).foo
+
+Module TypeId(2) => Call Module(0) TypeId(1)(No parameters)
+```
+
+# `/src/foo.ts` (Module 1)
+
+## Source
+
+```ts
+export function foo(): number {
+	return 1;
+}
+```
+
+## Module Info
+
+```
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: foo,
+  Type: Module(0) TypeId(1),
+  Declaration kind: HoistedValue
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => value: 1
+
+Module TypeId(1) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+```
+
+# Module Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => namespace for ModuleId(1)
+
+Full TypeId(1) => Import TypeId(1)
+
+Full TypeId(2) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+
+Full TypeId(3) => number
+```

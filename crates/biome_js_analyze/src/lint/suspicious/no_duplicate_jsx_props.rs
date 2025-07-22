@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxAttribute, JsxAttribute};
 use biome_rowan::AstNode;
+use biome_rule_options::no_duplicate_jsx_props::NoDuplicateJsxPropsOptions;
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
@@ -35,7 +36,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDuplicateJsxProps",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-no-duplicate-props")],
+        sources: &[RuleSource::EslintReact("jsx-no-duplicate-props").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -45,7 +46,7 @@ impl Rule for NoDuplicateJsxProps {
     type Query = Ast<AnyJsxElement>;
     type State = (Box<str>, Vec<JsxAttribute>);
     type Signals = FxHashMap<Box<str>, Vec<JsxAttribute>>;
-    type Options = ();
+    type Options = NoDuplicateJsxPropsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

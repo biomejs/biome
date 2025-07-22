@@ -3,12 +3,7 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
-use rustc_hash::FxHashMap;
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
-use std::ops::Deref;
+use biome_rule_options::no_restricted_elements::NoRestrictedElementsOptions;
 
 declare_lint_rule! {
     /// Disallow the use of configured elements.
@@ -75,7 +70,7 @@ declare_lint_rule! {
         name: "noRestrictedElements",
         language: "jsx",
         sources: &[
-            RuleSource::EslintReact("forbid-elements"),
+            RuleSource::EslintReact("forbid-elements").same(),
         ],
         recommended: false,
     }
@@ -101,60 +96,4 @@ impl Rule for NoRestrictedElements {
             markup! { {state} }.to_owned(),
         ))
     }
-}
-
-type CustomRestrictedElementsBaseType = FxHashMap<Box<str>, Box<str>>;
-
-#[derive(
-    Clone,
-    Debug,
-    Default,
-    biome_deserialize_macros::Deserializable,
-    Eq,
-    PartialEq,
-    Deserialize,
-    Serialize,
-)]
-struct CustomRestrictedElements(CustomRestrictedElementsBaseType);
-
-impl Deref for CustomRestrictedElements {
-    type Target = CustomRestrictedElementsBaseType;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[cfg(feature = "schemars")]
-impl JsonSchema for CustomRestrictedElements {
-    fn schema_name() -> String {
-        "CustomRestrictedElements".to_owned()
-    }
-
-    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::schema::Schema {
-        let mut schema = generator
-            .subschema_for::<CustomRestrictedElementsBaseType>()
-            .into_object();
-        schema.object().min_properties = Some(1);
-        schemars::schema::Schema::Object(schema)
-    }
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Default,
-    biome_deserialize_macros::Deserializable,
-    Deserialize,
-    Serialize,
-    Eq,
-    PartialEq,
-)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoRestrictedElementsOptions {
-    /// Elements to restrict.
-    /// Each key is the element name, and the value is the message to show when the element is used.
-    #[serde(skip_serializing_if = "FxHashMap::is_empty")]
-    elements: CustomRestrictedElements,
 }

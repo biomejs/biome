@@ -26,30 +26,28 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"import { returnPromiseResult } from "./returnPromiseResult.ts";
+    const SOURCE: &str = r#"async function doStuff(db) {
+    const txStatements: Array<(tx: any) => Promise<number>> = [(tx) => tx.insert().run()];
 
-returnPromiseResult();
-"#;
+    db.transaction((tx: any) => {
+        for (const stmt of txStatements) {
+            stmt(tx)
+        }
+    });
+}"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
     let mut fs = TemporaryFs::new("quick_test");
     fs.create_file(FILENAME, SOURCE);
-    fs.create_file(
-        "returnPromiseResult.ts",
-        r#"export function returnPromiseResult(): Promise<{ result: true | false }> {
-  return new Promise(resolve => resolve({ result: true }));
-}
-"#,
-    );
+
     let file_path = Utf8PathBuf::from(format!("{}/{FILENAME}", fs.cli_path()));
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
     let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
 
-    let mut dependencies = Dependencies::default();
-    dependencies.add("buffer", "latest");
+    let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
     let project_layout = project_layout_with_top_level_dependencies(dependencies);
     let services = crate::JsAnalyzerServices::from((

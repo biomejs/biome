@@ -1,0 +1,132 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+let status;
+if (status === 'ready') {
+  console.log('Ready!');
+}
+
+let user;
+greet(user);
+
+function test() {
+  let error;
+  return error || "Unknown error";
+}
+
+let options;
+const { debug } = options || {};
+
+let flag;
+while (!flag) {
+  // Do something...
+}
+
+let config;
+function init() {
+  return config?.enabled;
+}
+```
+
+# Diagnostics
+```
+invalid.js:1:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variable 'status' is declared but never assigned a value.
+  
+  > 1 │ let status;
+      │     ^^^^^^
+    2 │ if (status === 'ready') {
+    3 │   console.log('Ready!');
+  
+  i Variable declared without assignment. Either assign a value or remove the declaration.
+  
+
+```
+
+```
+invalid.js:6:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variable 'user' is declared but never assigned a value.
+  
+    4 │ }
+    5 │ 
+  > 6 │ let user;
+      │     ^^^^
+    7 │ greet(user);
+    8 │ 
+  
+  i Variable declared without assignment. Either assign a value or remove the declaration.
+  
+
+```
+
+```
+invalid.js:10:7 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variable 'error' is declared but never assigned a value.
+  
+     9 │ function test() {
+  > 10 │   let error;
+       │       ^^^^^
+    11 │   return error || "Unknown error";
+    12 │ }
+  
+  i Variable declared without assignment. Either assign a value or remove the declaration.
+  
+
+```
+
+```
+invalid.js:14:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variable 'options' is declared but never assigned a value.
+  
+    12 │ }
+    13 │ 
+  > 14 │ let options;
+       │     ^^^^^^^
+    15 │ const { debug } = options || {};
+    16 │ 
+  
+  i Variable declared without assignment. Either assign a value or remove the declaration.
+  
+
+```
+
+```
+invalid.js:17:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variable 'flag' is declared but never assigned a value.
+  
+    15 │ const { debug } = options || {};
+    16 │ 
+  > 17 │ let flag;
+       │     ^^^^
+    18 │ while (!flag) {
+    19 │   // Do something...
+  
+  i Variable declared without assignment. Either assign a value or remove the declaration.
+  
+
+```
+
+```
+invalid.js:22:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variable 'config' is declared but never assigned a value.
+  
+    20 │ }
+    21 │ 
+  > 22 │ let config;
+       │     ^^^^^^
+    23 │ function init() {
+    24 │   return config?.enabled;
+  
+  i Variable declared without assignment. Either assign a value or remove the declaration.
+  
+
+```

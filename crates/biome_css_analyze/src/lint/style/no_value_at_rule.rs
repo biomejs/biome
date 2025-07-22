@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_css_syntax::CssAtRule;
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_value_at_rule::NoValueAtRuleOptions;
 
 declare_lint_rule! {
     /// Disallow use of `@value` rule in css modules.
@@ -42,7 +43,7 @@ impl Rule for NoValueAtRule {
     type Query = Ast<CssAtRule>;
     type State = CssAtRule;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoValueAtRuleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

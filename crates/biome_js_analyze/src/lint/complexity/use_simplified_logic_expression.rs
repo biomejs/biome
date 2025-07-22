@@ -8,6 +8,7 @@ use biome_js_syntax::{
     JsUnaryExpression, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
+use biome_rule_options::use_simplified_logic_expression::UseSimplifiedLogicExpressionOptions;
 
 declare_lint_rule! {
     /// Discard redundant terms from logical expressions.
@@ -61,7 +62,7 @@ impl Rule for UseSimplifiedLogicExpression {
     /// First element of tuple is if the expression is simplified by [De Morgan's Law](https://en.wikipedia.org/wiki/De_Morgan%27s_laws) rule, the second element is the expression to replace.
     type State = (bool, AnyJsExpression);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSimplifiedLogicExpressionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

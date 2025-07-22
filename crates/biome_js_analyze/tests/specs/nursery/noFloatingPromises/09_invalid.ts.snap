@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: 09_invalid.ts
+---
+# Input
+```ts
+const sneakyObject1 = {
+	doSomething() {
+		return Promise.resolve("This is a floating promise!");
+	},
+};
+sneakyObject1.doSomething();
+
+```
+
+# Diagnostics
+```
+09_invalid.ts:6:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    4 │ 	},
+    5 │ };
+  > 6 │ sneakyObject1.doSomething();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```

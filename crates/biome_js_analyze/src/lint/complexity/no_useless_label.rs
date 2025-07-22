@@ -6,6 +6,7 @@ use biome_js_syntax::{AnyJsStatement, JsLabeledStatement, JsSyntaxKind};
 
 use crate::JsRuleAction;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_useless_label::NoUselessLabelOptions;
 
 declare_lint_rule! {
     /// Disallow unnecessary labels.
@@ -36,7 +37,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessLabel",
         language: "js",
-        sources: &[RuleSource::Eslint("no-extra-label")],
+        sources: &[RuleSource::Eslint("no-extra-label").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -47,7 +48,7 @@ impl Rule for NoUselessLabel {
     type Query = Ast<AnyJsStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessLabelOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let stmt = ctx.query();

@@ -3,7 +3,6 @@
 use js_sys::Error;
 use wasm_bindgen::prelude::*;
 
-use biome_fs::MemoryFileSystem;
 use biome_service::workspace::{
     self, ChangeFileParams, CloseFileParams, FixFileParams, FormatFileParams, FormatOnTypeParams,
     FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams, GetFormatterIRParams,
@@ -12,6 +11,8 @@ use biome_service::workspace::{
     UpdateSettingsParams,
 };
 use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
+use camino::{Utf8Path, Utf8PathBuf};
+use std::sync::Arc;
 
 mod utils;
 
@@ -25,6 +26,34 @@ pub fn main() {
 
 include!(concat!(env!("OUT_DIR"), "/ts_types.rs"));
 
+#[derive(Default)]
+#[wasm_bindgen]
+pub struct MemoryFileSystem {
+    inner: Arc<biome_fs::MemoryFileSystem>,
+}
+
+#[wasm_bindgen]
+impl MemoryFileSystem {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    #[wasm_bindgen(js_name = insert)]
+    pub fn insert(&self, path: &str, data: &[u8]) {
+        self.inner.insert(Utf8PathBuf::from(path), data);
+    }
+
+    #[wasm_bindgen(js_name = remove)]
+    pub fn remove(&self, path: &str) {
+        self.inner.remove(Utf8Path::new(path));
+    }
+
+    fn as_inner(&self) -> Arc<biome_fs::MemoryFileSystem> {
+        Arc::clone(&self.inner)
+    }
+}
+
 #[wasm_bindgen]
 pub struct Workspace {
     inner: Box<dyn workspace::Workspace>,
@@ -35,7 +64,14 @@ impl Workspace {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Self {
-            inner: workspace::server(Box::new(MemoryFileSystem::default()), None),
+            inner: workspace::server(Arc::new(biome_fs::MemoryFileSystem::default()), None),
+        }
+    }
+
+    #[wasm_bindgen(js_name = withFileSystem)]
+    pub fn new_with_filesystem(fs: &MemoryFileSystem) -> Self {
+        Self {
+            inner: workspace::server(fs.as_inner(), None),
         }
     }
 
@@ -230,8 +266,12 @@ impl Default for Workspace {
     }
 }
 
+const SERIALIZER: serde_wasm_bindgen::Serializer = serde_wasm_bindgen::Serializer::new()
+    .serialize_missing_as_null(true)
+    .serialize_maps_as_objects(true);
+
 fn to_value<T: serde::ser::Serialize + ?Sized>(
     value: &T,
 ) -> Result<JsValue, serde_wasm_bindgen::Error> {
-    value.serialize(&serde_wasm_bindgen::Serializer::new().serialize_missing_as_null(true))
+    value.serialize(&SERIALIZER)
 }

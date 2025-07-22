@@ -14,6 +14,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxError, SyntaxResult, TextRange,
     declare_node_union,
 };
+use biome_rule_options::no_self_assign::NoSelfAssignOptions;
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
 
@@ -69,8 +70,8 @@ declare_lint_rule! {
         name: "noSelfAssign",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-self-assign"),
-            RuleSource::Clippy("self_assignment"),
+            RuleSource::Eslint("no-self-assign").same(),
+            RuleSource::Clippy("self_assignment").same(),
         ],
         recommended: true,
         severity: Severity::Error,
@@ -81,7 +82,7 @@ impl Rule for NoSelfAssign {
     type Query = Ast<JsAssignmentExpression>;
     type State = IdentifiersLike;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoSelfAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

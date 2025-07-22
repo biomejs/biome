@@ -9,6 +9,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::no_aria_unsupported_elements::NoAriaUnsupportedElementsOptions;
 
 declare_lint_rule! {
     /// Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
@@ -40,7 +41,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noAriaUnsupportedElements",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("aria-unsupported-elements")],
+        sources: &[RuleSource::EslintJsxA11y("aria-unsupported-elements").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -74,7 +75,7 @@ impl Rule for NoAriaUnsupportedElements {
     type Query = Ast<AnyJsxElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAriaUnsupportedElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -11,6 +11,7 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece, trim_leading_trivia_pieces,
 };
+use biome_rule_options::use_single_var_declarator::UseSingleVarDeclaratorOptions;
 
 use crate::JsRuleAction;
 
@@ -44,7 +45,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useSingleVarDeclarator",
         language: "js",
-        sources: &[RuleSource::Eslint("one-var")],
+        sources: &[RuleSource::Eslint("one-var").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
@@ -55,7 +56,7 @@ impl Rule for UseSingleVarDeclarator {
     type Query = Ast<JsVariableStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseSingleVarDeclaratorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         (ctx.query().declaration().ok()?.declarators().len() > 1).then_some(())

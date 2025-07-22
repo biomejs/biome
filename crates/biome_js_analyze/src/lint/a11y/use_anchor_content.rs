@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::JsxElement;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
 use crate::JsRuleAction;
 
@@ -68,7 +69,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useAnchorContent",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("anchor-has-content")],
+        sources: &[RuleSource::EslintJsxA11y("anchor-has-content").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -79,7 +80,7 @@ impl Rule for UseAnchorContent {
     type Query = Ast<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAnchorContentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

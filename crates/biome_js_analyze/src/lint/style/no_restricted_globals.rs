@@ -2,13 +2,12 @@ use crate::services::semantic::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Binding, BindingExtensions};
 use biome_js_syntax::{AnyJsIdentifierUsage, TextRange};
 use biome_rowan::AstNode;
+use biome_rule_options::no_restricted_globals::NoRestrictedGlobalsOptions;
 use rustc_hash::FxHashMap;
-use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
     /// This rule allows you to specify global variable names that you don’t want to use in your application.
@@ -16,7 +15,7 @@ declare_lint_rule! {
     /// References to the global identifiers `error` and `event` are always disallowed by this rule.
     ///
     /// > Disallowing usage of specific global variables can be useful if you want to allow a set of
-    /// global variables by enabling an environment, but still want to disallow some of those.
+    /// global variables by enabling an environment but still want to disallow some of those.
     ///
     /// ## Examples
     ///
@@ -55,7 +54,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noRestrictedGlobals",
         language: "js",
-        sources: &[RuleSource::Eslint("no-restricted-globals")],
+        sources: &[RuleSource::Eslint("no-restricted-globals").same()],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -63,21 +62,11 @@ declare_lint_rule! {
 
 const RESTRICTED_GLOBALS: [&str; 2] = ["event", "error"];
 
-/// Options for the rule `noRestrictedGlobals`.
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct RestrictedGlobalsOptions {
-    /// A list of names that should trigger the rule
-    #[serde(skip_serializing_if = "FxHashMap::is_empty")]
-    pub denied_globals: FxHashMap<Box<str>, Box<str>>,
-}
-
 impl Rule for NoRestrictedGlobals {
     type Query = SemanticServices;
     type State = (TextRange, Box<str>, Option<Box<str>>);
     type Signals = Box<[Self::State]>;
-    type Options = Box<RestrictedGlobalsOptions>;
+    type Options = NoRestrictedGlobalsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();

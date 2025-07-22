@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6492.js
+---
+# Input
+```js
+// some comment
+import react from "@vitejs/plugin-react";
+import svgr from "vite-plugin-svgr";
+import { defineConfig } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
+
+```
+
+# Diagnostics
+```
+issue6492.js:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The imports and exports are not sorted.
+  
+    1 │ // some comment
+  > 2 │ import react from "@vitejs/plugin-react";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import svgr from "vite-plugin-svgr";
+    4 │ import { defineConfig } from "vite";
+  
+  i Safe fix: Organize Imports (Biome)
+  
+    1 1 │   // some comment
+    2 2 │   import react from "@vitejs/plugin-react";
+    3   │ - import·svgr·from·"vite-plugin-svgr";
+    4   │ - import·{·defineConfig·}·from·"vite";
+      3 │ + import·{·defineConfig·}·from·"vite";
+      4 │ + import·svgr·from·"vite-plugin-svgr";
+    5 5 │   import tsconfigPaths from "vite-tsconfig-paths";
+    6 6 │   
+  
+
+```

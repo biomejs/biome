@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+let value: number | undefined;
+console.log(value);
+```
+
+# Diagnostics
+```
+invalid.ts:1:5 lint/nursery/noUnassignedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variable 'value' is declared but never assigned a value.
+  
+  > 1 │ let value: number | undefined;
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ console.log(value);
+  
+  i Variable declared without assignment. Either assign a value or remove the declaration.
+  
+
+```

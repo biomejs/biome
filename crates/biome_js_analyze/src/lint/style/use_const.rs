@@ -12,6 +12,7 @@ use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, Scope, SemanticModel, SemanticScopeExtensions};
 use biome_js_syntax::*;
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rule_options::use_const::UseConstOptions;
 
 declare_lint_rule! {
     /// Require `const` declarations for variables that are only assigned once.
@@ -77,7 +78,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useConst",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-const")],
+        sources: &[RuleSource::Eslint("prefer-const").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -88,7 +89,7 @@ impl Rule for UseConst {
     type Query = Semantic<AnyJsVariableDeclaration>;
     type State = ConstBindings;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseConstOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declaration = ctx.query();

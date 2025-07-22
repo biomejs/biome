@@ -8,6 +8,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make::{jsx_ident, jsx_name};
 use biome_js_syntax::{AnyJsxAttributeName, JsxAttribute};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rule_options::no_react_specific_props::NoReactSpecificPropsOptions;
 
 declare_lint_rule! {
     /// Prevents React-specific JSX properties from being used.
@@ -32,7 +33,7 @@ declare_lint_rule! {
         version: "1.7.2",
         name: "noReactSpecificProps",
         language: "js",
-        sources: &[RuleSource::EslintSolid("no-react-specific-props")],
+        sources: &[RuleSource::EslintSolid("no-react-specific-props").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -54,7 +55,7 @@ impl Rule for NoReactSpecificProps {
     type Query = Ast<JsxAttribute>;
     type State = (TextRange, &'static str);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoReactSpecificPropsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attribute = ctx.query();

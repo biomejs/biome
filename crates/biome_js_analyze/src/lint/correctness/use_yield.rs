@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
+use biome_rule_options::use_yield::UseYieldOptions;
 
 declare_lint_rule! {
     /// Require generator functions to contain `yield`.
@@ -41,7 +42,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useYield",
         language: "js",
-        sources: &[RuleSource::Eslint("require-yield")],
+        sources: &[RuleSource::Eslint("require-yield").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -127,7 +128,7 @@ impl Rule for UseYield {
     type Query = MissingYield;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseYieldOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

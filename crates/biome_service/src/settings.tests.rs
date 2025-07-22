@@ -1,13 +1,14 @@
-use crate::settings::{LanguageSettings, ServiceLanguage, Settings};
+use crate::settings::{LanguageSettings, ServiceLanguage, Settings, to_json_language_settings};
 use crate::workspace::DocumentFileSource;
 use biome_analyze::RuleFilter;
 use biome_configuration::analyzer::{GroupPlainConfiguration, Nursery, SeverityOrGroup};
 use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::json::{JsonAssistConfiguration, JsonLinterConfiguration};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::{
-    Configuration, JsConfiguration, LinterConfiguration, OverrideFilesConfiguration, OverrideGlobs,
-    OverrideLinterConfiguration, OverridePattern, Overrides, RuleConfiguration,
-    RulePlainConfiguration, Rules,
+    Configuration, JsConfiguration, JsonConfiguration, LinterConfiguration,
+    OverrideFilesConfiguration, OverrideGlobs, OverrideLinterConfiguration, OverridePattern,
+    Overrides, RuleConfiguration, RulePlainConfiguration, Rules,
 };
 use biome_fs::BiomePath;
 use biome_js_syntax::JsLanguage;
@@ -45,7 +46,7 @@ fn correctly_lookups_environment_settings() {
     settings
         .merge_with_configuration(configuration, None)
         .expect("valid configuration");
-    let environment = JsLanguage::resolve_environment(Some(&settings));
+    let environment = JsLanguage::resolve_environment(&settings);
 
     assert_eq!(
         environment.unwrap().jsx_runtime,
@@ -67,11 +68,11 @@ fn correctly_computes_analyzer_options() {
     settings
         .merge_with_configuration(configuration, None)
         .expect("valid configuration");
-    let environment = JsLanguage::resolve_environment(Some(&settings));
+    let environment = JsLanguage::resolve_environment(&settings);
     let language = JsLanguage::lookup_settings(&settings.languages);
     let options = JsLanguage::resolve_analyzer_options(
-        Some(&settings),
-        Some(&language.linter),
+        &settings,
+        &language.linter,
         environment,
         &BiomePath::new(Utf8PathBuf::new()),
         &DocumentFileSource::from_language_id("javascript"),
@@ -154,4 +155,22 @@ fn merge_override_files_max_size_rule() {
         settings.override_settings.patterns[0].files.max_size,
         Some(MaxSize(NonZeroU64::new(1024).unwrap()))
     );
+}
+
+#[test]
+fn json_to_settings_includes_linter_and_assist() {
+    let config = JsonConfiguration {
+        linter: Some(JsonLinterConfiguration {
+            enabled: Some(true.into()),
+        }),
+        assist: Some(JsonAssistConfiguration {
+            enabled: Some(true.into()),
+        }),
+        ..Default::default()
+    };
+    let parent_settings = Settings::default();
+    let settings = to_json_language_settings(config, &parent_settings.languages.json);
+
+    assert_eq!(settings.linter.enabled, Some(true.into()));
+    assert_eq!(settings.assist.enabled, Some(true.into()));
 }

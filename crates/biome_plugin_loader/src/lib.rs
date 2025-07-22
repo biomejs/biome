@@ -115,7 +115,7 @@ mod test {
 
     #[test]
     fn load_plugin() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             "/my-plugin/biome-manifest.jsonc".into(),
             r#"{
@@ -133,7 +133,7 @@ mod test {
 
     #[test]
     fn load_plugin_without_manifest() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
 
         let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
@@ -143,7 +143,7 @@ mod test {
 
     #[test]
     fn load_plugin_with_wrong_version() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             "/my-plugin/biome-manifest.jsonc".into(),
             r#"{
@@ -159,7 +159,7 @@ mod test {
 
     #[test]
     fn load_plugin_with_wrong_rule_extension() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             "/my-plugin/biome-manifest.jsonc".into(),
             r#"{
@@ -175,7 +175,7 @@ mod test {
 
     #[test]
     fn load_single_rule_plugin() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert("/my-plugin.grit".into(), r#"`hello`"#);
 
         let (plugin, _) = BiomePlugin::load(&fs, "./my-plugin.grit", Utf8Path::new("/"))

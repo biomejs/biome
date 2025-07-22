@@ -13,15 +13,15 @@ mod language {
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
-    let src = r#"
-<div>
-    <p>hello
-    </p>
-</div>
+    let src = r#"---
+layout: foo
+---
+Test <a
+href="https://prettier.io">abc</a>.
 
     "#;
     let source_type = HtmlFileSource::html();
-    let tree = parse_html(src);
+    let tree = parse_html(src, source_type);
     let options = HtmlFormatOptions::new(HtmlFileSource::html())
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())

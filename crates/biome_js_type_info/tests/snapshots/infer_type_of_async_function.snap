@@ -26,5 +26,5 @@ async Function "returnsPromise" {
 ## Registered types
 
 ```
-Global TypeId(0) => instanceof unresolved reference "Promise"<string>
+Global TypeId(0) => instanceof unresolved reference "Promise"<string> (scope ID: 0)
 ```

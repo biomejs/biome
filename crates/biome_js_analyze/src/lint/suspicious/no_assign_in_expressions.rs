@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, declare_lint_rule};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
@@ -7,6 +7,7 @@ use biome_js_syntax::{
     JsSequenceExpression,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions;
 
 declare_lint_rule! {
     /// Disallow assignments in expressions.
@@ -46,8 +47,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noAssignInExpressions",
         language: "js",
-        sources: &[RuleSource::Eslint("no-cond-assign")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("no-cond-assign").inspired()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -57,7 +57,7 @@ impl Rule for NoAssignInExpressions {
     type Query = Ast<JsAssignmentExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAssignInExpressionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let assign = ctx.query();

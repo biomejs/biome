@@ -1,6 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
-use crate::commands::scan_kind::compute_scan_kind;
+use crate::commands::scan_kind::derive_best_scan_kind;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -39,7 +39,7 @@ use biome_service::workspace::{
 };
 use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
 use std::time::Duration;
 use tracing::info;
@@ -148,9 +148,15 @@ pub enum BiomeCommand {
         configuration: Option<Configuration>,
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
-        /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
+        /// Use this option when you want to format code piped from `stdin`, and
+        /// print the output to `stdout`.
         ///
-        /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to check the code.
+        /// The file doesn't need to exist on disk, what matters is the
+        /// extension of the file. Based on the extension, Biome knows how to
+        /// check the code.
+        ///
+        /// Also, if you have overrides configured and/or nested configurations,
+        /// the path may determine the settings being applied.
         ///
         /// Example:
         /// ```shell
@@ -441,7 +447,7 @@ pub enum BiomeCommand {
     /// interpret backticks as command invocations. To avoid this, it's best to
     /// put single quotes around your Grit queries.
     ///
-    /// ## Example
+    /// ### Example
     ///
     /// ```shell
     /// biome search '`console.log($message)`' # find all `console.log` invocations
@@ -494,7 +500,7 @@ pub enum BiomeCommand {
 
     /// Shows documentation of various aspects of the CLI.
     ///
-    /// ## Examples
+    /// ### Examples
     ///
     /// ```shell
     /// biome explain noDebugger
@@ -713,16 +719,28 @@ fn get_files_to_process_with_cli_options(
 ) -> Result<Option<Vec<OsString>>, CliDiagnostic> {
     if since.is_some() {
         if !changed {
-            return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--since",
+                "--changed",
+                "In order to use --since, you must also use --changed.",
+            ));
         }
         if staged {
-            return Err(CliDiagnostic::incompatible_arguments("since", "staged"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--since",
+                "--staged",
+                "--staged selects files that you have staged in version control. --since can't be used in this context.",
+            ));
         }
     }
 
     if changed {
         if staged {
-            return Err(CliDiagnostic::incompatible_arguments("changed", "staged"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--changed",
+                "--staged",
+                "--staged selects files that you have staged in version control. --changed selects files that have been committed since your default branch. You must either use --changed or --staged, but not both.",
+            ));
         }
         Ok(Some(get_changed_files(fs, configuration, since)?))
     } else if staged {
@@ -781,14 +799,23 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         ..
     } = options;
     if write && fix {
-        return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
+        return Err(CliDiagnostic::incompatible_arguments(
+            "--write",
+            "--fix",
+            "These arguments do the same thing, but --fix is deprecated. Prefer to use --write.",
+        ));
     } else if suppress && write {
         return Err(CliDiagnostic::incompatible_arguments(
             "--suppress",
             "--write",
+            "--write is used to write fixes, and --suppress is used to suppress diagnostics. Remove one of these arguments depending on what you want to do.",
         ));
     } else if suppress && fix {
-        return Err(CliDiagnostic::incompatible_arguments("--suppress", "--fix"));
+        return Err(CliDiagnostic::incompatible_arguments(
+            "--suppress",
+            "--fix",
+            "--fix is used to write fixes, and --suppress is used to suppress diagnostics. Remove one of these arguments depending on what you want to do. Also, --fix is deprecated. Prefer to use --write.",
+        ));
     } else if !suppress && suppression_reason.is_some() {
         return Err(CliDiagnostic::unexpected_argument(
             "--reason",
@@ -855,8 +882,8 @@ pub(crate) trait CommandRunner: Sized {
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
     ) -> Result<ConfiguredWorkspace, CliDiagnostic> {
+        // Load configuration
         let configuration_path_hint = cli_options.as_configuration_path_hint();
-        let is_configuration_from_user = configuration_path_hint.is_from_user();
         let loaded_configuration = load_configuration(fs, configuration_path_hint)?;
         if self.should_validate_configuration_diagnostics() {
             validate_configuration_diagnostics(
@@ -871,50 +898,60 @@ pub(crate) trait CommandRunner: Sized {
             loaded_configuration.diagnostics.len(),
         );
         let configuration_dir_path = loaded_configuration.directory_path.clone();
+
+        // Merge the FS configuration with the CLI arguments
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
-        let paths = self.get_files_to_process(fs, &configuration)?;
-        let project_path = fs
-            .working_directory()
-            .map(BiomePath::from)
-            .unwrap_or_default();
 
         let execution = self.get_execution(cli_options, console, workspace)?;
 
+        let working_dir = fs.working_directory().unwrap_or_default();
+        let root_configuration_dir = configuration_dir_path
+            .clone()
+            .unwrap_or_else(|| working_dir.clone());
+        // Using `--config-path`, users can point to a (root) config file that
+        // is not actually at the root of the project. So between the working
+        // directory and configuration directory, we use whichever one is higher
+        // up in the file system.
+        let project_dir = if root_configuration_dir.starts_with(&working_dir) {
+            &working_dir
+        } else {
+            &root_configuration_dir
+        };
+
+        let paths = self.get_files_to_process(fs, &configuration)?;
+        let paths = validated_paths_for_execution(paths, &execution, &working_dir)?;
+
         let params = if let TraversalMode::Lint { only, skip, .. } = execution.traversal_mode() {
             OpenProjectParams {
-                path: project_path.clone(),
+                path: BiomePath::new(project_dir),
                 open_uninitialized: true,
                 only_rules: Some(only.clone()),
                 skip_rules: Some(skip.clone()),
             }
         } else {
             OpenProjectParams {
-                path: project_path.clone(),
+                path: BiomePath::new(project_dir),
                 open_uninitialized: true,
                 only_rules: None,
                 skip_rules: None,
             }
         };
 
+        // Open the project
         let open_project_result = workspace.open_project(params)?;
 
-        let scan_kind = compute_scan_kind(&execution, &configuration).unwrap_or({
-            if open_project_result.scan_kind == ScanKind::None && configuration.use_ignore_file() {
-                ScanKind::KnownFiles
-            } else {
-                open_project_result.scan_kind
-            }
-        });
+        let scan_kind = derive_best_scan_kind(
+            open_project_result.scan_kind,
+            &execution,
+            &root_configuration_dir,
+            &working_dir,
+            &configuration,
+        );
 
+        // Update the settings of the project
         let result = workspace.update_settings(UpdateSettingsParams {
             project_key: open_project_result.project_key,
-            // When the user provides the path to the configuration, we can't use its directory because
-            // it might be outside the project, so we need to use the current project directory.
-            workspace_directory: if is_configuration_from_user {
-                Some(project_path.clone())
-            } else {
-                configuration_dir_path.map(BiomePath::from)
-            },
+            workspace_directory: Some(BiomePath::new(project_dir)),
             configuration,
         })?;
         if self.should_validate_configuration_diagnostics() {
@@ -925,12 +962,28 @@ pub(crate) trait CommandRunner: Sized {
             )?;
         }
 
+        // Scan the project
+        let scan_kind = match (scan_kind, execution.traversal_mode()) {
+            (scan_kind, TraversalMode::Migrate { .. }) => scan_kind,
+            (ScanKind::KnownFiles, _) => {
+                let target_paths = paths
+                    .iter()
+                    .map(|path| BiomePath::new(working_dir.join(path)))
+                    .collect();
+                ScanKind::TargetedKnownFiles {
+                    target_paths,
+                    descend_from_targets: true,
+                }
+            }
+            (scan_kind, _) => scan_kind,
+        };
         let result = workspace.scan_project_folder(ScanProjectFolderParams {
             project_key: open_project_result.project_key,
-            path: Some(project_path.clone()),
+            path: None,
             watch: cli_options.use_server,
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,
+            verbose: cli_options.verbose,
         })?;
 
         if self.should_validate_configuration_diagnostics() {
@@ -971,7 +1024,7 @@ pub(crate) trait CommandRunner: Sized {
         Ok(stdin)
     }
 
-    // Below, the methods that consumers must implement.
+    // #region Methods that consumers must implement
 
     /// Implements this method if you need to merge CLI arguments to the loaded configuration.
     ///
@@ -1017,13 +1070,53 @@ pub(crate) trait CommandRunner: Sized {
     fn should_validate_configuration_diagnostics(&self) -> bool {
         true
     }
+
+    // #endregion
+}
+
+/// Validates `paths` so they can be safely passed to the given `execution`.
+///
+/// - Converts paths from `OsString` to `String`.
+/// - If the `execution` expects paths to be given, we may initialise them with
+///   the current directory if they were empty otherwise.
+fn validated_paths_for_execution(
+    paths: Vec<OsString>,
+    execution: &Execution,
+    working_dir: &Utf8Path,
+) -> Result<Vec<String>, CliDiagnostic> {
+    let mut paths = paths
+        .into_iter()
+        .map(|path| path.into_string().map_err(WorkspaceError::non_utf8_path))
+        .collect::<Result<Vec<_>, _>>()?;
+
+    if paths.is_empty() {
+        match execution.traversal_mode() {
+            TraversalMode::Check { .. }
+            | TraversalMode::Lint { .. }
+            | TraversalMode::Format { .. }
+            | TraversalMode::CI { .. }
+            | TraversalMode::Search { .. } => {
+                if execution.is_vcs_targeted() {
+                    // If `--staged` or `--changed` is specified, it's
+                    // acceptable for them to be empty, so ignore it.
+                } else {
+                    paths.push(working_dir.to_string());
+                }
+            }
+            TraversalMode::Migrate { .. } => {
+                // Migrate doesn't do any traversal, so it doesn't care.
+            }
+        }
+    }
+
+    Ok(paths)
 }
 
 pub(crate) struct ConfiguredWorkspace {
     /// Execution context
     pub execution: Execution,
     /// Paths to crawl
-    pub paths: Vec<OsString>,
+    pub paths: Vec<String>,
     /// The duration of the scanning
     pub duration: Option<Duration>,
     /// Configuration files found inside the project

@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsExportClause;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use biome_rule_options::no_default_export::NoDefaultExportOptions;
 
 declare_lint_rule! {
     /// Disallow default exports.
@@ -63,7 +64,7 @@ declare_lint_rule! {
         version: "1.4.0",
         name: "noDefaultExport",
         language: "js",
-        sources: &[RuleSource::EslintImport("no-default-export")],
+        sources: &[RuleSource::EslintImport("no-default-export").same()],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -73,7 +74,7 @@ impl Rule for NoDefaultExport {
     type Query = Ast<AnyJsExportClause>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDefaultExportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let export_clause = ctx.query();

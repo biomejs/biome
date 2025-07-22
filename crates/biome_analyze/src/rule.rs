@@ -36,10 +36,8 @@ pub struct RuleMetadata {
     pub recommended: bool,
     /// The kind of fix
     pub fix_kind: FixKind,
-    /// The source URL of the rule
-    pub sources: &'static [RuleSource],
-    /// The source kind of the rule
-    pub source_kind: Option<RuleSourceKind>,
+    /// The sources of the rule
+    pub sources: &'static [RuleSourceWithKind],
     /// The default severity of the rule
     pub severity: Severity,
     /// Domains applied by this rule
@@ -113,6 +111,8 @@ pub enum RuleSource {
     EslintJsxA11y(&'static str),
     /// Rules from [Eslint Plugin JSDOc](https://github.com/gajus/eslint-plugin-jsdoc)
     EslintJsDoc(&'static str),
+    /// Rules from [Eslint Plugin Perfectionist](https://perfectionist.dev/)
+    EslintPerfectionist(&'static str),
     /// Rules from [Eslint Plugin React](https://github.com/jsx-eslint/eslint-plugin-react)
     EslintReact(&'static str),
     /// Rules from [Eslint Plugin React Hooks](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md)
@@ -151,6 +151,8 @@ pub enum RuleSource {
     DenoLint(&'static str),
     /// Rules from [Eslint Plugin Vitest](https://github.com/vitest-dev/eslint-plugin-vitest)
     EslintVitest(&'static str),
+    /// Rules from [Eslint Plugin Vue.js](https://eslint.vuejs.org/)
+    EslintVueJs(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -171,6 +173,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
             Self::EslintJsxA11y(_) => write!(f, "eslint-plugin-jsx-a11y"),
             Self::EslintJsDoc(_) => write!(f, "eslint-plugin-jsdoc"),
+            Self::EslintPerfectionist(_) => write!(f, "eslint-plugin-perfectionist"),
             Self::EslintReact(_) => write!(f, "eslint-plugin-react"),
             Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
             Self::EslintReactRefresh(_) => write!(f, "eslint-plugin-react-refresh"),
@@ -190,6 +193,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
             Self::DenoLint(_) => write!(f, "deno-lint"),
             Self::EslintVitest(_) => write!(f, "@vitest/eslint-plugin"),
+            Self::EslintVueJs(_) => write!(f, "eslint-plugin-vue"),
         }
     }
 }
@@ -217,6 +221,22 @@ impl Ord for RuleSource {
 }
 
 impl RuleSource {
+    /// The rule has the same logic as the declared rule.
+    pub const fn same(self) -> RuleSourceWithKind {
+        RuleSourceWithKind {
+            kind: RuleSourceKind::SameLogic,
+            source: self,
+        }
+    }
+
+    /// The rule has been a source of inspiration for the declared rule.
+    pub const fn inspired(self) -> RuleSourceWithKind {
+        RuleSourceWithKind {
+            kind: RuleSourceKind::Inspired,
+            source: self,
+        }
+    }
+
     pub fn as_rule_name(&self) -> &'static str {
         match self {
             Self::Clippy(rule_name)
@@ -228,6 +248,7 @@ impl RuleSource {
             | Self::EslintJest(rule_name)
             | Self::EslintJsxA11y(rule_name)
             | Self::EslintJsDoc(rule_name)
+            | Self::EslintPerfectionist(rule_name)
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
             | Self::EslintReactRefresh(rule_name)
@@ -246,7 +267,8 @@ impl RuleSource {
             | Self::EslintRegexp(rule_name)
             | Self::Stylelint(rule_name)
             | Self::DenoLint(rule_name)
-            | Self::EslintVitest(rule_name) => rule_name,
+            | Self::EslintVitest(rule_name)
+            | Self::EslintVueJs(rule_name) => rule_name,
         }
     }
 
@@ -260,6 +282,7 @@ impl RuleSource {
             Self::EslintJest(rule_name) => format!("jest/{rule_name}"),
             Self::EslintJsxA11y(rule_name) => format!("jsx-a11y/{rule_name}"),
             Self::EslintJsDoc(rule_name) => format!("jsdoc/{rule_name}"),
+            Self::EslintPerfectionist(rule_name) => format!("perfectionist/{rule_name}"),
             Self::EslintReact(rule_name) => format!("react/{rule_name}"),
             Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
             Self::EslintReactRefresh(rule_name) => format!("react-refresh/{rule_name}"),
@@ -279,6 +302,7 @@ impl RuleSource {
             Self::EslintRegexp(rule_name) => format!("regexp/{rule_name}"),
             Self::DenoLint(rule_name) => format!("deno-lint/{rule_name}"),
             Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
+            Self::EslintVueJs(rule_name) => format!("vue/{rule_name}"),
         }
     }
 
@@ -293,6 +317,7 @@ impl RuleSource {
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJsxA11y(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJsDoc(rule_name) => format!("https://github.com/gajus/eslint-plugin-jsdoc/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintPerfectionist(rule_name) => format!("https://perfectionist.dev/rules/{rule_name}.md"),
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
             Self::EslintReactRefresh(_) => "https://github.com/ArnaudBarre/eslint-plugin-react-refresh".to_string(),
@@ -312,6 +337,7 @@ impl RuleSource {
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
             Self::EslintVitest(rule_name) => format!("https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rule/{rule_name}.md"),
+            Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
         }
     }
 
@@ -334,7 +360,7 @@ impl RuleSource {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -344,6 +370,15 @@ pub enum RuleSourceKind {
     SameLogic,
     /// The rule deviate of the logic of the source
     Inspired,
+}
+
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct RuleSourceWithKind {
+    pub kind: RuleSourceKind,
+    pub source: RuleSource,
 }
 
 impl RuleSourceKind {
@@ -373,6 +408,8 @@ pub enum RuleDomain {
     Solid,
     /// Next.js framework rules
     Next,
+    /// Vue.js framework rules
+    Vue,
     /// For rules that require querying multiple files inside a project
     Project,
 }
@@ -385,6 +422,7 @@ impl Display for RuleDomain {
             Self::Test => fmt.write_str("test"),
             Self::Solid => fmt.write_str("solid"),
             Self::Next => fmt.write_str("next"),
+            Self::Vue => fmt.write_str("vue"),
             Self::Project => fmt.write_str("project"),
         }
     }
@@ -418,6 +456,7 @@ impl RuleDomain {
             ],
             Self::Solid => &[&("solid", ">=1.0.0")],
             Self::Next => &[&("next", ">=14.0.0")],
+            Self::Vue => &[&("vue", ">=3.0.0")],
             Self::Project => &[],
         }
     }
@@ -440,6 +479,7 @@ impl RuleDomain {
             ],
             Self::Solid => &[],
             Self::Next => &[],
+            Self::Vue => &[],
             Self::Project => &[],
         }
     }
@@ -461,7 +501,6 @@ impl RuleMetadata {
             recommended: false,
             fix_kind: FixKind::None,
             sources: &[],
-            source_kind: None,
             severity: Severity::Information,
             domains: &[],
         }
@@ -482,16 +521,8 @@ impl RuleMetadata {
         self
     }
 
-    pub const fn sources(mut self, sources: &'static [RuleSource]) -> Self {
+    pub const fn sources(mut self, sources: &'static [RuleSourceWithKind]) -> Self {
         self.sources = sources;
-        //if self.source_kind.is_none() {
-        //    self.source_kind = Some(RuleSourceKind::SameLogic);
-        //}
-        self
-    }
-
-    pub const fn source_kind(mut self, source_kind: RuleSourceKind) -> Self {
-        self.source_kind = Some(source_kind);
         self
     }
 

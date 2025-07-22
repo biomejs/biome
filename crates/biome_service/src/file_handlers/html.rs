@@ -5,13 +5,15 @@ use super::{
 };
 use crate::settings::{check_feature_activity, check_override_feature_activity};
 use crate::workspace::FixFileResult;
+use crate::workspace::{EmbeddedCssContent, EmbeddedJsContent};
 use crate::{
     WorkspaceError,
-    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
+    settings::{ServiceLanguage, Settings},
     workspace::GetSyntaxTreeResult,
 };
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::html::{HtmlFormatterConfiguration, HtmlFormatterEnabled};
+use biome_css_parser::{CssParserOptions, parse_css_with_offset_and_cache};
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
@@ -24,9 +26,11 @@ use biome_html_formatter::{
     format_node,
 };
 use biome_html_parser::parse_html_with_cache;
-use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_js_parser::{JsParserOptions, parse_js_with_offset_and_cache};
+use biome_js_syntax::JsFileSource;
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, NodeCache};
+use biome_rowan::{AstNode, AstNodeList, NodeCache};
 use camino::Utf8Path;
 use tracing::debug_span;
 
@@ -77,66 +81,60 @@ impl ServiceLanguage for HtmlLanguage {
     }
 
     fn resolve_format_options(
-        global: Option<&crate::settings::FormatSettings>,
-        overrides: Option<&crate::settings::OverrideSettings>,
-        language: Option<&Self::FormatterSettings>,
+        global: &crate::settings::FormatSettings,
+        overrides: &crate::settings::OverrideSettings,
+        language: &Self::FormatterSettings,
         path: &biome_fs::BiomePath,
         file_source: &super::DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
-            .and_then(|l| l.indent_style)
-            .or(global.and_then(|g| g.indent_style))
+            .indent_style
+            .or(global.indent_style)
             .unwrap_or_default();
         let line_width = language
-            .and_then(|l| l.line_width)
-            .or(global.and_then(|g| g.line_width))
+            .line_width
+            .or(global.line_width)
             .unwrap_or_default();
         let indent_width = language
-            .and_then(|l| l.indent_width)
-            .or(global.and_then(|g| g.indent_width))
+            .indent_width
+            .or(global.indent_width)
             .unwrap_or_default();
         let line_ending = language
-            .and_then(|l| l.line_ending)
-            .or(global.and_then(|g| g.line_ending))
+            .line_ending
+            .or(global.line_ending)
             .unwrap_or_default();
         let attribute_position = language
-            .and_then(|l| l.attribute_position)
-            .or(global.and_then(|g| g.attribute_position))
+            .attribute_position
+            .or(global.attribute_position)
             .unwrap_or_default();
         let bracket_same_line = language
-            .and_then(|l| l.bracket_same_line)
-            .or(global.and_then(|g| g.bracket_same_line))
+            .bracket_same_line
+            .or(global.bracket_same_line)
             .unwrap_or_default();
-        let whitespace_sensitivity = language
-            .and_then(|l| l.whitespace_sensitivity)
-            .unwrap_or_default();
-        let indent_script_and_style = language
-            .and_then(|l| l.indent_script_and_style)
-            .unwrap_or_default();
-        let self_close_void_elements = language
-            .and_then(|l| l.self_close_void_elements)
-            .unwrap_or_default();
+        let whitespace_sensitivity = language.whitespace_sensitivity.unwrap_or_default();
+        let indent_script_and_style = language.indent_script_and_style.unwrap_or_default();
+        let self_close_void_elements = language.self_close_void_elements.unwrap_or_default();
 
-        let options = HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
-            .with_line_ending(line_ending)
-            .with_attribute_position(attribute_position)
-            .with_bracket_same_line(bracket_same_line)
-            .with_whitespace_sensitivity(whitespace_sensitivity)
-            .with_indent_script_and_style(indent_script_and_style)
-            .with_self_close_void_elements(self_close_void_elements);
-        if let Some(overrides) = overrides {
-            overrides.to_override_html_format_options(path, options)
-        } else {
-            options
-        }
+        let mut options =
+            HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
+                .with_indent_style(indent_style)
+                .with_indent_width(indent_width)
+                .with_line_width(line_width)
+                .with_line_ending(line_ending)
+                .with_attribute_position(attribute_position)
+                .with_bracket_same_line(bracket_same_line)
+                .with_whitespace_sensitivity(whitespace_sensitivity)
+                .with_indent_script_and_style(indent_script_and_style)
+                .with_self_close_void_elements(self_close_void_elements);
+
+        overrides.apply_override_html_format_options(path, &mut options);
+
+        options
     }
 
     fn resolve_analyzer_options(
-        _global: Option<&Settings>,
-        _language: Option<&Self::LinterSettings>,
+        _global: &Settings,
+        _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
         path: &biome_fs::BiomePath,
         _file_source: &super::DocumentFileSource,
@@ -147,44 +145,42 @@ impl ServiceLanguage for HtmlLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
-    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.html.formatter.enabled,
-                                pattern.formatter.enabled,
-                            )
-                            .filter(|_| {
-                                // Then check whether the path satisfies
-                                pattern.is_file_included(path)
-                            })
-                        });
+    fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.html.formatter.enabled,
+                        pattern.formatter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
 
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.html.formatter.enabled,
-                    settings.formatter.enabled,
-                ))
-            })
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.html.formatter.enabled,
+                settings.formatter.enabled,
+            ))
             .unwrap_or_default()
             .into()
     }
 
-    fn assist_enabled_for_file_path(_settings: Option<&Settings>, _path: &Utf8Path) -> bool {
+    fn assist_enabled_for_file_path(_settings: &Settings, _path: &Utf8Path) -> bool {
         false
     }
 
-    fn linter_enabled_for_file_path(_settings: Option<&Settings>, _path: &Utf8Path) -> bool {
+    fn linter_enabled_for_file_path(_settings: &Settings, _path: &Utf8Path) -> bool {
         false
     }
 
-    fn resolve_environment(_settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings> {
+    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
         None
     }
 }
@@ -226,19 +222,19 @@ impl ExtensionHandler for HtmlFileHandler {
     }
 }
 
-fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.formatter_enabled_for_file_path::<HtmlLanguage>(path)
+fn formatter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+    settings.formatter_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.linter_enabled_for_file_path::<HtmlLanguage>(path)
+fn linter_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+    settings.linter_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.assist_enabled_for_file_path::<HtmlLanguage>(path)
+fn assist_enabled(path: &Utf8Path, settings: &Settings) -> bool {
+    settings.assist_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
-fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {
+fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
     true
 }
 
@@ -246,14 +242,140 @@ fn parse(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _handle: WorkspaceSettingsHandle,
+    _settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let parse = parse_html_with_cache(text, cache);
+    let html_file_source = file_source.to_html_file_source().unwrap_or_default();
+    let parse = parse_html_with_cache(text, html_file_source, cache);
 
     ParseResult {
         any_parse: parse.into(),
         language: Some(file_source),
+    }
+}
+
+/// Extracts embedded JavaScript content from HTML script elements.
+///
+/// This function walks the HTML syntax tree to find all `<script>` elements
+/// and extracts their content for offset-aware JavaScript parsing.
+///
+/// # Arguments
+/// * `html_root` - The parsed HTML syntax tree
+/// * `source_text` - The original HTML source text
+/// * `cache` - Node cache for performance optimization
+///
+/// # Returns
+/// A vector of `EmbeddedJsContent` containing parsed JavaScript with correct offsets
+pub(crate) fn extract_embedded_scripts(
+    html_root: &HtmlRoot,
+    cache: &mut NodeCache,
+) -> Vec<EmbeddedJsContent> {
+    let mut scripts = Vec::new();
+
+    // Walk through all HTML elements looking for script tags
+    for element in html_root.syntax().descendants() {
+        let Some(list) = extract_embedded_script(element.clone(), cache) else {
+            continue;
+        };
+        scripts.extend(list);
+    }
+    scripts
+}
+
+fn extract_embedded_script(
+    element: HtmlSyntaxNode,
+    cache: &mut NodeCache,
+) -> Option<Vec<EmbeddedJsContent>> {
+    let html_element = HtmlElement::cast(element)?;
+    let opening_element = html_element.opening_element().ok()?;
+    let name = opening_element.name().ok()?;
+    let name_text = name.value_token().ok()?;
+
+    if name_text.text_trimmed() == "script" {
+        Some(
+            html_element
+                .children()
+                .iter()
+                .filter_map(|child| child.as_any_html_content().cloned())
+                .filter_map(|child| child.as_html_content().cloned())
+                .filter_map(|child| {
+                    let content = child.value_token().ok()?;
+                    let parse = parse_js_with_offset_and_cache(
+                        content.text(),
+                        content.text_range().start(),
+                        JsFileSource::js_script(),
+                        JsParserOptions::default(),
+                        cache,
+                    );
+
+                    Some(EmbeddedJsContent {
+                        parse: parse.into(),
+                        element_range: child.range(),
+                        content_range: content.text_range(),
+                        content_offset: content.text_range().start(),
+                    })
+                })
+                .collect::<Vec<_>>(),
+        )
+    } else {
+        None
+    }
+}
+
+/// Extracts embedded CSS content from HTML style elements.
+pub(crate) fn parse_embedded_styles(
+    html_root: &HtmlRoot,
+    cache: &mut NodeCache,
+) -> Vec<EmbeddedCssContent> {
+    let mut styles = Vec::new();
+
+    // Walk through all HTML elements looking for style tags
+    for element in html_root.syntax().descendants() {
+        let Some(list) = parse_embedded_style(element.clone(), cache) else {
+            continue;
+        };
+        styles.extend(list);
+    }
+
+    styles
+}
+
+fn parse_embedded_style(
+    element: HtmlSyntaxNode,
+    cache: &mut NodeCache,
+) -> Option<Vec<EmbeddedCssContent>> {
+    let html_element = HtmlElement::cast(element)?;
+    let opening_element = html_element.opening_element().ok()?;
+    let name = opening_element.name().ok()?;
+    let name_text = name.value_token().ok()?;
+
+    if name_text.text_trimmed() == "style" {
+        Some(
+            html_element
+                .children()
+                .iter()
+                .filter_map(|child| child.as_any_html_content().cloned())
+                .filter_map(|child| child.as_html_content().cloned())
+                .filter_map(|child| {
+                    let content = child.value_token().ok()?;
+                    let parse = parse_css_with_offset_and_cache(
+                        content.text(),
+                        content.text_range().start(),
+                        cache,
+                        CssParserOptions::default(),
+                    );
+
+                    Some(EmbeddedCssContent {
+                        parse: parse.into(),
+                        element_range: child.range(),
+                        content_range: content.text_range(),
+                        content_offset: content.text_range().start(),
+                    })
+                })
+                .collect::<Vec<_>>(),
+        )
+    } else {
+        None
     }
 }
 
@@ -270,7 +392,7 @@ fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: WorkspaceSettingsHandle,
+    settings: &Settings,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(path, document_file_source);
 
@@ -286,7 +408,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: WorkspaceSettingsHandle,
+    settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
 
@@ -326,7 +448,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let code = if params.should_format {
         format_node(
             params
-                .workspace
+                .settings
                 .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source),
             tree.syntax(),
         )?

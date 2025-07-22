@@ -1,30 +1,135 @@
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
-    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
-    VisitorFinishContext,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, AnyJsSwitchClause, JsExpressionStatement, JsLanguage,
-    JsSwitchStatement, JsSyntaxNode,
+    AnyFunctionLike, AnyJsBinding, AnyJsClass, AnyJsClassMemberName, AnyJsExpression,
+    AnyJsFunction, AnyJsObjectMemberName, AnyJsRoot, JsLanguage, JsObjectExpression, JsSyntaxNode,
 };
 use biome_js_type_info::Type;
-use biome_module_graph::{ModuleGraph, ScopedResolver};
-use biome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
-use camino::Utf8PathBuf;
+use biome_module_graph::ModuleResolver;
+use biome_rowan::{AstNode, TextRange};
 use std::sync::Arc;
 
 /// Service for use with type inference rules.
 #[derive(Clone, Debug)]
 pub struct TypedService {
-    resolver: Option<Arc<ScopedResolver>>,
+    resolver: Option<Arc<ModuleResolver>>,
 }
 
 impl TypedService {
-    pub fn type_for_expression(&self, expr: &AnyJsExpression) -> Type {
+    pub fn type_of_expression(&self, expr: &AnyJsExpression) -> Type {
         self.resolver
             .as_ref()
-            .map(|resolver| resolver.resolved_type_for_expression(expr))
+            .map(|resolver| resolver.resolved_type_of_expression(expr))
             .unwrap_or_default()
+    }
+
+    pub fn type_of_function(&self, function: &AnyJsFunction) -> Type {
+        match function {
+            AnyJsFunction::JsArrowFunctionExpression(expr) => {
+                self.type_of_expression(&AnyJsExpression::JsArrowFunctionExpression(expr.clone()))
+            }
+            AnyJsFunction::JsFunctionDeclaration(decl) => decl
+                .id()
+                .ok()
+                .as_ref()
+                .and_then(AnyJsBinding::as_js_identifier_binding)
+                .and_then(|identifier| identifier.name_token().ok())
+                .and_then(|name| {
+                    self.resolver.as_ref().map(|resolver| {
+                        resolver.resolved_type_of_named_value(function.range(), name.text())
+                    })
+                })
+                .unwrap_or_default(),
+            AnyJsFunction::JsFunctionExportDefaultDeclaration(_decl) => self
+                .resolver
+                .as_ref()
+                .and_then(|resolver| resolver.resolved_type_of_default_export())
+                .unwrap_or_default(),
+            AnyJsFunction::JsFunctionExpression(expr) => {
+                self.type_of_expression(&AnyJsExpression::JsFunctionExpression(expr.clone()))
+            }
+        }
+    }
+
+    pub fn type_of_function_like(&self, function: &AnyFunctionLike) -> Option<Type> {
+        match function {
+            AnyFunctionLike::AnyJsFunction(function) => Some(self.type_of_function(function)),
+            AnyFunctionLike::JsConstructorClassMember(member) => {
+                let class_ty = self.get_type_of_enclosing_class(member.syntax())?;
+                let constructor = class_ty.own_members().find(|member| {
+                    // TODO: Accurately handle overloads
+                    member.is_constructor()
+                })?;
+                self.resolver
+                    .as_ref()
+                    .map(|resolver| resolver.resolved_type_for_reference(&constructor.ty))
+            }
+            AnyFunctionLike::JsMethodObjectMember(member) => {
+                let name = member
+                    .name()
+                    .ok()
+                    .as_ref()
+                    .and_then(AnyJsObjectMemberName::as_js_literal_member_name)
+                    .and_then(|name| name.value().ok())?;
+                let name = name.text_trimmed();
+
+                let object = member
+                    .syntax()
+                    .ancestors()
+                    .skip(1)
+                    .find_map(JsObjectExpression::cast)?;
+
+                let object_ty =
+                    self.type_of_expression(&AnyJsExpression::JsObjectExpression(object));
+                let member = object_ty.own_members().find(|member| {
+                    // TODO: Accurately handle overloads
+                    member.has_name(name)
+                })?;
+                self.resolver
+                    .as_ref()
+                    .map(|resolver| resolver.resolved_type_for_reference(&member.ty))
+            }
+            AnyFunctionLike::JsMethodClassMember(member) => {
+                let name = member
+                    .name()
+                    .ok()
+                    .as_ref()
+                    .and_then(AnyJsClassMemberName::as_js_literal_member_name)
+                    .and_then(|name| name.value().ok())?;
+                let name = name.text_trimmed();
+
+                let class_ty = self.get_type_of_enclosing_class(member.syntax())?;
+                let member = class_ty
+                    .own_members()
+                    .find(|member| member.has_name(name))?;
+                self.resolver
+                    .as_ref()
+                    .map(|resolver| resolver.resolved_type_for_reference(&member.ty))
+            }
+        }
+    }
+
+    fn get_type_of_enclosing_class(&self, node: &JsSyntaxNode) -> Option<Type> {
+        let class = node.ancestors().skip(1).find_map(AnyJsClass::cast)?;
+        let class_ty = match class {
+            AnyJsClass::JsClassDeclaration(decl) => {
+                let binding = decl.id().ok()?;
+                let name = binding.as_js_identifier_binding()?.name_token().ok()?;
+                self.resolver.as_ref().map(|resolver| {
+                    resolver.resolved_type_of_named_value(node.text_trimmed_range(), name.text())
+                })?
+            }
+            AnyJsClass::JsClassExportDefaultDeclaration(_decl) => self
+                .resolver
+                .as_ref()
+                .and_then(|resolver| resolver.resolved_type_of_default_export())?,
+            AnyJsClass::JsClassExpression(expr) => {
+                self.type_of_expression(&AnyJsExpression::JsClassExpression(expr))
+            }
+        };
+        Some(class_ty)
     }
 }
 
@@ -46,7 +151,7 @@ impl FromServices for TypedService {
             }
         }
 
-        let resolver: Option<&Option<Arc<ScopedResolver>>> = services.get_service();
+        let resolver: Option<&Option<Arc<ModuleResolver>>> = services.get_service();
         let resolver = resolver.and_then(|resolver| resolver.as_ref().map(Arc::clone));
         Ok(Self { resolver })
     }
@@ -83,7 +188,6 @@ where
     type Services = TypedService;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, ScopedResolverBuilderVisitor::default);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -93,69 +197,5 @@ where
 
     fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
         N::unwrap_cast(node.clone())
-    }
-}
-
-#[derive(Default)]
-struct ScopedResolverBuilderVisitor {
-    resolver: Option<Option<ScopedResolver>>,
-}
-
-impl Visitor for ScopedResolverBuilderVisitor {
-    type Language = JsLanguage;
-
-    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, ctx: VisitorContext<JsLanguage>) {
-        let resolver = self.resolver.get_or_insert_with(|| {
-            let file_path: &Arc<Utf8PathBuf> = ctx.services.get_service()?;
-            let module_graph: &Arc<ModuleGraph> = ctx.services.get_service()?;
-            module_graph
-                .module_info_for_path(file_path.as_ref())
-                .map(|module_info| {
-                    ScopedResolver::from_global_scope(module_info, module_graph.clone())
-                })
-        });
-
-        let Some(resolver) = resolver else {
-            return;
-        };
-
-        match event {
-            WalkEvent::Enter(node) => {
-                // FIXME: Currently, we need to register types for an expression before resolving it
-                //        from a lint rule, to share the resolved types for performance. It should
-                //        be resolved and cached on-demand.
-
-                // This is used by the `noFloatingPromises` rule.
-                if let Some(expr) =
-                    JsExpressionStatement::cast_ref(node).and_then(|node| node.expression().ok())
-                {
-                    resolver.register_types_for_expression(&expr);
-                }
-
-                // This is used by the `useExhaustiveSwitch` rule.
-                if let Some(stmt) = JsSwitchStatement::cast_ref(node) {
-                    if let Ok(expr) = stmt.discriminant() {
-                        resolver.register_types_for_expression(&expr);
-                    }
-
-                    stmt.cases()
-                        .iter()
-                        .filter_map(|case| match case {
-                            AnyJsSwitchClause::JsCaseClause(case) => Some(case),
-                            _ => None,
-                        })
-                        .filter_map(|case| case.test().ok())
-                        .for_each(|expr| {
-                            resolver.register_types_for_expression(&expr);
-                        });
-                }
-            }
-            WalkEvent::Leave(_node) => {}
-        }
-    }
-
-    fn finish(mut self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        let resolver = self.resolver.take().flatten().map(Arc::new);
-        ctx.services.insert_service(resolver);
     }
 }

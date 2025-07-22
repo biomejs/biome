@@ -6,6 +6,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
+use biome_rule_options::no_noninteractive_element_interactions::NoNoninteractiveElementInteractionsOptions;
 
 declare_lint_rule! {
     /// Disallow use event handlers on non-interactive elements.
@@ -74,7 +75,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noNoninteractiveElementInteractions",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-interactions")],
+        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-element-interactions").same()],
         recommended: false,
     }
 }
@@ -83,7 +84,7 @@ impl Rule for NoNoninteractiveElementInteractions {
     type Query = Aria<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNoninteractiveElementInteractionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

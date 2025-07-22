@@ -2,11 +2,12 @@ use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, termcolor};
 use biome_html_parser::parse_html;
+use biome_html_syntax::{HtmlFileSource, HtmlVariant};
 use biome_rowan::SyntaxKind;
 use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
+use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
-use std::path::Path;
 
 #[derive(Copy, Clone)]
 pub enum ExpectedOutcome {
@@ -23,24 +24,32 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         _ => panic!("Invalid expected outcome {outcome_str}"),
     };
 
-    let test_case_path = Path::new(test_case);
+    let test_case_path = Utf8Path::new(test_case);
 
-    let file_name = test_case_path
-        .file_name()
-        .expect("Expected test to have a file name")
-        .to_str()
-        .expect("File name to be valid UTF8");
+    let file_name = test_case_path.file_name();
 
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let parsed = parse_html(&content);
+    let file_source = HtmlFileSource::try_from(test_case_path).unwrap_or_default();
+
+    let parsed = parse_html(&content, file_source);
     validate_eof_token(parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();
-    writeln!(snapshot, "\n## Input\n\n```html\n{content}\n```\n\n").unwrap();
+    let code_block = match file_source.variant() {
+        HtmlVariant::Standard => "html",
+        HtmlVariant::Astro => "astro",
+        HtmlVariant::Vue => "vue",
+        HtmlVariant::Svelte => "svelte",
+    };
+    writeln!(
+        snapshot,
+        "\n## Input\n\n```{code_block}\n{content}\n```\n\n"
+    )
+    .unwrap();
 
     writeln!(
         snapshot,
@@ -128,4 +137,18 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     }, {
         insta::assert_snapshot!(file_name, snapshot);
     });
+}
+
+#[ignore]
+#[test]
+pub fn quick_test() {
+    let code = r#"<template>{{foo}}</template>
+    "#;
+
+    let root = parse_html(code, HtmlFileSource::astro());
+    let syntax = root.syntax();
+    dbg!(&syntax, root.diagnostics(), root.has_errors());
+    if has_bogus_nodes_or_empty_slots(&syntax) {
+        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
+    }
 }

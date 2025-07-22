@@ -7,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::*;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_string_case_mismatch::NoStringCaseMismatchOptions;
 use biome_string_case::StrOnlyExtension;
 
 use crate::JsRuleAction;
@@ -38,7 +39,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noStringCaseMismatch",
         language: "js",
-        sources: &[RuleSource::Clippy("match_str_case_mismatch")],
+        sources: &[RuleSource::Clippy("match_str_case_mismatch").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -49,7 +50,7 @@ impl Rule for NoStringCaseMismatch {
     type Query = Ast<QueryCandidate>;
     type State = CaseMismatchInfo;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoStringCaseMismatchOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

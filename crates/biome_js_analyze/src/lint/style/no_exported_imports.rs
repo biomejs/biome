@@ -4,6 +4,7 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::CanBeImportedExported;
 use biome_js_syntax::AnyJsImportSpecifier;
 use biome_rowan::AstNode;
+use biome_rule_options::no_exported_imports::NoExportedImportsOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -56,7 +57,7 @@ impl Rule for NoExportedImports {
     type Query = Semantic<AnyJsImportSpecifier>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoExportedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let specifier = ctx.query();

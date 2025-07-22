@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use camino::Utf8PathBuf;
 use crossbeam::channel::{Receiver, Sender, bounded, unbounded};
 use notify::{
@@ -6,14 +8,15 @@ use notify::{
     event::{CreateKind, ModifyKind, RemoveKind, RenameMode},
     recommended_watcher,
 };
+use rustc_hash::FxHashMap;
 use tracing::{debug, warn};
 
-use crate::{WorkspaceError, WorkspaceServer, diagnostics::WatchError};
+use crate::{WorkspaceError, WorkspaceServer, diagnostics::WatchError, workspace::ScanKind};
 
 /// Instructions to let the watcher either watch or unwatch a given folder.
 #[derive(Debug, Eq, PartialEq)]
 pub enum WatcherInstruction {
-    WatchFolder(Utf8PathBuf),
+    WatchFolder(Utf8PathBuf, ScanKind),
     UnwatchFolder(Utf8PathBuf),
 
     /// Resyncs a file after a file was closed by a client.
@@ -86,6 +89,9 @@ pub struct WorkspaceWatcher {
     //       `Send`, but it appears all platform implementations are.
     watcher: Box<dyn Watcher + Send>,
 
+    /// Tracks the folders we are watching, including the scan kind per folder.
+    watched_folders: FxHashMap<PathBuf, ScanKind>,
+
     /// Channel receiver for the events from our
     /// [internal watcher](Self::watcher).
     notify_rx: Receiver<NotifyResult<NotifyEvent>>,
@@ -118,6 +124,7 @@ impl WorkspaceWatcher {
         };
         let watcher = Self {
             watcher: Box::new(watcher),
+            watched_folders: Default::default(),
             notify_rx: rx,
             instruction_rx,
         };
@@ -137,55 +144,7 @@ impl WorkspaceWatcher {
         loop {
             crossbeam::channel::select! {
                 recv(self.notify_rx) -> event => match event {
-                    Ok(Ok(event)) => {
-                        if cfg!(debug_assertions) && !matches!(event.kind, EventKind::Access(_)) {
-                            debug!(event = debug(&event), "watcher_event");
-                        }
-
-                        let paths = workspace.filter_paths_for_watcher(event.paths);
-                        if paths.is_empty() {
-                            continue;
-                        };
-
-                        let result = match event.kind {
-                            EventKind::Access(_) => Ok(()),
-                            EventKind::Create(create_kind) => match create_kind {
-                                CreateKind::Folder => {
-                                    workspace.open_folders_through_watcher(paths)
-                                }
-                                _ => workspace.open_paths_through_watcher(paths),
-                            },
-                            EventKind::Modify(modify_kind) => match modify_kind {
-                                ModifyKind::Name(RenameMode::From) => {
-                                    workspace.close_paths_through_watcher(paths)
-                                }
-                                ModifyKind::Name(RenameMode::To) => {
-                                    workspace.open_paths_through_watcher(paths)
-                                },
-                                ModifyKind::Name(RenameMode::Both) if paths.len() == 2 => {
-                                    workspace.rename_path_through_watcher(
-                                        &paths[0],
-                                        &paths[1]
-                                    )
-                                },
-                                // `RenameMode::Any` and `ModifyKind::Any` need to be included as a catch-all.
-                                // Without it, we'll miss events on Windows or macOS.
-                                ModifyKind::Data(_) | ModifyKind::Name(RenameMode::Any) | ModifyKind::Any => {
-                                    workspace.open_paths_through_watcher(paths)
-                                },
-                                _ => Ok(()),
-                            },
-                            EventKind::Remove(remove_kind) => match remove_kind {
-                                RemoveKind::File => workspace.close_files_through_watcher(paths),
-                                _ => workspace.close_paths_through_watcher(paths),
-                            },
-                            EventKind::Any | EventKind::Other => Ok(()),
-                        };
-                        if let Err(error) = result {
-                            // TODO: Improve error propagation.
-                            warn!("Error processing watch event: {error}");
-                        }
-                    },
+                    Ok(Ok(event)) => self.handle_notify_event(event, workspace),
                     Ok(Err(error)) => {
                         // TODO: Improve error propagation.
                         warn!("Watcher error: {error}");
@@ -198,26 +157,14 @@ impl WorkspaceWatcher {
                     }
                 },
                 recv(self.instruction_rx) -> instruction => match instruction {
-                    Ok(WatcherInstruction::WatchFolder(path)) => {
-                        debug!(%path, "watch_folder");
-                        if let Err(error) = self.watcher.watch(path.as_std_path(), RecursiveMode::Recursive) {
-                            // TODO: Improve error propagation.
-                            warn!("Error watching path {path}: {error}");
-                        }
+                    Ok(WatcherInstruction::WatchFolder(path, scan_kind)) => {
+                        self.watch_folder(path, scan_kind);
                     }
                     Ok(WatcherInstruction::UnwatchFolder(path)) => {
-                        debug!(%path, "unwatch_folder");
-                        if let Err(error) = self.watcher.unwatch(path.as_std_path()) {
-                            // TODO: Improve error propagation.
-                            warn!("Error unwatching path {path}: {error}");
-                        }
+                        self.unwatch_folder(path);
                     }
                     Ok(WatcherInstruction::ResyncFile(path)) => {
-                        debug!(%path, "resync_file");
-                        if let Err(error) = workspace.open_path_through_watcher(&path) {
-                            // TODO: Improve error propagation.
-                            warn!("Error resyncing file {path}: {error}");
-                        }
+                        self.resync_file(path, workspace);
                     }
                     Ok(WatcherInstruction::Stop) | Err(_) => {
                         debug!("stop");
@@ -228,6 +175,139 @@ impl WorkspaceWatcher {
         }
 
         workspace.watcher_stopped();
+    }
+
+    #[tracing::instrument(level = "trace", skip(self, workspace))]
+    fn handle_notify_event(&self, event: NotifyEvent, workspace: &WorkspaceServer) {
+        let Some((paths, scan_kind)) = self.paths_with_scan_kind(event.paths) else {
+            return;
+        };
+
+        let paths = workspace.filter_paths_for_watcher(paths, &scan_kind);
+        if paths.is_empty() {
+            return;
+        };
+
+        let result = match event.kind {
+            EventKind::Access(_) => Ok(()),
+            EventKind::Create(create_kind) => match create_kind {
+                CreateKind::Folder => workspace.open_folders_through_watcher(paths, &scan_kind),
+                _ => workspace.open_paths_through_watcher(paths, &scan_kind),
+            },
+            EventKind::Modify(modify_kind) => match modify_kind {
+                ModifyKind::Name(RenameMode::From) => workspace.close_paths_through_watcher(paths),
+                ModifyKind::Name(RenameMode::To) => {
+                    workspace.open_paths_through_watcher(paths, &scan_kind)
+                }
+                ModifyKind::Name(RenameMode::Both) => match paths.len() {
+                    2 => {
+                        // Good, 2 paths are expected.
+                        workspace.rename_path_through_watcher(&paths[0], &paths[1], &scan_kind)
+                    }
+                    1 => {
+                        // Probably either the `to` or the `from` path was
+                        // filtered out, but we don't know which one, so we need
+                        // to check:
+                        if paths[0].exists() {
+                            workspace.open_paths_through_watcher(paths, &scan_kind)
+                        } else {
+                            workspace.close_paths_through_watcher(paths)
+                        }
+                    }
+                    _ => Ok(()),
+                },
+                // `RenameMode::Any` and `ModifyKind::Any` need to be included as a catch-all.
+                // Without it, we'll miss events on Windows or macOS.
+                ModifyKind::Data(_) | ModifyKind::Name(RenameMode::Any) | ModifyKind::Any => {
+                    workspace.open_paths_through_watcher(paths, &scan_kind)
+                }
+                _ => Ok(()),
+            },
+            EventKind::Remove(remove_kind) => match remove_kind {
+                RemoveKind::File => workspace.close_files_through_watcher(paths),
+                _ => workspace.close_paths_through_watcher(paths),
+            },
+            EventKind::Any | EventKind::Other => Ok(()),
+        };
+        if let Err(error) = result {
+            // TODO: Improve error propagation.
+            warn!("Error processing watch event: {error}");
+        }
+    }
+
+    /// Filters the paths to make sure only paths within watched folders remain,
+    /// and returns the `ScanKind` applicable.
+    ///
+    /// In the unlikely event that multiple paths are given that reside in
+    /// different folders with different `ScanKind`s, the `ScanKind` that would
+    /// scan the _most_ files is used.
+    ///
+    /// Returns `None` if no paths relevant to the scanner remain.
+    fn paths_with_scan_kind(&self, paths: Vec<PathBuf>) -> Option<(Vec<PathBuf>, ScanKind)> {
+        let mut scan_kind = ScanKind::NoScanner;
+        let paths = paths
+            .into_iter()
+            .filter(|path| match self.scan_kind_for_path(path) {
+                None => false,
+                Some(scan_kind) if scan_kind == &ScanKind::NoScanner => false,
+                Some(new_scan_kind) => {
+                    scan_kind = match (&scan_kind, new_scan_kind) {
+                        (_, &ScanKind::Project) | (&ScanKind::Project, _) => ScanKind::Project,
+                        _ => ScanKind::KnownFiles,
+                    };
+                    true
+                }
+            })
+            .collect();
+        (scan_kind != ScanKind::NoScanner).then_some((paths, scan_kind))
+    }
+
+    #[tracing::instrument(level = "debug", skip(self, workspace))]
+    fn resync_file(&self, path: Utf8PathBuf, workspace: &WorkspaceServer) {
+        let Some(scan_kind) = self.scan_kind_for_path(path.as_std_path()) else {
+            return;
+        };
+
+        if let Err(error) = workspace.resync_file_through_watcher(&path, scan_kind) {
+            // TODO: Improve error propagation.
+            warn!("Error resyncing file {path}: {error}");
+        }
+    }
+
+    #[inline]
+    fn scan_kind_for_path(&self, path: &Path) -> Option<&ScanKind> {
+        path.ancestors()
+            .find_map(|path| self.watched_folders.get(path))
+    }
+
+    #[tracing::instrument(level = "debug", skip(self))]
+    fn watch_folder(&mut self, path: Utf8PathBuf, scan_kind: ScanKind) {
+        let std_path = path.as_std_path();
+        if self
+            .watched_folders
+            .insert(std_path.to_path_buf(), scan_kind)
+            .is_some()
+        {
+            return; // Already watching.
+        }
+
+        if let Err(error) = self.watcher.watch(std_path, RecursiveMode::Recursive) {
+            // TODO: Improve error propagation.
+            warn!("Error unwatching path {path}: {error}");
+        }
+    }
+
+    #[tracing::instrument(level = "debug", skip(self))]
+    fn unwatch_folder(&mut self, path: Utf8PathBuf) {
+        let std_path = path.as_std_path();
+        if self.watched_folders.remove(std_path).is_none() {
+            return; // Not watching.
+        }
+
+        if let Err(error) = self.watcher.unwatch(std_path) {
+            // TODO: Improve error propagation.
+            warn!("Error unwatching path {path}: {error}");
+        }
     }
 }
 

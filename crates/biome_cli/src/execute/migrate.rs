@@ -23,6 +23,8 @@ use biome_service::workspace::{
 };
 use camino::Utf8PathBuf;
 use std::borrow::Cow;
+use std::collections::BTreeSet;
+use std::fmt::Debug;
 
 mod eslint;
 mod eslint_any_rule_to_biome;
@@ -56,9 +58,9 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     let workspace = &*session.app.workspace;
     let console = session.app.console;
 
-    let mut configuration_list = vec![configuration_file_path.into()];
+    let mut configuration_list = BTreeSet::default();
+    configuration_list.insert(configuration_file_path.into());
     configuration_list.extend(nested_configuration_files);
-
     let mut diagnostic_result = MigrationResultDiagnostic::default();
 
     for configuration_file_path in configuration_list {
@@ -209,7 +211,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
             let old_biome_config = biome_config.clone();
             let prettier_biome_config = prettier_config.try_into().map_err(|err| {
                 CliDiagnostic::MigrateError(MigrationDiagnostic {
-                    reason: format!("{:#}", err),
+                    reason: format!("{err:#}",),
                 })
             })?;
             biome_config.merge_with(prettier_biome_config);
@@ -282,7 +284,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
             let Some(mut biome_config) = biome_config else {
                 return Ok(MigrationFileResult::HasErrors);
             };
-            let (biome_eslint_config, results) =
+            let (biome_eslint_config, mut results) =
                 eslint_config.into_biome_config(&eslint_to_biome::MigrationOptions {
                     include_inspired: *include_inspired,
                     include_nursery: *include_nursery,
@@ -305,9 +307,6 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                 }
             }
             let result = if biome_config == old_biome_config {
-                console.log(markup! {
-                    <Info>"No changes to apply to the Biome configuration file."</Info>
-                });
                 MigrationFileResult::NoMigrationNeeded
             } else {
                 let new_content = serde_json::to_string(&biome_config).map_err(|err| {
@@ -327,9 +326,6 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                 })?;
                 if write {
                     biome_config_file.set_content(printed.as_code().as_bytes())?;
-                    console.log(markup!{
-                        <Info><Emphasis>{eslint_path}</Emphasis>" has been successfully migrated."</Info>
-                    });
                     MigrationFileResult::Migrated
                 } else {
                     let file_name = configuration_file_path.to_string();
@@ -344,11 +340,13 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     MigrationFileResult::NeedsMigration
                 }
             };
-            if results.has_inspired_rules {
-                console.log(markup! {
-                    <Info>"Run the command with the option "<Emphasis>"--include-inspired"</Emphasis>" to also migrate inspired rules."</Info>
-                });
+            if let Some(working_directory) = fs.working_directory() {
+                let path = working_directory.join(eslint_path);
+                let path = path.canonicalize_utf8().unwrap_or(path);
+                results.eslint_path = Some(path.to_string().into());
             }
+            results.write = write;
+            console.log(markup! {{PrintDiagnostic::simple(&results)}});
             Ok(result)
         }
         None => {

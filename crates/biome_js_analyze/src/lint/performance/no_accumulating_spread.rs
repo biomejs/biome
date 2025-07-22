@@ -4,9 +4,11 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsFunction, AnyJsMemberExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsFormalParameter, JsParameterList, JsParameters, JsSpread,
+    JsFormalParameter, JsParameterList, JsParameters, JsReferenceIdentifier, JsSpread,
+    JsStaticMemberExpression,
 };
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
+use biome_rule_options::no_accumulating_spread::NoAccumulatingSpreadOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -39,6 +41,16 @@ declare_lint_rule! {
     /// a.reduce((acc, val) => ({...acc, [val]: val}), {});
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// var a = ['a', 'b', 'c'];
+    /// a.reduce((acc, val) => Object.assign(acc, val), []);
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// var a = ['a', 'b', 'c'];
+    /// a.reduce((acc, val) => {return Object.assign(acc, val);}, []);
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
@@ -55,27 +67,52 @@ declare_lint_rule! {
     }
 }
 
+declare_node_union! {
+    pub AnySpread = JsSpread | JsStaticMemberExpression
+}
+
+pub struct FoundSpread {
+    range: TextRange,
+    is_spread: bool,
+}
+
+impl FoundSpread {
+    fn new(range: TextRange, is_spread: bool) -> Self {
+        Self { range, is_spread }
+    }
+}
+
 impl Rule for NoAccumulatingSpread {
-    type Query = Semantic<JsSpread>;
-    type State = ();
+    type Query = Semantic<AnySpread>;
+    type State = FoundSpread;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAccumulatingSpreadOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
         let model = ctx.model();
 
-        is_known_accumulator(node, model)?.then_some(())
+        match ctx.query() {
+            AnySpread::JsSpread(node) => {
+                handle_spread(node, model)?.then_some(FoundSpread::new(node.range(), true))
+            }
+            AnySpread::JsStaticMemberExpression(node) => {
+                handle_object_assign(node, model)?.then_some(FoundSpread::new(node.range(), false))
+            }
+        }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_: &RuleContext<Self>, found_spread: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
-                markup! {
-                    "Avoid the use of spread (`...`) syntax on accumulators."
+                found_spread.range,
+                match found_spread.is_spread {
+                    true => markup! {
+                        "Avoid the use of spread (`...`) syntax on accumulators."
+                    },
+                    false => markup! {
+                        "Avoid the use of Object.assign on accumulators."
+                    }
                 },
             )
             .note(markup! {
@@ -88,15 +125,9 @@ impl Rule for NoAccumulatingSpread {
     }
 }
 
-fn is_known_accumulator(node: &JsSpread, model: &SemanticModel) -> Option<bool> {
-    let reference = node
-        .argument()
-        .ok()?
-        .as_js_identifier_expression()?
-        .name()
-        .ok()?;
+fn is_known_accumulator(reference: &JsReferenceIdentifier, model: &SemanticModel) -> Option<bool> {
     let parameter = model
-        .binding(&reference)
+        .binding(reference)
         .and_then(|declaration| declaration.syntax().parent())
         .and_then(JsFormalParameter::cast)?;
     let function = parameter
@@ -139,4 +170,44 @@ fn is_known_accumulator(node: &JsSpread, model: &SemanticModel) -> Option<bool> 
 
     // Finally check that the spread references the first parameter.
     Some(parameter.syntax().index() == 0)
+}
+
+fn handle_spread(node: &JsSpread, model: &SemanticModel) -> Option<bool> {
+    let reference = node
+        .argument()
+        .ok()?
+        .as_js_identifier_expression()?
+        .name()
+        .ok()?;
+
+    is_known_accumulator(&reference, model)
+}
+
+// https://github.com/biomejs/biome/issues/5277
+// Spread operators are just syntax for Object.assign
+// Lets handle the rare cases where someone may use this
+fn handle_object_assign(node: &JsStaticMemberExpression, model: &SemanticModel) -> Option<bool> {
+    let object = node.object().ok()?;
+
+    let object_name = object.as_js_identifier_expression()?.name().ok()?;
+    if object_name.to_trimmed_text() != "Object" {
+        return None;
+    }
+    let operator = node.member().ok()?;
+    if operator.to_trimmed_text() != "assign" {
+        return None;
+    }
+
+    let call_expression = node.parent::<JsCallExpression>()?;
+    let arguments = call_expression.arguments().ok()?;
+    let reference = arguments
+        .args()
+        .first()?
+        .ok()?
+        .as_any_js_expression()?
+        .as_js_identifier_expression()?
+        .name()
+        .ok()?;
+
+    is_known_accumulator(&reference, model)
 }

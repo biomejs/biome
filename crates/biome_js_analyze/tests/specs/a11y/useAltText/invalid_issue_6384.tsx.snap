@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_issue_6384.tsx
+---
+# Input
+```tsx
+// should generate diagnostics
+import type { ComponentProps, FC } from 'react';
+
+export const CardImage: FC<ComponentProps<'img'>> = ({
+	 srcSet,
+	 ...restProps
+ }) => {
+	return (
+		<img
+			srcSet={srcSet}
+			loading="lazy"
+			{...restProps}
+		/>
+	);
+};
+
+```
+
+# Diagnostics
+```
+invalid_issue_6384.tsx:9:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+     7 │  }) => {
+     8 │ 	return (
+   > 9 │ 		<img
+       │ 		^^^^
+  > 10 │ 			srcSet={srcSet}
+  > 11 │ 			loading="lazy"
+  > 12 │ 			{...restProps}
+  > 13 │ 		/>
+       │ 		^^
+    14 │ 	);
+    15 │ };
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```

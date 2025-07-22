@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_css_syntax::{AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssSyntaxKind};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Text};
+use biome_rule_options::no_missing_var_function::NoMissingVarFunctionOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -119,7 +120,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("custom-property-no-missing-var-function")],
+        sources: &[RuleSource::Stylelint("custom-property-no-missing-var-function").same()],
     }
 }
 
@@ -148,7 +149,7 @@ impl Rule for NoMissingVarFunction {
     type Query = Semantic<CssDashedIdentifier>;
     type State = CssDashedIdentifier;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMissingVarFunctionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

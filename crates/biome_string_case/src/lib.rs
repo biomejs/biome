@@ -4,6 +4,9 @@
 
 use std::{borrow::Cow, cmp::Ordering, ffi::OsStr};
 
+#[cfg(feature = "biome_rowan")]
+pub mod comparable_token;
+
 /// Represents the case of a string.
 ///
 /// Note that some cases are supersets of others.
@@ -646,6 +649,11 @@ pub trait StrLikeExtension: ToOwned {
     /// Uppercase letters come first (e.g. `A` < `a` < `B` < `b`)
     /// and number are compared in a human way (e.g. `9` < `10`).
     fn ascii_nat_cmp(&self, other: &Self) -> Ordering;
+
+    /// Compare two strings using lexicographically by their byte values.
+    ///
+    ///  This orders Unicode code points based on their positions in the code charts.
+    fn lexicographic_cmp(&self, other: &Self) -> Ordering;
 }
 
 pub trait StrOnlyExtension: ToOwned {
@@ -668,6 +676,10 @@ impl StrLikeExtension for str {
 
     fn ascii_nat_cmp(&self, other: &Self) -> Ordering {
         self.as_bytes().ascii_nat_cmp(other.as_bytes())
+    }
+
+    fn lexicographic_cmp(&self, other: &Self) -> Ordering {
+        self.as_bytes().lexicographic_cmp(other.as_bytes())
     }
 }
 
@@ -701,6 +713,10 @@ impl StrLikeExtension for std::ffi::OsStr {
         self.as_encoded_bytes()
             .ascii_nat_cmp(other.as_encoded_bytes())
     }
+
+    fn lexicographic_cmp(&self, other: &Self) -> Ordering {
+        self.as_encoded_bytes().cmp(other.as_encoded_bytes())
+    }
 }
 
 impl StrLikeExtension for [u8] {
@@ -715,6 +731,10 @@ impl StrLikeExtension for [u8] {
 
     fn ascii_nat_cmp(&self, other: &Self) -> Ordering {
         CldrAsciiCollator.cmp(self.iter().copied(), other.iter().copied())
+    }
+
+    fn lexicographic_cmp(&self, other: &Self) -> Ordering {
+        self.iter().copied().cmp(other.iter().copied())
     }
 }
 

@@ -23,57 +23,29 @@ color: @@(style)color123;
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,9 +1,18 @@
--background-color: $$(style)Color;
--background-color: $$(style)Color Color122;
--color: @@color;
--font: 100% $font-stack;
--background-color: darken(@link-color, 10%);
--border: 1px solid var(--border-color);
+@@ -4,6 +4,6 @@
+ font: 100% $font-stack;
+ background-color: darken(@link-color, 10%);
+ border: 1px solid var(--border-color);
 -color: $(style) color;
++color: $(style)color;
+ color: @@(style) color123;
 -color: @@(style) color123;
--color: @@(style) color123;
-+background-color: $$(style)Color
-+;
-+background-color: $$(style)Color Color122
-+;
-+color: @@color
-+;
-+font: 100% $font-stack
-+;
-+background-color: darken(@link-color, 10%)
-+;
-+border: 1px solid var(--border-color)
-+;
-+color: $(style)color
-+;
-+color: @@(style) color123
-+;
-+color: @@(style)color123
-+;
++color: @@(style)color123;
 ```
 
 # Output
 
 ```css
-background-color: $$(style)Color
-;
-background-color: $$(style)Color Color122
-;
-color: @@color
-;
-font: 100% $font-stack
-;
-background-color: darken(@link-color, 10%)
-;
-border: 1px solid var(--border-color)
-;
-color: $(style)color
-;
-color: @@(style) color123
-;
-color: @@(style)color123
-;
+background-color: $$(style)Color;
+background-color: $$(style)Color Color122;
+color: @@color;
+font: 100% $font-stack;
+background-color: darken(@link-color, 10%);
+border: 1px solid var(--border-color);
+color: $(style)color;
+color: @@(style) color123;
+color: @@(style)color123;
 ```
 
 # Errors
@@ -160,54 +132,6 @@ postcss-simple-vars.css:2:20 parse ━━━━━━━━━━━━━━━
     3 │ color: @@color;
     4 │ font: 100% $font-stack;
   
-postcss-simple-vars.css:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `style`
-  
-    1 │ background-color: $$(style)Color;
-  > 2 │ background-color: $$(style)Color Color122;
-      │                      ^^^^^
-    3 │ color: @@color;
-    4 │ font: 100% $font-stack;
-  
-  i Remove style
-  
-postcss-simple-vars.css:2:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    1 │ background-color: $$(style)Color;
-  > 2 │ background-color: $$(style)Color Color122;
-      │                           ^
-    3 │ color: @@color;
-    4 │ font: 100% $font-stack;
-  
-  i Remove )
-  
-postcss-simple-vars.css:2:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `Color`
-  
-    1 │ background-color: $$(style)Color;
-  > 2 │ background-color: $$(style)Color Color122;
-      │                            ^^^^^
-    3 │ color: @@color;
-    4 │ font: 100% $font-stack;
-  
-  i Remove Color
-  
-postcss-simple-vars.css:2:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    1 │ background-color: $$(style)Color;
-  > 2 │ background-color: $$(style)Color Color122;
-      │                                          ^
-    3 │ color: @@color;
-    4 │ font: 100% $font-stack;
-  
-  i Remove ;
-  
 postcss-simple-vars.css:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
@@ -215,142 +139,19 @@ postcss-simple-vars.css:3:8 parse ━━━━━━━━━━━━━━━�
     1 │ background-color: $$(style)Color;
     2 │ background-color: $$(style)Color Color122;
   > 3 │ color: @@color;
-      │        ^
+      │        ^^^^^^^
     4 │ font: 100% $font-stack;
     5 │ background-color: darken(@link-color, 10%);
   
   i Expected one of:
   
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-simple-vars.css:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `color`
-  
-    1 │ background-color: $$(style)Color;
-    2 │ background-color: $$(style)Color Color122;
-  > 3 │ color: @@color;
-      │          ^^^^^
-    4 │ font: 100% $font-stack;
-    5 │ background-color: darken(@link-color, 10%);
-  
-  i Remove color
-  
-postcss-simple-vars.css:3:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    1 │ background-color: $$(style)Color;
-    2 │ background-color: $$(style)Color Color122;
-  > 3 │ color: @@color;
-      │               ^
-    4 │ font: 100% $font-stack;
-    5 │ background-color: darken(@link-color, 10%);
-  
-  i Remove ;
-  
-postcss-simple-vars.css:4:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    2 │ background-color: $$(style)Color Color122;
-    3 │ color: @@color;
-  > 4 │ font: 100% $font-stack;
-      │       ^^^
-    5 │ background-color: darken(@link-color, 10%);
-    6 │ border: 1px solid var(--border-color);
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
   
 postcss-simple-vars.css:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -363,44 +164,25 @@ postcss-simple-vars.css:4:12 parse ━━━━━━━━━━━━━━━
     5 │ background-color: darken(@link-color, 10%);
     6 │ border: 1px solid var(--border-color);
   
-postcss-simple-vars.css:4:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+postcss-simple-vars.css:5:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `font-stack`
-  
-    2 │ background-color: $$(style)Color Color122;
-    3 │ color: @@color;
-  > 4 │ font: 100% $font-stack;
-      │             ^^^^^^^^^^
-    5 │ background-color: darken(@link-color, 10%);
-    6 │ border: 1px solid var(--border-color);
-  
-  i Remove font-stack
-  
-postcss-simple-vars.css:4:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    2 │ background-color: $$(style)Color Color122;
-    3 │ color: @@color;
-  > 4 │ font: 100% $font-stack;
-      │                       ^
-    5 │ background-color: darken(@link-color, 10%);
-    6 │ border: 1px solid var(--border-color);
-  
-  i Remove ;
-  
-postcss-simple-vars.css:5:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `(`
+  × Expected a declaration item but instead found '@'.
   
     3 │ color: @@color;
     4 │ font: 100% $font-stack;
   > 5 │ background-color: darken(@link-color, 10%);
-      │                         ^
+      │                          ^
     6 │ border: 1px solid var(--border-color);
     7 │ color: $(style)color;
   
-  i Remove (
+  i Expected a declaration item here.
+  
+    3 │ color: @@color;
+    4 │ font: 100% $font-stack;
+  > 5 │ background-color: darken(@link-color, 10%);
+      │                          ^
+    6 │ border: 1px solid var(--border-color);
+    7 │ color: $(style)color;
   
 postcss-simple-vars.css:5:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -415,163 +197,6 @@ postcss-simple-vars.css:5:27 parse ━━━━━━━━━━━━━━━
   
   i Remove link-color
   
-postcss-simple-vars.css:5:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a selector but instead found '10%)'.
-  
-    3 │ color: @@color;
-    4 │ font: 100% $font-stack;
-  > 5 │ background-color: darken(@link-color, 10%);
-      │                                       ^^^^
-    6 │ border: 1px solid var(--border-color);
-    7 │ color: $(style)color;
-  
-  i Expected a selector here.
-  
-    3 │ color: @@color;
-    4 │ font: 100% $font-stack;
-  > 5 │ background-color: darken(@link-color, 10%);
-      │                                       ^^^^
-    6 │ border: 1px solid var(--border-color);
-    7 │ color: $(style)color;
-  
-postcss-simple-vars.css:5:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    3 │ color: @@color;
-    4 │ font: 100% $font-stack;
-  > 5 │ background-color: darken(@link-color, 10%);
-      │                                           ^
-    6 │ border: 1px solid var(--border-color);
-    7 │ color: $(style)color;
-  
-  i Remove ;
-  
-postcss-simple-vars.css:6:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    4 │ font: 100% $font-stack;
-    5 │ background-color: darken(@link-color, 10%);
-  > 6 │ border: 1px solid var(--border-color);
-      │         ^
-    7 │ color: $(style)color;
-    8 │ color: @@(style) color123;
-  
-  i Expected one of:
-  
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-simple-vars.css:6:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `px`
-  
-    4 │ font: 100% $font-stack;
-    5 │ background-color: darken(@link-color, 10%);
-  > 6 │ border: 1px solid var(--border-color);
-      │          ^^
-    7 │ color: $(style)color;
-    8 │ color: @@(style) color123;
-  
-  i Remove px
-  
-postcss-simple-vars.css:6:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `(`
-  
-    4 │ font: 100% $font-stack;
-    5 │ background-color: darken(@link-color, 10%);
-  > 6 │ border: 1px solid var(--border-color);
-      │                      ^
-    7 │ color: $(style)color;
-    8 │ color: @@(style) color123;
-  
-  i Remove (
-  
-postcss-simple-vars.css:6:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `--border-color`
-  
-    4 │ font: 100% $font-stack;
-    5 │ background-color: darken(@link-color, 10%);
-  > 6 │ border: 1px solid var(--border-color);
-      │                       ^^^^^^^^^^^^^^
-    7 │ color: $(style)color;
-    8 │ color: @@(style) color123;
-  
-  i Remove --border-color
-  
-postcss-simple-vars.css:6:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    4 │ font: 100% $font-stack;
-    5 │ background-color: darken(@link-color, 10%);
-  > 6 │ border: 1px solid var(--border-color);
-      │                                     ^
-    7 │ color: $(style)color;
-    8 │ color: @@(style) color123;
-  
-  i Remove )
-  
-postcss-simple-vars.css:6:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    4 │ font: 100% $font-stack;
-    5 │ background-color: darken(@link-color, 10%);
-  > 6 │ border: 1px solid var(--border-color);
-      │                                      ^
-    7 │ color: $(style)color;
-    8 │ color: @@(style) color123;
-  
-  i Remove ;
-  
 postcss-simple-vars.css:7:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected character `$`
@@ -583,58 +208,6 @@ postcss-simple-vars.css:7:8 parse ━━━━━━━━━━━━━━━�
     8 │ color: @@(style) color123;
     9 │ color: @@(style)color123;
   
-postcss-simple-vars.css:7:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `style`
-  
-    5 │ background-color: darken(@link-color, 10%);
-    6 │ border: 1px solid var(--border-color);
-  > 7 │ color: $(style)color;
-      │          ^^^^^
-    8 │ color: @@(style) color123;
-    9 │ color: @@(style)color123;
-  
-  i Remove style
-  
-postcss-simple-vars.css:7:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-    5 │ background-color: darken(@link-color, 10%);
-    6 │ border: 1px solid var(--border-color);
-  > 7 │ color: $(style)color;
-      │               ^
-    8 │ color: @@(style) color123;
-    9 │ color: @@(style)color123;
-  
-  i Remove )
-  
-postcss-simple-vars.css:7:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `color`
-  
-    5 │ background-color: darken(@link-color, 10%);
-    6 │ border: 1px solid var(--border-color);
-  > 7 │ color: $(style)color;
-      │                ^^^^^
-    8 │ color: @@(style) color123;
-    9 │ color: @@(style)color123;
-  
-  i Remove color
-  
-postcss-simple-vars.css:7:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-    5 │ background-color: darken(@link-color, 10%);
-    6 │ border: 1px solid var(--border-color);
-  > 7 │ color: $(style)color;
-      │                     ^
-    8 │ color: @@(style) color123;
-    9 │ color: @@(style)color123;
-  
-  i Remove ;
-  
 postcss-simple-vars.css:8:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
@@ -642,109 +215,19 @@ postcss-simple-vars.css:8:8 parse ━━━━━━━━━━━━━━━�
      6 │ border: 1px solid var(--border-color);
      7 │ color: $(style)color;
    > 8 │ color: @@(style) color123;
-       │        ^
+       │        ^^^^^^^^^^^^^^^^^^
      9 │ color: @@(style)color123;
     10 │ 
   
   i Expected one of:
   
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
-  
-postcss-simple-vars.css:8:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `style`
-  
-     6 │ border: 1px solid var(--border-color);
-     7 │ color: $(style)color;
-   > 8 │ color: @@(style) color123;
-       │           ^^^^^
-     9 │ color: @@(style)color123;
-    10 │ 
-  
-  i Remove style
-  
-postcss-simple-vars.css:8:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-     6 │ border: 1px solid var(--border-color);
-     7 │ color: $(style)color;
-   > 8 │ color: @@(style) color123;
-       │                ^
-     9 │ color: @@(style)color123;
-    10 │ 
-  
-  i Remove )
-  
-postcss-simple-vars.css:8:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `color123`
-  
-     6 │ border: 1px solid var(--border-color);
-     7 │ color: $(style)color;
-   > 8 │ color: @@(style) color123;
-       │                  ^^^^^^^^
-     9 │ color: @@(style)color123;
-    10 │ 
-  
-  i Remove color123
-  
-postcss-simple-vars.css:8:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-     6 │ border: 1px solid var(--border-color);
-     7 │ color: $(style)color;
-   > 8 │ color: @@(style) color123;
-       │                          ^
-     9 │ color: @@(style)color123;
-    10 │ 
-  
-  i Remove ;
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
   
 postcss-simple-vars.css:9:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -753,104 +236,34 @@ postcss-simple-vars.css:9:8 parse ━━━━━━━━━━━━━━━�
      7 │ color: $(style)color;
      8 │ color: @@(style) color123;
    > 9 │ color: @@(style)color123;
-       │        ^
+       │        ^^^^^^^^^^^^^^^^^
     10 │ 
   
   i Expected one of:
   
-  - hover
-  - focus
-  - active
-  - first-child
-  - last-child
-  - nth-child
-  - nth-last-child
-  - first-of-type
-  - last-of-type
-  - nth-of-type
-  - nth-last-of-type
-  - only-child
-  - only-of-type
-  - checked
-  - disabled
-  - enabled
-  - required
-  - optional
-  - valid
-  - invalid
-  - in-range
-  - out-of-range
-  - read-only
-  - read-write
-  - placeholder-shown
-  - default
-  - checked
-  - indeterminate
-  - blank
-  - empty
-  - root
-  - target
-  - lang
-  - not
-  - is
-  - where
-  - fullscreen
-  - link
-  - visited
-  - any-link
-  - local-link
-  - scope
-  - current
-  - past
-  - future
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
   
-postcss-simple-vars.css:9:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+postcss-simple-vars.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `style`
+  × expected `}` but instead the file ends
   
-     7 │ color: $(style)color;
      8 │ color: @@(style) color123;
-   > 9 │ color: @@(style)color123;
-       │           ^^^^^
-    10 │ 
+     9 │ color: @@(style)color123;
+  > 10 │ 
+       │ 
   
-  i Remove style
+  i the file ends here
   
-postcss-simple-vars.css:9:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-     7 │ color: $(style)color;
      8 │ color: @@(style) color123;
-   > 9 │ color: @@(style)color123;
-       │                ^
-    10 │ 
-  
-  i Remove )
-  
-postcss-simple-vars.css:9:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `color123`
-  
-     7 │ color: $(style)color;
-     8 │ color: @@(style) color123;
-   > 9 │ color: @@(style)color123;
-       │                 ^^^^^^^^
-    10 │ 
-  
-  i Remove color123
-  
-postcss-simple-vars.css:9:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-     7 │ color: $(style)color;
-     8 │ color: @@(style) color123;
-   > 9 │ color: @@(style)color123;
-       │                         ^
-    10 │ 
-  
-  i Remove ;
+     9 │ color: @@(style)color123;
+  > 10 │ 
+       │ 
   
 
 ```

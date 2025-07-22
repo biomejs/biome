@@ -1,0 +1,142 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+function useCallback<T extends Function>(callback: T, deps: DependencyList): T;
+
+export const makePromise = (): Promise => Promise.resolve(1);
+
+export const makePromiseCb = useCallback(makePromise);
+
+export const promise = makePromiseCb();
+```
+
+## Module Info
+
+```
+Exports {
+  "makePromise" => {
+    ExportOwnExport => JsOwnExport::Binding(4)
+  }
+  "makePromiseCb" => {
+    ExportOwnExport => JsOwnExport::Binding(5)
+  }
+  "promise" => {
+    ExportOwnExport => JsOwnExport::Binding(6)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(4) => JsBindingData {
+  Name: makePromise,
+  Type: Module(0) TypeId(6),
+  Declaration kind: Value
+}
+
+BindingId(5) => JsBindingData {
+  Name: makePromiseCb,
+  Type: Module(0) TypeId(6),
+  Declaration kind: Value
+}
+
+BindingId(6) => JsBindingData {
+  Name: promise,
+  Type: Module(0) TypeId(7),
+  Declaration kind: Value
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof Module(0) TypeId(9)
+
+Module TypeId(1) => Promise
+
+Module TypeId(2) => Promise.resolve
+
+Module TypeId(3) => value: 1
+
+Module TypeId(4) => Module(0) TypeId(10)
+
+Module TypeId(5) => Module(0) TypeId(6)
+
+Module TypeId(6) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(7)
+}
+
+Module TypeId(7) => instanceof Promise
+
+Module TypeId(8) => unknown
+
+Module TypeId(9) => T extends Module(0) TypeId(8)
+
+Module TypeId(10) => sync Function "useCallback" {
+  accepts: {
+    params: [
+      required callback: Module(0) TypeId(0)
+      required deps: Module(0) TypeId(8)
+    ]
+    type_args: [Module(0) TypeId(9)]
+  }
+  returns: Module(0) TypeId(0)
+}
+```
+
+# Module Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => instanceof Module(0) TypeId(9)
+
+Full TypeId(1) => Promise
+
+Full TypeId(2) => Promise.resolve
+
+Full TypeId(3) => value: 1
+
+Full TypeId(4) => Module(0) TypeId(10)
+
+Full TypeId(5) => Module(0) TypeId(6)
+
+Full TypeId(6) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(7)
+}
+
+Full TypeId(7) => instanceof Promise
+
+Full TypeId(8) => unknown
+
+Full TypeId(9) => T extends Module(0) TypeId(8)
+
+Full TypeId(10) => sync Function "useCallback" {
+  accepts: {
+    params: [
+      required callback: Module(0) TypeId(0)
+      required deps: Module(0) TypeId(8)
+    ]
+    type_args: [Module(0) TypeId(9)]
+  }
+  returns: Module(0) TypeId(0)
+}
+```

@@ -1,0 +1,1161 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: suppressions.jsx
+---
+# Input
+```jsx
+///! lint/a11y/useKeyWithClickEvents
+///! lint/a11y/useSemanticElements
+///! lint/correctness/noChildrenProp
+
+function bothFailing() {
+  return (
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function firstDisabled() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function firstDisabledStar() {
+  return (
+    /* biome-ignore lint/a11y/useKeyWithClickEvents: ... */
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function secondDisabled() {
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function bothDisabled() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function bothDisabledMixed1() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    /* biome-ignore lint/a11y/useSemanticElements: ... */
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function bothDisabledMixed2() {
+  return (
+    /* biome-ignore lint/a11y/useKeyWithClickEvents: ... */
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function onlyLastDisabledWithSpacing() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function bothDisabledFarAway() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    // biome-ignore lint/a11y/noRedundantAlt: ...
+    // biome-ignore lint/security/noBlankTarget: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function unused1() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    // biome-ignore lint/a11y/noRedundantAlt: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function unused2() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    // biome-ignore lint/security/noBlankTarget: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function unused3() {
+  return (
+    // biome-ignore lint/style/noImplicitBoolean: ...
+    // biome-ignore lint/security/noBlankTarget: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function wideThenNarrow() {
+  return (
+    // biome-ignore lint: ...
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function wideThenNarrowUnused() {
+  return (
+    // biome-ignore lint: ...
+    // biome-ignore lint/security/noBlankTarget: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function narrowThenWide() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    // biome-ignore lint: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function narrowThenWideUnused() {
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    // biome-ignore lint: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function narrowUnusedThenWide() {
+  return (
+    // biome-ignore lint/security/noBlankTarget: ...
+    // biome-ignore lint: ...
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function tagAndAttribute1() {
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    <span
+      role="button"
+      // biome-ignore lint/correctness/noChildrenProp: ...
+      children={[]}
+    >Some text</span>
+  )
+}
+
+function tagAndAttribute2() {
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: ...
+    // biome-ignore lint/correctness/noChildrenProp: ...
+    <span
+      role="button"
+      children={[]}
+    >Some text</span>
+  )
+}
+
+function bothDisabledInsideJsx() {
+  return (<>
+    {/* biome-ignore lint/a11y/useKeyWithClickEvents: ... */}
+    {/* biome-ignore lint/a11y/useSemanticElements: ... */}
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  </>)
+}
+
+function bothDisabledInsideJsxSameToken() {
+  return (<>
+    {/* biome-ignore lint/a11y/useKeyWithClickEvents: ... */
+    /* biome-ignore lint/a11y/useSemanticElements: ... */}
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  </>)
+}
+
+function bothDisabledViaSameComment() {
+  return (
+    /*biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    biome-ignore lint/a11y/useSemanticElements: ... */
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function bothDisabledViaSameComment2() {
+  return (
+    /*
+    biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    biome-ignore lint/a11y/useSemanticElements: ...
+    */
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function bothDisabledViaSameCommentInJsx() {
+  return (<>
+    {/*
+    biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    biome-ignore lint/a11y/useSemanticElements: ... */}
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  </>)
+}
+
+function bothDisabledViaSameCommentInJsx2() {
+  return (<>
+    {/*
+    biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    biome-ignore lint/a11y/useSemanticElements: ... */ <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>}
+  </>)
+}
+
+// Four examples below are still imperfect - the whole comment is reported unused.
+// That is probably good enough - suppression still works as intended, but we
+// don't have access to precise ranges of each part.
+
+function unusedCaughtWithinSameComment() {
+  return (
+    /*
+    biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    biome-ignore lint/security/noBlankTarget: ...
+    */
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function unusedCaughtWithinSameComment2() {
+  return (
+    /*
+    biome-ignore lint/security/noBlankTarget: ...
+    biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    */
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function unusedCaughtWithinSameComment3() {
+  return (
+    /* biome-ignore lint/security/noBlankTarget: ...
+    biome-ignore lint/a11y/useKeyWithClickEvents: ... */
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  )
+}
+
+function unusedCaughtWithinSameCommentInJsx() {
+  return (<>
+    {/* biome-ignore lint/security/noBlankTarget: ...
+    biome-ignore lint/a11y/useKeyWithClickEvents: ... */}
+    <span
+      role="button"
+      onClick={()=>null}
+    >Some text</span>
+  </>)
+}
+
+```
+
+# Diagnostics
+```
+suppressions.jsx:7:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+     5 │ function bothFailing() {
+     6 │   return (
+   > 7 │     <span
+       │     ^^^^^
+   > 8 │       role="button"
+   > 9 │       onClick={()=>null}
+  > 10 │     >Some text</span>
+       │     ^
+    11 │   )
+    12 │ }
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+      5   5 │   function bothFailing() {
+      6   6 │     return (
+      7     │ - ····<span
+          7 │ + ····//·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>
+          8 │ + <span
+      8   9 │         role="button"
+      9  10 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:8:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+     6 │   return (
+     7 │     <span
+   > 8 │       role="button"
+       │       ^^^^^^^^^^^^^
+     9 │       onClick={()=>null}
+    10 │     >Some text</span>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
+  
+      5   5 │   function bothFailing() {
+      6   6 │     return (
+      7     │ - ····<span
+          7 │ + ····//·biome-ignore·lint/a11y/useSemanticElements:·<explanation>
+          8 │ + <span
+      8   9 │         role="button"
+      9  10 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:18:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    16 │     // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    17 │     <span
+  > 18 │       role="button"
+       │       ^^^^^^^^^^^^^
+    19 │       onClick={()=>null}
+    20 │     >Some text</span>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
+  
+     15  15 │     return (
+     16  16 │       // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+     17     │ - ····<span
+         17 │ + ····//·biome-ignore·lint/a11y/useSemanticElements:·<explanation>
+         18 │ + <span
+     18  19 │         role="button"
+     19  20 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:28:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    26 │     /* biome-ignore lint/a11y/useKeyWithClickEvents: ... */
+    27 │     <span
+  > 28 │       role="button"
+       │       ^^^^^^^^^^^^^
+    29 │       onClick={()=>null}
+    30 │     >Some text</span>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
+  
+     25  25 │     return (
+     26  26 │       /* biome-ignore lint/a11y/useKeyWithClickEvents: ... */
+     27     │ - ····<span
+         27 │ + ····//·biome-ignore·lint/a11y/useSemanticElements:·<explanation>
+         28 │ + <span
+     28  29 │         role="button"
+     29  30 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:37:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    35 │   return (
+    36 │     // biome-ignore lint/a11y/useSemanticElements: ...
+  > 37 │     <span
+       │     ^^^^^
+  > 38 │       role="button"
+  > 39 │       onClick={()=>null}
+  > 40 │     >Some text</span>
+       │     ^
+    41 │   )
+    42 │ }
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+     35  35 │     return (
+     36  36 │       // biome-ignore lint/a11y/useSemanticElements: ...
+     37     │ - ····<span
+         37 │ + ····//·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>
+         38 │ + <span
+     38  39 │         role="button"
+     39  40 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:82:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    81 │     // biome-ignore lint/a11y/useSemanticElements: ...
+  > 82 │     <span
+       │     ^^^^^
+  > 83 │       role="button"
+  > 84 │       onClick={()=>null}
+  > 85 │     >Some text</span>
+       │     ^
+    86 │   )
+    87 │ }
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+     80  80 │   
+     81  81 │       // biome-ignore lint/a11y/useSemanticElements: ...
+     82     │ - ····<span
+         82 │ + ····//·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>
+         83 │ + <span
+     83  84 │         role="button"
+     84  85 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:107:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    105 │     // biome-ignore lint/a11y/noRedundantAlt: ...
+    106 │     <span
+  > 107 │       role="button"
+        │       ^^^^^^^^^^^^^
+    108 │       onClick={()=>null}
+    109 │     >Some text</span>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
+  
+    104 104 │       // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    105 105 │       // biome-ignore lint/a11y/noRedundantAlt: ...
+    106     │ - ····<span
+        106 │ + ····//·biome-ignore·lint/a11y/useSemanticElements:·<explanation>
+        107 │ + <span
+    107 108 │         role="button"
+    108 109 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:118:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    116 │     // biome-ignore lint/security/noBlankTarget: ...
+    117 │     <span
+  > 118 │       role="button"
+        │       ^^^^^^^^^^^^^
+    119 │       onClick={()=>null}
+    120 │     >Some text</span>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
+  
+    115 115 │       // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    116 116 │       // biome-ignore lint/security/noBlankTarget: ...
+    117     │ - ····<span
+        117 │ + ····//·biome-ignore·lint/a11y/useSemanticElements:·<explanation>
+        118 │ + <span
+    118 119 │         role="button"
+    119 120 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:129:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    127 │     // biome-ignore lint/security/noBlankTarget: ...
+    128 │     <span
+  > 129 │       role="button"
+        │       ^^^^^^^^^^^^^
+    130 │       onClick={()=>null}
+    131 │     >Some text</span>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
+  
+    126 126 │       // biome-ignore lint/style/noImplicitBoolean: ...
+    127 127 │       // biome-ignore lint/security/noBlankTarget: ...
+    128     │ - ····<span
+        128 │ + ····//·biome-ignore·lint/a11y/useSemanticElements:·<explanation>
+        129 │ + <span
+    129 130 │         role="button"
+    130 131 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:128:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    126 │     // biome-ignore lint/style/noImplicitBoolean: ...
+    127 │     // biome-ignore lint/security/noBlankTarget: ...
+  > 128 │     <span
+        │     ^^^^^
+  > 129 │       role="button"
+  > 130 │       onClick={()=>null}
+  > 131 │     >Some text</span>
+        │     ^
+    132 │   )
+    133 │ }
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
+  
+    126 126 │       // biome-ignore lint/style/noImplicitBoolean: ...
+    127 127 │       // biome-ignore lint/security/noBlankTarget: ...
+    128     │ - ····<span
+        128 │ + ····//·biome-ignore·lint/a11y/useKeyWithClickEvents:·<explanation>
+        129 │ + <span
+    129 130 │         role="button"
+    130 131 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useKeyWithClickEvents:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:293:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    291 │     */
+    292 │     <span
+  > 293 │       role="button"
+        │       ^^^^^^^^^^^^^
+    294 │       onClick={()=>null}
+    295 │     >Some text</span>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
+  
+    290 290 │       biome-ignore lint/security/noBlankTarget: ...
+    291 291 │       */
+    292     │ - ····<span
+        292 │ + ····
+        293 │ + //·biome-ignore·lint/a11y/useSemanticElements:·<explanation>
+        294 │ + <span
+    293 295 │         role="button"
+    294 296 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:306:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    304 │     */
+    305 │     <span
+  > 306 │       role="button"
+        │       ^^^^^^^^^^^^^
+    307 │       onClick={()=>null}
+    308 │     >Some text</span>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
+  
+    303 303 │       biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    304 304 │       */
+    305     │ - ····<span
+        305 │ + ····
+        306 │ + //·biome-ignore·lint/a11y/useSemanticElements:·<explanation>
+        307 │ + <span
+    306 308 │         role="button"
+    307 309 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:317:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    315 │     biome-ignore lint/a11y/useKeyWithClickEvents: ... */
+    316 │     <span
+  > 317 │       role="button"
+        │       ^^^^^^^^^^^^^
+    318 │       onClick={()=>null}
+    319 │     >Some text</span>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
+  
+    314 314 │       /* biome-ignore lint/security/noBlankTarget: ...
+    315 315 │       biome-ignore lint/a11y/useKeyWithClickEvents: ... */
+    316     │ - ····<span
+        316 │ + ····
+        317 │ + //·biome-ignore·lint/a11y/useSemanticElements:·<explanation>
+        318 │ + <span
+    317 319 │         role="button"
+    318 320 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:328:7 lint/a11y/useSemanticElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The elements with this role can be changed to the following elements:
+    <button>
+  
+    326 │     biome-ignore lint/a11y/useKeyWithClickEvents: ... */}
+    327 │     <span
+  > 328 │       role="button"
+        │       ^^^^^^^^^^^^^
+    329 │       onClick={()=>null}
+    330 │     >Some text</span>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for this line.
+  
+    325 325 │       {/* biome-ignore lint/security/noBlankTarget: ...
+    326 326 │       biome-ignore lint/a11y/useKeyWithClickEvents: ... */}
+    327     │ - ····<span
+        327 │ + ····{/**·biome-ignore·lint/a11y/useSemanticElements:·<explanation>·*/}
+        328 │ + ····<span
+    328 329 │         role="button"
+    329 330 │         onClick={()=>null}
+  
+  i Safe fix: Suppress rule lint/a11y/useSemanticElements for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/a11y/useSemanticElements:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:208:7 lint/correctness/noChildrenProp  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid passing children using a prop
+  
+    206 │     <span
+    207 │       role="button"
+  > 208 │       children={[]}
+        │       ^^^^^^^^
+    209 │     >Some text</span>
+    210 │   )
+  
+  i The canonical way to pass children in React is to use JSX elements
+  
+  i Safe fix: Suppress rule lint/correctness/noChildrenProp for this line.
+  
+    206 206 │       <span
+    207 207 │         role="button"
+    208     │ - ······children={[]}
+        208 │ + ······//·biome-ignore·lint/correctness/noChildrenProp:·<explanation>
+        209 │ + ······children={[]}
+    209 210 │       >Some text</span>
+    210 211 │     )
+  
+  i Safe fix: Suppress rule lint/correctness/noChildrenProp for the whole file.
+  
+      1   1 │   ///! lint/a11y/useKeyWithClickEvents
+      2     │ - ///!·lint/a11y/useSemanticElements
+          2 │ + /**·biome-ignore-all·lint/correctness/noChildrenProp:·<explanation>·*/
+          3 │ + ///!·lint/a11y/useSemanticElements
+      3   4 │   ///! lint/correctness/noChildrenProp
+      4   5 │   
+  
+
+```
+
+```
+suppressions.jsx:79:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    77 │ function onlyLastDisabledWithSpacing() {
+    78 │   return (
+  > 79 │     // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    80 │ 
+    81 │     // biome-ignore lint/a11y/useSemanticElements: ...
+  
+
+```
+
+```
+suppressions.jsx:93:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    91 │     // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    92 │     // biome-ignore lint/a11y/useSemanticElements: ...
+  > 93 │     // biome-ignore lint/a11y/noRedundantAlt: ...
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    94 │     // biome-ignore lint/security/noBlankTarget: ...
+    95 │     <span
+  
+
+```
+
+```
+suppressions.jsx:94:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    92 │     // biome-ignore lint/a11y/useSemanticElements: ...
+    93 │     // biome-ignore lint/a11y/noRedundantAlt: ...
+  > 94 │     // biome-ignore lint/security/noBlankTarget: ...
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    95 │     <span
+    96 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:105:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    103 │   return (
+    104 │     // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+  > 105 │     // biome-ignore lint/a11y/noRedundantAlt: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    106 │     <span
+    107 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:116:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    114 │   return (
+    115 │     // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+  > 116 │     // biome-ignore lint/security/noBlankTarget: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    117 │     <span
+    118 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:126:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    124 │ function unused3() {
+    125 │   return (
+  > 126 │     // biome-ignore lint/style/noImplicitBoolean: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    127 │     // biome-ignore lint/security/noBlankTarget: ...
+    128 │     <span
+  
+
+```
+
+```
+suppressions.jsx:127:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    125 │   return (
+    126 │     // biome-ignore lint/style/noImplicitBoolean: ...
+  > 127 │     // biome-ignore lint/security/noBlankTarget: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    128 │     <span
+    129 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:138:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    136 │   return (
+    137 │     // biome-ignore lint: ...
+  > 138 │     // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    139 │     <span
+    140 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:149:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    147 │   return (
+    148 │     // biome-ignore lint: ...
+  > 149 │     // biome-ignore lint/security/noBlankTarget: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    150 │     <span
+    151 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:172:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    170 │     // biome-ignore lint/a11y/useKeyWithClickEvents: ...
+    171 │     // biome-ignore lint/a11y/useSemanticElements: ...
+  > 172 │     // biome-ignore lint: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    173 │     <span
+    174 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:182:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    180 │ function narrowUnusedThenWide() {
+    181 │   return (
+  > 182 │     // biome-ignore lint/security/noBlankTarget: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    183 │     // biome-ignore lint: ...
+    184 │     <span
+  
+
+```
+
+```
+suppressions.jsx:205:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    203 │   return (
+    204 │     // biome-ignore lint/a11y/useSemanticElements: ...
+  > 205 │     // biome-ignore lint/correctness/noChildrenProp: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    206 │     <span
+    207 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:288:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    286 │ function unusedCaughtWithinSameComment() {
+    287 │   return (
+  > 288 │     /*
+        │     ^^
+  > 289 │     biome-ignore lint/a11y/useKeyWithClickEvents: ...
+  > 290 │     biome-ignore lint/security/noBlankTarget: ...
+  > 291 │     */
+        │     ^^
+    292 │     <span
+    293 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:301:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    299 │ function unusedCaughtWithinSameComment2() {
+    300 │   return (
+  > 301 │     /*
+        │     ^^
+  > 302 │     biome-ignore lint/security/noBlankTarget: ...
+  > 303 │     biome-ignore lint/a11y/useKeyWithClickEvents: ...
+  > 304 │     */
+        │     ^^
+    305 │     <span
+    306 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:314:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    312 │ function unusedCaughtWithinSameComment3() {
+    313 │   return (
+  > 314 │     /* biome-ignore lint/security/noBlankTarget: ...
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 315 │     biome-ignore lint/a11y/useKeyWithClickEvents: ... */
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    316 │     <span
+    317 │       role="button"
+  
+
+```
+
+```
+suppressions.jsx:325:6 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    323 │ function unusedCaughtWithinSameCommentInJsx() {
+    324 │   return (<>
+  > 325 │     {/* biome-ignore lint/security/noBlankTarget: ...
+        │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 326 │     biome-ignore lint/a11y/useKeyWithClickEvents: ... */}
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    327 │     <span
+    328 │       role="button"
+  
+
+```

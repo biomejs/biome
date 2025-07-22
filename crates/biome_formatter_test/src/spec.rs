@@ -14,7 +14,7 @@ use biome_service::App;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::Settings;
 use biome_service::workspace::{
-    DocumentFileSource, FeaturesBuilder, OpenProjectParams, OpenProjectResult,
+    DocumentFileSource, FeaturesBuilder, FileFeaturesResult, OpenProjectParams, OpenProjectResult,
     SupportsFeatureParams, UpdateSettingsParams,
 };
 use camino::{Utf8Path, Utf8PathBuf};
@@ -64,7 +64,9 @@ impl<'a> SpecTestFile<'a> {
             app.workspace.update_settings(settings).unwrap();
         }
         let mut input_file = BiomePath::new(file_path);
-        let can_format = app
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = app
             .workspace
             .file_features(SupportsFeatureParams {
                 project_key,
@@ -73,7 +75,7 @@ impl<'a> SpecTestFile<'a> {
             })
             .unwrap();
 
-        if can_format.supports_format() {
+        if file_features.supports_format() {
             let mut input_code = input_file.get_buffer_from_file();
 
             let (_, range_start_index, range_end_index) = strip_rome_placeholders(&mut input_code);

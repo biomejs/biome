@@ -11,5 +11,6 @@ pub(crate) mod pseudo_class_identifier;
 pub(crate) mod pseudo_class_nth;
 pub(crate) mod pseudo_class_nth_identifier;
 pub(crate) mod pseudo_class_nth_number;
-pub(crate) mod pseudo_element_function_identifier;
+pub(crate) mod pseudo_element_function;
+pub(crate) mod pseudo_element_function_custom_identifier;
 pub(crate) mod pseudo_element_identifier;

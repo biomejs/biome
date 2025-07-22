@@ -38,7 +38,7 @@ invalid.jsx:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     1 │ import·X·from·"react"
       │ ---------------------
@@ -58,7 +58,7 @@ invalid.jsx:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      1  1 │   import X from "react"
      2    │ - import·*·as·X·from·"react"
@@ -82,7 +82,7 @@ invalid.jsx:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      1  1 │   import X from "react"
      2  2 │   import * as X from "react"
@@ -107,7 +107,7 @@ invalid.jsx:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      1  1 │   import X from "react"
      2  2 │   import * as X from "react"
@@ -134,7 +134,7 @@ invalid.jsx:6:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      4  4 │   
      5  5 │   import React from "x"
@@ -159,7 +159,7 @@ invalid.jsx:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      5  5 │   import React from "x"
      6  6 │   import * as React from "x"
@@ -184,7 +184,7 @@ invalid.jsx:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      6  6 │   import * as React from "x"
      7  7 │   import { default as React } from "x"
@@ -208,7 +208,7 @@ invalid.jsx:11:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      6  6 │   import * as React from "x"
      7  7 │   import { default as React } from "x"
@@ -237,7 +237,7 @@ invalid.jsx:12:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     10 10 │   // unsupported patterns
     11 11 │   import X, { default as React } from "react"
@@ -261,7 +261,7 @@ invalid.jsx:15:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     10 10 │   // unsupported patterns
     11 11 │   import X, { default as React } from "react"
@@ -290,7 +290,7 @@ invalid.jsx:16:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     14 14 │   // React import (no exception)
     15 15 │   import React from "react"
@@ -315,7 +315,7 @@ invalid.jsx:17:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     15 15 │   import React from "react"
     16 16 │   import * as React from "react"
@@ -339,7 +339,7 @@ invalid.jsx:18:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     16 16 │   import * as React from "react"
     17 17 │   import { default as React } from "react"

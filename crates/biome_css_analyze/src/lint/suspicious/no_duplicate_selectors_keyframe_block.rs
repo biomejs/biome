@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_css_syntax::{AnyCssKeyframesItem, AnyCssKeyframesSelector, CssKeyframesBlock};
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_duplicate_selectors_keyframe_block::NoDuplicateSelectorsKeyframeBlockOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
@@ -44,7 +45,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources:&[RuleSource::Stylelint("keyframe-block-no-duplicate-selectors")],
+        sources:&[RuleSource::Stylelint("keyframe-block-no-duplicate-selectors").same()],
     }
 }
 
@@ -52,7 +53,7 @@ impl Rule for NoDuplicateSelectorsKeyframeBlock {
     type Query = Ast<CssKeyframesBlock>;
     type State = AnyCssKeyframesSelector;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateSelectorsKeyframeBlockOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

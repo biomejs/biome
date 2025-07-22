@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::HtmlSyntaxNode::kind(&node) {
+                $crate::HtmlSyntaxKind::ASTRO_FRONTMATTER_ELEMENT => {
+                    let $pattern = unsafe { $crate::AstroFrontmatterElement::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE => {
                     let $pattern = unsafe { $crate::HtmlAttribute::new_unchecked(node) };
                     $body
@@ -71,6 +75,18 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_TAG_NAME => {
                     let $pattern = unsafe { $crate::HtmlTagName::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlTextExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::SVELTE_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::SvelteTextExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ASTRO_BOGUS_FRONTMATTER => {
+                    let $pattern = unsafe { $crate::AstroBogusFrontmatter::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_BOGUS => {

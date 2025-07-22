@@ -86,6 +86,7 @@ impl TryFrom<YamlSyntaxKind> for TriviaPieceKind {
         match value {
             YamlSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
             YamlSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
+            YamlSyntaxKind::NEWLINE => Ok(Self::Newline),
             _ => Err(()),
         }
     }

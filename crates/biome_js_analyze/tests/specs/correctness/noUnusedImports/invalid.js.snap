@@ -53,7 +53,7 @@ invalid.js:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      1    │ - //·Header·comment
      2    │ - import·A·from·"mod";
@@ -77,7 +77,7 @@ invalid.js:5:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      1  1 │   // Header comment
      2    │ - import·A·from·"mod";
@@ -104,7 +104,7 @@ invalid.js:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      3  3 │   
      4  4 │   // Header comment
@@ -132,7 +132,7 @@ invalid.js:11:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      6  6 │   
      7  7 │   // Header comment
@@ -161,7 +161,7 @@ invalid.js:13:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      9  9 │   
     10 10 │   // Header comment
@@ -194,7 +194,7 @@ invalid.js:15:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     11 11 │   import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
     12 12 │   
@@ -226,7 +226,7 @@ invalid.js:21:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     17 17 │       H,
     18 18 │       I,
@@ -253,7 +253,7 @@ invalid.js:24:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     19 19 │   } from "mod";
     20 20 │   
@@ -282,7 +282,7 @@ invalid.js:28:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     26 26 │   // See https://github.com/biomejs/biome/issues/653
     27 27 │   import {a} from 'a'
@@ -306,7 +306,7 @@ invalid.js:32:9 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     28 28 │   import {d} from 'd'
     29 29 │   import {b} from 'b'

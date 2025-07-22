@@ -1,6 +1,6 @@
 mod tests;
 
-use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
+use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{
     DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE, TOMBSTONE,
     UNICODE_BOM, WHITESPACE,
@@ -60,6 +60,7 @@ impl<'src> HtmlLexer<'src> {
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
             b'\'' | b'"' => self.consume_string_literal(current),
+            b'-' if self.is_at_frontmatter_edge() => self.consume_frontmatter_edge(),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -84,6 +85,8 @@ impl<'src> HtmlLexer<'src> {
     fn consume_token_outside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'{' if self.is_at_l_text_expression() => self.consume_l_text_expression(),
+            b'}' if self.is_at_r_text_expression() => self.consume_r_text_expression(),
             b'<' => {
                 // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -137,7 +140,8 @@ impl<'src> HtmlLexer<'src> {
     fn consume_token_embedded_language(
         &mut self,
         _current: u8,
-        lang: HtmlEmbededLanguage,
+        lang: HtmlEmbeddedLanguage,
+        context: HtmlLexContext,
     ) -> HtmlSyntaxKind {
         let start = self.text_position();
         let end_tag = lang.end_tag();
@@ -152,6 +156,10 @@ impl<'src> HtmlLexer<'src> {
                 break;
             }
             self.advance_byte_or_char(byte);
+
+            if context == HtmlLexContext::AstroFencedCodeBlock && self.is_at_frontmatter_edge() {
+                return HTML_LITERAL;
+            }
         }
 
         if self.text_position() != start {
@@ -195,6 +203,26 @@ impl<'src> HtmlLexer<'src> {
                     self.advance_byte_or_char(char);
                 }
                 HTML_LITERAL
+            }
+        }
+    }
+
+    fn consume_astro_frontmatter(
+        &mut self,
+        current: u8,
+        context: HtmlLexContext,
+    ) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'<' if self.at_start_cdata() => self.consume_cdata_start(),
+            b'<' => self.consume_byte(T![<]),
+            b'-' => {
+                debug_assert!(self.is_at_frontmatter_edge());
+                self.advance(3);
+                T![---]
+            }
+            _ => {
+                self.consume_token_embedded_language(current, HtmlEmbeddedLanguage::Script, context)
             }
         }
     }
@@ -405,6 +433,24 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    fn consume_l_text_expression(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.is_at_l_text_expression());
+        self.advance(2);
+        T!["{{"]
+    }
+
+    fn consume_r_text_expression(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.is_at_r_text_expression());
+        self.advance(2);
+        T!["}}"]
+    }
+
+    fn consume_frontmatter_edge(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.is_at_frontmatter_edge());
+        self.advance(3);
+        T![---]
+    }
+
     fn at_start_comment(&mut self) -> bool {
         self.current_byte() == Some(b'<')
             && self.byte_at(1) == Some(b'!')
@@ -434,6 +480,20 @@ impl<'src> HtmlLexer<'src> {
         self.current_byte() == Some(b']')
             && self.byte_at(1) == Some(b']')
             && self.byte_at(2) == Some(b'>')
+    }
+
+    fn is_at_frontmatter_edge(&self) -> bool {
+        self.current_byte() == Some(b'-')
+            && self.byte_at(1) == Some(b'-')
+            && self.byte_at(2) == Some(b'-')
+    }
+
+    fn is_at_l_text_expression(&self) -> bool {
+        self.current_byte() == Some(b'{') && self.byte_at(1) == Some(b'{')
+    }
+
+    fn is_at_r_text_expression(&self) -> bool {
+        self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
     }
 
     fn consume_comment_start(&mut self) -> HtmlSyntaxKind {
@@ -522,8 +582,34 @@ impl<'src> HtmlLexer<'src> {
     /// See: https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace
     fn consume_html_text(&mut self) -> HtmlSyntaxKind {
         let mut whitespace_started = None;
+        let mut closing_expression = None;
+        let mut was_escaped = false;
+
+        if self.is_at_r_text_expression() {
+            return T!["}}"];
+        }
+
         while let Some(current) = self.current_byte() {
             match current {
+                b'\\' => {
+                    was_escaped = true;
+                    whitespace_started = None;
+                    self.advance(1);
+                }
+                b'}' => {
+                    if was_escaped {
+                        self.advance(1);
+                    } else {
+                        if let Some(checkpoint) = closing_expression {
+                            self.rewind(checkpoint);
+                            break;
+                        }
+                        closing_expression = Some(self.checkpoint());
+                        whitespace_started = None;
+                        self.advance(1);
+                    }
+                }
+
                 b'<' => {
                     if let Some(checkpoint) = whitespace_started {
                         // avoid treating the last space as part of the token if there is one
@@ -536,12 +622,16 @@ impl<'src> HtmlLexer<'src> {
                     break;
                 }
                 b' ' => {
+                    if was_escaped {
+                        was_escaped = false;
+                    }
                     if let Some(checkpoint) = whitespace_started {
                         // avoid treating the last space as part of the token
                         self.rewind(checkpoint);
                         break;
                     }
                     whitespace_started = Some(self.checkpoint());
+                    closing_expression = None;
                     self.advance(1);
                 }
                 _ => {
@@ -588,10 +678,13 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
-                        self.consume_token_embedded_language(current, lang)
+                        self.consume_token_embedded_language(current, lang, context)
                     }
                     HtmlLexContext::Comment => self.consume_inside_comment(current),
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
+                    HtmlLexContext::AstroFencedCodeBlock => {
+                        self.consume_astro_frontmatter(current, context)
+                    }
                 },
                 None => EOF,
             }
@@ -666,9 +759,10 @@ fn is_tag_name_byte(byte: u8) -> bool {
     // However, custom tag names must start with a lowercase letter, but they can be followed by pretty much anything else.
     // https://html.spec.whatwg.org/#valid-custom-element-name
 
-    // FIXME: The extra characters allowed here `-` and `:` is a temporary fix for now to fix parsing issues in some prettier test cases.
+    // The extra characters allowed here `-`, `:`, and `.` are not usually allowed in the HTML tag name.
+    // However, Prettier considers them to be valid characters in tag names, so we allow them to remain compatible.
 
-    byte.is_ascii_alphanumeric() || byte == b'-' || byte == b':'
+    byte.is_ascii_alphanumeric() || byte == b'-' || byte == b':' || byte == b'.'
 }
 
 fn is_attribute_name_byte(byte: u8) -> bool {

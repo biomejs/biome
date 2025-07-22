@@ -90,7 +90,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "11560602666260894730",
     "severity": "major",
@@ -102,7 +102,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "3378636030374148952",
     "severity": "major",
@@ -114,7 +114,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "1217643363874050521",
     "severity": "major",
@@ -126,7 +126,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "4133571069805885280",
     "severity": "major",
@@ -138,7 +138,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "5071171301459682706",
     "severity": "major",
@@ -150,7 +150,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "228646201265839522",
     "severity": "major",
@@ -162,7 +162,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "1113933937129958476",
     "severity": "major",
@@ -198,7 +198,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "17581182407618726497",
     "severity": "major",
@@ -210,7 +210,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "7876075472853952714",
     "severity": "major",
@@ -222,7 +222,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "9844529903890075314",
     "severity": "major",
@@ -234,7 +234,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "13391528371208812095",
     "severity": "major",
@@ -246,7 +246,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
-    "description": "This variable is unused.",
+    "description": "This variable f is unused.",
     "check_name": "lint/correctness/noUnusedVariables",
     "fingerprint": "17201637410894263274",
     "severity": "major",

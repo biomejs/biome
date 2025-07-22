@@ -2,14 +2,10 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize::{
-    DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
-};
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, JsCallExpression};
-use biome_rowan::{AstNode, AstSeparatedList, TextRange};
-use serde::{Deserialize, Serialize};
+use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rule_options::no_for_each::NoForEachOptions;
 
 declare_lint_rule! {
     /// Prefer `for...of` statement instead of `Array.forEach`.
@@ -94,8 +90,8 @@ declare_lint_rule! {
         name: "noForEach",
         language: "js",
         sources: &[
-            RuleSource::EslintUnicorn("no-array-for-each"),
-            RuleSource::Clippy("needless_for_each"),
+            RuleSource::EslintUnicorn("no-array-for-each").same(),
+            RuleSource::Clippy("needless_for_each").same(),
         ],
         recommended: false,
         severity: Severity::Warning,
@@ -162,41 +158,5 @@ impl Rule for NoForEach {
         ).note(markup!{
             <Emphasis>"forEach"</Emphasis>" may lead to performance issues when working with large arrays. When combined with functions like "<Emphasis>"filter"</Emphasis>" or "<Emphasis>"map"</Emphasis>", this causes multiple iterations over the same type."
         }))
-    }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[deserializable(with_validator)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoForEachOptions {
-    #[serde(skip_serializing_if = "<[_]>::is_empty")]
-    /// A list of variable names allowed for `forEach` calls.
-    pub allowed_identifiers: Box<[Box<str>]>,
-}
-
-impl DeserializableValidator for NoForEachOptions {
-    fn validate(
-        &mut self,
-        ctx: &mut impl DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        if self
-            .allowed_identifiers
-            .iter()
-            .any(|identifier| identifier.is_empty() || identifier.contains('.'))
-        {
-            ctx
-                .report(
-                    DeserializationDiagnostic::new(markup!(
-                        <Emphasis>"'allowedIdentifiers'"</Emphasis>" does not accept empty values or values with dots."
-                    ))
-                    .with_range(range)
-                );
-            return false;
-        }
-
-        true
     }
 }

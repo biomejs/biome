@@ -1,0 +1,101 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```astro
+---
+
+<div></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content_token: missing (optional),
+        r_fence_token: missing (required),
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@3..6 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@6..9 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@10..11 "<" [] [],
+                slash_token: SLASH@11..12 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@12..15 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@15..16 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@16..17 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..17
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..3
+    0: FENCE@0..3 "---" [] []
+    1: (empty)
+    2: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@3..16
+    0: HTML_ELEMENT@3..16
+      0: HTML_OPENING_ELEMENT@3..10
+        0: L_ANGLE@3..6 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@6..9
+          0: HTML_LITERAL@6..9 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..10
+      2: HTML_CLOSING_ELEMENT@10..16
+        0: L_ANGLE@10..11 "<" [] []
+        1: SLASH@11..12 "/" [] []
+        2: HTML_TAG_NAME@12..15
+          0: HTML_LITERAL@12..15 "div" [] []
+        3: R_ANGLE@15..16 ">" [] []
+  4: EOF@16..17 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing_fence.astro:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a --- but instead found '<'.
+  
+    1 │ ---
+    2 │ 
+  > 3 │ <div></div>
+      │ ^
+    4 │ 
+  
+  i Expected a --- here.
+  
+    1 │ ---
+    2 │ 
+  > 3 │ <div></div>
+      │ ^
+    4 │ 
+  
+```

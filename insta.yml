@@ -1,0 +1,3 @@
+behavior:
+  force_update: true
+  update: "new"

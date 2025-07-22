@@ -22,6 +22,7 @@ biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_rowan              = { workspace = true }
+biome_rule_options       = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
 camino                   = { workspace = true }
@@ -36,11 +37,23 @@ biome_fs            = { workspace = true }
 biome_plugin_loader = { workspace = true }
 biome_test_utils    = { path = "../biome_test_utils" }
 camino              = { workspace = true }
+criterion           = { package = "codspeed-criterion-compat", version = "=3.0.3" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
 
 [features]
 schema = ["schemars"]
 
 [lints]
 workspace = true
+
+
+[[bench]]
+harness = false
+name    = "css_analyzer"

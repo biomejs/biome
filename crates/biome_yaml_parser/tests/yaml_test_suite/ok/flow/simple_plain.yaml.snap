@@ -18,13 +18,14 @@ YamlRoot {
             directives: YamlDirectiveList [],
             dashdashdash_token: missing (optional),
             node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@0..0 "" [] [],
                 flow: YamlFlowYamlNode {
                     properties: missing (optional),
                     content: YamlPlainScalar {
-                        value_token: PLAIN_LITERAL@0..12 "simple_plain" [] [],
+                        value_token: PLAIN_LITERAL@0..13 "simple_plain\n" [] [],
                     },
                 },
-                newline_token: NEWLINE@12..13 "\n" [] [],
+                flow_end_token: FLOW_END@13..13 "" [] [],
             },
             dotdotdot_token: missing (optional),
         },
@@ -43,11 +44,12 @@ YamlRoot {
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
       3: YAML_FLOW_IN_BLOCK_NODE@0..13
-        0: YAML_FLOW_YAML_NODE@0..12
+        0: FLOW_START@0..0 "" [] []
+        1: YAML_FLOW_YAML_NODE@0..13
           0: (empty)
-          1: YAML_PLAIN_SCALAR@0..12
-            0: PLAIN_LITERAL@0..12 "simple_plain" [] []
-        1: NEWLINE@12..13 "\n" [] []
+          1: YAML_PLAIN_SCALAR@0..13
+            0: PLAIN_LITERAL@0..13 "simple_plain\n" [] []
+        2: FLOW_END@13..13 "" [] []
       4: (empty)
   1: EOF@13..13 "" [] []
 

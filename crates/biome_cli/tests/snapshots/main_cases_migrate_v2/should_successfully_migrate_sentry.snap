@@ -11,7 +11,7 @@ expression: redactor(content)
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true,
+    "useIgnoreFile": false,
     "defaultBranch": "master"
   },
   "assist": { "actions": { "source": { "organizeImports": "off" } } },
@@ -144,9 +144,9 @@ expression: redactor(content)
   "overrides": [
     {
       "includes": [
-        "**/api-docs/*.ts",
-        "**/build-utils/*.ts",
-        "**/config/*.ts",
+        "**/api-docs/**/*.ts",
+        "**/build-utils/**/*.ts",
+        "**/config/**/*.ts",
         "**/scripts/**",
         "**/tests/js/sentry-test/loadFixtures.ts",
         "**/tests/js/jest-pegjs-transform.js",

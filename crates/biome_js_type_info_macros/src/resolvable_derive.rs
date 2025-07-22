@@ -107,65 +107,36 @@ pub(crate) fn generate_resolvable(input: DeriveInput) -> TokenStream {
 
 pub(crate) fn generate_resolvable_enum(ident: Ident, variants: Vec<VariantData>) -> TokenStream {
     let resolved_variants = variants.iter().map(|VariantData { ident, ty }| match ty {
-        Some(ty) => {
-            let resolved_ty = resolved_unit_type(ty);
-            quote! { Self::#ident(ty) => Self::#ident(#resolved_ty) }
-        }
-        None => quote! { Self::#ident => Self::#ident },
+        Some(ty) => match resolved_unit_type(ident, ty) {
+            Some(resolved_ty) => quote! { Self::#ident(ty) => #resolved_ty },
+            None => quote! { Self::#ident(_) => None },
+        },
+        None => quote! { Self::#ident => None },
     });
 
-    let resolved_variants_with_mapped_references =
+    let update_all_references_variants =
         variants.iter().map(|VariantData { ident, ty }| match ty {
             Some(ty) => {
-                let resolved_ty = resolved_unit_type_with_mapped_references(ty);
-                quote! { Self::#ident(ty) => Self::#ident(#resolved_ty) }
+                let update = update_all_references_for_type(quote! { ty }, ty);
+                quote! { Self::#ident(ty) => { #update } }
             }
-            None => quote! { Self::#ident => Self::#ident },
+            None => quote! { Self::#ident => {} },
         });
-
-    let variants_with_module_id = variants.iter().map(|VariantData { ident, ty }| match ty {
-        Some(ty) => {
-            let ty_with_module_id = unit_type_with_module_id(ty);
-            quote! { Self::#ident(ty) => Self::#ident(#ty_with_module_id) }
-        }
-        None => quote! { Self::#ident => Self::#ident },
-    });
-
-    let variants_with_scope_id = variants.iter().map(|VariantData { ident, ty }| match ty {
-        Some(ty) => {
-            let ty_with_scope_id = unit_type_with_scope_id(ty);
-            quote! { Self::#ident(ty) => Self::#ident(#ty_with_scope_id) }
-        }
-        None => quote! { Self::#ident => Self::#ident },
-    });
 
     quote! {
         impl crate::Resolvable for #ident {
-            fn resolved(&self, resolver: &mut dyn crate::TypeResolver) -> Self {
+            fn resolved(&self, resolver: &mut dyn crate::TypeResolver) -> Option<Self> {
                 match self {
                     #( #resolved_variants ),*
                 }
             }
 
-            fn resolved_with_mapped_references(
-                &self,
-                map: impl Copy + Fn(crate::TypeReference, &mut dyn crate::TypeResolver) -> crate::TypeReference,
-                resolver: &mut dyn crate::TypeResolver
-            ) -> Self {
+            fn update_all_references(
+                &mut self,
+                updater: impl Copy + Fn(&mut crate::TypeReference),
+            ) {
                 match self {
-                    #( #resolved_variants_with_mapped_references ),*
-                }
-            }
-
-            fn with_module_id(self, module_id: crate::ModuleId) -> Self {
-                match self {
-                    #( #variants_with_module_id ),*
-                }
-            }
-
-            fn with_scope_id(self, scope_id: crate::ScopeId) -> Self {
-                match self {
-                    #( #variants_with_scope_id ),*
+                    #( #update_all_references_variants ),*
                 }
             }
         }
@@ -175,52 +146,48 @@ pub(crate) fn generate_resolvable_enum(ident: Ident, variants: Vec<VariantData>)
 pub(crate) fn generate_resolvable_struct(ident: Ident, fields: Vec<FieldData>) -> TokenStream {
     let resolved_fields = fields.iter().map(|FieldData { ident, ty }| {
         let resolved_ty = resolved_type(IdentOrZero::Ident(ident), ty);
-        quote! { #ident: #resolved_ty }
+        quote! { let #ident = #resolved_ty; }
+    });
+    let resolved_fields_test = fields.iter().map(|FieldData { ident, ty }| {
+        if is_option(ty) {
+            quote! { #ident.as_ref().is_some_and(Option::is_some) }
+        } else {
+            quote! { #ident.is_some() }
+        }
+    });
+    let resolved_result_fields = fields.iter().map(|FieldData { ident, ty }| {
+        if is_option(ty) {
+            quote! { #ident: match (#ident, self.#ident.as_ref()) {
+                (Some(new), Some(existing)) => Some(new.unwrap_or_else(|| existing.clone())),
+                (_, existing) => existing.cloned()
+            } }
+        } else {
+            quote! { #ident: #ident.unwrap_or_else(|| self.#ident.clone()) }
+        }
     });
 
-    let resolved_fields_with_mapped_references = fields.iter().map(|FieldData { ident, ty }| {
-        let resolved_ty = resolved_type_with_mapped_references(IdentOrZero::Ident(ident), ty);
-        quote! { #ident: #resolved_ty }
-    });
-
-    let fields_with_module_id = fields.iter().map(|FieldData { ident, ty }| {
-        let ty_with_module_id = type_with_module_id(IdentOrZero::Ident(ident), ty);
-        quote! { #ident: #ty_with_module_id }
-    });
-
-    let fields_with_scope_id = fields.iter().map(|FieldData { ident, ty }| {
-        let ty_with_scope_id = type_with_scope_id(IdentOrZero::Ident(ident), ty);
-        quote! { #ident: #ty_with_scope_id }
+    let update_all_references_fields = fields.iter().filter_map(|FieldData { ident, ty }| {
+        update_all_references_for_type(quote! { self.#ident }, ty)
     });
 
     quote! {
         impl crate::Resolvable for #ident {
-            fn resolved(&self, resolver: &mut dyn crate::TypeResolver) -> Self {
-                Self {
-                    #( #resolved_fields ),*
+            fn resolved(&self, resolver: &mut dyn crate::TypeResolver) -> Option<Self> {
+                #( #resolved_fields )*
+                if #( #resolved_fields_test )||* {
+                    Some(Self {
+                        #( #resolved_result_fields ),*
+                    })
+                } else {
+                    None
                 }
             }
 
-            fn resolved_with_mapped_references(
-                &self,
-                map: impl Copy + Fn(crate::TypeReference, &mut dyn crate::TypeResolver) -> crate::TypeReference,
-                resolver: &mut dyn crate::TypeResolver
-            ) -> Self {
-                Self {
-                    #( #resolved_fields_with_mapped_references ),*
-                }
-            }
-
-            fn with_module_id(self, module_id: crate::ModuleId) -> Self {
-                Self {
-                    #( #fields_with_module_id ),*
-                }
-            }
-
-            fn with_scope_id(self, scope_id: crate::ScopeId) -> Self {
-                Self {
-                    #( #fields_with_scope_id ),*
-                }
+            fn update_all_references(
+                &mut self,
+                updater: impl Copy + Fn(&mut crate::TypeReference),
+            ) {
+                #( #update_all_references_fields )*
             }
         }
     }
@@ -229,33 +196,19 @@ pub(crate) fn generate_resolvable_struct(ident: Ident, fields: Vec<FieldData>) -
 fn generate_resolvable_unit_type(ident: Ident, ty: Type) -> TokenStream {
     let resolved_field = resolved_type(IdentOrZero::Zero, &ty);
 
-    let resolved_field_with_mapped_references =
-        resolved_type_with_mapped_references(IdentOrZero::Zero, &ty);
-
-    let field_with_module_id = type_with_module_id(IdentOrZero::Zero, &ty);
-
-    let field_with_scope_id = type_with_scope_id(IdentOrZero::Zero, &ty);
+    let update_all_references = update_all_references_for_type(quote! { self.0 }, &ty);
 
     quote! {
         impl crate::Resolvable for #ident {
-            fn resolved(&self, resolver: &mut dyn crate::TypeResolver) -> Self {
-                Self(#resolved_field)
+            fn resolved(&self, resolver: &mut dyn crate::TypeResolver) -> Option<Self> {
+                #resolved_field.map(Self)
             }
 
-            fn resolved_with_mapped_references(
-                &self,
-                map: impl Copy + Fn(crate::TypeReference, &mut dyn crate::TypeResolver) -> crate::TypeReference,
-                resolver: &mut dyn crate::TypeResolver
-            ) -> Self {
-                Self(#resolved_field_with_mapped_references)
-            }
-
-            fn with_module_id(self, module_id: crate::ModuleId) -> Self {
-                Self(#field_with_module_id)
-            }
-
-            fn with_scope_id(self, scope_id: crate::ScopeId) -> Self {
-                Self(#field_with_scope_id)
+            fn update_all_references(
+                &mut self,
+                updater: impl Copy + Fn(&mut crate::TypeReference),
+            ) {
+                #update_all_references
             }
         }
     }
@@ -268,7 +221,7 @@ fn resolved_type(ident: IdentOrZero, ty: &Type) -> TokenStream {
 
     match path.path.segments.last() {
         Some(segment) if segment.ident == "Text" => {
-            quote! { self.#ident.clone() }
+            quote! { None }
         }
         Some(segment) if segment.ident == "Box" => match &segment.arguments {
             PathArguments::None => abort!(segment, "Box is missing argument"),
@@ -276,23 +229,36 @@ fn resolved_type(ident: IdentOrZero, ty: &Type) -> TokenStream {
                 match args.args.iter().next().unwrap() {
                     GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
                         Type::Path(ty) if ty.path.is_ident("Text") => {
-                            quote! {
-                                self.#ident.clone()
-                            }
+                            quote! { None }
                         }
-                        Type::Path(_) => quote! {
-                            self.#ident.iter().map(|elem| elem.resolved(resolver)).collect()
-                        },
+                        Type::Path(_) => quote! {{
+                            let mut some_resolved = false;
+                            let result: Vec<_> = self.#ident
+                                .iter()
+                                .map(|elem| {
+                                    let resolved_elem = elem.resolved(resolver);
+                                    if resolved_elem.is_some() {
+                                        some_resolved = true;
+                                    }
+                                    resolved_elem
+                                })
+                                .collect();
+                            some_resolved.then(|| {
+                                result
+                                    .into_iter()
+                                    .enumerate()
+                                    .map(|(i, elem)| elem.unwrap_or_else(|| self.#ident[i].clone()))
+                                    .collect()
+                            })
+                        }},
                         _ => abort!(slice, "Unsupported arguments"),
                     },
                     GenericArgument::Type(Type::Path(ty)) => {
                         if ty.path.is_ident("Text") {
-                            quote! {
-                                self.#ident.clone()
-                            }
+                            quote! { None }
                         } else {
                             quote! {
-                                Box::new(self.#ident.resolved(resolver))
+                                self.#ident.resolved(resolver).map(Box::new)
                             }
                         }
                     }
@@ -309,9 +275,9 @@ fn resolved_type(ident: IdentOrZero, ty: &Type) -> TokenStream {
                 match args.args.iter().next().unwrap() {
                     GenericArgument::Type(Type::Path(ty)) => {
                         if ty.path.is_ident("Text") {
-                            quote! { self.#ident.clone() }
+                            quote! { None }
                         } else {
-                            quote! { self.#ident.as_ref().map(|f| f.resolved(resolver)) }
+                            quote! { self.#ident.as_ref().map(|field| field.resolved(resolver)) }
                         }
                     }
                     _ => abort!(args, "Unsupported arguments"),
@@ -327,41 +293,26 @@ fn resolved_type(ident: IdentOrZero, ty: &Type) -> TokenStream {
     }
 }
 
-fn resolved_type_with_mapped_references(ident: IdentOrZero, ty: &Type) -> TokenStream {
+fn resolved_unit_type(ident: &Ident, ty: &Type) -> Option<TokenStream> {
     let Type::Path(path) = ty else {
         abort!(ty, "Resolvable derive requires plain path types");
     };
 
     match path.path.segments.last() {
-        Some(segment) if segment.ident == "Text" => {
-            quote! { self.#ident.clone() }
-        }
+        Some(segment) if segment.ident == "Text" => None,
         Some(segment) if segment.ident == "Box" => match &segment.arguments {
             PathArguments::None => abort!(segment, "Box is missing argument"),
             PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
                 match args.args.iter().next().unwrap() {
                     GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
-                        Type::Path(ty) if ty.path.is_ident("Text") => {
-                            quote! {
-                                self.#ident.clone()
-                            }
-                        }
-                        Type::Path(_) => quote! {
-                            self.#ident.iter()
-                                .map(|elem| elem.resolved_with_mapped_references(map, resolver))
-                                .collect()
-                        },
-                        _ => abort!(slice, "Unsupported arguments"),
+                        Type::Path(ty) if ty.path.is_ident("Text") => None,
+                        _ => abort!(args, "Unsupported arguments"),
                     },
                     GenericArgument::Type(Type::Path(ty)) => {
                         if ty.path.is_ident("Text") {
-                            quote! {
-                                self.#ident.clone()
-                            }
+                            None
                         } else {
-                            quote! {
-                                Box::new(self.#ident.resolved_with_mapped_references(map, resolver))
-                            }
+                            Some(quote! { ty.resolved(resolver).map(Box::new).map(Self::#ident) })
                         }
                     }
                     _ => abort!(args, "Unsupported arguments"),
@@ -377,13 +328,12 @@ fn resolved_type_with_mapped_references(ident: IdentOrZero, ty: &Type) -> TokenS
                 match args.args.iter().next().unwrap() {
                     GenericArgument::Type(Type::Path(ty)) => {
                         if ty.path.is_ident("Text") {
-                            quote! { self.#ident.clone() }
+                            None
                         } else {
-                            quote! {
-                                self.#ident
-                                    .as_ref()
-                                    .map(|f| f.resolved_with_mapped_references(map, resolver))
-                            }
+                            Some(quote! { match ty {
+                                Some(ty) => ty.resolved(resolver).map(Self::#ident).map(Some)
+                                None => None
+                            } })
                         }
                     }
                     _ => abort!(args, "Unsupported arguments"),
@@ -393,9 +343,80 @@ fn resolved_type_with_mapped_references(ident: IdentOrZero, ty: &Type) -> TokenS
                 abort!(path, "Unsupported type arguments in path")
             }
         },
-        _ => {
-            quote! { self.#ident.resolved_with_mapped_references(map, resolver) }
+        _ => Some(quote! { ty.resolved(resolver).map(Self::#ident) }),
+    }
+}
+
+fn is_option(ty: &Type) -> bool {
+    match ty {
+        Type::Path(path) => {
+            matches!(path.path.segments.last(), Some(segment) if segment.ident == "Option")
         }
+        _ => false,
+    }
+}
+
+fn update_all_references_for_type(instance: TokenStream, ty: &Type) -> Option<TokenStream> {
+    let Type::Path(path) = ty else {
+        abort!(ty, "Resolvable derive requires plain path types");
+    };
+
+    match path.path.segments.last() {
+        Some(segment) if segment.ident == "Text" => None,
+        Some(segment) if segment.ident == "Box" => match &segment.arguments {
+            PathArguments::None => abort!(segment, "Box is missing argument"),
+            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
+                match args.args.iter().next().unwrap() {
+                    GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
+                        Type::Path(ty) if ty.path.is_ident("Text") => None,
+                        Type::Path(_) => Some(quote! {
+                            for elem in &mut #instance {
+                                elem.update_all_references(updater);
+                            }
+                        }),
+                        _ => abort!(slice, "Unsupported arguments"),
+                    },
+                    GenericArgument::Type(Type::Path(ty)) => {
+                        if ty.path.is_ident("Text") {
+                            None
+                        } else {
+                            Some(quote! {
+                                #instance.update_all_references(updater);
+                            })
+                        }
+                    }
+                    _ => abort!(args, "Unsupported arguments"),
+                }
+            }
+            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                abort!(path, "Unsupported type arguments in path")
+            }
+        },
+        Some(segment) if segment.ident == "Option" => match &segment.arguments {
+            PathArguments::None => abort!(segment, "Option is missing argument"),
+            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
+                match args.args.iter().next().unwrap() {
+                    GenericArgument::Type(Type::Path(ty)) => {
+                        if ty.path.is_ident("Text") {
+                            None
+                        } else {
+                            Some(quote! {
+                                if let Some(ty) = &mut #instance {
+                                    ty.update_all_references(updater);
+                                }
+                            })
+                        }
+                    }
+                    _ => abort!(args, "Unsupported arguments"),
+                }
+            }
+            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
+                abort!(path, "Unsupported type arguments in path")
+            }
+        },
+        _ => Some(quote! {
+            #instance.update_all_references(updater);
+        }),
     }
 }
 
@@ -409,354 +430,6 @@ impl ToTokens for IdentOrZero<'_> {
         match self {
             Self::Ident(ident) => ident.to_tokens(tokens),
             Self::Zero => quote! { 0 }.to_tokens(tokens),
-        }
-    }
-}
-
-fn resolved_unit_type(ty: &Type) -> TokenStream {
-    let Type::Path(path) = ty else {
-        abort!(ty, "Resolvable derive requires plain path types");
-    };
-
-    match path.path.segments.last() {
-        Some(segment) if segment.ident == "Text" => {
-            quote! { ty.clone() }
-        }
-        Some(segment) if segment.ident == "Box" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Box is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
-                        Type::Path(ty) if ty.path.is_ident("Text") => quote! { ty.clone() },
-                        _ => abort!(args, "Unsupported arguments"),
-                    },
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { ty.clone() }
-                        } else {
-                            quote! { Box::new(ty.resolved(resolver)) }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        Some(segment) if segment.ident == "Option" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Option is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { ty.clone() }
-                        } else {
-                            quote! { ty.as_ref().map(|f| f.resolved(resolver)) }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        _ => {
-            quote! { ty.resolved(resolver) }
-        }
-    }
-}
-
-fn resolved_unit_type_with_mapped_references(ty: &Type) -> TokenStream {
-    let Type::Path(path) = ty else {
-        abort!(ty, "Resolvable derive requires plain path types");
-    };
-
-    match path.path.segments.last() {
-        Some(segment) if segment.ident == "Text" => {
-            quote! { ty.clone() }
-        }
-        Some(segment) if segment.ident == "Box" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Box is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
-                        Type::Path(ty) if ty.path.is_ident("Text") => quote! { ty.clone() },
-                        _ => abort!(args, "Unsupported arguments"),
-                    },
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { ty.clone() }
-                        } else {
-                            quote! { Box::new(ty.resolved_with_mapped_references(map, resolver)) }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        Some(segment) if segment.ident == "Option" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Option is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { ty.clone() }
-                        } else {
-                            quote! {
-                                ty
-                                    .as_ref()
-                                    .map(|f| f.resolved_with_mapped_references(map, resolver))
-                            }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        _ => {
-            quote! { ty.resolved_with_mapped_references(map, resolver) }
-        }
-    }
-}
-
-fn type_with_module_id(ident: IdentOrZero, ty: &Type) -> TokenStream {
-    let Type::Path(path) = ty else {
-        abort!(ty, "Resolvable derive requires plain path types");
-    };
-
-    match path.path.segments.last() {
-        Some(segment) if segment.ident == "Text" => {
-            quote! { self.#ident }
-        }
-        Some(segment) if segment.ident == "Box" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Box is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
-                        Type::Path(ty) if ty.path.is_ident("Text") => {
-                            quote! { self.#ident }
-                        }
-                        Type::Path(_) => quote! {
-                            self.#ident.into_iter().map(|elem| elem.with_module_id(module_id)).collect()
-                        },
-                        _ => abort!(slice, "Unsupported arguments"),
-                    },
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { self.#ident }
-                        } else {
-                            quote! {
-                                Box::new(self.#ident.with_module_id(module_id))
-                            }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        Some(segment) if segment.ident == "Option" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Option is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { self.#ident }
-                        } else {
-                            quote! { self.#ident.map(|f| f.with_module_id(module_id)) }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        _ => {
-            quote! { self.#ident.with_module_id(module_id) }
-        }
-    }
-}
-
-fn unit_type_with_module_id(ty: &Type) -> TokenStream {
-    let Type::Path(path) = ty else {
-        abort!(ty, "Resolvable derive requires plain path types");
-    };
-
-    match path.path.segments.last() {
-        Some(segment) if segment.ident == "Text" => {
-            quote! { ty }
-        }
-        Some(segment) if segment.ident == "Box" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Box is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
-                        Type::Path(ty) if ty.path.is_ident("Text") => quote! { ty.clone() },
-                        _ => abort!(args, "Unsupported arguments"),
-                    },
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { ty }
-                        } else {
-                            quote! { Box::new(ty.with_module_id(module_id)) }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        Some(segment) if segment.ident == "Option" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Option is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { ty }
-                        } else {
-                            quote! { ty.map(|f| f.with_module_id(module_id)) }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        _ => {
-            quote! { ty.with_module_id(module_id) }
-        }
-    }
-}
-
-fn type_with_scope_id(ident: IdentOrZero, ty: &Type) -> TokenStream {
-    let Type::Path(path) = ty else {
-        abort!(ty, "Resolvable derive requires plain path types");
-    };
-
-    match path.path.segments.last() {
-        Some(segment) if segment.ident == "Text" => {
-            quote! { self.#ident }
-        }
-        Some(segment) if segment.ident == "Box" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Box is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
-                        Type::Path(ty) if ty.path.is_ident("Text") => {
-                            quote! { self.#ident }
-                        }
-                        Type::Path(_) => quote! {
-                            self.#ident.into_iter().map(|elem| elem.with_scope_id(scope_id)).collect()
-                        },
-                        _ => abort!(slice, "Unsupported arguments"),
-                    },
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { self.#ident }
-                        } else {
-                            quote! {
-                                Box::new(self.#ident.with_scope_id(scope_id))
-                            }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        Some(segment) if segment.ident == "Option" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Option is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { self.#ident }
-                        } else {
-                            quote! { self.#ident.map(|f| f.with_scope_id(scope_id)) }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        _ => {
-            quote! { self.#ident.with_scope_id(scope_id) }
-        }
-    }
-}
-
-fn unit_type_with_scope_id(ty: &Type) -> TokenStream {
-    let Type::Path(path) = ty else {
-        abort!(ty, "Resolvable derive requires plain path types");
-    };
-
-    match path.path.segments.last() {
-        Some(segment) if segment.ident == "Text" => {
-            quote! { ty }
-        }
-        Some(segment) if segment.ident == "Box" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Box is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Slice(slice)) => match slice.elem.as_ref() {
-                        Type::Path(ty) if ty.path.is_ident("Text") => quote! { ty.clone() },
-                        _ => abort!(args, "Unsupported arguments"),
-                    },
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { ty }
-                        } else {
-                            quote! { Box::new(ty.with_scope_id(scope_id)) }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        Some(segment) if segment.ident == "Option" => match &segment.arguments {
-            PathArguments::None => abort!(segment, "Option is missing argument"),
-            PathArguments::AngleBracketed(args) if args.args.len() == 1 => {
-                match args.args.iter().next().unwrap() {
-                    GenericArgument::Type(Type::Path(ty)) => {
-                        if ty.path.is_ident("Text") {
-                            quote! { ty }
-                        } else {
-                            quote! { ty.map(|f| f.with_scope_id(scope_id)) }
-                        }
-                    }
-                    _ => abort!(args, "Unsupported arguments"),
-                }
-            }
-            PathArguments::AngleBracketed(_) | PathArguments::Parenthesized(_) => {
-                abort!(path, "Unsupported type arguments in path")
-            }
-        },
-        _ => {
-            quote! { ty.with_scope_id(scope_id) }
         }
     }
 }

@@ -9,17 +9,18 @@ use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDescription;
 use biome_fs::BiomePath;
-use biome_lsp_converters::{PositionEncoding, WideEncoding, negotiated_encoding};
+use biome_line_index::WideEncoding;
+use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
 use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
-use biome_service::workspace::ServiceDataNotification;
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, SupportsFeatureParams,
 };
+use biome_service::workspace::{FileFeaturesResult, ServiceDataNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::workspace::{ScanKind, ScanProjectFolderParams};
 use camino::Utf8Path;
@@ -43,7 +44,7 @@ use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
 use tower_lsp_server::lsp_types::{MessageType, Registration};
 use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
 use tower_lsp_server::{Client, UriExt, lsp_types};
-use tracing::{error, info, instrument, warn};
+use tracing::{debug, error, info, instrument, warn};
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -104,6 +105,7 @@ struct InitializeParams {
     workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 
+#[derive(Debug)]
 #[repr(u8)]
 pub(crate) enum ConfigurationStatus {
     /// The configuration file was properly loaded
@@ -399,7 +401,9 @@ impl Session {
             }
         }
 
-        let file_features = self.workspace.file_features(SupportsFeatureParams {
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = self.workspace.file_features(SupportsFeatureParams {
             project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
@@ -506,6 +510,48 @@ impl Session {
     }
 
     #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_on_type_formatting(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.on_type_formatting)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register onTypeFormatting: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_formatting(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.formatting)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register formatting: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_range_formatting(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.range_formatting)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register rangeFormatting: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
     pub(crate) fn can_register_did_change_watched_files(&self) -> bool {
         let result = self
             .initialize_params
@@ -516,6 +562,20 @@ impl Session {
             == Some(true);
 
         info!("Can register didChangeWatchedFiles: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_code_action(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.code_action.as_ref())
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register codeAction: {result}");
         result
     }
 
@@ -565,7 +625,7 @@ impl Session {
             let status = self
                 .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path))
                 .await;
-
+            debug!("Configuration status: {:?}", status);
             self.set_configuration_status(status);
         } else if let Some(folders) = self.get_workspace_folders() {
             info!("Detected workspace folder.");
@@ -582,6 +642,7 @@ impl Session {
                                 base_path,
                             ))
                             .await;
+                        debug!("Configuration status: {:?}", status);
                         self.set_configuration_status(status);
                     }
                     None => {
@@ -620,6 +681,7 @@ impl Session {
                     watch: true,
                     force: false,
                     scan_kind,
+                    verbose: false,
                 });
 
             match result {
@@ -682,6 +744,10 @@ impl Session {
             ..
         } = loaded_configuration;
 
+        if configuration_path.is_none() && self.requires_configuration() {
+            return ConfigurationStatus::Missing;
+        }
+
         let fs = self.workspace.fs();
         let should_use_editorconfig = fs_configuration.use_editorconfig();
         let mut configuration = if should_use_editorconfig {
@@ -737,6 +803,12 @@ impl Session {
                 self.client.log_message(MessageType::ERROR, &error).await;
                 return ConfigurationStatus::Error;
             }
+        };
+
+        let scan_kind = if scan_kind.is_none() {
+            ScanKind::KnownFiles
+        } else {
+            scan_kind
         };
 
         let result = self.workspace.update_settings(UpdateSettingsParams {
@@ -842,7 +914,15 @@ impl Session {
             .store(true, Ordering::Relaxed);
     }
 
+    pub(crate) fn requires_configuration(&self) -> bool {
+        self.extension_settings
+            .read()
+            .unwrap()
+            .requires_configuration()
+    }
+
     pub(crate) fn is_linting_and_formatting_disabled(&self) -> bool {
+        debug!("configuration status {:?}", self.configuration_status());
         match self.configuration_status() {
             ConfigurationStatus::Loaded => false,
             ConfigurationStatus::Missing => self

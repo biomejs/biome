@@ -1,6 +1,6 @@
 mod utils;
 
-use biome_js_type_info::{GlobalsResolver, TypeData};
+use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData};
 
 use utils::{
     assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
@@ -14,8 +14,8 @@ fn infer_type_of_identifier() {
     let root = parse_ts(CODE);
     let expr = get_expression(&root);
     let mut resolver = GlobalsResolver::default();
-    let ty = TypeData::from_any_js_expression(&mut resolver, &expr);
-    assert_type_data_snapshot(CODE, ty, &resolver, "infer_type_of_identifier");
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_identifier");
 }
 
 #[test]
@@ -25,10 +25,10 @@ fn infer_type_of_object_member_expression() {
     let root = parse_ts(CODE);
     let expr = get_expression(&root);
     let mut resolver = GlobalsResolver::default();
-    let ty = TypeData::from_any_js_expression(&mut resolver, &expr);
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
     assert_type_data_snapshot(
         CODE,
-        ty,
+        &ty,
         &resolver,
         "infer_type_of_object_member_expression",
     );
@@ -41,8 +41,8 @@ fn infer_type_of_typeof_expression() {
     let root = parse_ts(CODE);
     let expr = get_expression(&root);
     let mut resolver = GlobalsResolver::default();
-    let ty = TypeData::from_any_js_expression(&mut resolver, &expr);
-    assert_type_data_snapshot(CODE, ty, &resolver, "infer_type_of_typeof_expression");
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_typeof_expression");
 }
 
 #[test]
@@ -54,10 +54,10 @@ fn infer_type_of_promise_returning_function() {
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
+    let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     assert_type_data_snapshot(
         CODE,
-        ty,
+        &ty,
         &resolver,
         "infer_type_of_promise_returning_function",
     );
@@ -72,8 +72,8 @@ fn infer_type_of_async_function() {
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
-    assert_type_data_snapshot(CODE, ty, &resolver, "infer_type_of_async_function");
+    let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
+    assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_async_function");
 }
 
 #[test]
@@ -83,7 +83,11 @@ fn infer_type_of_array() {
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
     assert_typed_bindings_snapshot(CODE, &bindings, &resolver, "infer_type_of_array");
 }
 
@@ -94,7 +98,11 @@ fn infer_type_of_destructured_array_element() {
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
     assert_typed_bindings_snapshot(
         CODE,
         &bindings,
@@ -110,10 +118,10 @@ fn infer_type_of_function_with_destructured_arguments() {
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
+    let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     assert_type_data_snapshot(
         CODE,
-        ty,
+        &ty,
         &resolver,
         "infer_type_of_function_with_destructured_arguments",
     );
@@ -126,7 +134,11 @@ fn infer_type_of_literal() {
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
     assert_typed_bindings_snapshot(CODE, &bindings, &resolver, "infer_type_of_literal");
 }
 
@@ -137,7 +149,11 @@ fn infer_type_of_binary_expression_eq() {
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
     assert_typed_bindings_snapshot(
         CODE,
         &bindings,
@@ -153,7 +169,11 @@ fn infer_type_of_binary_expression_ne() {
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
     assert_typed_bindings_snapshot(
         CODE,
         &bindings,
@@ -169,6 +189,10 @@ fn infer_type_of_dynamic_import() {
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
     assert_typed_bindings_snapshot(CODE, &bindings, &resolver, "infer_type_of_dynamic_import");
 }

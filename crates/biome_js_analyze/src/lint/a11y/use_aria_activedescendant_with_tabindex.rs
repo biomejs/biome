@@ -13,6 +13,7 @@ use biome_js_syntax::{
     jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::use_aria_activedescendant_with_tabindex::UseAriaActivedescendantWithTabindexOptions;
 
 declare_lint_rule! {
     /// Enforce that `tabIndex` is assigned to non-interactive HTML elements with `aria-activedescendant`.
@@ -52,7 +53,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "useAriaActivedescendantWithTabindex",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex")],
+        sources: &[RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -63,7 +64,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
     type Query = Aria<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAriaActivedescendantWithTabindexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

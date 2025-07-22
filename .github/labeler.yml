@@ -60,11 +60,21 @@ A-Diagnostic:
     - crates/biome_diagnostics_categories/**
     - crates/biome_diagnostics_macros/**
 
+A-Resolver:
+- changed-files:
+  - any-glob-to-any-file:
+    - crates/biome_resolver/**
+
 A-Tooling:
 - changed-files:
   - any-glob-to-any-file:
     - xtask/**
     - crates/biome_ungrammar/**
+
+A-Type-Inference:
+- changed-files:
+  - any-glob-to-any-file:
+    - crates/biome_*_type_info/**
 
 A-LSP:
 - changed-files:

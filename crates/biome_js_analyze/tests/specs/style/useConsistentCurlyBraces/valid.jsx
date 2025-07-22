@@ -21,4 +21,22 @@ let baz = 4;
 <Foo>{/*comment*/}Hello world{/*comment*/}</Foo>
 
 <Foo>{' '}</Foo>
+
+<Foo>Invalid closing tag {'}'}</Foo>
+
+<Foo>{'Invalid closing tag }'}</Foo>
+
+<Foo>Jupiter {">"} Venus</Foo>
+
+<Foo>Jupiter {'>'} Venus</Foo>
+
+<Foo>{'Jupiter > Venus'}</Foo>
+
+<Foo>{'Invalid double quotes " '}</Foo>
+
+<Foo>{'Invalid single quote \' '}</Foo>
+
+<Foo>{"Invalid single quote ' "}</Foo>
+
+<Foo>{"Invalid double quotes \" "}</Foo>
 </>

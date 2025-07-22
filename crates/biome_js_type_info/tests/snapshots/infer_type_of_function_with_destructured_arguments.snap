@@ -18,14 +18,14 @@ function destruct(
 sync Function "destruct" {
   accepts: {
     params: [
-      required (unnamed): Global TypeId(0) (bindings: a:Global TypeId(0).a,
-      b:Global TypeId(0).b)
-      required (unnamed): Global TypeId(4) (bindings: first:Global TypeId(4)[0],
-      rest:[(1 others)...Global TypeId(4)])
+      required (bindings: a: Global TypeId(1),
+      b: Global TypeId(2)): Global TypeId(0)
+      required (bindings: first: Global TypeId(5),
+      rest: Global TypeId(6)): Global TypeId(4)
     ]
     type_args: []
   }
-  returns: unknown reference
+  returns: void
 }
 ```
 
@@ -43,7 +43,7 @@ Global TypeId(2) => Global TypeId(0).b
 
 Global TypeId(3) => boolean
 
-Global TypeId(4) => instanceof unresolved reference "Array"<Global TypeId(3)>
+Global TypeId(4) => instanceof unresolved reference "Array"<Global TypeId(3)> (scope ID: 0)
 
 Global TypeId(5) => Global TypeId(4)[0]
 

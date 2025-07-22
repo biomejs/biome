@@ -25,3 +25,5 @@ import "./sub/component.svg.svelte.ts?query=string&query2#hash";
 import './sub/baz';
 import './sub/baz.css';
 import './sub/baz.css.com';
+
+import "./sub/generated/index.js";

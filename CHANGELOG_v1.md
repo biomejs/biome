@@ -201,7 +201,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
    Contributed by @fireairforce
 
- - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now allows configuring conventions for readonly index signatures.
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now allows configuring conventions for readonly index signatures.
 
   Contributed by @sepruko
 
@@ -405,7 +405,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores `alert` and `alertdialog` roles ([#3858](https://github.com/biomejs/biome/issues/3858)). Contributed by @Conaclos
 
-- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) don't create invaild JSX code when Fragments children contains JSX Expression and in a LogicalExpression. Contributed by @fireairforce
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) don't create invalid JSX code when Fragments children contains JSX Expression and in a LogicalExpression. Contributed by @fireairforce
 
 ### Parser
 
@@ -2026,7 +2026,7 @@ z.object({})
 
 - [useJsxKeyInIterable](https://biomejs.dev/linter/rules/use-jsx-key-in-iterable/) no longer reports false positive when iterating on non-jsx items ([#2590](https://github.com/biomejs/biome/issues/2590)).
 
-  The following snipet of code no longer triggers the rule:
+  The following snippet of code no longer triggers the rule:
 
   ```jsx
   <>{data.reduce((total, next) => total + next, 0)}</>
@@ -2756,7 +2756,7 @@ The following rules are promoted:
 
 #### Bug fixes
 
-- Fix enabled rules calculation. The precendence of individual rules, `all` and `recommend` presets in top-level and group-level configs is now correctly respected. More details can be seen in ([#2072](https://github.com/biomejs/biome/pull/2072)) ([#2028](https://github.com/biomejs/biome/issues/2028)). Contributed by @Sec-ant
+- Fix enabled rules calculation. The precedence of individual rules, `all` and `recommend` presets in top-level and group-level configs is now correctly respected. More details can be seen in ([#2072](https://github.com/biomejs/biome/pull/2072)) ([#2028](https://github.com/biomejs/biome/issues/2028)). Contributed by @Sec-ant
 
 ### Formatter
 
@@ -3661,7 +3661,7 @@ Additionally, the following rules are now recommended:
 
 -
 Fix [#1575](https://github.com/biomejs/biome/issues/1575). [noArrayIndexKey](https://biomejs.dev/linter/rules/no-array-index-key/)
-now captures array index value inside template literals and with string concatination. Contributed by @vasucp1207
+now captures array index value inside template literals and with string concatenation. Contributed by @vasucp1207
 
 - Linter rules that inspect regexes now handle multibyte characters
   correctly ([#1522](https://github.com/biomejs/biome/issues/1522)).
@@ -4539,7 +4539,7 @@ now ignores `<svg>` element with `aria-hidden="true"`. COntributed by @vasucp120
 
 -
 Fix [#918](https://github.com/biomejs/biome/issues/918). [useSimpleNumberKeys](https://biomejs.dev/linter/rules/use-simple-number-keys)
-no longer repports false positive on comments. Contributed by @kalleep
+no longer reports false positive on comments. Contributed by @kalleep
 
 - Fix [#953](https://github.com/biomejs/biome/issues/953). [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare)
   no longer reports type parameters with the same name in different mapped types as redeclarations. Contributed by
@@ -4547,7 +4547,7 @@ no longer repports false positive on comments. Contributed by @kalleep
 
 -
 Fix [#608](https://github.com/biomejs/biome/issues/608). [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies)
-no longer repports missing dependencies for React hooks without dependency array. Contributed by @kalleep
+no longer reports missing dependencies for React hooks without dependency array. Contributed by @kalleep
 
 ### Parser
 

@@ -10,6 +10,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_unknown_media_feature_name::NoUnknownMediaFeatureNameOptions;
 
 use crate::utils::is_media_feature_name;
 
@@ -73,7 +74,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("media-feature-name-no-unknown")],
+        sources: &[RuleSource::Stylelint("media-feature-name-no-unknown").same()],
     }
 }
 
@@ -81,7 +82,7 @@ impl Rule for NoUnknownMediaFeatureName {
     type Query = Ast<CssMediaQueryList>;
     type State = CssMediaQueryList;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownMediaFeatureNameOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let media_query_list = ctx.query();

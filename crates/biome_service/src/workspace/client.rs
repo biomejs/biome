@@ -1,11 +1,11 @@
 use super::{
-    ChangeFileParams, CloseFileParams, FixFileParams, FixFileResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
-    RenameParams, RenameResult, ScanProjectFolderParams, ScanProjectFolderResult,
-    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateSettingsParams,
-    UpdateSettingsResult,
+    ChangeFileParams, CloseFileParams, FileExitsParams, FixFileParams, FixFileResult,
+    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
+    GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
+    OpenFileParams, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectFolderParams,
+    ScanProjectFolderResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
+    UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -131,6 +131,10 @@ where
 
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
         self.request("biome/open_file", params)
+    }
+
+    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError> {
+        self.request("biome/file_exists", params)
     }
 
     fn file_features(

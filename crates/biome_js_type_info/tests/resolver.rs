@@ -1,7 +1,7 @@
 mod utils;
 
 use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsExpressionStatement};
-use biome_js_type_info::{GlobalsResolver, Resolvable, TypeData};
+use biome_js_type_info::{GlobalsResolver, Resolvable, ScopeId, TypeData};
 
 use utils::{
     HardcodedSymbolResolver, assert_type_data_snapshot, assert_typed_bindings_snapshot,
@@ -17,14 +17,12 @@ fn infer_resolved_type_of_promise_returning_function() {
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
+    let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     resolver.resolve_all();
-
-    let ty = ty.resolved(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
-        ty,
+        &ty,
         &resolver,
         "infer_resolved_type_of_promise_returning_function",
     )
@@ -39,12 +37,15 @@ fn infer_resolved_type_of_async_function() {
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
+    let ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     resolver.resolve_all();
 
-    let ty = ty.resolved(&mut resolver);
-
-    assert_type_data_snapshot(CODE, ty, &resolver, "infer_resolved_type_of_async_function")
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_resolved_type_of_async_function",
+    )
 }
 
 #[test]
@@ -58,19 +59,23 @@ returnsPromise()"#;
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let function_ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
+    let function_ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     resolver.resolve_all();
 
     let expr = get_expression_statement(&root);
     let mut resolver = HardcodedSymbolResolver::new("returnsPromise", function_ty, resolver);
-    let expr_ty = TypeData::from_any_js_expression(&mut resolver, &expr.expression().unwrap());
+    let expr_ty = TypeData::from_any_js_expression(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &expr.expression().unwrap(),
+    );
     resolver.resolve_all();
 
-    let expr_ty = expr_ty.resolved(&mut resolver);
+    let expr_ty = expr_ty.resolved(&mut resolver).expect("must be resolved");
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_resolved_type_from_invocation_of_promise_returning_function",
     )
@@ -87,19 +92,21 @@ returnsPromise().then(() => {})"#;
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let function_ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
+    let function_ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     resolver.resolve_all();
 
     let expr = get_expression_statement(&root);
     let mut resolver = HardcodedSymbolResolver::new("returnsPromise", function_ty, resolver);
-    let expr_ty = TypeData::from_any_js_expression(&mut resolver, &expr.expression().unwrap());
+    let expr_ty = TypeData::from_any_js_expression(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &expr.expression().unwrap(),
+    );
     resolver.resolve_all();
-
-    let expr_ty = expr_ty.resolved(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_resolved_type_from_chained_invocation_of_promise_returning_function",
     )
@@ -116,19 +123,21 @@ returnsPromise().then(() => {}).finally(() => {})"#;
     let root = parse_ts(CODE);
     let decl = get_function_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let function_ty = TypeData::from_js_function_declaration(&mut resolver, &decl);
+    let function_ty = TypeData::from_js_function_declaration(&mut resolver, ScopeId::GLOBAL, &decl);
     resolver.resolve_all();
 
     let expr = get_expression_statement(&root);
     let mut resolver = HardcodedSymbolResolver::new("returnsPromise", function_ty, resolver);
-    let expr_ty = TypeData::from_any_js_expression(&mut resolver, &expr.expression().unwrap());
+    let expr_ty = TypeData::from_any_js_expression(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &expr.expression().unwrap(),
+    );
     resolver.resolve_all();
-
-    let expr_ty = expr_ty.resolved(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_resolved_type_from_double_chained_invocation_of_promise_returning_function",
     )
@@ -141,14 +150,18 @@ fn infer_resolved_type_from_direct_promise_instance() {
     let root = parse_ts(CODE);
     let expr = get_expression_statement(&root);
     let mut resolver = GlobalsResolver::default();
-    let expr_ty = TypeData::from_any_js_expression(&mut resolver, &expr.expression().unwrap());
+    let expr_ty = TypeData::from_any_js_expression(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &expr.expression().unwrap(),
+    );
     resolver.resolve_all();
 
-    let expr_ty = expr_ty.resolved(&mut resolver);
+    let expr_ty = expr_ty.resolved(&mut resolver).expect("must be resolved");
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_resolved_type_from_direct_promise_instance",
     )
@@ -161,14 +174,16 @@ fn infer_resolved_type_from_static_promise_function() {
     let root = parse_ts(CODE);
     let expr = get_expression_statement(&root);
     let mut resolver = GlobalsResolver::default();
-    let expr_ty = TypeData::from_any_js_expression(&mut resolver, &expr.expression().unwrap());
+    let expr_ty = TypeData::from_any_js_expression(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &expr.expression().unwrap(),
+    );
     resolver.resolve_all();
-
-    let expr_ty = expr_ty.resolved(&mut resolver);
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_resolved_type_from_static_promise_function",
     )
@@ -181,13 +196,12 @@ fn infer_resolved_type_of_destructured_array_element() {
     let root = parse_ts(CODE);
     let decl = get_variable_declaration(&root);
     let mut resolver = GlobalsResolver::default();
-    let bindings = TypeData::typed_bindings_from_js_variable_declaration(&mut resolver, &decl);
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
     resolver.resolve_all();
-
-    let bindings: Vec<_> = bindings
-        .into_iter()
-        .map(|(name, binding)| (name, binding.resolved(&mut resolver)))
-        .collect();
 
     assert_typed_bindings_snapshot(
         CODE,

@@ -5,7 +5,6 @@ use crate::analyzers::no_restriected_globals::NoRestrictedGlobals;
 use crate::analyzers::organize_imports::OrganizeImports;
 use crate::analyzers::rule_mover::RuleMover;
 use crate::analyzers::schema::Schema;
-use crate::analyzers::style_rules::StyleRules;
 use crate::analyzers::trailing_comma::TrailingComma;
 use crate::analyzers::use_naming_convention_enum_member_case::UseNamingConventionEnumMemberCase;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
@@ -18,7 +17,6 @@ mod no_restriected_globals;
 mod organize_imports;
 mod rule_mover;
 mod schema;
-mod style_rules;
 mod trailing_comma;
 mod use_naming_convention_enum_member_case;
 
@@ -36,7 +34,6 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<Schema>();
         // v2.0.0
         registry.record_rule::<RulesAll>();
-        registry.record_rule::<StyleRules>();
         registry.record_rule::<OrganizeImports>();
         registry.record_rule::<RuleMover>();
         registry.record_rule::<Includes>();

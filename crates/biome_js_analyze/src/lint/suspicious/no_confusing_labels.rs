@@ -1,10 +1,9 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, declare_lint_rule};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsStatement, JsFileSource, JsLabeledStatement};
-use serde::{Deserialize, Serialize};
+use biome_rule_options::no_confusing_labels::NoConfusingLabelsOptions;
 
 declare_lint_rule! {
     /// Disallow labeled statements that are not loops.
@@ -82,28 +81,17 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noConfusingLabels",
         language: "js",
-        sources: &[RuleSource::Eslint("no-labels")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("no-labels").inspired()],
         recommended: true,
         severity: Severity::Warning,
     }
-}
-
-/// Options for the rule `noConfusingLabels`
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoConfusingLabelsOptions {
-    /// A list of (non-confusing) labels that should be allowed
-    #[serde(skip_serializing_if = "<[_]>::is_empty")]
-    pub allowed_labels: Box<[Box<str>]>,
 }
 
 impl Rule for NoConfusingLabels {
     type Query = Ast<JsLabeledStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = Box<NoConfusingLabelsOptions>;
+    type Options = NoConfusingLabelsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let labeled_stmt = ctx.query();

@@ -1,12 +1,51 @@
 use biome_js_syntax::export_ext::{AnyJsExported, ExportedItem};
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsCallArgument, AnyJsExpression, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
-    JsExportDefaultExpressionClause, JsExtendsClause, JsFunctionDeclaration,
-    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsLanguage, JsSyntaxToken,
-    JsVariableDeclarator,
+    AnyJsBinding, AnyJsExpression, JsArrowFunctionExpression, JsAssignmentExpression,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsExportDefaultExpressionClause, JsExtendsClause,
+    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
+    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
+    JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxToken, JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, TextRange, declare_node_union};
+
+// This module provides utilities for analyzing React components in JavaScript/JSX code.
+// It is mainly useful for identifying React components, their names,
+// and their kinds (function or class).
+//
+// Supported declarations:
+//
+// ```js
+// const MyComponent = () => { ... }; // var declarator
+// let MyComponent; MyComponent = () => { ... }; // assignment expression
+// export const MyComponent = () => { ... }; // named export
+// export default function MyComponent() { ... } // default function export
+// export default class MyComponent extends React.Component { ... } // default class export
+// export function MyComponent() { ... } // named function export
+// const components = {
+//     MyComponent: () => { ... }, // Component as object property
+//     MyComponent() { ... }, // Component as object method
+// };
+// class Components {
+//    MyComponent() { ... }, // Component as class method
+//    MyComponent = () => { ... }, // Component as class field
+// }
+// ```
+//
+// Supported function component wrappers are `memo` and `forwardRef`.
+//
+// ```js
+// const MyComponent = memo(() => { ... }); // memo wrapper
+// const MyComponent = forwardRef((props, ref) => { ... }); // forwardRef wrapper
+// const MyComponent = memo(forwardRef((props, ref) => { ... })); // nested wrappers
+// ```
+//
+// Supported class components are those that extend `Component` or `PureComponent`.
+//
+// ```js
+// class MyComponent extends Component { ... } // class component extending a component imported from React-like library
+// class MyComponent extends PureComponent { ... } // class component extending a pure component imported from React-like library
+// ```
 
 /// React Function components may have no more than one parameter (props).
 /// Parameter count in case of wrapped components (in memo or forwardRef) is not checked.
@@ -40,32 +79,30 @@ impl ReactComponentInfo {
         }
     }
 
-    fn from_any_js_function_declaration(
-        function_declaration: &AnyJsFunctionDeclaration,
+    fn from_any_function_or_method_declaration(
+        function_declaration: &AnyJsFunctionOrMethodDeclaration,
     ) -> Option<Self> {
-        let id = function_declaration.id()?;
-        let identifier = id.as_js_identifier_binding()?;
-        let name = identifier.name_token().ok()?;
+        let name = function_declaration.name()?;
 
         if function_declaration.param_count()? > REACT_COMPONENT_PARAMS_LIMIT {
             return None;
         }
 
-        if is_react_component_name(name.text_trimmed()) {
-            Some(Self {
-                name: Some(name),
-                name_hint: None,
-                start_range: function_declaration.start_range(),
-                kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
-                    wrappers: Box::new([]),
-                }),
-            })
-        } else {
-            None
+        if !is_react_component_name(name.text_trimmed()) {
+            return None;
         }
+
+        Some(Self {
+            name: Some(name),
+            name_hint: None,
+            start_range: function_declaration.start_range(),
+            kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
+                wrappers: Box::new([]),
+            }),
+        })
     }
 
-    fn from_any_js_class_declaration(class_declaration: &AnyJsClassDeclaration) -> Option<Self> {
+    fn from_any_class_declaration(class_declaration: &AnyJsClassDeclaration) -> Option<Self> {
         let super_class =
             ReactSuperClass::from_extends_clause(&class_declaration.extends_clause()?)?;
         let name = class_declaration
@@ -89,11 +126,11 @@ impl ReactComponentInfo {
     /// - Variable declarator
     /// - Assignment expression
     pub(crate) fn from_declaration(syntax: &SyntaxNode<JsLanguage>) -> Option<Self> {
-        if let Some(function_declaration) = AnyJsFunctionDeclaration::cast_ref(syntax) {
-            return Self::from_any_js_function_declaration(&function_declaration);
+        if let Some(function_or_method) = AnyJsFunctionOrMethodDeclaration::cast_ref(syntax) {
+            return Self::from_any_function_or_method_declaration(&function_or_method);
         }
         if let Some(class_declaration) = AnyJsClassDeclaration::cast_ref(syntax) {
-            return Self::from_any_js_class_declaration(&class_declaration);
+            return Self::from_any_class_declaration(&class_declaration);
         }
         if let Some(variable_declarator) = JsVariableDeclarator::cast_ref(syntax) {
             let name = variable_declarator
@@ -131,6 +168,15 @@ impl ReactComponentInfo {
             }
 
             let mut result = Self::from_expression(assignment.right().ok()?.syntax())?;
+            result.name = Some(name);
+            return Some(result);
+        }
+        if let Some(property) = AnyJsProperty::cast_ref(syntax) {
+            let name = property.name()?;
+            if !is_react_component_name(name.text_trimmed()) {
+                return None;
+            }
+            let mut result = Self::from_expression(property.value()?.syntax())?;
             result.name = Some(name);
             return Some(result);
         }
@@ -181,27 +227,15 @@ impl ReactComponentInfo {
         let mut wrappers = Vec::<ReactFunctionComponentWrapper>::new();
 
         // Check if the expression is wrapped in memo or forwardRef.
-        while let AnyJsExpression::JsCallExpression(call) = &expression {
-            let args = call.arguments().ok()?.args();
-            // Both memo and forwardRef take one argument.
-            if args.len() != 1 {
-                return None;
-            }
-
-            let callee_name = call.callee().ok()?.get_callee_member_name()?;
-            let callee_member_name = callee_name.text_trimmed();
-            if callee_member_name == "memo" {
-                wrappers.push(ReactFunctionComponentWrapper::Memo);
-            } else if callee_member_name == "forwardRef" {
-                wrappers.push(ReactFunctionComponentWrapper::ForwardRef);
-            } else {
-                return None;
-            }
+        while let Some(ReactFunctionComponentWrapperInfo {
+            wrapper,
+            wrapped_expression,
+        }) = ReactFunctionComponentWrapperInfo::from_expression(&expression)
+        {
+            wrappers.push(wrapper);
 
             // There can be multiple wrappers, e.g. memo(forwardRef(...)).
-            if let Some(Ok(AnyJsCallArgument::AnyJsExpression(call_expression))) = args.first() {
-                expression = call_expression
-            }
+            expression = wrapped_expression;
         }
 
         let mut name_hint = None;
@@ -220,10 +254,7 @@ impl ReactComponentInfo {
             if function_expression.param_count()? > REACT_COMPONENT_PARAMS_LIMIT {
                 return None;
             }
-            name_hint = function_expression.id().and_then(|id| {
-                id.as_js_identifier_binding()
-                    .and_then(|id_binding| id_binding.name_token().ok())
-            });
+            name_hint = function_expression.name();
         };
 
         if let Some(identifier) = expression.as_js_identifier_expression() {
@@ -259,29 +290,102 @@ impl ReactComponentInfo {
                 }
                 Some(result)
             }
-            AnyJsExported::JsFunctionDeclaration(decl) => Self::from_any_js_function_declaration(
-                &AnyJsFunctionDeclaration::JsFunctionDeclaration(decl.clone()),
-            ),
+            AnyJsExported::JsFunctionDeclaration(decl) => {
+                Self::from_any_function_or_method_declaration(
+                    &AnyJsFunctionOrMethodDeclaration::JsFunctionDeclaration(decl.clone()),
+                )
+            }
             AnyJsExported::JsFunctionExportDefaultDeclaration(decl) => {
-                Self::from_any_js_function_declaration(
-                    &AnyJsFunctionDeclaration::JsFunctionExportDefaultDeclaration(decl.clone()),
+                Self::from_any_function_or_method_declaration(
+                    &AnyJsFunctionOrMethodDeclaration::JsFunctionExportDefaultDeclaration(
+                        decl.clone(),
+                    ),
                 )
             }
             AnyJsExported::JsClassExportDefaultDeclaration(decl) => {
-                Self::from_any_js_class_declaration(
+                Self::from_any_class_declaration(
                     &AnyJsClassDeclaration::JsClassExportDefaultDeclaration(decl.clone()),
                 )
             }
-            AnyJsExported::JsClassDeclaration(decl) => Self::from_any_js_class_declaration(
+            AnyJsExported::JsClassDeclaration(decl) => Self::from_any_class_declaration(
                 &AnyJsClassDeclaration::JsClassDeclaration(decl.clone()),
             ),
             _ => None,
         }
     }
+
+    /// Creates a `ReactComponentInfo` from a function expression.
+    /// This is used to process function declarations, methods and function expressions
+    /// in order to identify React components.
+    pub(crate) fn from_function(syntax: &SyntaxNode<JsLanguage>) -> Option<Self> {
+        if let Some(function_expression) = AnyJsFunctionExpression::cast_ref(syntax) {
+            let mut expression = function_expression.as_any_js_expression();
+            let mut wrappers = Vec::<ReactFunctionComponentWrapper>::new();
+            while let Some(call_args) = expression.parent::<JsCallArgumentList>() {
+                let call_expression = call_args
+                    .parent::<JsCallArguments>()?
+                    .parent::<JsCallExpression>()?;
+                expression = AnyJsExpression::JsCallExpression(call_expression);
+                let wrapper_info = ReactFunctionComponentWrapperInfo::from_expression(&expression)?;
+                wrappers.push(wrapper_info.wrapper);
+            }
+            let mut name = None;
+
+            // Find related declaration to get the name.
+            if let Some(init) = expression.parent::<JsInitializerClause>() {
+                if let Some(variable_declarator) = init.parent::<JsVariableDeclarator>() {
+                    name = variable_declarator
+                        .id()
+                        .ok()?
+                        .as_any_js_binding()?
+                        .as_js_identifier_binding()?
+                        .name_token()
+                        .ok();
+                } else if let Some(property) = init.parent::<AnyJsProperty>() {
+                    name = property.name();
+                }
+            } else if let Some(assignment) = expression.parent::<JsAssignmentExpression>() {
+                name = assignment
+                    .left()
+                    .ok()?
+                    .as_any_js_assignment()?
+                    .as_js_identifier_assignment()?
+                    .name_token()
+                    .ok();
+            } else if let Some(property) = expression.parent::<AnyJsProperty>() {
+                name = property.name();
+            }
+
+            if let Some(name) = &name {
+                if !is_react_component_name(name.text_trimmed()) {
+                    return None;
+                }
+            } else if wrappers.is_empty() {
+                // If we have no name and no wrappers,
+                // we can't be sure that this is a React component.
+                return None;
+            }
+            // We were collecting wrappers in reverse order.
+            wrappers.reverse();
+            Some(Self {
+                name,
+                name_hint: function_expression.name(),
+                start_range: expression.syntax().first_token()?.text_range(),
+                kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
+                    wrappers: wrappers.into_boxed_slice(),
+                }),
+            })
+        } else if let Some(function_or_method) = AnyJsFunctionOrMethodDeclaration::cast_ref(syntax)
+        {
+            Self::from_any_function_or_method_declaration(&function_or_method)
+        } else {
+            None
+        }
+    }
 }
 
 declare_node_union! {
-    AnyJsFunctionDeclaration = JsFunctionExportDefaultDeclaration | JsFunctionDeclaration
+    AnyJsClassDeclaration = JsClassExportDefaultDeclaration | JsClassDeclaration
 }
 
 impl AnyJsClassDeclaration {
@@ -322,9 +426,11 @@ pub(crate) enum ReactComponentKind {
 }
 
 impl AnyJsFunctionExpression {
-    fn id(&self) -> Option<AnyJsBinding> {
+    fn name(&self) -> Option<JsSyntaxToken> {
         match self {
-            Self::JsFunctionExpression(expr) => expr.id(),
+            Self::JsFunctionExpression(expr) => {
+                expr.id()?.as_js_identifier_binding()?.name_token().ok()
+            }
             Self::JsArrowFunctionExpression(_) => None,
         }
     }
@@ -337,17 +443,49 @@ impl AnyJsFunctionExpression {
             }
         }
     }
+
+    fn as_any_js_expression(&self) -> AnyJsExpression {
+        match self {
+            Self::JsFunctionExpression(expr) => AnyJsExpression::JsFunctionExpression(expr.clone()),
+            Self::JsArrowFunctionExpression(expr) => {
+                AnyJsExpression::JsArrowFunctionExpression(expr.clone())
+            }
+        }
+    }
 }
 
 declare_node_union! {
-    AnyJsClassDeclaration = JsClassExportDefaultDeclaration | JsClassDeclaration
+    AnyJsFunctionOrMethodDeclaration =
+        JsFunctionExportDefaultDeclaration
+        | JsFunctionDeclaration
+        | JsMethodClassMember
+        | JsMethodObjectMember
 }
 
-impl AnyJsFunctionDeclaration {
-    fn id(&self) -> Option<AnyJsBinding> {
+impl AnyJsFunctionOrMethodDeclaration {
+    fn name(&self) -> Option<JsSyntaxToken> {
         match self {
-            Self::JsFunctionExportDefaultDeclaration(decl) => decl.id(),
-            Self::JsFunctionDeclaration(decl) => decl.id().ok(),
+            Self::JsFunctionExportDefaultDeclaration(decl) => {
+                decl.id()?.as_js_identifier_binding()?.name_token().ok()
+            }
+            Self::JsFunctionDeclaration(decl) => decl
+                .id()
+                .ok()?
+                .as_js_identifier_binding()?
+                .name_token()
+                .ok(),
+            Self::JsMethodClassMember(method) => method
+                .name()
+                .ok()?
+                .as_js_literal_member_name()?
+                .value()
+                .ok(),
+            Self::JsMethodObjectMember(method) => method
+                .name()
+                .ok()?
+                .as_js_literal_member_name()?
+                .value()
+                .ok(),
         }
     }
 
@@ -355,16 +493,64 @@ impl AnyJsFunctionDeclaration {
         let parameters = match self {
             Self::JsFunctionExportDefaultDeclaration(decl) => decl.parameters(),
             Self::JsFunctionDeclaration(decl) => decl.parameters(),
+            Self::JsMethodClassMember(method) => method.parameters(),
+            Self::JsMethodObjectMember(method) => method.parameters(),
         };
         parameters.ok().map(|params| params.items().len())
     }
 
     fn start_range(&self) -> TextRange {
-        (match self {
-            Self::JsFunctionDeclaration(decl) => decl.function_token(),
-            Self::JsFunctionExportDefaultDeclaration(decl) => decl.function_token(),
-        })
-        .map_or_else(|_| self.range(), |token| token.text_range())
+        let function_token = match self {
+            Self::JsFunctionDeclaration(decl) => decl.function_token().ok(),
+            Self::JsFunctionExportDefaultDeclaration(decl) => decl.function_token().ok(),
+            _ => None,
+        };
+
+        if let Some(token) = function_token {
+            return token.text_range();
+        }
+
+        let name_range = match self {
+            Self::JsMethodClassMember(method) => method.name().ok().map(|name| name.range()),
+            Self::JsMethodObjectMember(method) => method.name().ok().map(|name| name.range()),
+            _ => None,
+        };
+
+        if let Some(range) = name_range {
+            return range;
+        }
+
+        self.range()
+    }
+}
+
+declare_node_union! {
+    AnyJsProperty = JsPropertyObjectMember | JsPropertyClassMember
+}
+
+impl AnyJsProperty {
+    fn name(&self) -> Option<JsSyntaxToken> {
+        match self {
+            Self::JsPropertyObjectMember(property) => property
+                .name()
+                .ok()?
+                .as_js_literal_member_name()?
+                .value()
+                .ok(),
+            Self::JsPropertyClassMember(property) => property
+                .name()
+                .ok()?
+                .as_js_literal_member_name()?
+                .value()
+                .ok(),
+        }
+    }
+
+    fn value(&self) -> Option<AnyJsExpression> {
+        match self {
+            Self::JsPropertyObjectMember(property) => property.value().ok(),
+            Self::JsPropertyClassMember(property) => property.value()?.expression().ok(),
+        }
     }
 }
 
@@ -376,7 +562,17 @@ pub(crate) fn is_react_component_name(name: &str) -> bool {
 }
 
 declare_node_union! {
-    pub AnyPotentialReactComponentDeclaration = JsClassExportDefaultDeclaration | JsFunctionExportDefaultDeclaration | JsFunctionDeclaration | JsVariableDeclarator | JsAssignmentExpression | JsExportDefaultExpressionClause
+    pub AnyPotentialReactComponentDeclaration =
+        JsClassExportDefaultDeclaration
+        | JsFunctionExportDefaultDeclaration
+        | JsFunctionDeclaration
+        | JsVariableDeclarator
+        | JsAssignmentExpression
+        | JsExportDefaultExpressionClause
+        | JsMethodObjectMember
+        | JsPropertyObjectMember
+        | JsMethodClassMember
+        | JsPropertyClassMember
 }
 
 /// Represents a React function component.
@@ -401,6 +597,44 @@ pub(crate) enum ReactFunctionComponentWrapper {
     Memo,
     /// Wrapped using `React.forwardRef()`.
     ForwardRef,
+}
+
+/// Wrapper (memo or forwardRef) with wrapped expression.
+/// This is a utility struct to help with parsing and analyzing wrapped components.
+struct ReactFunctionComponentWrapperInfo {
+    wrapper: ReactFunctionComponentWrapper,
+    wrapped_expression: AnyJsExpression,
+}
+
+impl ReactFunctionComponentWrapperInfo {
+    fn from_expression(expression: &AnyJsExpression) -> Option<Self> {
+        if let AnyJsExpression::JsCallExpression(call_expression) = &expression {
+            let args = call_expression.arguments().ok()?.args();
+            // Both memo and forwardRef take one argument.
+            if args.len() != 1 {
+                return None;
+            }
+            let callee_name = call_expression.callee().ok()?.get_callee_member_name()?;
+            let callee_member_name = callee_name.text_trimmed();
+            let first_arg = args.first()?.ok()?;
+            let wrapped_expression = first_arg.as_any_js_expression()?;
+            if callee_member_name == "memo" {
+                Some(Self {
+                    wrapper: ReactFunctionComponentWrapper::Memo,
+                    wrapped_expression: wrapped_expression.clone(),
+                })
+            } else if callee_member_name == "forwardRef" {
+                Some(Self {
+                    wrapper: ReactFunctionComponentWrapper::ForwardRef,
+                    wrapped_expression: wrapped_expression.clone(),
+                })
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
 }
 
 /// Represents the super class of a React class component.
@@ -867,7 +1101,7 @@ mod test {
             // Test each valid exported item
             for (index, item) in exported_items.iter().enumerate().take(4) {
                 let component_info = ReactComponentInfo::from_exported_item(item);
-                assert!(component_info.is_some(), "Failed on item {}", index);
+                assert!(component_info.is_some(), "Failed on item {index}");
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -879,7 +1113,7 @@ mod test {
                         if let ReactComponentKind::Function(func_info) = &component_info.kind {
                             assert_eq!(func_info.wrappers.len(), 0);
                         } else {
-                            panic!("Expected function component for index {}", index);
+                            panic!("Expected function component for index {index}");
                         }
                     }
                     2 => {
@@ -1089,6 +1323,503 @@ mod test {
         }
     }
 
+    mod from_function {
+        use super::*;
+        use biome_rowan::AstNode;
+
+        #[test]
+        fn it_should_handle_wrapped_function_expressions() {
+            let source = parse_jsx(
+                r#"
+                    const MyComponent = memo(() => {
+                        return <div>Hello, world!</div>;
+                    });
+
+                    const MyForwardRefComponent = forwardRef((props, ref) => {
+                        return <div ref={ref}>Hello, world!</div>;
+                    });
+
+                    const MyDoubleWrappedComponent = memo(forwardRef((props, ref) => {
+                        return <div ref={ref}>Hello, world!</div>;
+                    }));
+
+                    const myComponent = memo(() => {
+                        return <div>Hello, world!</div>;
+                    });
+
+                    const UnwrappedFunction = () => {
+                        return <div>Hello, world!</div>;
+                    };
+                "#,
+            );
+
+            let arrow_functions = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsFunctionExpression::cast_ref(&node).filter(|expr| {
+                        matches!(expr, AnyJsFunctionExpression::JsArrowFunctionExpression(_))
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(arrow_functions.len(), 5);
+
+            // Test memo wrapped component
+            let info1 = ReactComponentInfo::from_function(arrow_functions[0].syntax());
+            assert!(info1.is_some());
+            let info1 = info1.unwrap();
+            assert_eq!(info1.name.as_ref().unwrap().text_trimmed(), "MyComponent");
+            if let ReactComponentKind::Function(func_info) = &info1.kind {
+                assert_eq!(func_info.wrappers.len(), 1);
+                assert_eq!(func_info.wrappers[0], ReactFunctionComponentWrapper::Memo);
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test forwardRef wrapped component
+            let info2 = ReactComponentInfo::from_function(arrow_functions[1].syntax());
+            assert!(info2.is_some());
+            let info2 = info2.unwrap();
+            assert_eq!(
+                info2.name.as_ref().unwrap().text_trimmed(),
+                "MyForwardRefComponent"
+            );
+            if let ReactComponentKind::Function(func_info) = &info2.kind {
+                assert_eq!(func_info.wrappers.len(), 1);
+                assert_eq!(
+                    func_info.wrappers[0],
+                    ReactFunctionComponentWrapper::ForwardRef
+                );
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test double wrapped component
+            let info3 = ReactComponentInfo::from_function(arrow_functions[2].syntax());
+            assert!(info3.is_some());
+            let info3 = info3.unwrap();
+            assert_eq!(
+                info3.name.as_ref().unwrap().text_trimmed(),
+                "MyDoubleWrappedComponent"
+            );
+            if let ReactComponentKind::Function(func_info) = &info3.kind {
+                assert_eq!(func_info.wrappers.len(), 2);
+                assert_eq!(func_info.wrappers[0], ReactFunctionComponentWrapper::Memo);
+                assert_eq!(
+                    func_info.wrappers[1],
+                    ReactFunctionComponentWrapper::ForwardRef
+                );
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test invalid component name (lowercase)
+            let info4 = ReactComponentInfo::from_function(arrow_functions[3].syntax());
+            assert!(info4.is_none());
+
+            // Test unwrapped function (should be Some because it has a capital name from the variable declarator)
+            let info5 = ReactComponentInfo::from_function(arrow_functions[4].syntax());
+            assert!(info5.is_some());
+            let info5 = info5.unwrap();
+            assert_eq!(
+                info5.name.as_ref().unwrap().text_trimmed(),
+                "UnwrappedFunction"
+            );
+        }
+
+        #[test]
+        fn it_should_handle_assignment_expressions() {
+            let source = parse_jsx(
+                r#"
+                    let MyComponent;
+                    MyComponent = memo(() => {
+                        return <div>Hello, world!</div>;
+                    });
+
+                    let myComponent;
+                    myComponent = () => {
+                        return <div>Hello, world!</div>;
+                    };
+                "#,
+            );
+
+            let arrow_functions = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsFunctionExpression::cast_ref(&node).filter(|expr| {
+                        matches!(expr, AnyJsFunctionExpression::JsArrowFunctionExpression(_))
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(arrow_functions.len(), 2);
+
+            // Test valid assignment to capitalized variable
+            let info1 = ReactComponentInfo::from_function(arrow_functions[0].syntax());
+            assert!(info1.is_some());
+            let info1 = info1.unwrap();
+            assert_eq!(info1.name.as_ref().unwrap().text_trimmed(), "MyComponent");
+            if let ReactComponentKind::Function(func_info) = &info1.kind {
+                assert_eq!(func_info.wrappers.len(), 1);
+                assert_eq!(func_info.wrappers[0], ReactFunctionComponentWrapper::Memo);
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test invalid assignment to lowercase variable
+            let info2 = ReactComponentInfo::from_function(arrow_functions[1].syntax());
+            assert!(info2.is_none());
+        }
+
+        #[test]
+        fn it_should_handle_object_properties() {
+            let source = parse_jsx(
+                r#"
+                    const components = {
+                        MyComponent: () => {
+                            return <div>Hello, world!</div>;
+                        },
+                        MyMemoComponent: memo(() => {
+                            return <div>Hello, world!</div>;
+                        }),
+                        myComponent: () => {
+                            return <div>Hello, world!</div>;
+                        }
+                    };
+                "#,
+            );
+
+            let arrow_functions = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsFunctionExpression::cast_ref(&node).filter(|expr| {
+                        matches!(expr, AnyJsFunctionExpression::JsArrowFunctionExpression(_))
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(arrow_functions.len(), 3);
+
+            // Test valid property with capitalized name
+            let info1 = ReactComponentInfo::from_function(arrow_functions[0].syntax());
+            assert!(info1.is_some());
+            let info1 = info1.unwrap();
+            assert_eq!(info1.name.as_ref().unwrap().text_trimmed(), "MyComponent");
+            if let ReactComponentKind::Function(func_info) = &info1.kind {
+                assert_eq!(func_info.wrappers.len(), 0);
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test memo wrapped property
+            let info2 = ReactComponentInfo::from_function(arrow_functions[1].syntax());
+            assert!(info2.is_some());
+            let info2 = info2.unwrap();
+            assert_eq!(
+                info2.name.as_ref().unwrap().text_trimmed(),
+                "MyMemoComponent"
+            );
+            if let ReactComponentKind::Function(func_info) = &info2.kind {
+                assert_eq!(func_info.wrappers.len(), 1);
+                assert_eq!(func_info.wrappers[0], ReactFunctionComponentWrapper::Memo);
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test invalid property with lowercase name
+            let info3 = ReactComponentInfo::from_function(arrow_functions[2].syntax());
+            assert!(info3.is_none());
+        }
+
+        #[test]
+        fn it_should_handle_function_declarations() {
+            let source = parse_jsx(
+                r#"
+                    function MyComponent() {
+                        return <div>Hello, world!</div>;
+                    }
+
+                    function myComponent() {
+                        return <div>Hello, world!</div>;
+                    }
+
+                    function MyComponentWithTooManyParams(props, context) {
+                        return <div>Hello, world!</div>;
+                    }
+                "#,
+            );
+
+            let function_declarations = source
+                .syntax()
+                .descendants()
+                .filter_map(AnyJsFunctionOrMethodDeclaration::cast)
+                .collect::<Vec<_>>();
+
+            assert_eq!(function_declarations.len(), 3);
+
+            // Test valid function declaration
+            let info1 = ReactComponentInfo::from_function(function_declarations[0].syntax());
+            assert!(info1.is_some());
+            let info1 = info1.unwrap();
+            assert_eq!(info1.name.as_ref().unwrap().text_trimmed(), "MyComponent");
+
+            // Test invalid function declaration (lowercase)
+            let info2 = ReactComponentInfo::from_function(function_declarations[1].syntax());
+            assert!(info2.is_none());
+
+            // Test invalid function declaration (too many params)
+            let info3 = ReactComponentInfo::from_function(function_declarations[2].syntax());
+            assert!(info3.is_none());
+        }
+
+        #[test]
+        fn it_should_handle_class_properties() {
+            let source = parse_jsx(
+                r#"
+                    class Components {
+                        MyComponent = () => {
+                            return <div>Hello, world!</div>;
+                        };
+
+                        MyMemoComponent = memo(() => {
+                            return <div>Hello, world!</div>;
+                        });
+
+                        MyForwardRefComponent = forwardRef((props, ref) => {
+                            return <div ref={ref}>Hello, world!</div>;
+                        });
+
+                        MyDoubleWrappedComponent = memo(forwardRef((props, ref) => {
+                            return <div ref={ref}>Hello, world!</div>;
+                        }));
+
+                        myComponent = () => {
+                            return <div>Hello, world!</div>;
+                        };
+                    }
+                "#,
+            );
+
+            let arrow_functions = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsFunctionExpression::cast_ref(&node).filter(|expr| {
+                        matches!(expr, AnyJsFunctionExpression::JsArrowFunctionExpression(_))
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(arrow_functions.len(), 5);
+
+            // Test class property with arrow function
+            let info1 = ReactComponentInfo::from_function(arrow_functions[0].syntax());
+            assert!(info1.is_some());
+            let info1 = info1.unwrap();
+            assert_eq!(info1.name.as_ref().unwrap().text_trimmed(), "MyComponent");
+            if let ReactComponentKind::Function(func_info) = &info1.kind {
+                assert_eq!(func_info.wrappers.len(), 0);
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test memo wrapped class property
+            let info2 = ReactComponentInfo::from_function(arrow_functions[1].syntax());
+            assert!(info2.is_some());
+            let info2 = info2.unwrap();
+            assert_eq!(
+                info2.name.as_ref().unwrap().text_trimmed(),
+                "MyMemoComponent"
+            );
+            if let ReactComponentKind::Function(func_info) = &info2.kind {
+                assert_eq!(func_info.wrappers.len(), 1);
+                assert_eq!(func_info.wrappers[0], ReactFunctionComponentWrapper::Memo);
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test forwardRef wrapped class property
+            let info3 = ReactComponentInfo::from_function(arrow_functions[2].syntax());
+            assert!(info3.is_some());
+            let info3 = info3.unwrap();
+            assert_eq!(
+                info3.name.as_ref().unwrap().text_trimmed(),
+                "MyForwardRefComponent"
+            );
+            if let ReactComponentKind::Function(func_info) = &info3.kind {
+                assert_eq!(func_info.wrappers.len(), 1);
+                assert_eq!(
+                    func_info.wrappers[0],
+                    ReactFunctionComponentWrapper::ForwardRef
+                );
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test double wrapped class property
+            let info4 = ReactComponentInfo::from_function(arrow_functions[3].syntax());
+            assert!(info4.is_some());
+            let info4 = info4.unwrap();
+            assert_eq!(
+                info4.name.as_ref().unwrap().text_trimmed(),
+                "MyDoubleWrappedComponent"
+            );
+            if let ReactComponentKind::Function(func_info) = &info4.kind {
+                assert_eq!(func_info.wrappers.len(), 2);
+                assert_eq!(func_info.wrappers[0], ReactFunctionComponentWrapper::Memo);
+                assert_eq!(
+                    func_info.wrappers[1],
+                    ReactFunctionComponentWrapper::ForwardRef
+                );
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test invalid class property name (lowercase)
+            let info5 = ReactComponentInfo::from_function(arrow_functions[4].syntax());
+            assert!(info5.is_none());
+        }
+
+        #[test]
+        fn it_should_handle_class_methods() {
+            let source = parse_jsx(
+                r#"
+                    class Components {
+                        MyComponent() {
+                            return <div>Hello, world!</div>;
+                        }
+
+                        MyComponentWithParam(props) {
+                            return <div>Hello, {props.name}</div>;
+                        }
+
+                        myComponent() {
+                            return <div>Hello, world!</div>;
+                        }
+
+                        MyComponentWithTooManyParams(props, context) {
+                            return <div>Hello, world!</div>;
+                        }
+                    }
+                "#,
+            );
+
+            let method_declarations = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsFunctionOrMethodDeclaration::cast_ref(&node).filter(|decl| {
+                        matches!(
+                            decl,
+                            AnyJsFunctionOrMethodDeclaration::JsMethodClassMember(_)
+                        )
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(method_declarations.len(), 4);
+
+            // Test valid class method
+            let info1 = ReactComponentInfo::from_function(method_declarations[0].syntax());
+            assert!(info1.is_some());
+            let info1 = info1.unwrap();
+            assert_eq!(info1.name.as_ref().unwrap().text_trimmed(), "MyComponent");
+            if let ReactComponentKind::Function(func_info) = &info1.kind {
+                assert_eq!(func_info.wrappers.len(), 0);
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test valid class method with parameter
+            let info2 = ReactComponentInfo::from_function(method_declarations[1].syntax());
+            assert!(info2.is_some());
+            let info2 = info2.unwrap();
+            assert_eq!(
+                info2.name.as_ref().unwrap().text_trimmed(),
+                "MyComponentWithParam"
+            );
+
+            // Test invalid class method (lowercase name)
+            let info3 = ReactComponentInfo::from_function(method_declarations[2].syntax());
+            assert!(info3.is_none());
+
+            // Test invalid class method (too many params)
+            let info4 = ReactComponentInfo::from_function(method_declarations[3].syntax());
+            assert!(info4.is_none());
+        }
+
+        #[test]
+        fn it_should_handle_object_methods() {
+            let source = parse_jsx(
+                r#"
+                    const components = {
+                        MyComponent() {
+                            return <div>Hello, world!</div>;
+                        },
+
+                        MyComponentWithParam(props) {
+                            return <div>Hello, {props.name}</div>;
+                        },
+
+                        myComponent() {
+                            return <div>Hello, world!</div>;
+                        },
+
+                        MyComponentWithTooManyParams(props, context) {
+                            return <div>Hello, world!</div>;
+                        }
+                    };
+                "#,
+            );
+
+            let method_declarations = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsFunctionOrMethodDeclaration::cast_ref(&node).filter(|decl| {
+                        matches!(
+                            decl,
+                            AnyJsFunctionOrMethodDeclaration::JsMethodObjectMember(_)
+                        )
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(method_declarations.len(), 4);
+
+            // Test valid object method
+            let info1 = ReactComponentInfo::from_function(method_declarations[0].syntax());
+            assert!(info1.is_some());
+            let info1 = info1.unwrap();
+            assert_eq!(info1.name.as_ref().unwrap().text_trimmed(), "MyComponent");
+            if let ReactComponentKind::Function(func_info) = &info1.kind {
+                assert_eq!(func_info.wrappers.len(), 0);
+            } else {
+                panic!("Expected function component");
+            }
+
+            // Test valid object method with parameter
+            let info2 = ReactComponentInfo::from_function(method_declarations[1].syntax());
+            assert!(info2.is_some());
+            let info2 = info2.unwrap();
+            assert_eq!(
+                info2.name.as_ref().unwrap().text_trimmed(),
+                "MyComponentWithParam"
+            );
+
+            // Test invalid object method (lowercase name)
+            let info3 = ReactComponentInfo::from_function(method_declarations[2].syntax());
+            assert!(info3.is_none());
+
+            // Test invalid object method (too many params)
+            let info4 = ReactComponentInfo::from_function(method_declarations[3].syntax());
+            assert!(info4.is_none());
+        }
+    }
+
     mod from_declaration {
         use super::*;
         use biome_rowan::AstNode;
@@ -1118,7 +1849,7 @@ mod test {
             let funcs = source
                 .syntax()
                 .descendants()
-                .filter_map(AnyJsFunctionDeclaration::cast)
+                .filter_map(AnyJsFunctionOrMethodDeclaration::cast)
                 .collect::<Vec<_>>();
 
             assert_eq!(funcs.len(), 4);
@@ -1128,13 +1859,7 @@ mod test {
                 assert_eq!(
                     component_info,
                     Some(ReactComponentInfo {
-                        name: func
-                            .id()
-                            .unwrap()
-                            .as_js_identifier_binding()
-                            .unwrap()
-                            .name_token()
-                            .ok(),
+                        name: func.name(),
                         name_hint: None,
                         start_range: func.start_range(),
                         kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
@@ -1174,7 +1899,7 @@ mod test {
             let funcs = source
                 .syntax()
                 .descendants()
-                .filter_map(AnyJsFunctionDeclaration::cast)
+                .filter_map(AnyJsFunctionOrMethodDeclaration::cast)
                 .collect::<Vec<_>>();
 
             assert_eq!(funcs.len(), 5);
@@ -1524,6 +2249,440 @@ mod test {
             for assignment in assignments {
                 let component_info = ReactComponentInfo::from_declaration(assignment.syntax());
                 assert_eq!(component_info, None)
+            }
+        }
+
+        #[test]
+        fn it_should_handle_valid_class_properties() {
+            let source = parse_jsx(
+                r#"
+                    class Components {
+                        MyComponent = () => {
+                            return <div>Hello, world!</div>;
+                        };
+
+                        MyMemoComponent = memo(() => {
+                            return <div>Hello, world!</div>;
+                        });
+
+                        MyForwardRefComponent = forwardRef((props, ref) => {
+                            return <div ref={ref}>Hello, world!</div>;
+                        });
+
+                        MyDoubleWrappedComponent = memo(forwardRef((props, ref) => {
+                            return <div ref={ref}>Hello, world!</div>;
+                        }));
+                    }
+                "#,
+            );
+
+            let class_properties = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsProperty::cast_ref(&node)
+                        .filter(|prop| matches!(prop, AnyJsProperty::JsPropertyClassMember(_)))
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(class_properties.len(), 4);
+
+            for (index, property) in class_properties.iter().enumerate() {
+                let component_info = ReactComponentInfo::from_declaration(property.syntax());
+                assert!(component_info.is_some(), "Failed on property {index}");
+
+                let component_info = component_info.unwrap();
+                assert!(component_info.name.is_some());
+
+                if let ReactComponentKind::Function(func_info) = &component_info.kind {
+                    match index {
+                        0 => assert_eq!(func_info.wrappers.len(), 0), // MyComponent
+                        1 => {
+                            // MyMemoComponent
+                            assert_eq!(func_info.wrappers.len(), 1);
+                            assert_eq!(func_info.wrappers[0], ReactFunctionComponentWrapper::Memo);
+                        }
+                        2 => {
+                            // MyForwardRefComponent
+                            assert_eq!(func_info.wrappers.len(), 1);
+                            assert_eq!(
+                                func_info.wrappers[0],
+                                ReactFunctionComponentWrapper::ForwardRef
+                            );
+                        }
+                        3 => {
+                            // MyDoubleWrappedComponent
+                            assert_eq!(func_info.wrappers.len(), 2);
+                            assert_eq!(func_info.wrappers[0], ReactFunctionComponentWrapper::Memo);
+                            assert_eq!(
+                                func_info.wrappers[1],
+                                ReactFunctionComponentWrapper::ForwardRef
+                            );
+                        }
+                        _ => unreachable!(),
+                    }
+                } else {
+                    panic!("Expected function component for property {index}",);
+                }
+            }
+        }
+
+        #[test]
+        fn it_should_ignore_invalid_class_properties() {
+            let source = parse_jsx(
+                r#"
+                    class Components {
+                        myComponent = () => {
+                            return <div>Hello, world!</div>;
+                        };
+
+                        MyComponentWithTooManyParams = (props, context) => {
+                            return <div>Hello, world!</div>;
+                        };
+
+                        notAFunction = "not a function";
+
+                        MyClassComponent = class extends React.Component {
+                            render() {
+                                return <div>Hello, world!</div>;
+                            }
+                        };
+                    }
+                "#,
+            );
+
+            let class_properties = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsProperty::cast_ref(&node)
+                        .filter(|prop| matches!(prop, AnyJsProperty::JsPropertyClassMember(_)))
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(class_properties.len(), 4);
+
+            // Test invalid property (lowercase name)
+            let component_info = ReactComponentInfo::from_declaration(class_properties[0].syntax());
+            assert_eq!(component_info, None);
+
+            // Test invalid property (too many params)
+            let component_info = ReactComponentInfo::from_declaration(class_properties[1].syntax());
+            assert_eq!(component_info, None);
+
+            // Test invalid property (not a function)
+            let component_info = ReactComponentInfo::from_declaration(class_properties[2].syntax());
+            assert_eq!(component_info, None);
+
+            // Test valid class expression property
+            let component_info = ReactComponentInfo::from_declaration(class_properties[3].syntax());
+            assert!(component_info.is_some());
+            if let ReactComponentKind::Class(_) = component_info.unwrap().kind {
+                // Expected class component
+            } else {
+                panic!("Expected class component");
+            }
+        }
+
+        #[test]
+        fn it_should_handle_valid_class_methods() {
+            let source = parse_jsx(
+                r#"
+                    class Components {
+                        MyComponent() {
+                            return <div>Hello, world!</div>;
+                        }
+
+                        MyComponentWithParam(props) {
+                            return <div>Hello, {props.name}</div>;
+                        }
+                    }
+                "#,
+            );
+
+            let class_methods = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsFunctionOrMethodDeclaration::cast_ref(&node).filter(|decl| {
+                        matches!(
+                            decl,
+                            AnyJsFunctionOrMethodDeclaration::JsMethodClassMember(_)
+                        )
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(class_methods.len(), 2);
+
+            for (index, method) in class_methods.iter().enumerate() {
+                let component_info = ReactComponentInfo::from_declaration(method.syntax());
+                assert!(component_info.is_some(), "Failed on method {index}");
+
+                let component_info = component_info.unwrap();
+                assert!(component_info.name.is_some());
+
+                if let ReactComponentKind::Function(func_info) = &component_info.kind {
+                    assert_eq!(func_info.wrappers.len(), 0);
+                } else {
+                    panic!("Expected function component for method {index}",);
+                }
+            }
+        }
+
+        #[test]
+        fn it_should_ignore_invalid_class_methods() {
+            let source = parse_jsx(
+                r#"
+                    class Components {
+                        myComponent() {
+                            return <div>Hello, world!</div>;
+                        }
+
+                        MyComponentWithTooManyParams(props, context) {
+                            return <div>Hello, world!</div>;
+                        }
+                    }
+                "#,
+            );
+
+            let class_methods = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsFunctionOrMethodDeclaration::cast_ref(&node).filter(|decl| {
+                        matches!(
+                            decl,
+                            AnyJsFunctionOrMethodDeclaration::JsMethodClassMember(_)
+                        )
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(class_methods.len(), 2);
+
+            for method in class_methods.iter() {
+                let component_info = ReactComponentInfo::from_declaration(method.syntax());
+                assert_eq!(component_info, None);
+            }
+        }
+
+        #[test]
+        fn it_should_handle_valid_object_properties() {
+            let source = parse_jsx(
+                r#"
+                    const components = {
+                        MyComponent: () => {
+                            return <div>Hello, world!</div>;
+                        },
+
+                        MyMemoComponent: memo(() => {
+                            return <div>Hello, world!</div>;
+                        }),
+
+                        MyForwardRefComponent: forwardRef((props, ref) => {
+                            return <div ref={ref}>Hello, world!</div>;
+                        }),
+
+                        MyDoubleWrappedComponent: memo(forwardRef((props, ref) => {
+                            return <div ref={ref}>Hello, world!</div>;
+                        }))
+                    };
+                "#,
+            );
+
+            let object_properties = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsProperty::cast_ref(&node)
+                        .filter(|prop| matches!(prop, AnyJsProperty::JsPropertyObjectMember(_)))
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(object_properties.len(), 4);
+
+            for (index, property) in object_properties.iter().enumerate() {
+                let component_info = ReactComponentInfo::from_declaration(property.syntax());
+                assert!(component_info.is_some(), "Failed on property {index}",);
+
+                let component_info = component_info.unwrap();
+                assert!(component_info.name.is_some());
+
+                if let ReactComponentKind::Function(func_info) = &component_info.kind {
+                    match index {
+                        0 => assert_eq!(func_info.wrappers.len(), 0), // MyComponent
+                        1 => {
+                            // MyMemoComponent
+                            assert_eq!(func_info.wrappers.len(), 1);
+                            assert_eq!(func_info.wrappers[0], ReactFunctionComponentWrapper::Memo);
+                        }
+                        2 => {
+                            // MyForwardRefComponent
+                            assert_eq!(func_info.wrappers.len(), 1);
+                            assert_eq!(
+                                func_info.wrappers[0],
+                                ReactFunctionComponentWrapper::ForwardRef
+                            );
+                        }
+                        3 => {
+                            // MyDoubleWrappedComponent
+                            assert_eq!(func_info.wrappers.len(), 2);
+                            assert_eq!(func_info.wrappers[0], ReactFunctionComponentWrapper::Memo);
+                            assert_eq!(
+                                func_info.wrappers[1],
+                                ReactFunctionComponentWrapper::ForwardRef
+                            );
+                        }
+                        _ => unreachable!(),
+                    }
+                } else {
+                    panic!("Expected function component for property {index}",);
+                }
+            }
+        }
+
+        #[test]
+        fn it_should_ignore_invalid_object_properties() {
+            let source = parse_jsx(
+                r#"
+                    const components = {
+                        myComponent: () => {
+                            return <div>Hello, world!</div>;
+                        },
+
+                        MyComponentWithTooManyParams: (props, context) => {
+                            return <div>Hello, world!</div>;
+                        },
+
+                        notAFunction: "not a function",
+
+                        MyClassComponent: class extends React.Component {
+                            render() {
+                                return <div>Hello, world!</div>;
+                            }
+                        }
+                    };
+                "#,
+            );
+
+            let object_properties = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsProperty::cast_ref(&node)
+                        .filter(|prop| matches!(prop, AnyJsProperty::JsPropertyObjectMember(_)))
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(object_properties.len(), 4);
+
+            // Test invalid property (lowercase name)
+            let component_info =
+                ReactComponentInfo::from_declaration(object_properties[0].syntax());
+            assert_eq!(component_info, None);
+
+            // Test invalid property (too many params)
+            let component_info =
+                ReactComponentInfo::from_declaration(object_properties[1].syntax());
+            assert_eq!(component_info, None);
+
+            // Test invalid property (not a function)
+            let component_info =
+                ReactComponentInfo::from_declaration(object_properties[2].syntax());
+            assert_eq!(component_info, None);
+
+            // Test valid class expression property
+            let component_info =
+                ReactComponentInfo::from_declaration(object_properties[3].syntax());
+            assert!(component_info.is_some());
+            if let ReactComponentKind::Class(_) = component_info.unwrap().kind {
+                // Expected class component
+            } else {
+                panic!("Expected class component");
+            }
+        }
+
+        #[test]
+        fn it_should_handle_valid_object_methods() {
+            let source = parse_jsx(
+                r#"
+                    const components = {
+                        MyComponent() {
+                            return <div>Hello, world!</div>;
+                        },
+
+                        MyComponentWithParam(props) {
+                            return <div>Hello, {props.name}</div>;
+                        }
+                    };
+                "#,
+            );
+
+            let object_methods = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsFunctionOrMethodDeclaration::cast_ref(&node).filter(|decl| {
+                        matches!(
+                            decl,
+                            AnyJsFunctionOrMethodDeclaration::JsMethodObjectMember(_)
+                        )
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(object_methods.len(), 2);
+
+            for (index, method) in object_methods.iter().enumerate() {
+                let component_info = ReactComponentInfo::from_declaration(method.syntax());
+                assert!(component_info.is_some(), "Failed on method {index}",);
+
+                let component_info = component_info.unwrap();
+                assert!(component_info.name.is_some());
+
+                if let ReactComponentKind::Function(func_info) = &component_info.kind {
+                    assert_eq!(func_info.wrappers.len(), 0);
+                } else {
+                    panic!("Expected function component for method {index}",);
+                }
+            }
+        }
+
+        #[test]
+        fn it_should_ignore_invalid_object_methods() {
+            let source = parse_jsx(
+                r#"
+                    const components = {
+                        myComponent() {
+                            return <div>Hello, world!</div>;
+                        },
+
+                        MyComponentWithTooManyParams(props, context) {
+                            return <div>Hello, world!</div>;
+                        }
+                    };
+                "#,
+            );
+
+            let object_methods = source
+                .syntax()
+                .descendants()
+                .filter_map(|node| {
+                    AnyJsFunctionOrMethodDeclaration::cast_ref(&node).filter(|decl| {
+                        matches!(
+                            decl,
+                            AnyJsFunctionOrMethodDeclaration::JsMethodObjectMember(_)
+                        )
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            assert_eq!(object_methods.len(), 2);
+
+            for method in object_methods.iter() {
+                let component_info = ReactComponentInfo::from_declaration(method.syntax());
+                assert_eq!(component_info, None);
             }
         }
     }

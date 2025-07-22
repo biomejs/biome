@@ -7,6 +7,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{SyntaxNodeCast, TextRange};
+use biome_rule_options::no_unknown_unit::NoUnknownUnitOptions;
 use biome_string_case::StrLikeExtension;
 
 const RESOLUTION_MEDIA_FEATURE_NAMES: [&str; 3] =
@@ -66,7 +67,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("unit-no-unknown")],
+        sources: &[RuleSource::Stylelint("unit-no-unknown").same()],
     }
 }
 
@@ -79,7 +80,7 @@ impl Rule for NoUnknownUnit {
     type Query = Ast<AnyCssDimension>;
     type State = NoUnknownUnitState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownUnitOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

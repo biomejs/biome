@@ -9,6 +9,7 @@ use biome_js_syntax::{
     AnyJsStatement, JsBreakStatement, JsContinueStatement, JsFileSource, JsLabeledStatement,
     JsLanguage, TextRange, WalkEvent,
 };
+use biome_rule_options::no_unused_labels::NoUnusedLabelsOptions;
 
 use biome_rowan::{AstNode, BatchMutationExt, Language, SyntaxNode, SyntaxResult, TokenText};
 use rustc_hash::FxHashSet;
@@ -63,7 +64,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnusedLabels",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unused-labels")],
+        sources: &[RuleSource::Eslint("no-unused-labels").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -163,7 +164,7 @@ impl Rule for NoUnusedLabels {
     type Query = UnusedLabel;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnusedLabelsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let label = ctx.query().label_token().ok()?;

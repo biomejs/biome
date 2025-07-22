@@ -12,5 +12,5 @@ foo.bar;
 ## Result
 
 ```
-unresolved reference "foo".bar
+unresolved reference "foo" (scope ID: 0).bar
 ```

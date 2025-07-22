@@ -20,7 +20,7 @@ const CUSTOM_CONFIGURATION_AFTER: &str = "function f() {
 
 #[test]
 fn formatter_biome_json() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -62,7 +62,7 @@ fn formatter_biome_json() {
 
 #[test]
 fn linter_biome_json() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -111,7 +111,7 @@ fn linter_biome_json() {
 
 #[test]
 fn check_biome_json() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("fix.js");
@@ -160,7 +160,7 @@ fn check_biome_json() {
 
 #[test]
 fn ci_biome_json() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     fs.insert(
@@ -199,7 +199,7 @@ fn ci_biome_json() {
 
 #[test]
 fn biome_json_is_not_ignored() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     fs.insert(
@@ -237,7 +237,7 @@ fn biome_json_is_not_ignored() {
 
 #[test]
 fn always_disable_trailing_commas_biome_json() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");

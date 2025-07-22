@@ -5,7 +5,6 @@ use biome_deserialize::{
 };
 use biome_deserialize_macros::Merge;
 use biome_diagnostics::Severity;
-use schemars::SchemaGenerator;
 use serde::{Deserialize, Serialize};
 
 /// A list of paths to other JSON files, used to extends the current configuration.
@@ -67,7 +66,7 @@ impl schemars::JsonSchema for Extends {
         "Extends".to_string()
     }
 
-    fn json_schema(generator: &mut SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::schema::Schema {
         #[derive(serde::Deserialize, schemars::JsonSchema)]
         #[serde(untagged)]
         #[expect(dead_code)]

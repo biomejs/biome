@@ -1,10 +1,11 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsExportFromClause;
 use biome_rowan::AstNode;
+use biome_rule_options::no_re_export_all::NoReExportAllOptions;
 
 declare_lint_rule! {
     /// Avoid re-export all.
@@ -42,8 +43,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Warning,
-        sources: &[RuleSource::EslintBarrelFiles("avoid-re-export-all")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintBarrelFiles("avoid-re-export-all").same()],
     }
 }
 
@@ -51,7 +51,7 @@ impl Rule for NoReExportAll {
     type Query = Ast<JsExportFromClause>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoReExportAllOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         ctx.query().type_token().is_none().then_some(())

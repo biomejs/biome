@@ -848,19 +848,23 @@ pub const VENDOR_SPECIFIC_PSEUDO_ELEMENTS: [&str; 66] = [
 
 pub const SHADOW_TREE_PSEUDO_ELEMENTS: [&str; 1] = ["part"];
 
-pub const OTHER_PSEUDO_ELEMENTS: [&str; 18] = [
+pub const OTHER_PSEUDO_ELEMENTS: [&str; 22] = [
     "backdrop",
     "content",
     "cue",
+    "details-content",
     "file-selector-button",
     "grammar-error",
     "highlight",
     "marker",
     "placeholder",
+    "prefix",
+    "search-text",
     "selection",
     "shadow",
     "slotted",
     "spelling-error",
+    "suffix",
     "target-text",
     "view-transition",
     "view-transition-group",
@@ -923,7 +927,7 @@ pub const RESOURCE_STATE_PSEUDO_CLASSES: [&str; 7] = [
     "volume-locked",
 ];
 
-pub const OTHER_PSEUDO_CLASSES: [&str; 50] = [
+pub const OTHER_PSEUDO_CLASSES: [&str; 51] = [
     "active",
     "any-link",
     "autofill",
@@ -955,6 +959,7 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 50] = [
     "modal",
     "only-child",
     "only-of-type",
+    "open",
     "optional",
     "out-of-range",
     "past",

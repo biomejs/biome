@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_6391.jsx
+---
+# Input
+```jsx
+appendToLastRow(rows, <> {character.leftBracket}</>);
+appendToLastRow(rows, <Fragment> {character.leftBracket}</Fragment>);
+appendToLastRow(rows, <React.Fragment> {character.leftBracket}</React.Fragment>);
+
+```

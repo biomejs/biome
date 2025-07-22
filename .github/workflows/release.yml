@@ -14,19 +14,23 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
+  BIOME_WEBSITE_REPO: biomejs/website
+  BIOME_RELEASE_CLI_EVENT: biome-release-cli-event
 
 jobs:
   changesets:
     name: Release
+    outputs:
+      hasChangesets: ${{ steps.changesets-action.outputs.hasChangesets }}
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout Repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Setup Node.js 20.x
+      - name: Setup Node.js 22.x
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install pnpm
         run: |
@@ -35,9 +39,10 @@ jobs:
           pnpm --version
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Create Release Pull Request
+        id: changesets-action
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
           version: pnpm run version
@@ -50,36 +55,39 @@ jobs:
   version:
     runs-on: depot-ubuntu-24.04-arm-16
     needs: changesets
-    if: needs.changesets.outputs.hasChangesets == 'false' && github.head_ref == 'changeset-release/main'
+    if: needs.changesets.outputs.hasChangesets == 'false'
     outputs:
-      cli-version: ${{ env.cli-version }}
-      js-api-version: ${{ env.cli-js-api-version }}
+      cli-version: ${{ steps.cli-version-changed.outputs.version }}
+      js-api-version: ${{ steps.js-api-version-changed.outputs.version }}
 
     steps:
-      - name: Check CLI version changes
-        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
-        id: cli-version-changed
+      - name: Checkout Repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          diff-search: true
-          file-name: packages/@biomejs/biome/package.json
+          node-version: 22
+
+      - name: Check CLI version changes
+        id: cli-version-changed
+        run: |
+          version=$(node --experimental-strip-types scripts/version-check.ts packages/@biomejs/biome/package.json)
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Check JS API version changes
-        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
         id: js-api-version-changed
-        with:
-          diff-search: true
-          file-name: packages/@biomejs/js-api/package.json
-
-      - name: Set Biome Version as Environment Variable
         run: |
-          echo "cli-version=${{ steps.cli-version-changed.outputs.version }}" >> $GITHUB_ENV
-          echo "js-api-version=${{ steps.js-api-version-changed.outputs.version }}" >> $GITHUB_ENV
+          version=$(node --experimental-strip-types scripts/version-check.ts packages/@biomejs/js-api/package.json)
+          echo "version=$version" >> $GITHUB_OUTPUT
 
   # Building jobs
 
   build-binaries:
     needs: version
-    if: needs.cli-version-changed.outputs.changed == 'true'
+    if: needs.version.outputs.cli-version
+    outputs:
+      version: ${{ needs.version.outputs.cli-version }}
     strategy:
       matrix:
         include:
@@ -119,7 +127,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@941e8a4d9d7cdb696bd4f017cf54aca281f8ffff # v2.51.2
+        uses: taiki-e/install-action@c07504cae06f832dc8de08911c9a9c5cddb0d2d3 # v2.56.13
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -135,7 +143,7 @@ jobs:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
           # Inline the version of the npm package in the CLI binary
-          BIOME_VERSION: ${{ env.cli-version }}
+          BIOME_VERSION: ${{ needs.version.outputs.cli-version }}
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
@@ -160,7 +168,7 @@ jobs:
   # Build GNU/Linux binaries in Docker, using Debian 11 (bullseye), to support older versions of glibc.
   build-binaries-gnu:
     needs: version
-    if: needs.cli-version-changed.outputs.changed == 'true'
+    if: needs.version.outputs.cli-version
     strategy:
       matrix:
         include:
@@ -174,7 +182,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.87.0-bullseye@sha256:eb809362961259a30f540857c3cac8423c466d558bea0f55f32e3a6354654353
+      image: rust:1.88.0-bullseye@sha256:8eb96c7c77c04660a95d5e256869de0a18130f97624ef75c522ea886d4e51d95
 
     steps:
       - name: Checkout repository
@@ -192,7 +200,7 @@ jobs:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
           # Inline the version of the npm package in the CLI binary
-          BIOME_VERSION: ${{ env.cli-version }}
+          BIOME_VERSION: ${{ needs.version.outputs.cli-version }}
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
@@ -212,7 +220,7 @@ jobs:
     name: Build WASM
     runs-on: depot-ubuntu-24.04-arm-16
     needs: version
-    if: needs.cli-version-changed.outputs.changed == 'true'
+    if: needs.version.outputs.cli-version
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -241,7 +249,9 @@ jobs:
     name: Package JavaScript APIs
     runs-on: depot-ubuntu-24.04-arm-16
     needs: version
-    if: needs.js-api-version-changed.outputs.changed == 'true'
+    if: needs.version.outputs.js-api-version
+    outputs:
+      version: ${{ needs.version.outputs.js-api-version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -287,12 +297,13 @@ jobs:
   # Publishing jobs
 
   publish-cli:
-    name: Publish
-    runs-on: depot-ubuntu-24.04-arm-16
+    name: Publish CLI
+    runs-on: ubuntu-24.04
     needs:
       - build-binaries
       - build-binaries-gnu
       - build-wasm
+    if: needs.build-binaries.outputs.version
     environment: npm-publish
     permissions:
       contents: write
@@ -311,30 +322,70 @@ jobs:
           pattern: wasm-*
           merge-multiple: true
           path: packages/@biomejs
-
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Install pnpm
+        run: |
+          npm install -g corepack
+          corepack enable
+          pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The WASM job updates the package.json file, because of wasm-pack, which we need to restore
+      - name: Restore packages changes
+        run: |
+          git restore packages/@biomejs/wasm-bundler/package.json
+          git restore packages/@biomejs/wasm-nodejs/package.json
+          git restore packages/@biomejs/wasm-web/package.json
+
       - name: Generate npm packages
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
       - name: Publish npm packages as latest
-        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag latest --access public --provenance; fi; done
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package  --tag latest --access public --provenance; fi; done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Upload assets to the latest tag
+      - name: Publish release for @biomejs/biome
         run: |
-          files=$(ls biome-* | tr '\n' ' ')
-          gh release upload @biomejs/biome@${{ env.cli-version }} $files
+          bash scripts/print-changelog.sh ${{ needs.build-binaries.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
+
+      - name: Create GitHub @biomejs/biome release and tag
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: |
+            Biome CLI v${{ needs.build-binaries.outputs.version }}
+          tag_name: |
+            @biomejs/biome@${{ needs.build-binaries.outputs.version }}
+          draft: false
+          body_path: ${{ github.workspace }}/RELEASE_NOTES
+          files: |
+            biome-*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+
+      - name: Dispatch event on release
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
+        with:
+          token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
+          repository: ${{ env.BIOME_WEBSITE_REPO }}
+          event-type: ${{ env.BIOME_RELEASE_CLI_EVENT }}
+          client-payload: |
+            { "sha": "${{ env.GITHUB_SHA }}", "tag": "@biomejs/biome@${{ needs.build-binaries.outputs.version }}", "version": "${{ needs.build-binaries.outputs.version }}" }
 
   publish-js-api:
-    name: Publish
-    runs-on: depot-ubuntu-24.04-arm-16
+    name: Publish JS API
+    runs-on: ubuntu-24.04
     needs: build-js-api
+    if: needs.build-js-api.outputs.version
     environment: npm-publish
     permissions:
       contents: write
@@ -342,7 +393,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Download package artifact
+      - name: Download JS API artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: js-api
@@ -353,7 +404,36 @@ jobs:
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Install pnpm
+        run: |
+          npm install -g corepack
+          corepack enable
+          pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Publish npm package as latest
-        run: npm publish packages/@biomejs/js-api --tag latest --access public --provenance
+        run: pnpm publish packages/@biomejs/js-api --no-git-checks --tag latest --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish release for @biomejs/js-api
+        run: |
+          bash scripts/print-changelog.sh ${{ needs.build-js-api.outputs.version }} packages/@biomejs/js-api/CHANGELOG.md  >| ${{ github.workspace }}/JS_RELEASE_NOTES
+
+      - name: Create GitHub @biomejs/js-api release and tag
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: |
+            JavaScript APIs v${{ needs.build-js-api.outputs.version }}
+          tag_name: |
+            @biomejs/js-api@${{ needs.build-js-api.outputs.version }}
+          draft: false
+          body_path: ${{ github.workspace }}/JS_RELEASE_NOTES
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          make_latest: false # Keep the CLI release as latest

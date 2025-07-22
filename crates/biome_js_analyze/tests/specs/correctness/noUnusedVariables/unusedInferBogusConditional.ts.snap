@@ -11,7 +11,7 @@ export type ToPascalCase<S extends string> = S extends `${infer Prefix}` ? : ;
 ```
 unusedInferBogusConditional.ts:1:65 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable Prefix is unused.
   
   > 1 │ export type ToPascalCase<S extends string> = S extends `${infer Prefix}` ? : ;
       │                                                                 ^^^^^^

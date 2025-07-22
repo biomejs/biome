@@ -13,8 +13,8 @@ expression: result.diagnostics
             },
         ),
         severity: Warning,
-        description: "This variable is unused.",
-        message: "This variable is unused.",
+        description: "This variable a is unused.",
+        message: "This variable "<Emphasis>"a"</Emphasis>" is unused.",
         advices: Advices {
             advices: [
                 Log(

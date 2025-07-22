@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsObjectMember, JsObjectExpression, JsSyntaxKind};
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, TokenText};
+use biome_rule_options::no_duplicate_object_keys::NoDuplicateObjectKeysOptions;
 use rustc_hash::FxHashMap;
 use std::collections::hash_map;
 use std::fmt::Display;
@@ -53,7 +54,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDuplicateObjectKeys",
         language: "js",
-        sources: &[RuleSource::Eslint("no-dupe-keys")],
+        sources: &[RuleSource::Eslint("no-dupe-keys").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -64,7 +65,7 @@ impl Rule for NoDuplicateObjectKeys {
     type Query = Ast<JsObjectExpression>;
     type State = PropertyConflict;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDuplicateObjectKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

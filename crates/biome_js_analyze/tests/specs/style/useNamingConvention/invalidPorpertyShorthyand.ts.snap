@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidPorpertyShorthyand.ts
+---
+# Input
+```ts
+const SERVICE_NAME = "my-service" as const;
+
+const SERVICE = {
+  SERVICE_NAME,
+} as const;
+
+```
+
+# Diagnostics
+```
+invalidPorpertyShorthyand.ts:4:3 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object property name should be in camelCase.
+  
+    3 │ const SERVICE = {
+  > 4 │   SERVICE_NAME,
+      │   ^^^^^^^^^^^^
+    5 │ } as const;
+    6 │ 
+  
+
+```

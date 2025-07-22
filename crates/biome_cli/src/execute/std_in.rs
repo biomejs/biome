@@ -1,8 +1,9 @@
 //! In here, there are the operations that run via standard input
 //!
+use crate::cli_options::CliOptions;
 use crate::diagnostics::StdinDiagnostic;
 use crate::execute::Execution;
-use crate::{CliDiagnostic, CliSession, TEMPORARY_INTERNAL_FILE_NAME, TraversalMode};
+use crate::{CliDiagnostic, CliSession, TraversalMode};
 use biome_analyze::RuleCategoriesBuilder;
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::Diagnostic;
@@ -13,9 +14,8 @@ use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileH
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DropPatternParams, FeaturesBuilder, FileContent,
-    FixFileParams, FormatFileParams, OpenFileParams, SupportsFeatureParams,
+    FileFeaturesResult, FixFileParams, FormatFileParams, OpenFileParams, SupportsFeatureParams,
 };
-use camino::Utf8PathBuf;
 use std::borrow::Cow;
 
 pub(crate) fn run<'a>(
@@ -24,29 +24,38 @@ pub(crate) fn run<'a>(
     mode: &'a Execution,
     biome_path: BiomePath,
     content: &'a str,
-    verbose: bool,
+    cli_options: &CliOptions,
 ) -> Result<(), CliDiagnostic> {
     let workspace = &*session.app.workspace;
     let console = &mut *session.app.console;
     let mut version = 0;
 
-    let std_in_file = biome_path
-        .extension()
-        .map(|ext| {
-            BiomePath::new(Utf8PathBuf::from(TEMPORARY_INTERNAL_FILE_NAME).with_extension(ext))
-        })
-        .ok_or_else(|| CliDiagnostic::from(StdinDiagnostic::new_no_extension()))?;
+    if biome_path.extension().is_none() {
+        console.error(markup! {
+            {PrintDiagnostic::simple(&CliDiagnostic::from(StdinDiagnostic::new_no_extension()))}
+        });
+        console.append(markup! {{content}});
+        return Ok(());
+    }
 
     if mode.is_format() {
-        let file_features = workspace.file_features(SupportsFeatureParams {
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = workspace.file_features(SupportsFeatureParams {
             project_key,
             path: biome_path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
         })?;
+
+        if file_features.is_ignored() {
+            console.append(markup! {{content}});
+            return Ok(());
+        }
+
         if file_features.is_protected() {
             let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
             if protected_diagnostic.tags().is_verbose() {
-                if verbose {
+                if cli_options.verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
                 }
             } else {
@@ -58,14 +67,14 @@ pub(crate) fn run<'a>(
         if file_features.supports_format() {
             workspace.open_file(OpenFileParams {
                 project_key,
-                path: std_in_file.clone(),
+                path: biome_path.clone(),
                 content: FileContent::from_client(content),
                 document_file_source: None,
                 persist_node_cache: false,
             })?;
             let printed = workspace.format_file(FormatFileParams {
                 project_key,
-                path: std_in_file.clone(),
+                path: biome_path.clone(),
             })?;
 
             let code = printed.into_code();
@@ -80,7 +89,7 @@ pub(crate) fn run<'a>(
             });
             workspace.close_file(CloseFileParams {
                 project_key,
-                path: std_in_file.clone(),
+                path: biome_path.clone(),
             })?;
         } else {
             console.append(markup! {
@@ -96,13 +105,16 @@ pub(crate) fn run<'a>(
 
         workspace.open_file(OpenFileParams {
             project_key,
-            path: std_in_file.clone(),
+            path: biome_path.clone(),
             content: FileContent::from_client(content),
             document_file_source: None,
             persist_node_cache: false,
         })?;
+
         // apply fix file of the linter
-        let file_features = workspace.file_features(SupportsFeatureParams {
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = workspace.file_features(SupportsFeatureParams {
             project_key,
             path: biome_path.clone(),
             features: FeaturesBuilder::new()
@@ -112,10 +124,15 @@ pub(crate) fn run<'a>(
                 .build(),
         })?;
 
+        if file_features.is_ignored() {
+            console.append(markup! {{content}});
+            return Ok(());
+        }
+
         if file_features.is_protected() {
             let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
             if protected_diagnostic.tags().is_verbose() {
-                if verbose {
+                if cli_options.verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
                 }
             } else {
@@ -147,7 +164,7 @@ pub(crate) fn run<'a>(
                 let fix_file_result = workspace.fix_file(FixFileParams {
                     project_key,
                     fix_file_mode: *fix_file_mode,
-                    path: std_in_file.clone(),
+                    path: biome_path.clone(),
                     should_format: mode.is_check() && file_features.supports_format(),
                     only: only.clone(),
                     skip: skip.clone(),
@@ -167,7 +184,7 @@ pub(crate) fn run<'a>(
                     workspace.change_file(ChangeFileParams {
                         project_key,
                         content: output.clone(),
-                        path: std_in_file.clone(),
+                        path: biome_path.clone(),
                         version,
                     })?;
                     new_content = Cow::Owned(output);
@@ -178,7 +195,7 @@ pub(crate) fn run<'a>(
         if file_features.supports_format() && mode.is_check() {
             let printed = workspace.format_file(FormatFileParams {
                 project_key,
-                path: std_in_file.clone(),
+                path: biome_path.clone(),
             })?;
             let code = printed.into_code();
             let output = match biome_path.extension() {
@@ -212,7 +229,7 @@ pub(crate) fn run<'a>(
         }
         workspace.close_file(CloseFileParams {
             project_key,
-            path: std_in_file.clone(),
+            path: biome_path.clone(),
         })?;
     } else if let TraversalMode::Search { pattern, .. } = mode.traversal_mode() {
         // Make sure patterns are always cleaned up at the end of execution.

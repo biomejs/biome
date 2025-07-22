@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::{TextRange, TextSize};
+use biome_rule_options::no_empty_character_class_in_regex::NoEmptyCharacterClassInRegexOptions;
 
 declare_lint_rule! {
     /// Disallow empty character classes in regular expression literals.
@@ -45,7 +46,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noEmptyCharacterClassInRegex",
         language: "js",
-        sources: &[RuleSource::Eslint("no-empty-character-class")],
+        sources: &[RuleSource::Eslint("no-empty-character-class").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -55,7 +56,7 @@ impl Rule for NoEmptyCharacterClassInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = Range<usize>;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoEmptyCharacterClassInRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut empty_classes = vec![];

@@ -7,8 +7,9 @@ use biome_lsp_converters::from_proto;
 use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams,
-    FormatRangeParams, GetFileContentParams, IsPathIgnoredParams, SupportsFeatureParams,
+    CheckFileSizeParams, FeaturesBuilder, FeaturesSupported, FileFeaturesResult, FormatFileParams,
+    FormatOnTypeParams, FormatRangeParams, GetFileContentParams, IgnoreKind, IsPathIgnoredParams,
+    SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
 use std::ops::Sub;
@@ -24,17 +25,23 @@ pub(crate) fn format(
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(None);
+    }
     let features = FeaturesBuilder::new().with_formatter().build();
 
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }
     let features = FeaturesBuilder::new().with_formatter().build();
-    let file_features = session.workspace.file_features(SupportsFeatureParams {
+    let FileFeaturesResult {
+        features_supported: file_features,
+    } = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -45,6 +52,7 @@ pub(crate) fn format(
             path: path.clone(),
             project_key: doc.project_key,
             features,
+            ignore_kind: IgnoreKind::Ancestors,
         })?
     {
         let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
@@ -101,18 +109,24 @@ pub(crate) fn format_range(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(None);
+    }
     let features = FeaturesBuilder::new().with_formatter().build();
 
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }
 
     let features = FeaturesBuilder::new().with_formatter().build();
-    let file_features = session.workspace.file_features(SupportsFeatureParams {
+    let FileFeaturesResult {
+        features_supported: file_features,
+    } = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -123,6 +137,7 @@ pub(crate) fn format_range(
             path: path.clone(),
             project_key: doc.project_key,
             features,
+            ignore_kind: IgnoreKind::Ancestors,
         })?
     {
         let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
@@ -203,8 +218,13 @@ pub(crate) fn format_on_type(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(None);
+    }
     let features = FeaturesBuilder::new().with_formatter().build();
-    let file_features = session.workspace.file_features(SupportsFeatureParams {
+    let FileFeaturesResult {
+        features_supported: file_features,
+    } = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
         features,
@@ -214,6 +234,7 @@ pub(crate) fn format_on_type(
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return notify_user(file_features, path);
     }
@@ -223,6 +244,7 @@ pub(crate) fn format_on_type(
             path: path.clone(),
             project_key: doc.project_key,
             features,
+            ignore_kind: IgnoreKind::Ancestors,
         })?
     {
         let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
@@ -272,7 +294,7 @@ pub(crate) fn format_on_type(
     }
 }
 
-fn notify_user<T>(file_features: FileFeaturesResult, biome_path: BiomePath) -> Result<T, LspError> {
+fn notify_user<T>(file_features: FeaturesSupported, biome_path: BiomePath) -> Result<T, LspError> {
     let error = if file_features.is_ignored() {
         WorkspaceError::file_ignored(biome_path.to_string())
     } else if file_features.is_protected() {

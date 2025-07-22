@@ -1,22 +1,19 @@
+use crate::services::module_graph::ResolvedImports;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::{fmt::Display, markup};
-use biome_deserialize_macros::Deserializable;
+use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_fs::BiomePath;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
+use biome_jsdoc_comment::JsdocComment;
 use biome_module_graph::{JsModuleInfo, ModuleGraph, ResolvedPath};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
+use biome_rule_options::no_private_imports::{NoPrivateImportsOptions, Visibility};
 use camino::{Utf8Path, Utf8PathBuf};
-use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
-
-use crate::services::module_graph::ResolvedImports;
 
 const INDEX_BASENAMES: &[&str] = &["index", "mod"];
 
@@ -31,7 +28,7 @@ declare_lint_rule! {
     ///
     /// This rule recognizes the JSDoc tags `@public`, `@package`, and
     /// `@private` so that you are free to set the visibility of exports.
-    /// Exports without tag have a default visibility of **public**, but  this
+    /// Exports without tag have a default visibility of **public**, but this
     /// can be configured.
     ///
     /// The `@access` tag is also supported if it's used with one of the values
@@ -59,11 +56,11 @@ declare_lint_rule! {
     /// Private visibility means that a symbol may not be imported from other
     /// modules.
     ///
-    /// The key thing to understanding the usefulness of `@private` is that
-    /// this rule doesn't treat modules and files as one and the same thing.
-    /// While files are indeed modules, folders are considered modules too, with
-    /// their files and subfolders being submodules. Therefore, symbols exported
-    /// as `@private` from an index file, such as `index.js`, can _still_ be
+    /// The key thing to understanding the usefulness of `@private` is that this
+    /// rule doesn't treat modules and files as one and the same thing. While
+    /// files are indeed modules, folders are considered modules too, with their
+    /// files and subfolders being submodules. Therefore, symbols exported as
+    /// `@private` from an index file, such as `index.js`, can _still_ be
     /// imported from other submodules in that same module.
     ///
     /// :::note
@@ -85,6 +82,8 @@ declare_lint_rule! {
     ///   regardless of the default visibility setting.
     /// * This rule does not validate imports through dynamic `import()`
     ///   expressions or CommonJS `require()` calls.
+    /// * Imports from dependencies under `node_modules` are considered out of
+    ///   scope.
     ///
     /// ## Examples
     ///
@@ -110,10 +109,10 @@ declare_lint_rule! {
     /// export function getTestStuff() {}
     /// ```
     ///
-    /// **`bar.test.js`**
-    /// // Attempt to import a private export. To allow this, you probably want
-    /// // to configure an `override` to disable this rule in test files.
-    /// // See: https://biomejs.dev/reference/configuration/#overrides
+    /// **`bar.test.js`** // Attempt to import a private export. To allow this,
+    /// you probably want // to configure an `override` to disable this rule in
+    /// test files. // See:
+    /// https://biomejs.dev/reference/configuration/#overrides
     /// ```js
     /// import { getTestStuff } from "./bar.js";
     /// ```
@@ -144,55 +143,11 @@ declare_lint_rule! {
         name: "noPrivateImports",
         language: "js",
         sources: &[
-            RuleSource::EslintImportAccess("eslint-plugin-import-access")
+            RuleSource::EslintImportAccess("eslint-plugin-import-access").same()
         ],
         recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Project],
-    }
-}
-
-/// Options for the rule `noPrivateImports`.
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoPrivateImportsOptions {
-    /// The default visibility to assume for symbols without visibility tag.
-    ///
-    /// Default: **public**.
-    pub default_visibility: Visibility,
-}
-
-#[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub enum Visibility {
-    #[default]
-    Public,
-    Package,
-    Private,
-}
-
-impl Display for Visibility {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        match self {
-            Self::Public => fmt.write_str("public"),
-            Self::Package => fmt.write_str("package"),
-            Self::Private => fmt.write_str("private"),
-        }
-    }
-}
-
-impl FromStr for Visibility {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "public" => Ok(Self::Public),
-            "package" => Ok(Self::Package),
-            "private" => Ok(Self::Private),
-            _ => Err(()),
-        }
     }
 }
 
@@ -220,9 +175,13 @@ impl Rule for NoPrivateImports {
         };
 
         let node = ctx.query();
-        let Some(target_path) = module_info
-            .get_import_path_by_js_node(node)
+        let Some(target_path) = node
+            .is_static_import()
+            .then(|| node.inner_string_text())
+            .flatten()
+            .and_then(|specifier| module_info.static_import_paths.get(specifier.text()))
             .and_then(ResolvedPath::as_path)
+            .filter(|path| !BiomePath::new(path).is_dependency())
         else {
             return Vec::new();
         };
@@ -411,8 +370,9 @@ fn get_restricted_import_visibility(
 ) -> Option<Visibility> {
     let visibility = options
         .target_info
-        .find_exported_symbol(options.module_graph, import_name.text())
-        .and_then(|export| export.jsdoc_comment.as_deref().and_then(parse_visibility))
+        .find_jsdoc_for_exported_symbol(options.module_graph, import_name.text())
+        .as_ref()
+        .and_then(parse_visibility)
         .unwrap_or(options.default_visibility);
 
     let is_restricted = match visibility {
@@ -427,7 +387,7 @@ fn get_restricted_import_visibility(
 /// Searches JSDoc comments to find the first `@public`, `@package`, `@private`,
 /// or `@access` tag, and maps it to one of the supported [Visibility] values,
 /// if possible.
-fn parse_visibility(jsdoc_comment: &str) -> Option<Visibility> {
+fn parse_visibility(jsdoc_comment: &JsdocComment) -> Option<Visibility> {
     jsdoc_comment.lines().find_map(|line| {
         line.strip_prefix('@')
             .map(|tag| tag.strip_prefix("access ").unwrap_or(tag))

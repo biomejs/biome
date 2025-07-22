@@ -9,6 +9,7 @@ use biome_js_syntax::{
     TsTypeMemberList,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
+use biome_rule_options::use_adjacent_overload_signatures::UseAdjacentOverloadSignaturesOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -93,7 +94,7 @@ declare_lint_rule! {
         name: "useAdjacentOverloadSignatures",
         language: "js",
         sources: &[
-            RuleSource::EslintTypeScript("adjacent-overload-signatures")
+            RuleSource::EslintTypeScript("adjacent-overload-signatures").same(),
         ],
         recommended: true,
         severity: Severity::Warning,
@@ -104,7 +105,7 @@ impl Rule for UseAdjacentOverloadSignatures {
     type Query = Ast<DeclarationOrModuleNode>;
     type State = Box<[(TokenText, TextRange)]>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAdjacentOverloadSignaturesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let methods = match ctx.query() {

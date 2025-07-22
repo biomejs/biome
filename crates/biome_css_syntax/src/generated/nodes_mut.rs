@@ -1883,11 +1883,11 @@ impl CssPseudoClassSelector {
         )
     }
 }
-impl CssPseudoElementFunctionIdentifier {
-    pub fn with_name_token(self, element: SyntaxToken) -> Self {
+impl CssPseudoElementFunction {
+    pub fn with_name(self, element: CssIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
@@ -1896,7 +1896,33 @@ impl CssPseudoElementFunctionIdentifier {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_ident(self, element: CssIdentifier) -> Self {
+    pub fn with_items(self, element: CssPseudoElementFunctionParameterList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssPseudoElementFunctionCustomIdentifier {
+    pub fn with_name(self, element: CssIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_ident(self, element: CssCustomIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -2256,7 +2282,7 @@ impl CssStartingStyleAtRule {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_block(self, element: AnyCssStartingStyleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssConditionalBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

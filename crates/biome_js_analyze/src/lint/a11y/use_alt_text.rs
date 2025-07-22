@@ -5,6 +5,7 @@ use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_diagnostics::Severity;
 use biome_js_syntax::{TextRange, jsx_ext::AnyJsxElement, static_value::StaticValue};
 use biome_rowan::AstNode;
+use biome_rule_options::use_alt_text::UseAltTextOptions;
 
 declare_lint_rule! {
     /// Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
@@ -50,7 +51,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useAltText",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("alt-text")],
+        sources: &[RuleSource::EslintJsxA11y("alt-text").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -76,7 +77,7 @@ impl Rule for UseAltText {
     type Query = Ast<AnyJsxElement>;
     type State = (ValidatedElement, TextRange);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAltTextOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
@@ -99,14 +100,14 @@ impl Rule for UseAltText {
                             if !opening_element.has_accessible_child() {
                                 return Some((
                                     ValidatedElement::Object,
-                                    element.syntax().text_range_with_trivia(),
+                                    element.syntax().text_trimmed_range(),
                                 ));
                             }
                         }
                         AnyJsxElement::JsxSelfClosingElement(_) => {
                             return Some((
                                 ValidatedElement::Object,
-                                element.syntax().text_range_with_trivia(),
+                                element.syntax().text_trimmed_range(),
                             ));
                         }
                     }
@@ -114,17 +115,14 @@ impl Rule for UseAltText {
             }
             "img" => {
                 if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
-                    return Some((
-                        ValidatedElement::Img,
-                        element.syntax().text_range_with_trivia(),
-                    ));
+                    return Some((ValidatedElement::Img, element.syntax().text_trimmed_range()));
                 }
             }
             "area" => {
                 if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
                     return Some((
                         ValidatedElement::Area,
-                        element.syntax().text_range_with_trivia(),
+                        element.syntax().text_trimmed_range(),
                     ));
                 }
             }
@@ -137,7 +135,7 @@ impl Rule for UseAltText {
                 {
                     return Some((
                         ValidatedElement::Input,
-                        element.syntax().text_range_with_trivia(),
+                        element.syntax().text_trimmed_range(),
                     ));
                 }
             }

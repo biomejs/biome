@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsSyntaxToken, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::use_numeric_literals::UseNumericLiteralsOptions;
 
 declare_lint_rule! {
     /// Disallow `parseInt()` and `Number.parseInt()` in favor of binary, octal, and hexadecimal literals
@@ -58,7 +59,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useNumericLiterals",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-numeric-literals")],
+        sources: &[RuleSource::Eslint("prefer-numeric-literals").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -69,7 +70,7 @@ impl Rule for UseNumericLiterals {
     type Query = Semantic<JsCallExpression>;
     type State = CallInfo;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNumericLiteralsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let expr = ctx.query();

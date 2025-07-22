@@ -1,7 +1,6 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsVariableDeclarator, global_identifier,
 };
 use biome_rowan::{AstSeparatedList, BatchMutationExt, TriviaPieceKind, declare_node_union};
+use biome_rule_options::no_global_dirname_filename::NoGlobalDirnameFilenameOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `__dirname` and `__filename` in the global scope.
@@ -53,8 +53,7 @@ declare_lint_rule! {
         name: "noGlobalDirnameFilename",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintUnicorn("prefer-module")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintUnicorn("prefer-module").inspired()],
         fix_kind: FixKind::Safe,
     }
 }
@@ -70,7 +69,7 @@ impl Rule for NoGlobalDirnameFilename {
     type Query = Semantic<AnyGlobalDirnameFileName>;
     type State = (JsSyntaxToken, String);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoGlobalDirnameFilenameOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

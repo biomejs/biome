@@ -8,6 +8,7 @@ import TypeOnClassField from "mod";
 import TypeOnGlobalVariable from "mod";
 import TypeOnFunctionVariable from "mod";
 import TypeOnTypeDef from "mod";
+import TypeOnExportedFunction from "mod";
 
 /**
  * @typedef {TypeOnTypeDef} TestTypeOnTypeDef 
@@ -17,6 +18,11 @@ import TypeOnTypeDef from "mod";
  * @param {TypeOnFunctionParam} param
  */
 function testTypeOnFunction(param) {}
+
+/**
+ * @param {TypeOnExportedFunction} param
+ */
+export function testTypeOnExportedFunction(param) {}
 
 class TestTypeOnClassMethodParam {
 	/**
@@ -52,5 +58,3 @@ function testTypeOnFunctionVariable() {
 	 */
 	let testTypeOnFunctionVariable;
 }
-
-

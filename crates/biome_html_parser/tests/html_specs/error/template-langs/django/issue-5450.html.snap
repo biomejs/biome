@@ -15,6 +15,7 @@ expression: snapshot
 ```
 HtmlRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlBogusElement {
@@ -76,7 +77,8 @@ HtmlRoot {
 0: HTML_ROOT@0..70
   0: (empty)
   1: (empty)
-  2: HTML_ELEMENT_LIST@0..69
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..69
     0: HTML_BOGUS_ELEMENT@0..69
       0: HTML_OPENING_ELEMENT@0..32
         0: L_ANGLE@0..1 "<" [] []
@@ -107,7 +109,7 @@ HtmlRoot {
         3: HTML_BOGUS@42..66 "heading_level|default:2" [] [Whitespace(" ")]
         4: HTML_BOGUS@66..68 "}}" [] []
         5: R_ANGLE@68..69 ">" [] []
-  3: EOF@69..70 "" [Newline("\n")] []
+  4: EOF@69..70 "" [Newline("\n")] []
 
 ```
 

@@ -3,6 +3,7 @@ use biome_module_graph::ResolvedPath;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
 
+use crate::{JsRuleAction, services::module_graph::ResolvedImports};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
 };
@@ -11,11 +12,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsImportLike, JsSyntaxToken, inner_string_text};
 use biome_rowan::BatchMutationExt;
-
-use crate::{JsRuleAction, services::module_graph::ResolvedImports};
-
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
+use biome_rule_options::use_import_extensions::UseImportExtensionsOptions;
 
 declare_lint_rule! {
     /// Enforce file extensions for relative imports.
@@ -125,15 +122,6 @@ declare_lint_rule! {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseImportExtensionsOptions {
-    /// If `true`, the suggested extension is always `.js` regardless of what
-    /// extension the source file has in your project.
-    pub force_js_extensions: bool,
-}
-
 #[derive(Debug, Clone, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
@@ -148,7 +136,7 @@ impl Rule for UseImportExtensions {
     type Query = ResolvedImports<AnyJsImportLike>;
     type State = UseImportExtensionsState;
     type Signals = Option<Self::State>;
-    type Options = Box<UseImportExtensionsOptions>;
+    type Options = UseImportExtensionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let module_info = ctx.module_info_for_path(ctx.file_path())?;
@@ -227,19 +215,22 @@ fn get_extensionless_import(
         return None;
     }
 
-    // In cases like `./foo.css` -> `./foo.css.ts`
-    let resolved_path_has_sub_extension = resolved_path
-        .file_stem()
-        .is_some_and(|stem| stem.contains('.'));
+    let resolved_stem = resolved_path.file_stem();
+    let resolved_extension = resolved_path.extension();
+    let resolved_path_sub_extension =
+        resolved_stem.and_then(|stem| stem.rfind('.').map(|pos| &stem[pos + 1..]));
+
     let existing_extension = path.extension();
 
-    if resolved_path_has_sub_extension && path.file_name()?.starts_with(resolved_path.file_name()?)
-    {
-        return None;
-    }
-
-    if !resolved_path_has_sub_extension && existing_extension.is_some() {
-        return None;
+    match (resolved_path_sub_extension, existing_extension) {
+        (Some("d"), Some("js")) if resolved_extension.is_some_and(|ext| ext == "ts") => {
+            return None; // We resolved a `.d.ts` file, but imported the `.js` file: OK.
+        }
+        (Some(_), _) if path.file_name()?.starts_with(resolved_path.file_name()?) => {
+            return None; // For cases like `./foo.css` -> `./foo.css.ts`
+        }
+        (None, Some(_)) => return None,
+        _ => {}
     }
 
     let last_component = path_components.next_back().unwrap_or(first_component);
@@ -256,12 +247,10 @@ fn get_extensionless_import(
     let extension = if force_js_extensions {
         "js"
     } else {
-        resolved_path.extension()?
+        resolved_extension?
     };
 
-    let is_index_file = resolved_path
-        .file_stem()
-        .is_some_and(|stem| stem == "index");
+    let is_index_file = resolved_stem.is_some_and(|stem| stem == "index");
 
     let new_path = if is_index_file {
         let mut path_parts = path.as_str().split('/');
@@ -286,14 +275,14 @@ fn get_extensionless_import(
         new_path
     } else {
         let mut new_path = path.to_path_buf();
-        let sub_extension = if resolved_path_has_sub_extension {
+        let sub_extension = if resolved_path_sub_extension.is_some() {
             existing_extension
         } else {
             None
         };
 
         if let Some(sub_ext) = sub_extension {
-            new_path.set_extension(format!("{}.{}", sub_ext, extension));
+            new_path.set_extension(format!("{sub_ext}.{extension}",));
         } else {
             new_path.set_extension(extension);
         }

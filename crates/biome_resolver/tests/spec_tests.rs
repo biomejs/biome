@@ -1,6 +1,6 @@
 use biome_fs::OsFileSystem;
 use biome_resolver::*;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 
 /// Returns the path to a `fixtures/` subdirectory, regardless of working dir.
 fn get_fixtures_path(subdir: &str) -> Utf8PathBuf {
@@ -411,9 +411,9 @@ fn test_resolve_type_definitions() {
     let fs = OsFileSystem::new(base_dir.clone());
 
     let options = ResolveOptions {
-        condition_names: &["types", "default"],
+        condition_names: &["types", "import", "default"],
         default_files: &["index"],
-        extensions: &["d.ts", "ts", "js"],
+        extensions: &["ts", "js"],
         resolve_types: true,
         ..Default::default()
     };
@@ -434,6 +434,32 @@ fn test_resolve_type_definitions() {
 }
 
 #[test]
+fn test_resolve_type_definitions_from_another_type_definition() {
+    let base_dir = get_fixtures_path("resolver_cases_5");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["types", "import", "default"],
+        default_files: &["index"],
+        extensions: &["ts", "js"],
+        resolve_types: true,
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve(
+            "../_internal/index.js",
+            Utf8Path::new(&format!("{base_dir}/node_modules/swr/dist/index")),
+            &fs,
+            &options
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/swr/dist/_internal/index.d.ts"
+        )))
+    );
+}
+
+#[test]
 fn test_resolve_type_definitions_with_custom_type_roots() {
     let base_dir = get_fixtures_path("resolver_cases_6");
     let fs = OsFileSystem::new(base_dir.clone());
@@ -441,10 +467,11 @@ fn test_resolve_type_definitions_with_custom_type_roots() {
     let symlinked_node_modules = get_fixtures_path("resolver_cases_5").join("node_modules");
 
     let options = ResolveOptions {
-        condition_names: &["types", "default"],
+        condition_names: &["types", "import", "default"],
         default_files: &["index"],
-        extensions: &["d.ts", "ts", "js"],
+        extensions: &["ts", "js"],
         resolve_types: true,
+        type_roots: TypeRoots::Auto, // auto-detected from `tsconfig.json`
         ..Default::default()
     };
 

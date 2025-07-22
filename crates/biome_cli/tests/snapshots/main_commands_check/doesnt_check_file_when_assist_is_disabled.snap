@@ -1,0 +1,52 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedKeys": "on"
+      }
+    },
+    "includes": ["**", "!**/src/file.json"]
+  }
+}
+```
+
+## `src/file.json`
+
+```json
+{ "z": 1, "b": 2 }
+
+```
+
+# Emitted Messages
+
+```block
+ VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Files processed:
+  
+  - src/file.json
+  
+
+```
+
+```block
+ VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Files fixed:
+  
+  ! The list is empty.
+  
+
+```
+
+```block
+Scanned project folder in <TIME>.
+Checked 1 file in <TIME>. No fixes applied.
+```

@@ -9,13 +9,13 @@
 //! well as the watcher to allow continuous scanning.
 
 use super::server::WorkspaceServer;
-use super::{FeaturesBuilder, IsPathIgnoredParams};
+use super::{FeaturesBuilder, IgnoreKind, IsPathIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::DocumentFileSource;
 use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
-use biome_diagnostics::{Diagnostic as _, Error, Severity};
+use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
 use camino::Utf8Path;
 use crossbeam::channel::{Receiver, Sender, unbounded};
@@ -33,7 +33,9 @@ pub(crate) struct ScanResult {
     /// Duration of the full scan.
     pub duration: Duration,
 
-    /// List of additional configuration files found inside the project (it doesn't contain the current one)
+    /// List of nested configuration files found inside the project.
+    ///
+    /// The root configuration is not included in this.
     pub configuration_files: Vec<BiomePath>,
 }
 
@@ -46,11 +48,12 @@ impl WorkspaceServer {
         project_key: ProjectKey,
         folder: &Utf8Path,
         scan_kind: ScanKind,
+        verbose: bool,
     ) -> Result<ScanResult, WorkspaceError> {
         let (interner, _path_receiver) = PathInterner::new();
         let (diagnostics_sender, diagnostics_receiver) = unbounded();
 
-        let collector = DiagnosticsCollector::new();
+        let collector = DiagnosticsCollector::new(verbose);
 
         let (duration, diagnostics, configuration_files) = thread::scope(|scope| {
             let handler = thread::Builder::new()
@@ -84,6 +87,73 @@ impl WorkspaceServer {
             configuration_files,
         })
     }
+
+    pub(super) fn is_ignored_by_scanner(
+        &self,
+        project_key: ProjectKey,
+        scan_kind: &ScanKind,
+        path: &BiomePath,
+    ) -> Result<bool, WorkspaceError> {
+        if self.projects.is_ignored_by_scanner(project_key, path) {
+            return Ok(true);
+        }
+
+        let is_ignored = match self.fs().symlink_path_kind(path)? {
+            PathKind::Directory { .. } => {
+                if path.is_dependency() {
+                    // Every mode ignores dependencies, except project mode.
+                    return Ok(!scan_kind.is_project());
+                }
+
+                if self
+                    .projects
+                    .is_ignored_by_top_level_config(project_key, path, IgnoreKind::Path)
+                {
+                    return Ok(true); // Nobody cares about ignored paths.
+                }
+
+                if let ScanKind::TargetedKnownFiles {
+                    target_paths,
+                    descend_from_targets,
+                } = &scan_kind
+                    && !target_paths.iter().any(|target_path| {
+                        target_path.starts_with(path.as_path())
+                            || (*descend_from_targets && path.starts_with(target_path.as_path()))
+                    })
+                {
+                    return Ok(true); // Path is not being targeted.
+                }
+
+                false
+            }
+            PathKind::File { .. } => match scan_kind {
+                ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
+                    if path.is_config() {
+                        self.projects.is_ignored_by_top_level_config(
+                            project_key,
+                            path,
+                            IgnoreKind::Path,
+                        )
+                    } else {
+                        !path.is_ignore() && !path.is_manifest()
+                    }
+                }
+                ScanKind::Project => {
+                    if path.is_dependency() {
+                        // For dependencies, we ignore everything except
+                        // manifests and type declarations.
+                        !path.is_package_json() && !path.is_type_declaration()
+                    } else {
+                        !path.is_required_during_scan()
+                            && DocumentFileSource::try_from_path(path).is_err()
+                    }
+                }
+                ScanKind::NoScanner => true,
+            },
+        };
+
+        Ok(is_ignored)
+    }
 }
 
 /// Initiates the filesystem traversal tasks from the provided path and runs it to completion.
@@ -101,11 +171,11 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
     let evaluated_paths = ctx.evaluated_paths();
     let mut configs = Vec::new();
     let mut manifests = Vec::new();
-    let mut handleable_paths = Vec::new();
+    let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
     let mut ignore_paths = Vec::new();
     // We want to process files that closest to the project root first. For example, we must process
     // first the `.gitignore` at the root of the project.
-    let iter = evaluated_paths.into_iter().rev();
+    let iter = evaluated_paths.into_iter();
 
     for path in iter {
         if path.is_config() {
@@ -118,7 +188,6 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
             handleable_paths.push(path);
         }
     }
-
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
         for path in &configs {
             scope.handle(ctx_ref, path.to_path_buf());
@@ -165,23 +234,22 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> (Duration, Vec<BiomePath>
 struct DiagnosticsCollector {
     /// The minimum level of diagnostic we should collect.
     diagnostic_level: Severity,
-
-    /// Whether we should collect verbose diagnostics.
-    verbose: bool,
 }
 
 impl DiagnosticsCollector {
-    fn new() -> Self {
+    fn new(verbose: bool) -> Self {
         Self {
-            diagnostic_level: Severity::Hint,
-            verbose: false,
+            diagnostic_level: if verbose {
+                Severity::Hint
+            } else {
+                Severity::Error
+            },
         }
     }
 
     /// Checks whether the given `diagnostic` should be collected or not.
     fn should_collect(&self, diagnostic: &Diagnostic) -> bool {
         diagnostic.severity() >= self.diagnostic_level
-            && (self.verbose || !diagnostic.tags().is_verbose())
     }
 
     fn run(&self, receiver: Receiver<Diagnostic>) -> Vec<Diagnostic> {
@@ -218,29 +286,44 @@ pub(crate) struct ScanContext<'app> {
     scan_kind: ScanKind,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum ScanKind {
-    /// The scanner should not be triggered
-    None,
-    /// It targets specific files
+    /// The scanner should not be triggered.
+    NoScanner,
+    /// Scans for limited, known files across the repository.
     KnownFiles,
-    /// It targets the project, so it attempts to open all the files in the project.
+    /// Scans for limited, knows files, but only within a set of predefined
+    /// paths.
+    #[serde(rename_all = "camelCase")]
+    TargetedKnownFiles {
+        /// The paths to target by the scanner.
+        ///
+        /// If a target path indicates a folder, all files within are scanned as well.
+        ///
+        /// Target paths must be absolute.
+        target_paths: Vec<BiomePath>,
+
+        /// Determines whether the file scanner should descend into
+        /// subdirectories of the target paths.
+        descend_from_targets: bool,
+    },
+    /// Scans the entire repository, indexing all files to enable project rules.
     Project,
 }
 
 impl ScanKind {
-    pub const fn is_project(self) -> bool {
+    pub const fn is_project(&self) -> bool {
         matches!(self, Self::Project)
     }
 
-    pub const fn is_known_files(self) -> bool {
+    pub const fn is_known_files(&self) -> bool {
         matches!(self, Self::KnownFiles)
     }
 
-    pub const fn is_none(self) -> bool {
-        matches!(self, Self::None)
+    pub const fn is_none(&self) -> bool {
+        matches!(self, Self::NoScanner)
     }
 }
 
@@ -264,48 +347,23 @@ impl TraversalContext for ScanContext<'_> {
         self.send_diagnostic(Diagnostic::new(error));
     }
 
-    // This is the first filtering we apply at the scanner. In this function `can_handle`
-    // We roughly understand which files should be open by the scanner.
-    // Here, we mostly do file operations by reading their metadata.
+    // This is the main filtering logic applied by the scanner.
+    //
+    // Whether the scanner handles a file or not is based on:
+    // - The file path and whether that path is being ignored, and/or whether
+    //   the path belongs to a dependency.
+    // - The kind of file system entry the path points to.
+    // - The kind of scan we are performing.
     fn can_handle(&self, path: &BiomePath) -> bool {
-        if self.workspace.is_ignored_by_scanner(self.project_key, path) {
-            return false;
-        }
-
-        match self.workspace.fs().symlink_path_kind(path) {
-            Ok(PathKind::Directory { .. }) => {
-                if self.scan_kind.is_project() && path.is_dependency() {
-                    // In project mode, the scanner always scans dependencies
-                    // because they're a valuable source of type information.
-                    true
-                } else {
-                    !self
-                        .workspace
-                        .is_path_ignored(IsPathIgnoredParams {
-                            project_key: self.project_key,
-                            path: path.clone(),
-                            // The scanner only cares about the top-level
-                            // `files.includes`.
-                            features: FeaturesBuilder::new().build(),
-                        })
-                        .unwrap_or_default()
-                }
-            }
-            Ok(PathKind::File { .. }) => match self.scan_kind {
-                ScanKind::KnownFiles => path.is_required_during_scan() && !path.is_dependency(),
-                ScanKind::Project => {
-                    if path.is_dependency() {
-                        path.is_package_json() || path.is_type_declaration()
-                    } else {
-                        path.is_required_during_scan()
-                            || DocumentFileSource::try_from_path(path).is_ok()
-                    }
-                }
-                ScanKind::None => false,
-            },
+        match self
+            .workspace
+            .is_ignored_by_scanner(self.project_key, &self.scan_kind, path)
+        {
+            Ok(is_ignored) => !is_ignored,
             Err(_) => {
-                // bail on fifo and socket files
-                false
+                // Pretend we can handle it so we can give a meaningful error
+                // when it fails.
+                true
             }
         }
     }
@@ -315,10 +373,7 @@ impl TraversalContext for ScanContext<'_> {
     }
 
     fn store_path(&self, path: BiomePath) {
-        self.evaluated_paths
-            .write()
-            .unwrap()
-            .insert(BiomePath::new(path.as_path()));
+        self.evaluated_paths.write().unwrap().insert(path);
     }
 }
 
@@ -341,6 +396,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
                             project_key: ctx.project_key,
                             path: dir_path.into(),
                             features: FeaturesBuilder::new().build(),
+                            ignore_kind: IgnoreKind::Path,
                         })
                         .ok()
                 })
@@ -351,6 +407,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
                     project_key: ctx.project_key,
                     path: path.clone(),
                     features: FeaturesBuilder::new().build(),
+                    ignore_kind: IgnoreKind::Path,
                 })
                 .unwrap_or_default()
         };
@@ -363,7 +420,11 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
     }) {
         Ok(Ok(())) => {}
         Ok(Err(err)) => {
-            ctx.send_diagnostic(err);
+            let mut error: Error = err.into();
+            if !path.is_config() && error.severity() == Severity::Error {
+                error = error.with_severity(Severity::Warning);
+            }
+            ctx.send_diagnostic(Diagnostic::new(error));
         }
         Err(err) => {
             let error = match err.downcast::<String>() {
@@ -378,3 +439,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "scanner.tests.rs"]
+mod tests;

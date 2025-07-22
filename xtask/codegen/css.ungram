@@ -397,7 +397,8 @@ CssPseudoElementSelector =
 AnyCssPseudoElement =
 	CssPseudoElementIdentifier
 	| CssPseudoElementFunctionSelector
-	| CssPseudoElementFunctionIdentifier
+	| CssPseudoElementFunctionCustomIdentifier
+	| CssPseudoElementFunction
 	| CssBogusPseudoElement
 
 // a::after {}
@@ -415,13 +416,21 @@ CssPseudoElementFunctionSelector =
 
 // ::highlight(sample) {}
 //   ^^^^^^^^^^^^^^^^^
-// ::part(active) {}
-//   ^^^^^^^^^^^^
-CssPseudoElementFunctionIdentifier =
-	name: ('highlight' | 'part')
+CssPseudoElementFunctionCustomIdentifier =
+	name: CssIdentifier
 	'('
-	ident: CssIdentifier
+	ident: CssCustomIdentifier
 	')'
+
+// ::part(active button) {}
+//   ^^^^^^^^^^^^^^^^^^^
+CssPseudoElementFunction =
+	name: CssIdentifier
+	'('
+	items: CssPseudoElementFunctionParameterList
+	')'
+
+CssPseudoElementFunctionParameterList = CssIdentifier*
 
 /////////////
 // COMMON BLOCKS
@@ -442,9 +451,9 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
 	| CssBogus
 	| CssMetavariable
-	| CssEmptyDeclaration
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -460,8 +469,9 @@ CssDeclarationOrAtRuleBlock =
 CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 
 AnyCssDeclarationOrAtRule =
-    CssDeclarationWithSemicolon
-    | CssAtRule
+	CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
+	| CssAtRule
 
 // When nested in this way, the contents of a nested group rule's block are parsed as <block-contents> rather than <rule-list>:
 // https://drafts.csswg.org/css-nesting-1/#conditionals
@@ -489,7 +499,11 @@ CssDeclarationBlock =
 	declarations: CssDeclarationList
  	'}'
 
-CssDeclarationList = CssDeclarationWithSemicolon*
+CssDeclarationList = AnyCssDeclaration*
+
+AnyCssDeclaration =
+	CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
 
 AnyCssRuleBlock =
 	CssRuleBlock
@@ -1221,6 +1235,7 @@ CssPageAtRuleItemList = AnyCssPageAtRuleItem*
 
 AnyCssPageAtRuleItem =
 	CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
 	| CssAtRule
 	| CssMarginAtRule
 
@@ -1489,12 +1504,7 @@ AnyCssNamespaceUrl = CssUrlFunction | CssString
 // }
 CssStartingStyleAtRule =
 	'starting-style'
-	block: AnyCssStartingStyleBlock
-
-AnyCssStartingStyleBlock =
-	CssRuleBlock
-	| CssDeclarationBlock
-	| CssBogusBlock
+	block: AnyCssConditionalBlock
 
 // https://www.w3.org/TR/2012/WD-css3-conditional-20120911/#at-document
 // @document [ <url>                   |

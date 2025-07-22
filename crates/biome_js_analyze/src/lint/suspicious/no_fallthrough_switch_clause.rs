@@ -9,6 +9,7 @@ use biome_control_flow::{
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsDefaultClause, JsLanguage, JsSwitchStatement, JsSyntaxNode};
 use biome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
+use biome_rule_options::no_fallthrough_switch_clause::NoFallthroughSwitchClauseOptions;
 use roaring::RoaringBitmap;
 use rustc_hash::FxHashMap;
 
@@ -59,7 +60,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noFallthroughSwitchClause",
         language: "js",
-        sources: &[RuleSource::Eslint("no-fallthrough")],
+        sources: &[RuleSource::Eslint("no-fallthrough").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -69,7 +70,7 @@ impl Rule for NoFallthroughSwitchClause {
     type Query = ControlFlowGraph;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoFallthroughSwitchClauseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();

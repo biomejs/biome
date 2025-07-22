@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::TsEnumDeclaration;
 use biome_rowan::{AstNode, BatchMutationExt, chain_trivia_pieces, trim_leading_trivia_pieces};
+use biome_rule_options::no_const_enum::NoConstEnumOptions;
 
 use crate::JsRuleAction;
 
@@ -49,7 +50,7 @@ impl Rule for NoConstEnum {
     type Query = Ast<TsEnumDeclaration>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConstEnumOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let enum_decl = ctx.query();

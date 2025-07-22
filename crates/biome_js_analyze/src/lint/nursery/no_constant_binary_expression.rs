@@ -1,6 +1,4 @@
-use biome_analyze::{
-    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::markup;
 use biome_js_semantic::{BindingExtensions, SemanticModel};
@@ -11,6 +9,7 @@ use biome_js_syntax::{
     JsReferenceIdentifier, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, declare_node_union};
+use biome_rule_options::no_constant_binary_expression::NoConstantBinaryExpressionOptions;
 
 use crate::ast_utils::is_constant_condition;
 use crate::globals::is_js_language_global;
@@ -94,8 +93,7 @@ declare_lint_rule! {
         name: "noConstantBinaryExpression",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("no-constant-binary-expression")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::Eslint("no-constant-binary-expression").same()],
     }
 }
 
@@ -156,7 +154,7 @@ impl Rule for NoConstantBinaryExpression {
     type Query = Semantic<Query>;
     type State = Issue;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConstantBinaryExpressionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();

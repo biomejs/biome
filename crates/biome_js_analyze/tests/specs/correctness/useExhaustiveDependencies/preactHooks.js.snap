@@ -21,7 +21,7 @@ function useCounter() {
 ```
 preactHooks.js:6:23 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: value
+  × This hook does not specify its dependency on value.
   
     4 │ function useCounter() {
     5 │     const [value, setValue] = useState(0);
@@ -30,7 +30,7 @@ preactHooks.js:6:23 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
     7 │         setValue(value + 1);
     8 │     }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     5 │     const [value, setValue] = useState(0);
     6 │     const increment = useCallback(() => {
@@ -39,9 +39,9 @@ preactHooks.js:6:23 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
     8 │     }, []);
     9 │     return { value, increment };
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     8 │ ····},·[value]);
       │         +++++   

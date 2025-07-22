@@ -162,18 +162,6 @@ index.css format ━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
-Diagnostics not shown: 60.
-```
-
-```block
-Scanned project folder in <TIME>.
-Checked 3 files in <TIME>. No fixes applied.
-Found 49 errors.
-Found 16 warnings.
-```
-
-```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Files processed:
@@ -193,4 +181,16 @@ Found 16 warnings.
   ! The list is empty.
   
 
+```
+
+```block
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 60.
+```
+
+```block
+Scanned project folder in <TIME>.
+Checked 3 files in <TIME>. No fixes applied.
+Found 49 errors.
+Found 16 warnings.
 ```

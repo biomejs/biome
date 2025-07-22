@@ -10,6 +10,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsVariableDeclaration, JsModule, JsScript, JsSyntaxKind, TsGlobalDeclaration,
 };
+use biome_rule_options::no_var::NoVarOptions;
 
 use crate::lint::style::use_const::ConstBindings;
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -39,7 +40,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noVar",
         language: "js",
-        sources: &[RuleSource::Eslint("no-var")],
+        sources: &[RuleSource::Eslint("no-var").same()],
         recommended: false,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -50,7 +51,7 @@ impl Rule for NoVar {
     type Query = Semantic<AnyJsVariableDeclaration>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoVarOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declaration = ctx.query();

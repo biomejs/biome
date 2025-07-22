@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsCallExpression, T, global_identifier, numbers::parse_js_number,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::use_parse_int_radix::UseParseIntRadixOptions;
 
 declare_lint_rule! {
     /// Enforce the consistent use of the radix argument when using `parseInt()`.
@@ -54,7 +55,7 @@ declare_lint_rule! {
         name: "useParseIntRadix",
         language: "js",
         recommended: true,
-        sources: &[RuleSource::Eslint("radix")],
+        sources: &[RuleSource::Eslint("radix").same()],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -63,7 +64,7 @@ impl Rule for UseParseIntRadix {
     type Query = Ast<JsCallExpression>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseParseIntRadixOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expression = ctx.query();

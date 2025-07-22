@@ -20,11 +20,10 @@
   [discord-url]: https://biomejs.dev/chat
   [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
   [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
-  [vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=60a5fa
+  [vscode-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Visual%20Studio%20Marketplace&labelColor=374151&color=60a5fa
   [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
-  [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=60a5fa
+  [open-vsx-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Open%20VSX%20Registry&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2aWV3Qm94PSI0LjYgNSA5Ni4yIDEyMi43IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxwYXRoIGQ9Ik0zMCA0NC4yTDUyLjYgNUg3LjN6TTQuNiA4OC41aDQ1LjNMMjcuMiA0OS40em01MSAwbDIyLjYgMzkuMiAyMi42LTM5LjJ6IiBmaWxsPSIjYzE2MGVmIi8+CiAgPHBhdGggZD0iTTUyLjYgNUwzMCA0NC4yaDQ1LjJ6TTI3LjIgNDkuNGwyMi43IDM5LjEgMjIuNi0zOS4xem01MSAwTDU1LjYgODguNWg0NS4yeiIgZmlsbD0iI2E2MGVlNSIvPgo8L3N2Zz4=&labelColor=374151&color=60a5fa
   [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
-  [polar-badge]: https://polar.sh/embed/seeks-funding-shield.svg?org=biomejs
 
   <!-- Insert new entries lexicographically by language code.
      For example given below is the same order as these files appear on page:
@@ -41,7 +40,7 @@
 
 **Biome は _JavaScript_, _TypeScript_, _JSX_ のための[高性能なLinter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** であり、ESLint, typescript-eslint, [その他のソース](https://github.com/biomejs/biome/discussions/3)から **[270以上のルール](https://biomejs.dev/linter/rules/)**を提供しています。Biome は**詳細で文脈に沿った結果を出力**するため、コードを改善し、より良いプログラマになるための手助けをします！
 
-**Biome** は最初から[**エディタ内で対話的に**](https://biomejs.dev/ja/guides/integrate-in-editor/)使用できるように設計されています。
+**Biome** は最初から[**エディタ内で対話的に**](https://biomejs.dev/ja/guides/editors/first-party-extensions/)使用できるように設計されています。
 あなたがコードを書いているときに、形の崩れたコードを format と lint することができます。
 
 ### インストール
@@ -89,24 +88,6 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
 **Biome** は [MIT ライセンス](https://github.com/biomejs/biome/tree/main/LICENSE-MIT)または [Apache 2.0 ライセンス](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE)であり、[コントリビューター行動規範](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md)の下で管理されています。
 
 ## スポンサー
-
-### Platinum Sponsors
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://vercel.com/?utm_source=biome&utm_medium=readme" target="_blank">
-          <picture>
-            <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" />
-            <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" />
-            <img src="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" width="500" alt="Vercel" />
-          </picture>
-        </a>
-      </td>
-    </tr>
-  </tbody>
-</table>
 
 ### ゴールドスポンサー
 

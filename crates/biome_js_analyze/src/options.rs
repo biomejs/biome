@@ -7,6 +7,7 @@ use crate::lint;
 pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze::Rule>::Options;
 pub type NoAccumulatingSpread = < lint :: performance :: no_accumulating_spread :: NoAccumulatingSpread as biome_analyze :: Rule > :: Options ;
 pub type NoAdjacentSpacesInRegex = < lint :: complexity :: no_adjacent_spaces_in_regex :: NoAdjacentSpacesInRegex as biome_analyze :: Rule > :: Options ;
+pub type NoAlert = <lint::suspicious::no_alert::NoAlert as biome_analyze::Rule>::Options;
 pub type NoApproximativeNumericConstant = < lint :: suspicious :: no_approximative_numeric_constant :: NoApproximativeNumericConstant as biome_analyze :: Rule > :: Options ;
 pub type NoArguments =
     <lint::complexity::no_arguments::NoArguments as biome_analyze::Rule>::Options;
@@ -95,6 +96,7 @@ pub type NoEnum = <lint::style::no_enum::NoEnum as biome_analyze::Rule>::Options
 pub type NoEvolvingTypes =
     <lint::suspicious::no_evolving_types::NoEvolvingTypes as biome_analyze::Rule>::Options;
 pub type NoExcessiveCognitiveComplexity = < lint :: complexity :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity as biome_analyze :: Rule > :: Options ;
+pub type NoExcessiveLinesPerFunction = < lint :: nursery :: no_excessive_lines_per_function :: NoExcessiveLinesPerFunction as biome_analyze :: Rule > :: Options ;
 pub type NoExcessiveNestedTestSuites = < lint :: complexity :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites as biome_analyze :: Rule > :: Options ;
 pub type NoExplicitAny =
     <lint::suspicious::no_explicit_any::NoExplicitAny as biome_analyze::Rule>::Options;
@@ -136,6 +138,8 @@ pub type NoImplicitAnyLet =
     <lint::suspicious::no_implicit_any_let::NoImplicitAnyLet as biome_analyze::Rule>::Options;
 pub type NoImplicitBoolean =
     <lint::style::no_implicit_boolean::NoImplicitBoolean as biome_analyze::Rule>::Options;
+pub type NoImplicitCoercion =
+    <lint::nursery::no_implicit_coercion::NoImplicitCoercion as biome_analyze::Rule>::Options;
 pub type NoImportAssign =
     <lint::suspicious::no_import_assign::NoImportAssign as biome_analyze::Rule>::Options;
 pub type NoImportCycles =
@@ -152,10 +156,14 @@ pub type NoIrregularWhitespace = < lint :: suspicious :: no_irregular_whitespace
 pub type NoLabelVar = <lint::suspicious::no_label_var::NoLabelVar as biome_analyze::Rule>::Options;
 pub type NoLabelWithoutControl =
     <lint::a11y::no_label_without_control::NoLabelWithoutControl as biome_analyze::Rule>::Options;
+pub type NoMagicNumbers =
+    <lint::nursery::no_magic_numbers::NoMagicNumbers as biome_analyze::Rule>::Options;
 pub type NoMisleadingCharacterClass = < lint :: suspicious :: no_misleading_character_class :: NoMisleadingCharacterClass as biome_analyze :: Rule > :: Options ;
 pub type NoMisleadingInstantiator = < lint :: suspicious :: no_misleading_instantiator :: NoMisleadingInstantiator as biome_analyze :: Rule > :: Options ;
 pub type NoMisplacedAssertion = < lint :: suspicious :: no_misplaced_assertion :: NoMisplacedAssertion as biome_analyze :: Rule > :: Options ;
 pub type NoMisrefactoredShorthandAssign = < lint :: suspicious :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign as biome_analyze :: Rule > :: Options ;
+pub type NoMisusedPromises =
+    <lint::nursery::no_misused_promises::NoMisusedPromises as biome_analyze::Rule>::Options;
 pub type NoNamespace = <lint::style::no_namespace::NoNamespace as biome_analyze::Rule>::Options;
 pub type NoNamespaceImport =
     <lint::performance::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
@@ -191,6 +199,8 @@ pub type NoPrototypeBuiltins =
     <lint::suspicious::no_prototype_builtins::NoPrototypeBuiltins as biome_analyze::Rule>::Options;
 pub type NoReExportAll =
     <lint::performance::no_re_export_all::NoReExportAll as biome_analyze::Rule>::Options;
+pub type NoReactPropAssign =
+    <lint::nursery::no_react_prop_assign::NoReactPropAssign as biome_analyze::Rule>::Options;
 pub type NoReactSpecificProps = < lint :: suspicious :: no_react_specific_props :: NoReactSpecificProps as biome_analyze :: Rule > :: Options ;
 pub type NoRedeclare =
     <lint::suspicious::no_redeclare::NoRedeclare as biome_analyze::Rule>::Options;
@@ -238,6 +248,8 @@ pub type NoThenProperty =
 pub type NoThisInStatic =
     <lint::complexity::no_this_in_static::NoThisInStatic as biome_analyze::Rule>::Options;
 pub type NoTsIgnore = <lint::nursery::no_ts_ignore::NoTsIgnore as biome_analyze::Rule>::Options;
+pub type NoUnassignedVariables =
+    <lint::nursery::no_unassigned_variables::NoUnassignedVariables as biome_analyze::Rule>::Options;
 pub type NoUndeclaredDependencies = < lint :: correctness :: no_undeclared_dependencies :: NoUndeclaredDependencies as biome_analyze :: Rule > :: Options ;
 pub type NoUndeclaredVariables = < lint :: correctness :: no_undeclared_variables :: NoUndeclaredVariables as biome_analyze :: Rule > :: Options ;
 pub type NoUnreachable =
@@ -385,6 +397,7 @@ pub type UseIndexOf = <lint::nursery::use_index_of::UseIndexOf as biome_analyze:
 pub type UseIsArray = <lint::suspicious::use_is_array::UseIsArray as biome_analyze::Rule>::Options;
 pub type UseIsNan = <lint::correctness::use_is_nan::UseIsNan as biome_analyze::Rule>::Options;
 pub type UseIterableCallbackReturn = < lint :: nursery :: use_iterable_callback_return :: UseIterableCallbackReturn as biome_analyze :: Rule > :: Options ;
+pub type UseJsonImportAttribute = < lint :: nursery :: use_json_import_attribute :: UseJsonImportAttribute as biome_analyze :: Rule > :: Options ;
 pub type UseJsxKeyInIterable = < lint :: correctness :: use_jsx_key_in_iterable :: UseJsxKeyInIterable as biome_analyze :: Rule > :: Options ;
 pub type UseKeyWithClickEvents =
     <lint::a11y::use_key_with_click_events::UseKeyWithClickEvents as biome_analyze::Rule>::Options;
@@ -416,6 +429,7 @@ pub type UseOptionalChain =
     <lint::complexity::use_optional_chain::UseOptionalChain as biome_analyze::Rule>::Options;
 pub type UseParseIntRadix =
     <lint::nursery::use_parse_int_radix::UseParseIntRadix as biome_analyze::Rule>::Options;
+pub type UseReadonlyClassProperties = < lint :: nursery :: use_readonly_class_properties :: UseReadonlyClassProperties as biome_analyze :: Rule > :: Options ;
 pub type UseRegexLiterals =
     <lint::complexity::use_regex_literals::UseRegexLiterals as biome_analyze::Rule>::Options;
 pub type UseSelfClosingElements = < lint :: style :: use_self_closing_elements :: UseSelfClosingElements as biome_analyze :: Rule > :: Options ;
@@ -448,6 +462,7 @@ pub type UseTopLevelRegex =
     <lint::performance::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
 pub type UseTrimStartEnd =
     <lint::style::use_trim_start_end::UseTrimStartEnd as biome_analyze::Rule>::Options;
+pub type UseUnifiedTypeSignature = < lint :: nursery :: use_unified_type_signature :: UseUnifiedTypeSignature as biome_analyze :: Rule > :: Options ;
 pub type UseUniqueElementIds =
     <lint::nursery::use_unique_element_ids::UseUniqueElementIds as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =

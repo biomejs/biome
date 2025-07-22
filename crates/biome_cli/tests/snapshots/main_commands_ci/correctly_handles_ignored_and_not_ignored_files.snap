@@ -73,7 +73,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 /formatter-ignored/test.js:1:23 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable a is unused.
   
   > 1 │ statement(    ) ; let a = !b || !c;
       │                       ^

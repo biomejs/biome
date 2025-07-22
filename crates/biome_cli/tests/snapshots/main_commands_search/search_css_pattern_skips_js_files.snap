@@ -1,0 +1,30 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.css`
+
+```css
+div {
+    color: green;
+}
+```
+
+## `file.js`
+
+```js
+const a = 'foo';
+```
+
+# Emitted Messages
+
+```block
+file.css:2:5 search ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  2 │     color: green;
+
+```
+
+```block
+Searched 1 file in <TIME>. Found 1 match.
+```

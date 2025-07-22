@@ -6,21 +6,26 @@ on:
     types: [ opened, synchronize ]
     branches:
       - main
+      - next
     paths:
       - 'Cargo.lock'
-      - 'crates/**_parser/**/*.rs'
-      - 'crates/**_formatter/**/*.rs'
       - 'crates/**_analyze/**/*.rs'
+      - 'crates/**_formatter/**/*.rs'
+      - 'crates/**_parser/**/*.rs'
+      - 'crates/biome_configuration/**/*.rs'
       - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_package/**/*.rs'
   push:
     branches:
       - main
     paths:
       - 'Cargo.lock'
-      - 'crates/**_parser/**/*.rs'
-      - 'crates/**_formatter/**/*.rs'
       - 'crates/**_analyze/**/*.rs'
+      - 'crates/**_formatter/**/*.rs'
+      - 'crates/**_parser/**/*.rs'
+      - 'crates/biome_configuration/**/*.rs'
       - 'crates/biome_grit_patterns/**/*.rs'
+      - 'crates/biome_package/**/*.rs'
 
 env:
   RUST_LOG: info
@@ -31,6 +36,25 @@ jobs:
       pull-requests: write
     name: Bench
     runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_js_parser
+          - biome_js_formatter
+          - biome_js_analyze
+          - biome_css_parser
+          - biome_css_formatter
+          - biome_css_analyze
+          - biome_json_parser
+          - biome_json_formatter
+          - biome_json_analyze
+          - biome_graphql_parser
+          - biome_graphql_formatter
+          - biome_html_parser
+          - biome_html_formatter
+          - biome_module_graph
+          - biome_package
+          - biome_configuration
 
     steps:
 
@@ -51,12 +75,12 @@ jobs:
 
       - name: Compile
         timeout-minutes: 20
-        run: cargo codspeed build -p xtask_bench
+        run: cargo codspeed build -p ${{ matrix.package }}
         env:
           CARGO_BUILD_JOBS: 3  # Default is 4 (equals to the vCPU count of the runner), which leads OOM on cargo build
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@0010eb0ca6e89b80c88e8edaaa07cfe5f3e6664d # v3.5.0
+        uses: CodSpeedHQ/action@c28fe9fbe7d57a3da1b7834ae3761c1d8217612d # v3.7.0
         timeout-minutes: 50
         with:
           run: cargo codspeed run

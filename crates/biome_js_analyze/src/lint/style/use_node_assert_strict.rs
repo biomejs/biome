@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportLike, JsSyntaxKind, JsSyntaxToken, inner_string_text};
 use biome_rowan::BatchMutationExt;
+use biome_rule_options::use_node_assert_strict::UseNodeAssertStrictOptions;
 
 declare_lint_rule! {
     /// Promotes the usage of `node:assert/strict` over `node:assert`.
@@ -38,7 +39,7 @@ impl Rule for UseNodeAssertStrict {
     type Query = Ast<AnyJsImportLike>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNodeAssertStrictOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

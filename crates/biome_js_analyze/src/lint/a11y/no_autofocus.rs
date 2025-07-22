@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsLanguage, JsSyntaxKind, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::{AstNode, BatchMutationExt, WalkEvent};
+use biome_rule_options::no_autofocus::NoAutofocusOptions;
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
@@ -75,7 +76,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noAutofocus",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-autofocus")],
+        sources: &[RuleSource::EslintJsxA11y("no-autofocus").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -191,7 +192,7 @@ impl Rule for NoAutofocus {
     type Query = ValidAutofocus;
     type State = JsxAttribute;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAutofocusOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

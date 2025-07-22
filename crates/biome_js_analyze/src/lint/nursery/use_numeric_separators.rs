@@ -1,10 +1,10 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsNumberLiteralExpression, JsSyntaxToken};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_numeric_separators::UseNumericSeparatorsOptions;
 
 use crate::JsRuleAction;
 
@@ -56,8 +56,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "useNumericSeparators",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("numeric-separators-style"), RuleSource::Clippy("unreadable_literal")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintUnicorn("numeric-separators-style").same(), RuleSource::Clippy("unreadable_literal").same()],
         recommended: false,
         fix_kind: FixKind::Safe,
     }
@@ -67,7 +66,7 @@ impl Rule for UseNumericSeparators {
     type Query = Ast<JsNumberLiteralExpression>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNumericSeparatorsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let token = ctx.query().value_token().ok()?;
@@ -219,7 +218,7 @@ fn format_numeric_literal(raw: &str) -> String {
                 current_num.push(b);
             }
 
-            _ => panic!("unexpected byte '{}'", b),
+            _ => panic!("unexpected byte '{b}'",),
         }
     }
 

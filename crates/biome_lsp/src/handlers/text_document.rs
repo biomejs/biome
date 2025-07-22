@@ -6,7 +6,8 @@ use crate::{documents::Document, session::Session};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
-    GetFileContentParams, IsPathIgnoredParams, OpenFileParams, OpenProjectParams,
+    GetFileContentParams, IgnoreKind, IsPathIgnoredParams, OpenFileParams, OpenProjectParams,
+    ScanKind,
 };
 use tower_lsp_server::lsp_types;
 use tracing::{debug, error, field, info};
@@ -45,8 +46,13 @@ pub(crate) async fn did_open(
                 skip_rules: None,
                 only_rules: None,
             })?;
+            let scan_kind = if result.scan_kind.is_none() {
+                ScanKind::KnownFiles
+            } else {
+                result.scan_kind
+            };
             session
-                .insert_and_scan_project(result.project_key, parent_path, result.scan_kind)
+                .insert_and_scan_project(result.project_key, parent_path, scan_kind)
                 .await;
             result.project_key
         }
@@ -58,6 +64,7 @@ pub(crate) async fn did_open(
             project_key,
             path: path.clone(),
             features: FeaturesBuilder::new().build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })
         .unwrap_or_default();
 
@@ -97,12 +104,15 @@ pub(crate) async fn did_change(
     let Some(doc) = session.document(&url) else {
         return Ok(());
     };
-
+    if !session.workspace.file_exists(path.clone().into())? {
+        return Ok(());
+    }
     let features = FeaturesBuilder::new().build();
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(());
     }

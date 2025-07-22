@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{TsAnyType, TsTypeConstraintClause};
 use biome_rowan::AstNode;
+use biome_rule_options::no_explicit_any::NoExplicitAnyOptions;
 
 declare_lint_rule! {
     /// Disallow the `any` type usage.
@@ -56,7 +57,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noExplicitAny",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-explicit-any")],
+        sources: &[RuleSource::EslintTypeScript("no-explicit-any").same()],
         recommended: true,
         severity: Severity::Warning,
     }
@@ -66,7 +67,7 @@ impl Rule for NoExplicitAny {
     type Query = Ast<TsAnyType>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoExplicitAnyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

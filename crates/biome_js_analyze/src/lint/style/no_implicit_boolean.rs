@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -9,6 +8,7 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsxAttributeValue, JsSyntaxKind, JsxAttribute, JsxAttributeFields, T,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
+use biome_rule_options::no_implicit_boolean::NoImplicitBooleanOptions;
 
 use crate::JsRuleAction;
 
@@ -48,11 +48,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noImplicitBoolean",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-boolean-value")],
+        sources: &[RuleSource::EslintReact("jsx-boolean-value").inspired()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
-        source_kind: RuleSourceKind::Inspired,
     }
 }
 
@@ -60,7 +59,7 @@ impl Rule for NoImplicitBoolean {
     type Query = Ast<JsxAttribute>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImplicitBooleanOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let n = ctx.query();

@@ -1,0 +1,120 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import foo from 'bar.json';
+
+import foo from 'bar.json' // with comment
+
+import foo from 'bar.json'; // with comment after colon
+
+import foo from 'bar.json'/** with inline comment */;
+
+import foo from 'bar.json' with { some: 'attr' };
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useJsonImportAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON import is missing the type: "json" import attribute.
+  
+  > 1 │ import foo from 'bar.json';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ import foo from 'bar.json' // with comment
+  
+  i To explicitly declare the module type for JSON imports, add with { type: "json" } to this import statement.
+  
+  i Safe fix: Add 'type: "json"' import attribute.
+  
+    1 │ import·foo·from·'bar.json'·with·{·type:·"json"·};
+      │                           ++++++++++++++++++++++ 
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useJsonImportAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON import is missing the type: "json" import attribute.
+  
+    1 │ import foo from 'bar.json';
+    2 │ 
+  > 3 │ import foo from 'bar.json' // with comment
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ import foo from 'bar.json'; // with comment after colon
+  
+  i To explicitly declare the module type for JSON imports, add with { type: "json" } to this import statement.
+  
+  i Safe fix: Add 'type: "json"' import attribute.
+  
+    3 │ import·foo·from·'bar.json'·with·{·type:·"json"·}·//·with·comment
+      │                            ++++++++++++++++++++++               
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useJsonImportAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON import is missing the type: "json" import attribute.
+  
+    3 │ import foo from 'bar.json' // with comment
+    4 │ 
+  > 5 │ import foo from 'bar.json'; // with comment after colon
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ import foo from 'bar.json'/** with inline comment */;
+  
+  i To explicitly declare the module type for JSON imports, add with { type: "json" } to this import statement.
+  
+  i Safe fix: Add 'type: "json"' import attribute.
+  
+    5 │ import·foo·from·'bar.json'·with·{·type:·"json"·};·//·with·comment·after·colon
+      │                           ++++++++++++++++++++++                             
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useJsonImportAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON import is missing the type: "json" import attribute.
+  
+    5 │ import foo from 'bar.json'; // with comment after colon
+    6 │ 
+  > 7 │ import foo from 'bar.json'/** with inline comment */;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ import foo from 'bar.json' with { some: 'attr' };
+  
+  i To explicitly declare the module type for JSON imports, add with { type: "json" } to this import statement.
+  
+  i Safe fix: Add 'type: "json"' import attribute.
+  
+    7 │ import·foo·from·'bar.json'·with·{·type:·"json"·}/**·with·inline·comment·*/;
+      │                           ++++++++++++++++++++++                           
+
+```
+
+```
+invalid.js:9:28 lint/nursery/useJsonImportAttribute  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The import attributes for this JSON module are missing type: "json".
+  
+     7 │ import foo from 'bar.json'/** with inline comment */;
+     8 │ 
+   > 9 │ import foo from 'bar.json' with { some: 'attr' };
+       │                            ^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Ensure the with clause includes type: "json" for this JSON import.
+  
+  i Safe fix: Add 'type: "json"' import attribute.
+  
+    9 │ import·foo·from·'bar.json'·with·{·type:·"json",·some:·'attr'·};
+      │                                   ++++++++++++++               
+
+```

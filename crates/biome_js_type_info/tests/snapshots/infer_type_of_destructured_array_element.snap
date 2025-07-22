@@ -19,7 +19,7 @@ a => Global TypeId(0)[0]
 ## Registered types
 
 ```
-Global TypeId(0) => instanceof unresolved reference "Array"<string>
+Global TypeId(0) => instanceof unresolved reference "Array"<string> (scope ID: 0)
 
 Global TypeId(1) => Global TypeId(0)[0]
 ```

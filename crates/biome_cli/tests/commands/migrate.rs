@@ -29,7 +29,7 @@ fn migrate_help() {
 
 #[test]
 fn migrate_config_up_to_date() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
@@ -72,7 +72,7 @@ fn missing_configuration_file() {
 
 #[test]
 fn should_emit_incompatible_arguments_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;

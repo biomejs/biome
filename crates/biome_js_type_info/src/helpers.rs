@@ -1,11 +1,16 @@
-use std::borrow::Cow;
+use std::{
+    borrow::Cow,
+    cmp::Ordering,
+    hash::{Hash, Hasher},
+};
 
-use biome_rowan::Text;
+use hashbrown::{HashTable, hash_table::Entry};
+use rustc_hash::FxHasher;
 
 use crate::{
-    BindingId, Class, GenericTypeParameter, Interface, Module, Namespace, Object, ResolvedTypeData,
-    ResolvedTypeId, ResolvedTypeMember, ResolverId, TypeData, TypeInstance, TypeReference,
-    TypeResolver,
+    BindingId, Class, Interface, Intersection, Module, Namespace, Object, Resolvable,
+    ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember, ResolverId, Type, TypeData, TypeInstance,
+    TypeMember, TypeReference, TypeResolver, Union,
     globals::{GLOBAL_ARRAY_ID, GLOBAL_PROMISE_ID, GLOBAL_TYPE_MEMBERS},
 };
 
@@ -16,8 +21,8 @@ impl<'a> ResolvedTypeData<'a> {
     /// Note that members which are inherited and overridden may appear multiple
     /// times, but the member that is closest to the current type is guaranteed
     /// to come first.
-    pub fn all_members(self, resolver: &'a dyn TypeResolver) -> TypeMemberIterator<'a> {
-        TypeMemberIterator {
+    pub fn all_members(self, resolver: &'a dyn TypeResolver) -> AllTypeMemberIterator<'a> {
+        AllTypeMemberIterator {
             resolver,
             resolver_id: self.resolver_id(),
             owner: TypeMemberOwner::from_type_data(self.as_raw_data()),
@@ -30,7 +35,7 @@ impl<'a> ResolvedTypeData<'a> {
     /// Returns the type of an array's elements, if this object is an instance of `Array`.
     pub fn find_array_element_type(self, resolver: &'a dyn TypeResolver) -> Option<Self> {
         if self.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
-            self.find_type_parameter(resolver, "T")
+            self.get_type_parameter(0)
                 .and_then(|reference| resolver.resolve_and_get(&reference))
         } else {
             None
@@ -40,56 +45,70 @@ impl<'a> ResolvedTypeData<'a> {
     /// Returns the promised type, if this object is an instance of `Promise`.
     pub fn find_promise_type(self, resolver: &'a dyn TypeResolver) -> Option<Self> {
         if self.is_instance_of(resolver, GLOBAL_PROMISE_ID) {
-            self.find_type_parameter(resolver, "T")
+            self.get_type_parameter(0)
                 .and_then(|reference| resolver.resolve_and_get(&reference))
         } else {
             None
         }
     }
 
-    pub fn find_type_parameter(
-        self,
-        resolver: &'a dyn TypeResolver,
-        parameter_name: &str,
-    ) -> Option<Cow<'a, TypeReference>> {
-        let mut seen_types = Vec::new();
-        let mut current_object = Some(self);
-        while let Some(current) = current_object {
-            if let Some(argument) = current
-                .as_raw_data()
-                .type_parameters()
-                .iter()
-                .flat_map(|params| params.iter())
-                .find(|param| param.name == parameter_name && param.ty.is_known())
-            {
-                return Some(current.apply_module_id_to_reference(&argument.ty));
-            }
-
-            let Some(next_object) = current
-                .prototype(resolver)
-                .and_then(|prototype| resolver.resolve_reference(&prototype))
-            else {
-                break;
-            };
-
-            if seen_types.contains(&next_object) {
-                break;
-            }
-
-            seen_types.push(next_object);
-            current_object = resolver.get_by_resolved_id(next_object);
-        }
-
-        None
+    pub fn get_type_parameter(self, index: usize) -> Option<Cow<'a, TypeReference>> {
+        self.as_raw_data()
+            .type_parameters()
+            .and_then(|params| params.get(index))
+            .map(|param| self.apply_module_id_to_reference(param))
     }
 
-    /// Returns whether this object is an instance of the type with the given ID.
+    pub fn has_members(self) -> bool {
+        TypeMemberOwner::from_type_data(self.as_raw_data()).is_some()
+    }
+
+    #[inline]
+    pub fn is_inferred(self) -> bool {
+        self.as_raw_data().is_inferred()
+    }
+
+    /// Returns whether this type data is an instance of a type matching the
+    /// given `predicate`.
+    pub fn is_instance_matching(
+        self,
+        resolver: &'a dyn TypeResolver,
+        predicate: impl Fn(TypeInstance) -> bool,
+    ) -> bool {
+        let apply_predicate = |owner: Self, instance: &TypeInstance| {
+            let mut instance = instance.clone();
+            instance.update_all_references(|reference| {
+                if let Cow::Owned(updated_reference) = owner.apply_module_id_to_reference(reference)
+                {
+                    *reference = updated_reference;
+                }
+            });
+            predicate(instance)
+        };
+
+        match self.as_raw_data() {
+            TypeData::InstanceOf(instance) => apply_predicate(self, instance),
+            TypeData::Reference(TypeReference::Resolved(resolved_id)) => resolver
+                .get_by_resolved_id(self.apply_module_id(*resolved_id))
+                .is_some_and(|resolved_data| match resolved_data.as_raw_data() {
+                    TypeData::InstanceOf(instance) => apply_predicate(resolved_data, instance),
+                    _ => false,
+                }),
+            _ => false,
+        }
+    }
+
     pub fn is_instance_of(self, resolver: &dyn TypeResolver, id: ResolvedTypeId) -> bool {
         let mut seen_types = Vec::new();
         let mut current_object = Some(self);
         while let Some(current) = current_object {
             let Some(prototype) = current.prototype(resolver) else {
-                break;
+                match current.as_raw_data() {
+                    TypeData::Reference(TypeReference::Resolved(resolved_id)) => {
+                        return *resolved_id == id;
+                    }
+                    _ => break,
+                }
             };
 
             let Some(next_id) = resolver.resolve_reference(&prototype) else {
@@ -144,12 +163,12 @@ impl TypeData {
         index: usize,
     ) -> Option<ResolvedTypeData<'a>> {
         match self {
-            Self::Tuple(tuple) => Some(tuple.get_ty(resolver, index)),
+            Self::Tuple(tuple) => tuple.get_ty(resolver, index),
             _ => {
                 let resolved = ResolvedTypeData::from((resolver_id, self));
                 if resolved.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
                     resolved
-                        .find_type_parameter(resolver, "T")
+                        .get_type_parameter(0)
                         .map(|reference| reference.into_owned())
                         .map(|reference| resolver.optional(reference))
                         .map(|id| {
@@ -178,13 +197,10 @@ impl TypeData {
             _ => {
                 let resolved = ResolvedTypeData::from((resolver_id, self));
                 if resolved.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
-                    match resolved.find_type_parameter(resolver, "T") {
+                    match resolved.get_type_parameter(0) {
                         Some(elem_ty) => Some(Self::instance_of(TypeInstance {
                             ty: GLOBAL_ARRAY_ID.into(),
-                            type_parameters: Box::new([GenericTypeParameter {
-                                name: Text::Static("T"),
-                                ty: elem_ty.into_owned(),
-                            }]),
+                            type_parameters: Box::new([elem_ty.into_owned()]),
                         })),
                         None => return resolver.get_by_resolved_id(GLOBAL_ARRAY_ID),
                     }
@@ -197,9 +213,111 @@ impl TypeData {
         let id = resolver.register_and_resolve(data);
         resolver.get_by_resolved_id(id)
     }
+
+    /// Turns this [`TypeData`] into an instance of itself.
+    pub fn into_instance(self, resolver: &mut dyn TypeResolver) -> Self {
+        match self {
+            Self::InstanceOf(instance) => Self::InstanceOf(instance),
+            Self::Reference(reference) => Self::instance_of(reference),
+            other => Self::instance_of(TypeReference::from(resolver.register_and_resolve(other))),
+        }
+    }
+
+    /// Creates an intersection of type references.
+    ///
+    /// References are automatically deduplicated. If only a single type
+    /// remains, an instance of `Self::Reference` is returned instead of
+    /// `Self::Intersection`.
+    pub fn intersection_of(mut types: Vec<TypeReference>) -> Self {
+        types.dedup();
+        match types.len().cmp(&1) {
+            Ordering::Greater => Self::Intersection(Box::new(Intersection(types.into()))),
+            Ordering::Equal => Self::reference(types.remove(0)),
+            Ordering::Less => Self::unknown(),
+        }
+    }
+
+    /// Iterates own member fields.
+    ///
+    /// This iterator does not return members of [`TypeData::InstanceOf`] or
+    /// [`TypeData::Reference`] variants. If that's what you want, you will need
+    /// to dereference them first.
+    pub fn own_members(&self) -> OwnTypeMemberIterator {
+        OwnTypeMemberIterator {
+            owner: TypeMemberOwner::from_type_data(self),
+            index: 0,
+        }
+    }
+
+    /// Creates a union of type references.
+    ///
+    /// References are automatically deduplicated. If only a single type
+    /// remains, an instance of `Self::Reference` is returned instead of
+    /// `Self::Union`.
+    pub fn union_of(resolver: &dyn TypeResolver, types: Box<[TypeReference]>) -> Self {
+        // We use a hash table separately of a vector to quickly check for
+        // duplicates, without messing with the original order.
+        let mut table: HashTable<usize> = HashTable::with_capacity(types.len());
+        let mut vec = Vec::with_capacity(types.len());
+        for ty in types {
+            if let Some(resolved) = resolver.resolve_and_get(&ty) {
+                match resolved.as_raw_data() {
+                    Self::AnyKeyword => {
+                        // `any` poisons the entire union.
+                        return Self::AnyKeyword;
+                    }
+                    Self::NeverKeyword => {
+                        // No point in adding `never` to the union.
+                        continue;
+                    }
+                    Self::Union(union) => {
+                        // Flatten existing union into the new one:
+                        for ty in union.types() {
+                            let ty = resolved.apply_module_id_to_reference(ty);
+                            let entry = table.entry(
+                                hash_reference(&ty),
+                                |i| &vec[*i] == ty.as_ref(),
+                                |i| hash_reference(&vec[*i]),
+                            );
+                            if let Entry::Vacant(entry) = entry {
+                                let index = vec.len();
+                                vec.push(ty.into_owned());
+                                entry.insert(index);
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            let entry = table.entry(
+                hash_reference(&ty),
+                |i| vec[*i] == ty,
+                |i| hash_reference(&vec[*i]),
+            );
+            if let Entry::Vacant(entry) = entry {
+                let index = vec.len();
+                vec.push(ty);
+                entry.insert(index);
+            }
+        }
+
+        match vec.len().cmp(&1) {
+            Ordering::Greater => Self::Union(Box::new(Union(vec.into()))),
+            Ordering::Equal => Self::reference(vec.remove(0)),
+            Ordering::Less => Self::NeverKeyword,
+        }
+    }
 }
 
-pub struct TypeMemberIterator<'a> {
+#[inline(always)]
+fn hash_reference(reference: &TypeReference) -> u64 {
+    let mut hash = FxHasher::default();
+    reference.hash(&mut hash);
+    hash.finish()
+}
+
+pub struct AllTypeMemberIterator<'a> {
     resolver: &'a dyn TypeResolver,
     resolver_id: ResolverId,
     owner: Option<TypeMemberOwner<'a>>,
@@ -208,14 +326,14 @@ pub struct TypeMemberIterator<'a> {
     excluded_binding_id: Option<BindingId>,
 }
 
-impl TypeMemberIterator<'_> {
+impl AllTypeMemberIterator<'_> {
     pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {
         self.excluded_binding_id = Some(binding_id);
         self
     }
 }
 
-impl<'a> Iterator for TypeMemberIterator<'a> {
+impl<'a> Iterator for AllTypeMemberIterator<'a> {
     type Item = ResolvedTypeMember<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -293,18 +411,43 @@ impl<'a> Iterator for TypeMemberIterator<'a> {
             None => return None,
         };
 
-        let mut next_reference = self
-            .resolver_id
-            .apply_module_id_to_reference(next_reference);
-        if let Some(excluded_binding_id) = self.excluded_binding_id {
-            next_reference = Cow::Owned(
-                next_reference
-                    .into_owned()
-                    .with_excluded_binding_id(excluded_binding_id),
-            );
+        // If there are any references in the inheritance chain, we need to keep
+        // resolving them until we find an "actual" type again.
+        let mut next_resolved_id = None;
+        let mut next_reference = Cow::Borrowed(next_reference);
+        while next_resolved_id.is_none() {
+            if let TypeReference::Resolved(id) = next_reference.as_ref() {
+                next_reference = Cow::Owned(TypeReference::Resolved(
+                    self.resolver_id.apply_module_id(*id),
+                ));
+            }
+
+            if let Some(excluded_binding_id) = self.excluded_binding_id {
+                next_reference = Cow::Owned(
+                    next_reference
+                        .into_owned()
+                        .with_excluded_binding_id(excluded_binding_id),
+                );
+            }
+
+            let Some(resolved_id) = self.resolver.resolve_reference(&next_reference) else {
+                break;
+            };
+
+            let Some(ty) = self.resolver.get_by_resolved_id(resolved_id) else {
+                break;
+            };
+
+            match ty.as_raw_data() {
+                TypeData::Reference(reference) => {
+                    self.resolver_id = ty.resolver_id();
+                    next_reference = Cow::Borrowed(reference);
+                }
+                _ => next_resolved_id = Some(resolved_id),
+            }
         }
 
-        let Some(next_resolved_id) = self.resolver.resolve_reference(&next_reference) else {
+        let Some(next_resolved_id) = next_resolved_id else {
             self.owner = None;
             return None;
         };
@@ -329,6 +472,35 @@ impl<'a> Iterator for TypeMemberIterator<'a> {
     }
 }
 
+pub struct OwnTypeMemberIterator<'a> {
+    owner: Option<TypeMemberOwner<'a>>,
+    index: usize,
+}
+
+impl<'a> Iterator for OwnTypeMemberIterator<'a> {
+    type Item = &'a TypeMember;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = match &self.owner {
+            Some(TypeMemberOwner::Class(class)) => class.members.get(self.index),
+            Some(TypeMemberOwner::Global) => GLOBAL_TYPE_MEMBERS.get(self.index),
+            Some(TypeMemberOwner::Interface(interface)) => interface.members.get(self.index),
+            Some(TypeMemberOwner::Module(module)) => module.members.get(self.index),
+            Some(TypeMemberOwner::Namespace(namespace)) => namespace.members.get(self.index),
+            Some(TypeMemberOwner::Object(object)) => object.members.get(self.index),
+            None | Some(TypeMemberOwner::InstanceOf(_)) => None,
+        };
+
+        if next.is_some() {
+            self.index += 1;
+        } else {
+            self.owner = None;
+        }
+
+        next
+    }
+}
+
 #[derive(Debug)]
 enum TypeMemberOwner<'a> {
     Class(&'a Class),
@@ -341,6 +513,7 @@ enum TypeMemberOwner<'a> {
 }
 
 impl<'a> TypeMemberOwner<'a> {
+    #[inline]
     fn from_type_data(type_data: &'a TypeData) -> Option<Self> {
         match type_data {
             TypeData::Class(class) => Some(Self::Class(class)),
@@ -354,3 +527,62 @@ impl<'a> TypeMemberOwner<'a> {
         }
     }
 }
+
+macro_rules! generate_resolved_matcher {
+    ($name:ident) => {
+        impl ResolvedTypeData<'_> {
+            #[inline]
+            pub fn $name(self) -> bool {
+                self.as_raw_data().$name()
+            }
+        }
+    };
+}
+macro_rules! generate_type_matcher {
+    ($name:ident) => {
+        impl Type {
+            #[inline]
+            pub fn $name(&self) -> bool {
+                self.as_raw_data().is_some_and(TypeData::$name)
+            }
+        }
+    };
+}
+macro_rules! generate_matcher {
+    ($name:ident, $variant:ident) => {
+        impl TypeData {
+            #[inline]
+            pub fn $name(&self) -> bool {
+                matches!(self, Self::$variant)
+            }
+        }
+
+        generate_resolved_matcher!($name);
+        generate_type_matcher!($name);
+    };
+    ($name:ident, $variant:ident, $data:pat) => {
+        impl TypeData {
+            #[inline]
+            pub fn $name(&self) -> bool {
+                matches!(self, Self::$variant($data))
+            }
+        }
+
+        generate_resolved_matcher!($name);
+        generate_type_matcher!($name);
+    };
+}
+
+generate_matcher!(is_any_keyword, AnyKeyword);
+generate_matcher!(is_big_int, BigInt);
+generate_matcher!(is_class, Class, _);
+generate_matcher!(is_conditional, Conditional);
+generate_matcher!(is_expression, TypeofExpression, _);
+generate_matcher!(is_function, Function, _);
+generate_matcher!(is_generic, Generic, _);
+generate_matcher!(is_interface, Interface, _);
+generate_matcher!(is_null, Null);
+generate_matcher!(is_reference, Reference, _);
+generate_matcher!(is_never_keyword, NeverKeyword);
+generate_matcher!(is_unknown_keyword, UnknownKeyword);
+generate_matcher!(is_void_keyword, VoidKeyword);

@@ -6,6 +6,7 @@ use biome_css_factory::make::css_declaration;
 use biome_css_syntax::{CssDeclaration, CssDeclarationImportant};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_important_styles::NoImportantStylesOptions;
 
 declare_lint_rule! {
     /// Disallow the use of the `!important` style.
@@ -55,7 +56,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Warning,
-        sources: &[RuleSource::Stylelint("declaration-no-important")],
+        sources: &[RuleSource::Stylelint("declaration-no-important").same()],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -64,7 +65,7 @@ impl Rule for NoImportantStyles {
     type Query = Ast<CssDeclarationImportant>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImportantStylesOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

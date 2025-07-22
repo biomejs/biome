@@ -176,7 +176,7 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━�
 ```
 extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: someObj
+  × This hook does not specify its dependency on someObj.
   
     26 │ function MyComponent1() {
     27 │   let someObj = getObj();
@@ -185,7 +185,7 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIX
     29 │       console.log(someObj)
     30 │   }, [someObj.id]);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     27 │   let someObj = getObj();
     28 │   useEffect(() => {
@@ -194,7 +194,7 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIX
     30 │   }, [someObj.id]);
     31 │ }
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     30 │ ··},·[someObj.id,·someObj]);
        │                 +++++++++   

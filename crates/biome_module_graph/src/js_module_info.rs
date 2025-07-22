@@ -1,27 +1,26 @@
 mod binding;
 mod collector;
+mod module_resolver;
 mod scope;
-mod scoped_resolver;
 mod visitor;
 
-use std::{collections::BTreeMap, ops::Deref, sync::Arc};
+use std::{ops::Deref, sync::Arc};
 
 use biome_js_syntax::AnyJsImportLike;
-use biome_js_type_info::{
-    BindingId, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, ImportSymbol, ResolvedTypeData, ResolvedTypeId,
-    ScopeId, TypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeResolverLevel,
-};
+use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeData};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
-use biome_rowan::{Text, TextRange, TokenText};
+use biome_rowan::{Text, TextRange};
+use indexmap::IndexMap;
+use rust_lapper::Lapper;
+use rustc_hash::FxHashMap;
 
 use crate::ModuleGraph;
 
-use binding::JsBindingData;
 use scope::{JsScope, JsScopeData, TsBindingReference};
 
-pub use scoped_resolver::ScopedResolver;
+pub(super) use binding::JsBindingData;
+pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
 
 /// Information restricted to a single module in the [ModuleGraph].
@@ -40,15 +39,10 @@ impl JsModuleInfo {
     /// Returns an iterator over all the static and dynamic imports in this
     /// module.
     pub fn all_import_paths(&self) -> impl Iterator<Item = ResolvedPath> + use<> {
-        let module_info = self.0.as_ref();
         ImportPathIterator {
-            static_import_paths: module_info.static_import_paths.clone(),
-            dynamic_import_paths: module_info.dynamic_import_paths.clone(),
+            module_info: self.clone(),
+            index: 0,
         }
-    }
-
-    pub fn as_resolver(&self) -> &impl TypeResolver {
-        self.0.as_ref()
     }
 
     /// Finds an exported symbol by `name`, using the `module_graph` to
@@ -60,6 +54,17 @@ impl JsModuleInfo {
         name: &str,
     ) -> Option<JsOwnExport> {
         module_graph.find_exported_symbol(self, name)
+    }
+
+    /// Finds an exported symbol by `name`, using the `module_graph` to
+    /// lookup re-exports if necessary.
+    #[inline]
+    pub fn find_jsdoc_for_exported_symbol(
+        &self,
+        module_graph: &ModuleGraph,
+        name: &str,
+    ) -> Option<JsdocComment> {
+        module_graph.find_jsdoc_for_exported_symbol(self, name)
     }
 
     /// Returns the module's global scope.
@@ -74,21 +79,8 @@ impl JsModuleInfo {
     pub fn scope_for_range(&self, range: TextRange) -> JsScope {
         JsScope {
             info: self.0.clone(),
-            id: self.scope_id_for_range(range),
+            id: scope_id_for_range(&self.0.scope_by_range, range),
         }
-    }
-
-    pub fn scope_id_for_range(&self, range: TextRange) -> ScopeId {
-        let start = range.start().into();
-        let end = range.end().into();
-        self.0
-            .scope_by_range
-            .find(start, end)
-            .filter(|interval| !(start < interval.start || end > interval.stop))
-            .max_by_key(|interval| interval.val)
-            .map_or(ScopeId::GLOBAL, |interval| {
-                ScopeId::new(interval.val.index())
-            })
     }
 }
 
@@ -113,7 +105,7 @@ pub struct JsModuleInfoInner {
     /// absolute path it resolves to. The resolved path may be looked up as key
     /// in the [ModuleGraph::data] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
-    pub static_import_paths: BTreeMap<Text, ResolvedPath>,
+    pub static_import_paths: IndexMap<Text, ResolvedPath>,
 
     /// Map of all dynamic import paths found in the module for which the import
     /// specifier could be statically determined.
@@ -129,7 +121,7 @@ pub struct JsModuleInfoInner {
     ///
     /// Paths found in `require()` expressions in CommonJS sources are also
     /// included with the dynamic import paths.
-    pub dynamic_import_paths: BTreeMap<Text, ResolvedPath>,
+    pub dynamic_import_paths: IndexMap<Text, ResolvedPath>,
 
     /// Map of exports from the module.
     ///
@@ -148,23 +140,26 @@ pub struct JsModuleInfoInner {
     /// Collection of all the declarations in the module.
     pub(crate) bindings: Box<[JsBindingData]>,
 
+    /// Parsed expressions, mapped from their range to their type ID.
+    pub(crate) expressions: FxHashMap<TextRange, ResolvedTypeId>,
+
     /// All scopes in this module.
     ///
     /// The first entry is expected to be the global scope.
     pub(crate) scopes: Box<[JsScopeData]>,
 
     /// Lookup tree to find scopes by text range.
-    pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
+    pub(crate) scope_by_range: Lapper<u32, ScopeId>,
 
     /// Collection of all types in the module.
-    pub(crate) types: Box<[TypeData]>,
+    pub(crate) types: Box<[Arc<TypeData>]>,
 }
 
 #[derive(Debug, Default)]
-pub struct Exports(pub(crate) BTreeMap<Text, JsExport>);
+pub struct Exports(pub(crate) IndexMap<Text, JsExport>);
 
 impl Deref for Exports {
-    type Target = BTreeMap<Text, JsExport>;
+    type Target = IndexMap<Text, JsExport>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -172,10 +167,11 @@ impl Deref for Exports {
 }
 
 #[derive(Debug, Default)]
-pub struct Imports(pub(crate) BTreeMap<Text, JsImport>);
+pub struct Imports(pub(crate) IndexMap<Text, JsImport>);
 
 impl Deref for Imports {
-    type Target = BTreeMap<Text, JsImport>;
+    type Target = IndexMap<Text, JsImport>;
+
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -185,7 +181,8 @@ static_assertions::assert_impl_all!(JsModuleInfo: Send, Sync);
 
 impl JsModuleInfoInner {
     /// Returns one of the bindings by ID.
-    pub(crate) fn binding(&self, binding_id: BindingId) -> &JsBindingData {
+    #[inline]
+    pub fn binding(&self, binding_id: BindingId) -> &JsBindingData {
         &self.bindings[binding_id.index()]
     }
 
@@ -220,71 +217,9 @@ impl JsModuleInfoInner {
             self.dynamic_import_paths.get(specifier)
         }
     }
-}
 
-impl TypeResolver for JsModuleInfoInner {
-    fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Module
-    }
-
-    fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
-        self.types
-            .iter()
-            .position(|data| data == type_data)
-            .map(TypeId::new)
-    }
-
-    fn get_by_id(&self, id: TypeId) -> &TypeData {
-        &self.types[id.index()]
-    }
-
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
-        match id.level() {
-            TypeResolverLevel::Module => Some((id, self.get_by_id(id.id())).into()),
-            TypeResolverLevel::Global => Some((id, GLOBAL_RESOLVER.get_by_id(id.id())).into()),
-            TypeResolverLevel::Scope | TypeResolverLevel::Import => None,
-        }
-    }
-
-    fn register_type(&mut self, _type_data: TypeData) -> TypeId {
-        panic!("Cannot register new types after the module has been constructed");
-    }
-
-    fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId> {
-        match ty {
-            TypeReference::Qualifier(qualifier) => self.resolve_qualifier(qualifier),
-            TypeReference::Resolved(resolved_id) => Some(*resolved_id),
-            TypeReference::Import(_) => None,
-            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
-        }
-    }
-
-    fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() != 1 {
-            return None;
-        }
-
-        if let Some(export) = self.exports.get(&qualifier.path[0]) {
-            export
-                .as_own_export()
-                .and_then(|own_export| self.resolve_reference(&own_export.ty))
-        } else {
-            GLOBAL_RESOLVER.resolve_qualifier(qualifier)
-        }
-    }
-
-    fn resolve_type_of(&self, identifier: &Text, scope_id: ScopeId) -> Option<ResolvedTypeId> {
-        if let Some(export) = self.exports.get(identifier) {
-            export
-                .as_own_export()
-                .and_then(|own_export| self.resolve_reference(&own_export.ty))
-        } else {
-            GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id)
-        }
-    }
-
-    fn registered_types(&self) -> &[TypeData] {
-        &self.types
+    pub fn types(&self) -> Vec<&TypeData> {
+        self.types.iter().map(Arc::as_ref).collect()
     }
 }
 
@@ -352,16 +287,13 @@ pub struct JsImport {
 }
 
 /// Information tracked for every "own" export.
+///
+/// Exports can reference bindings, types of expressions or other references for
+/// which no binding exists, or namespaces defined by exports of another module.
 #[derive(Clone, Debug, PartialEq)]
-pub struct JsOwnExport {
-    /// Optional JSDoc comment associated with the symbol being exported.
-    pub jsdoc_comment: Option<JsdocComment>,
-
-    /// Name of the binding in the module's global scope.
-    pub local_name: Option<TokenText>,
-
-    /// Type of the exported symbol.
-    pub ty: TypeReference,
+pub enum JsOwnExport {
+    Binding(BindingId),
+    Type(ResolvedTypeId),
 }
 
 /// Information about an export statement that re-exports all symbols from
@@ -376,22 +308,40 @@ pub struct JsReexport {
 }
 
 struct ImportPathIterator {
-    static_import_paths: BTreeMap<Text, ResolvedPath>,
-    dynamic_import_paths: BTreeMap<Text, ResolvedPath>,
+    module_info: JsModuleInfo,
+    index: usize,
 }
 
 impl Iterator for ImportPathIterator {
     type Item = ResolvedPath;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.static_import_paths.is_empty() {
-            self.dynamic_import_paths
-                .pop_first()
-                .map(|(_source, path)| path)
+        let num_static_imports = self.module_info.static_import_paths.len();
+        let resolved_path = if self.index < num_static_imports {
+            let resolved_path = &self.module_info.static_import_paths[self.index];
+            self.index += 1;
+            resolved_path
+        } else if self.index < self.module_info.dynamic_import_paths.len() + num_static_imports {
+            let resolved_path =
+                &self.module_info.dynamic_import_paths[self.index - num_static_imports];
+            self.index += 1;
+            resolved_path
         } else {
-            self.static_import_paths
-                .pop_first()
-                .map(|(_identifier, path)| path)
-        }
+            return None;
+        };
+
+        Some(resolved_path.clone())
     }
+}
+
+fn scope_id_for_range(scope_by_range: &Lapper<u32, ScopeId>, range: TextRange) -> ScopeId {
+    let start = range.start().into();
+    let end = range.end().into();
+    scope_by_range
+        .find(start, end)
+        .filter(|interval| !(start < interval.start || end > interval.stop))
+        .max_by_key(|interval| interval.val)
+        .map_or(ScopeId::GLOBAL, |interval| {
+            ScopeId::new(interval.val.index())
+        })
 }

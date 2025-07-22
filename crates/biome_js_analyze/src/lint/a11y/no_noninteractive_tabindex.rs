@@ -9,6 +9,7 @@ use biome_js_syntax::{
     AnyJsxAttributeValue, AnyNumberLikeExpression, TextRange, jsx_ext::AnyJsxElement,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions;
 
 declare_lint_rule! {
     /// Enforce that `tabIndex` is not assigned to non-interactive HTML elements.
@@ -51,7 +52,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noNoninteractiveTabindex",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-tabindex")],
+        sources: &[RuleSource::EslintJsxA11y("no-noninteractive-tabindex").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -67,7 +68,7 @@ impl Rule for NoNoninteractiveTabindex {
     type Query = Aria<AnyJsxElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNoninteractiveTabindexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
