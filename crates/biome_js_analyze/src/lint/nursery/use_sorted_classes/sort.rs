@@ -128,7 +128,6 @@ fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
 }
 
 /// Sort the given class string according to the given sort config.
-/// `template_context` is used to determine if the class string is part of a template literal and how to handle spaces.
 pub fn sort_class_name(
     class_name: &TokenText,
     sort_config: &SortConfig,
