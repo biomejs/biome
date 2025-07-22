@@ -397,8 +397,8 @@ fn handle_rule(
             fields.push(field);
         }
 
-        Rule::Rep(_) => {
-            panic!("Create a list node for *many* children {label:?}");
+        Rule::Rep(rule) => {
+            panic!("Create a list node for *many* children {label:?} {rule:?}");
         }
         Rule::Opt(rule) => {
             handle_rule(fields, grammar, rule, label, true, false);
