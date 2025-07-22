@@ -11,6 +11,19 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         .nodes
         .iter()
         .map(|node| {
+            if node.name.ends_with("Root") && let Some(last) = node.fields.last() {
+                match last {
+                    field @ Field::Token { kind, .. } => {
+                        if let TokenKind::Single(k) = kind && k == "EOF" {
+                            // do nothing
+                        } else {
+                            panic!("The last field of the root node to be an EOF token. Instead, got {field:?}")
+                        }
+                    }
+                    field => panic!("The last field of the root node to be an EOF token. Instead, got {field:?}"),
+                }
+            }
+
             let name = format_ident!("{}", node.name);
             let node_kind = format_ident!("{}", Case::Constant.convert(node.name.as_str()));
             let needs_dynamic_slots = node.dynamic;

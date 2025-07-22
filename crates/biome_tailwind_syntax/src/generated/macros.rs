@@ -20,10 +20,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TwArbitraryCandidate::new_unchecked(node) };
                     $body
                 }
-                $crate::TailwindSyntaxKind::TW_ARBITRARY_MODIFIER => {
-                    let $pattern = unsafe { $crate::TwArbitraryModifier::new_unchecked(node) };
-                    $body
-                }
                 $crate::TailwindSyntaxKind::TW_ARBITRARY_VALUE => {
                     let $pattern = unsafe { $crate::TwArbitraryValue::new_unchecked(node) };
                     $body
@@ -48,12 +44,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TwFunctionalVariant::new_unchecked(node) };
                     $body
                 }
-                $crate::TailwindSyntaxKind::TW_FUNCTIONAL_VARIANT_VALUE => {
-                    let $pattern = unsafe { $crate::TwFunctionalVariantValue::new_unchecked(node) };
-                    $body
-                }
-                $crate::TailwindSyntaxKind::TW_NAMED_MODIFIER => {
-                    let $pattern = unsafe { $crate::TwNamedModifier::new_unchecked(node) };
+                $crate::TailwindSyntaxKind::TW_MODIFIER => {
+                    let $pattern = unsafe { $crate::TwModifier::new_unchecked(node) };
                     $body
                 }
                 $crate::TailwindSyntaxKind::TW_NAMED_VALUE => {

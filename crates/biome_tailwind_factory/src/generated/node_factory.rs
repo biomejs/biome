@@ -50,22 +50,6 @@ impl TwArbitraryCandidateBuilder {
         ))
     }
 }
-pub fn tw_arbitrary_modifier(
-    slash_token: SyntaxToken,
-    l_brack_token: SyntaxToken,
-    value_token: SyntaxToken,
-    r_brack_token: SyntaxToken,
-) -> TwArbitraryModifier {
-    TwArbitraryModifier::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_ARBITRARY_MODIFIER,
-        [
-            Some(SyntaxElement::Token(slash_token)),
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Token(value_token)),
-            Some(SyntaxElement::Token(r_brack_token)),
-        ],
-    ))
-}
 pub fn tw_arbitrary_value(
     l_brack_token: SyntaxToken,
     value_token: SyntaxToken,
@@ -172,50 +156,26 @@ impl TwFunctionalCandidateBuilder {
         ))
     }
 }
-pub fn tw_functional_variant(selector_token: SyntaxToken) -> TwFunctionalVariantBuilder {
-    TwFunctionalVariantBuilder {
-        selector_token,
-        value: None,
-    }
-}
-pub struct TwFunctionalVariantBuilder {
-    selector_token: SyntaxToken,
-    value: Option<TwFunctionalVariantValue>,
-}
-impl TwFunctionalVariantBuilder {
-    pub fn with_value(mut self, value: TwFunctionalVariantValue) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> TwFunctionalVariant {
-        TwFunctionalVariant::unwrap_cast(SyntaxNode::new_detached(
-            TailwindSyntaxKind::TW_FUNCTIONAL_VARIANT,
-            [
-                Some(SyntaxElement::Token(self.selector_token)),
-                self.value
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn tw_functional_variant_value(
+pub fn tw_functional_variant(
+    base_token: SyntaxToken,
     minus_token: SyntaxToken,
     value: AnyTwValue,
-) -> TwFunctionalVariantValue {
-    TwFunctionalVariantValue::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_FUNCTIONAL_VARIANT_VALUE,
+) -> TwFunctionalVariant {
+    TwFunctionalVariant::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_FUNCTIONAL_VARIANT,
         [
+            Some(SyntaxElement::Token(base_token)),
             Some(SyntaxElement::Token(minus_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
         ],
     ))
 }
-pub fn tw_named_modifier(slash_token: SyntaxToken, value_token: SyntaxToken) -> TwNamedModifier {
-    TwNamedModifier::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_NAMED_MODIFIER,
+pub fn tw_modifier(slash_token: SyntaxToken, value: AnyTwValue) -> TwModifier {
+    TwModifier::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_MODIFIER,
         [
             Some(SyntaxElement::Token(slash_token)),
-            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
         ],
     ))
 }
@@ -225,11 +185,33 @@ pub fn tw_named_value(value_token: SyntaxToken) -> TwNamedValue {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn tw_root(tw_candidate_list: TwCandidateList) -> TwRoot {
-    TwRoot::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_ROOT,
-        [Some(SyntaxElement::Node(tw_candidate_list.into_syntax()))],
-    ))
+pub fn tw_root(candidates: TwCandidateList, eof_token: SyntaxToken) -> TwRootBuilder {
+    TwRootBuilder {
+        candidates,
+        eof_token,
+        bom_token: None,
+    }
+}
+pub struct TwRootBuilder {
+    candidates: TwCandidateList,
+    eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
+}
+impl TwRootBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn build(self) -> TwRoot {
+        TwRoot::unwrap_cast(SyntaxNode::new_detached(
+            TailwindSyntaxKind::TW_ROOT,
+            [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.candidates.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
 }
 pub fn tw_static_candidate(base_token: SyntaxToken) -> TwStaticCandidate {
     TwStaticCandidate::unwrap_cast(SyntaxNode::new_detached(
@@ -237,15 +219,15 @@ pub fn tw_static_candidate(base_token: SyntaxToken) -> TwStaticCandidate {
         [Some(SyntaxElement::Token(base_token))],
     ))
 }
-pub fn tw_static_variant(selector_token: SyntaxToken) -> TwStaticVariant {
+pub fn tw_static_variant(base_token: SyntaxToken) -> TwStaticVariant {
     TwStaticVariant::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_STATIC_VARIANT,
-        [Some(SyntaxElement::Token(selector_token))],
+        [Some(SyntaxElement::Token(base_token))],
     ))
 }
 pub fn tw_candidate_list<I>(items: I) -> TwCandidateList
 where
-    I: IntoIterator<Item = AnyTwCandidate>,
+    I: IntoIterator<Item = TwCandidate>,
     I::IntoIter: ExactSizeIterator,
 {
     TwCandidateList::unwrap_cast(SyntaxNode::new_detached(
@@ -255,16 +237,25 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
-pub fn tw_variant_list<I>(items: I) -> TwVariantList
+pub fn tw_variant_list<I, S>(items: I, separators: S) -> TwVariantList
 where
     I: IntoIterator<Item = AnyTwVariant>,
     I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = TailwindSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
 {
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
     TwVariantList::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_VARIANT_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn tw_bogus<I>(slots: I) -> TwBogus

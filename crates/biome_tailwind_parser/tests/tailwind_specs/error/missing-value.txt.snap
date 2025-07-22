@@ -1,0 +1,72 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+text-
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..4 "text" [] [],
+                minus_token: DASH@4..5 "-" [] [],
+                value: TwNamedValue {
+                    value_token: missing (required),
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@5..6 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..6
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..5
+    0: TW_CANDIDATE@0..5
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..5
+        0: TW_BASE@0..4 "text" [] []
+        1: DASH@4..5 "-" [] []
+        2: TW_NAMED_VALUE@5..5
+          0: (empty)
+        3: (empty)
+      2: (empty)
+  2: EOF@5..6 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing-value.txt:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `value` but instead the file ends
+  
+    1 │ text-
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ text-
+  > 2 │ 
+      │ 
+  
+```

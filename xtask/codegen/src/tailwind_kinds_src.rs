@@ -25,12 +25,10 @@ pub const TAILWIND_KINDS_SRC: KindsSrc = KindsSrc {
         "TW_ARBITRARY_VARIANT",
         "TW_STATIC_VARIANT",
         "TW_FUNCTIONAL_VARIANT",
-        "TW_FUNCTIONAL_VARIANT_VALUE",
         "TW_NAMED_VALUE",
         "TW_ARBITRARY_VALUE",
         "TW_CSS_VARIABLE_VALUE",
-        "TW_NAMED_MODIFIER",
-        "TW_ARBITRARY_MODIFIER",
+        "TW_MODIFIER",
         // Bogus nodes
         "TW_BOGUS",
         "TW_BOGUS_CANDIDATE",
