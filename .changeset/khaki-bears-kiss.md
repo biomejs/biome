@@ -10,7 +10,7 @@ Previously, trailing spaces in className were not fully removed.
 // Think we have this code:
 <div className="text-sm font-bold            " /> 
 
-// Before: applied fix, but trailing space was preserved
+// Before: applied fix, but a trailing space was preserved
 <div className="font-bold text-sm " />
 
 // After: applied fix, trailing spaces removed
