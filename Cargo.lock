@@ -1396,6 +1396,7 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_glob",
+ "biome_js_syntax",
  "biome_resolver",
  "biome_rowan",
  "biome_string_case",
