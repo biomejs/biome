@@ -3,25 +3,23 @@ use std::str::FromStr;
 
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsDeclaration,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClass, AnyJsClassMember, AnyJsDeclaration,
     AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
     AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
     AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression,
-    JsConstructorClassMember, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
-    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
-    JsGetterClassMember, JsGetterObjectMember, JsLogicalExpression, JsLogicalOperator,
-    JsMethodClassMember, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
+    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsForInStatement,
+    JsForOfStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
+    JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsLogicalExpression,
+    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
     JsObjectExpression, JsParameters, JsReferenceIdentifier, JsReturnStatement,
-    JsSetterClassMember, JsSetterObjectMember, JsStaticInitializationBlockClassMember,
-    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
-    TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
-    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    JsSetterObjectMember, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
+    TsExternalModuleDeclaration, TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType,
+    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
+    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
@@ -32,17 +30,16 @@ use crate::globals::{
 use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, DestructureField, Function,
-    FunctionParameter, FunctionParameterBinding, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
-    Interface, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
-    TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberKind, TypeOperator,
-    TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
-    TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, Interface, Literal, Module,
+    NamedFunctionParameter, Namespace, Object, Path, PatternFunctionParameter, PredicateReturnType,
+    ResolvedTypeId, ReturnType, ScopeId, Tuple, TupleElementType, TypeData, TypeInstance,
+    TypeMember, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
+    TypeReferenceQualifier, TypeResolver, TypeofAdditionExpression, TypeofAwaitExpression,
+    TypeofBitwiseNotExpression, TypeofCallExpression, TypeofConditionalExpression,
+    TypeofDestructureExpression, TypeofExpression, TypeofIndexExpression,
+    TypeofIterableValueOfExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression,
+    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
 };
 
 impl TypeData {
@@ -454,7 +451,7 @@ impl TypeData {
                                 is_rest: true,
                             }),
                         Ok(AnyJsArrayElement::JsArrayHole(_)) | Err(_) => Some(TupleElementType {
-                            ty: TypeReference::Unknown,
+                            ty: TypeReference::unknown(),
                             name: None,
                             is_optional: false,
                             is_rest: false,
@@ -619,7 +616,7 @@ impl TypeData {
                 Literal::RegExp(text_from_token(expr.value_token())?)
             }
             AnyJsLiteralExpression::JsStringLiteralExpression(expr) => Literal::String(
-                StringLiteral::from(Text::Borrowed(expr.inner_string_text().ok()?)),
+                StringLiteral::from(Text::from(expr.inner_string_text().ok()?)),
             ),
         };
 
@@ -642,7 +639,7 @@ impl TypeData {
             ),
             AnyTsType::TsBigintLiteralType(ty) => match (ty.minus_token(), ty.literal_token()) {
                 (Some(minus_token), Ok(literal_token)) => Self::Literal(Box::new(Literal::BigInt(
-                    Text::Owned(format!("{minus_token}{literal_token}")),
+                    format!("{minus_token}{literal_token}").into(),
                 ))),
                 (None, Ok(literal_token)) => Self::Literal(Box::new(Literal::BigInt(
                     literal_token.token_text_trimmed().into(),
@@ -753,7 +750,7 @@ impl TypeData {
             AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_ID),
             AnyTsType::TsSymbolType(_) => Self::Symbol,
             AnyTsType::TsTemplateLiteralType(ty) => {
-                Self::Literal(Box::new(Literal::Template(Text::Owned(ty.to_string()))))
+                Self::Literal(Box::new(Literal::Template(ty.to_string().into())))
             }
             AnyTsType::TsThisType(_) => Self::ThisKeyword,
             AnyTsType::TsTupleType(ty) => {
@@ -833,7 +830,7 @@ impl TypeData {
                         .unwrap_or_default();
                     Box::new([FunctionParameter::Named(NamedFunctionParameter {
                         name,
-                        ty: TypeReference::Unknown,
+                        ty: TypeReference::unknown(),
                         is_optional: false,
                     })])
                 }
@@ -1113,14 +1110,11 @@ impl TypeData {
     }
 
     pub fn from_js_reference_identifier(scope_id: ScopeId, id: &JsReferenceIdentifier) -> Self {
-        id.name().map_or(
-            Self::Reference(GLOBAL_UNKNOWN_ID.into()),
-            |name| match name.text() {
-                "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
-                "undefined" => Self::Undefined,
-                _ => Self::reference(TypeReference::from_name(scope_id, name)),
-            },
-        )
+        id.name().map_or(Self::unknown(), |name| match name.text() {
+            "globalThis" => Self::reference(GLOBAL_GLOBAL_ID),
+            "undefined" => Self::Undefined,
+            _ => Self::reference(TypeReference::from_name(scope_id, name)),
+        })
     }
 
     pub fn from_js_unary_expression(
@@ -1338,7 +1332,7 @@ impl TypeData {
 
     pub fn promise_of(scope_id: ScopeId, ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::from(
-            TypeReferenceQualifier::from_path(scope_id, Text::Static("Promise"))
+            TypeReferenceQualifier::from_path(scope_id, Text::new_static("Promise"))
                 .with_type_parameters([ty]),
         ))
     }
@@ -1477,7 +1471,7 @@ impl FunctionParameter {
                 param,
             )) => Self::from_js_formal_parameter(resolver, scope_id, param),
             AnyJsParameter::AnyJsFormalParameter(_) => Self::Pattern(PatternFunctionParameter {
-                ty: TypeReference::Unknown,
+                ty: TypeReference::unknown(),
                 bindings: [].into(),
                 is_optional: false,
                 is_rest: false,
@@ -1505,7 +1499,7 @@ impl FunctionParameter {
                 })
             }
             AnyJsParameter::TsThisParameter(param) => Self::Named(NamedFunctionParameter {
-                name: Text::Static("this"),
+                name: Text::new_static("this"),
                 ty: param
                     .type_annotation()
                     .and_then(|annotation| annotation.ty().ok())
@@ -1672,7 +1666,9 @@ impl ReturnType {
                             AnyTsTypePredicateParameterName::JsReferenceIdentifier(identifier) => {
                                 text_from_token(identifier.value_token())?
                             }
-                            AnyTsTypePredicateParameterName::TsThisType(_) => Text::Static("text"),
+                            AnyTsTypePredicateParameterName::TsThisType(_) => {
+                                Text::new_static("text")
+                            }
                         },
                         ty: ty
                             .predicate()
@@ -1689,7 +1685,9 @@ impl ReturnType {
                             AnyTsTypePredicateParameterName::JsReferenceIdentifier(identifier) => {
                                 text_from_token(identifier.value_token())?
                             }
-                            AnyTsTypePredicateParameterName::TsThisType(_) => Text::Static("text"),
+                            AnyTsTypePredicateParameterName::TsThisType(_) => {
+                                Text::new_static("text")
+                            }
                         },
                         ty: ty
                             .ty()
@@ -1966,7 +1964,7 @@ impl TypeMember {
                     kind: TypeMemberKind::Named(name.clone()),
                     ty: resolver.reference_to_owned_data(TypeData::from(TypeofValue {
                         identifier: name,
-                        ty: TypeReference::Unknown,
+                        ty: TypeReference::unknown(),
                         scope_id: None,
                     })),
                 }),
@@ -2218,7 +2216,7 @@ impl TypeReference {
                         .map(Self::from)
                         .unwrap_or_default()
                 }
-                Err(_) => Self::Unknown,
+                Err(_) => Self::unknown(),
             })
             .collect()
     }
@@ -2279,31 +2277,69 @@ impl TypeReferenceQualifier {
     }
 }
 
-impl TypeofThisOrSuperExpression {
-    fn from_any_js_expression(scope_id: ScopeId, expr: &AnyJsExpression) -> Self {
-        let binds_this = |node: &JsSyntaxNode| {
-            JsConstructorClassMember::can_cast(node.kind())
-                || JsFunctionExpression::can_cast(node.kind())
-                || JsGetterClassMember::can_cast(node.kind())
-                || JsGetterObjectMember::can_cast(node.kind())
-                || JsMethodClassMember::can_cast(node.kind())
-                || JsMethodObjectMember::can_cast(node.kind())
-                || JsSetterClassMember::can_cast(node.kind())
-                || JsSetterObjectMember::can_cast(node.kind())
-                || JsStaticInitializationBlockClassMember::can_cast(node.kind())
-        };
+fn is_direct_class_or_object_member(node: &JsSyntaxNode) -> bool {
+    node.ancestors()
+        .skip(1)
+        .find_map(|node| {
+            if let Some(node) = AnyJsExpression::cast_ref(&node) {
+                let node = node.omit_parentheses();
+                if matches!(
+                    node,
+                    AnyJsExpression::TsAsExpression(_)
+                        | AnyJsExpression::TsNonNullAssertionExpression(_)
+                        | AnyJsExpression::TsSatisfiesExpression(_)
+                        | AnyJsExpression::TsTypeAssertionExpression(_)
+                ) {
+                    None
+                } else {
+                    Some(matches!(
+                        node,
+                        AnyJsExpression::JsObjectExpression(_)
+                            | AnyJsExpression::JsClassExpression(_)
+                    ))
+                }
+            } else if AnyJsClass::can_cast(node.kind()) {
+                Some(true)
+            } else {
+                None
+            }
+        })
+        .unwrap_or_default()
+}
 
+impl TypeofThisOrSuperExpression {
+    /// Detect a nearest parent that can be used as type of `this`.
+    fn from_any_js_expression(scope_id: ScopeId, expr: &AnyJsExpression) -> Self {
+        // The rules are as follows:
+        //
+        // 1. If we reached a class node, that class is `this`.
+        // 2. If we reached a function, `this` is unknown, unless that function
+        //    is a direct descendant of a class or an object, ignoring non-exprs and
+        //    typescript extras (like `as typ`).
+        // 3. If we reached an object literal *and* have already traversed past
+        //    a function or an object method, this object is `this`.
+
+        let binds_this_to_object = |node: &JsSyntaxNode| {
+            JsFunctionExpression::can_cast(node.kind())
+                || JsFunctionDeclaration::can_cast(node.kind())
+                || JsGetterObjectMember::can_cast(node.kind())
+                || JsMethodObjectMember::can_cast(node.kind())
+                || JsSetterObjectMember::can_cast(node.kind())
+        };
+        let mut may_bind_to_object = false;
         let parent = expr
             .syntax()
             .ancestors()
             .skip(1)
-            .skip_while(|node| !binds_this(node))
-            .skip(1)
             .find_map(|node| {
-                if binds_this(&node) {
-                    // Nested function, map `this` to unknown.
+                if (JsFunctionExpression::can_cast(node.kind())
+                    && !is_direct_class_or_object_member(&node))
+                    || JsFunctionDeclaration::can_cast(node.kind())
+                {
                     return Some(Err(()));
                 }
+
+                may_bind_to_object = may_bind_to_object || binds_this_to_object(&node);
 
                 let binding = if let Some(class) = JsClassDeclaration::cast_ref(&node) {
                     class.id().ok()
@@ -2327,6 +2363,8 @@ impl TypeofThisOrSuperExpression {
                     }
                 } else if let Some(class) = JsClassExportDefaultDeclaration::cast_ref(&node) {
                     class.id()
+                } else if !may_bind_to_object {
+                    None
                 } else if let Some(object) = JsObjectExpression::cast(node) {
                     object
                         .syntax()
@@ -2392,7 +2430,7 @@ fn function_return_type(
         None => {
             return ReturnType::Type(match is_async {
                 true => GLOBAL_INSTANCEOF_PROMISE_ID.into(),
-                false => TypeReference::Unknown,
+                false => TypeReference::unknown(),
             });
         }
     };
@@ -2416,7 +2454,7 @@ fn getter_return_type(
 
     let return_ty = match body {
         Some(body) => type_from_function_body(resolver, scope_id, body),
-        None => return TypeReference::Unknown,
+        None => return TypeReference::unknown(),
     };
 
     resolver.reference_to_owned_data(return_ty)
@@ -2475,15 +2513,15 @@ fn text_from_any_js_name(name: AnyJsName) -> Option<Text> {
         AnyJsName::JsPrivateName(name) => name
             .value_token()
             .ok()
-            .map(|token| Text::Owned(format!("#{}", token.token_text_trimmed()))),
+            .map(|token| format!("#{}", token.token_text_trimmed()).into()),
     }
 }
 
 #[inline]
 fn text_from_class_member_name(name: ClassMemberName) -> Text {
     match name {
-        ClassMemberName::Private(name) => Text::Owned(format!("#{name}")),
-        ClassMemberName::Public(name) => Text::Borrowed(name),
+        ClassMemberName::Private(name) => format!("#{name}").into(),
+        ClassMemberName::Public(name) => name.into(),
     }
 }
 

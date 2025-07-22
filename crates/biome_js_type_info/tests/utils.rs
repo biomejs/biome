@@ -189,7 +189,6 @@ impl TypeResolver for HardcodedSymbolResolver {
             TypeReference::Import(_import) => {
                 panic!("Project-level references unsupported by resolver")
             }
-            TypeReference::Unknown => None,
         }
     }
 

@@ -7,7 +7,15 @@ use crate::{
 
 use super::MAX_FLATTEN_DEPTH;
 
-/// Provides semantic information about [`TypeData`] for use in conditionals.
+/// Provides semantic information about types for use in conditionals.
+///
+/// If you want to know whether a type is truthy, falsy, nullish, or
+/// non-nullish, see the [`Self::is_truthy()`], [`Self::is_falsy()`],
+/// [`Self::is_nullish()`] and [`Self::is_non_nullish()`] methods. Please
+/// refrain from matching the enum variants directly.
+///
+/// You can access the conditional information from a [`Type`](crate::Type)
+/// instance using its [`conditional()`](crate::Type::conditional) method.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ConditionalType {
     /// A type for which no semantic value can be determined statically.
@@ -267,12 +275,14 @@ pub fn reference_to_falsy_subset_of(
     resolver: &mut dyn TypeResolver,
 ) -> Option<TypeReference> {
     let filter = |ty: &TypeData| match ty {
-        TypeData::BigInt => FilteredData::Mapped(Literal::BigInt(Text::Static("0n")).into()),
+        TypeData::BigInt => FilteredData::Mapped(Literal::BigInt(Text::new_static("0n")).into()),
         TypeData::Boolean => FilteredData::Mapped(Literal::Boolean(false.into()).into()),
         TypeData::Number => {
-            FilteredData::Mapped(Literal::Number(NumberLiteral::new(Text::Static("0"))).into())
+            FilteredData::Mapped(Literal::Number(NumberLiteral::new(Text::new_static("0"))).into())
         }
-        TypeData::String => FilteredData::Mapped(Literal::String(Text::Static("").into()).into()),
+        TypeData::String => {
+            FilteredData::Mapped(Literal::String(Text::new_static("").into()).into())
+        }
         other => {
             if ConditionalType::from_data_shallow(other)
                 .is_none_or(|conditional| !conditional.is_truthy())

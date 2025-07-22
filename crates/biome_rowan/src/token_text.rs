@@ -5,6 +5,7 @@ use std::{borrow::Borrow, fmt::Formatter};
 
 /// Reference to the text of a SyntaxToken without having to worry about the lifetime of `&str`.
 #[derive(Eq, Clone)]
+#[repr(C)]
 pub struct TokenText {
     // Using a green token to ensure this type is Send + Sync.
     token: GreenToken,

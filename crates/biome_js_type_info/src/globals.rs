@@ -12,12 +12,13 @@ use biome_rowan::Text;
 
 use crate::{
     Class, Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
-    Resolvable, ResolvedTypeData, ResolvedTypeId, ReturnType, ScopeId, TypeData, TypeId,
-    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier, TypeResolver,
-    TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
+    Resolvable, ResolvedTypeData, ResolvedTypeId, ResolverId, ReturnType, ScopeId, TypeData,
+    TypeId, TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    TypeResolver, TypeResolverLevel, TypeStore, Union, flattening::MAX_FLATTEN_DEPTH,
 };
 
-const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
+pub(super) const GLOBAL_LEVEL: TypeResolverLevel = TypeResolverLevel::Global;
+pub(super) const GLOBAL_RESOLVER_ID: ResolverId = ResolverId::from_level(GLOBAL_LEVEL);
 
 pub static GLOBAL_RESOLVER: LazyLock<Arc<GlobalsResolver>> =
     LazyLock::new(|| Arc::new(GlobalsResolver::default()));
@@ -26,7 +27,7 @@ pub static GLOBAL_TYPE_MEMBERS: LazyLock<Vec<TypeMember>> = LazyLock::new(|| {
     (0..NUM_PREDEFINED_TYPES)
         .map(TypeId::new)
         .map(|id| TypeMember {
-            kind: TypeMemberKind::Named(Text::Static(global_type_name(id))),
+            kind: TypeMemberKind::Named(Text::new_static(global_type_name(id))),
             ty: ResolvedTypeId::new(GLOBAL_LEVEL, id).into(),
         })
         .collect()
@@ -173,12 +174,12 @@ pub struct GlobalsResolver {
 impl Default for GlobalsResolver {
     fn default() -> Self {
         let method = |name: &'static str, id: TypeId| TypeMember {
-            kind: TypeMemberKind::Named(Text::Static(name)),
+            kind: TypeMemberKind::Named(Text::new_static(name)),
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
 
         let static_method = |name: &'static str, id: TypeId| TypeMember {
-            kind: TypeMemberKind::NamedStatic(Text::Static(name)),
+            kind: TypeMemberKind::NamedStatic(Text::new_static(name)),
             ty: ResolvedTypeId::new(TypeResolverLevel::Global, id).into(),
         };
 
@@ -190,7 +191,7 @@ impl Default for GlobalsResolver {
                 TypeData::from(Function {
                     is_async: false,
                     type_parameters,
-                    name: Some(Text::Static(global_type_name(id))),
+                    name: Some(Text::new_static(global_type_name(id))),
                     parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
                         bindings: Default::default(),
                         is_optional: false,
@@ -208,14 +209,14 @@ impl Default for GlobalsResolver {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(id))),
+                name: Some(Text::new_static(global_type_name(id))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             })
         };
 
         let string_literal = |value: &'static str| -> TypeData {
-            TypeData::from(Literal::String(Text::Static(value).into()))
+            TypeData::from(Literal::String(Text::new_static(value).into()))
         };
 
         let types = vec![
@@ -231,7 +232,7 @@ impl Default for GlobalsResolver {
                 type_parameters: [GLOBAL_U_ID.into()].into(),
             }),
             TypeData::Class(Box::new(Class {
-                name: Some(Text::Static("Array")),
+                name: Some(Text::new_static("Array")),
                 type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
                 extends: None,
                 implements: [].into(),
@@ -240,7 +241,7 @@ impl Default for GlobalsResolver {
                     method("forEach", ARRAY_FOREACH_ID),
                     method("map", ARRAY_MAP_ID),
                     TypeMember {
-                        kind: TypeMemberKind::Named(Text::Static("length")),
+                        kind: TypeMemberKind::Named(Text::new_static("length")),
                         ty: GLOBAL_NUMBER_ID.into(),
                     },
                 ]),
@@ -266,7 +267,7 @@ impl Default for GlobalsResolver {
             TypeData::Global,
             TypeData::instance_of(TypeReference::from(GLOBAL_PROMISE_ID)),
             TypeData::Class(Box::new(Class {
-                name: Some(Text::Static("Promise")),
+                name: Some(Text::new_static("Promise")),
                 type_parameters: Box::new([TypeReference::from(GLOBAL_T_ID)]),
                 extends: None,
                 implements: [].into(),
@@ -290,7 +291,7 @@ impl Default for GlobalsResolver {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(PROMISE_CONSTRUCTOR_ID))),
+                name: Some(Text::new_static(global_type_name(PROMISE_CONSTRUCTOR_ID))),
                 parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
                     bindings: Default::default(),
                     is_optional: false,
@@ -329,26 +330,26 @@ impl Default for GlobalsResolver {
                 GLOBAL_UNDEFINED_STRING_LITERAL_ID.into(),
             ])))),
             TypeData::from(GenericTypeParameter {
-                name: Text::Static("T"),
-                constraint: TypeReference::Unknown,
-                default: TypeReference::Unknown,
+                name: Text::new_static("T"),
+                constraint: TypeReference::unknown(),
+                default: TypeReference::unknown(),
             }),
             TypeData::from(GenericTypeParameter {
-                name: Text::Static("U"),
-                constraint: TypeReference::Unknown,
-                default: TypeReference::Unknown,
+                name: Text::new_static("U"),
+                constraint: TypeReference::unknown(),
+                default: TypeReference::unknown(),
             }),
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(CONDITIONAL_CALLBACK_ID))),
+                name: Some(Text::new_static(global_type_name(CONDITIONAL_CALLBACK_ID))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_CONDITIONAL_ID.into()),
             }),
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(MAP_CALLBACK_ID))),
+                name: Some(Text::new_static(global_type_name(MAP_CALLBACK_ID))),
                 parameters: [FunctionParameter::Pattern(PatternFunctionParameter {
                     ty: GLOBAL_U_ID.into(),
                     bindings: Default::default(),
@@ -361,14 +362,14 @@ impl Default for GlobalsResolver {
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(VOID_CALLBACK_ID))),
+                name: Some(Text::new_static(global_type_name(VOID_CALLBACK_ID))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_VOID_ID.into()),
             }),
             TypeData::from(Function {
                 is_async: false,
                 type_parameters: Default::default(),
-                name: Some(Text::Static(global_type_name(FETCH_ID))),
+                name: Some(Text::new_static(global_type_name(FETCH_ID))),
                 parameters: Default::default(),
                 return_type: ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into()),
             }),
@@ -445,7 +446,6 @@ impl TypeResolver for GlobalsResolver {
                 (resolved_id.level() == GLOBAL_LEVEL).then_some(*resolved_id)
             }
             TypeReference::Import(_) => None,
-            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
         }
     }
 

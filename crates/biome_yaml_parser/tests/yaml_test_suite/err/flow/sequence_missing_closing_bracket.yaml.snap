@@ -1,0 +1,84 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+[ a
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@0..0 "" [] [],
+                flow: YamlFlowJsonNode {
+                    properties: missing (optional),
+                    content: YamlFlowSequence {
+                        l_brack_token: L_BRACK@0..2 "[" [] [Whitespace(" ")],
+                        entries: YamlFlowSequenceEntryList [
+                            YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@2..4 "a\n" [] [],
+                                },
+                            },
+                        ],
+                        r_brack_token: missing (required),
+                    },
+                },
+                flow_end_token: FLOW_END@4..4 "" [] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@4..4 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..4
+  0: YAML_DOCUMENT_LIST@0..4
+    0: YAML_DOCUMENT@0..4
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_FLOW_IN_BLOCK_NODE@0..4
+        0: FLOW_START@0..0 "" [] []
+        1: YAML_FLOW_JSON_NODE@0..4
+          0: (empty)
+          1: YAML_FLOW_SEQUENCE@0..4
+            0: L_BRACK@0..2 "[" [] [Whitespace(" ")]
+            1: YAML_FLOW_SEQUENCE_ENTRY_LIST@2..4
+              0: YAML_FLOW_YAML_NODE@2..4
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@2..4
+                  0: PLAIN_LITERAL@2..4 "a\n" [] []
+            2: (empty)
+        2: FLOW_END@4..4 "" [] []
+      4: (empty)
+  1: EOF@4..4 "" [] []
+
+```
+
+## Diagnostics
+
+```
+sequence_missing_closing_bracket.yaml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `]`
+  
+    1 │ [ a
+  > 2 │ 
+      │ 
+  
+```

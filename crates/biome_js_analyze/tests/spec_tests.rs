@@ -280,6 +280,8 @@ fn check_code_action(
     options: JsParserOptions,
     root: &AnyJsRoot,
 ) {
+    assert!(!action.mutation.is_empty(), "Mutation must not be empty");
+
     let (new_tree, text_edit) = match action
         .mutation
         .clone()

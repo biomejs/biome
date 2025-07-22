@@ -7,8 +7,14 @@
 'Lang-Chinese':
   - 'https://biomejs.dev/zh-cn/'
 'Lang-English':
-  - 'https://biomejs.dev/(?!(zh-cn|ja|pt-br))'
+  - 'https://biomejs.dev/(?!(zh-cn|fr|ja|pt-br|es|uk))'
+'Lang-French':
+  - 'https://biomejs.dev/fr/'
 'Lang-Japanese':
   - 'https://biomejs.dev/ja/'
 'Lang-Portuguese':
   - 'https://biomejs.dev/pt-br/'
+'Lang-Spanish':
+  - 'https://biomejs.dev/es/'
+'Lang-Ukrainian':
+  - 'https://biomejs.dev/uk/'

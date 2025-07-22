@@ -13,22 +13,20 @@ pub mod literal;
 
 use std::borrow::Cow;
 use std::fmt::Debug;
-use std::{ops::Deref, str::FromStr, sync::Arc};
+use std::str::FromStr;
 
 use biome_js_type_info_macros::Resolvable;
 use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 
-use crate::globals::{
-    GLOBAL_ARRAY_ID, GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID,
-};
-use crate::type_info::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
 use crate::{
-    GLOBAL_RESOLVER, ModuleId, Resolvable, ResolvedTypeData, ResolvedTypeId, ResolvedTypeMember,
-    TypeResolver,
+    ModuleId, Resolvable, ResolvedTypeData, ResolvedTypeId, TypeResolver,
+    globals::{GLOBAL_NUMBER_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID},
+    type_data::literal::{BooleanLiteral, NumberLiteral, StringLiteral},
 };
 
-const UNKNOWN: TypeData = TypeData::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID));
+const UNKNOWN_REFERENCE: TypeReference = TypeReference::Resolved(GLOBAL_UNKNOWN_ID);
+pub(super) const UNKNOWN_DATA: TypeData = TypeData::Reference(UNKNOWN_REFERENCE);
 
 /// Type identifier referencing the type in a resolver's `types` vector.
 ///
@@ -49,196 +47,10 @@ impl TypeId {
     }
 }
 
-#[derive(Clone)]
-pub struct Type {
-    resolver: Arc<dyn TypeResolver>,
-    id: ResolvedTypeId,
-}
-
-impl Debug for Type {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Debug::fmt(self.deref(), f)
-    }
-}
-
-impl Default for Type {
-    fn default() -> Self {
-        Self {
-            resolver: GLOBAL_RESOLVER.clone(),
-            id: GLOBAL_UNKNOWN_ID,
-        }
-    }
-}
-
-impl Deref for Type {
-    type Target = TypeData;
-
-    fn deref(&self) -> &Self::Target {
-        self.resolved_data()
-            .map_or(&UNKNOWN, |resolved| resolved.as_raw_data())
-    }
-}
-
-impl Type {
-    pub fn from_id(resolver: Arc<dyn TypeResolver>, id: ResolvedTypeId) -> Self {
-        Self { resolver, id }
-    }
-
-    /// Returns this type's [`TypeId`].
-    ///
-    /// **Warning:** Type IDs can only be safely compared with other IDs from
-    ///              the same module.
-    pub fn id(&self) -> TypeId {
-        self.id.id()
-    }
-
-    /// Returns `true` if this type represents a **union type** that has a
-    /// variant for which the given `predicate` returns `true`.
-    ///
-    /// Returns `false` otherwise.
-    pub fn has_variant(&self, predicate: impl Fn(Self) -> bool) -> bool {
-        match self.as_raw_data() {
-            Some(TypeData::Union(union)) => union
-                .types()
-                .iter()
-                .filter_map(|ty| self.resolve(ty))
-                .any(predicate),
-            _ => false,
-        }
-    }
-
-    /// Returns whether if this type is an instance of a type matching the given
-    /// `predicate`.
-    pub fn is_array_of(&self, predicate: impl Fn(Self) -> bool) -> bool {
-        match self.as_raw_data() {
-            Some(TypeData::InstanceOf(instance)) => {
-                instance.ty == GLOBAL_ARRAY_ID.into()
-                    && instance
-                        .type_parameters
-                        .first()
-                        .and_then(|type_param| self.resolve(type_param))
-                        .is_some_and(predicate)
-            }
-            _ => false,
-        }
-    }
-
-    /// Returns whether `self` is a function with a return type matching the
-    /// given `predicate`.
-    pub fn is_function_with_return_type(&self, predicate: impl Fn(Self) -> bool) -> bool {
-        match self.as_raw_data() {
-            Some(TypeData::Function(function)) => function
-                .return_type
-                .as_type()
-                .and_then(|ty| self.resolve(ty))
-                .is_some_and(predicate),
-            _ => false,
-        }
-    }
-
-    /// Returns whether if this type is an instance of a type matching the given
-    /// `predicate`.
-    pub fn is_instance_of(&self, predicate: impl Fn(Self) -> bool) -> bool {
-        match self.as_raw_data() {
-            Some(TypeData::InstanceOf(instance)) => {
-                self.resolve(&instance.ty).is_some_and(predicate)
-            }
-            _ => false,
-        }
-    }
-
-    /// Returns whether this type is an interface that has a member matching the
-    /// given `predicate`.
-    pub fn is_interface_with_member(&self, predicate: impl Fn(ResolvedTypeMember) -> bool) -> bool {
-        match self.as_raw_data() {
-            Some(TypeData::Interface(interface)) => interface
-                .members
-                .iter()
-                .map(|member| ResolvedTypeMember::from((self.id.resolver_id(), member)))
-                .any(predicate),
-            _ => false,
-        }
-    }
-
-    /// Returns whether this type is a number or a literal number.
-    pub fn is_number(&self) -> bool {
-        self.id == GLOBAL_NUMBER_ID
-            || self.as_raw_data().is_some_and(|ty| match ty {
-                TypeData::Number => true,
-                TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::Number(_)),
-                _ => false,
-            })
-    }
-
-    /// Returns whether this type is the `Promise` class.
-    pub fn is_promise(&self) -> bool {
-        self.id == GLOBAL_PROMISE_ID
-    }
-
-    /// Returns whether this type is an instance of a `Promise`.
-    pub fn is_promise_instance(&self) -> bool {
-        self.resolved_data()
-            .is_some_and(|ty| ty.is_instance_of(self.resolver.as_ref(), GLOBAL_PROMISE_ID))
-    }
-
-    /// Returns whether this type is a string.
-    pub fn is_string(&self) -> bool {
-        self.id == GLOBAL_STRING_ID
-            || self.as_raw_data().is_some_and(|ty| match ty {
-                TypeData::String => true,
-                TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::String(_)),
-                _ => false,
-            })
-    }
-
-    /// Returns whether this type is a string with the given `value`.
-    pub fn is_string_literal(&self, value: &str) -> bool {
-        self.as_raw_data().is_some_and(|ty| match ty {
-            TypeData::Literal(literal) => match literal.as_ref() {
-                Literal::String(literal) => literal.as_str() == value,
-                _ => false,
-            },
-            _ => false,
-        })
-    }
-
-    pub fn resolve(&self, ty: &TypeReference) -> Option<Self> {
-        self.resolver
-            .resolve_reference(&self.id.apply_module_id_to_reference(ty))
-            .map(|resolved_id| self.with_resolved_id(resolved_id))
-    }
-
-    #[inline]
-    pub(super) fn as_raw_data(&self) -> Option<&TypeData> {
-        self.resolved_data().map(ResolvedTypeData::as_raw_data)
-    }
-
-    #[inline]
-    pub fn resolved_data(&self) -> Option<ResolvedTypeData> {
-        self.resolver.get_by_resolved_id(self.id)
-    }
-
-    fn with_resolved_id(&self, id: ResolvedTypeId) -> Self {
-        let mut id = id;
-        loop {
-            let Some(resolved_data) = self.resolver.get_by_resolved_id(id) else {
-                break;
-            };
-            match resolved_data.as_raw_data() {
-                TypeData::Reference(TypeReference::Resolved(resolved_id)) => {
-                    id = resolved_data.apply_module_id(*resolved_id);
-                }
-                _ => break,
-            }
-        }
-
-        Self {
-            resolver: self.resolver.clone(),
-            id,
-        }
-    }
-}
-
+/// Type data as stored within a [`TypeStore`](crate::TypeStore).
+///
+/// If you wish to consume type information from the `TypedService`, see
+/// [`Type`](crate::Type) instead.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Resolvable)]
 pub enum TypeData {
     /// The type is unknown because inference couldn't determine a type.
@@ -433,7 +245,7 @@ impl From<TypeofValue> for TypeData {
 impl TypeData {
     pub fn array_of(scope_id: ScopeId, ty: TypeReference) -> Self {
         Self::instance_of(TypeReference::from(
-            TypeReferenceQualifier::from_path(scope_id, Text::Static("Array"))
+            TypeReferenceQualifier::from_path(scope_id, Text::new_static("Array"))
                 .with_type_parameters([ty]),
         ))
     }
@@ -485,7 +297,7 @@ impl TypeData {
     pub fn is_inferred(&self) -> bool {
         match self {
             Self::Reference(TypeReference::Resolved(resolved)) => *resolved != GLOBAL_UNKNOWN_ID,
-            Self::Reference(TypeReference::Unknown) | Self::Unknown => false,
+            Self::Unknown => false,
             _ => true,
         }
     }
@@ -602,8 +414,8 @@ impl TypeData {
     }
 
     #[inline]
-    pub fn unknown() -> Self {
-        Self::Reference(TypeReference::Resolved(GLOBAL_UNKNOWN_ID))
+    pub const fn unknown() -> Self {
+        UNKNOWN_DATA
     }
 }
 
@@ -910,7 +722,7 @@ impl Path {
     /// inference from the CST.TokenText
     pub fn from_reversed_parts(mut parts: Vec<Text>) -> Self {
         match parts.len() {
-            0 => Self::Identifier(Text::Static("")),
+            0 => Self::Identifier(Text::new_static("")),
             1 => Self::Identifier(parts.remove(0)),
             _ => {
                 parts.reverse();
@@ -987,7 +799,7 @@ pub enum ReturnType {
 
 impl Default for ReturnType {
     fn default() -> Self {
-        Self::Type(TypeReference::Unknown)
+        Self::Type(UNKNOWN_REFERENCE)
     }
 }
 
@@ -1178,7 +990,7 @@ impl TypeMemberKind {
     pub fn name(&self) -> Option<Text> {
         match self {
             Self::CallSignature => None,
-            Self::Constructor => Some(Text::Static("constructor")),
+            Self::Constructor => Some(Text::new_static("constructor")),
             Self::Getter(name) | Self::Named(name) | Self::NamedStatic(name) => Some(name.clone()),
         }
     }
@@ -1392,13 +1204,17 @@ impl FromStr for TypeOperator {
 /// Reference to another type definition.
 ///
 /// This definition may require importing from another module.
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum TypeReference {
     Qualifier(Box<TypeReferenceQualifier>),
     Resolved(ResolvedTypeId),
     Import(Box<TypeImportQualifier>),
-    #[default]
-    Unknown,
+}
+
+impl Default for TypeReference {
+    fn default() -> Self {
+        UNKNOWN_REFERENCE
+    }
 }
 
 impl From<TypeReferenceQualifier> for TypeReference {
@@ -1420,14 +1236,31 @@ impl From<TypeImportQualifier> for TypeReference {
 }
 
 impl TypeReference {
-    /// Returns `true` if the reference references anything but `Unknown`.
+    /// Returns a reference to an unknown type.
+    pub const fn unknown() -> Self {
+        UNKNOWN_REFERENCE
+    }
+
+    /// Returns `true` if the reference references anything but
+    /// [`TypeData::Unknown`].
+    ///
+    /// See [`Self::is_unknown()`].
     #[inline]
-    pub fn is_known(&self) -> bool {
+    pub const fn is_known(&self) -> bool {
+        !self.is_unknown()
+    }
+
+    /// Returns `true` if the reference references [`TypeData::Unknown`],
+    /// `false` otherwise.
+    ///
+    /// Returns `false` if the reference references
+    /// [`TypeData::UnknownKeyword`]. See [`TypeData::is_unknown_keyword()`] if
+    /// you want to know if a type matches the `unknown` keyword.
+    #[inline]
+    pub const fn is_unknown(&self) -> bool {
         match self {
-            Self::Import(_) => true,
-            Self::Qualifier(_) => true,
-            Self::Resolved(resolved_id) => *resolved_id != GLOBAL_UNKNOWN_ID,
-            Self::Unknown => false,
+            Self::Import(_) | Self::Qualifier(_) => false,
+            Self::Resolved(resolved_id) => resolved_id.is_unknown(),
         }
     }
 
@@ -1456,7 +1289,7 @@ impl TypeReference {
                 // When we assign a module ID in order to store a type in the
                 // scoped resolver, we also clear out qualifiers to avoid
                 // resolving from an incorrect scope.
-                *self = Self::Unknown;
+                *self = UNKNOWN_REFERENCE;
             }
             Self::Resolved(resolved_id) => {
                 *resolved_id = resolved_id.with_module_id(module_id);

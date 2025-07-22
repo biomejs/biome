@@ -1257,8 +1257,10 @@ JsImportDefaultClause =
 
 // import * as foo from "mod";
 // import type * as foo from "mod";
+// import defer * as foo from "mod";
 JsImportNamespaceClause =
 	'type'?
+	phase: 'defer'?
 	namespace_specifier: JsNamespaceImportSpecifier
 	'from'
 	source: AnyJsModuleSource

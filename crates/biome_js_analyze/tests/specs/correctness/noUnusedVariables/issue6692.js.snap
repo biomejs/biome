@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6692.js
+---
+# Input
+```js
+function _A() {}
+function A() {}
+
+```
+
+# Diagnostics
+```
+issue6692.js:2:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function A is unused.
+  
+    1 │ function _A() {}
+  > 2 │ function A() {}
+      │          ^
+    3 │ 
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+
+```

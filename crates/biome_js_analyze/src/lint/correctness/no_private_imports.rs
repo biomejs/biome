@@ -281,7 +281,7 @@ fn get_restricted_imports_from_module_source(
     let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
         Some(AnyJsImportClause::JsImportCombinedClause(node)) => {
             let range = node.default_specifier()?.range();
-            get_restricted_import_visibility(&Text::Static("default"), options)
+            get_restricted_import_visibility(&Text::new_static("default"), options)
                 .map(|visibility| NoPrivateImportsState {
                     range,
                     path: path.clone(),
@@ -298,7 +298,7 @@ fn get_restricted_imports_from_module_source(
                         .filter_map(get_named_specifier_import_name)
                         .filter_map(|name| {
                             get_restricted_import_visibility(
-                                &Text::Borrowed(name.token_text_trimmed()),
+                                &Text::from(name.token_text_trimmed()),
                                 options,
                             )
                             .map(|visibility| NoPrivateImportsState {
@@ -312,7 +312,7 @@ fn get_restricted_imports_from_module_source(
         }
         Some(AnyJsImportClause::JsImportDefaultClause(node)) => {
             let range = node.default_specifier()?.range();
-            get_restricted_import_visibility(&Text::Static("default"), options)
+            get_restricted_import_visibility(&Text::new_static("default"), options)
                 .map(|visibility| NoPrivateImportsState {
                     range,
                     path,
@@ -328,15 +328,12 @@ fn get_restricted_imports_from_module_source(
             .flatten()
             .filter_map(get_named_specifier_import_name)
             .filter_map(|name| {
-                get_restricted_import_visibility(
-                    &Text::Borrowed(name.token_text_trimmed()),
-                    options,
-                )
-                .map(|visibility| NoPrivateImportsState {
-                    range: name.text_trimmed_range(),
-                    path: path.clone(),
-                    visibility,
-                })
+                get_restricted_import_visibility(&Text::from(name.token_text_trimmed()), options)
+                    .map(|visibility| NoPrivateImportsState {
+                        range: name.text_trimmed_range(),
+                        path: path.clone(),
+                        visibility,
+                    })
             })
             .collect(),
         Some(
