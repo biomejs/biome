@@ -1,10 +1,10 @@
-#[cfg(test)]
 mod tests;
 
 use crate::token_source::TailwindLexContext;
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
-use biome_rowan::SyntaxKind;
+use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
+use biome_rowan::{SyntaxKind, TextLen};
+use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextSize};
 
@@ -45,8 +45,157 @@ impl<'src> TailwindLexer<'src> {
         }
     }
 
-    fn consume_token(&mut self, _current: u8) -> TailwindSyntaxKind {
-        todo!();
+    fn consume_token(&mut self, current: u8) -> TailwindSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, b']'),
+            _ if self.current_kind == T!['('] => self.consume_bracketed_thing(TW_VALUE, b')'),
+            _ if self.current_kind == T![-] => self.consume_named_value(),
+            _ if self.current_kind == T![/] => self.consume_modifier(),
+            b':' => self.consume_byte(T![:]),
+            b'-' => self.consume_byte(T![-]),
+            b'!' => self.consume_byte(T![!]),
+            b'/' => self.consume_byte(T![/]),
+            _ if current.is_ascii_alphabetic() => self.consume_base(),
+            _ => {
+                if self.position == 0 {
+                    if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
+                        self.unicode_bom_length = bom_size;
+                        return bom;
+                    }
+                }
+                self.consume_unexpected_character()
+            }
+        }
+    }
+
+    /// Consume a token in the arbitrary context
+    fn consume_token_arbitrary(&mut self, current: u8) -> TailwindSyntaxKind {
+        match current {
+            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_VALUE, b']'),
+            _ => self.consume_named_value(),
+        }
+    }
+
+    /// Consume a token in the arbitrary variant context
+    fn consume_token_arbitrary_variant(&mut self, current: u8) -> TailwindSyntaxKind {
+        match current {
+            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, b']'),
+            _ => self.consume_named_value(),
+        }
+    }
+
+    fn consume_bracket(&mut self, byte: u8) -> TailwindSyntaxKind {
+        let kind = match byte {
+            b'[' => T!['['],
+            b']' => T![']'],
+            b'(' => T!['('],
+            b')' => T![')'],
+            _ => unreachable!(),
+        };
+        self.consume_byte(kind)
+    }
+
+    fn consume_base(&mut self) -> TailwindSyntaxKind {
+        self.assert_current_char_boundary();
+
+        while let Some(byte) = self.current_byte() {
+            let char = self.current_char_unchecked();
+            if char.is_whitespace() || byte == b'-' || byte == b'!' || byte == b':' {
+                break;
+            }
+            self.advance(char.len_utf8());
+        }
+
+        TW_BASE
+    }
+
+    fn consume_named_value(&mut self) -> TailwindSyntaxKind {
+        self.assert_current_char_boundary();
+
+        while let Some(byte) = self.current_byte() {
+            let char = self.current_char_unchecked();
+            if char.is_whitespace()
+                || byte == b':'
+                || byte == b'/'
+                || byte == b'!'
+                || byte == b']'
+                || byte == b')'
+            {
+                break;
+            }
+            self.advance(char.len_utf8());
+        }
+
+        TW_VALUE
+    }
+
+    fn consume_modifier(&mut self) -> TailwindSyntaxKind {
+        self.assert_current_char_boundary();
+
+        let mut empty = true;
+        while let Some(byte) = self.current_byte() {
+            let char = self.current_char_unchecked();
+            if char.is_whitespace() || byte == b'!' {
+                break;
+            }
+            self.advance(char.len_utf8());
+            empty = false;
+        }
+
+        if empty { ERROR_TOKEN } else { TW_VALUE }
+    }
+
+    fn consume_bracketed_thing(
+        &mut self,
+        kind: TailwindSyntaxKind,
+        looking_for: u8,
+    ) -> TailwindSyntaxKind {
+        self.assert_current_char_boundary();
+
+        let mut empty = true;
+        while let Some(byte) = self.current_byte() {
+            let char = self.current_char_unchecked();
+            if byte == looking_for || (byte as char).is_whitespace() {
+                break;
+            }
+            self.advance(char.len_utf8());
+            empty = false;
+        }
+
+        if empty { ERROR_TOKEN } else { kind }
+    }
+
+    /// Bumps the current byte and creates a lexed token of the passed in kind.
+    #[inline]
+    fn consume_byte(&mut self, tok: TailwindSyntaxKind) -> TailwindSyntaxKind {
+        self.advance(1);
+        tok
+    }
+
+    fn consume_unexpected_character(&mut self) -> TailwindSyntaxKind {
+        self.assert_at_char_boundary();
+
+        let char = self.current_char_unchecked();
+        let err = ParseDiagnostic::new(
+            format!("Unexpected character `{char}`"),
+            self.text_position()..self.text_position() + char.text_len(),
+        );
+        self.diagnostics.push(err);
+        self.advance(char.len_utf8());
+
+        ERROR_TOKEN
+    }
+
+    /// Asserts that the lexer is at a UTF8 char boundary
+    #[inline]
+    fn assert_at_char_boundary(&self) {
+        debug_assert!(self.source.is_char_boundary(self.position));
     }
 }
 
@@ -79,6 +228,10 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
             match self.current_byte() {
                 Some(current) => match context {
                     TailwindLexContext::Regular => self.consume_token(current),
+                    TailwindLexContext::Arbitrary => self.consume_token_arbitrary(current),
+                    TailwindLexContext::ArbitraryVariant => {
+                        self.consume_token_arbitrary_variant(current)
+                    }
                 },
                 None => EOF,
             }
@@ -158,5 +311,11 @@ impl<'src> LexerWithCheckpoint<'src> for TailwindLexer<'src> {
             unicode_bom_length: self.unicode_bom_length,
             diagnostics_pos: self.diagnostics.len() as u32,
         }
+    }
+}
+
+impl<'src> ReLexer<'src> for TailwindLexer<'src> {
+    fn re_lex(&mut self, _context: Self::ReLexContext) -> Self::Kind {
+        todo!()
     }
 }
