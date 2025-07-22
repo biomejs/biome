@@ -174,7 +174,7 @@ impl Rule for UseSortedClasses {
 
         if node.should_visit(options)? {
             if let Some(value) = node.value() {
-                let template_context = sort::get_template_context(node);
+                let template_context = sort::get_template_literal_space_context(node);
                 let sorted_value = sort_class_name(&value, &SORT_CONFIG, &template_context);
                 if sorted_value.is_empty() {
                     return None;
@@ -193,7 +193,7 @@ impl Rule for UseSortedClasses {
         // Calculate the range offset to account for the ignored prefix and postfix.
         let sort_range = if let Some(value) = node.value() {
             let range = node.range();
-            let template_context = sort::get_template_context(node);
+            let template_context = sort::get_template_literal_space_context(node);
             let real_sort_range = get_sort_class_name_range(&value, &range, &template_context);
             real_sort_range.unwrap_or(range)
         } else {

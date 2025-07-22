@@ -215,8 +215,6 @@ pub fn get_sort_class_name_range(
     class_name: &TokenText,
     range: &TextRange,
     template_context: &Option<TemplateLiteralSpaceContext>,
-    // ignore_prefix: bool,
-    // ignore_postfix: bool,
 ) -> Option<TextRange> {
     let mut class_iter = class_name.split_whitespace();
     let first_class_len = class_iter.next().map_or(0, |s| s.len()) as u32;
@@ -239,14 +237,14 @@ pub fn get_sort_class_name_range(
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum TemplateLiteralSpaceContext {
-    /// Template literal with variables on both sides: `${var} p-2 ${var}`
+    /// Template literal with variables on both sides: `${var} p-2 ${var}` (` p-2 `)
     BothSides {
-        prefix_space: bool,
-        postfix_space: bool,
+        has_prefix_space: bool,
+        has_postfix_space: bool,
     },
-    /// Template literal with variable only before: `${var} p-2`
+    /// Template literal with variable only before: `${var} p-2` (` p-2`)
     PrefixOnly { has_space: bool },
-    /// Template literal with variable only after: `p-2 ${var}`
+    /// Template literal with variable only after: `p-2 ${var}` (`p-2 `)
     PostfixOnly { has_space: bool },
     /// Template literal without any variables: `p-2`
     NoVariables,
@@ -258,7 +256,7 @@ impl TemplateLiteralSpaceContext {
         matches!(
             self,
             Self::BothSides {
-                prefix_space: false,
+                has_prefix_space: false,
                 ..
             } | Self::PrefixOnly { has_space: false }
         )
@@ -269,7 +267,7 @@ impl TemplateLiteralSpaceContext {
         matches!(
             self,
             Self::BothSides {
-                postfix_space: false,
+                has_postfix_space: false,
                 ..
             } | Self::PostfixOnly { has_space: false }
         )
@@ -280,7 +278,7 @@ impl TemplateLiteralSpaceContext {
         matches!(
             self,
             Self::BothSides {
-                prefix_space: true,
+                has_prefix_space: true,
                 ..
             } | Self::PrefixOnly { has_space: true }
         )
@@ -291,7 +289,7 @@ impl TemplateLiteralSpaceContext {
         matches!(
             self,
             Self::BothSides {
-                postfix_space: true,
+                has_postfix_space: true,
                 ..
             } | Self::PostfixOnly { has_space: true }
         )
@@ -299,7 +297,9 @@ impl TemplateLiteralSpaceContext {
 }
 
 /// Returns the template context for the given node, analyzing variable positions and spaces.
-pub fn get_template_context(node: &AnyClassStringLike) -> Option<TemplateLiteralSpaceContext> {
+pub(crate) fn get_template_literal_space_context(
+    node: &AnyClassStringLike,
+) -> Option<TemplateLiteralSpaceContext> {
     if !matches!(node, AnyClassStringLike::JsTemplateChunkElement(_)) {
         return None;
     }
@@ -323,8 +323,8 @@ pub fn get_template_context(node: &AnyClassStringLike) -> Option<TemplateLiteral
 
     let context = match (prefix_is_var, postfix_is_var) {
         (true, true) => TemplateLiteralSpaceContext::BothSides {
-            prefix_space: value.starts_with(' '),
-            postfix_space: value.ends_with(' '),
+            has_prefix_space: value.starts_with(' '),
+            has_postfix_space: value.ends_with(' '),
         },
         (true, false) => TemplateLiteralSpaceContext::PrefixOnly {
             has_space: value.starts_with(' '),
@@ -337,13 +337,3 @@ pub fn get_template_context(node: &AnyClassStringLike) -> Option<TemplateLiteral
 
     Some(context)
 }
-
-// // Returns whether the given node should be ignored prefix when sorting.
-// pub fn should_ignore_prefix(node: &AnyClassStringLike) -> bool {
-//     get_template_context(node).is_some_and(|ctx| ctx.should_ignore_prefix())
-// }
-
-// // Returns whether the given node should be ignored postfix when sorting.
-// pub fn should_ignore_postfix(node: &AnyClassStringLike) -> bool {
-//     get_template_context(node).is_some_and(|ctx| ctx.should_ignore_postfix())
-// }
