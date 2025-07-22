@@ -3455,9 +3455,14 @@ export type RuleFixConfiguration_for_UseStrictModeOptions =
 	| RuleWithFixOptions_for_UseStrictModeOptions;
 export interface OrganizeImportsOptions {
 	groups?: ImportGroups;
+	identifierOrder?: SortOrder;
 }
-export interface UseSortedAttributesOptions {}
-export interface UseSortedKeysOptions {}
+export interface UseSortedAttributesOptions {
+	sortOrder?: SortOrder;
+}
+export interface UseSortedKeysOptions {
+	sortOrder?: SortOrder;
+}
 export interface UseSortedPropertiesOptions {}
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_NoAccessKeyOptions {
@@ -7405,6 +7410,7 @@ export interface RuleWithFixOptions_for_UseStrictModeOptions {
 	options: UseStrictModeOptions;
 }
 export type ImportGroups = ImportGroup[];
+export type SortOrder = "natural" | "lexicographic";
 /**
  * Used to identify the kind of code action emitted by a rule
  */
