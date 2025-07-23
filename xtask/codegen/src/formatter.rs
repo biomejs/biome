@@ -837,6 +837,12 @@ fn get_node_concept(
 
             // TODO: implement formatter
             LanguageKind::Yaml => NodeConcept::Auxiliary,
+
+            LanguageKind::Tailwind => match name {
+                _ if name.ends_with("Value") => NodeConcept::Value,
+                "TW_CANDIDATE" => NodeConcept::Expression,
+                _ => NodeConcept::Auxiliary,
+            },
         }
     }
 }
@@ -903,6 +909,7 @@ impl LanguageKind {
             Self::Html => "HtmlFormatter",
             Self::Yaml => "YamlFormatter",
             Self::Markdown => "DemoFormatter",
+            Self::Tailwind => "TailwindFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -918,6 +925,7 @@ impl LanguageKind {
             Self::Html => "HtmlFormatContext",
             Self::Yaml => "YamlFormatContext",
             Self::Markdown => "DemoFormatterContext",
+            Self::Tailwind => "TailwindFormatContext",
         };
 
         Ident::new(name, Span::call_site())

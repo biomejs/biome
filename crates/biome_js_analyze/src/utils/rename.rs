@@ -156,6 +156,7 @@ impl TryFrom<JsSyntaxNode> for AnyJsRenamableDeclaration {
 
 pub trait RenameSymbolExtensions {
     /// Rename the binding and all its references to "new_name".
+    #[must_use = "Check the return value and ignore the mutation if false was returned"]
     fn rename_node_declaration(
         &mut self,
         model: &SemanticModel,
