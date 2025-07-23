@@ -174,7 +174,7 @@ impl TwFunctionalCandidate {
     }
 }
 impl TwFunctionalVariant {
-    pub fn with_base_token(self, element: SyntaxToken) -> Self {
+    pub fn with_selector_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),

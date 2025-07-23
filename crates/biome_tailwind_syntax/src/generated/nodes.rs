@@ -376,11 +376,11 @@ impl TwFunctionalVariant {
     }
     pub fn as_fields(&self) -> TwFunctionalVariantFields {
         TwFunctionalVariantFields {
-            base_token: self.base_token(),
+            selector_token: self.selector_token(),
             value: self.value(),
         }
     }
-    pub fn base_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn selector_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn value(&self) -> Option<TwFunctionalVariantValue> {
@@ -397,7 +397,7 @@ impl Serialize for TwFunctionalVariant {
 }
 #[derive(Serialize)]
 pub struct TwFunctionalVariantFields {
-    pub base_token: SyntaxResult<SyntaxToken>,
+    pub selector_token: SyntaxResult<SyntaxToken>,
     pub value: Option<TwFunctionalVariantValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1174,7 +1174,10 @@ impl std::fmt::Debug for TwFunctionalVariant {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("TwFunctionalVariant")
-                .field("base_token", &support::DebugSyntaxResult(self.base_token()))
+                .field(
+                    "selector_token",
+                    &support::DebugSyntaxResult(self.selector_token()),
+                )
                 .field("value", &support::DebugOptionalElement(self.value()))
                 .finish()
         } else {

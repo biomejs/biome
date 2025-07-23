@@ -112,7 +112,7 @@ TwStaticVariant =
   selector: 'tw_selector'
 
 TwFunctionalVariant =
-	base: 'tw_base'
+	selector: 'tw_selector'
 	value: TwFunctionalVariantValue?
 
 TwFunctionalVariantValue =
