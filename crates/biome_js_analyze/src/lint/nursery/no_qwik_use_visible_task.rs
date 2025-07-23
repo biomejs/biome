@@ -69,32 +69,41 @@ impl Rule for NoQwikUseVisibleTask {
             };
 
             for member in obj.members().iter().flatten() {
-                let Some(prop) = member.as_js_property_object_member() else {
-                    continue;
-                };
-                let Ok(name_node) = prop.name() else {
-                    continue;
-                };
-                let Some(name) = name_node.name() else {
-                    continue;
-                };
-                if name == "strategy" {
-                    let Ok(value) = prop.value() else {
-                        continue;
-                    };
-                    let Some(lit) = value.as_any_js_literal_expression() else {
-                        continue;
-                    };
-                    let Some(str_lit) = lit.as_js_string_literal_expression() else {
-                        continue;
-                    };
-                    let Ok(text) = str_lit.inner_string_text() else {
-                        continue;
-                    };
-                    let trimmed = text.text().trim_matches(['"', '\'']);
-                    if trimmed == "document-idle" {
-                        return None;
-                    }
+                if member
+                    .as_js_property_object_member()
+                    .and_then(|prop| {
+                        prop.name().ok().and_then(|name_node| {
+                            name_node.name().and_then(|name| {
+                                if name == "strategy" {
+                                    prop.value().ok().and_then(|value| {
+                                        value.as_any_js_literal_expression().and_then(|lit| {
+                                            lit.as_js_string_literal_expression().and_then(
+                                                |str_lit| {
+                                                    str_lit.inner_string_text().ok().and_then(
+                                                        |text| {
+                                                            let trimmed = text
+                                                                .text()
+                                                                .trim_matches(['"', '\'']);
+                                                            if trimmed == "document-idle" {
+                                                                Some(())
+                                                            } else {
+                                                                None
+                                                            }
+                                                        },
+                                                    )
+                                                },
+                                            )
+                                        })
+                                    })
+                                } else {
+                                    None
+                                }
+                            })
+                        })
+                    })
+                    .is_some()
+                {
+                    return None;
                 }
             }
             Some(name.range())
@@ -108,7 +117,7 @@ impl Rule for NoQwikUseVisibleTask {
             RuleDiagnostic::new(
                 rule_category!(),
                 range,
-                markup!("useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern."),
+                markup!("<Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern."),
             )
             .note(markup!(
                 "Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations."

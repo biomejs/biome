@@ -1,17 +1,12 @@
-use std::sync::Arc;
-
-use biome_fs::{BiomePath, TemporaryFs};
-use crossbeam::channel::bounded;
-use tokio::sync::watch;
-
-use crate::{
-    Workspace, WorkspaceServer,
-    workspace::{OpenProjectParams, ScanKind, ScanProjectFolderParams, ServiceDataNotification},
-};
-
 #[test]
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 fn scanner_doesnt_show_errors_for_inaccessible_files() {
+    use std::sync::Arc;
+    use biome_fs::{BiomePath, TemporaryFs};
+    use crossbeam::channel::bounded;
+    use tokio::sync::watch;
+    use crate::WorkspaceServer;
+    use crate::workspace::{OpenProjectParams, ScanKind, ScanProjectFolderParams, ServiceDataNotification};
     use std::os::unix::fs::PermissionsExt;
 
     const FILE_CONTENT: &str = "import 'foo';";

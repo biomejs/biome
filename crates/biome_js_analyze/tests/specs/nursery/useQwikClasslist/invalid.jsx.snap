@@ -22,14 +22,24 @@ export default component$((props) => {
       Hello world!
     </div>
   );
-}); 
+});
+
+// Invalid: classnames with spread props
+export const SpreadPropsInvalid = (props) => (
+  <div {...props} class={classnames('foo', { bar: true })} />
+);
+
+// Invalid: classnames in nested call
+export const NestedClassnamesInvalid = () => (
+  <div class={classnames(classnames('foo', { bar: true }))} />
+); 
 ```
 
 # Diagnostics
 ```
 invalid.jsx:7:10 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the classnames utility. The Qwik class prop natively supports strings, objects, and arrays, which enables better static analysis and reactivity.
+  ! Avoid using the <Emphasis>classnames</Emphasis> utility. Qwik's <Emphasis>class</Emphasis> prop natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using <Emphasis>classnames</Emphasis> can prevent Qwik from optimizing your component's updates. See <Link href='https://qwik.dev/docs/components/css/#class-and-style-bindings'>Qwik documentation</Link> for more details.
   
      5 │ export default component$((props) => {
      6 │   return (
@@ -42,6 +52,35 @@ invalid.jsx:7:10 lint/nursery/useQwikClasslist ━━━━━━━━━━━
        │     ^^
     16 │       Hello world!
     17 │     </div>
+  
+
+```
+
+```
+invalid.jsx:23:19 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the <Emphasis>classnames</Emphasis> utility. Qwik's <Emphasis>class</Emphasis> prop natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using <Emphasis>classnames</Emphasis> can prevent Qwik from optimizing your component's updates. See <Link href='https://qwik.dev/docs/components/css/#class-and-style-bindings'>Qwik documentation</Link> for more details.
+  
+    21 │ // Invalid: classnames with spread props
+    22 │ export const SpreadPropsInvalid = (props) => (
+  > 23 │   <div {...props} class={classnames('foo', { bar: true })} />
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ );
+    25 │ 
+  
+
+```
+
+```
+invalid.jsx:28:8 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using the <Emphasis>classnames</Emphasis> utility. Qwik's <Emphasis>class</Emphasis> prop natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using <Emphasis>classnames</Emphasis> can prevent Qwik from optimizing your component's updates. See <Link href='https://qwik.dev/docs/components/css/#class-and-style-bindings'>Qwik documentation</Link> for more details.
+  
+    26 │ // Invalid: classnames in nested call
+    27 │ export const NestedClassnamesInvalid = () => (
+  > 28 │   <div class={classnames(classnames('foo', { bar: true }))} />
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ );·
   
 
 ```

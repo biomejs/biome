@@ -10,8 +10,9 @@ use biome_rule_options::use_qwik_classlist::UseQwikClasslistOptions;
 declare_lint_rule! {
     /// Prefer using the `class` prop as a classlist over the `classnames` helper.
     ///
-    /// This rule is intended for use in Qwik applications to encourage the use of
-    /// the built-in `class` prop (which accepts a string, object, or array) instead of the `classnames` utility library.
+    /// Qwik's `class` prop natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using utilities like `classnames` can interfere with Qwik's reactivity model and prevent the framework from optimizing component updates. Prefer using the built-in `class` prop for best results.
+    ///
+    /// For more information, see: [Qwik documentation on class bindings](https://qwik.dev/docs/components/css/#class-and-style-bindings)
     ///
     /// ## Examples
     ///
@@ -76,7 +77,7 @@ impl Rule for UseQwikClasslist {
             rule_category!(),
             range,
             markup!(
-                "Avoid using the classnames utility. The Qwik class prop natively supports strings, objects, and arrays, which enables better static analysis and reactivity."
+                "Avoid using the <Emphasis>classnames</Emphasis> utility. Qwik's <Emphasis>class</Emphasis> prop natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using <Emphasis>classnames</Emphasis> can prevent Qwik from optimizing your component's updates. See <Link href='https://qwik.dev/docs/components/css/#class-and-style-bindings'>Qwik documentation</Link> for more details."
             ),
         ))
     }

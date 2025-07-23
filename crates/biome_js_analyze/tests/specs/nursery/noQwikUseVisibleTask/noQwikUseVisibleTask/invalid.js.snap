@@ -73,7 +73,7 @@ useVisibleTask$(({ track, cleanup }) => {
 ```
 invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
   > 1 │ useVisibleTask$(() => {
       │ ^^^^^^^^^^^^^^^
@@ -88,7 +88,7 @@ invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     3 │ });
     4 │ 
@@ -105,7 +105,7 @@ invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
 ```
 invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
      8 │ });
      9 │ 
@@ -122,7 +122,7 @@ invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     14 │ const MyComponent = component$(() => {
   > 15 │   useVisibleTask$(() => {
@@ -138,7 +138,7 @@ invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     21 │ export const App = component$(() => {
   > 22 │   useVisibleTask$(({ track }) => {
@@ -154,7 +154,7 @@ invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     29 │ function setupComponent() {
   > 30 │   useVisibleTask$(() => {
@@ -170,7 +170,7 @@ invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     35 │ const setup = () => {
   > 36 │   useVisibleTask$(() => {
@@ -186,7 +186,7 @@ invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     41 │ class MyClass {
     42 │   constructor() {
@@ -203,7 +203,7 @@ invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     47 │ }
     48 │ 
@@ -220,7 +220,7 @@ invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     51 │ });
     52 │ 
@@ -237,7 +237,7 @@ invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:57:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! useVisibleTask$() runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
   
     55 │ });
     56 │ 

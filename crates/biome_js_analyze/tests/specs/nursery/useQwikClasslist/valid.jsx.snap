@@ -27,5 +27,15 @@ export default component$((props) => {
       <div class={objectClass}>Hello world!</div>
     </>
   );
-}); 
+});
+
+// should not generate diagnostics: spread props with valid class usage
+export const SpreadPropsValid = (props) => (
+  <div {...props} class={{ foo: true, bar: props.active }} />
+);
+
+// should not generate diagnostics: class as string with spread props
+export const SpreadPropsStringValid = (props) => (
+  <div {...props} class={"foo bar"} />
+); 
 ```

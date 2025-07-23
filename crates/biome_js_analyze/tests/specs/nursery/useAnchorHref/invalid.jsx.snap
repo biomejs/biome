@@ -4,17 +4,42 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
-<a>Link</a> 
+<>
+  <a>Link</a>
+  <a target="_blank">External</a>
+  <a href="">Empty</a>
+  <a href="   ">Whitespace</a>
+  <a href={null}>Null</a>
+  <a href={undefined}>Undefined</a>
+</> 
 ```
 
 # Diagnostics
 ```
-invalid.jsx:1:1 lint/nursery/useAnchorHref ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:3 lint/nursery/useAnchorHref ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! <Emphasis>a</Emphasis> elements must have an <Emphasis>href</Emphasis> attribute to ensure accessibility and proper navigation.
   
-  > 1 │ <a>Link</a>·
-      │ ^^^
+    1 │ <>
+  > 2 │   <a>Link</a>
+      │   ^^^
+    3 │   <a target="_blank">External</a>
+    4 │   <a href="">Empty</a>
+  
+
+```
+
+```
+invalid.jsx:3:3 lint/nursery/useAnchorHref ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! <Emphasis>a</Emphasis> elements must have an <Emphasis>href</Emphasis> attribute to ensure accessibility and proper navigation.
+  
+    1 │ <>
+    2 │   <a>Link</a>
+  > 3 │   <a target="_blank">External</a>
+      │   ^^^^^^^^^^^^^^^^^^^
+    4 │   <a href="">Empty</a>
+    5 │   <a href="   ">Whitespace</a>
   
 
 ```

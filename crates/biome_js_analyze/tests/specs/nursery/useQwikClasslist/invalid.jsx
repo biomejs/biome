@@ -16,4 +16,14 @@ export default component$((props) => {
       Hello world!
     </div>
   );
-}); 
+});
+
+// Invalid: classnames with spread props
+export const SpreadPropsInvalid = (props) => (
+  <div {...props} class={classnames('foo', { bar: true })} />
+);
+
+// Invalid: classnames in nested call
+export const NestedClassnamesInvalid = () => (
+  <div class={classnames(classnames('foo', { bar: true }))} />
+); 

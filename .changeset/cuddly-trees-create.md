@@ -4,7 +4,7 @@
 
 Added the [`useImageSize`](https://biomejs.dev/linter/rules/use-image-size) rule to Biome.
 
-The `useImageSize` rule enforces the use of width and height attributes on `<img>` elements for performance reasons. This rule is intended for use in Qwik applications to prevent layout shifts and improve Core Web Vitals by ensuring images have explicit dimensions.
+The `useImageSize` rule enforces the use of width and height attributes on `<img>` elements for performance reasons. This rule is intended to prevent layout shifts and improve Core Web Vitals by ensuring images have explicit dimensions.
 
 **Invalid:**
 
