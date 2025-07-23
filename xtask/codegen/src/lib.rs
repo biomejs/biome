@@ -18,6 +18,7 @@ mod grit_kinds_src;
 mod js_kinds_src;
 mod json_kinds_src;
 mod markdown_kinds_src;
+mod tailwind_kinds_src;
 mod yaml_kinds_src;
 
 mod html_kinds_src;
