@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added a new option to Biome's Javascript formatter, `operator_linebreak`, to configure whether long lines should be broken before or after binary operators.
+Added a new option to Biome's JavaScript formatter, `javascript.formatter.operatorLinebreak`, to configure whether long lines should be broken before or after binary operators.
 
 For example:
 
