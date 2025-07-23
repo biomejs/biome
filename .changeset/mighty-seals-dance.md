@@ -4,7 +4,7 @@
 
 Added a new option to Biome's JavaScript formatter, `javascript.formatter.operatorLinebreak`, to configure whether long lines should be broken before or after binary operators.
 
-For example:
+For example, the following configuration:
 
 ```json
 {
