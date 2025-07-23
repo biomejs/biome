@@ -16,7 +16,7 @@ For example, the following configuration:
 }
 ```
 
-Will cause this JavaScript file
+Will cause this JavaScript file:
 
 ```js
 const VERY_LONG_CONDITION_1234123412341234123412341234 = false;
