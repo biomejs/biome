@@ -323,9 +323,9 @@ pub fn unescape_json_string(text: TokenText) -> Text {
                     State::Normal => string.push(c),
                 }
             }
-            Text::Owned(string)
+            string.into()
         }
-        None => Text::Borrowed(text),
+        None => text.into(),
     }
 }
 

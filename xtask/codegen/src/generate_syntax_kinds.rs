@@ -210,6 +210,21 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                 }
             }
         }
+        LanguageKind::Tailwind => {
+            quote! {
+                pub const fn to_string(&self) -> Option<&'static str> {
+                    let tok = match self {
+                        #(#punctuation => #punctuation_strings,)*
+                        TW_BASE => "base",
+                        TW_VALUE => "value",
+                        TW_SELECTOR => "selector",
+                        TW_PROPERTY => "property",
+                        _ => return None,
+                    };
+                    Some(tok)
+                }
+            }
+        }
     };
 
     let keyword_impl = if all_keywords.is_empty() {

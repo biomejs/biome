@@ -198,7 +198,7 @@ impl ReactComponentInfo {
 
     /// Creates a `ReactComponentInfo` from an expression.
     /// It is not guaranteed that the expression is a React component,
-    /// but if any reqiuirements are not met, it will return `None`.
+    /// but if any requirements are not met, it will return `None`.
     /// Never returns a name, can only return a name hint.
     pub(crate) fn from_expression(syntax: &SyntaxNode<JsLanguage>) -> Option<Self> {
         let any_expression = AnyJsExpression::cast_ref(syntax)?;

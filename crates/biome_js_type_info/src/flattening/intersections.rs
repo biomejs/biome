@@ -1,7 +1,7 @@
 use biome_rowan::Text;
 
 use crate::{
-    Class, Function, Interface, Intersection, Literal, Namespace, Object, ResolvedTypeData,
+    Class, Function, Interface, Intersection, Literal, Namespace, Object, Path, ResolvedTypeData,
     ReturnType, TypeData, TypeMember, TypeMemberKind, TypeResolver,
 };
 
@@ -269,12 +269,12 @@ impl MergedType {
             Self::Interface(members) => TypeData::from(Interface {
                 extends: [].into(),
                 members: members.into_iter().collect(),
-                name: Text::Static("(merged)"),
+                name: Text::new_static("(merged)"),
                 type_parameters: [].into(),
             }),
             Self::Namespace(members) => TypeData::from(Namespace {
                 members: members.into_iter().collect(),
-                path: [].into(),
+                path: Path::from(Text::new_static("")),
             }),
             Self::Never => TypeData::NeverKeyword,
             Self::Object(members) => TypeData::from(Object {

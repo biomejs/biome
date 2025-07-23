@@ -157,6 +157,8 @@ biome_plugin_loader          = { version = "0.0.1", path = "./crates/biome_plugi
 biome_project_layout         = { version = "0.0.1", path = "./crates/biome_project_layout" }
 biome_resolver               = { version = "0.1.0", path = "./crates/biome_resolver" }
 biome_rule_options           = { version = "0.0.1", path = "./crates/biome_rule_options" }
+biome_tailwind_factory       = { version = "0.0.1", path = "./crates/biome_tailwind_factory" }
+biome_tailwind_syntax        = { version = "0.0.1", path = "./crates/biome_tailwind_syntax" }
 biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
 biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
@@ -215,7 +217,7 @@ rust-lapper          = "1.2.0"
 rustc-hash           = "2.1.1"
 schemars             = { version = "0.8.22", features = ["indexmap2", "smallvec"] }
 serde                = { version = "1.0.219", features = ["derive"] }
-serde_json           = "1.0.140"
+serde_json           = "1.0.141"
 similar              = "2.7.0"
 smallvec             = { version = "1.15.1", features = ["union", "const_new", "serde"] }
 static_assertions    = "1.1"

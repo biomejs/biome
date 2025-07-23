@@ -1,0 +1,90 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.jsonc`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": true
+    },
+    "domains": {
+      "next": "all",
+      "project": "all",
+      "react": "all",
+      "solid": "all"
+    }
+  }
+}
+```
+
+## `src/hooks/useHook.ts`
+
+```ts
+function useHook() {
+    useHook();
+}
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/hooks/useHook.ts:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function useHook is unused.
+  
+  > 1 │ function useHook() {
+      │          ^^^^^^^
+    2 │     useHook();
+    3 │ }
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend useHook with an underscore.
+  
+    1   │ - function·useHook()·{
+    2   │ - ····useHook();
+      1 │ + function·_useHook()·{
+      2 │ + ····_useHook();
+    3 3 │   }
+  
+
+```
+
+```block
+src/hooks/useHook.ts:2:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook is being called recursively.
+  
+    1 │ function useHook() {
+  > 2 │     useHook();
+      │     ^^^^^^^
+    3 │ }
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i This means recursive calls are not allowed, because they require a condition in order to terminate.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 error.
+Found 1 warning.
+```

@@ -7751,7 +7751,12 @@ export interface UseSortedClassesOptions {
 }
 export interface UseSymbolDescriptionOptions {}
 export interface UseUnifiedTypeSignatureOptions {}
-export interface UseUniqueElementIdsOptions {}
+export interface UseUniqueElementIdsOptions {
+	/**
+	 * Component names that accept an `id` prop that does not translate to a DOM element id.
+	 */
+	excludedComponents?: string[];
+}
 export interface NoAccumulatingSpreadOptions {}
 export interface NoBarrelFileOptions {}
 export interface NoDeleteOptions {}
