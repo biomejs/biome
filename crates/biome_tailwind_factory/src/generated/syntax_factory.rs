@@ -288,7 +288,7 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == TW_BASE {
+                    if element.kind() == TW_SELECTOR {
                         slots.mark_present();
                         current_element = elements.next();
                     }
