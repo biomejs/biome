@@ -9,5 +9,6 @@ pub use biome_resolver::ResolvedPath;
 
 pub use js_module_info::{
     JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport, ModuleResolver,
+    SerializedJsModuleInfo,
 };
 pub use module_graph::{ModuleGraph, SUPPORTED_EXTENSIONS};

@@ -3,11 +3,12 @@ use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, FileContent, FileExitsParams, FixFileParams, FixFileResult,
     FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
-    GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
-    IgnoreKind, OpenFileParams, OpenProjectParams, ParsePatternParams, ParsePatternResult,
-    PatternId, ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
-    PullDiagnosticsResult, RenameResult, ScanProjectFolderParams, ScanProjectFolderResult,
-    SearchPatternParams, SearchResults, ServiceDataNotification, SupportsFeatureParams,
+    GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetSemanticModelParams,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, IgnoreKind, OpenFileParams, OpenProjectParams,
+    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
+    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
+    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
+    ServiceDataNotification, SupportsFeatureParams, UpdateKind, UpdateModuleGraphParams,
     UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
@@ -21,7 +22,7 @@ use crate::projects::Projects;
 use crate::workspace::scanner::ScanOptions;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
-    IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
+    OpenProjectResult, PathIsIgnoredParams, RageEntry, RageParams, RageResult, ScanKind,
     ServerInfo,
 };
 use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
@@ -803,7 +804,7 @@ impl WorkspaceServer {
 
     /// Updates the [ModuleGraph] for the given `path` with an optional `root`.
     #[tracing::instrument(level = "debug", skip(self, root))]
-    fn update_module_graph(
+    fn update_module_graph_internal(
         &self,
         signal_kind: WatcherSignalKind,
         path: &BiomePath,
@@ -842,7 +843,7 @@ impl WorkspaceServer {
             self.update_project_layout(signal_kind, &path)?;
         }
 
-        self.update_module_graph(signal_kind, &path, root);
+        self.update_module_graph_internal(signal_kind, &path, root);
 
         match signal_kind {
             WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan) => {
@@ -1101,7 +1102,7 @@ impl Workspace for WorkspaceServer {
         )
     }
 
-    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
+    fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError> {
         // Never ignore Biome's top-level config file regardless of `includes`.
         if params.path.file_name().is_some_and(|file_name| {
             file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
@@ -1687,6 +1688,19 @@ impl Workspace for WorkspaceServer {
         }
     }
 
+    fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
+        let parsed = self.get_parse(params.path.as_path())?;
+        let signal = match params.update_kind {
+            UpdateKind::AddOrUpdate => {
+                WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest)
+            }
+            UpdateKind::Remove => WatcherSignalKind::Removed,
+        };
+
+        self.update_module_graph_internal(signal, &params.path, Some(parsed.root()));
+        Ok(())
+    }
+
     fn fs(&self) -> &dyn FsWithResolverProxy {
         self.fs.as_ref()
     }
@@ -1750,6 +1764,20 @@ impl Workspace for WorkspaceServer {
 
     fn server_info(&self) -> Option<&ServerInfo> {
         None
+    }
+
+    fn get_module_graph(
+        &self,
+        _params: GetModuleGraphParams,
+    ) -> Result<GetModuleGraphResult, WorkspaceError> {
+        let module_graph = self.module_graph.data();
+        let mut data = FxHashMap::default();
+
+        for (path, info) in module_graph.iter() {
+            data.insert(path.as_str().to_string(), info.dump());
+        }
+
+        Ok(GetModuleGraphResult { data })
     }
 }
 

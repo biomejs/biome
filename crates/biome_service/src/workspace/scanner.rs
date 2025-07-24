@@ -9,7 +9,7 @@
 //! well as the watcher to allow continuous scanning.
 
 use super::server::WorkspaceServer;
-use super::{FeaturesBuilder, IgnoreKind, IsPathIgnoredParams};
+use super::{FeaturesBuilder, IgnoreKind, PathIsIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::DocumentFileSource;
@@ -450,7 +450,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
             path.parent()
                 .and_then(|dir_path| {
                     ctx.workspace
-                        .is_path_ignored(IsPathIgnoredParams {
+                        .is_path_ignored(PathIsIgnoredParams {
                             project_key: ctx.project_key,
                             path: dir_path.into(),
                             features: FeaturesBuilder::new().build(),
@@ -461,7 +461,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
                 .unwrap_or_default()
         } else {
             ctx.workspace
-                .is_path_ignored(IsPathIgnoredParams {
+                .is_path_ignored(PathIsIgnoredParams {
                     project_key: ctx.project_key,
                     path: path.clone(),
                     features: FeaturesBuilder::new().build(),

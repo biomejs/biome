@@ -27,10 +27,12 @@ biome_rowan          = { workspace = true }
 camino               = { workspace = true }
 cfg-if               = { workspace = true }
 indexmap             = { workspace = true }
-once_cell            = "1.21.3"             # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
+once_cell            = "1.21.3"                              # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
 papaya               = { workspace = true }
 rust-lapper          = { workspace = true }
 rustc-hash           = { workspace = true }
+schemars             = { workspace = true, optional = true }
+serde                = { workspace = true, optional = true }
 serde_json           = { workspace = true }
 static_assertions    = { workspace = true }
 
@@ -50,6 +52,10 @@ mimalloc = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
+
+[features]
+schema = ["dep:schemars"]
+serde  = ["dep:serde"]
 
 [[bench]]
 harness = false

@@ -8,7 +8,7 @@ use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FeaturesSupported, FileFeaturesResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetFileContentParams, IgnoreKind, IsPathIgnoredParams,
+    FormatOnTypeParams, FormatRangeParams, GetFileContentParams, IgnoreKind, PathIsIgnoredParams,
     SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
@@ -30,7 +30,7 @@ pub(crate) fn format(
     }
     let features = FeaturesBuilder::new().with_formatter().build();
 
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,
@@ -48,7 +48,7 @@ pub(crate) fn format(
     })?;
 
     if file_features.supports_format()
-        && !session.workspace.is_path_ignored(IsPathIgnoredParams {
+        && !session.workspace.is_path_ignored(PathIsIgnoredParams {
             path: path.clone(),
             project_key: doc.project_key,
             features,
@@ -114,7 +114,7 @@ pub(crate) fn format_range(
     }
     let features = FeaturesBuilder::new().with_formatter().build();
 
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,
@@ -133,7 +133,7 @@ pub(crate) fn format_range(
     })?;
 
     if file_features.supports_format()
-        && !session.workspace.is_path_ignored(IsPathIgnoredParams {
+        && !session.workspace.is_path_ignored(PathIsIgnoredParams {
             path: path.clone(),
             project_key: doc.project_key,
             features,
@@ -230,7 +230,7 @@ pub(crate) fn format_on_type(
         features,
     })?;
 
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,
@@ -240,7 +240,7 @@ pub(crate) fn format_on_type(
     }
 
     if file_features.supports_format()
-        && !session.workspace.is_path_ignored(IsPathIgnoredParams {
+        && !session.workspace.is_path_ignored(PathIsIgnoredParams {
             path: path.clone(),
             project_key: doc.project_key,
             features,
