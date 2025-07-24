@@ -1,0 +1,42 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: settings.json
+---
+# Input
+```json
+{
+  "editor.code_action_on_format": {
+    "quickfix.biome": true,
+    "source.organizeImports.biome": true
+  }
+}
+
+```
+
+# Diagnostics
+```
+settings.json:3:5 lint/nursery/noQuickfixBiome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of quickfix.biome is deprecated.
+  
+    1 │ {
+    2 │   "editor.code_action_on_format": {
+  > 3 │     "quickfix.biome": true,
+      │     ^^^^^^^^^^^^^^^^
+    4 │     "source.organizeImports.biome": true
+    5 │   }
+  
+  i The code action quickfix.biome applies the code fix of rules and actions without being aware of each other. This might cause the emission of malformed code, especially if the code fixes are applied to the same code.
+  
+  i Safe fix: Remove the code action.
+  
+    1 1 │   {
+    2 2 │     "editor.code_action_on_format": {
+    3   │ - ····"quickfix.biome":·true,
+    4   │ - ····"source.organizeImports.biome":·true
+      3 │ + ····"source.fixAll.biome":·true
+    5 4 │     }
+    6 5 │   }
+  
+
+```
