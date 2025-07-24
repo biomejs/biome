@@ -3770,6 +3770,24 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoQuickfixBiomeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoQuickfixBiomeOptions" }
+			]
+		},
+		"NoQuickfixBiomeOptions": {
+			"type": "object",
+			"properties": {
+				"additionalPaths": {
+					"description": "A list of additional JSON files that should be checked.",
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoQwikUseVisibleTaskConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4801,6 +4819,13 @@
 					"description": "Disallow the use of process global.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoProcessGlobalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noQuickfixBiome": {
+					"description": "Disallow the use if quickfix.biome inside editor settings file.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQuickfixBiomeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7891,6 +7916,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoPrototypeBuiltinsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoQuickfixBiomeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoQuickfixBiomeOptions" }]
 				}
 			},
 			"additionalProperties": false

@@ -1611,6 +1611,10 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_NoProcessGlobalOptions;
 	/**
+	 * Disallow the use if quickfix.biome inside editor settings file.
+	 */
+	noQuickfixBiome?: RuleFixConfiguration_for_NoQuickfixBiomeOptions;
+	/**
 	 * Disallow useVisibleTask$() functions in Qwik components.
 	 */
 	noQwikUseVisibleTask?: RuleConfiguration_for_NoQwikUseVisibleTaskOptions;
@@ -2900,6 +2904,9 @@ export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoProcessGlobalOptions;
+export type RuleFixConfiguration_for_NoQuickfixBiomeOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoQuickfixBiomeOptions;
 export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
@@ -5196,6 +5203,20 @@ export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
 	 * Rule's options
 	 */
 	options: NoProcessGlobalOptions;
+}
+export interface RuleWithFixOptions_for_NoQuickfixBiomeOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoQuickfixBiomeOptions;
 }
 export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
 	/**
@@ -7735,6 +7756,12 @@ export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
+export interface NoQuickfixBiomeOptions {
+	/**
+	 * A list of additional JSON files that should be checked.
+	 */
+	additionalPaths?: string[];
+}
 export interface NoQwikUseVisibleTaskOptions {}
 export interface NoReactPropAssignOptions {}
 export interface NoRestrictedElementsOptions {
@@ -8425,6 +8452,7 @@ export type Category =
 	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
+	| "lint/nursery/noQuickfixBiome"
 	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"

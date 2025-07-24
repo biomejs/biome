@@ -172,14 +172,14 @@ impl TwFunctionalCandidateBuilder {
         ))
     }
 }
-pub fn tw_functional_variant(base_token: SyntaxToken) -> TwFunctionalVariantBuilder {
+pub fn tw_functional_variant(selector_token: SyntaxToken) -> TwFunctionalVariantBuilder {
     TwFunctionalVariantBuilder {
-        base_token,
+        selector_token,
         value: None,
     }
 }
 pub struct TwFunctionalVariantBuilder {
-    base_token: SyntaxToken,
+    selector_token: SyntaxToken,
     value: Option<TwFunctionalVariantValue>,
 }
 impl TwFunctionalVariantBuilder {
@@ -191,7 +191,7 @@ impl TwFunctionalVariantBuilder {
         TwFunctionalVariant::unwrap_cast(SyntaxNode::new_detached(
             TailwindSyntaxKind::TW_FUNCTIONAL_VARIANT,
             [
-                Some(SyntaxElement::Token(self.base_token)),
+                Some(SyntaxElement::Token(self.selector_token)),
                 self.value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],

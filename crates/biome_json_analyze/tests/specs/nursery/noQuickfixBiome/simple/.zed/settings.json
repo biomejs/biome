@@ -1,0 +1,5 @@
+{
+  "editor.code_action_on_format": {
+    "quickfix.biome": true
+  }
+}
