@@ -3,6 +3,12 @@ name: Publish to WinGet
 on:
   release:
     types: [released]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g., 2.1.2)"
+        required: true
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,16 +18,24 @@ jobs:
   publish-winget:
     name: Publish to WinGet
     runs-on: windows-latest
-    # Only run for CLI releases (not JS API releases)
-    if: startsWith(github.event.release.tag_name, '@biomejs/biome@')
+    # Only run for CLI releases (not JS API releases) or when manually dispatched
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'release' && startsWith(github.event.release.tag_name, '@biomejs/biome@'))
     steps:
-      - name: Extract version from tag
+      - name: Extract version from tag or input
         id: extract-version
         run: |
-          $tag = "${{ github.event.release.tag_name }}"
-          $version = $tag -replace '^@biomejs/biome@', ''
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "${{ github.event.inputs.version }}"
+            echo "Using manual version: $version"
+          } else {
+            $tag = "${{ github.event.release.tag_name }}"
+            $version = $tag -replace '^@biomejs/biome@', ''
+            echo "Extracted version from release: $version"
+          }
           echo "version=$version" >> $env:GITHUB_OUTPUT
-          echo "Extracted version: $version"
+          echo "Final version: $version"
         shell: pwsh
 
       - name: Publish to WinGet
@@ -29,4 +43,4 @@ jobs:
         with:
           identifier: BiomeJS.Biome
           version: ${{ steps.extract-version.outputs.version }}
-          token: ${{ secrets.WINGET_TOKEN }} 
+          token: ${{ secrets.WINGET_TOKEN }}
