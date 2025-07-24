@@ -79,6 +79,11 @@ new-json-assistrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=json --category=assist --name={{rulename}}
   just gen-analyzer
 
+# Creates a new json lint rule with the given name. Name has to be camel case.
+new-json-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=json --category=lint --name={{rulename}}
+  just gen-analyzer
+
 # Creates a new css lint rule with the given name. Name has to be camel case.
 new-css-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=css --category=lint --name={{rulename}}

@@ -347,7 +347,6 @@ impl TypeResolver for ModuleResolver {
             TypeReference::Qualifier(_qualifier) => None,
             TypeReference::Resolved(resolved_id) => Some(self.mapped_resolved_id(*resolved_id)),
             TypeReference::Import(import) => self.resolve_import(import),
-            TypeReference::Unknown => Some(GLOBAL_UNKNOWN_ID),
         }
     }
 
@@ -468,7 +467,6 @@ fn resolve_from_export<'a>(
             TypeReference::Import(import) => {
                 return ResolveFromExportResult::FollowImport(import);
             }
-            TypeReference::Unknown => None,
         },
         JsOwnExport::Type(resolved_id) => Some(resolved_id.with_module_id(module_id)),
     };

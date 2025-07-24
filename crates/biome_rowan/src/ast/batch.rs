@@ -555,6 +555,10 @@ where
     pub fn root(&self) -> &SyntaxNode<L> {
         &self.root
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.changes.is_empty()
+    }
 }
 
 #[cfg(test)]

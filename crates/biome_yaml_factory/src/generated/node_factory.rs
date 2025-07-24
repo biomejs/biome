@@ -19,16 +19,31 @@ pub fn yaml_anchor_property(value_token: SyntaxToken) -> YamlAnchorProperty {
     ))
 }
 pub fn yaml_block_map_explicit_entry(
-    key: YamlBlockMapExplicitKey,
+    question_mark_token: SyntaxToken,
 ) -> YamlBlockMapExplicitEntryBuilder {
-    YamlBlockMapExplicitEntryBuilder { key, value: None }
+    YamlBlockMapExplicitEntryBuilder {
+        question_mark_token,
+        key: None,
+        colon_token: None,
+        value: None,
+    }
 }
 pub struct YamlBlockMapExplicitEntryBuilder {
-    key: YamlBlockMapExplicitKey,
-    value: Option<YamlBlockMapExplicitValue>,
+    question_mark_token: SyntaxToken,
+    key: Option<AnyYamlBlockNode>,
+    colon_token: Option<SyntaxToken>,
+    value: Option<AnyYamlBlockNode>,
 }
 impl YamlBlockMapExplicitEntryBuilder {
-    pub fn with_value(mut self, value: YamlBlockMapExplicitValue) -> Self {
+    pub fn with_key(mut self, key: AnyYamlBlockNode) -> Self {
+        self.key = Some(key);
+        self
+    }
+    pub fn with_colon_token(mut self, colon_token: SyntaxToken) -> Self {
+        self.colon_token = Some(colon_token);
+        self
+    }
+    pub fn with_value(mut self, value: AnyYamlBlockNode) -> Self {
         self.value = Some(value);
         self
     }
@@ -36,79 +51,35 @@ impl YamlBlockMapExplicitEntryBuilder {
         YamlBlockMapExplicitEntry::unwrap_cast(SyntaxNode::new_detached(
             YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_ENTRY,
             [
-                Some(SyntaxElement::Node(self.key.into_syntax())),
-                self.value
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn yaml_block_map_explicit_key(
-    question_mark_token: SyntaxToken,
-) -> YamlBlockMapExplicitKeyBuilder {
-    YamlBlockMapExplicitKeyBuilder {
-        question_mark_token,
-        key: None,
-    }
-}
-pub struct YamlBlockMapExplicitKeyBuilder {
-    question_mark_token: SyntaxToken,
-    key: Option<AnyYamlBlockNode>,
-}
-impl YamlBlockMapExplicitKeyBuilder {
-    pub fn with_key(mut self, key: AnyYamlBlockNode) -> Self {
-        self.key = Some(key);
-        self
-    }
-    pub fn build(self) -> YamlBlockMapExplicitKey {
-        YamlBlockMapExplicitKey::unwrap_cast(SyntaxNode::new_detached(
-            YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_KEY,
-            [
                 Some(SyntaxElement::Token(self.question_mark_token)),
                 self.key
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn yaml_block_map_explicit_value(colon_token: SyntaxToken) -> YamlBlockMapExplicitValueBuilder {
-    YamlBlockMapExplicitValueBuilder {
-        colon_token,
-        value: None,
-    }
-}
-pub struct YamlBlockMapExplicitValueBuilder {
-    colon_token: SyntaxToken,
-    value: Option<AnyYamlBlockNode>,
-}
-impl YamlBlockMapExplicitValueBuilder {
-    pub fn with_value(mut self, value: AnyYamlBlockNode) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> YamlBlockMapExplicitValue {
-        YamlBlockMapExplicitValue::unwrap_cast(SyntaxNode::new_detached(
-            YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_VALUE,
-            [
-                Some(SyntaxElement::Token(self.colon_token)),
+                self.colon_token.map(|token| SyntaxElement::Token(token)),
                 self.value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
     }
 }
-pub fn yaml_block_map_implicit_entry(
-    value: YamlBlockMapImplicitValue,
-) -> YamlBlockMapImplicitEntryBuilder {
-    YamlBlockMapImplicitEntryBuilder { value, key: None }
+pub fn yaml_block_map_implicit_entry(colon_token: SyntaxToken) -> YamlBlockMapImplicitEntryBuilder {
+    YamlBlockMapImplicitEntryBuilder {
+        colon_token,
+        key: None,
+        value: None,
+    }
 }
 pub struct YamlBlockMapImplicitEntryBuilder {
-    value: YamlBlockMapImplicitValue,
-    key: Option<AnyYamlBlockMapImplicitKey>,
+    colon_token: SyntaxToken,
+    key: Option<AnyYamlMappingImplicitKey>,
+    value: Option<AnyYamlBlockNode>,
 }
 impl YamlBlockMapImplicitEntryBuilder {
-    pub fn with_key(mut self, key: AnyYamlBlockMapImplicitKey) -> Self {
+    pub fn with_key(mut self, key: AnyYamlMappingImplicitKey) -> Self {
         self.key = Some(key);
+        self
+    }
+    pub fn with_value(mut self, value: AnyYamlBlockNode) -> Self {
+        self.value = Some(value);
         self
     }
     pub fn build(self) -> YamlBlockMapImplicitEntry {
@@ -117,30 +88,6 @@ impl YamlBlockMapImplicitEntryBuilder {
             [
                 self.key
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.value.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn yaml_block_map_implicit_value(colon_token: SyntaxToken) -> YamlBlockMapImplicitValueBuilder {
-    YamlBlockMapImplicitValueBuilder {
-        colon_token,
-        value: None,
-    }
-}
-pub struct YamlBlockMapImplicitValueBuilder {
-    colon_token: SyntaxToken,
-    value: Option<AnyYamlBlockNode>,
-}
-impl YamlBlockMapImplicitValueBuilder {
-    pub fn with_value(mut self, value: AnyYamlBlockNode) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> YamlBlockMapImplicitValue {
-        YamlBlockMapImplicitValue::unwrap_cast(SyntaxNode::new_detached(
-            YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_VALUE,
-            [
                 Some(SyntaxElement::Token(self.colon_token)),
                 self.value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
@@ -383,16 +330,28 @@ pub fn yaml_flow_map_explicit_entry(
 ) -> YamlFlowMapExplicitEntryBuilder {
     YamlFlowMapExplicitEntryBuilder {
         question_mark_token,
-        entry: None,
+        key: None,
+        colon_token: None,
+        value: None,
     }
 }
 pub struct YamlFlowMapExplicitEntryBuilder {
     question_mark_token: SyntaxToken,
-    entry: Option<YamlFlowMapImplicitEntry>,
+    key: Option<AnyYamlMappingImplicitKey>,
+    colon_token: Option<SyntaxToken>,
+    value: Option<AnyYamlFlowNode>,
 }
 impl YamlFlowMapExplicitEntryBuilder {
-    pub fn with_entry(mut self, entry: YamlFlowMapImplicitEntry) -> Self {
-        self.entry = Some(entry);
+    pub fn with_key(mut self, key: AnyYamlMappingImplicitKey) -> Self {
+        self.key = Some(key);
+        self
+    }
+    pub fn with_colon_token(mut self, colon_token: SyntaxToken) -> Self {
+        self.colon_token = Some(colon_token);
+        self
+    }
+    pub fn with_value(mut self, value: AnyYamlFlowNode) -> Self {
+        self.value = Some(value);
         self
     }
     pub fn build(self) -> YamlFlowMapExplicitEntry {
@@ -400,30 +359,38 @@ impl YamlFlowMapExplicitEntryBuilder {
             YamlSyntaxKind::YAML_FLOW_MAP_EXPLICIT_ENTRY,
             [
                 Some(SyntaxElement::Token(self.question_mark_token)),
-                self.entry
+                self.key
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.colon_token.map(|token| SyntaxElement::Token(token)),
+                self.value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
     }
 }
-pub fn yaml_flow_map_implicit_entry(
-    colon_token: SyntaxToken,
-    value: AnyYamlFlowNode,
-) -> YamlFlowMapImplicitEntryBuilder {
+pub fn yaml_flow_map_implicit_entry() -> YamlFlowMapImplicitEntryBuilder {
     YamlFlowMapImplicitEntryBuilder {
-        colon_token,
-        value,
         key: None,
+        colon_token: None,
+        value: None,
     }
 }
 pub struct YamlFlowMapImplicitEntryBuilder {
-    colon_token: SyntaxToken,
-    value: AnyYamlFlowNode,
-    key: Option<AnyYamlFlowMapImplicitKey>,
+    key: Option<AnyYamlMappingImplicitKey>,
+    colon_token: Option<SyntaxToken>,
+    value: Option<AnyYamlFlowNode>,
 }
 impl YamlFlowMapImplicitEntryBuilder {
-    pub fn with_key(mut self, key: AnyYamlFlowMapImplicitKey) -> Self {
+    pub fn with_key(mut self, key: AnyYamlMappingImplicitKey) -> Self {
         self.key = Some(key);
+        self
+    }
+    pub fn with_colon_token(mut self, colon_token: SyntaxToken) -> Self {
+        self.colon_token = Some(colon_token);
+        self
+    }
+    pub fn with_value(mut self, value: AnyYamlFlowNode) -> Self {
+        self.value = Some(value);
         self
     }
     pub fn build(self) -> YamlFlowMapImplicitEntry {
@@ -432,8 +399,9 @@ impl YamlFlowMapImplicitEntryBuilder {
             [
                 self.key
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.colon_token)),
-                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.colon_token.map(|token| SyntaxElement::Token(token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
     }
@@ -698,6 +666,16 @@ where
 {
     YamlBogusBlockNode::unwrap_cast(SyntaxNode::new_detached(
         YamlSyntaxKind::YAML_BOGUS_BLOCK_NODE,
+        slots,
+    ))
+}
+pub fn yaml_bogus_flow_node<I>(slots: I) -> YamlBogusFlowNode
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    YamlBogusFlowNode::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_BOGUS_FLOW_NODE,
         slots,
     ))
 }

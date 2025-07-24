@@ -1610,6 +1610,10 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_NoProcessGlobalOptions;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noQuickfixBiome?: RuleConfiguration_for_NoQuickfixBiomeOptions;
+	/**
 	 * Disallow assigning to React component props.
 	 */
 	noReactPropAssign?: RuleConfiguration_for_NoReactPropAssignOptions;
@@ -2883,6 +2887,9 @@ export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoProcessGlobalOptions;
+export type RuleConfiguration_for_NoQuickfixBiomeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoQuickfixBiomeOptions;
 export type RuleConfiguration_for_NoReactPropAssignOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoReactPropAssignOptions;
@@ -5167,6 +5174,16 @@ export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
 	 * Rule's options
 	 */
 	options: NoProcessGlobalOptions;
+}
+export interface RuleWithOptions_for_NoQuickfixBiomeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoQuickfixBiomeOptions;
 }
 export interface RuleWithOptions_for_NoReactPropAssignOptions {
 	/**
@@ -7666,6 +7683,12 @@ export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
+export interface NoQuickfixBiomeOptions {
+	/**
+	 * A list of additional JSON files that should be checked.
+	 */
+	additionalPaths?: string[];
+}
 export interface NoReactPropAssignOptions {}
 export interface NoRestrictedElementsOptions {
 	/**
@@ -8352,6 +8375,7 @@ export type Category =
 	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
+	| "lint/nursery/noQuickfixBiome"
 	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"

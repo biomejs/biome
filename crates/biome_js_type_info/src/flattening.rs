@@ -1,6 +1,5 @@
 use crate::{TypeData, TypeInstance, TypeReference, TypeResolver};
 
-mod conditionals;
 mod expressions;
 mod intersections;
 
@@ -67,28 +66,22 @@ impl TypeData {
                     _ => None,
                 }
             }
-            Self::InstanceOf(instance) => match &instance.ty {
-                TypeReference::Unknown => Some(Self::unknown()),
-                reference => flattened_instance(instance, reference, resolver),
-            },
+            Self::InstanceOf(instance) => flattened_instance(instance, &instance.ty, resolver),
             Self::Intersection(intersection) => {
                 Some(flattened_intersection(intersection, resolver))
             }
-            Self::Reference(reference) => match reference {
-                TypeReference::Unknown => Some(Self::unknown()),
-                _ => match resolver.resolve_and_get(reference) {
-                    Some(reference) => match reference.as_raw_data() {
-                        Self::InstanceOf(instance_of) => Some(
-                            reference
-                                .apply_module_id_to_data(Self::InstanceOf(instance_of.clone())),
-                        ),
-                        Self::Reference(target) => Some(Self::Reference(
-                            reference.apply_module_id_to_reference(target).into_owned(),
-                        )),
-                        _ => None,
-                    },
-                    None => None,
+            Self::Reference(reference) => match resolver.resolve_and_get(reference) {
+                Some(reference) => match reference.as_raw_data() {
+                    Self::InstanceOf(instance_of) => Some(
+                        reference.apply_module_id_to_data(Self::InstanceOf(instance_of.clone())),
+                    ),
+                    Self::Reference(target) => Some(Self::Reference(
+                        reference.apply_module_id_to_reference(target).into_owned(),
+                    )),
+                    Self::Unknown => Some(Self::unknown()),
+                    _ => None,
                 },
+                None => None,
             },
             Self::TypeofExpression(expr) => flattened_expression(expr, resolver),
             Self::TypeofType(reference) => resolver
@@ -126,15 +119,15 @@ fn flattened_instance(
                     .collect()
             },
         })),
-        TypeData::Reference(reference) => match reference {
-            TypeReference::Unknown => Some(TypeData::unknown()),
-            _ => Some(TypeData::instance_of(TypeInstance {
+        TypeData::Reference(reference) if reference.is_known() => {
+            Some(TypeData::instance_of(TypeInstance {
                 ty: resolved
                     .apply_module_id_to_reference(reference)
                     .into_owned(),
                 type_parameters: instance.type_parameters.clone(),
-            })),
-        },
+            }))
+        }
+        TypeData::Reference(_) => Some(TypeData::unknown()),
         _ => resolved
             .should_flatten_instance(instance)
             .then(|| resolved.to_data()),

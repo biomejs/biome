@@ -105,15 +105,23 @@ impl YamlBlockMapExplicitEntry {
     }
     pub fn as_fields(&self) -> YamlBlockMapExplicitEntryFields {
         YamlBlockMapExplicitEntryFields {
+            question_mark_token: self.question_mark_token(),
             key: self.key(),
+            colon_token: self.colon_token(),
             value: self.value(),
         }
     }
-    pub fn key(&self) -> SyntaxResult<YamlBlockMapExplicitKey> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn question_mark_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> Option<YamlBlockMapExplicitValue> {
+    pub fn key(&self) -> Option<AnyYamlBlockNode> {
         support::node(&self.syntax, 1usize)
+    }
+    pub fn colon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
+    pub fn value(&self) -> Option<AnyYamlBlockNode> {
+        support::node(&self.syntax, 3usize)
     }
 }
 impl Serialize for YamlBlockMapExplicitEntry {
@@ -126,87 +134,9 @@ impl Serialize for YamlBlockMapExplicitEntry {
 }
 #[derive(Serialize)]
 pub struct YamlBlockMapExplicitEntryFields {
-    pub key: SyntaxResult<YamlBlockMapExplicitKey>,
-    pub value: Option<YamlBlockMapExplicitValue>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct YamlBlockMapExplicitKey {
-    pub(crate) syntax: SyntaxNode,
-}
-impl YamlBlockMapExplicitKey {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> YamlBlockMapExplicitKeyFields {
-        YamlBlockMapExplicitKeyFields {
-            question_mark_token: self.question_mark_token(),
-            key: self.key(),
-        }
-    }
-    pub fn question_mark_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn key(&self) -> Option<AnyYamlBlockNode> {
-        support::node(&self.syntax, 1usize)
-    }
-}
-impl Serialize for YamlBlockMapExplicitKey {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct YamlBlockMapExplicitKeyFields {
     pub question_mark_token: SyntaxResult<SyntaxToken>,
     pub key: Option<AnyYamlBlockNode>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct YamlBlockMapExplicitValue {
-    pub(crate) syntax: SyntaxNode,
-}
-impl YamlBlockMapExplicitValue {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> YamlBlockMapExplicitValueFields {
-        YamlBlockMapExplicitValueFields {
-            colon_token: self.colon_token(),
-            value: self.value(),
-        }
-    }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn value(&self) -> Option<AnyYamlBlockNode> {
-        support::node(&self.syntax, 1usize)
-    }
-}
-impl Serialize for YamlBlockMapExplicitValue {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct YamlBlockMapExplicitValueFields {
-    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub colon_token: Option<SyntaxToken>,
     pub value: Option<AnyYamlBlockNode>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -226,14 +156,18 @@ impl YamlBlockMapImplicitEntry {
     pub fn as_fields(&self) -> YamlBlockMapImplicitEntryFields {
         YamlBlockMapImplicitEntryFields {
             key: self.key(),
+            colon_token: self.colon_token(),
             value: self.value(),
         }
     }
-    pub fn key(&self) -> Option<AnyYamlBlockMapImplicitKey> {
+    pub fn key(&self) -> Option<AnyYamlMappingImplicitKey> {
         support::node(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> SyntaxResult<YamlBlockMapImplicitValue> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> Option<AnyYamlBlockNode> {
+        support::node(&self.syntax, 2usize)
     }
 }
 impl Serialize for YamlBlockMapImplicitEntry {
@@ -246,46 +180,7 @@ impl Serialize for YamlBlockMapImplicitEntry {
 }
 #[derive(Serialize)]
 pub struct YamlBlockMapImplicitEntryFields {
-    pub key: Option<AnyYamlBlockMapImplicitKey>,
-    pub value: SyntaxResult<YamlBlockMapImplicitValue>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct YamlBlockMapImplicitValue {
-    pub(crate) syntax: SyntaxNode,
-}
-impl YamlBlockMapImplicitValue {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> YamlBlockMapImplicitValueFields {
-        YamlBlockMapImplicitValueFields {
-            colon_token: self.colon_token(),
-            value: self.value(),
-        }
-    }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn value(&self) -> Option<AnyYamlBlockNode> {
-        support::node(&self.syntax, 1usize)
-    }
-}
-impl Serialize for YamlBlockMapImplicitValue {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct YamlBlockMapImplicitValueFields {
+    pub key: Option<AnyYamlMappingImplicitKey>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub value: Option<AnyYamlBlockNode>,
 }
@@ -696,14 +591,22 @@ impl YamlFlowMapExplicitEntry {
     pub fn as_fields(&self) -> YamlFlowMapExplicitEntryFields {
         YamlFlowMapExplicitEntryFields {
             question_mark_token: self.question_mark_token(),
-            entry: self.entry(),
+            key: self.key(),
+            colon_token: self.colon_token(),
+            value: self.value(),
         }
     }
     pub fn question_mark_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn entry(&self) -> Option<YamlFlowMapImplicitEntry> {
+    pub fn key(&self) -> Option<AnyYamlMappingImplicitKey> {
         support::node(&self.syntax, 1usize)
+    }
+    pub fn colon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
+    pub fn value(&self) -> Option<AnyYamlFlowNode> {
+        support::node(&self.syntax, 3usize)
     }
 }
 impl Serialize for YamlFlowMapExplicitEntry {
@@ -717,7 +620,9 @@ impl Serialize for YamlFlowMapExplicitEntry {
 #[derive(Serialize)]
 pub struct YamlFlowMapExplicitEntryFields {
     pub question_mark_token: SyntaxResult<SyntaxToken>,
-    pub entry: Option<YamlFlowMapImplicitEntry>,
+    pub key: Option<AnyYamlMappingImplicitKey>,
+    pub colon_token: Option<SyntaxToken>,
+    pub value: Option<AnyYamlFlowNode>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct YamlFlowMapImplicitEntry {
@@ -740,14 +645,14 @@ impl YamlFlowMapImplicitEntry {
             value: self.value(),
         }
     }
-    pub fn key(&self) -> Option<AnyYamlFlowMapImplicitKey> {
+    pub fn key(&self) -> Option<AnyYamlMappingImplicitKey> {
         support::node(&self.syntax, 0usize)
     }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn colon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> SyntaxResult<AnyYamlFlowNode> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn value(&self) -> Option<AnyYamlFlowNode> {
+        support::node(&self.syntax, 2usize)
     }
 }
 impl Serialize for YamlFlowMapImplicitEntry {
@@ -760,9 +665,9 @@ impl Serialize for YamlFlowMapImplicitEntry {
 }
 #[derive(Serialize)]
 pub struct YamlFlowMapImplicitEntryFields {
-    pub key: Option<AnyYamlFlowMapImplicitKey>,
-    pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<AnyYamlFlowNode>,
+    pub key: Option<AnyYamlMappingImplicitKey>,
+    pub colon_token: Option<SyntaxToken>,
+    pub value: Option<AnyYamlFlowNode>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct YamlFlowMapping {
@@ -1242,25 +1147,6 @@ impl AnyYamlBlockMapEntry {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyYamlBlockMapImplicitKey {
-    YamlFlowJsonNode(YamlFlowJsonNode),
-    YamlFlowYamlNode(YamlFlowYamlNode),
-}
-impl AnyYamlBlockMapImplicitKey {
-    pub fn as_yaml_flow_json_node(&self) -> Option<&YamlFlowJsonNode> {
-        match &self {
-            Self::YamlFlowJsonNode(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_yaml_flow_yaml_node(&self) -> Option<&YamlFlowYamlNode> {
-        match &self {
-            Self::YamlFlowYamlNode(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyYamlBlockNode {
     AnyYamlBlockInBlockNode(AnyYamlBlockInBlockNode),
     YamlBogusBlockNode(YamlBogusBlockNode),
@@ -1363,27 +1249,9 @@ impl AnyYamlFlowMapEntry {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyYamlFlowMapImplicitKey {
-    YamlFlowJsonNode(YamlFlowJsonNode),
-    YamlFlowYamlNode(YamlFlowYamlNode),
-}
-impl AnyYamlFlowMapImplicitKey {
-    pub fn as_yaml_flow_json_node(&self) -> Option<&YamlFlowJsonNode> {
-        match &self {
-            Self::YamlFlowJsonNode(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_yaml_flow_yaml_node(&self) -> Option<&YamlFlowYamlNode> {
-        match &self {
-            Self::YamlFlowYamlNode(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyYamlFlowNode {
     YamlAliasNode(YamlAliasNode),
+    YamlBogusFlowNode(YamlBogusFlowNode),
     YamlFlowJsonNode(YamlFlowJsonNode),
     YamlFlowYamlNode(YamlFlowYamlNode),
 }
@@ -1391,6 +1259,12 @@ impl AnyYamlFlowNode {
     pub fn as_yaml_alias_node(&self) -> Option<&YamlAliasNode> {
         match &self {
             Self::YamlAliasNode(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_yaml_bogus_flow_node(&self) -> Option<&YamlBogusFlowNode> {
+        match &self {
+            Self::YamlBogusFlowNode(item) => Some(item),
             _ => None,
         }
     }
@@ -1455,6 +1329,25 @@ impl AnyYamlJsonContent {
     pub fn as_yaml_single_quoted_scalar(&self) -> Option<&YamlSingleQuotedScalar> {
         match &self {
             Self::YamlSingleQuotedScalar(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyYamlMappingImplicitKey {
+    YamlFlowJsonNode(YamlFlowJsonNode),
+    YamlFlowYamlNode(YamlFlowYamlNode),
+}
+impl AnyYamlMappingImplicitKey {
+    pub fn as_yaml_flow_json_node(&self) -> Option<&YamlFlowJsonNode> {
+        match &self {
+            Self::YamlFlowJsonNode(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_yaml_flow_yaml_node(&self) -> Option<&YamlFlowYamlNode> {
+        match &self {
+            Self::YamlFlowYamlNode(item) => Some(item),
             _ => None,
         }
     }
@@ -1606,7 +1499,15 @@ impl std::fmt::Debug for YamlBlockMapExplicitEntry {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("YamlBlockMapExplicitEntry")
-                .field("key", &support::DebugSyntaxResult(self.key()))
+                .field(
+                    "question_mark_token",
+                    &support::DebugSyntaxResult(self.question_mark_token()),
+                )
+                .field("key", &support::DebugOptionalElement(self.key()))
+                .field(
+                    "colon_token",
+                    &support::DebugOptionalElement(self.colon_token()),
+                )
                 .field("value", &support::DebugOptionalElement(self.value()))
                 .finish()
         } else {
@@ -1623,108 +1524,6 @@ impl From<YamlBlockMapExplicitEntry> for SyntaxNode {
 }
 impl From<YamlBlockMapExplicitEntry> for SyntaxElement {
     fn from(n: YamlBlockMapExplicitEntry) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for YamlBlockMapExplicitKey {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(YAML_BLOCK_MAP_EXPLICIT_KEY as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == YAML_BLOCK_MAP_EXPLICIT_KEY
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for YamlBlockMapExplicitKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("YamlBlockMapExplicitKey")
-                .field(
-                    "question_mark_token",
-                    &support::DebugSyntaxResult(self.question_mark_token()),
-                )
-                .field("key", &support::DebugOptionalElement(self.key()))
-                .finish()
-        } else {
-            f.debug_struct("YamlBlockMapExplicitKey").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<YamlBlockMapExplicitKey> for SyntaxNode {
-    fn from(n: YamlBlockMapExplicitKey) -> Self {
-        n.syntax
-    }
-}
-impl From<YamlBlockMapExplicitKey> for SyntaxElement {
-    fn from(n: YamlBlockMapExplicitKey) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for YamlBlockMapExplicitValue {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(YAML_BLOCK_MAP_EXPLICIT_VALUE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == YAML_BLOCK_MAP_EXPLICIT_VALUE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for YamlBlockMapExplicitValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("YamlBlockMapExplicitValue")
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("value", &support::DebugOptionalElement(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("YamlBlockMapExplicitValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<YamlBlockMapExplicitValue> for SyntaxNode {
-    fn from(n: YamlBlockMapExplicitValue) -> Self {
-        n.syntax
-    }
-}
-impl From<YamlBlockMapExplicitValue> for SyntaxElement {
-    fn from(n: YamlBlockMapExplicitValue) -> Self {
         n.syntax.into()
     }
 }
@@ -1757,7 +1556,11 @@ impl std::fmt::Debug for YamlBlockMapImplicitEntry {
             DEPTH.set(current_depth + 1);
             f.debug_struct("YamlBlockMapImplicitEntry")
                 .field("key", &support::DebugOptionalElement(self.key()))
-                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugOptionalElement(self.value()))
                 .finish()
         } else {
             f.debug_struct("YamlBlockMapImplicitEntry").finish()
@@ -1773,57 +1576,6 @@ impl From<YamlBlockMapImplicitEntry> for SyntaxNode {
 }
 impl From<YamlBlockMapImplicitEntry> for SyntaxElement {
     fn from(n: YamlBlockMapImplicitEntry) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for YamlBlockMapImplicitValue {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(YAML_BLOCK_MAP_IMPLICIT_VALUE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == YAML_BLOCK_MAP_IMPLICIT_VALUE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for YamlBlockMapImplicitValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("YamlBlockMapImplicitValue")
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("value", &support::DebugOptionalElement(self.value()))
-                .finish()
-        } else {
-            f.debug_struct("YamlBlockMapImplicitValue").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<YamlBlockMapImplicitValue> for SyntaxNode {
-    fn from(n: YamlBlockMapImplicitValue) -> Self {
-        n.syntax
-    }
-}
-impl From<YamlBlockMapImplicitValue> for SyntaxElement {
-    fn from(n: YamlBlockMapImplicitValue) -> Self {
         n.syntax.into()
     }
 }
@@ -2345,7 +2097,12 @@ impl std::fmt::Debug for YamlFlowMapExplicitEntry {
                     "question_mark_token",
                     &support::DebugSyntaxResult(self.question_mark_token()),
                 )
-                .field("entry", &support::DebugOptionalElement(self.entry()))
+                .field("key", &support::DebugOptionalElement(self.key()))
+                .field(
+                    "colon_token",
+                    &support::DebugOptionalElement(self.colon_token()),
+                )
+                .field("value", &support::DebugOptionalElement(self.value()))
                 .finish()
         } else {
             f.debug_struct("YamlFlowMapExplicitEntry").finish()
@@ -2395,9 +2152,9 @@ impl std::fmt::Debug for YamlFlowMapImplicitEntry {
                 .field("key", &support::DebugOptionalElement(self.key()))
                 .field(
                     "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
+                    &support::DebugOptionalElement(self.colon_token()),
                 )
-                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("value", &support::DebugOptionalElement(self.value()))
                 .finish()
         } else {
             f.debug_struct("YamlFlowMapImplicitEntry").finish()
@@ -3127,66 +2884,6 @@ impl From<AnyYamlBlockMapEntry> for SyntaxElement {
         node.into()
     }
 }
-impl From<YamlFlowJsonNode> for AnyYamlBlockMapImplicitKey {
-    fn from(node: YamlFlowJsonNode) -> Self {
-        Self::YamlFlowJsonNode(node)
-    }
-}
-impl From<YamlFlowYamlNode> for AnyYamlBlockMapImplicitKey {
-    fn from(node: YamlFlowYamlNode) -> Self {
-        Self::YamlFlowYamlNode(node)
-    }
-}
-impl AstNode for AnyYamlBlockMapImplicitKey {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        YamlFlowJsonNode::KIND_SET.union(YamlFlowYamlNode::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, YAML_FLOW_JSON_NODE | YAML_FLOW_YAML_NODE)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            YAML_FLOW_JSON_NODE => Self::YamlFlowJsonNode(YamlFlowJsonNode { syntax }),
-            YAML_FLOW_YAML_NODE => Self::YamlFlowYamlNode(YamlFlowYamlNode { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::YamlFlowJsonNode(it) => &it.syntax,
-            Self::YamlFlowYamlNode(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::YamlFlowJsonNode(it) => it.syntax,
-            Self::YamlFlowYamlNode(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyYamlBlockMapImplicitKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
-            Self::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyYamlBlockMapImplicitKey> for SyntaxNode {
-    fn from(n: AnyYamlBlockMapImplicitKey) -> Self {
-        match n {
-            AnyYamlBlockMapImplicitKey::YamlFlowJsonNode(it) => it.into(),
-            AnyYamlBlockMapImplicitKey::YamlFlowYamlNode(it) => it.into(),
-        }
-    }
-}
-impl From<AnyYamlBlockMapImplicitKey> for SyntaxElement {
-    fn from(n: AnyYamlBlockMapImplicitKey) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl From<YamlBogusBlockNode> for AnyYamlBlockNode {
     fn from(node: YamlBogusBlockNode) -> Self {
         Self::YamlBogusBlockNode(node)
@@ -3509,69 +3206,14 @@ impl From<AnyYamlFlowMapEntry> for SyntaxElement {
         node.into()
     }
 }
-impl From<YamlFlowJsonNode> for AnyYamlFlowMapImplicitKey {
-    fn from(node: YamlFlowJsonNode) -> Self {
-        Self::YamlFlowJsonNode(node)
-    }
-}
-impl From<YamlFlowYamlNode> for AnyYamlFlowMapImplicitKey {
-    fn from(node: YamlFlowYamlNode) -> Self {
-        Self::YamlFlowYamlNode(node)
-    }
-}
-impl AstNode for AnyYamlFlowMapImplicitKey {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        YamlFlowJsonNode::KIND_SET.union(YamlFlowYamlNode::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, YAML_FLOW_JSON_NODE | YAML_FLOW_YAML_NODE)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            YAML_FLOW_JSON_NODE => Self::YamlFlowJsonNode(YamlFlowJsonNode { syntax }),
-            YAML_FLOW_YAML_NODE => Self::YamlFlowYamlNode(YamlFlowYamlNode { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::YamlFlowJsonNode(it) => &it.syntax,
-            Self::YamlFlowYamlNode(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::YamlFlowJsonNode(it) => it.syntax,
-            Self::YamlFlowYamlNode(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyYamlFlowMapImplicitKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
-            Self::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyYamlFlowMapImplicitKey> for SyntaxNode {
-    fn from(n: AnyYamlFlowMapImplicitKey) -> Self {
-        match n {
-            AnyYamlFlowMapImplicitKey::YamlFlowJsonNode(it) => it.into(),
-            AnyYamlFlowMapImplicitKey::YamlFlowYamlNode(it) => it.into(),
-        }
-    }
-}
-impl From<AnyYamlFlowMapImplicitKey> for SyntaxElement {
-    fn from(n: AnyYamlFlowMapImplicitKey) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl From<YamlAliasNode> for AnyYamlFlowNode {
     fn from(node: YamlAliasNode) -> Self {
         Self::YamlAliasNode(node)
+    }
+}
+impl From<YamlBogusFlowNode> for AnyYamlFlowNode {
+    fn from(node: YamlBogusFlowNode) -> Self {
+        Self::YamlBogusFlowNode(node)
     }
 }
 impl From<YamlFlowJsonNode> for AnyYamlFlowNode {
@@ -3587,17 +3229,19 @@ impl From<YamlFlowYamlNode> for AnyYamlFlowNode {
 impl AstNode for AnyYamlFlowNode {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = YamlAliasNode::KIND_SET
+        .union(YamlBogusFlowNode::KIND_SET)
         .union(YamlFlowJsonNode::KIND_SET)
         .union(YamlFlowYamlNode::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            YAML_ALIAS_NODE | YAML_FLOW_JSON_NODE | YAML_FLOW_YAML_NODE
+            YAML_ALIAS_NODE | YAML_BOGUS_FLOW_NODE | YAML_FLOW_JSON_NODE | YAML_FLOW_YAML_NODE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             YAML_ALIAS_NODE => Self::YamlAliasNode(YamlAliasNode { syntax }),
+            YAML_BOGUS_FLOW_NODE => Self::YamlBogusFlowNode(YamlBogusFlowNode { syntax }),
             YAML_FLOW_JSON_NODE => Self::YamlFlowJsonNode(YamlFlowJsonNode { syntax }),
             YAML_FLOW_YAML_NODE => Self::YamlFlowYamlNode(YamlFlowYamlNode { syntax }),
             _ => return None,
@@ -3607,6 +3251,7 @@ impl AstNode for AnyYamlFlowNode {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::YamlAliasNode(it) => &it.syntax,
+            Self::YamlBogusFlowNode(it) => &it.syntax,
             Self::YamlFlowJsonNode(it) => &it.syntax,
             Self::YamlFlowYamlNode(it) => &it.syntax,
         }
@@ -3614,6 +3259,7 @@ impl AstNode for AnyYamlFlowNode {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::YamlAliasNode(it) => it.syntax,
+            Self::YamlBogusFlowNode(it) => it.syntax,
             Self::YamlFlowJsonNode(it) => it.syntax,
             Self::YamlFlowYamlNode(it) => it.syntax,
         }
@@ -3623,6 +3269,7 @@ impl std::fmt::Debug for AnyYamlFlowNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::YamlAliasNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlBogusFlowNode(it) => std::fmt::Debug::fmt(it, f),
             Self::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
             Self::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -3632,6 +3279,7 @@ impl From<AnyYamlFlowNode> for SyntaxNode {
     fn from(n: AnyYamlFlowNode) -> Self {
         match n {
             AnyYamlFlowNode::YamlAliasNode(it) => it.into(),
+            AnyYamlFlowNode::YamlBogusFlowNode(it) => it.into(),
             AnyYamlFlowNode::YamlFlowJsonNode(it) => it.into(),
             AnyYamlFlowNode::YamlFlowYamlNode(it) => it.into(),
         }
@@ -3793,6 +3441,66 @@ impl From<AnyYamlJsonContent> for SyntaxElement {
         node.into()
     }
 }
+impl From<YamlFlowJsonNode> for AnyYamlMappingImplicitKey {
+    fn from(node: YamlFlowJsonNode) -> Self {
+        Self::YamlFlowJsonNode(node)
+    }
+}
+impl From<YamlFlowYamlNode> for AnyYamlMappingImplicitKey {
+    fn from(node: YamlFlowYamlNode) -> Self {
+        Self::YamlFlowYamlNode(node)
+    }
+}
+impl AstNode for AnyYamlMappingImplicitKey {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        YamlFlowJsonNode::KIND_SET.union(YamlFlowYamlNode::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, YAML_FLOW_JSON_NODE | YAML_FLOW_YAML_NODE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            YAML_FLOW_JSON_NODE => Self::YamlFlowJsonNode(YamlFlowJsonNode { syntax }),
+            YAML_FLOW_YAML_NODE => Self::YamlFlowYamlNode(YamlFlowYamlNode { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::YamlFlowJsonNode(it) => &it.syntax,
+            Self::YamlFlowYamlNode(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::YamlFlowJsonNode(it) => it.syntax,
+            Self::YamlFlowYamlNode(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyYamlMappingImplicitKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::YamlFlowJsonNode(it) => std::fmt::Debug::fmt(it, f),
+            Self::YamlFlowYamlNode(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyYamlMappingImplicitKey> for SyntaxNode {
+    fn from(n: AnyYamlMappingImplicitKey) -> Self {
+        match n {
+            AnyYamlMappingImplicitKey::YamlFlowJsonNode(it) => it.into(),
+            AnyYamlMappingImplicitKey::YamlFlowYamlNode(it) => it.into(),
+        }
+    }
+}
+impl From<AnyYamlMappingImplicitKey> for SyntaxElement {
+    fn from(n: AnyYamlMappingImplicitKey) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<YamlPropertiesAnchorFirst> for AnyYamlPropertiesCombination {
     fn from(node: YamlPropertiesAnchorFirst) -> Self {
         Self::YamlPropertiesAnchorFirst(node)
@@ -3870,11 +3578,6 @@ impl std::fmt::Display for AnyYamlBlockMapEntry {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyYamlBlockMapImplicitKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for AnyYamlBlockNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -3900,11 +3603,6 @@ impl std::fmt::Display for AnyYamlFlowMapEntry {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyYamlFlowMapImplicitKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for AnyYamlFlowNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -3916,6 +3614,11 @@ impl std::fmt::Display for AnyYamlFlowSequenceEntry {
     }
 }
 impl std::fmt::Display for AnyYamlJsonContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyYamlMappingImplicitKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -3940,22 +3643,7 @@ impl std::fmt::Display for YamlBlockMapExplicitEntry {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for YamlBlockMapExplicitKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for YamlBlockMapExplicitValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for YamlBlockMapImplicitEntry {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for YamlBlockMapImplicitValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4238,7 +3926,63 @@ impl From<YamlBogusBlockNode> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyYamlBogusNode = YamlBogus | YamlBogusBlockMapEntry | YamlBogusBlockNode }
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct YamlBogusFlowNode {
+    syntax: SyntaxNode,
+}
+impl YamlBogusFlowNode {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for YamlBogusFlowNode {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(YAML_BOGUS_FLOW_NODE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == YAML_BOGUS_FLOW_NODE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for YamlBogusFlowNode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("YamlBogusFlowNode")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<YamlBogusFlowNode> for SyntaxNode {
+    fn from(n: YamlBogusFlowNode) -> Self {
+        n.syntax
+    }
+}
+impl From<YamlBogusFlowNode> for SyntaxElement {
+    fn from(n: YamlBogusFlowNode) -> Self {
+        n.syntax.into()
+    }
+}
+biome_rowan::declare_node_union! { pub AnyYamlBogusNode = YamlBogus | YamlBogusBlockMapEntry | YamlBogusBlockNode | YamlBogusFlowNode }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct YamlBlockMapEntryList {
     syntax_list: SyntaxList,
