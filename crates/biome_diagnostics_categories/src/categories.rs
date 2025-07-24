@@ -170,6 +170,7 @@ define_categories! {
     "lint/nursery/noNestedComponentDefinitions": "https://biomejs.dev/linter/rules/no-nested-component-definitions",
     "lint/nursery/noNoninteractiveElementInteractions": "https://biomejs.dev/linter/rules/no-noninteractive-element-interactions",
     "lint/nursery/noProcessGlobal": "https://biomejs.dev/linter/rules/no-process-global",
+    "lint/nursery/noQuickfixBiome": "https://biomejs.dev/linter/rules/no-quickfix-biome",
     "lint/nursery/noReactPropAssign": "https://biomejs.dev/linter/rules/no-react-prop-assign",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
     "lint/nursery/noRestrictedElements": "https://biomejs.dev/linter/rules/no-restricted-elements",
