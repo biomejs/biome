@@ -423,6 +423,12 @@ macro_rules! map_syntax_node {
                     };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST => {
+                    let $pattern = unsafe {
+                        $crate::CssPseudoClassFunctionCustomIdentifierList::new_unchecked(node)
+                    };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER => {
                     let $pattern =
                         unsafe { $crate::CssPseudoClassFunctionIdentifier::new_unchecked(node) };

@@ -1,6 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::css_modules::{CSS_MODULES_SCOPE_SET, local_or_global_not_allowed};
 use crate::syntax::parse_error::expected_selector;
+use crate::syntax::parse_regular_identifier;
 use crate::syntax::selector::{
     eat_or_recover_selector_function_close_token, parse_selector,
     recover_selector_function_parameter,
@@ -58,7 +59,7 @@ pub(crate) fn parse_pseudo_class_function_selector(p: &mut CssParser) -> ParsedS
 
     let m = p.start();
 
-    p.bump_ts(CSS_MODULES_SCOPE_SET);
+    parse_regular_identifier(p).ok();
     p.bump(T!['(']);
 
     let kind = match parse_selector(p) {
