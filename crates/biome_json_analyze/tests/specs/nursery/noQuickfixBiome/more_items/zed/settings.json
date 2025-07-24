@@ -1,0 +1,6 @@
+{
+  "editor.code_action_on_format": {
+    "quickfix.biome": true,
+    "source.organizeImports.biome": true
+  }
+}
