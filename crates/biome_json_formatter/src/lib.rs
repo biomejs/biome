@@ -7,11 +7,13 @@ mod generated;
 mod json;
 mod prelude;
 mod separated;
+mod verbatim;
 
 use crate::comments::JsonCommentStyle;
 pub(crate) use crate::context::JsonFormatContext;
 use crate::context::JsonFormatOptions;
 use crate::cst::FormatJsonSyntaxNode;
+use crate::verbatim::{format_bogus_node, format_suppressed_node};
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
 use biome_formatter::{

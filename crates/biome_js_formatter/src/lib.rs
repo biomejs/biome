@@ -179,6 +179,7 @@ pub mod context;
 mod parentheses;
 pub(crate) mod separated;
 mod syntax_rewriter;
+mod verbatim;
 
 use biome_formatter::format_element::tag::Label;
 use biome_formatter::prelude::*;
@@ -197,6 +198,7 @@ use crate::comments::JsCommentStyle;
 use crate::context::{JsFormatContext, JsFormatOptions};
 use crate::cst::FormatJsSyntaxNode;
 use crate::syntax_rewriter::transform;
+use crate::verbatim::{format_bogus_node, format_suppressed_node};
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {

@@ -7,6 +7,7 @@ mod generated;
 mod grit;
 mod prelude;
 pub(crate) mod separated;
+mod verbatim;
 
 use biome_formatter::{
     CstFormatContext, Format, FormatLanguage, FormatResult, Formatted, Printed,
@@ -20,6 +21,8 @@ use comments::GritCommentStyle;
 
 pub(crate) use crate::context::GritFormatContext;
 
+use crate::prelude::*;
+use crate::verbatim::format_suppressed_node;
 use biome_rowan::{AstNode, TextRange};
 use context::GritFormatOptions;
 use cst::FormatGritSyntaxNode;
