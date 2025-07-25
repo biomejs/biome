@@ -8,6 +8,7 @@ use camino::Utf8Path;
 )]
 pub struct HtmlFileSource {
     variant: HtmlVariant,
+    text_expressions: Option<HtmlTextExpressions>,
 }
 
 impl HtmlFileSource {
@@ -18,6 +19,21 @@ impl HtmlFileSource {
     pub fn variant(&self) -> &HtmlVariant {
         &self.variant
     }
+
+    pub fn text_expressions(&self) -> Option<&HtmlTextExpressions> {
+        self.text_expressions.as_ref()
+    }
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+pub enum HtmlTextExpressions {
+    #[default]
+    None,
+    Single,
+    Double,
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -39,22 +55,34 @@ impl HtmlFileSource {
     pub fn html() -> Self {
         Self {
             variant: HtmlVariant::Standard,
+            text_expressions: None,
         }
     }
+
+    pub fn html_with_text_expressions() -> Self {
+        Self {
+            variant: HtmlVariant::Standard,
+            text_expressions: Some(HtmlTextExpressions::Double),
+        }
+    }
+
     pub fn astro() -> Self {
         Self {
             variant: HtmlVariant::Astro,
+            text_expressions: Some(HtmlTextExpressions::Single),
         }
     }
 
     pub fn vue() -> Self {
         Self {
             variant: HtmlVariant::Vue,
+            text_expressions: Some(HtmlTextExpressions::Double),
         }
     }
     pub fn svelte() -> Self {
         Self {
             variant: HtmlVariant::Svelte,
+            text_expressions: Some(HtmlTextExpressions::Single),
         }
     }
 
