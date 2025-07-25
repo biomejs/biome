@@ -27,17 +27,22 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
     const SOURCE: &str = r#"
-// function foo(arg: 'one' | 'two') {
-//   if (arg && (true && false) && false || 6 || "fdgsd") {
-//   }
+// let b1 = {};
+// declare const b2: T[];
+// declare const b3: string;
+// const t1 = b1 || b2 || b3;
+
+// function bar<T>(arg: string) {
+//   // arg can never be nullish, so ?. is unnecessary
+//   return arg?.length;
 // }
-//
-// switch check both case and switch are static values, fail
 
+// const foo = (a) => a;
 
-declare const b1: (string | number) & ("foo" | 123) & { __brand: string };
-declare const b2: null;
-const t1 = b1 && b2;
+function bar<T>(arg: string) {
+  // arg can never be nullish, so ?. is unnecessary
+  return arg?.length;
+}
     "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());

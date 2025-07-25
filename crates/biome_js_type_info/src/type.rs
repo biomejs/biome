@@ -20,6 +20,7 @@ use crate::{
         GLOBAL_ARRAY_ID, GLOBAL_NUMBER_ID, GLOBAL_PROMISE_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID,
     },
 };
+use crate::globals::{GLOBAL_BIGINT_STRING_LITERAL_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID, GLOBAL_FUNCTION_STRING_LITERAL_ID, GLOBAL_NUMBER_STRING_LITERAL_ID, GLOBAL_OBJECT_STRING_LITERAL_ID, GLOBAL_STRING_STRING_LITERAL_ID, GLOBAL_SYMBOL_STRING_LITERAL_ID, GLOBAL_UNDEFINED_STRING_LITERAL_ID};
 
 /// Wrapper used to refer to type information stored in the `ModuleGraph`.
 ///
@@ -162,6 +163,24 @@ impl Type {
                 TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::Number(_)),
                 _ => false,
             })
+    }
+    
+    /// Returns whether this type is a number or a literal number.
+    pub fn is_literal(&self) -> bool {
+        match self.id {
+            GLOBAL_BIGINT_STRING_LITERAL_ID
+            | GLOBAL_BOOLEAN_STRING_LITERAL_ID
+            | GLOBAL_FUNCTION_STRING_LITERAL_ID
+            | GLOBAL_NUMBER_STRING_LITERAL_ID
+            | GLOBAL_OBJECT_STRING_LITERAL_ID
+            | GLOBAL_STRING_STRING_LITERAL_ID
+            | GLOBAL_SYMBOL_STRING_LITERAL_ID
+            | GLOBAL_UNDEFINED_STRING_LITERAL_ID => {
+                println!("Matched literal type: {:?}", self.id);
+                true
+            }
+            _ => false,
+        }
     }
 
     /// Returns whether this type is the `Promise` class.
