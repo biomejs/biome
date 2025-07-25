@@ -48,12 +48,20 @@ expression: redactor(content)
 let a = "a"; if (true) { a = "b" }
 ```
 
-# Emitted Messages
+# Termination Message
 
 ```block
-let _a = 'a';
-if (true) {
-   _a = 'b';
-}
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Failed to resolve the configuration from base-config/biome
+    
+    Caused by:
+      Could not resolve base-config/biome: module not found
+  
+  Verbose advice
+  
+    i Biome tried to resolve the configuration file "base-config/biome" in "extends" using "<TEMP_DIR>/should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config" as the base path.
+    
+
 
 ```
