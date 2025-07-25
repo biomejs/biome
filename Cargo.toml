@@ -235,6 +235,7 @@ unicode-width        = "0.1.12"
 ureq                 = "3.0.12"
 url                  = "2.5.4"
 walkdir              = "2.5.0"
+web-time             = "1.1.0"
 
 [profile.dev.package.biome_wasm]
 debug     = true

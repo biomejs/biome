@@ -13,7 +13,7 @@ use super::{FeaturesBuilder, IgnoreKind, PathIsIgnoredParams};
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::DocumentFileSource;
-use crate::{WatcherInstruction, Workspace, WorkspaceError};
+use crate::{Workspace, WorkspaceError};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
@@ -22,8 +22,7 @@ use crossbeam::channel::{Receiver, Sender, unbounded};
 use std::collections::BTreeSet;
 use std::panic::catch_unwind;
 use std::sync::RwLock;
-use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use tracing::instrument;
 
 pub(crate) struct ScanOptions {
@@ -75,8 +74,9 @@ impl WorkspaceServer {
 
         let collector = DiagnosticsCollector::new(verbose);
 
-        let (duration, diagnostics, configuration_files) = thread::scope(|scope| {
-            let handler = thread::Builder::new()
+        #[cfg(not(target_family = "wasm"))]
+        let (duration, diagnostics, configuration_files) = std::thread::scope(|scope| {
+            let handler = std::thread::Builder::new()
                 .name("biome::scanner".to_string())
                 .spawn_scoped(scope, || collector.run(diagnostics_receiver))
                 .expect("failed to spawn scanner thread");
@@ -103,7 +103,10 @@ impl WorkspaceServer {
             for folder in folders_to_watch {
                 let _ = self
                     .watcher_tx
-                    .try_send(WatcherInstruction::WatchFolder(folder, scan_kind.clone()));
+                    .try_send(crate::WatcherInstruction::WatchFolder(
+                        folder,
+                        scan_kind.clone(),
+                    ));
             }
 
             // Wait for the collector thread to finish.
@@ -111,6 +114,32 @@ impl WorkspaceServer {
 
             (duration, diagnostics, configuration_files)
         });
+
+        // On WASM platforms, run the scanner without spawning a thread.
+        // The watcher is also not available.
+        #[cfg(target_family = "wasm")]
+        let (duration, diagnostics, configuration_files) = {
+            let ScanFolderResult {
+                duration,
+                configuration_files,
+                ..
+            } = scan_folder(
+                folder,
+                ScanContext {
+                    workspace: self,
+                    project_key,
+                    interner,
+                    diagnostics_sender,
+                    evaluated_paths: Default::default(),
+                    scan_kind: scan_kind.clone(),
+                    watch,
+                },
+            );
+
+            let diagnostics = collector.run(diagnostics_receiver);
+
+            (duration, diagnostics, configuration_files)
+        };
 
         Ok(ScanResult {
             diagnostics,
@@ -195,6 +224,7 @@ struct ScanFolderResult {
     pub configuration_files: Vec<BiomePath>,
 
     /// List of directories that need to be watched.
+    #[cfg_attr(target_family = "wasm", allow(dead_code))]
     pub folders_to_watch: Vec<Utf8PathBuf>,
 }
 
@@ -203,7 +233,8 @@ struct ScanFolderResult {
 /// Returns the duration of the process and the evaluated paths.
 #[instrument(level = "debug", skip(ctx))]
 fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> ScanFolderResult {
-    let start = Instant::now();
+    let start = web_time::Instant::now();
+
     let fs = ctx.workspace.fs();
     let ctx_ref = &ctx;
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
