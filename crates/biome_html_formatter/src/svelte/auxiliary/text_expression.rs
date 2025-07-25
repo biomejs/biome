@@ -5,6 +5,6 @@ use biome_rowan::AstNode;
 pub(crate) struct FormatSvelteTextExpression;
 impl FormatNodeRule<SvelteTextExpression> for FormatSvelteTextExpression {
     fn fmt_fields(&self, node: &SvelteTextExpression, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        format_html_verbatim_node(node.syntax()).fmt(f)
     }
 }

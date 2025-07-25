@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::CssValueAtRuleDeclarationClause;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssValueAtRuleDeclarationClause, CssValueAtRuleDeclarationClauseFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssValueAtRuleDeclarationClause;
 impl FormatNodeRule<CssValueAtRuleDeclarationClause> for FormatCssValueAtRuleDeclarationClause {
@@ -9,6 +10,8 @@ impl FormatNodeRule<CssValueAtRuleDeclarationClause> for FormatCssValueAtRuleDec
         node: &CssValueAtRuleDeclarationClause,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssValueAtRuleDeclarationClauseFields { properties } = node.as_fields();
+
+        write!(f, [properties.format()])
     }
 }

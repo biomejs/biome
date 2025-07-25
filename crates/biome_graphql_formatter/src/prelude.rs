@@ -4,7 +4,7 @@
 
 pub(crate) use crate::{
     AsFormat, FormatNodeRule, FormattedIterExt as _, GraphqlFormatContext, GraphqlFormatter,
-    IntoFormat,
+    IntoFormat, verbatim::*,
 };
 pub(crate) use biome_formatter::prelude::*;
 pub(crate) use biome_rowan::{
