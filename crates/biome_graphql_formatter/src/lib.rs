@@ -7,11 +7,13 @@ mod generated;
 mod graphql;
 mod prelude;
 mod utils;
+mod verbatim;
 
 use crate::comments::GraphqlCommentStyle;
 pub(crate) use crate::context::GraphqlFormatContext;
 use crate::context::GraphqlFormatOptions;
 use crate::cst::FormatGraphqlSyntaxNode;
+use crate::prelude::{format_bogus_node, format_suppressed_node};
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
 use biome_formatter::{

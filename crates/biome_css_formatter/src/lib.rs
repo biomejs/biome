@@ -8,6 +8,7 @@ mod generated;
 mod prelude;
 mod separated;
 mod utils;
+mod verbatim;
 
 use std::borrow::Cow;
 
@@ -15,6 +16,7 @@ use crate::comments::CssCommentStyle;
 pub(crate) use crate::context::CssFormatContext;
 use crate::context::CssFormatOptions;
 use crate::cst::FormatCssSyntaxNode;
+use crate::prelude::{format_bogus_node, format_suppressed_node};
 use biome_css_syntax::{
     AnyCssDeclarationBlock, AnyCssRule, AnyCssRuleBlock, AnyCssValue, CssLanguage, CssSyntaxKind,
     CssSyntaxNode, CssSyntaxToken,

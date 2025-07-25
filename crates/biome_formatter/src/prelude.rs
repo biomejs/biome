@@ -11,10 +11,6 @@ pub use crate::trivia::{
 pub use crate::diagnostics::FormatError;
 pub use crate::format_element::document::Document;
 pub use crate::format_element::tag::{LabelId, Tag, TagKind};
-pub use crate::verbatim::{
-    format_bogus_node, format_or_verbatim, format_suppressed_node, format_verbatim_node,
-    format_verbatim_skipped,
-};
 
 pub use crate::{
     Buffer as _, BufferExtensions, Format, Format as _, FormatResult, FormatRule,

@@ -40,7 +40,6 @@ pub mod separated;
 mod source_map;
 pub mod token;
 pub mod trivia;
-mod verbatim;
 
 use crate::formatter::Formatter;
 use crate::group_id::UniqueGroupIdBuilder;
