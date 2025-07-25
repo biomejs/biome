@@ -1,8 +1,14 @@
-use crate::format_element::tag::VerbatimKind;
-use crate::prelude::*;
-use crate::trivia::{FormatLeadingComments, FormatTrailingComments};
-use crate::{CstFormatContext, FormatWithRule, write};
-use biome_rowan::{AstNode, Direction, Language, SyntaxElement, SyntaxNode, TextRange};
+use crate::context::CssFormatContext;
+use biome_css_syntax::{CssLanguage, CssSyntaxNode};
+use biome_formatter::format_element::tag::VerbatimKind;
+use biome_formatter::formatter::Formatter;
+use biome_formatter::prelude::{Tag, dynamic_text};
+use biome_formatter::trivia::{FormatLeadingComments, FormatTrailingComments};
+use biome_formatter::{
+    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
+    FormatWithRule, LINE_TERMINATORS, normalize_newlines,
+};
+use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
 /// a node "as is" is useful if a node contains syntax errors. Formatting a node with syntax errors
@@ -14,8 +20,8 @@ use biome_rowan::{AstNode, Direction, Language, SyntaxElement, SyntaxNode, TextR
 ///
 /// These nodes and tokens get tracked as [VerbatimKind::Verbatim], useful to understand
 /// if these nodes still need to have their own implementation.
-pub fn format_verbatim_node<L: Language>(node: &SyntaxNode<L>) -> FormatVerbatimNode<L> {
-    FormatVerbatimNode {
+pub fn format_css_verbatim_node(node: &CssSyntaxNode) -> FormatCssVerbatimNode {
+    FormatCssVerbatimNode {
         node,
         kind: VerbatimKind::Verbatim {
             length: node.text_range_with_trivia().len(),
@@ -24,28 +30,15 @@ pub fn format_verbatim_node<L: Language>(node: &SyntaxNode<L>) -> FormatVerbatim
     }
 }
 
-/// "Formats" a node according to its original formatting in the source text. It's functionally equal to
-/// [`format_verbatim_node`], but it doesn't track the node as [VerbatimKind::Verbatim].
-pub fn format_verbatim_skipped<L: Language>(node: &SyntaxNode<L>) -> FormatVerbatimNode<L> {
-    FormatVerbatimNode {
-        node,
-        kind: VerbatimKind::Skipped,
-        format_comments: true,
-    }
-}
-
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub struct FormatVerbatimNode<'node, L: Language> {
-    node: &'node SyntaxNode<L>,
+pub struct FormatCssVerbatimNode<'node> {
+    node: &'node CssSyntaxNode,
     kind: VerbatimKind,
     format_comments: bool,
 }
 
-impl<Context> Format<Context> for FormatVerbatimNode<'_, Context::Language>
-where
-    Context: CstFormatContext,
-{
-    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
+    fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
         for element in self.node.descendants_with_tokens(Direction::Next) {
             match element {
                 SyntaxElement::Token(token) => f.state_mut().track_token(&token),
@@ -91,7 +84,7 @@ where
             let (outside_trimmed_range, in_trimmed_range) =
                 leading_comments.split_at(outside_trimmed_range);
 
-            write!(f, [FormatLeadingComments::Comments(outside_trimmed_range)])?;
+            biome_formatter::write!(f, [FormatLeadingComments::Comments(outside_trimmed_range)])?;
 
             for comment in in_trimmed_range {
                 comment.mark_formatted();
@@ -148,24 +141,17 @@ where
                 comment.mark_formatted();
             }
 
-            write!(f, [FormatTrailingComments::Comments(outside_trimmed_range)])?;
+            biome_formatter::write!(f, [FormatTrailingComments::Comments(outside_trimmed_range)])?;
         }
 
         f.write_element(FormatElement::Tag(Tag::EndVerbatim))
     }
 }
 
-impl<L: Language> FormatVerbatimNode<'_, L> {
-    pub fn skip_comments(mut self) -> Self {
-        self.format_comments = false;
-        self
-    }
-}
-
 /// Formats bogus nodes. The difference between this method  and `format_verbatim` is that this method
 /// doesn't track nodes/tokens as [VerbatimKind::Verbatim]. They are just printed as they are.
-pub fn format_bogus_node<L: Language>(node: &SyntaxNode<L>) -> FormatVerbatimNode<L> {
-    FormatVerbatimNode {
+pub fn format_bogus_node(node: &CssSyntaxNode) -> FormatCssVerbatimNode {
+    FormatCssVerbatimNode {
         node,
         kind: VerbatimKind::Bogus,
         format_comments: true,
@@ -173,8 +159,8 @@ pub fn format_bogus_node<L: Language>(node: &SyntaxNode<L>) -> FormatVerbatimNod
 }
 
 /// Format a node having formatter suppression comment applied to it
-pub fn format_suppressed_node<L: Language>(node: &SyntaxNode<L>) -> FormatVerbatimNode<L> {
-    FormatVerbatimNode {
+pub fn format_suppressed_node(node: &CssSyntaxNode) -> FormatCssVerbatimNode {
+    FormatCssVerbatimNode {
         node,
         kind: VerbatimKind::Suppressed,
         format_comments: true,
@@ -193,13 +179,12 @@ pub struct FormatNodeOrVerbatim<F> {
     inner: F,
 }
 
-impl<F, Context, Item> Format<Context> for FormatNodeOrVerbatim<F>
+impl<F, Item> Format<CssFormatContext> for FormatNodeOrVerbatim<F>
 where
-    F: FormatWithRule<Context, Item = Item>,
-    Item: AstNode,
-    Context: CstFormatContext<Language = Item::Language>,
+    F: FormatWithRule<CssFormatContext, Item = Item>,
+    Item: AstNode<Language = CssLanguage>,
 {
-    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+    fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
         let snapshot = Formatter::state_snapshot(f);
 
         match self.inner.fmt(f) {

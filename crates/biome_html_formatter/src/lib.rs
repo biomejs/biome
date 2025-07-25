@@ -1,5 +1,6 @@
 #![deny(clippy::use_self)]
 
+use crate::prelude::{format_bogus_node, format_suppressed_node};
 use biome_formatter::comments::Comments;
 use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
 use biome_formatter::{FormatLanguage, FormatResult, FormatToken, Formatted, write};
@@ -19,6 +20,7 @@ mod html;
 pub(crate) mod prelude;
 mod svelte;
 pub mod utils;
+mod verbatim;
 
 /// Formats a Html file based on its features.
 ///
