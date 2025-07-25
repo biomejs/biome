@@ -1,6 +1,4 @@
-use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule,
-};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
@@ -10,7 +8,7 @@ use biome_rule_options::use_image_size::UseImageSizeOptions;
 declare_lint_rule! {
     /// Enforces that `<img>` elements have both width and height attributes.
     ///
-    /// This rule is intended for use in Qwik applications to ensure `<img>` elements have width and height attributes.
+    /// This rule ensures that `<img>` elements have `width` and `height` attributes
     ///
     /// ## Examples
     ///
@@ -48,18 +46,13 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintQwik("jsx-img").same()],
         recommended: true,
         severity: Severity::Warning,
-        fix_kind: FixKind::None,
         domains: &[RuleDomain::Qwik],
     }
 }
 
-pub enum JsxImgDiagnosticKind {
-    MissingWidthOrHeight,
-}
-
 impl Rule for UseImageSize {
     type Query = Ast<AnyJsxElement>;
-    type State = JsxImgDiagnosticKind;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = UseImageSizeOptions;
 
@@ -72,23 +65,30 @@ impl Rule for UseImageSize {
         let has_width = element.find_attribute_by_name("width").is_some();
         let has_height = element.find_attribute_by_name("height").is_some();
         if !has_width || !has_height {
-            return Some(JsxImgDiagnosticKind::MissingWidthOrHeight);
+            return Some(());
         }
         None
     }
 
     fn diagnostic(
         ctx: &biome_analyze::context::RuleContext<Self>,
-        kind: &Self::State,
+        _state: &Self::State,
     ) -> Option<RuleDiagnostic> {
-        match kind {
-            JsxImgDiagnosticKind::MissingWidthOrHeight => Some(RuleDiagnostic::new(
-                rule_category!(),
-                ctx.query().range(),
-                markup!(
-                    "<Emphasis>img</Emphasis> elements should always have both width and height attributes to prevent layout shifts and improve performance."
-                ),
-            )),
-        }
+        let diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            ctx.query().range(),
+            markup! {
+                "Missing "<Emphasis>"width"</Emphasis>" or "<Emphasis>"height"</Emphasis>" attribute on "<Emphasis>"img"</Emphasis>" element."
+            },
+        )
+        .note(markup! {
+            "Without explicit dimensions, images cause layout shifts (CLS) when loading, harming user experience and SEO."
+        })
+        .note(markup! {
+            "Learn why this matters: "
+            <Hyperlink href="https://web.dev/optimize-cls/#images-without-dimensions">"web.dev: Image Dimensions"</Hyperlink>", "
+            <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attributes">"MDN: img attributes"</Hyperlink>
+        });
+        Some(diagnostic)
     }
 }

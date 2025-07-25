@@ -12,11 +12,15 @@ expression: invalid-4.jsx
 ```
 invalid-4.jsx:2:1 lint/nursery/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>img</Emphasis> elements should always have both width and height attributes to prevent layout shifts and improve performance.
+  ! Missing width or height attribute on img element.
   
     1 │ // Invalid: missing width
   > 2 │ <img src="/image.png" height="200" />·
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Without explicit dimensions, images cause layout shifts (CLS) when loading, harming user experience and SEO.
+  
+  i Learn why this matters: web.dev: Image Dimensions, MDN: img attributes
   
 
 ```

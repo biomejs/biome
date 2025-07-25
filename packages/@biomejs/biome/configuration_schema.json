@@ -4939,7 +4939,7 @@
 					]
 				},
 				"useAnchorHref": {
-					"description": "Require href attribute for \\<a> elements in JSX.",
+					"description": "Enforces href attribute for \\<a> elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
 						{ "type": "null" }

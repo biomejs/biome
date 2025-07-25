@@ -1,6 +1,4 @@
-use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule,
-};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, AnyJsxAttributeValue, JsxAttribute};
@@ -10,9 +8,9 @@ use biome_rule_options::use_qwik_classlist::UseQwikClasslistOptions;
 declare_lint_rule! {
     /// Prefer using the `class` prop as a classlist over the `classnames` helper.
     ///
-    /// Qwik's `class` prop natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using utilities like `classnames` can interfere with Qwik's reactivity model and prevent the framework from optimizing component updates. Prefer using the built-in `class` prop for best results.
+    /// This rule encourages the use of `class` prop which natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using utilities like `classnames` can interfere with Qwik's reactivity model and prevent the framework from optimizing component updates. Prefer using the built-in `class` prop for best results.
     ///
-    /// For more information, see: [Qwik documentation on class bindings](https://qwik.dev/docs/components/css/#class-and-style-bindings)
+    /// For more information, see: [Qwik documentation on class bindings](https://qwik.dev/docs/components/rendering/#class-and-style-bindings)
     ///
     /// ## Examples
     ///
@@ -34,7 +32,6 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintQwik("prefer-classlist").same()],
         recommended: true,
         severity: Severity::Warning,
-        fix_kind: FixKind::None,
         domains: &[RuleDomain::Qwik],
     }
 }
@@ -62,7 +59,7 @@ impl Rule for UseQwikClasslist {
             };
             let callee = call.callee().ok()?;
             let ident = callee.as_js_reference_identifier()?;
-            if ident.value_token().ok()?.text() == "classnames" {
+            if ident.value_token().ok()?.text_trimmed() == "classnames" {
                 return Some(attr.range());
             }
         }
@@ -73,12 +70,25 @@ impl Rule for UseQwikClasslist {
         _: &biome_analyze::context::RuleContext<Self>,
         range: &Self::State,
     ) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
+        RuleDiagnostic::new(
             rule_category!(),
             range,
-            markup!(
-                "Avoid using the <Emphasis>classnames</Emphasis> utility. Qwik's <Emphasis>class</Emphasis> prop natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using <Emphasis>classnames</Emphasis> can prevent Qwik from optimizing your component's updates. See <Link href='https://qwik.dev/docs/components/css/#class-and-style-bindings'>Qwik documentation</Link> for more details."
-            ),
-        ))
+            markup! {
+                "Avoid third-party "<Emphasis>"classnames"</Emphasis>" utilities with Qwik components"
+            },
+        )
+        .note(markup! {
+            "Qwik's built-in "<Emphasis>"class"</Emphasis>" prop handles:"
+            "\n- Conditional classes via objects: "<Emphasis>"class={{ active: isActive }}"</Emphasis>
+            "\n- Dynamic string concatenation"
+            "\n- Array combinations"
+            "\n\nExternal utilities break Qwik's:"
+            "\n- Fine-grained reactivity tracking"
+            "\n- Resumability optimizations"
+        })
+        .note(markup! {
+            "Use native Qwik class binding as shown in "<Hyperlink href="https://qwik.dev/docs/components/tasks/">"Qwik Rendering: Class Bindings (Official Docs)."</Hyperlink>
+        })
+        .into()
     }
 }

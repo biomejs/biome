@@ -39,7 +39,7 @@ export const NestedClassnamesInvalid = () => (
 ```
 invalid.jsx:7:10 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the <Emphasis>classnames</Emphasis> utility. Qwik's <Emphasis>class</Emphasis> prop natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using <Emphasis>classnames</Emphasis> can prevent Qwik from optimizing your component's updates. See <Link href='https://qwik.dev/docs/components/css/#class-and-style-bindings'>Qwik documentation</Link> for more details.
+  ! Avoid third-party classnames utilities with Qwik components
   
      5 │ export default component$((props) => {
      6 │   return (
@@ -53,13 +53,24 @@ invalid.jsx:7:10 lint/nursery/useQwikClasslist ━━━━━━━━━━━
     16 │       Hello world!
     17 │     </div>
   
+  i Qwik's built-in class prop handles:
+    - Conditional classes via objects: class={{ active: isActive }}
+    - Dynamic string concatenation
+    - Array combinations
+    
+    External utilities break Qwik's:
+    - Fine-grained reactivity tracking
+    - Resumability optimizations
+  
+  i Use native Qwik class binding as shown in Qwik Rendering: Class Bindings (Official Docs).
+  
 
 ```
 
 ```
 invalid.jsx:23:19 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the <Emphasis>classnames</Emphasis> utility. Qwik's <Emphasis>class</Emphasis> prop natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using <Emphasis>classnames</Emphasis> can prevent Qwik from optimizing your component's updates. See <Link href='https://qwik.dev/docs/components/css/#class-and-style-bindings'>Qwik documentation</Link> for more details.
+  ! Avoid third-party classnames utilities with Qwik components
   
     21 │ // Invalid: classnames with spread props
     22 │ export const SpreadPropsInvalid = (props) => (
@@ -68,19 +79,41 @@ invalid.jsx:23:19 lint/nursery/useQwikClasslist ━━━━━━━━━━�
     24 │ );
     25 │ 
   
+  i Qwik's built-in class prop handles:
+    - Conditional classes via objects: class={{ active: isActive }}
+    - Dynamic string concatenation
+    - Array combinations
+    
+    External utilities break Qwik's:
+    - Fine-grained reactivity tracking
+    - Resumability optimizations
+  
+  i Use native Qwik class binding as shown in Qwik Rendering: Class Bindings (Official Docs).
+  
 
 ```
 
 ```
 invalid.jsx:28:8 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the <Emphasis>classnames</Emphasis> utility. Qwik's <Emphasis>class</Emphasis> prop natively supports strings, objects, and arrays, enabling fine-grained reactivity and optimal performance. Using <Emphasis>classnames</Emphasis> can prevent Qwik from optimizing your component's updates. See <Link href='https://qwik.dev/docs/components/css/#class-and-style-bindings'>Qwik documentation</Link> for more details.
+  ! Avoid third-party classnames utilities with Qwik components
   
     26 │ // Invalid: classnames in nested call
     27 │ export const NestedClassnamesInvalid = () => (
   > 28 │   <div class={classnames(classnames('foo', { bar: true }))} />
        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     29 │ );·
+  
+  i Qwik's built-in class prop handles:
+    - Conditional classes via objects: class={{ active: isActive }}
+    - Dynamic string concatenation
+    - Array combinations
+    
+    External utilities break Qwik's:
+    - Fine-grained reactivity tracking
+    - Resumability optimizations
+  
+  i Use native Qwik class binding as shown in Qwik Rendering: Class Bindings (Official Docs).
   
 
 ```

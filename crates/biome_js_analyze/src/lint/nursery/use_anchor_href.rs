@@ -8,9 +8,10 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_anchor_href::UseAnchorHrefOptions;
 
 declare_lint_rule! {
-    /// Require `href` attribute for `<a>` elements in JSX.
+    /// Enforces `href` attribute for `<a>` elements.
     ///
-    /// This rule is intended for use in Qwik applications to ensure `<a>` elements have an `href` attribute.
+    /// Ensures `<a>` tags are either valid links (with href) or replaced with buttons for actions.
+    /// See [WCAG 4.1.2](https://www.w3.org/WAI/WCAG22/Understanding/name-role-value) for accessibility requirements.
     ///
     /// ## Examples
     ///
@@ -39,7 +40,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintQwik("jsx-a").same()],
         recommended: true,
-        severity: Severity::Warning,
+        severity: Severity::Error,
         fix_kind: FixKind::None,
         domains: &[RuleDomain::Qwik],
     }
@@ -67,12 +68,21 @@ impl Rule for UseAnchorHref {
         _: &biome_analyze::context::RuleContext<Self>,
         range: &Self::State,
     ) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
+        RuleDiagnostic::new(
             rule_category!(),
             range,
-            markup!(
-                "<Emphasis>a</Emphasis> elements must have an <Emphasis>href</Emphasis> attribute to ensure accessibility and proper navigation."
-            ),
-        ))
+            markup! {
+                "Missing required "<Emphasis>"href"</Emphasis>" attribute on "<Emphasis>"a"</Emphasis>" element"
+            },
+        )
+        .note(markup! {
+            "Anchor tags without href attributes are inaccessible to keyboard navigation and screen readers, violating WCAG 2.2 Success Criterion 4.1.2 (Name, Role, Value)."
+        })
+        .note(markup! {
+            "Use "<Emphasis>"href"</Emphasis>" for navigation or "<Emphasis>"<button>"</Emphasis>" for actions. "
+            "Reference: "
+            <Hyperlink href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value">"WCAG 4.1.2"</Hyperlink>
+        })
+        .into()
     }
 }

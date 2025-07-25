@@ -10,8 +10,8 @@ use biome_rule_options::no_qwik_use_visible_task::NoQwikUseVisibleTaskOptions;
 declare_lint_rule! {
     /// Disallow `useVisibleTask$()` functions in Qwik components.
     ///
-    /// This rule is intended for use in Qwik applications to prevent the use of
-    /// `useVisibleTask$()` functions which are not recommended in Qwik.
+    /// Prevents hydration-blocking operations that hurt Qwik's resumability.
+    /// See [Qwik Tasks Documentation](https://qwik.dev/docs/components/tasks/) for proper alternatives.
     ///
     /// ## Examples
     ///
@@ -113,15 +113,22 @@ impl Rule for NoQwikUseVisibleTask {
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup!("<Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern."),
-            )
-            .note(markup!(
-                "Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations."
-            )),
+        RuleDiagnostic::new(
+            rule_category!(),
+            range,
+            markup! {
+                "Avoid "<Emphasis>"useVisibleTask$"</Emphasis>" for non-interactive initialization"
+            },
         )
+        .note(markup! {
+            "This hook executes immediately on component mount without user interaction, potentially:"
+            "\n- Hurting performance (blocking hydration)"
+            "\n- Causing layout shifts (CLS)"
+            "\n- Breaking SSR compatibility"
+        })
+        .note(markup! {
+            "Check the "<Hyperlink href="https://qwik.dev/docs/components/tasks/">"Qwik documentation"</Hyperlink>" for suitable alternatives."
+        })
+        .into()
     }
 }

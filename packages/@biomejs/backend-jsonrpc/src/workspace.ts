@@ -1679,7 +1679,7 @@ export interface Nursery {
 	 */
 	useAdjacentGetterSetter?: RuleConfiguration_for_UseAdjacentGetterSetterOptions;
 	/**
-	 * Require href attribute for \<a> elements in JSX.
+	 * Enforces href attribute for \<a> elements.
 	 */
 	useAnchorHref?: RuleConfiguration_for_UseAnchorHrefOptions;
 	/**

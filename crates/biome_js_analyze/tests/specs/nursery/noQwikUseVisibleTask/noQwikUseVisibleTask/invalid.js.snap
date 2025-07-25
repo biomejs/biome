@@ -73,14 +73,19 @@ useVisibleTask$(({ track, cleanup }) => {
 ```
 invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
   > 1 │ useVisibleTask$(() => {
       │ ^^^^^^^^^^^^^^^
     2 │   console.log('Component is visible');
     3 │ });
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
@@ -88,7 +93,7 @@ invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
     3 │ });
     4 │ 
@@ -97,7 +102,12 @@ invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
     6 │   const subscription = someObservable.subscribe();
     7 │   cleanup(() => subscription.unsubscribe());
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
@@ -105,7 +115,7 @@ invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
 ```
 invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
      8 │ });
      9 │ 
@@ -114,7 +124,12 @@ invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     11 │   document.title = 'New Title';
     12 │ }, { eagerness: 'visible' });
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
@@ -122,7 +137,7 @@ invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
     14 │ const MyComponent = component$(() => {
   > 15 │   useVisibleTask$(() => {
@@ -130,7 +145,12 @@ invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     16 │     console.log('Component mounted');
     17 │   });
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
@@ -138,7 +158,7 @@ invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
     21 │ export const App = component$(() => {
   > 22 │   useVisibleTask$(({ track }) => {
@@ -146,7 +166,12 @@ invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     23 │     track(() => state.value);
     24 │     console.log('State changed');
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
@@ -154,7 +179,7 @@ invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
     29 │ function setupComponent() {
   > 30 │   useVisibleTask$(() => {
@@ -162,7 +187,12 @@ invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     31 │     // Setup logic
     32 │   });
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
@@ -170,7 +200,7 @@ invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
     35 │ const setup = () => {
   > 36 │   useVisibleTask$(() => {
@@ -178,7 +208,12 @@ invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     37 │     // Setup in arrow function
     38 │   });
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
@@ -186,7 +221,7 @@ invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
     41 │ class MyClass {
     42 │   constructor() {
@@ -195,7 +230,12 @@ invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     44 │       // Setup in constructor
     45 │     });
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
@@ -203,7 +243,7 @@ invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
     47 │ }
     48 │ 
@@ -212,7 +252,12 @@ invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     50 │   console.log('First task');
     51 │ });
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
@@ -220,7 +265,7 @@ invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
     51 │ });
     52 │ 
@@ -229,7 +274,12 @@ invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     54 │   console.log('Second task');
     55 │ });
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
@@ -237,7 +287,7 @@ invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 invalid.js:57:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! <Emphasis>useVisibleTask$()</Emphasis> runs code in the browser immediately without user interaction, which is an anti-pattern.
+  ! Avoid useVisibleTask$ for non-interactive initialization
   
     55 │ });
     56 │ 
@@ -246,7 +296,12 @@ invalid.js:57:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
     58 │   const interval = setInterval(() => {
     59 │     track(() => count.value);
   
-  i Consider using useTask$ for async operations, useComputed$ for derived state, event hooks (useOn, useOnDocument, useOnWindow) for user interactions, or sync$ for synchronous operations.
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
   
 
 ```
