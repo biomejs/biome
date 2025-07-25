@@ -1,6 +1,6 @@
 use std::sync::mpsc;
 
-use biome_fs::FileSystem;
+use biome_fs::{BiomePath, FileSystem};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashSet;
 use rustc_hash::{FxBuildHasher, FxHashSet};
@@ -74,7 +74,14 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
         self.fs
     }
 
-    fn find_project_for_path(&self, _path: &Utf8Path) -> Option<(ProjectKey, ScanKind)> {
+    fn find_project_for_path(&self, _path: &Utf8Path) -> Option<ProjectKey> {
+        Some(self.project_key)
+    }
+
+    fn find_project_with_scan_kind_for_path(
+        &self,
+        _path: &Utf8Path,
+    ) -> Option<(ProjectKey, ScanKind)> {
         Some((self.project_key, self.scan_kind.clone()))
     }
 
@@ -93,25 +100,19 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
     fn index_file(
         &self,
         project_key: ProjectKey,
-        scan_kind: &ScanKind,
-        path: &Utf8Path,
+        path: impl Into<BiomePath>,
     ) -> Result<(), WorkspaceError> {
         assert_eq!(project_key, self.project_key);
-        assert_eq!(*scan_kind, self.scan_kind);
 
-        if !self.is_ignored(project_key, scan_kind, path)? {
-            self.indexed_files.pin().insert(path.to_path_buf());
-            self.tx.send(()).expect("can send notification");
-        }
+        self.indexed_files.pin().insert(path.into().into());
+        self.tx.send(()).expect("can send notification");
 
         Ok(())
     }
 
     fn index_folder(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
-        if !self.is_ignored(self.project_key, &self.scan_kind, path)? {
-            self.indexed_folders.pin().insert(path.to_path_buf());
-            self.tx.send(()).expect("can send notification");
-        }
+        self.indexed_folders.pin().insert(path.to_path_buf());
+        self.tx.send(()).expect("can send notification");
 
         Ok(())
     }

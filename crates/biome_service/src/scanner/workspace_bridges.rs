@@ -4,11 +4,7 @@ use biome_fs::FileSystem;
 use biome_module_graph::ModuleDependencies;
 use camino::Utf8Path;
 
-use crate::{
-    WorkspaceError,
-    projects::ProjectKey,
-    workspace::{IgnoreKind, ServiceNotification},
-};
+use crate::{WorkspaceError, projects::ProjectKey, workspace::ServiceNotification};
 
 use super::*;
 
@@ -27,13 +23,13 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
 
     /// Asks the workspace whether the given `path` that falls under the project
     /// with the given `project_key` is ignored, assuming the given `scan_kind`
-    /// and `ignore_kind`.
+    /// and `request_kind`.
     fn is_ignored(
         &self,
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
-        ignore_kind: IgnoreKind,
+        request_kind: IndexRequestKind,
     ) -> Result<bool, WorkspaceError>;
 
     /// Returns whether the given `path` has been indexed.
@@ -42,35 +38,14 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     /// Indexes the file with the given `path` within the project with the given
     /// `project_key` in the workspace.
     ///
-    /// Does nothing if the given `path` is ignored by the workspace for the
-    /// given `scan_kind`, using the given `trigger`.
-    ///
     /// Returns a set of dependencies that can be scanned using
     /// [`WorkspaceScannerBridge::index_dependencies()`], if desired.
     fn index_file(
         &self,
         project_key: ProjectKey,
-        scan_kind: &ScanKind,
-        path: &Utf8Path,
-        trigger: IndexTrigger,
+        path: impl Into<BiomePath>,
+        request_kind: IndexRequestKind,
     ) -> Result<ModuleDependencies, WorkspaceError>;
-
-    /// Scans and potentially watches the folder with the given `path` within
-    /// the project with the given `project_key` in the workspace, while
-    /// indexing all the files relevant for the given `scan_kind`.
-    ///
-    /// Does nothing if the given `path` is ignored by the workspace for the
-    /// given `scan_kind`, using the given `trigger`.
-    ///
-    /// Transitively indexes dependencies that were discovered during indexing
-    /// the folder as well, if relevant to the given `scan_kind`.
-    fn index_folder(
-        &self,
-        project_key: ProjectKey,
-        scan_kind: &ScanKind,
-        path: &Utf8Path,
-        trigger: IndexTrigger,
-    ) -> Result<(), WorkspaceError>;
 
     /// Informs the workspace of the list of nested config files.
     ///
@@ -131,8 +106,14 @@ pub(crate) trait WorkspaceWatcherBridge {
     /// Returns a reference to the [`FileSystem`].
     fn fs(&self) -> &dyn FileSystem;
 
+    /// Finds the [`ProjectKey`] to use for the given `path`.
+    fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey>;
+
     /// Finds the [`ProjectKey`] and [`ScanKind`] to use for the given `path`.
-    fn find_project_for_path(&self, path: &Utf8Path) -> Option<(ProjectKey, ScanKind)>;
+    fn find_project_with_scan_kind_for_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<(ProjectKey, ScanKind)>;
 
     /// Asks the workspace whether the given `path` that falls under the project
     /// with the given `project_key` is ignored, assuming the given `scan_kind`.
@@ -146,24 +127,17 @@ pub(crate) trait WorkspaceWatcherBridge {
     /// Indexes the file with the given `path` within the project with the given
     /// `project_key` in the workspace.
     ///
-    /// Does nothing if the given `path` is ignored by the workspace for the
-    /// given `scan_kind`.
-    ///
     /// If relevant to the given `scan_kind`, dependencies of the file are
     /// indexed as well.
     fn index_file(
         &self,
         project_key: ProjectKey,
-        scan_kind: &ScanKind,
-        path: &Utf8Path,
+        path: impl Into<BiomePath>,
     ) -> Result<(), WorkspaceError>;
 
     /// Scans and watches the folder with the given `path` within the project
     /// with the given `project_key` in the workspace, while indexing all the
     /// files relevant for the given `scan_kind`.
-    ///
-    /// Does nothing if the given `path` is ignored by the workspace for the
-    /// given `scan_kind`.
     ///
     /// If relevant to the given `scan_kind`, dependencies of the files in the
     /// folder are indexed as well.
@@ -215,7 +189,15 @@ where
     }
 
     #[inline]
-    fn find_project_for_path(&self, path: &Utf8Path) -> Option<(ProjectKey, ScanKind)> {
+    fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
+        self.1.find_project_for_path(path)
+    }
+
+    #[inline]
+    fn find_project_with_scan_kind_for_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<(ProjectKey, ScanKind)> {
         self.1.find_project_for_path(path).and_then(|project_key| {
             self.0
                 .get_scan_kind_for_project(project_key)
@@ -234,30 +216,31 @@ where
             project_key,
             scan_kind,
             path,
-            IgnoreKind::for_trigger(IndexTrigger::WatcherUpdate),
+            IndexRequestKind::Explicit(IndexTrigger::Update),
         )
     }
 
-    #[inline]
     fn index_file(
         &self,
         project_key: ProjectKey,
-        scan_kind: &ScanKind,
-        path: &Utf8Path,
+        path: impl Into<BiomePath>,
     ) -> Result<(), WorkspaceError> {
         self.1
-            .index_file(project_key, scan_kind, path, IndexTrigger::WatcherUpdate)
+            .index_file(
+                project_key,
+                path,
+                IndexRequestKind::Explicit(IndexTrigger::Update),
+            )
             .map(|_| ())
     }
 
     #[inline]
     fn index_folder(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
-        let Some((project_key, scan_kind)) = self.find_project_for_path(path) else {
+        let Some(project_key) = self.find_project_for_path(path) else {
             return Ok(()); // file events outside our projects can be safely ignored.
         };
 
-        self.1
-            .index_folder(project_key, &scan_kind, path, IndexTrigger::WatcherUpdate)
+        self.0.index_folder(self.1, project_key, path)
     }
 
     #[inline]

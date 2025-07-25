@@ -12,7 +12,7 @@ use tracing::{debug, warn};
 
 use crate::WorkspaceError;
 use crate::diagnostics::WatchError;
-use crate::workspace::{OpenFileReason, ScanKind};
+use crate::workspace::ScanKind;
 
 use super::WorkspaceWatcherBridge;
 
@@ -43,13 +43,6 @@ impl Drop for WatcherInstructionChannel {
     fn drop(&mut self) {
         let _ = self.sender.send(WatcherInstruction::Stop);
     }
-}
-
-/// Kind of change being reported.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum WatcherSignalKind {
-    AddedOrChanged(OpenFileReason),
-    Removed,
 }
 
 /// Watcher to keep the [WorkspaceServer] in sync with the filesystem state.
@@ -215,11 +208,11 @@ impl Watcher {
             .filter_map(|path| {
                 let path = Utf8PathBuf::from_path_buf(path).ok()?;
                 workspace
-                    .find_project_for_path(&path)
+                    .find_project_with_scan_kind_for_path(&path)
                     .filter(|(project_key, scan_kind)| {
                         match workspace.is_ignored(*project_key, scan_kind, &path) {
                             Ok(is_ignored) => !is_ignored,
-                            Err(_) => true,
+                            Err(_) => false,
                         }
                     })
                     .map(|_| path)
@@ -265,11 +258,11 @@ impl Watcher {
         if workspace.fs().path_is_dir(path) {
             workspace.index_folder(path)
         } else {
-            let Some((project_key, scan_kind)) = workspace.find_project_for_path(path) else {
+            let Some(project_key) = workspace.find_project_for_path(path) else {
                 return Ok(()); // file events outside our projects can be safely ignored.
             };
 
-            workspace.index_file(project_key, &scan_kind, path)
+            workspace.index_file(project_key, path)
         }
     }
 
@@ -312,11 +305,11 @@ impl Watcher {
     /// Reopens an individual file if the watcher (still) has interest in it.
     #[tracing::instrument(level = "debug", skip(workspace))]
     fn resync_file(workspace: &impl WorkspaceWatcherBridge, path: &Utf8Path) {
-        let Some((project_key, scan_kind)) = workspace.find_project_for_path(path) else {
+        let Some(project_key) = workspace.find_project_for_path(path) else {
             return; // file events outside our projects can be safely ignored.
         };
 
-        if let Err(error) = workspace.index_file(project_key, &scan_kind, path) {
+        if let Err(error) = workspace.index_file(project_key, path) {
             // TODO: Improve error propagation.
             warn!("Error re-indexing path {path}: {error}");
         }

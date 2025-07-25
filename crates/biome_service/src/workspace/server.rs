@@ -45,7 +45,7 @@ use crate::file_handlers::{
 };
 use crate::projects::Projects;
 use crate::scanner::{
-    IndexTrigger, ScanOptions, Scanner, WatcherInstruction, WatcherSignalKind,
+    IndexRequestKind, IndexTrigger, ScanOptions, Scanner, WatcherInstruction,
     WorkspaceScannerBridge,
 };
 
@@ -484,7 +484,7 @@ impl WorkspaceServer {
 
         if is_indexed {
             let dependencies =
-                self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path, root)?;
+                self.update_service_data(UpdateKind::AddedOrChanged(reason), &path, root)?;
             Ok(InternalOpenFileResult { dependencies })
         } else {
             // If the document was never opened by the scanner, we don't care
@@ -581,17 +581,57 @@ impl WorkspaceServer {
 
     /// Returns whether the given `path` that falls under the project with the
     /// given `project_key` is ignored, assuming the given `scan_kind` and
-    /// `ignore_kind`.
+    /// `reason`.
     fn is_ignored_by_scanner(
         &self,
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
-        ignore_kind: IgnoreKind,
+        request_kind: IndexRequestKind,
     ) -> Result<bool, WorkspaceError> {
         if self.projects.is_ignored_by_scanner(project_key, path) {
             return Ok(true);
         }
+
+        // Determine the ignore kind based on the kind of request.
+        let ignore_kind = match request_kind {
+            // For an initial scan, we don't descend into ignored folders.
+            // Therefore, we don't need to check if any of the ancestors of the
+            // given `path` are ignored. If they were, we wouldn't have been
+            // scanning them in the first place. So checking whether the path
+            // itself is ignored is enough.
+            IndexRequestKind::Explicit(IndexTrigger::InitialScan) => IgnoreKind::Path,
+
+            // For a (watcher) update, we can't rely on the above reasoning.
+            // Even though we only install watchers on folders that contain
+            // indexed files, such indexed files might've been indexed even
+            // though the folder they are in is ignored, as happens when we
+            // watch dependencies. Therefore, we take the following approach:
+            // - If the path is already indexed, we can assume it's not ignored.
+            //   This works for dependencies and non-dependencies alike.
+            // - Otherwise, we verify that none of the ancestor folders are
+            //   ignored, so we don't accidentally pick up on new files inside
+            //   ignored folders.
+            IndexRequestKind::Explicit(IndexTrigger::Update) if self.is_indexed(path) => {
+                return Ok(false);
+            }
+            IndexRequestKind::Explicit(IndexTrigger::Update) => IgnoreKind::Ancestors,
+
+            // If the path is a dependency of an indexed file, we accept them
+            // under the following conditions:
+            // - If the path is inside `node_modules`, we only care about
+            //   `package.json` and type declarations, to avoid accidentally
+            //   indexing minified files.
+            // - The path shouldn't be indexed yet, to avoid double indexing.
+            IndexRequestKind::Dependency(_) => {
+                let path = BiomePath::new(path);
+                if path.is_dependency() && !path.is_package_json() && !path.is_type_declaration() {
+                    return Ok(true);
+                }
+
+                return Ok(self.is_indexed(&path));
+            }
+        };
 
         let path = BiomePath::new(path);
         let is_ignored = match self.fs.symlink_path_kind(&path)? {
@@ -624,24 +664,53 @@ impl WorkspaceServer {
             }
             PathKind::File { .. } => match scan_kind {
                 ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
-                    if path.is_config() {
+                    // For required files, we don't care if the file is ignored
+                    // by the configuration or not. But we do care it is not
+                    // inside an ignored folder.
+                    if path.is_required_during_scan() {
+                        match ignore_kind {
+                            IgnoreKind::Path => false,
+                            IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
+                                self.projects.is_ignored_by_top_level_config(
+                                    project_key,
+                                    folder_path,
+                                    ignore_kind,
+                                )
+                            }),
+                        }
+                    } else {
+                        true
+                    }
+                }
+                ScanKind::Project => {
+                    if path.is_dependency() {
+                        // During the initial scan, we only care about
+                        // `package.json` files inside `node_modules`, so that
+                        // we can build the project layout and resolve
+                        // dependencies that lead there. The resolved
+                        // dependencies can then be scanned using
+                        // `IndexReason::InitialScanDependency`.
+                        //
+                        // For everything else, dependencies are ignored.
+                        request_kind.trigger() != IndexTrigger::InitialScan
+                            || !path.is_package_json()
+                    } else if path.is_required_during_scan() {
+                        match ignore_kind {
+                            IgnoreKind::Path => false,
+                            IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
+                                self.projects.is_ignored_by_top_level_config(
+                                    project_key,
+                                    folder_path,
+                                    ignore_kind,
+                                )
+                            }),
+                        }
+                    } else {
                         self.projects.is_ignored_by_top_level_config(
                             project_key,
                             &path,
                             ignore_kind,
                         )
-                    } else {
-                        !path.is_ignore() && !path.is_manifest()
-                    }
-                }
-                ScanKind::Project => {
-                    if path.is_dependency() {
-                        // For dependencies, we ignore everything except
-                        // manifests and type declarations.
-                        !path.is_package_json() && !path.is_type_declaration()
-                    } else {
-                        !path.is_required_during_scan()
-                            && DocumentFileSource::try_from_path(&path).is_err()
                     }
                 }
                 ScanKind::NoScanner => true,
@@ -654,7 +723,7 @@ impl WorkspaceServer {
     /// Updates the [ProjectLayout] for the given `path`.
     pub(super) fn update_project_layout(
         &self,
-        signal_kind: WatcherSignalKind,
+        signal_kind: UpdateKind,
         path: &Utf8Path,
     ) -> Result<(), WorkspaceError> {
         let filename = path.file_name();
@@ -665,12 +734,12 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match signal_kind {
-                WatcherSignalKind::AddedOrChanged(_) => {
+                UpdateKind::AddedOrChanged(_) => {
                     let parsed = self.get_parse(path)?;
                     self.project_layout
                         .insert_serialized_node_manifest(package_path, parsed);
                 }
-                WatcherSignalKind::Removed => {
+                UpdateKind::Removed => {
                     self.project_layout.remove_package(&package_path);
                 }
             }
@@ -681,12 +750,12 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
 
             match signal_kind {
-                WatcherSignalKind::AddedOrChanged(_) => {
+                UpdateKind::AddedOrChanged(_) => {
                     let parsed = self.get_parse(path)?;
                     self.project_layout
                         .insert_serialized_tsconfig(package_path, parsed);
                 }
-                WatcherSignalKind::Removed => {
+                UpdateKind::Removed => {
                     self.project_layout
                         .remove_tsconfig_from_package(&package_path);
                 }
@@ -704,12 +773,12 @@ impl WorkspaceServer {
     #[tracing::instrument(level = "debug", skip(self, root))]
     fn update_module_graph_internal(
         &self,
-        signal_kind: WatcherSignalKind,
+        signal_kind: UpdateKind,
         path: &BiomePath,
         root: Option<SendNode>,
     ) -> ModuleDependencies {
         let (added_or_changed_paths, removed_paths) = match signal_kind {
-            WatcherSignalKind::AddedOrChanged(_) => {
+            UpdateKind::AddedOrChanged(_) => {
                 let Some(root) = root.and_then(SendNode::into_node).and_then(AnyJsRoot::cast)
                 else {
                     return Default::default();
@@ -717,7 +786,7 @@ impl WorkspaceServer {
 
                 (&[(path, root)] as &[_], &[] as &[_])
             }
-            WatcherSignalKind::Removed => (&[] as &[_], &[path] as &[_]),
+            UpdateKind::Removed => (&[] as &[_], &[path] as &[_]),
         };
 
         self.module_graph.update_graph_for_js_paths(
@@ -736,7 +805,7 @@ impl WorkspaceServer {
     #[instrument(level = "debug", skip(self, path, root))]
     fn update_service_data(
         &self,
-        signal_kind: WatcherSignalKind,
+        signal_kind: UpdateKind,
         path: &Utf8Path,
         root: Option<SendNode>,
     ) -> Result<ModuleDependencies, WorkspaceError> {
@@ -748,7 +817,7 @@ impl WorkspaceServer {
         let dependencies = self.update_module_graph_internal(signal_kind, &path, root);
 
         match signal_kind {
-            WatcherSignalKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan)) => {
+            UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan)) => {
                 // We'll send a single signal at the end of the scan.
             }
             _ => {
@@ -806,7 +875,7 @@ impl Workspace for WorkspaceServer {
             if self.fs.path_exists(&manifest) {
                 const REASON: OpenFileReason = OpenFileReason::Index(IndexTrigger::InitialScan);
                 self.open_file_for_reason(project_key, manifest.clone().into(), REASON)?;
-                self.update_project_layout(WatcherSignalKind::AddedOrChanged(REASON), &manifest)?;
+                self.update_project_layout(UpdateKind::AddedOrChanged(REASON), &manifest)?;
             }
             return Ok(ScanProjectFolderResult {
                 diagnostics: Vec::new(),
@@ -1204,16 +1273,20 @@ impl Workspace for WorkspaceServer {
 
         if is_indexed {
             let dependencies = self.update_service_data(
-                WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest),
+                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest),
                 &path,
                 Some(root),
             )?;
             if !dependencies.is_empty()
                 && let Some(project_path) = self.projects.get_project_path(project_key)
             {
-                let _ =
-                    self.scanner
-                        .index_dependencies(self, project_key, &project_path, dependencies);
+                let _ = self.scanner.index_dependencies(
+                    self,
+                    project_key,
+                    &project_path,
+                    dependencies,
+                    IndexTrigger::Update,
+                );
             }
         }
 
@@ -1578,10 +1651,10 @@ impl Workspace for WorkspaceServer {
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
         let parsed = self.get_parse(params.path.as_path())?;
         let signal = match params.update_kind {
-            UpdateKind::AddOrUpdate => {
-                WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest)
+            super::UpdateKind::AddOrUpdate => {
+                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest)
             }
-            UpdateKind::Remove => WatcherSignalKind::Removed,
+            super::UpdateKind::Remove => UpdateKind::Removed,
         };
 
         self.update_module_graph_internal(signal, &params.path, Some(parsed.root()));
@@ -1690,9 +1763,9 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         project_key: ProjectKey,
         scan_kind: &ScanKind,
         path: &Utf8Path,
-        ignore_kind: IgnoreKind,
+        request_kind: IndexRequestKind,
     ) -> Result<bool, WorkspaceError> {
-        self.is_ignored_by_scanner(project_key, scan_kind, path, ignore_kind)
+        self.is_ignored_by_scanner(project_key, scan_kind, path, request_kind)
     }
 
     #[inline]
@@ -1703,42 +1776,20 @@ impl WorkspaceScannerBridge for WorkspaceServer {
             .is_some_and(|document| document.is_indexed)
     }
 
-    #[instrument(level = "debug", skip(self))]
     fn index_file(
         &self,
         project_key: ProjectKey,
-        scan_kind: &ScanKind,
-        path: &Utf8Path,
-        trigger: IndexTrigger,
+        path: impl Into<BiomePath>,
+        request_kind: IndexRequestKind,
     ) -> Result<ModuleDependencies, WorkspaceError> {
-        let path = BiomePath::new(path);
-
-        let ignore_kind = IgnoreKind::for_trigger(trigger);
-        if self.is_ignored_by_scanner(project_key, scan_kind, &path, ignore_kind)? {
-            return Ok(Default::default());
-        }
-
-        self.open_file_for_reason(project_key, path, OpenFileReason::Index(trigger))
-            .map(|result| result.dependencies)
+        self.open_file_for_reason(
+            project_key,
+            path.into(),
+            OpenFileReason::Index(request_kind.trigger()),
+        )
+        .map(|result| result.dependencies)
     }
 
-    #[instrument(level = "debug", skip(self))]
-    fn index_folder(
-        &self,
-        project_key: ProjectKey,
-        scan_kind: &ScanKind,
-        path: &Utf8Path,
-        trigger: IndexTrigger,
-    ) -> Result<(), WorkspaceError> {
-        let ignore_kind = IgnoreKind::for_trigger(trigger);
-        if self.is_ignored_by_scanner(project_key, scan_kind, &BiomePath::new(path), ignore_kind)? {
-            return Ok(());
-        }
-
-        self.scanner.index_folder(self, project_key, path)
-    }
-
-    #[inline]
     fn update_project_config_files(
         &self,
         project_key: ProjectKey,
@@ -1889,13 +1940,12 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         });
 
         if matches!(result, Compute::Removed(_, _)) {
-            let _ = self.update_service_data(WatcherSignalKind::Removed, path, None);
+            let _ = self.update_service_data(UpdateKind::Removed, path, None);
         }
 
         Ok(())
     }
 
-    #[inline]
     fn unload_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         // Note that we cannot check the kind of the path, because the watcher
         // would only attempt to unload a file or folder after it has been
@@ -1934,6 +1984,13 @@ impl OpenFileReason {
     pub const fn is_indexed(self) -> bool {
         matches!(self, Self::Index(_))
     }
+}
+
+/// Kind of update being reported.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum UpdateKind {
+    AddedOrChanged(OpenFileReason),
+    Removed,
 }
 
 /// Sets up the global Rayon thread pool the first time it's called.

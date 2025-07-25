@@ -29,9 +29,8 @@ use tracing::instrument;
 
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
-use crate::workspace::{IgnoreKind, ScanProjectFolderResult, ServiceNotification, WorkspaceError};
+use crate::workspace::{ScanProjectFolderResult, ServiceNotification, WorkspaceError};
 
-pub(crate) use watcher::WatcherSignalKind;
 pub use watcher::{Watcher, WatcherInstruction};
 pub(crate) use workspace_bridges::{WorkspaceScannerBridge, WorkspaceWatcherBridge};
 
@@ -68,25 +67,35 @@ pub(crate) struct ScanResult {
     pub configuration_files: Vec<BiomePath>,
 }
 
-/// The trigger that is causing a file or folder to be indexed.
+/// The kind of request for why a path is being indexed.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum IndexRequestKind {
+    /// There is an explicit request for the path to be indexed, due to being
+    /// included in the configuration.
+    Explicit(IndexTrigger),
+
+    /// The file is being indexed because it is a dependency of one or more
+    /// files that were explicitely indexed.
+    Dependency(IndexTrigger),
+}
+
+impl IndexRequestKind {
+    pub fn trigger(self) -> IndexTrigger {
+        match self {
+            Self::Explicit(trigger) | Self::Dependency(trigger) => trigger,
+        }
+    }
+}
+
+/// Indicates what triggered the index request.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum IndexTrigger {
     /// The file is being indexed as part of an initial scanner run.
     InitialScan,
 
-    /// The file is being (re-)indexed as part of a watcher update.
-    WatcherUpdate,
-}
-
-impl IgnoreKind {
-    /// Returns the [`IgnoreKind`] that should be used for the given trigger.
-    #[inline]
-    pub(crate) const fn for_trigger(trigger: IndexTrigger) -> Self {
-        match trigger {
-            IndexTrigger::InitialScan => Self::Path,
-            IndexTrigger::WatcherUpdate => Self::Ancestors,
-        }
-    }
+    /// The file is being (re-)indexed as part of an update, either by client
+    /// request or a watcher update.
+    Update,
 }
 
 pub(crate) struct Scanner {
@@ -151,7 +160,13 @@ impl Scanner {
             });
         }
 
-        let result = self.scan(workspace, project_key, &project_path, scan_options)?;
+        let result = self.scan(
+            workspace,
+            project_key,
+            &project_path,
+            IndexTrigger::InitialScan,
+            scan_options,
+        )?;
 
         workspace.notify(ServiceNotification::IndexUpdated);
 
@@ -193,8 +208,14 @@ impl Scanner {
             watch,
         };
 
-        self.scan(workspace, project_key, path, scan_options)
-            .map(|_| ())
+        self.scan(
+            workspace,
+            project_key,
+            path,
+            IndexTrigger::Update,
+            scan_options,
+        )
+        .map(|_| ())
 
         // No need to notify after this scan, because the individual file
         // updates will already trigger notifications.
@@ -206,6 +227,7 @@ impl Scanner {
         project_key: ProjectKey,
         project_path: &Utf8Path,
         dependencies: ModuleDependencies,
+        trigger: IndexTrigger,
     ) -> Result<(), WorkspaceError> {
         let scan_kind = self
             .get_scan_kind_for_project(project_key)
@@ -231,6 +253,7 @@ impl Scanner {
                 diagnostics_sender,
                 evaluated_paths: Default::default(),
                 scan_kind,
+                trigger,
                 watch: true,
                 dependencies: Default::default(),
             };
@@ -296,6 +319,7 @@ impl Scanner {
         workspace: &W,
         project_key: ProjectKey,
         folder: &Utf8Path,
+        trigger: IndexTrigger,
         ScanOptions {
             scan_kind,
             force,
@@ -323,6 +347,7 @@ impl Scanner {
                 diagnostics_sender,
                 evaluated_paths: Default::default(),
                 scan_kind,
+                trigger,
                 watch,
                 dependencies: Default::default(),
             };
@@ -507,21 +532,40 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
             ctx: &'a ScanContext<'a, W>,
             dependency_path: Utf8PathBuf,
         ) {
-            let dependencies = open_file(ctx, &BiomePath::new(dependency_path));
+            let request_kind = IndexRequestKind::Dependency(ctx.trigger);
+            let dependencies = open_file(ctx, BiomePath::new(dependency_path), request_kind);
             ctx.dependencies
                 .lock()
                 .unwrap()
                 .extend(dependencies.clone());
 
             for dependency_path in dependencies {
-                if !ctx.workspace.is_indexed(&dependency_path) {
-                    s.spawn(|s| index_dependency(s, ctx, dependency_path));
+                let is_ignored = ctx
+                    .workspace
+                    .is_ignored(
+                        ctx.project_key,
+                        &ctx.scan_kind,
+                        &dependency_path,
+                        request_kind,
+                    )
+                    .unwrap_or(true);
+                if !is_ignored {
+                    s.spawn(move |s| index_dependency(s, ctx, dependency_path));
                 }
             }
         }
 
         for dependency_path in dependencies {
-            if !ctx.workspace.is_indexed(&dependency_path) {
+            let is_ignored = ctx
+                .workspace
+                .is_ignored(
+                    ctx.project_key,
+                    &ctx.scan_kind,
+                    &dependency_path,
+                    IndexRequestKind::Dependency(ctx.trigger),
+                )
+                .unwrap_or(true);
+            if !is_ignored {
                 s.spawn(|s| index_dependency(s, ctx, dependency_path));
             }
         }
@@ -596,6 +640,9 @@ pub(crate) struct ScanContext<'app, W: WorkspaceScannerBridge> {
 
     /// What the scanner should target.
     scan_kind: ScanKind,
+
+    /// The trigger that initiated this scan.
+    trigger: IndexTrigger,
 
     /// Whether the scanned folders need to be watched.
     watch: bool,
@@ -687,10 +734,12 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
     // - The kind of file system entry the path points to.
     // - The kind of scan we are performing.
     fn can_handle(&self, path: &BiomePath) -> bool {
-        match self
-            .workspace
-            .is_ignored(self.project_key, &self.scan_kind, path, IgnoreKind::Path)
-        {
+        match self.workspace.is_ignored(
+            self.project_key,
+            &self.scan_kind,
+            path,
+            IndexRequestKind::Explicit(self.trigger),
+        ) {
             Ok(is_ignored) => !is_ignored,
             Err(_) => {
                 // Pretend we can handle it so we can give a meaningful error
@@ -701,7 +750,7 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
     }
 
     fn handle_path(&self, path: BiomePath) {
-        let dependencies = open_file(self, &path);
+        let dependencies = open_file(self, path, IndexRequestKind::Explicit(self.trigger));
         self.dependencies.lock().unwrap().extend(dependencies);
     }
 
@@ -721,15 +770,12 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
 /// so panics are caught, and diagnostics are submitted in case of panic too.
 fn open_file<W: WorkspaceScannerBridge>(
     ctx: &ScanContext<W>,
-    path: &BiomePath,
+    path: BiomePath,
+    request_kind: IndexRequestKind,
 ) -> ModuleDependencies {
-    match catch_unwind(move || {
-        ctx.workspace.index_file(
-            ctx.project_key,
-            &ctx.scan_kind,
-            path,
-            IndexTrigger::InitialScan,
-        )
+    match catch_unwind(|| {
+        ctx.workspace
+            .index_file(ctx.project_key, path.clone(), request_kind)
     }) {
         Ok(Ok(dependencies)) => dependencies,
         Ok(Err(err)) => {
@@ -743,10 +789,10 @@ fn open_file<W: WorkspaceScannerBridge>(
         }
         Err(err) => {
             let error = match err.downcast::<String>() {
-                Ok(description) => Panic::with_file_and_message(path, *description),
+                Ok(description) => Panic::with_file_and_message(&path, *description),
                 Err(err) => match err.downcast::<&'static str>() {
-                    Ok(description) => Panic::with_file_and_message(path, *description),
-                    Err(_) => Panic::with_file(path),
+                    Ok(description) => Panic::with_file_and_message(&path, *description),
+                    Err(_) => Panic::with_file(&path),
                 },
             };
 

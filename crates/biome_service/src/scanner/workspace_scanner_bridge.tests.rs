@@ -11,17 +11,19 @@ use std::str::FromStr;
 
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration};
 use biome_configuration::{Configuration, FilesConfiguration};
-use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_glob::NormalizedGlob;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 
+use crate::scanner::IndexTrigger;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::{
-    CloseFileParams, FileContent, GetFileContentParams, OpenFileParams, UpdateSettingsParams,
+    CloseFileParams, FileContent, GetFileContentParams, OpenFileParams, ScanProjectFolderParams,
+    UpdateSettingsParams,
 };
 use crate::{Workspace, WorkspaceError};
 
-use super::{IndexTrigger, ScanKind, WorkspaceScannerBridge};
+use super::{IndexRequestKind, ScanKind, WorkspaceScannerBridge};
 
 #[test]
 fn close_file_through_watcher_before_client() {
@@ -37,9 +39,8 @@ fn close_file_through_watcher_before_client() {
     workspace
         .index_file(
             project_key,
-            &ScanKind::Project,
-            &file_path,
-            IndexTrigger::WatcherUpdate,
+            file_path.clone(),
+            IndexRequestKind::Explicit(IndexTrigger::InitialScan),
         )
         .expect("can index file");
 
@@ -125,9 +126,8 @@ fn close_file_from_client_before_watcher() {
     workspace
         .index_file(
             project_key,
-            &ScanKind::Project,
-            &file_path,
-            IndexTrigger::WatcherUpdate,
+            file_path.clone(),
+            IndexRequestKind::Explicit(IndexTrigger::Update),
         )
         .expect("can also index file");
 
@@ -172,13 +172,14 @@ fn should_not_index_a_source_file_with_scan_kind_known_files() {
     let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
 
     workspace
-        .index_file(
+        .scan_project(ScanProjectFolderParams {
             project_key,
-            &ScanKind::KnownFiles,
-            &file_path,
-            IndexTrigger::InitialScan,
-        )
-        .expect("can request file to be indexed");
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::KnownFiles,
+            verbose: false,
+        })
+        .expect("can scan the project");
 
     assert!(!workspace.is_indexed(&file_path));
 }
@@ -210,13 +211,14 @@ fn should_not_index_an_ignored_file_inside_vcs_ignore_file() {
         .expect("can update settings");
 
     workspace
-        .index_file(
+        .scan_project(ScanProjectFolderParams {
             project_key,
-            &ScanKind::Project,
-            &file_path,
-            IndexTrigger::InitialScan,
-        )
-        .expect("can request file to be indexed");
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
 
     assert!(!workspace.is_indexed(&file_path));
 }
@@ -236,7 +238,10 @@ fn should_not_index_an_ignored_file_inside_file_includes() {
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration {
                 files: Some(FilesConfiguration {
-                    includes: Some(vec![NormalizedGlob::from_str("!**/dist/**").unwrap()]),
+                    includes: Some(vec![
+                        NormalizedGlob::from_str("**").unwrap(),
+                        NormalizedGlob::from_str("!**/dist/**").unwrap(),
+                    ]),
                     ..Default::default()
                 }),
                 ..Default::default()
@@ -245,13 +250,207 @@ fn should_not_index_an_ignored_file_inside_file_includes() {
         .expect("can update settings");
 
     workspace
-        .index_file(
+        .scan_project(ScanProjectFolderParams {
             project_key,
-            &ScanKind::Project,
-            &file_path,
-            IndexTrigger::InitialScan,
-        )
-        .expect("can request file to be indexed");
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
 
     assert!(!workspace.is_indexed(&file_path));
+}
+
+#[test]
+fn should_index_an_ignored_file_if_it_is_a_dependency_of_a_non_ignored_file() {
+    let file_path = Utf8PathBuf::from("/project/a.js");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(file_path.clone(), "import 'foo';");
+    fs.insert("/project/b.js".into(), "import './a.js';");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                files: Some(FilesConfiguration {
+                    includes: Some(vec![
+                        NormalizedGlob::from_str("**").unwrap(),
+                        NormalizedGlob::from_str("!**/a.js").unwrap(),
+                    ]),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+        })
+        .expect("can update settings");
+
+    workspace
+        .scan_project(ScanProjectFolderParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(workspace.is_indexed(&file_path));
+}
+
+#[test]
+fn should_not_index_dependency_with_scan_kind_known_files() {
+    let file_path = Utf8PathBuf::from("/project/a.js");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(file_path.clone(), "import 'foo';");
+    fs.insert("/project/b.js".into(), "import './a.js';");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                files: Some(FilesConfiguration {
+                    includes: Some(vec![
+                        NormalizedGlob::from_str("**").unwrap(),
+                        NormalizedGlob::from_str("!**/a.js").unwrap(),
+                    ]),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+        })
+        .expect("can update settings");
+
+    workspace
+        .scan_project(ScanProjectFolderParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::KnownFiles,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(!workspace.is_indexed(&file_path));
+}
+
+#[test]
+fn should_not_index_inside_an_ignored_folder_inside_file_includes() {
+    let file_path = "dist/minified.js";
+
+    let mut fs = TemporaryFs::new("should_not_index_inside_an_ignored_folder_inside_file_includes");
+    fs.create_file(file_path, "import 'foo';");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs.create_os(), fs.cli_path());
+    let file_path = format!("{}/{file_path}", fs.cli_path());
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                files: Some(FilesConfiguration {
+                    includes: Some(vec![
+                        NormalizedGlob::from_str("**").unwrap(),
+                        NormalizedGlob::from_str("!**/dist").unwrap(),
+                    ]),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+        })
+        .expect("can update settings");
+
+    workspace
+        .scan_project(ScanProjectFolderParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(!workspace.is_indexed(Utf8Path::new(&file_path)));
+}
+
+#[test]
+fn should_not_index_inside_an_ignored_folder_inside_vcs_ignore_file() {
+    let file_path = "dist/minified.js";
+
+    let mut fs =
+        TemporaryFs::new("should_not_index_inside_an_ignored_folder_inside_vcs_ignore_file");
+    fs.create_file(file_path, "import 'foo';");
+    fs.create_file(".gitignore", "dist\n");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs.create_os(), fs.cli_path());
+    let file_path = format!("{}/{file_path}", fs.cli_path());
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new(fs.cli_path())),
+            configuration: Configuration {
+                vcs: Some(VcsConfiguration {
+                    use_ignore_file: Some(true.into()),
+                    enabled: Some(true.into()),
+                    client_kind: Some(VcsClientKind::Git),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+        })
+        .expect("can update settings");
+
+    workspace
+        .scan_project(ScanProjectFolderParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(!workspace.is_indexed(Utf8Path::new(&file_path)));
+}
+
+#[test]
+fn should_index_used_type_definition_of_used_dependency() {
+    let used_file_path = "node_modules/used/index.d.ts";
+    let unused_file_path = "node_modules/used/unused.d.ts";
+
+    let mut fs = TemporaryFs::new("should_index_type_definition_of_used_dependency");
+    fs.create_file(used_file_path, "import 'foo';");
+    fs.create_file(unused_file_path, "import 'foo';");
+    fs.create_file(
+        "node_modules/used/package.json",
+        r#"{ "name": "used", "types": "./index.d.ts" }"#,
+    );
+    fs.create_file("a.js", "import 'used';");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs.create_os(), fs.cli_path());
+    let used_file_path = format!("{}/{used_file_path}", fs.cli_path());
+    let unused_file_path = format!("{}/{unused_file_path}", fs.cli_path());
+
+    workspace
+        .scan_project(ScanProjectFolderParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(workspace.is_indexed(Utf8Path::new(&used_file_path)));
+    assert!(!workspace.is_indexed(Utf8Path::new(&unused_file_path)));
 }

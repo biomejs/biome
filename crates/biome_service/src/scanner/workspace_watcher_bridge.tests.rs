@@ -14,7 +14,7 @@ use crate::workspace::{
 };
 use crate::{WatcherInstruction, Workspace};
 
-use super::{ScanKind, WorkspaceWatcherBridge};
+use super::WorkspaceWatcherBridge;
 
 #[test]
 fn close_modified_file_from_client_before_watcher() {
@@ -43,7 +43,7 @@ fn close_modified_file_from_client_before_watcher() {
         .expect("can open from client");
 
     (&workspace.scanner, &workspace)
-        .index_file(project_key, &ScanKind::Project, &file_path)
+        .index_file(project_key, file_path.clone())
         .expect("can also index file");
 
     workspace
@@ -80,7 +80,7 @@ fn close_modified_file_from_client_before_watcher() {
     );
     // call the instruction handler manually for the sake of the test:
     (&workspace.scanner, &workspace)
-        .index_file(project_key, &ScanKind::Project, &file_path)
+        .index_file(project_key, file_path.clone())
         .expect("path to be updated by us");
 
     let content = workspace
