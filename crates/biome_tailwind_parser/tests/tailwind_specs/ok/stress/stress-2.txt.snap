@@ -45,10 +45,10 @@ TwRoot {
         TwFullCandidate {
             variants: TwVariantList [],
             candidate: TwFunctionalCandidate {
-                base_token: TW_BASE@34..38 "ring" [] [],
-                minus_token: DASH@38..39 "-" [] [],
+                base_token: TW_BASE@34..45 "ring-offset" [] [],
+                minus_token: DASH@45..46 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@39..56 "offset-background" [] [],
+                    value_token: TW_VALUE@46..56 "background" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -176,10 +176,10 @@ TwRoot {
                 COLON@175..176 ":" [] [],
             ],
             candidate: TwFunctionalCandidate {
-                base_token: TW_BASE@176..180 "ring" [] [],
-                minus_token: DASH@180..181 "-" [] [],
+                base_token: TW_BASE@176..187 "ring-offset" [] [],
+                minus_token: DASH@187..188 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@181..189 "offset-2" [] [],
+                    value_token: TW_VALUE@188..189 "2" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -255,10 +255,10 @@ TwRoot {
     4: TW_FULL_CANDIDATE@34..56
       0: TW_VARIANT_LIST@34..34
       1: TW_FUNCTIONAL_CANDIDATE@34..56
-        0: TW_BASE@34..38 "ring" [] []
-        1: DASH@38..39 "-" [] []
-        2: TW_NAMED_VALUE@39..56
-          0: TW_VALUE@39..56 "offset-background" [] []
+        0: TW_BASE@34..45 "ring-offset" [] []
+        1: DASH@45..46 "-" [] []
+        2: TW_NAMED_VALUE@46..56
+          0: TW_VALUE@46..56 "background" [] []
         3: (empty)
       2: (empty)
     5: WHITESPACE@56..57 " " [] []
@@ -352,10 +352,10 @@ TwRoot {
             0: TW_VALUE@168..175 "visible" [] []
         1: COLON@175..176 ":" [] []
       1: TW_FUNCTIONAL_CANDIDATE@176..189
-        0: TW_BASE@176..180 "ring" [] []
-        1: DASH@180..181 "-" [] []
-        2: TW_NAMED_VALUE@181..189
-          0: TW_VALUE@181..189 "offset-2" [] []
+        0: TW_BASE@176..187 "ring-offset" [] []
+        1: DASH@187..188 "-" [] []
+        2: TW_NAMED_VALUE@188..189
+          0: TW_VALUE@188..189 "2" [] []
         3: (empty)
       2: (empty)
     21: WHITESPACE@189..190 " " [] []
