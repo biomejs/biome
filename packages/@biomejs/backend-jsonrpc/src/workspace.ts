@@ -1610,9 +1610,9 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_NoProcessGlobalOptions;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow the use if quickfix.biome inside editor settings file.
 	 */
-	noQuickfixBiome?: RuleConfiguration_for_NoQuickfixBiomeOptions;
+	noQuickfixBiome?: RuleFixConfiguration_for_NoQuickfixBiomeOptions;
 	/**
 	 * Disallow assigning to React component props.
 	 */
@@ -2887,9 +2887,9 @@ export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoProcessGlobalOptions;
-export type RuleConfiguration_for_NoQuickfixBiomeOptions =
+export type RuleFixConfiguration_for_NoQuickfixBiomeOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoQuickfixBiomeOptions;
+	| RuleWithFixOptions_for_NoQuickfixBiomeOptions;
 export type RuleConfiguration_for_NoReactPropAssignOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoReactPropAssignOptions;
@@ -5175,7 +5175,11 @@ export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
 	 */
 	options: NoProcessGlobalOptions;
 }
-export interface RuleWithOptions_for_NoQuickfixBiomeOptions {
+export interface RuleWithFixOptions_for_NoQuickfixBiomeOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
