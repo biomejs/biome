@@ -9,6 +9,7 @@ mod generated;
 pub mod assign_ext;
 pub mod binary_like_expression;
 pub mod binding_ext;
+pub mod class_member_analyzer;
 pub mod declaration_ext;
 pub mod directive_ext;
 pub mod export_ext;
@@ -30,6 +31,7 @@ mod syntax_node;
 pub mod type_ext;
 mod unescape;
 mod union_ext;
+
 
 pub use self::generated::*;
 pub use biome_rowan::{
