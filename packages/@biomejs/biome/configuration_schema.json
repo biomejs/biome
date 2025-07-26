@@ -48,7 +48,7 @@
 			]
 		},
 		"grit": {
-			"description": "Specific configuration for the GraphQL language",
+			"description": "Specific configuration for the GritQL language",
 			"anyOf": [
 				{ "$ref": "#/definitions/GritConfiguration" },
 				{ "type": "null" }
