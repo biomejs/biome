@@ -5514,6 +5514,11 @@
 					"enum": ["next"]
 				},
 				{
+					"description": "Qwik framework rules",
+					"type": "string",
+					"enum": ["qwik"]
+				},
+				{
 					"description": "Vue.js framework rules",
 					"type": "string",
 					"enum": ["vue"]
