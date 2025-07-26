@@ -27,7 +27,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssPseudoClassFunctionSelector {
-                                name: GLOBAL_KW@1..7 "global" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@1..7 "global" [] [],
+                                },
                                 l_paren_token: L_PAREN@7..8 "(" [] [],
                                 selector: CssComplexSelector {
                                     left: CssCompoundSelector {
@@ -75,7 +77,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@22..24 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionSelector {
-                                name: LOCAL_KW@24..29 "local" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@24..29 "local" [] [],
+                                },
                                 l_paren_token: L_PAREN@29..30 "(" [] [],
                                 selector: CssComplexSelector {
                                     left: CssComplexSelector {
@@ -139,7 +143,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@50..52 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionSelector {
-                                    name: GLOBAL_KW@52..58 "global" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@52..58 "global" [] [],
+                                    },
                                     l_paren_token: L_PAREN@58..59 "(" [] [],
                                     selector: CssComplexSelector {
                                         left: CssCompoundSelector {
@@ -212,7 +218,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..20
               0: COLON@0..1 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@1..20
-                0: GLOBAL_KW@1..7 "global" [] []
+                0: CSS_IDENTIFIER@1..7
+                  0: IDENT@1..7 "global" [] []
                 1: L_PAREN@7..8 "(" [] []
                 2: CSS_COMPLEX_SELECTOR@8..18
                   0: CSS_COMPOUND_SELECTOR@8..14
@@ -245,7 +252,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@22..48
               0: COLON@22..24 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@24..48
-                0: LOCAL_KW@24..29 "local" [] []
+                0: CSS_IDENTIFIER@24..29
+                  0: IDENT@24..29 "local" [] []
                 1: L_PAREN@29..30 "(" [] []
                 2: CSS_COMPLEX_SELECTOR@30..46
                   0: CSS_COMPLEX_SELECTOR@30..41
@@ -289,7 +297,8 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@50..70
                 0: COLON@50..52 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@52..70
-                  0: GLOBAL_KW@52..58 "global" [] []
+                  0: CSS_IDENTIFIER@52..58
+                    0: IDENT@52..58 "global" [] []
                   1: L_PAREN@58..59 "(" [] []
                   2: CSS_COMPLEX_SELECTOR@59..69
                     0: CSS_COMPOUND_SELECTOR@59..65

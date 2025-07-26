@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -179,7 +178,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@64..65 ":" [] [],
-                                selector: FIRST_KW@65..71 "first" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@65..71 "first" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -220,7 +221,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@92..93 ":" [] [],
-                                selector: FIRST_KW@93..98 "first" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@93..98 "first" [] [],
+                                },
                             },
                         ],
                     },
@@ -273,7 +276,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@128..129 ":" [] [],
-                                selector: LEFT_KW@129..134 "left" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@129..134 "left" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -295,7 +300,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@143..144 ":" [] [],
-                                selector: RIGHT_KW@144..150 "right" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@144..150 "right" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -338,7 +345,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@200..201 ":" [] [],
-                                selector: FIRST_KW@201..207 "first" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@201..207 "first" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -360,7 +369,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@250..251 ":" [] [],
-                                selector: FIRST_KW@251..257 "first" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@251..257 "first" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -408,11 +419,15 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@286..287 ":" [] [],
-                                selector: BLANK_KW@287..292 "blank" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@287..292 "blank" [] [],
+                                },
                             },
                             CssPageSelectorPseudo {
                                 colon_token: COLON@292..293 ":" [] [],
-                                selector: FIRST_KW@293..299 "first" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@293..299 "first" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -465,7 +480,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@352..353 ":" [] [],
-                                selector: LEFT_KW@353..358 "left" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@353..358 "left" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -497,7 +514,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@383..384 ":" [] [],
-                                selector: RIGHT_KW@384..389 "right" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@384..389 "right" [] [],
+                                },
                             },
                         ],
                     },
@@ -529,7 +548,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@416..417 ":" [] [],
-                                selector: LEFT_KW@417..422 "left" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@417..422 "left" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -561,7 +582,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@454..455 ":" [] [],
-                                selector: RIGHT_KW@455..461 "right" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@455..461 "right" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -593,7 +616,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@494..495 ":" [] [],
-                                selector: FIRST_KW@495..501 "first" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@495..501 "first" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -646,7 +671,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@569..570 ":" [] [],
-                                selector: LEFT_KW@570..575 "left" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@570..575 "left" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -668,7 +695,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@584..585 ":" [] [],
-                                selector: FIRST_KW@585..591 "first" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@585..591 "first" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -690,11 +719,15 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@600..601 ":" [] [],
-                                selector: BLANK_KW@601..606 "blank" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@601..606 "blank" [] [],
+                                },
                             },
                             CssPageSelectorPseudo {
                                 colon_token: COLON@606..607 ":" [] [],
-                                selector: LEFT_KW@607..612 "left" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@607..612 "left" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -737,7 +770,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@641..642 ":" [] [],
-                                selector: LEFT_KW@642..647 "left" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@642..647 "left" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -761,7 +796,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@661..662 ":" [] [],
-                                selector: FIRST_KW@662..668 "first" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@662..668 "first" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -783,7 +820,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@677..678 ":" [] [],
-                                selector: FIRST_KW@678..684 "first" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@678..684 "first" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -894,7 +933,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@794..795 ":" [] [],
-                                selector: FIRST_KW@795..801 "first" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@795..801 "first" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -1023,7 +1064,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@928..929 ":" [] [],
-                                selector: FIRST_KW@929..935 "FIRST" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@929..935 "FIRST" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -1045,7 +1088,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@944..945 ":" [] [],
-                                selector: LEFT_KW@945..950 "LEFT" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@945..950 "LEFT" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -1252,7 +1297,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@64..71
               0: CSS_PAGE_SELECTOR_PSEUDO@64..71
                 0: COLON@64..65 ":" [] []
-                1: FIRST_KW@65..71 "first" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@65..71
+                  0: IDENT@65..71 "first" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@71..85
           0: L_CURLY@71..72 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@72..84
@@ -1279,7 +1325,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@92..98
               0: CSS_PAGE_SELECTOR_PSEUDO@92..98
                 0: COLON@92..93 ":" [] []
-                1: FIRST_KW@93..98 "first" [] []
+                1: CSS_IDENTIFIER@93..98
+                  0: IDENT@93..98 "first" [] []
         2: CSS_PAGE_AT_RULE_BLOCK@98..112
           0: L_CURLY@98..99 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@99..111
@@ -1315,7 +1362,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@128..134
               0: CSS_PAGE_SELECTOR_PSEUDO@128..134
                 0: COLON@128..129 ":" [] []
-                1: LEFT_KW@129..134 "left" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@129..134
+                  0: IDENT@129..134 "left" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@134..136
           0: L_CURLY@134..135 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@135..135
@@ -1330,7 +1378,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@143..150
               0: CSS_PAGE_SELECTOR_PSEUDO@143..150
                 0: COLON@143..144 ":" [] []
-                1: RIGHT_KW@144..150 "right" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@144..150
+                  0: IDENT@144..150 "right" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@150..152
           0: L_CURLY@150..151 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@151..151
@@ -1359,7 +1408,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@200..207
               0: CSS_PAGE_SELECTOR_PSEUDO@200..207
                 0: COLON@200..201 ":" [] []
-                1: FIRST_KW@201..207 "first" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@201..207
+                  0: IDENT@201..207 "first" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@207..244
           0: L_CURLY@207..208 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@208..208
@@ -1374,7 +1424,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@250..257
               0: CSS_PAGE_SELECTOR_PSEUDO@250..257
                 0: COLON@250..251 ":" [] []
-                1: FIRST_KW@251..257 "first" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@251..257
+                  0: IDENT@251..257 "first" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@257..259
           0: L_CURLY@257..258 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@258..258
@@ -1407,10 +1458,12 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@286..299
               0: CSS_PAGE_SELECTOR_PSEUDO@286..292
                 0: COLON@286..287 ":" [] []
-                1: BLANK_KW@287..292 "blank" [] []
+                1: CSS_IDENTIFIER@287..292
+                  0: IDENT@287..292 "blank" [] []
               1: CSS_PAGE_SELECTOR_PSEUDO@292..299
                 0: COLON@292..293 ":" [] []
-                1: FIRST_KW@293..299 "first" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@293..299
+                  0: IDENT@293..299 "first" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@299..302
           0: L_CURLY@299..301 "{" [] [Whitespace(" ")]
           1: CSS_PAGE_AT_RULE_ITEM_LIST@301..301
@@ -1448,7 +1501,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@352..358
               0: CSS_PAGE_SELECTOR_PSEUDO@352..358
                 0: COLON@352..353 ":" [] []
-                1: LEFT_KW@353..358 "left" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@353..358
+                  0: IDENT@353..358 "left" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@358..376
           0: L_CURLY@358..360 "{" [] [Whitespace(" ")]
           1: CSS_PAGE_AT_RULE_ITEM_LIST@360..375
@@ -1470,7 +1524,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@383..389
               0: CSS_PAGE_SELECTOR_PSEUDO@383..389
                 0: COLON@383..384 ":" [] []
-                1: RIGHT_KW@384..389 "right" [] []
+                1: CSS_IDENTIFIER@384..389
+                  0: IDENT@384..389 "right" [] []
         2: CSS_PAGE_AT_RULE_BLOCK@389..408
           0: L_CURLY@389..391 "{" [] [Whitespace(" ")]
           1: CSS_PAGE_AT_RULE_ITEM_LIST@391..407
@@ -1492,7 +1547,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@416..422
               0: CSS_PAGE_SELECTOR_PSEUDO@416..422
                 0: COLON@416..417 ":" [] []
-                1: LEFT_KW@417..422 "left" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@417..422
+                  0: IDENT@417..422 "left" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@422..447
           0: L_CURLY@422..424 "{" [] [Whitespace(" ")]
           1: CSS_PAGE_AT_RULE_ITEM_LIST@424..446
@@ -1514,7 +1570,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@454..461
               0: CSS_PAGE_SELECTOR_PSEUDO@454..461
                 0: COLON@454..455 ":" [] []
-                1: RIGHT_KW@455..461 "right" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@455..461
+                  0: IDENT@455..461 "right" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@461..487
           0: L_CURLY@461..463 "{" [] [Whitespace(" ")]
           1: CSS_PAGE_AT_RULE_ITEM_LIST@463..486
@@ -1536,7 +1593,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@494..501
               0: CSS_PAGE_SELECTOR_PSEUDO@494..501
                 0: COLON@494..495 ":" [] []
-                1: FIRST_KW@495..501 "first" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@495..501
+                  0: IDENT@495..501 "first" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@501..553
           0: L_CURLY@501..502 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@502..551
@@ -1574,7 +1632,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@569..575
               0: CSS_PAGE_SELECTOR_PSEUDO@569..575
                 0: COLON@569..570 ":" [] []
-                1: LEFT_KW@570..575 "left" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@570..575
+                  0: IDENT@570..575 "left" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@575..577
           0: L_CURLY@575..576 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@576..576
@@ -1589,7 +1648,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@584..591
               0: CSS_PAGE_SELECTOR_PSEUDO@584..591
                 0: COLON@584..585 ":" [] []
-                1: FIRST_KW@585..591 "first" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@585..591
+                  0: IDENT@585..591 "first" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@591..593
           0: L_CURLY@591..592 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@592..592
@@ -1604,10 +1664,12 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@600..612
               0: CSS_PAGE_SELECTOR_PSEUDO@600..606
                 0: COLON@600..601 ":" [] []
-                1: BLANK_KW@601..606 "blank" [] []
+                1: CSS_IDENTIFIER@601..606
+                  0: IDENT@601..606 "blank" [] []
               1: CSS_PAGE_SELECTOR_PSEUDO@606..612
                 0: COLON@606..607 ":" [] []
-                1: LEFT_KW@607..612 "left" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@607..612
+                  0: IDENT@607..612 "left" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@612..614
           0: L_CURLY@612..613 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@613..613
@@ -1636,7 +1698,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@641..647
               0: CSS_PAGE_SELECTOR_PSEUDO@641..647
                 0: COLON@641..642 ":" [] []
-                1: LEFT_KW@642..647 "left" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@642..647
+                  0: IDENT@642..647 "left" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@647..649
           0: L_CURLY@647..648 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@648..648
@@ -1652,7 +1715,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@661..668
               0: CSS_PAGE_SELECTOR_PSEUDO@661..668
                 0: COLON@661..662 ":" [] []
-                1: FIRST_KW@662..668 "first" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@662..668
+                  0: IDENT@662..668 "first" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@668..670
           0: L_CURLY@668..669 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@669..669
@@ -1667,7 +1731,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@677..684
               0: CSS_PAGE_SELECTOR_PSEUDO@677..684
                 0: COLON@677..678 ":" [] []
-                1: FIRST_KW@678..684 "first" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@678..684
+                  0: IDENT@678..684 "first" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@684..787
           0: L_CURLY@684..685 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@685..785
@@ -1740,7 +1805,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@794..801
               0: CSS_PAGE_SELECTOR_PSEUDO@794..801
                 0: COLON@794..795 ":" [] []
-                1: FIRST_KW@795..801 "first" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@795..801
+                  0: IDENT@795..801 "first" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@801..920
           0: L_CURLY@801..802 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@802..918
@@ -1825,7 +1891,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@928..935
               0: CSS_PAGE_SELECTOR_PSEUDO@928..935
                 0: COLON@928..929 ":" [] []
-                1: FIRST_KW@929..935 "FIRST" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@929..935
+                  0: IDENT@929..935 "FIRST" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@935..937
           0: L_CURLY@935..936 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@936..936
@@ -1840,7 +1907,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@944..950
               0: CSS_PAGE_SELECTOR_PSEUDO@944..950
                 0: COLON@944..945 ":" [] []
-                1: LEFT_KW@945..950 "LEFT" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@945..950
+                  0: IDENT@945..950 "LEFT" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@950..952
           0: L_CURLY@950..951 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@951..951
@@ -1926,5 +1994,3 @@ CssRoot {
   2: EOF@1106..1106 "" [] []
 
 ```
-
-

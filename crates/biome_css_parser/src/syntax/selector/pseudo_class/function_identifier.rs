@@ -25,7 +25,7 @@ pub(crate) fn parse_pseudo_class_function_identifier(p: &mut CssParser) -> Parse
 
     let m = p.start();
 
-    p.bump_ts(PSEUDO_CLASS_FUNCTION_IDENTIFIER_SET);
+    parse_regular_identifier(p).ok();
     p.bump(T!['(']);
 
     let kind = if is_at_dir_parameter_identifier(p) {
