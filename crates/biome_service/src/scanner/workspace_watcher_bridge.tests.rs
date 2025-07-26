@@ -8,6 +8,7 @@
 use biome_fs::{BiomePath, MemoryFileSystem};
 use camino::Utf8PathBuf;
 
+use crate::scanner::workspace_bridges::ScannerWatcherBridge;
 use crate::test_utils::setup_workspace_and_open_project_and_get_watcher_instruction_receiver;
 use crate::workspace::{
     ChangeFileParams, CloseFileParams, FileContent, GetFileContentParams, OpenFileParams,
@@ -42,7 +43,7 @@ fn close_modified_file_from_client_before_watcher() {
         })
         .expect("can open from client");
 
-    (&workspace.scanner, &workspace)
+    ScannerWatcherBridge::new((&workspace.scanner, &workspace))
         .index_file(project_key, file_path.clone())
         .expect("can also index file");
 
@@ -79,7 +80,7 @@ fn close_modified_file_from_client_before_watcher() {
         WatcherInstruction::ReindexFile(file_path.clone())
     );
     // call the instruction handler manually for the sake of the test:
-    (&workspace.scanner, &workspace)
+    ScannerWatcherBridge::new((&workspace.scanner, &workspace))
         .index_file(project_key, file_path.clone())
         .expect("path to be updated by us");
 

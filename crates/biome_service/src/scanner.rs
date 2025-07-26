@@ -32,7 +32,9 @@ use crate::projects::ProjectKey;
 use crate::workspace::{ScanProjectResult, ServiceNotification, WorkspaceError};
 
 pub use watcher::{Watcher, WatcherInstruction};
-pub(crate) use workspace_bridges::{WorkspaceScannerBridge, WorkspaceWatcherBridge};
+pub(crate) use workspace_bridges::{
+    ScannerWatcherBridge, WorkspaceScannerBridge, WorkspaceWatcherBridge,
+};
 
 pub(crate) struct ScanOptions {
     /// The kind of scan to perform (targeted, project, etc.).
