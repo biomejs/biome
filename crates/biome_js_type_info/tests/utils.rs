@@ -189,12 +189,11 @@ impl TypeResolver for HardcodedSymbolResolver {
             TypeReference::Import(_import) => {
                 panic!("Project-level references unsupported by resolver")
             }
-            TypeReference::Unknown => None,
         }
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() == 1 && qualifier.path[0] == self.name {
+        if qualifier.path.is_identifier(self.name) {
             Some(ResolvedTypeId::new(self.level(), TypeId::new(0)))
         } else {
             self.globals.resolve_qualifier(qualifier)

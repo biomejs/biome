@@ -1,0 +1,136 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+? a
+: 10
+? b
+: 11
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockMapping {
+                mapping_start_token: MAPPING_START@0..0 "" [] [],
+                properties: missing (optional),
+                entries: YamlBlockMapEntryList [
+                    YamlBlockMapExplicitEntry {
+                        question_mark_token: QUESTION@0..2 "?" [] [Whitespace(" ")],
+                        key: YamlFlowInBlockNode {
+                            flow_start_token: FLOW_START@2..2 "" [] [],
+                            flow: YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@2..3 "a" [] [],
+                                },
+                            },
+                            flow_end_token: FLOW_END@3..3 "" [] [],
+                        },
+                        colon_token: COLON@3..6 ":" [Newline("\n")] [Whitespace(" ")],
+                        value: YamlFlowInBlockNode {
+                            flow_start_token: FLOW_START@6..6 "" [] [],
+                            flow: YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@6..8 "10" [] [],
+                                },
+                            },
+                            flow_end_token: FLOW_END@8..8 "" [] [],
+                        },
+                    },
+                    YamlBlockMapExplicitEntry {
+                        question_mark_token: QUESTION@8..11 "?" [Newline("\n")] [Whitespace(" ")],
+                        key: YamlFlowInBlockNode {
+                            flow_start_token: FLOW_START@11..11 "" [] [],
+                            flow: YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@11..12 "b" [] [],
+                                },
+                            },
+                            flow_end_token: FLOW_END@12..12 "" [] [],
+                        },
+                        colon_token: COLON@12..15 ":" [Newline("\n")] [Whitespace(" ")],
+                        value: YamlFlowInBlockNode {
+                            flow_start_token: FLOW_START@15..15 "" [] [],
+                            flow: YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@15..17 "11" [] [],
+                                },
+                            },
+                            flow_end_token: FLOW_END@17..17 "" [] [],
+                        },
+                    },
+                ],
+                mapping_end_token: MAPPING_END@17..18 "" [Newline("\n")] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@18..18 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..18
+  0: YAML_DOCUMENT_LIST@0..18
+    0: YAML_DOCUMENT@0..18
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_MAPPING@0..18
+        0: MAPPING_START@0..0 "" [] []
+        1: (empty)
+        2: YAML_BLOCK_MAP_ENTRY_LIST@0..17
+          0: YAML_BLOCK_MAP_EXPLICIT_ENTRY@0..8
+            0: QUESTION@0..2 "?" [] [Whitespace(" ")]
+            1: YAML_FLOW_IN_BLOCK_NODE@2..3
+              0: FLOW_START@2..2 "" [] []
+              1: YAML_FLOW_YAML_NODE@2..3
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@2..3
+                  0: PLAIN_LITERAL@2..3 "a" [] []
+              2: FLOW_END@3..3 "" [] []
+            2: COLON@3..6 ":" [Newline("\n")] [Whitespace(" ")]
+            3: YAML_FLOW_IN_BLOCK_NODE@6..8
+              0: FLOW_START@6..6 "" [] []
+              1: YAML_FLOW_YAML_NODE@6..8
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@6..8
+                  0: PLAIN_LITERAL@6..8 "10" [] []
+              2: FLOW_END@8..8 "" [] []
+          1: YAML_BLOCK_MAP_EXPLICIT_ENTRY@8..17
+            0: QUESTION@8..11 "?" [Newline("\n")] [Whitespace(" ")]
+            1: YAML_FLOW_IN_BLOCK_NODE@11..12
+              0: FLOW_START@11..11 "" [] []
+              1: YAML_FLOW_YAML_NODE@11..12
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@11..12
+                  0: PLAIN_LITERAL@11..12 "b" [] []
+              2: FLOW_END@12..12 "" [] []
+            2: COLON@12..15 ":" [Newline("\n")] [Whitespace(" ")]
+            3: YAML_FLOW_IN_BLOCK_NODE@15..17
+              0: FLOW_START@15..15 "" [] []
+              1: YAML_FLOW_YAML_NODE@15..17
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@15..17
+                  0: PLAIN_LITERAL@15..17 "11" [] []
+              2: FLOW_END@17..17 "" [] []
+        3: MAPPING_END@17..18 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@18..18 "" [] []
+
+```

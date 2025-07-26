@@ -1,0 +1,221 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts`
+
+## Source
+
+```ts
+class Foo {
+	x = "foo";
+
+	nested() {
+		const fn = function () {
+			return this.x;
+		};
+		return fn();
+	}
+	nested2() {
+		function fn() {
+			return this.x;
+		}
+		return fn();
+	}
+
+	nestedObject() {
+		const inner = {
+			fn: function () {
+				return this.x;
+			},
+		};
+		return inner.fn();
+	}
+	nestedObject2() {
+		const inner = {
+			fn() {
+				return this.x;
+			},
+		};
+		return inner.fn();
+	}
+
+	nestedInArrow = () => {
+		const fn = function () {
+			return this.x;
+		};
+		return fn();
+	};
+}
+
+const obj = new Foo();
+
+const notFoo1 = obj.nested();
+const notFoo2 = obj.nested2();
+const notFoo3 = obj.nestedInArrow();
+const notFoo4 = obj.nestedObject();
+const notFoo5 = obj.nestedObject2();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof Module(0) TypeId(37)
+
+Module TypeId(1) => Module(0) TypeId(4)
+
+Module TypeId(2) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(1)
+}
+
+Module TypeId(3) => Module(0) TypeId(2)
+
+Module TypeId(4) => value: foo
+
+Module TypeId(5) => unknown
+
+Module TypeId(6) => Module(0) TypeId(38)
+
+Module TypeId(7) => Object {
+  prototype: No prototype
+  members: ["fn": Module(0) TypeId(8)]
+}
+
+Module TypeId(8) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(11)
+}
+
+Module TypeId(9) => Module(0) TypeId(7)
+
+Module TypeId(10) => Module(0) TypeId(8)
+
+Module TypeId(11) => Module(0) TypeId(7).x
+
+Module TypeId(12) => Object {
+  prototype: No prototype
+  members: ["fn": Module(0) TypeId(13)]
+}
+
+Module TypeId(13) => sync Function "fn" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(16)
+}
+
+Module TypeId(14) => Module(0) TypeId(12)
+
+Module TypeId(15) => Module(0) TypeId(13)
+
+Module TypeId(16) => Module(0) TypeId(12).x
+
+Module TypeId(17) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(19)
+}
+
+Module TypeId(18) => Module(0) TypeId(17)
+
+Module TypeId(19) => Module(0) TypeId(5).x
+
+Module TypeId(20) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(28)
+}
+
+Module TypeId(21) => Module(0) TypeId(37)
+
+Module TypeId(22) => instanceof Module(0) TypeId(21)
+
+Module TypeId(23) => Module(0) TypeId(33)
+
+Module TypeId(24) => Module(0) TypeId(1) | Module(0) TypeId(4)
+
+Module TypeId(25) => Module(0) TypeId(34)
+
+Module TypeId(26) => Module(0) TypeId(19) | Module(0) TypeId(19)
+
+Module TypeId(27) => Module(0) TypeId(20)
+
+Module TypeId(28) => Module(0) TypeId(19) | Module(0) TypeId(19)
+
+Module TypeId(29) => Module(0) TypeId(35)
+
+Module TypeId(30) => Module(0) TypeId(11) | Module(0) TypeId(11)
+
+Module TypeId(31) => Module(0) TypeId(36)
+
+Module TypeId(32) => Module(0) TypeId(16) | Module(0) TypeId(16)
+
+Module TypeId(33) => sync Function "nested" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(24)
+}
+
+Module TypeId(34) => sync Function "nested2" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(26)
+}
+
+Module TypeId(35) => sync Function "nestedObject" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(30)
+}
+
+Module TypeId(36) => sync Function "nestedObject2" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(32)
+}
+
+Module TypeId(37) => class "Foo" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Module TypeId(38) => sync Function "fn" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(19)
+}
+```

@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIssue6939.ts
+---
+# Input
+```ts
+type State = "running" | "jumping" | "ducking"
+
+export class Player {
+  state: State
+  constructor(state: State) {
+    this.state = state
+  }
+
+  update = () => {
+    switch(this.state) {
+      case "running":
+        break;
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalidIssue6939.ts:10:5 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+     9 │   update = () => {
+  > 10 │     switch(this.state) {
+       │     ^^^^^^^^^^^^^^^^^^^^
+  > 11 │       case "running":
+  > 12 │         break;
+  > 13 │     }
+       │     ^
+    14 │   }
+    15 │ }
+  
+  i Some variants of the union type are not handled here.
+  
+  i These cases are missing:
+  
+  - "jumping"
+  - "ducking"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    10 10 │       switch(this.state) {
+    11 11 │         case "running":
+    12    │ - ········break;
+       12 │ + ········break;
+       13 │ + ······case·"jumping":·throw·new·Error("TODO:·Not·implemented·yet");
+       14 │ + ······case·"ducking":·throw·new·Error("TODO:·Not·implemented·yet");
+    13 15 │       }
+    14 16 │     }
+  
+
+```

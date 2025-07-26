@@ -1,0 +1,10 @@
+{
+  a: b,
+  "x":y,
+  'z':,
+  :d,
+  :,
+  plain
+  with
+  newline
+}

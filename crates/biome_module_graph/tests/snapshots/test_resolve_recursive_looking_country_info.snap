@@ -162,17 +162,13 @@ Module TypeId(5) => interface "Full" {
 }
 
 Module TypeId(6) => Namespace {
-    path: [
-        Borrowed(
-            "SubdivisionInfo",
-        ),
-    ],
+    path: Identifier(
+        "SubdivisionInfo",
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Partial",
-                ),
+                "Partial",
             ),
             ty: Resolved(
                 Module(0) TypeId(4),
@@ -180,9 +176,7 @@ Module TypeId(6) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Full",
-                ),
+                "Full",
             ),
             ty: Resolved(
                 Module(0) TypeId(5),
@@ -190,9 +184,7 @@ Module TypeId(6) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Map",
-                ),
+                "Map",
             ),
             ty: Resolved(
                 Module(0) TypeId(1),
@@ -217,17 +209,13 @@ Module TypeId(9) => sync Function "subdivision" {
 }
 
 Module TypeId(10) => Namespace {
-    path: [
-        Borrowed(
-            "CountryInfo",
-        ),
-    ],
+    path: Identifier(
+        "CountryInfo",
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Partial",
-                ),
+                "Partial",
             ),
             ty: Resolved(
                 Module(0) TypeId(2),
@@ -235,9 +223,7 @@ Module TypeId(10) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Full",
-                ),
+                "Full",
             ),
             ty: Resolved(
                 Module(0) TypeId(3),
@@ -245,9 +231,7 @@ Module TypeId(10) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Map",
-                ),
+                "Map",
             ),
             ty: Resolved(
                 Module(0) TypeId(1),

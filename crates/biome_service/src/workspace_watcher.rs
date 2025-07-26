@@ -276,8 +276,10 @@ impl WorkspaceWatcher {
 
     #[inline]
     fn scan_kind_for_path(&self, path: &Path) -> Option<&ScanKind> {
-        path.ancestors()
-            .find_map(|path| self.watched_folders.get(path))
+        self.watched_folders.get(path).or_else(|| {
+            path.parent()
+                .and_then(|dir_path| self.watched_folders.get(dir_path))
+        })
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
@@ -291,23 +293,25 @@ impl WorkspaceWatcher {
             return; // Already watching.
         }
 
-        if let Err(error) = self.watcher.watch(std_path, RecursiveMode::Recursive) {
+        if let Err(error) = self.watcher.watch(std_path, RecursiveMode::NonRecursive) {
             // TODO: Improve error propagation.
-            warn!("Error unwatching path {path}: {error}");
+            warn!("Error watching path {path}: {error}");
         }
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
     fn unwatch_folder(&mut self, path: Utf8PathBuf) {
-        let std_path = path.as_std_path();
-        if self.watched_folders.remove(std_path).is_none() {
-            return; // Not watching.
-        }
-
-        if let Err(error) = self.watcher.unwatch(std_path) {
-            // TODO: Improve error propagation.
-            warn!("Error unwatching path {path}: {error}");
-        }
+        self.watched_folders.retain(|watched_path, _| {
+            if watched_path.starts_with(path.as_std_path()) {
+                if let Err(error) = self.watcher.unwatch(watched_path) {
+                    // TODO: Improve error propagation.
+                    warn!("Error unwatching path {}: {error}", watched_path.display());
+                }
+                false
+            } else {
+                true
+            }
+        });
     }
 }
 

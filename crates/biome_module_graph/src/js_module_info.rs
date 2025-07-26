@@ -3,9 +3,6 @@ mod collector;
 mod module_resolver;
 mod scope;
 mod visitor;
-
-use std::{ops::Deref, sync::Arc};
-
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeData};
 use biome_jsdoc_comment::JsdocComment;
@@ -14,6 +11,8 @@ use biome_rowan::{Text, TextRange};
 use indexmap::IndexMap;
 use rust_lapper::Lapper;
 use rustc_hash::FxHashMap;
+use std::collections::BTreeSet;
+use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
 use crate::ModuleGraph;
 
@@ -80,6 +79,31 @@ impl JsModuleInfo {
         JsScope {
             info: self.0.clone(),
             id: scope_id_for_range(&self.0.scope_by_range, range),
+        }
+    }
+
+    /// Returns a serializable version of this module
+    pub fn dump(&self) -> SerializedJsModuleInfo {
+        SerializedJsModuleInfo {
+            static_imports: self
+                .static_imports
+                .iter()
+                .map(|(text, static_import)| {
+                    (text.to_string(), static_import.specifier.to_string())
+                })
+                .collect::<BTreeMap<_, _>>(),
+
+            exports: self
+                .exports
+                .iter()
+                .map(|(text, _)| text.to_string())
+                .collect::<BTreeSet<_>>(),
+
+            dynamic_imports: self
+                .dynamic_import_paths
+                .iter()
+                .map(|(text, _)| text.to_string())
+                .collect::<BTreeSet<_>>(),
         }
     }
 }
@@ -344,4 +368,16 @@ fn scope_id_for_range(scope_by_range: &Lapper<u32, ScopeId>, range: TextRange) -
         .map_or(ScopeId::GLOBAL, |interval| {
             ScopeId::new(interval.val.index())
         })
+}
+
+#[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct SerializedJsModuleInfo {
+    /// Static imports
+    static_imports: BTreeMap<String, String>,
+    /// Dynamic imports
+    dynamic_imports: BTreeSet<String>,
+    /// Exported symbols
+    exports: BTreeSet<String>,
 }

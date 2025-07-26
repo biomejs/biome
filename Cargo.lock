@@ -1274,6 +1274,8 @@ dependencies = [
  "papaya",
  "rust-lapper",
  "rustc-hash 2.1.1",
+ "schemars",
+ "serde",
  "serde_json",
  "static_assertions",
  "tikv-jemallocator",
@@ -1396,6 +1398,7 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_glob",
+ "biome_js_syntax",
  "biome_resolver",
  "biome_rowan",
  "biome_string_case",
@@ -1473,6 +1476,7 @@ dependencies = [
  "smallvec",
  "tokio",
  "tracing",
+ "web-time",
 ]
 
 [[package]]
@@ -1500,6 +1504,23 @@ dependencies = [
  "biome_ungrammar",
  "proc-macro2",
  "quote",
+]
+
+[[package]]
+name = "biome_tailwind_factory"
+version = "0.0.1"
+dependencies = [
+ "biome_rowan",
+ "biome_tailwind_syntax",
+]
+
+[[package]]
+name = "biome_tailwind_syntax"
+version = "0.0.1"
+dependencies = [
+ "biome_rowan",
+ "schemars",
+ "serde",
 ]
 
 [[package]]
@@ -2165,7 +2186,7 @@ dependencies = [
  "libc",
  "option-ext",
  "redox_users",
- "windows-sys 0.59.0",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -3613,9 +3634,9 @@ dependencies = [
 
 [[package]]
 name = "roaring"
-version = "0.11.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a728d3a68e1cf244b26b3fec3d045a6d69b7890eda1ba6ea451ea88889824e01"
+checksum = "18f79304aff09c245934bb9558a215e53a4cfbbe6aa8ac2a79847be551264979"
 dependencies = [
  "bytemuck",
  "byteorder",
@@ -3853,9 +3874,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.140"
+version = "1.0.141"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20068b6e96dc6c9bd23e01df8827e6c7e1f2fddd43c21810382803c136b99373"
+checksum = "30b9eff21ebe718216c6ec64e1d9ac57087aad11efc64e32002bce4a0d4c03d3"
 dependencies = [
  "itoa",
  "memchr",

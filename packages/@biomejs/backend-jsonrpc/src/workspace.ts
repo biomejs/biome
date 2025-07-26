@@ -3456,9 +3456,14 @@ export type RuleFixConfiguration_for_UseStrictModeOptions =
 	| RuleWithFixOptions_for_UseStrictModeOptions;
 export interface OrganizeImportsOptions {
 	groups?: ImportGroups;
+	identifierOrder?: SortOrder;
 }
-export interface UseSortedAttributesOptions {}
-export interface UseSortedKeysOptions {}
+export interface UseSortedAttributesOptions {
+	sortOrder?: SortOrder;
+}
+export interface UseSortedKeysOptions {
+	sortOrder?: SortOrder;
+}
 export interface UseSortedPropertiesOptions {}
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_NoAccessKeyOptions {
@@ -7406,6 +7411,7 @@ export interface RuleWithFixOptions_for_UseStrictModeOptions {
 	options: UseStrictModeOptions;
 }
 export type ImportGroups = ImportGroup[];
+export type SortOrder = "natural" | "lexicographic";
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -7746,7 +7752,12 @@ export interface UseSortedClassesOptions {
 }
 export interface UseSymbolDescriptionOptions {}
 export interface UseUnifiedTypeSignatureOptions {}
-export interface UseUniqueElementIdsOptions {}
+export interface UseUniqueElementIdsOptions {
+	/**
+	 * Component names that accept an `id` prop that does not translate to a DOM element id.
+	 */
+	excludedComponents?: string[];
+}
 export interface NoAccumulatingSpreadOptions {}
 export interface NoBarrelFileOptions {}
 export interface NoDeleteOptions {}
@@ -7799,7 +7810,11 @@ export interface NoRestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: Record<string, CustomRestrictedImport>;
+	paths: Record<string, Paths>;
+	/**
+	 * gitignore-style patterns that should trigger the rule.
+	 */
+	patterns?: Patterns[];
 }
 export interface NoRestrictedTypesOptions {
 	types?: Record<string, CustomRestrictedType>;
@@ -8033,7 +8048,8 @@ export interface Convention {
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
 export type PropertyAssignmentMode = "allow" | "deny";
-export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
+export type Paths = string | PathOptions;
+export type Patterns = PatternOptions;
 export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type ConsistentArrayType = "shorthand" | "generic";
 export type Accessibility = "noPublic" | "explicit" | "none";
@@ -8060,7 +8076,7 @@ export interface Selector {
 	 */
 	scope: Scope;
 }
-export interface CustomRestrictedImportOptions {
+export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
 	 */
@@ -8073,6 +8089,24 @@ export interface CustomRestrictedImportOptions {
 	 * The message to display when this module is imported.
 	 */
 	message: string;
+}
+export interface PatternOptions {
+	/**
+	 * An array of gitignore-style patterns.
+	 */
+	group?: SourcesMatcher;
+	/**
+	 * A regex pattern for import names to forbid within the matched modules.
+	 */
+	importNamePattern?: Regex;
+	/**
+	 * If true, the matched patterns in the importNamePattern will be allowed. Defaults to `false`.
+	 */
+	invertImportNamePattern?: boolean;
+	/**
+	 * A custom message for diagnostics related to this pattern.
+	 */
+	message?: string;
 }
 export interface CustomRestrictedTypeOptions {
 	message?: string;
@@ -8741,6 +8775,47 @@ Target paths must be absolute.
 			};
 	  }
 	| "project";
+export interface ScanProjectFolderParams {
+	/**
+	 * Forces scanning of the folder, even if it is already being watched.
+	 */
+	force: boolean;
+	/**
+	* Optional path within the project to scan.
+
+If omitted, the project is scanned from its root folder.
+
+This is a potential optimization that allows scanning to be limited to a subset of the full project. Clients should specify it to indicate which part of the project they are interested in. The server may or may not use this to avoid scanning parts that are irrelevant to clients. 
+	 */
+	path?: BiomePath;
+	projectKey: ProjectKey;
+	scanKind: ScanKind;
+	verbose: boolean;
+	/**
+	* Whether the watcher should watch this path.
+
+Does nothing if the watcher is already watching this path. 
+	 */
+	watch: boolean;
+}
+export interface ScanProjectFolderResult {
+	/**
+	 * A list of child configuration files found inside the project
+	 */
+	configurationFiles: BiomePath[];
+	/**
+	 * Diagnostics reported while scanning the project.
+	 */
+	diagnostics: Diagnostic[];
+	/**
+	 * Duration of the scan.
+	 */
+	duration: Duration;
+}
+export interface Duration {
+	nanos: number;
+	secs: number;
+}
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
@@ -8833,6 +8908,33 @@ export interface CloseFileParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
+export interface FileExitsParams {
+	filePath: BiomePath;
+}
+export interface PathIsIgnoredParams {
+	/**
+	 * Whether the path is ignored for specific features e.g. `formatter.includes`. When this field is empty, Biome checks only `files.includes`.
+	 */
+	features: FeatureName;
+	/**
+	 * Controls how to ignore check should be done
+	 */
+	ignoreKind?: IgnoreKind;
+	/**
+	 * The path to inspect
+	 */
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export type IgnoreKind = "path" | "ancestors";
+export interface UpdateModuleGraphParams {
+	path: BiomePath;
+	/**
+	 * The kind of update to apply to the module graph
+	 */
+	updateKind: UpdateKind;
+}
+export type UpdateKind = "addOrUpdate" | "remove";
 export interface GetSyntaxTreeParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
@@ -8840,9 +8942,6 @@ export interface GetSyntaxTreeParams {
 export interface GetSyntaxTreeResult {
 	ast: string;
 	cst: string;
-}
-export interface FileExitsParams {
-	filePath: BiomePath;
 }
 export interface CheckFileSizeParams {
 	path: BiomePath;
@@ -8876,6 +8975,24 @@ export interface GetRegisteredTypesParams {
 export interface GetSemanticModelParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
+}
+export interface GetModuleGraphParams {}
+export interface GetModuleGraphResult {
+	data: Record<string, SerializedJsModuleInfo>;
+}
+export interface SerializedJsModuleInfo {
+	/**
+	 * Dynamic imports
+	 */
+	dynamic_imports: string[];
+	/**
+	 * Exported symbols
+	 */
+	exports: string[];
+	/**
+	 * Static imports
+	 */
+	static_imports: Record<string, string>;
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
@@ -9087,9 +9204,15 @@ export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
 	openProject(params: OpenProjectParams): Promise<OpenProjectResult>;
+	scanProjectFolder(
+		params: ScanProjectFolderParams,
+	): Promise<ScanProjectFolderResult>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
+	fileExists(params: FileExitsParams): Promise<boolean>;
+	isPathIgnored(params: PathIsIgnoredParams): Promise<boolean>;
+	updateModuleGraph(params: UpdateModuleGraphParams): Promise<void>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
 	fileExists(params: FileExitsParams): Promise<boolean>;
 	checkFileSize(params: CheckFileSizeParams): Promise<CheckFileSizeResult>;
@@ -9099,6 +9222,7 @@ export interface Workspace {
 	getTypeInfo(params: GetTypeInfoParams): Promise<string>;
 	getRegisteredTypes(params: GetRegisteredTypesParams): Promise<string>;
 	getSemanticModel(params: GetSemanticModelParams): Promise<string>;
+	getModuleGraph(params: GetModuleGraphParams): Promise<GetModuleGraphResult>;
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
@@ -9124,6 +9248,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		openProject(params) {
 			return transport.request("biome/open_project", params);
 		},
+		scanProjectFolder(params) {
+			return transport.request("biome/scan_project_folder", params);
+		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);
 		},
@@ -9132,6 +9259,15 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		closeFile(params) {
 			return transport.request("biome/close_file", params);
+		},
+		fileExists(params) {
+			return transport.request("biome/file_exists", params);
+		},
+		isPathIgnored(params) {
+			return transport.request("biome/is_path_ignored", params);
+		},
+		updateModuleGraph(params) {
+			return transport.request("biome/update_module_graph", params);
 		},
 		getSyntaxTree(params) {
 			return transport.request("biome/get_syntax_tree", params);
@@ -9159,6 +9295,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		getSemanticModel(params) {
 			return transport.request("biome/get_semantic_model", params);
+		},
+		getModuleGraph(params) {
+			return transport.request("biome/get_module_graph", params);
 		},
 		pullDiagnostics(params) {
 			return transport.request("biome/pull_diagnostics", params);

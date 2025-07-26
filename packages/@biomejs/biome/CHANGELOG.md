@@ -192,6 +192,14 @@
 
 - [#6839](https://github.com/biomejs/biome/pull/6839) [`4cd62d8`](https://github.com/biomejs/biome/commit/4cd62d8ae2e5cb24d6f308e05b38003486294548) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where Biome didn't throw any error when `vcs.useIgnoreFile` is set to `true`, and there wasn't any ignore file read. Now Biome correctly throws an error if no ignore files are found.
 
+- [#6911](https://github.com/biomejs/biome/pull/6911) [`6d68074`](https://github.com/biomejs/biome/commit/6d68074bf2a2ca4bc514398a180524394690fafe) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#6838](https://github.com/biomejs/biome/issues/6838): Reduce resource consumption in the Biome Language Server by using non-recursive filesystem watchers instead of recursive ones.
+
+  Watchers are responsible for notifying Biome of changes to files in the filesystem. We used to set up a single recursive watcher, but that meant that Biome would receive filesystem notifications for _all_ files in your project, even for ignored folders such as `build/` or `dist/` folders.
+
+  With this patch, we set up non-recursive watchers only for the folders that are relevant to a project.
+
+  Related to this, we also solved an issue where incoming notifications were incorrectly filtered, causing ignored files to be processed and stored in our module graph anyway.
+
 ## 2.1.1
 
 ### Patch Changes

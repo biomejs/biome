@@ -630,7 +630,6 @@ impl Format<FormatTypeContext> for TypeReference {
                 }
             }
             Self::Import(import) => write!(f, [import.as_ref()]),
-            Self::Unknown => write!(f, [text("unknown reference")]),
         }
     }
 }

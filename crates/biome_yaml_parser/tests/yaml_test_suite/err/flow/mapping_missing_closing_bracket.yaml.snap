@@ -1,0 +1,91 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+{ a:
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@0..0 "" [] [],
+                flow: YamlFlowJsonNode {
+                    properties: missing (optional),
+                    content: YamlFlowMapping {
+                        l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+                        entries: YamlFlowMapEntryList [
+                            YamlFlowMapImplicitEntry {
+                                key: YamlFlowYamlNode {
+                                    properties: missing (optional),
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@2..3 "a" [] [],
+                                    },
+                                },
+                                colon_token: COLON@3..4 ":" [] [],
+                                value: missing (optional),
+                            },
+                        ],
+                        r_curly_token: missing (required),
+                    },
+                },
+                flow_end_token: FLOW_END@4..5 "" [Newline("\n")] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@5..5 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..5
+  0: YAML_DOCUMENT_LIST@0..5
+    0: YAML_DOCUMENT@0..5
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_FLOW_IN_BLOCK_NODE@0..5
+        0: FLOW_START@0..0 "" [] []
+        1: YAML_FLOW_JSON_NODE@0..4
+          0: (empty)
+          1: YAML_FLOW_MAPPING@0..4
+            0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+            1: YAML_FLOW_MAP_ENTRY_LIST@2..4
+              0: YAML_FLOW_MAP_IMPLICIT_ENTRY@2..4
+                0: YAML_FLOW_YAML_NODE@2..3
+                  0: (empty)
+                  1: YAML_PLAIN_SCALAR@2..3
+                    0: PLAIN_LITERAL@2..3 "a" [] []
+                1: COLON@3..4 ":" [] []
+                2: (empty)
+            2: (empty)
+        2: FLOW_END@4..5 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@5..5 "" [] []
+
+```
+
+## Diagnostics
+
+```
+mapping_missing_closing_bracket.yaml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `}`
+  
+    1 │ { a:
+  > 2 │ 
+      │ 
+  
+```

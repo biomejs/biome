@@ -1,0 +1,7 @@
+# Equivalent to {{a: 10}: null, {b: 11}: null}
+? a: 10
+? b: 11
+
+# Equivalent to {{c: 12, {d: 13}: null}: null}
+? c: 12
+  ? d: 13
