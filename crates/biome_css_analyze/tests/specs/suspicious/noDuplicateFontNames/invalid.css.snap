@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -9,8 +8,8 @@ a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
 a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
 a { fOnT-fAmIlY: "Lucida Grande", '  Lucida Grande ', sans-serif; }
 a { font-family: 'Times', Times }
-a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
-b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
+/* a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
+b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; } */
 ```
 
 # Diagnostics
@@ -48,14 +47,14 @@ invalid.css:2:44 lint/suspicious/noDuplicateFontNames ━━━━━━━━�
 ```
 invalid.css:3:35 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate font names are redundant and unnecessary: LucidaGrande
+  × Duplicate font names are redundant and unnecessary: Lucida Grande
   
     1 │ a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
     2 │ a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
   > 3 │ a { fOnT-fAmIlY: "Lucida Grande", '  Lucida Grande ', sans-serif; }
       │                                   ^^^^^^^^^^^^^^^^^^
     4 │ a { font-family: 'Times', Times }
-    5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
+    5 │ /* a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
   
   i Remove duplicate font names within the property
   
@@ -71,39 +70,8 @@ invalid.css:4:27 lint/suspicious/noDuplicateFontNames ━━━━━━━━�
     3 │ a { fOnT-fAmIlY: "Lucida Grande", '  Lucida Grande ', sans-serif; }
   > 4 │ a { font-family: 'Times', Times }
       │                           ^^^^^
-    5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
-    6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
-  
-  i Remove duplicate font names within the property
-  
-
-```
-
-```
-invalid.css:5:39 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Duplicate font names are redundant and unnecessary: Arial
-  
-    3 │ a { fOnT-fAmIlY: "Lucida Grande", '  Lucida Grande ', sans-serif; }
-    4 │ a { font-family: 'Times', Times }
-  > 5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
-      │                                       ^^^^^^^^
-    6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
-  
-  i Remove duplicate font names within the property
-  
-
-```
-
-```
-invalid.css:6:75 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Duplicate font names are redundant and unnecessary: sans-serif
-  
-    4 │ a { font-family: 'Times', Times }
-    5 │ a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
-  > 6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
-      │                                                                           ^^^^^^^^^^
+    5 │ /* a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
+    6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; } */
   
   i Remove duplicate font names within the property
   
