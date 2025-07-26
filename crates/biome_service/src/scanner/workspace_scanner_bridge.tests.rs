@@ -23,7 +23,7 @@ use crate::workspace::{
 };
 use crate::{Workspace, WorkspaceError};
 
-use super::{IndexRequestKind, ScanKind, WorkspaceScannerBridge};
+use super::{ScanKind, WorkspaceScannerBridge};
 
 #[test]
 fn close_file_through_watcher_before_client() {
@@ -37,11 +37,7 @@ fn close_file_through_watcher_before_client() {
     let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
 
     workspace
-        .index_file(
-            project_key,
-            file_path.clone(),
-            IndexRequestKind::Explicit(IndexTrigger::InitialScan),
-        )
+        .index_file(project_key, file_path.clone(), IndexTrigger::InitialScan)
         .expect("can index file");
 
     assert!(workspace.is_indexed(&file_path), "file should be indexed");
@@ -124,11 +120,7 @@ fn close_file_from_client_before_watcher() {
         .expect("can open from client");
 
     workspace
-        .index_file(
-            project_key,
-            file_path.clone(),
-            IndexRequestKind::Explicit(IndexTrigger::Update),
-        )
+        .index_file(project_key, file_path.clone(), IndexTrigger::Update)
         .expect("can also index file");
 
     let content = workspace
@@ -350,7 +342,7 @@ fn should_not_index_inside_an_ignored_folder_inside_file_includes() {
     fs.create_file(file_path, "import 'foo';");
 
     let (workspace, project_key) = setup_workspace_and_open_project(fs.create_os(), fs.cli_path());
-    let file_path = format!("{}/{file_path}", fs.cli_path());
+    let file_path = Utf8Path::new(fs.cli_path()).join(file_path);
 
     workspace
         .update_settings(UpdateSettingsParams {
@@ -379,7 +371,7 @@ fn should_not_index_inside_an_ignored_folder_inside_file_includes() {
         })
         .expect("can scan the project");
 
-    assert!(!workspace.is_indexed(Utf8Path::new(&file_path)));
+    assert!(!workspace.is_indexed(&file_path));
 }
 
 #[test]
@@ -392,7 +384,7 @@ fn should_not_index_inside_an_ignored_folder_inside_vcs_ignore_file() {
     fs.create_file(".gitignore", "dist\n");
 
     let (workspace, project_key) = setup_workspace_and_open_project(fs.create_os(), fs.cli_path());
-    let file_path = format!("{}/{file_path}", fs.cli_path());
+    let file_path = Utf8Path::new(fs.cli_path()).join(file_path);
 
     workspace
         .update_settings(UpdateSettingsParams {
@@ -420,26 +412,28 @@ fn should_not_index_inside_an_ignored_folder_inside_vcs_ignore_file() {
         })
         .expect("can scan the project");
 
-    assert!(!workspace.is_indexed(Utf8Path::new(&file_path)));
+    assert!(!workspace.is_indexed(&file_path));
 }
 
 #[test]
 fn should_index_used_type_definition_of_used_dependency() {
-    let used_file_path = "node_modules/used/index.d.ts";
+    let entry_file_path = "a.js";
+    let used_file_path = "node_modules/used/used.d.ts";
     let unused_file_path = "node_modules/used/unused.d.ts";
 
-    let mut fs = TemporaryFs::new("should_index_type_definition_of_used_dependency");
+    let mut fs = TemporaryFs::new("should_index_used_type_definition_of_used_dependency");
     fs.create_file(used_file_path, "import 'foo';");
     fs.create_file(unused_file_path, "import 'foo';");
     fs.create_file(
         "node_modules/used/package.json",
-        r#"{ "name": "used", "types": "./index.d.ts" }"#,
+        r#"{ "name": "used", "types": "./used.d.ts" }"#,
     );
-    fs.create_file("a.js", "import 'used';");
+    fs.create_file(entry_file_path, "import 'used';");
 
     let (workspace, project_key) = setup_workspace_and_open_project(fs.create_os(), fs.cli_path());
-    let used_file_path = format!("{}/{used_file_path}", fs.cli_path());
-    let unused_file_path = format!("{}/{unused_file_path}", fs.cli_path());
+    let entry_file_path = Utf8Path::new(fs.cli_path()).join(entry_file_path);
+    let used_file_path = Utf8Path::new(fs.cli_path()).join(used_file_path);
+    let unused_file_path = Utf8Path::new(fs.cli_path()).join(unused_file_path);
 
     workspace
         .scan_project(ScanProjectParams {
@@ -451,6 +445,7 @@ fn should_index_used_type_definition_of_used_dependency() {
         })
         .expect("can scan the project");
 
-    assert!(workspace.is_indexed(Utf8Path::new(&used_file_path)));
-    assert!(!workspace.is_indexed(Utf8Path::new(&unused_file_path)));
+    assert!(workspace.is_indexed(&entry_file_path));
+    assert!(workspace.is_indexed(&used_file_path));
+    assert!(!workspace.is_indexed(&unused_file_path));
 }

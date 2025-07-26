@@ -559,8 +559,7 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
             ctx: &'a ScanContext<'a, W>,
             dependency_path: Utf8PathBuf,
         ) {
-            let request_kind = IndexRequestKind::Dependency(ctx.trigger);
-            let dependencies = open_file(ctx, BiomePath::new(dependency_path), request_kind);
+            let dependencies = open_file(ctx, BiomePath::new(dependency_path), ctx.trigger);
             ctx.dependencies
                 .lock()
                 .unwrap()
@@ -573,7 +572,7 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
                         ctx.project_key,
                         &ctx.scan_kind,
                         &dependency_path,
-                        request_kind,
+                        IndexRequestKind::Dependency(ctx.trigger),
                     )
                     .unwrap_or(true);
                 if !is_ignored {
@@ -777,7 +776,7 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
     }
 
     fn handle_path(&self, path: BiomePath) {
-        let dependencies = open_file(self, path, IndexRequestKind::Explicit(self.trigger));
+        let dependencies = open_file(self, path, self.trigger);
         self.dependencies.lock().unwrap().extend(dependencies);
     }
 
@@ -798,11 +797,11 @@ impl<W: WorkspaceScannerBridge> TraversalContext for ScanContext<'_, W> {
 fn open_file<W: WorkspaceScannerBridge>(
     ctx: &ScanContext<W>,
     path: BiomePath,
-    request_kind: IndexRequestKind,
+    trigger: IndexTrigger,
 ) -> ModuleDependencies {
     match catch_unwind(|| {
         ctx.workspace
-            .index_file(ctx.project_key, path.clone(), request_kind)
+            .index_file(ctx.project_key, path.clone(), trigger)
     }) {
         Ok(Ok(dependencies)) => dependencies,
         Ok(Err(err)) => {

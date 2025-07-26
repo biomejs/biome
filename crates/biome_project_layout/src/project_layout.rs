@@ -186,6 +186,26 @@ impl ProjectLayout {
         );
     }
 
+    /// Returns whether the manifest with the given `path` is indexed in the
+    /// project layout.
+    ///
+    /// Only returns `true` for `package.json` and `tsconfig.json` manifests.
+    pub fn is_indexed(&self, path: &Utf8Path) -> bool {
+        path.parent()
+            .and_then(|package_path| {
+                self.0
+                    .pin()
+                    .get(package_path)
+                    .and_then(|data| data.node_package.as_ref())
+                    .map(|package| match path.file_name() {
+                        Some("package.json") => package.manifest.is_some(),
+                        Some("tsconfig.json") => package.tsconfig.is_some(),
+                        _ => false,
+                    })
+            })
+            .unwrap_or_default()
+    }
+
     /// Removes a `tsconfig.json` manifest from the package with the given
     /// `path`.
     pub fn remove_tsconfig_from_package(&self, path: &Utf8Path) {
@@ -200,5 +220,15 @@ impl ProjectLayout {
     /// Removes a package and its metadata from the project layout.
     pub fn remove_package(&self, path: &Utf8Path) {
         self.0.pin().remove(path);
+    }
+
+    /// Unloads all paths from the graph within the given `path`.
+    pub fn unload_folder(&self, path: &Utf8Path) {
+        let packages = self.0.pin();
+        for package_path in packages.keys() {
+            if package_path.starts_with(path) {
+                packages.remove(package_path);
+            }
+        }
     }
 }

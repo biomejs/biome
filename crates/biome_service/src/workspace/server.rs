@@ -30,7 +30,7 @@ use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AstNode, NodeCache, SendNode};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
-use papaya::{Compute, HashMap, Operation};
+use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
@@ -276,11 +276,11 @@ impl WorkspaceServer {
             .unwrap_or_else(|| self.file_sources.push(document_file_source))
     }
 
-    fn open_file_for_reason(
+    fn open_file_for_scanner(
         &self,
         project_key: ProjectKey,
         path: BiomePath,
-        reason: OpenFileReason,
+        trigger: IndexTrigger,
     ) -> Result<InternalOpenFileResult, WorkspaceError> {
         match self
             .module_graph
@@ -288,7 +288,7 @@ impl WorkspaceServer {
         {
             Some(path_info) if path_info.is_symlink() => Ok(Default::default()),
             Some(_) => self.open_file_internal(
-                reason,
+                OpenFileReason::Index(trigger),
                 OpenFileParams {
                     project_key,
                     path,
@@ -385,7 +385,7 @@ impl WorkspaceServer {
             .and_then(|syntax| syntax.as_ref().ok())
             .map(|parse| parse.root());
 
-        let is_indexed = reason.is_indexed();
+        let is_indexed = reason.is_index();
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let (embedded_scripts, embedded_styles) = if let Some(DocumentFileSource::Html(_)) =
@@ -401,85 +401,59 @@ impl WorkspaceServer {
             (Vec::new(), Vec::new())
         };
 
-        let documents = self.documents.pin();
-        let result = documents.compute(path.clone(), |current| {
-            let biome_path = BiomePath::new(&path);
-            if biome_path.is_dependency() && biome_path.is_type_declaration() {
-                return if current.is_some() {
-                    Operation::Remove
-                } else {
-                    // The document isn't inside the current files, however we
-                    // want to signal that it's a type declaration, and we want
-                    // to update the module graph
-                    Operation::Abort(true)
-                };
-            }
-            match current {
-                Some((_path, document)) => {
-                    let version = match (document.version, version) {
+        let is_indexed = if is_indexed {
+            // If the request is for indexing, we don't insert any document,
+            // we only care about updating the module graph.
+            true
+        } else {
+            self.documents.pin().update_or_insert_with(
+                path.clone(),
+                |current| {
+                    let version = match (current.version, version) {
                         (Some(current_version), Some(new_version)) => {
-                            // This is awkward. It most likely means we have two
-                            // clients independently specifying their own version,
-                            // with no way for us to distinguish them. Or it is a
-                            // bug.
-                            // The safest thing to do seems to use the _minimum_ of
-                            // the versions specified, so that updates coming from
-                            // either will be accepted.
+                            // This is awkward. It most likely means we have
+                            // two clients independently specifying their
+                            // own version, with no way for us to
+                            // distinguish them. Or it is a bug. The safest
+                            // thing to do seems to use the _minimum_ of the
+                            // versions specified, so that updates coming
+                            // from either will be accepted.
                             Some(current_version.min(new_version))
                         }
                         (Some(current_version), None) => {
-                            // It appears the document is open in a client, and the
-                            // scanner also wants to open/update the document. We
-                            // stick with the version from the client, and ignore
-                            // this request.
+                            // It appears the document is open in a client,
+                            // and the scanner also wants to open/update the
+                            // document. We stick with the version from the
+                            // client and ignore this request.
                             Some(current_version)
                         }
                         (None, new_version) => {
-                            // The document was only opened by the scanner, so
-                            // whatever's the new version will do.
+                            // The document was only opened by the scanner,
+                            // so whatever's the new version will do.
                             new_version
                         }
                     };
 
-                    // If the document already had a version, but the new
-                    // content is coming from the scanner, we keep the same
-                    // content that was already in the document. This means,
-                    // active clients are leading over the filesystem.
-                    if document.version.is_some() && is_indexed {
-                        let mut doc = document.clone();
-                        doc.is_indexed = true;
-                        return Operation::Insert(doc);
-                    };
-
-                    Operation::Insert::<Document, bool>(Document {
+                    Document {
                         content: content.clone(),
                         version,
                         file_source_index,
                         syntax: syntax.clone(),
-                        is_indexed: is_indexed || document.is_indexed,
                         _embedded_scripts: embedded_scripts.clone(),
                         _embedded_styles: embedded_styles.clone(),
-                    })
-                }
-                None => Operation::Insert(Document {
+                    }
+                },
+                || Document {
                     content: content.clone(),
                     version,
                     file_source_index,
                     syntax: syntax.clone(),
-                    is_indexed,
                     _embedded_scripts: embedded_scripts.clone(),
                     _embedded_styles: embedded_styles.clone(),
-                }),
-            }
-        });
+                },
+            );
 
-        let is_indexed = match result {
-            Compute::Inserted(_, document)
-            | Compute::Updated {
-                new: (_, document), ..
-            } => document.is_indexed,
-            Compute::Aborted(result) => result,
-            _ => false,
+            self.is_indexed(&path)
         };
 
         if is_indexed {
@@ -873,9 +847,12 @@ impl Workspace for WorkspaceServer {
 
             let manifest = path.join("package.json");
             if self.fs.path_exists(&manifest) {
-                const REASON: OpenFileReason = OpenFileReason::Index(IndexTrigger::InitialScan);
-                self.open_file_for_reason(project_key, manifest.clone().into(), REASON)?;
-                self.update_project_layout(UpdateKind::AddedOrChanged(REASON), &manifest)?;
+                let trigger = IndexTrigger::InitialScan;
+                self.open_file_for_scanner(project_key, manifest.clone().into(), trigger)?;
+                self.update_project_layout(
+                    UpdateKind::AddedOrChanged(OpenFileReason::Index(trigger)),
+                    &manifest,
+                )?;
             }
             return Ok(ScanProjectResult {
                 diagnostics: Vec::new(),
@@ -1018,16 +995,18 @@ impl Workspace for WorkspaceServer {
         // Unload all the documents within the project folder.
         let documents = self.documents.pin();
         let mut node_cache = self.node_cache.lock().unwrap();
-        for (path, document) in documents.iter() {
-            if document.is_indexed
-                && self
-                    .projects
-                    .path_belongs_only_to_project_with_path(path, &project_path)
+        for path in documents.keys() {
+            if self
+                .projects
+                .path_belongs_only_to_project_with_path(path, &project_path)
             {
                 documents.remove(path);
                 node_cache.remove(path.as_path());
             }
         }
+
+        self.module_graph.unload_folder(&project_path);
+        self.project_layout.unload_folder(&project_path);
 
         Ok(())
     }
@@ -1204,15 +1183,9 @@ impl Workspace for WorkspaceServer {
         }: ChangeFileParams,
     ) -> Result<(), WorkspaceError> {
         let documents = self.documents.pin();
-        let (index, opened_by_scanner, existing_version) = documents
+        let (index, existing_version) = documents
             .get(path.as_path())
-            .map(|document| {
-                (
-                    document.file_source_index,
-                    document.is_indexed,
-                    document.version,
-                )
-            })
+            .map(|document| (document.file_source_index, document.version))
             .ok_or_else(WorkspaceError::not_found)?;
 
         if existing_version.is_some_and(|existing_version| existing_version >= version) {
@@ -1254,7 +1227,6 @@ impl Workspace for WorkspaceServer {
             version: Some(version),
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
-            is_indexed: opened_by_scanner,
             _embedded_scripts: embedded_scripts,
             _embedded_styles: embedded_styles,
         };
@@ -1266,12 +1238,11 @@ impl Workspace for WorkspaceServer {
                 .insert(path.to_path_buf(), node_cache);
         }
 
-        let is_indexed = document.is_indexed;
         documents
             .insert(path.clone().into(), document)
             .ok_or_else(WorkspaceError::not_found)?;
 
-        if is_indexed {
+        if self.is_indexed(&path) {
             let dependencies = self.update_service_data(
                 UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest),
                 &path,
@@ -1612,40 +1583,19 @@ impl Workspace for WorkspaceServer {
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
         let path = params.path.as_path();
 
-        let documents = self.documents.pin();
-        let result = documents.compute(path.to_path_buf(), |current| {
-            match current {
-                Some((_path, document)) if document.is_indexed => {
-                    // If the scanner is still interested in the document, we
-                    // only unset the version and re-sync the content below.
-                    Operation::Insert(Document {
-                        version: None,
-                        ..document.clone()
-                    })
-                }
-                Some(_) => Operation::Remove,
-                None => Operation::Abort(()),
-            }
-        });
-
-        // The node cache can be cleared in any case.
+        self.documents.pin().remove(path);
         self.node_cache.lock().unwrap().remove(path);
 
-        match result {
-            Compute::Inserted(_, _) => Ok(()), // should be unreachable
-            Compute::Updated { .. } => {
-                // This may look counter-intuitive, but we need to consider that
-                // the file may have gone out-of-sync between the client and the
-                // filesystem. So when the client closes it, and the scanner
-                // still wants to index it, we need to re-index it to make sure
-                // they're back in sync.
-                self.scanner.reindex_file(path.to_path_buf());
-
-                Ok(())
-            }
-            Compute::Removed(_, _) => Ok(()),
-            Compute::Aborted(_) => Err(WorkspaceError::not_found()),
+        if self.is_indexed(path) {
+            // This may look counter-intuitive, but we need to consider that the
+            // file may have gone out-of-sync between the client and the
+            // filesystem. So when the client closes it, and the scanner still
+            // wants to index it, we need to re-index it to make sure they're
+            // back in sync.
+            self.scanner.reindex_file(path.to_path_buf());
         }
+
+        Ok(())
     }
 
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
@@ -1770,24 +1720,20 @@ impl WorkspaceScannerBridge for WorkspaceServer {
 
     #[inline]
     fn is_indexed(&self, path: &Utf8Path) -> bool {
-        self.documents
-            .pin()
-            .get(path)
-            .is_some_and(|document| document.is_indexed)
+        match path.file_name() {
+            Some("package.json" | "tsconfig.json") => self.project_layout.is_indexed(path),
+            _ => self.module_graph.contains(path),
+        }
     }
 
     fn index_file(
         &self,
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
-        request_kind: IndexRequestKind,
+        trigger: IndexTrigger,
     ) -> Result<ModuleDependencies, WorkspaceError> {
-        self.open_file_for_reason(
-            project_key,
-            path.into(),
-            OpenFileReason::Index(request_kind.trigger()),
-        )
-        .map(|result| result.dependencies)
+        self.open_file_for_scanner(project_key, path.into(), trigger)
+            .map(|result| result.dependencies)
     }
 
     fn update_project_config_files(
@@ -1922,28 +1868,8 @@ impl WorkspaceScannerBridge for WorkspaceServer {
     }
 
     fn unload_file(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
-        let documents = self.documents.pin();
-        let result = documents.compute(path.to_path_buf(), |current| {
-            match current {
-                Some((_path, document)) if document.version.is_some() => {
-                    // If the document has a version, some client is also
-                    // working with it, so we only unflag it as being opened by
-                    // the scanner.
-                    Operation::Insert(Document {
-                        is_indexed: false,
-                        ..document.clone()
-                    })
-                }
-                Some(_) => Operation::Remove,
-                None => Operation::Abort(()),
-            }
-        });
-
-        if matches!(result, Compute::Removed(_, _)) {
-            let _ = self.update_service_data(UpdateKind::Removed, path, None);
-        }
-
-        Ok(())
+        self.update_service_data(UpdateKind::Removed, path, None)
+            .map(|_| ())
     }
 
     fn unload_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
@@ -1981,7 +1907,7 @@ pub enum OpenFileReason {
 }
 
 impl OpenFileReason {
-    pub const fn is_indexed(self) -> bool {
+    pub const fn is_index(self) -> bool {
         matches!(self, Self::Index(_))
     }
 }
