@@ -1476,6 +1476,7 @@ dependencies = [
  "smallvec",
  "tokio",
  "tracing",
+ "web-time",
 ]
 
 [[package]]

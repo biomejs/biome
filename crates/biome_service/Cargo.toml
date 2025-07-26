@@ -74,6 +74,7 @@ serde_json              = { workspace = true, features = ["raw_value"] }
 smallvec                = { workspace = true, features = ["serde"] }
 tokio                   = { workspace = true, features = ["sync"] }
 tracing                 = { workspace = true, features = ["attributes", "log"] }
+web-time                = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }
