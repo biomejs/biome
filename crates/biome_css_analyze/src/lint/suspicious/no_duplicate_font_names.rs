@@ -231,6 +231,7 @@ fn parse_shorthand_font_families(list: CssGenericComponentValueList) -> Option<V
     let mut font_families: Vec<FontFamily> = Vec::new();
 
     for v in list {
+        let is_last_value_node = v.syntax().next_sibling().is_none();
         let value = v.to_trimmed_text();
         let lower_case_value = value.text().to_ascii_lowercase_cow();
 
@@ -327,6 +328,17 @@ fn parse_shorthand_font_families(list: CssGenericComponentValueList) -> Option<V
                 _ => {}
             },
         };
+
+        if is_last_value_node {
+            let merged_font = current_font_texts.join(" ");
+            let merged_range = first_range?.cover(last_range?);
+
+            font_families.push(FontFamily {
+                text: merged_font.into(),
+                range: merged_range,
+                is_quoted: false,
+            });
+        }
     }
     Some(font_families)
 }
