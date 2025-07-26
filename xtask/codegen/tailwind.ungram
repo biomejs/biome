@@ -46,9 +46,12 @@ TwBogusModifier = SyntaxElement*
 // https://github.com/tailwindlabs/tailwindcss/blob/fa3f45f02c7153876f0e01088b4b5b27bd8e5e96/packages/tailwindcss/src/candidate.ts
 // Note that this document uses the terminology "base" instead of "root". A base is the identifier that tailwind maps to a CSS property.
 
-TwRoot = TwCandidateList
+TwRoot =
+  bom: 'UNICODE_BOM'?
+	candidates: TwCandidateList
+	eof: 'EOF'
 
-TwCandidateList = AnyTwCandidate*
+TwCandidateList = TwCandidate*
 
 // A Candidate is essentially a CSS class from an end user perspective. It's what the end user puts inside the `class` attribute in their HTML, separated by spaces.
 TwCandidate =
@@ -90,8 +93,7 @@ TwFunctionalCandidate =
   modifier: AnyTwModifier?
 
 // The list of variants must end with a colon.
-//TwVariantList = (AnyTwVariant (':' AnyTwVariant)* ':')
-TwVariantList = AnyTwVariant*
+TwVariantList = (AnyTwVariant (':' AnyTwVariant)* ':'?)
 
 // A Variant is a selector that modifies what the Candidate applies to.
 AnyTwVariant = TwArbitraryVariant | TwStaticVariant | TwFunctionalVariant | TwBogusVariant
@@ -109,13 +111,14 @@ TwArbitraryVariant =
 // hover:text-red-500
 // ^^^^^
 TwStaticVariant =
-  selector: 'tw_selector'
+  base: 'tw_base'
 
+// aria-disabled:text-red-500
+// ^^^^^^^^^^^^^
+// aria-[disabled]:text-red-500
+// ^^^^^^^^^^^^^^^
 TwFunctionalVariant =
-	selector: 'tw_selector'
-	value: TwFunctionalVariantValue?
-
-TwFunctionalVariantValue =
+	base: 'tw_base'
 	'-'
 	value: AnyTwValue
 
@@ -133,25 +136,19 @@ TwArbitraryValue =
 	value: 'tw_value'
 	']'
 
-// bg-[#ff0000]
-//    ^^^^^^^^^
+// bg-(--brand-primary)
+//    ^^^^^^^^^^^^^^^^^
 TwCssVariableValue =
 	'('
 	value: 'tw_value'
 	')'
 
-AnyTwModifier = TwNamedModifier | TwArbitraryModifier | TwBogusModifier
+AnyTwModifier = TwModifier | TwBogusModifier
 
 // text-red-500/50
 //             ^^^
-TwNamedModifier =
-	'/'
-	value: 'tw_value'
-
 // text-red-500/[50%]
 //             ^^^^^^
-TwArbitraryModifier =
+TwModifier =
 	'/'
-	'['
-	value: 'tw_value'
-	']'
+	value: AnyTwValue

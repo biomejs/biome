@@ -1,0 +1,76 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+text-[
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..4 "text" [] [],
+                minus_token: DASH@4..5 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@5..6 "[" [] [],
+                    value_token: missing (required),
+                    r_brack_token: missing (required),
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@6..7 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..7
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..6
+    0: TW_CANDIDATE@0..6
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..6
+        0: TW_BASE@0..4 "text" [] []
+        1: DASH@4..5 "-" [] []
+        2: TW_ARBITRARY_VALUE@5..6
+          0: L_BRACKET@5..6 "[" [] []
+          1: (empty)
+          2: (empty)
+        3: (empty)
+      2: (empty)
+  2: EOF@6..7 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+incomplete-arbirary-value-0.txt:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `value` but instead the file ends
+  
+    1 │ text-[
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ text-[
+  > 2 │ 
+      │ 
+  
+```

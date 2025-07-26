@@ -1,0 +1,365 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+border-foreground text-foreground ring-offset-background focus-visible:ring-ring aspect-square size-4 rounded-full border focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..6 "border" [] [],
+                minus_token: DASH@6..7 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@7..18 "foreground" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@18..22 "text" [] [],
+                minus_token: DASH@22..23 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@23..34 "foreground" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@34..38 "ring" [] [],
+                minus_token: DASH@38..39 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@39..57 "offset-background" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [
+                TwFunctionalVariant {
+                    base_token: TW_BASE@57..62 "focus" [] [],
+                    minus_token: DASH@62..63 "-" [] [],
+                    value: TwNamedValue {
+                        value_token: TW_VALUE@63..70 "visible" [] [],
+                    },
+                },
+                COLON@70..71 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@71..75 "ring" [] [],
+                minus_token: DASH@75..76 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@76..81 "ring" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@81..87 "aspect" [] [],
+                minus_token: DASH@87..88 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@88..95 "square" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@95..99 "size" [] [],
+                minus_token: DASH@99..100 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@100..102 "4" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@102..109 "rounded" [] [],
+                minus_token: DASH@109..110 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@110..115 "full" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [],
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@115..122 "border" [] [Whitespace(" ")],
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [
+                TwStaticVariant {
+                    base_token: TW_BASE@122..127 "focus" [] [],
+                },
+                COLON@127..128 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@128..135 "outline" [] [],
+                minus_token: DASH@135..136 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@136..141 "none" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [
+                TwFunctionalVariant {
+                    base_token: TW_BASE@141..146 "focus" [] [],
+                    minus_token: DASH@146..147 "-" [] [],
+                    value: TwNamedValue {
+                        value_token: TW_VALUE@147..154 "visible" [] [],
+                    },
+                },
+                COLON@154..155 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@155..159 "ring" [] [],
+                minus_token: DASH@159..160 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@160..162 "2" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [
+                TwFunctionalVariant {
+                    base_token: TW_BASE@162..167 "focus" [] [],
+                    minus_token: DASH@167..168 "-" [] [],
+                    value: TwNamedValue {
+                        value_token: TW_VALUE@168..175 "visible" [] [],
+                    },
+                },
+                COLON@175..176 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@176..180 "ring" [] [],
+                minus_token: DASH@180..181 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@181..190 "offset-2" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [
+                TwStaticVariant {
+                    base_token: TW_BASE@190..198 "disabled" [] [],
+                },
+                COLON@198..199 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@199..205 "cursor" [] [],
+                minus_token: DASH@205..206 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@206..218 "not-allowed" [] [Whitespace(" ")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        TwCandidate {
+            variants: TwVariantList [
+                TwStaticVariant {
+                    base_token: TW_BASE@218..226 "disabled" [] [],
+                },
+                COLON@226..227 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@227..234 "opacity" [] [],
+                minus_token: DASH@234..235 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@235..237 "50" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@237..238 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..238
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..237
+    0: TW_CANDIDATE@0..18
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..18
+        0: TW_BASE@0..6 "border" [] []
+        1: DASH@6..7 "-" [] []
+        2: TW_NAMED_VALUE@7..18
+          0: TW_VALUE@7..18 "foreground" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    1: TW_CANDIDATE@18..34
+      0: TW_VARIANT_LIST@18..18
+      1: TW_FUNCTIONAL_CANDIDATE@18..34
+        0: TW_BASE@18..22 "text" [] []
+        1: DASH@22..23 "-" [] []
+        2: TW_NAMED_VALUE@23..34
+          0: TW_VALUE@23..34 "foreground" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    2: TW_CANDIDATE@34..57
+      0: TW_VARIANT_LIST@34..34
+      1: TW_FUNCTIONAL_CANDIDATE@34..57
+        0: TW_BASE@34..38 "ring" [] []
+        1: DASH@38..39 "-" [] []
+        2: TW_NAMED_VALUE@39..57
+          0: TW_VALUE@39..57 "offset-background" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    3: TW_CANDIDATE@57..81
+      0: TW_VARIANT_LIST@57..71
+        0: TW_FUNCTIONAL_VARIANT@57..70
+          0: TW_BASE@57..62 "focus" [] []
+          1: DASH@62..63 "-" [] []
+          2: TW_NAMED_VALUE@63..70
+            0: TW_VALUE@63..70 "visible" [] []
+        1: COLON@70..71 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@71..81
+        0: TW_BASE@71..75 "ring" [] []
+        1: DASH@75..76 "-" [] []
+        2: TW_NAMED_VALUE@76..81
+          0: TW_VALUE@76..81 "ring" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    4: TW_CANDIDATE@81..95
+      0: TW_VARIANT_LIST@81..81
+      1: TW_FUNCTIONAL_CANDIDATE@81..95
+        0: TW_BASE@81..87 "aspect" [] []
+        1: DASH@87..88 "-" [] []
+        2: TW_NAMED_VALUE@88..95
+          0: TW_VALUE@88..95 "square" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    5: TW_CANDIDATE@95..102
+      0: TW_VARIANT_LIST@95..95
+      1: TW_FUNCTIONAL_CANDIDATE@95..102
+        0: TW_BASE@95..99 "size" [] []
+        1: DASH@99..100 "-" [] []
+        2: TW_NAMED_VALUE@100..102
+          0: TW_VALUE@100..102 "4" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    6: TW_CANDIDATE@102..115
+      0: TW_VARIANT_LIST@102..102
+      1: TW_FUNCTIONAL_CANDIDATE@102..115
+        0: TW_BASE@102..109 "rounded" [] []
+        1: DASH@109..110 "-" [] []
+        2: TW_NAMED_VALUE@110..115
+          0: TW_VALUE@110..115 "full" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    7: TW_CANDIDATE@115..122
+      0: TW_VARIANT_LIST@115..115
+      1: TW_STATIC_CANDIDATE@115..122
+        0: TW_BASE@115..122 "border" [] [Whitespace(" ")]
+      2: (empty)
+    8: TW_CANDIDATE@122..141
+      0: TW_VARIANT_LIST@122..128
+        0: TW_STATIC_VARIANT@122..127
+          0: TW_BASE@122..127 "focus" [] []
+        1: COLON@127..128 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@128..141
+        0: TW_BASE@128..135 "outline" [] []
+        1: DASH@135..136 "-" [] []
+        2: TW_NAMED_VALUE@136..141
+          0: TW_VALUE@136..141 "none" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    9: TW_CANDIDATE@141..162
+      0: TW_VARIANT_LIST@141..155
+        0: TW_FUNCTIONAL_VARIANT@141..154
+          0: TW_BASE@141..146 "focus" [] []
+          1: DASH@146..147 "-" [] []
+          2: TW_NAMED_VALUE@147..154
+            0: TW_VALUE@147..154 "visible" [] []
+        1: COLON@154..155 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@155..162
+        0: TW_BASE@155..159 "ring" [] []
+        1: DASH@159..160 "-" [] []
+        2: TW_NAMED_VALUE@160..162
+          0: TW_VALUE@160..162 "2" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    10: TW_CANDIDATE@162..190
+      0: TW_VARIANT_LIST@162..176
+        0: TW_FUNCTIONAL_VARIANT@162..175
+          0: TW_BASE@162..167 "focus" [] []
+          1: DASH@167..168 "-" [] []
+          2: TW_NAMED_VALUE@168..175
+            0: TW_VALUE@168..175 "visible" [] []
+        1: COLON@175..176 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@176..190
+        0: TW_BASE@176..180 "ring" [] []
+        1: DASH@180..181 "-" [] []
+        2: TW_NAMED_VALUE@181..190
+          0: TW_VALUE@181..190 "offset-2" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    11: TW_CANDIDATE@190..218
+      0: TW_VARIANT_LIST@190..199
+        0: TW_STATIC_VARIANT@190..198
+          0: TW_BASE@190..198 "disabled" [] []
+        1: COLON@198..199 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@199..218
+        0: TW_BASE@199..205 "cursor" [] []
+        1: DASH@205..206 "-" [] []
+        2: TW_NAMED_VALUE@206..218
+          0: TW_VALUE@206..218 "not-allowed" [] [Whitespace(" ")]
+        3: (empty)
+      2: (empty)
+    12: TW_CANDIDATE@218..237
+      0: TW_VARIANT_LIST@218..227
+        0: TW_STATIC_VARIANT@218..226
+          0: TW_BASE@218..226 "disabled" [] []
+        1: COLON@226..227 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@227..237
+        0: TW_BASE@227..234 "opacity" [] []
+        1: DASH@234..235 "-" [] []
+        2: TW_NAMED_VALUE@235..237
+          0: TW_VALUE@235..237 "50" [] []
+        3: (empty)
+      2: (empty)
+  2: EOF@237..238 "" [Newline("\n")] []
+
+```

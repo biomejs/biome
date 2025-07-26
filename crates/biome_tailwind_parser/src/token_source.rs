@@ -2,7 +2,9 @@ use crate::lexer::TailwindLexer;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
 use biome_parser::prelude::BumpWithContext;
-use biome_parser::token_source::{TokenSource, TokenSourceWithBufferedLexer, Trivia};
+use biome_parser::token_source::{
+    TokenSource, TokenSourceCheckpoint, TokenSourceWithBufferedLexer, Trivia,
+};
 use biome_rowan::TriviaPieceKind;
 use biome_tailwind_syntax::TailwindSyntaxKind::EOF;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextRange};
@@ -13,12 +15,17 @@ pub(crate) struct TailwindTokenSource<'source> {
     /// List of the skipped trivia. Needed to construct the CST and compute the non-trivia token offsets.
     pub(super) trivia_list: Vec<Trivia>,
 }
+pub(crate) type TailwindTokenSourceCheckpoint = TokenSourceCheckpoint<TailwindSyntaxKind>;
 
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 pub(crate) enum TailwindLexContext {
     /// The default state.
     #[default]
     Regular,
+    /// The lexer has encountered a `[` and the parser has yet to encounter the matching `]`.
+    Arbitrary,
+    /// Like Arbitrary, but specifically for arbitrary variants.
+    ArbitraryVariant,
 }
 
 impl LexContext for TailwindLexContext {
@@ -70,6 +77,21 @@ impl<'source> TailwindTokenSource<'source> {
                 }
             }
         }
+    }
+
+    /// Creates a checkpoint to which it can later return using [Self::rewind].
+    pub fn checkpoint(&self) -> TailwindTokenSourceCheckpoint {
+        TailwindTokenSourceCheckpoint {
+            trivia_len: self.trivia_list.len() as u32,
+            lexer_checkpoint: self.lexer.checkpoint(),
+        }
+    }
+
+    /// Restores the token source to a previous state
+    pub fn rewind(&mut self, checkpoint: TailwindTokenSourceCheckpoint) {
+        assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
+        self.trivia_list.truncate(checkpoint.trivia_len as usize);
+        self.lexer.rewind(checkpoint.lexer_checkpoint);
     }
 }
 
