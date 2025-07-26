@@ -3386,6 +3386,19 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionCo
         FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_compound_selector_list :: FormatCssPseudoClassFunctionCompoundSelectorList :: default ())
     }
 }
+impl FormatRule < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList > for crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionCustomIdentifierList {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionCustomIdentifierList {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssPseudoClassFunctionIdentifier>
     for crate::css::pseudo::pseudo_class_function_identifier::FormatCssPseudoClassFunctionIdentifier
 {

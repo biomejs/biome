@@ -225,6 +225,7 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionRelativeSelectorList
 	| CssPseudoClassFunctionValueList
 	| CssPseudoClassFunctionNth
+	| CssPseudoClassFunctionCustomIdentifierList
 	| CssBogusPseudoClass
 
 CssPseudoClassIdentifier =
@@ -233,7 +234,7 @@ CssPseudoClassIdentifier =
 // :first-of-type {}
 //  ^^^^^^^^^^^^^
 CssPseudoClassFunctionIdentifier =
- 	name: 'dir'
+ 	name: CssIdentifier
 	'('
 	ident: CssIdentifier
 	')'
@@ -241,7 +242,7 @@ CssPseudoClassFunctionIdentifier =
 // :global(.class div) {}
 //  ^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionSelector =
- 	name: ('global' | 'local')
+ 	name: CssIdentifier
 	'('
 	selector: AnyCssSelector
 	')'
@@ -249,7 +250,7 @@ CssPseudoClassFunctionSelector =
 // :not(div + #id:hover) {}
 //  ^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionSelectorList =
- 	name: ('matches' | 'not' | 'is' | 'where')
+ 	name: CssIdentifier
 	'('
 	selectors: CssSelectorList
 	')'
@@ -257,7 +258,7 @@ CssPseudoClassFunctionSelectorList =
 // :-webkit-any(i,p,:link,span:focus) {}
 //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelectorList =
- 	name: ('any' | 'past' | 'current' | 'future')
+ 	name: CssIdentifier
 	'('
 	compound_selectors: CssCompoundSelectorList
 	')'
@@ -269,7 +270,7 @@ CssCompoundSelectorList = (AnyCssCompoundSelector (',' AnyCssCompoundSelector)*)
 // :host(span:focus) {}
 //  ^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelector =
- 	name: ('host' | 'host-context')
+ 	name: CssIdentifier
 	'('
 	selector: AnyCssCompoundSelector
 	')'
@@ -281,7 +282,7 @@ AnyCssCompoundSelector =
 // :has(> img, +dt) {}
 // ^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionRelativeSelectorList =
- 	name: 'has'
+ 	name: CssIdentifier
 	'('
 	relative_selectors: CssRelativeSelectorList
 	')'
@@ -303,7 +304,7 @@ CssRelativeSelector =
 // :lang(de, fr) {}
 // ^^^^^^^^^^^^^
 CssPseudoClassFunctionValueList =
- 	name: 'lang'
+ 	name: CssIdentifier
 	'('
 	values: CssPseudoValueList
 	')'
@@ -321,7 +322,7 @@ AnyCssPseudoValue =
 // :nth-child(2n+1 of li, .test) {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionNth =
-	name: ('nth-child' | 'nth-last-child' | 'nth-of-type' | 'nth-last-of-type' | 'nth-col' | 'nth-last-col')
+	name: CssIdentifier
 	'('
 	selector: AnyCssPseudoClassNthSelector
 	')'
@@ -383,6 +384,14 @@ CssNthOffset =
 CssPseudoClassOfNthSelector =
 	'of'
 	selectors: CssSelectorList
+
+// :active-view-transition-type(backwards forwards) { }
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPseudoClassFunctionCustomIdentifierList =
+	name: CssIdentifier
+	'('
+	items: CssCustomIdentifierList
+	')'
 
 // a::after {}
 //  ^^^^^^^^
@@ -1218,7 +1227,7 @@ AnyCssPageSelectorPseudo =
 // 			     ^^^^^^ ^^^^^^^^^^^^
 CssPageSelectorPseudo =
 	':'
-	selector: ('left' | 'right' | 'first' | 'blank')
+	selector: CssIdentifier
 
 AnyCssPageAtRuleBlock =
 	CssPageAtRuleBlock

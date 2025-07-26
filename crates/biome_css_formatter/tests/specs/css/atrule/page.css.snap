@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/page.css
 ---
-
 # Input
 
 ```css
@@ -188,5 +187,3 @@ Quote style: Double Quotes
 @page :left {
 }
 ```
-
-

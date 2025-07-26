@@ -1,5 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_relative_selector;
+use crate::syntax::parse_regular_identifier;
 use crate::syntax::selector::eat_or_recover_selector_function_close_token;
 use crate::syntax::selector::relative_selector::RelativeSelectorList;
 use biome_css_syntax::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST;
@@ -28,7 +29,7 @@ pub(crate) fn parse_pseudo_class_function_relative_selector_list(
 
     let m = p.start();
 
-    p.bump_ts(PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST_SET);
+    parse_regular_identifier(p).ok();
     p.bump(T!['(']);
 
     let list = RelativeSelectorList::new(T![')'])

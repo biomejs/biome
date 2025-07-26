@@ -27,7 +27,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssPseudoClassFunctionCompoundSelector {
-                                name: HOST_CONTEXT_KW@1..13 "host-context" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@1..13 "host-context" [] [],
+                                },
                                 l_paren_token: L_PAREN@13..14 "(" [] [],
                                 selector: CssCompoundSelector {
                                     nesting_selectors: CssNestedSelectorList [],
@@ -60,7 +62,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@20..22 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelector {
-                                name: HOST_CONTEXT_KW@22..34 "host-context" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@22..34 "host-context" [] [],
+                                },
                                 l_paren_token: L_PAREN@34..38 "(" [] [Whitespace("   ")],
                                 selector: CssCompoundSelector {
                                     nesting_selectors: CssNestedSelectorList [],
@@ -94,7 +98,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@47..49 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionCompoundSelector {
-                                    name: HOST_CONTEXT_KW@49..61 "host-context" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@49..61 "host-context" [] [],
+                                    },
                                     l_paren_token: L_PAREN@61..62 "(" [] [],
                                     selector: CssCompoundSelector {
                                         nesting_selectors: CssNestedSelectorList [],
@@ -152,7 +158,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..18
               0: COLON@0..1 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR@1..18
-                0: HOST_CONTEXT_KW@1..13 "host-context" [] []
+                0: CSS_IDENTIFIER@1..13
+                  0: IDENT@1..13 "host-context" [] []
                 1: L_PAREN@13..14 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@14..16
                   0: CSS_NESTED_SELECTOR_LIST@14..14
@@ -175,7 +182,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@20..45
               0: COLON@20..22 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR@22..45
-                0: HOST_CONTEXT_KW@22..34 "host-context" [] []
+                0: CSS_IDENTIFIER@22..34
+                  0: IDENT@22..34 "host-context" [] []
                 1: L_PAREN@34..38 "(" [] [Whitespace("   ")]
                 2: CSS_COMPOUND_SELECTOR@38..43
                   0: CSS_NESTED_SELECTOR_LIST@38..38
@@ -199,7 +207,8 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@47..65
                 0: COLON@47..49 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR@49..65
-                  0: HOST_CONTEXT_KW@49..61 "host-context" [] []
+                  0: CSS_IDENTIFIER@49..61
+                    0: IDENT@49..61 "host-context" [] []
                   1: L_PAREN@61..62 "(" [] []
                   2: CSS_COMPOUND_SELECTOR@62..64
                     0: CSS_NESTED_SELECTOR_LIST@62..62

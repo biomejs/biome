@@ -32,7 +32,9 @@ CssRoot {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    LANG_KW@1..5 "lang" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@1..5 "lang" [] [],
+                                    },
                                     L_PAREN@5..7 "(" [] [Whitespace(" ")],
                                     CssPseudoValueList [],
                                 ],
@@ -57,7 +59,9 @@ CssRoot {
                             colon_token: COLON@9..11 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    LANG_KW@11..15 "lang" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@11..15 "lang" [] [],
+                                    },
                                     L_PAREN@15..16 "(" [] [],
                                     CssPseudoValueList [],
                                     R_PAREN@16..18 ")" [] [Whitespace(" ")],
@@ -83,7 +87,9 @@ CssRoot {
                             colon_token: COLON@20..22 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    LANG_KW@22..26 "lang" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@22..26 "lang" [] [],
+                                    },
                                     L_PAREN@26..27 "(" [] [],
                                     CssPseudoValueList [],
                                     CssBogus {
@@ -118,7 +124,9 @@ CssRoot {
                             colon_token: COLON@43..45 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    LANG_KW@45..49 "lang" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@45..49 "lang" [] [],
+                                    },
                                     L_PAREN@49..50 "(" [] [],
                                     CssPseudoValueList [],
                                     CssBogus {
@@ -151,7 +159,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@65..67 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionValueList {
-                                name_token: LANG_KW@67..71 "lang" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@67..71 "lang" [] [],
+                                },
                                 l_paren_token: L_PAREN@71..72 "(" [] [],
                                 values: CssPseudoValueList [
                                     CssIdentifier {
@@ -184,7 +194,9 @@ CssRoot {
                             colon_token: COLON@81..83 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    LANG_KW@83..87 "lang" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@83..87 "lang" [] [],
+                                    },
                                     L_PAREN@87..88 "(" [] [],
                                     CssPseudoValueList [
                                         CssIdentifier {
@@ -217,7 +229,9 @@ CssRoot {
                             colon_token: COLON@96..98 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    LANG_KW@98..102 "lang" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@98..102 "lang" [] [],
+                                    },
                                     L_PAREN@102..103 "(" [] [],
                                     CssPseudoValueList [
                                         CssIdentifier {
@@ -258,7 +272,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..7
               0: COLON@0..1 ":" [] []
               1: CSS_BOGUS_PSEUDO_CLASS@1..7
-                0: LANG_KW@1..5 "lang" [] []
+                0: CSS_IDENTIFIER@1..5
+                  0: IDENT@1..5 "lang" [] []
                 1: L_PAREN@5..7 "(" [] [Whitespace(" ")]
                 2: CSS_PSEUDO_VALUE_LIST@7..7
       1: CSS_DECLARATION_OR_RULE_BLOCK@7..9
@@ -274,7 +289,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@9..18
               0: COLON@9..11 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@11..18
-                0: LANG_KW@11..15 "lang" [] []
+                0: CSS_IDENTIFIER@11..15
+                  0: IDENT@11..15 "lang" [] []
                 1: L_PAREN@15..16 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@16..16
                 3: R_PAREN@16..18 ")" [] [Whitespace(" ")]
@@ -291,7 +307,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@20..41
               0: COLON@20..22 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@22..41
-                0: LANG_KW@22..26 "lang" [] []
+                0: CSS_IDENTIFIER@22..26
+                  0: IDENT@22..26 "lang" [] []
                 1: L_PAREN@26..27 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@27..27
                 3: CSS_BOGUS@27..39
@@ -314,7 +331,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@43..63
               0: COLON@43..45 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@45..63
-                0: LANG_KW@45..49 "lang" [] []
+                0: CSS_IDENTIFIER@45..49
+                  0: IDENT@45..49 "lang" [] []
                 1: L_PAREN@49..50 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@50..50
                 3: CSS_BOGUS@50..63
@@ -336,7 +354,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@65..79
               0: COLON@65..67 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@67..79
-                0: LANG_KW@67..71 "lang" [] []
+                0: CSS_IDENTIFIER@67..71
+                  0: IDENT@67..71 "lang" [] []
                 1: L_PAREN@71..72 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@72..77
                   0: CSS_IDENTIFIER@72..75
@@ -358,7 +377,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@81..94
               0: COLON@81..83 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@83..94
-                0: LANG_KW@83..87 "lang" [] []
+                0: CSS_IDENTIFIER@83..87
+                  0: IDENT@83..87 "lang" [] []
                 1: L_PAREN@87..88 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@88..94
                   0: CSS_IDENTIFIER@88..91
@@ -379,7 +399,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@96..109
               0: COLON@96..98 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@98..109
-                0: LANG_KW@98..102 "lang" [] []
+                0: CSS_IDENTIFIER@98..102
+                  0: IDENT@98..102 "lang" [] []
                 1: L_PAREN@102..103 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@103..109
                   0: CSS_IDENTIFIER@103..105

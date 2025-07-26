@@ -349,7 +349,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@163..164 ":" [] [],
-                                selector: FIRST_KW@164..169 "first" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@164..169 "first" [] [],
+                                },
                             },
                         ],
                     },
@@ -423,7 +425,9 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@216..217 ":" [] [],
-                                selector: FIRST_KW@217..223 "first" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@217..223 "first" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -709,7 +713,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@163..169
               0: CSS_PAGE_SELECTOR_PSEUDO@163..169
                 0: COLON@163..164 ":" [] []
-                1: FIRST_KW@164..169 "first" [] []
+                1: CSS_IDENTIFIER@164..169
+                  0: IDENT@164..169 "first" [] []
         2: CSS_PAGE_AT_RULE_BLOCK@169..208
           0: L_CURLY@169..170 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@170..206
@@ -758,7 +763,8 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@216..223
               0: CSS_PAGE_SELECTOR_PSEUDO@216..223
                 0: COLON@216..217 ":" [] []
-                1: FIRST_KW@217..223 "first" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@217..223
+                  0: IDENT@217..223 "first" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@223..308
           0: L_CURLY@223..224 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@224..306

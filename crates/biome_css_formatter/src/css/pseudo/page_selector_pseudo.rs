@@ -1,3 +1,4 @@
+use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
 use biome_css_syntax::{CssPageSelectorPseudo, CssPageSelectorPseudoFields};
 use biome_formatter::write;
@@ -11,6 +12,14 @@ impl FormatNodeRule<CssPageSelectorPseudo> for FormatCssPageSelectorPseudo {
             selector,
         } = node.as_fields();
 
-        write!(f, [colon_token.format(), selector.format()])
+        write!(
+            f,
+            [
+                colon_token.format(),
+                selector
+                    .format()?
+                    .with_options(FormatCssIdentifierOptions::default().with_lowercasing())
+            ]
+        )
     }
 }

@@ -102,16 +102,23 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
     match nth {
         AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(_) => false,
         AnyCssPseudoClassNth::CssPseudoClassNth(nth) => {
-            let coefficient = nth.value();
-            let constant = nth.offset().and_then(|offset| offset.value().ok());
+            let coefficient = nth.value().and_then(|n| n.value_token().ok());
+            let constant = nth
+                .offset()
+                .and_then(|offset| offset.value().ok())
+                .and_then(|n| n.value_token().ok());
 
             match (coefficient, constant) {
-                (Some(a), Some(b)) => a.to_trimmed_text() == "0" && b.to_trimmed_text() == "0",
-                (Some(a), None) => a.to_trimmed_text() == "0",
+                (Some(a), Some(b)) => a.text_trimmed() == "0" && b.text_trimmed() == "0",
+                (Some(a), None) => a.text_trimmed() == "0",
                 _ => false,
             }
         }
-        AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth.to_trimmed_text() == "0",
+        AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth
+            .value()
+            .ok()
+            .and_then(|n| n.value_token().ok())
+            .is_some_and(|n| n.text_trimmed() == "0"),
     }
 }
 
@@ -124,7 +131,8 @@ fn is_within_not_pseudo_class(node: &AnyCssPseudoClassNth) -> bool {
         .ancestors()
         .filter_map(|n| n.cast::<CssPseudoClassFunctionSelectorList>())
         .filter_map(|n| n.name().ok())
-        .filter(|n| n.text() == "not")
+        .filter_map(|n| n.value_token().ok())
+        .filter(|n| n.text_trimmed() == "not")
         .count();
     number_of_not % 2 == 1
 }

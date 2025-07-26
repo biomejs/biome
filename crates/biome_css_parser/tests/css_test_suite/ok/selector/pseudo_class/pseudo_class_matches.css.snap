@@ -27,7 +27,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@0..1 ":" [] [],
                                 class: CssPseudoClassFunctionSelectorList {
-                                    name: MATCHES_KW@1..8 "matches" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@1..8 "matches" [] [],
+                                    },
                                     l_paren_token: L_PAREN@8..9 "(" [] [],
                                     selectors: CssSelectorList [
                                         CssCompoundSelector {
@@ -75,7 +77,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@18..20 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionSelectorList {
-                                    name: MATCHES_KW@20..27 "matches" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@20..27 "matches" [] [],
+                                    },
                                     l_paren_token: L_PAREN@27..28 "(" [] [],
                                     selectors: CssSelectorList [
                                         CssCompoundSelector {
@@ -145,7 +149,8 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@0..12
                 0: COLON@0..1 ":" [] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@1..12
-                  0: MATCHES_KW@1..8 "matches" [] []
+                  0: CSS_IDENTIFIER@1..8
+                    0: IDENT@1..8 "matches" [] []
                   1: L_PAREN@8..9 "(" [] []
                   2: CSS_SELECTOR_LIST@9..11
                     0: CSS_COMPOUND_SELECTOR@9..11
@@ -178,7 +183,8 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@18..35
                 0: COLON@18..20 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@20..35
-                  0: MATCHES_KW@20..27 "matches" [] []
+                  0: CSS_IDENTIFIER@20..27
+                    0: IDENT@20..27 "matches" [] []
                   1: L_PAREN@27..28 "(" [] []
                   2: CSS_SELECTOR_LIST@28..34
                     0: CSS_COMPOUND_SELECTOR@28..30

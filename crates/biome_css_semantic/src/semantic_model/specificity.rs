@@ -53,9 +53,10 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
         AnyCssPseudoClass::CssPseudoClassFunctionNth(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
             if let Some(base) = selector_list
-                .name_token()
+                .name()
                 .ok()
-                .and_then(|name| evaluate_pseudo_function_selector(name.text()))
+                .and_then(|name| name.value_token().ok())
+                .and_then(|name| evaluate_pseudo_function_selector(name.text_trimmed()))
             {
                 let list_max = selector_list
                     .relative_selectors()
@@ -75,7 +76,8 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
             if let Some(base) = s
                 .name()
                 .ok()
-                .and_then(|name| evaluate_pseudo_function_selector(name.text()))
+                .and_then(|name| name.value_token().ok())
+                .and_then(|name| evaluate_pseudo_function_selector(name.text_trimmed()))
             {
                 base + s.selector().map_or(ZERO_SPECIFICITY, |selector| {
                     evaluate_any_selector(&selector)
@@ -88,7 +90,8 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
             if let Some(base) = selector_list
                 .name()
                 .ok()
-                .and_then(|name| evaluate_pseudo_function_selector(name.text()))
+                .and_then(|name| name.value_token().ok())
+                .and_then(|name| evaluate_pseudo_function_selector(name.text_trimmed()))
             {
                 let list_max = selector_list
                     .selectors()
@@ -105,6 +108,7 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
         }
         AnyCssPseudoClass::CssPseudoClassFunctionValueList(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassIdentifier(_) => CLASS_SPECIFICITY,
+        &AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(_) => CLASS_SPECIFICITY,
     }
 }
 

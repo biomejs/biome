@@ -40,7 +40,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@1..2 ":" [] [],
                             class: CssPseudoClassFunctionRelativeSelectorList {
-                                name_token: HAS_KW@2..5 "has" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@2..5 "has" [] [],
+                                },
                                 l_paren_token: L_PAREN@5..6 "(" [] [],
                                 relative_selectors: CssRelativeSelectorList [
                                     CssRelativeSelector {
@@ -83,7 +85,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@17..18 ":" [] [],
                             class: CssPseudoClassFunctionRelativeSelectorList {
-                                name_token: HAS_KW@18..21 "has" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@18..21 "has" [] [],
+                                },
                                 l_paren_token: L_PAREN@21..25 "(" [] [Whitespace("   ")],
                                 relative_selectors: CssRelativeSelectorList [
                                     CssRelativeSelector {
@@ -126,7 +130,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@39..40 ":" [] [],
                             class: CssPseudoClassFunctionRelativeSelectorList {
-                                name_token: HAS_KW@40..43 "has" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@40..43 "has" [] [],
+                                },
                                 l_paren_token: L_PAREN@43..47 "(" [] [Whitespace("   ")],
                                 relative_selectors: CssRelativeSelectorList [
                                     CssRelativeSelector {
@@ -169,7 +175,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@63..64 ":" [] [],
                             class: CssPseudoClassFunctionRelativeSelectorList {
-                                name_token: HAS_KW@64..67 "has" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@64..67 "has" [] [],
+                                },
                                 l_paren_token: L_PAREN@67..71 "(" [] [Whitespace("   ")],
                                 relative_selectors: CssRelativeSelectorList [
                                     CssRelativeSelector {
@@ -226,7 +234,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@101..102 ":" [] [],
                             class: CssPseudoClassFunctionRelativeSelectorList {
-                                name_token: HAS_KW@102..105 "has" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@102..105 "has" [] [],
+                                },
                                 l_paren_token: L_PAREN@105..109 "(" [] [Whitespace("   ")],
                                 relative_selectors: CssRelativeSelectorList [
                                     CssRelativeSelector {
@@ -269,7 +279,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@122..123 ":" [] [],
                             class: CssPseudoClassFunctionRelativeSelectorList {
-                                name_token: HAS_KW@123..126 "has" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@123..126 "has" [] [],
+                                },
                                 l_paren_token: L_PAREN@126..127 "(" [] [],
                                 relative_selectors: CssRelativeSelectorList [
                                     CssRelativeSelector {
@@ -312,7 +324,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@143..144 ":" [] [],
                             class: CssPseudoClassFunctionSelectorList {
-                                name: NOT_KW@144..147 "not" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@144..147 "not" [] [],
+                                },
                                 l_paren_token: L_PAREN@147..148 "(" [] [],
                                 selectors: CssSelectorList [
                                     CssCompoundSelector {
@@ -322,7 +336,9 @@ CssRoot {
                                             CssPseudoClassSelector {
                                                 colon_token: COLON@148..149 ":" [] [],
                                                 class: CssPseudoClassFunctionRelativeSelectorList {
-                                                    name_token: HAS_KW@149..152 "has" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@149..152 "has" [] [],
+                                                    },
                                                     l_paren_token: L_PAREN@152..153 "(" [] [],
                                                     relative_selectors: CssRelativeSelectorList [
                                                         CssRelativeSelector {
@@ -441,7 +457,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@188..189 ":" [] [],
                             class: CssPseudoClassFunctionRelativeSelectorList {
-                                name_token: HAS_KW@189..192 "has" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@189..192 "has" [] [],
+                                },
                                 l_paren_token: L_PAREN@192..193 "(" [] [],
                                 relative_selectors: CssRelativeSelectorList [
                                     CssRelativeSelector {
@@ -453,7 +471,9 @@ CssRoot {
                                                 CssPseudoClassSelector {
                                                     colon_token: COLON@193..194 ":" [] [],
                                                     class: CssPseudoClassFunctionSelectorList {
-                                                        name: NOT_KW@194..197 "not" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@194..197 "not" [] [],
+                                                        },
                                                         l_paren_token: L_PAREN@197..198 "(" [] [],
                                                         selectors: CssSelectorList [
                                                             CssCompoundSelector {
@@ -555,7 +575,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@229..230 ":" [] [],
                             class: CssPseudoClassFunctionRelativeSelectorList {
-                                name_token: HAS_KW@230..233 "has" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@230..233 "has" [] [],
+                                },
                                 l_paren_token: L_PAREN@233..234 "(" [] [],
                                 relative_selectors: CssRelativeSelectorList [
                                     CssRelativeSelector {
@@ -600,7 +622,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@253..254 ":" [] [],
                                 class: CssPseudoClassFunctionRelativeSelectorList {
-                                    name_token: HAS_KW@254..257 "has" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@254..257 "has" [] [],
+                                    },
                                     l_paren_token: L_PAREN@257..258 "(" [] [],
                                     relative_selectors: CssRelativeSelectorList [
                                         CssRelativeSelector {
@@ -623,7 +647,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@261..262 ":" [] [],
                                 class: CssPseudoClassFunctionRelativeSelectorList {
-                                    name_token: HAS_KW@262..265 "has" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@262..265 "has" [] [],
+                                    },
                                     l_paren_token: L_PAREN@265..266 "(" [] [],
                                     relative_selectors: CssRelativeSelectorList [
                                         CssRelativeSelector {
@@ -681,7 +707,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@284..285 ":" [] [],
                                 class: CssPseudoClassFunctionRelativeSelectorList {
-                                    name_token: HAS_KW@285..288 "has" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@285..288 "has" [] [],
+                                    },
                                     l_paren_token: L_PAREN@288..289 "(" [] [],
                                     relative_selectors: CssRelativeSelectorList [
                                         CssRelativeSelector {
@@ -747,7 +775,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@1..13
               0: COLON@1..2 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@2..13
-                0: HAS_KW@2..5 "has" [] []
+                0: CSS_IDENTIFIER@2..5
+                  0: IDENT@2..5 "has" [] []
                 1: L_PAREN@5..6 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@6..11
                   0: CSS_RELATIVE_SELECTOR@6..11
@@ -776,7 +805,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@17..35
               0: COLON@17..18 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@18..35
-                0: HAS_KW@18..21 "has" [] []
+                0: CSS_IDENTIFIER@18..21
+                  0: IDENT@18..21 "has" [] []
                 1: L_PAREN@21..25 "(" [] [Whitespace("   ")]
                 2: CSS_RELATIVE_SELECTOR_LIST@25..33
                   0: CSS_RELATIVE_SELECTOR@25..33
@@ -805,7 +835,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@39..59
               0: COLON@39..40 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@40..59
-                0: HAS_KW@40..43 "has" [] []
+                0: CSS_IDENTIFIER@40..43
+                  0: IDENT@40..43 "has" [] []
                 1: L_PAREN@43..47 "(" [] [Whitespace("   ")]
                 2: CSS_RELATIVE_SELECTOR_LIST@47..57
                   0: CSS_RELATIVE_SELECTOR@47..57
@@ -834,7 +865,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@63..97
               0: COLON@63..64 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@64..97
-                0: HAS_KW@64..67 "has" [] []
+                0: CSS_IDENTIFIER@64..67
+                  0: IDENT@64..67 "has" [] []
                 1: L_PAREN@67..71 "(" [] [Whitespace("   ")]
                 2: CSS_RELATIVE_SELECTOR_LIST@71..95
                   0: CSS_RELATIVE_SELECTOR@71..81
@@ -873,7 +905,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@101..117
               0: COLON@101..102 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@102..117
-                0: HAS_KW@102..105 "has" [] []
+                0: CSS_IDENTIFIER@102..105
+                  0: IDENT@102..105 "has" [] []
                 1: L_PAREN@105..109 "(" [] [Whitespace("   ")]
                 2: CSS_RELATIVE_SELECTOR_LIST@109..115
                   0: CSS_RELATIVE_SELECTOR@109..115
@@ -902,7 +935,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@122..133
               0: COLON@122..123 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@123..133
-                0: HAS_KW@123..126 "has" [] []
+                0: CSS_IDENTIFIER@123..126
+                  0: IDENT@123..126 "has" [] []
                 1: L_PAREN@126..127 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@127..131
                   0: CSS_RELATIVE_SELECTOR@127..131
@@ -931,7 +965,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@143..178
               0: COLON@143..144 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@144..178
-                0: NOT_KW@144..147 "not" [] []
+                0: CSS_IDENTIFIER@144..147
+                  0: IDENT@144..147 "not" [] []
                 1: L_PAREN@147..148 "(" [] []
                 2: CSS_SELECTOR_LIST@148..176
                   0: CSS_COMPOUND_SELECTOR@148..176
@@ -941,7 +976,8 @@ CssRoot {
                       0: CSS_PSEUDO_CLASS_SELECTOR@148..176
                         0: COLON@148..149 ":" [] []
                         1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@149..176
-                          0: HAS_KW@149..152 "has" [] []
+                          0: CSS_IDENTIFIER@149..152
+                            0: IDENT@149..152 "has" [] []
                           1: L_PAREN@152..153 "(" [] []
                           2: CSS_RELATIVE_SELECTOR_LIST@153..175
                             0: CSS_RELATIVE_SELECTOR@153..155
@@ -1021,7 +1057,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@188..223
               0: COLON@188..189 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@189..223
-                0: HAS_KW@189..192 "has" [] []
+                0: CSS_IDENTIFIER@189..192
+                  0: IDENT@189..192 "has" [] []
                 1: L_PAREN@192..193 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@193..221
                   0: CSS_RELATIVE_SELECTOR@193..221
@@ -1033,7 +1070,8 @@ CssRoot {
                         0: CSS_PSEUDO_CLASS_SELECTOR@193..221
                           0: COLON@193..194 ":" [] []
                           1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@194..221
-                            0: NOT_KW@194..197 "not" [] []
+                            0: CSS_IDENTIFIER@194..197
+                              0: IDENT@194..197 "not" [] []
                             1: L_PAREN@197..198 "(" [] []
                             2: CSS_SELECTOR_LIST@198..220
                               0: CSS_COMPOUND_SELECTOR@198..200
@@ -1101,7 +1139,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@229..237
               0: COLON@229..230 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@230..237
-                0: HAS_KW@230..233 "has" [] []
+                0: CSS_IDENTIFIER@230..233
+                  0: IDENT@230..233 "has" [] []
                 1: L_PAREN@233..234 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@234..235
                   0: CSS_RELATIVE_SELECTOR@234..235
@@ -1132,7 +1171,8 @@ CssRoot {
               1: CSS_PSEUDO_CLASS_SELECTOR@253..261
                 0: COLON@253..254 ":" [] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@254..261
-                  0: HAS_KW@254..257 "has" [] []
+                  0: CSS_IDENTIFIER@254..257
+                    0: IDENT@254..257 "has" [] []
                   1: L_PAREN@257..258 "(" [] []
                   2: CSS_RELATIVE_SELECTOR_LIST@258..260
                     0: CSS_RELATIVE_SELECTOR@258..260
@@ -1148,7 +1188,8 @@ CssRoot {
               2: CSS_PSEUDO_CLASS_SELECTOR@261..276
                 0: COLON@261..262 ":" [] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@262..276
-                  0: HAS_KW@262..265 "has" [] []
+                  0: CSS_IDENTIFIER@262..265
+                    0: IDENT@262..265 "has" [] []
                   1: L_PAREN@265..266 "(" [] []
                   2: CSS_RELATIVE_SELECTOR_LIST@266..275
                     0: CSS_RELATIVE_SELECTOR@266..275
@@ -1187,7 +1228,8 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@284..295
                 0: COLON@284..285 ":" [] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@285..295
-                  0: HAS_KW@285..288 "has" [] []
+                  0: CSS_IDENTIFIER@285..288
+                    0: IDENT@285..288 "has" [] []
                   1: L_PAREN@288..289 "(" [] []
                   2: CSS_RELATIVE_SELECTOR_LIST@289..294
                     0: CSS_RELATIVE_SELECTOR@289..294

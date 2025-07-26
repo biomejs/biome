@@ -1,3 +1,4 @@
+use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
 use biome_css_syntax::{CssPseudoClassFunctionValueList, CssPseudoClassFunctionValueListFields};
 use biome_formatter::{format_args, write};
@@ -11,7 +12,7 @@ impl FormatNodeRule<CssPseudoClassFunctionValueList> for FormatCssPseudoClassFun
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         let CssPseudoClassFunctionValueListFields {
-            name_token,
+            name,
             l_paren_token,
             values,
             r_paren_token,
@@ -20,7 +21,8 @@ impl FormatNodeRule<CssPseudoClassFunctionValueList> for FormatCssPseudoClassFun
         write!(
             f,
             [
-                name_token.format(),
+                name.format()?
+                    .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent(&values.format()),

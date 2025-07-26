@@ -1,24 +1,25 @@
+use crate::css::lists::custom_identifier_list::FormatCssCustomIdentifierListOptions;
 use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
 use biome_css_syntax::{
-    CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionRelativeSelectorListFields,
+    CssPseudoClassFunctionCustomIdentifierList, CssPseudoClassFunctionCustomIdentifierListFields,
 };
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatCssPseudoClassFunctionRelativeSelectorList;
-impl FormatNodeRule<CssPseudoClassFunctionRelativeSelectorList>
-    for FormatCssPseudoClassFunctionRelativeSelectorList
+pub(crate) struct FormatCssPseudoClassFunctionCustomIdentifierList;
+impl FormatNodeRule<CssPseudoClassFunctionCustomIdentifierList>
+    for FormatCssPseudoClassFunctionCustomIdentifierList
 {
     fn fmt_fields(
         &self,
-        node: &CssPseudoClassFunctionRelativeSelectorList,
+        node: &CssPseudoClassFunctionCustomIdentifierList,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        let CssPseudoClassFunctionRelativeSelectorListFields {
+        let CssPseudoClassFunctionCustomIdentifierListFields {
             name,
             l_paren_token,
-            relative_selectors,
+            items,
             r_paren_token,
         } = node.as_fields();
 
@@ -29,7 +30,9 @@ impl FormatNodeRule<CssPseudoClassFunctionRelativeSelectorList>
                     .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&relative_selectors.format()),
+                    soft_block_indent(&items.format().with_options(
+                        FormatCssCustomIdentifierListOptions::default().with_fluid_layout()
+                    )),
                     r_paren_token.format()
                 ])
             ]

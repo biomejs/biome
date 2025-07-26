@@ -34,7 +34,9 @@ CssRoot {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    WHERE_KW@1..6 "where" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@1..6 "where" [] [],
+                                    },
                                     L_PAREN@6..8 "(" [] [Whitespace(" ")],
                                     CssSelectorList [],
                                 ],
@@ -59,7 +61,9 @@ CssRoot {
                             colon_token: COLON@10..12 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    WHERE_KW@12..17 "where" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@12..17 "where" [] [],
+                                    },
                                     L_PAREN@17..18 "(" [] [],
                                     CssSelectorList [],
                                     R_PAREN@18..20 ")" [] [Whitespace(" ")],
@@ -85,7 +89,9 @@ CssRoot {
                             colon_token: COLON@22..24 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    WHERE_KW@24..29 "where" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@24..29 "where" [] [],
+                                    },
                                     L_PAREN@29..30 "(" [] [],
                                     CssSelectorList [],
                                     CssBogus {
@@ -117,7 +123,9 @@ CssRoot {
                             colon_token: COLON@42..44 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    WHERE_KW@44..49 "where" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@44..49 "where" [] [],
+                                    },
                                     L_PAREN@49..50 "(" [] [],
                                     CssSelectorList [],
                                     CssBogus {
@@ -148,7 +156,9 @@ CssRoot {
                             colon_token: COLON@61..63 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    WHERE_KW@63..68 "where" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@63..68 "where" [] [],
+                                    },
                                     L_PAREN@68..69 "(" [] [],
                                     CssSelectorList [],
                                     CssBogus {
@@ -182,7 +192,9 @@ CssRoot {
                             colon_token: COLON@88..90 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    WHERE_KW@90..95 "where" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@90..95 "where" [] [],
+                                    },
                                     L_PAREN@95..96 "(" [] [],
                                     CssSelectorList [
                                         CssComplexSelector {
@@ -244,7 +256,9 @@ CssRoot {
                             colon_token: COLON@120..122 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    WHERE_KW@122..127 "where" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@122..127 "where" [] [],
+                                    },
                                     L_PAREN@127..128 "(" [] [],
                                     CssSelectorList [
                                         CssComplexSelector {
@@ -297,7 +311,9 @@ CssRoot {
                             colon_token: COLON@142..144 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    WHERE_KW@144..149 "where" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@144..149 "where" [] [],
+                                    },
                                     L_PAREN@149..150 "(" [] [],
                                     CssSelectorList [
                                         CssCompoundSelector {
@@ -335,7 +351,9 @@ CssRoot {
                             colon_token: COLON@157..159 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    WHERE_KW@159..164 "where" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@159..164 "where" [] [],
+                                    },
                                     L_PAREN@164..165 "(" [] [],
                                     CssSelectorList [
                                         CssComplexSelector {
@@ -385,7 +403,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..8
               0: COLON@0..1 ":" [] []
               1: CSS_BOGUS_PSEUDO_CLASS@1..8
-                0: WHERE_KW@1..6 "where" [] []
+                0: CSS_IDENTIFIER@1..6
+                  0: IDENT@1..6 "where" [] []
                 1: L_PAREN@6..8 "(" [] [Whitespace(" ")]
                 2: CSS_SELECTOR_LIST@8..8
       1: CSS_DECLARATION_OR_RULE_BLOCK@8..10
@@ -401,7 +420,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@10..20
               0: COLON@10..12 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@12..20
-                0: WHERE_KW@12..17 "where" [] []
+                0: CSS_IDENTIFIER@12..17
+                  0: IDENT@12..17 "where" [] []
                 1: L_PAREN@17..18 "(" [] []
                 2: CSS_SELECTOR_LIST@18..18
                 3: R_PAREN@18..20 ")" [] [Whitespace(" ")]
@@ -418,7 +438,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@22..40
               0: COLON@22..24 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@24..40
-                0: WHERE_KW@24..29 "where" [] []
+                0: CSS_IDENTIFIER@24..29
+                  0: IDENT@24..29 "where" [] []
                 1: L_PAREN@29..30 "(" [] []
                 2: CSS_SELECTOR_LIST@30..30
                 3: CSS_BOGUS@30..38
@@ -438,7 +459,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@42..59
               0: COLON@42..44 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@44..59
-                0: WHERE_KW@44..49 "where" [] []
+                0: CSS_IDENTIFIER@44..49
+                  0: IDENT@44..49 "where" [] []
                 1: L_PAREN@49..50 "(" [] []
                 2: CSS_SELECTOR_LIST@50..50
                 3: CSS_BOGUS@50..59
@@ -457,7 +479,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@61..86
               0: COLON@61..63 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@63..86
-                0: WHERE_KW@63..68 "where" [] []
+                0: CSS_IDENTIFIER@63..68
+                  0: IDENT@63..68 "where" [] []
                 1: L_PAREN@68..69 "(" [] []
                 2: CSS_SELECTOR_LIST@69..69
                 3: CSS_BOGUS@69..84
@@ -479,7 +502,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@88..118
               0: COLON@88..90 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@90..118
-                0: WHERE_KW@90..95 "where" [] []
+                0: CSS_IDENTIFIER@90..95
+                  0: IDENT@90..95 "where" [] []
                 1: L_PAREN@95..96 "(" [] []
                 2: CSS_SELECTOR_LIST@96..108
                   0: CSS_COMPLEX_SELECTOR@96..107
@@ -519,7 +543,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@120..140
               0: COLON@120..122 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@122..140
-                0: WHERE_KW@122..127 "where" [] []
+                0: CSS_IDENTIFIER@122..127
+                  0: IDENT@122..127 "where" [] []
                 1: L_PAREN@127..128 "(" [] []
                 2: CSS_SELECTOR_LIST@128..140
                   0: CSS_COMPLEX_SELECTOR@128..140
@@ -553,7 +578,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@142..155
               0: COLON@142..144 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@144..155
-                0: WHERE_KW@144..149 "where" [] []
+                0: CSS_IDENTIFIER@144..149
+                  0: IDENT@144..149 "where" [] []
                 1: L_PAREN@149..150 "(" [] []
                 2: CSS_SELECTOR_LIST@150..155
                   0: CSS_COMPOUND_SELECTOR@150..155
@@ -577,7 +603,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@157..170
               0: COLON@157..159 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@159..170
-                0: WHERE_KW@159..164 "where" [] []
+                0: CSS_IDENTIFIER@159..164
+                  0: IDENT@159..164 "where" [] []
                 1: L_PAREN@164..165 "(" [] []
                 2: CSS_SELECTOR_LIST@165..170
                   0: CSS_COMPLEX_SELECTOR@165..170

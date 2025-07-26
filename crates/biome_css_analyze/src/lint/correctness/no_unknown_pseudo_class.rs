@@ -85,75 +85,26 @@ declare_node_union! {
 }
 
 impl AnyPseudoLike {
-    fn name_range(&self) -> Option<TextRange> {
-        Some(match self {
+    fn name(&self) -> Option<CssSyntaxToken> {
+        let ident = match self {
             Self::CssBogusPseudoClass(_) => return None,
-            Self::CssPseudoClassFunctionCompoundSelector(selector) => {
-                let name = selector.name().ok()?;
-                name.text_trimmed_range()
-            }
-            Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
-                let name = selector_list.name().ok()?;
-                name.text_trimmed_range()
-            }
-            Self::CssPseudoClassFunctionIdentifier(ident) => {
-                let name = ident.name_token().ok()?;
-                name.text_trimmed_range()
-            }
-            Self::CssPseudoClassFunctionNth(func_nth) => {
-                let name = func_nth.name().ok()?;
-                name.text_trimmed_range()
-            }
-            Self::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
-                let name = selector_list.name_token().ok()?;
-                name.text_trimmed_range()
-            }
-            Self::CssPseudoClassFunctionSelector(selector) => {
-                let name = selector.name().ok()?;
-                name.text_trimmed_range()
-            }
-            Self::CssPseudoClassFunctionSelectorList(selector_list) => {
-                let name = selector_list.name().ok()?;
-                name.text_trimmed_range()
-            }
-            Self::CssPseudoClassFunctionValueList(func_value_list) => {
-                let name = func_value_list.name_token().ok()?;
-                name.text_trimmed_range()
-            }
-            Self::CssPseudoClassIdentifier(ident) => {
-                let name = ident.name().ok()?;
-                name.range()
-            }
-            Self::CssPageSelectorPseudo(page_pseudo) => {
-                let name = page_pseudo.selector().ok()?;
-                name.text_trimmed_range()
-            }
-        })
+            Self::CssPseudoClassFunctionCompoundSelector(selector) => selector.name(),
+            Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => selector_list.name(),
+            Self::CssPseudoClassFunctionIdentifier(ident) => ident.name(),
+            Self::CssPseudoClassFunctionNth(func_nth) => func_nth.name(),
+            Self::CssPseudoClassFunctionRelativeSelectorList(selector_list) => selector_list.name(),
+            Self::CssPseudoClassFunctionSelector(selector) => selector.name(),
+            Self::CssPseudoClassFunctionSelectorList(selector_list) => selector_list.name(),
+            Self::CssPseudoClassFunctionValueList(func_value_list) => func_value_list.name(),
+            Self::CssPseudoClassIdentifier(ident) => ident.name(),
+            Self::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector(),
+        };
+
+        ident.ok()?.value_token().ok()
     }
 
-    fn name(&self) -> Option<CssSyntaxToken> {
-        Some(match self {
-            Self::CssBogusPseudoClass(_) => return None,
-            Self::CssPseudoClassFunctionCompoundSelector(selector) => selector.name().ok()?,
-            Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
-                selector_list.name().ok()?
-            }
-            Self::CssPseudoClassFunctionIdentifier(ident) => ident.name_token().ok()?,
-            Self::CssPseudoClassFunctionNth(func_nth) => func_nth.name().ok()?,
-            Self::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
-                selector_list.name_token().ok()?
-            }
-            Self::CssPseudoClassFunctionSelector(selector) => selector.name().ok()?,
-            Self::CssPseudoClassFunctionSelectorList(selector_list) => selector_list.name().ok()?,
-            Self::CssPseudoClassFunctionValueList(func_value_list) => {
-                func_value_list.name_token().ok()?
-            }
-            Self::CssPseudoClassIdentifier(ident) => {
-                let name = ident.name().ok()?;
-                name.value_token().ok()?
-            }
-            Self::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector().ok()?,
-        })
+    fn name_range(&self) -> Option<TextRange> {
+        self.name().map(|name| name.text_trimmed_range())
     }
 }
 

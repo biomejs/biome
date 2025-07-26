@@ -1,3 +1,4 @@
+use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
 use biome_css_syntax::{CssPseudoClassFunctionIdentifier, CssPseudoClassFunctionIdentifierFields};
 use biome_formatter::{format_args, write};
@@ -11,7 +12,7 @@ impl FormatNodeRule<CssPseudoClassFunctionIdentifier> for FormatCssPseudoClassFu
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         let CssPseudoClassFunctionIdentifierFields {
-            name_token,
+            name,
             l_paren_token,
             ident,
             r_paren_token,
@@ -20,7 +21,8 @@ impl FormatNodeRule<CssPseudoClassFunctionIdentifier> for FormatCssPseudoClassFu
         write!(
             f,
             [
-                name_token.format(),
+                name.format()?
+                    .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent(&ident.format()),

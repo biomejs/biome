@@ -2,6 +2,7 @@
 
 pub(crate) mod page_selector_pseudo;
 pub(crate) mod pseudo_class_function_compound_selector_list;
+pub(crate) mod pseudo_class_function_custom_identifier_list;
 pub(crate) mod pseudo_class_function_identifier;
 pub(crate) mod pseudo_class_function_nth;
 pub(crate) mod pseudo_class_function_relative_selector_list;

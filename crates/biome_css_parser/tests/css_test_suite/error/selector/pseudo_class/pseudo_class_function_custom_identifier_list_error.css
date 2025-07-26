@@ -1,0 +1,12 @@
+html:active-view-transition-type() {
+}
+
+
+html:active-view-transition-type(first 123213) {
+}
+
+html:active-view-transition-type(first 123213 second) {
+}
+
+html:active-view-transition-type(first "string??" second) {
+}

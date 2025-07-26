@@ -25,7 +25,7 @@ pub(crate) fn parse_pseudo_class_function_value_list(p: &mut CssParser) -> Parse
 
     let m = p.start();
 
-    p.bump_ts(PSEUDO_CLASS_FUNCTION_VALUE_LIST_SET);
+    parse_regular_identifier(p).ok();
     p.bump(T!['(']);
 
     let list = PseudoValueList.parse_list(p);

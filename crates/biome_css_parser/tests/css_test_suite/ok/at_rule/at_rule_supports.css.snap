@@ -2394,7 +2394,9 @@ CssRoot {
                                 CssPseudoClassSelector {
                                     colon_token: COLON@2270..2271 ":" [] [],
                                     class: CssPseudoClassFunctionSelectorList {
-                                        name: IS_KW@2271..2273 "is" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@2271..2273 "is" [] [],
+                                        },
                                         l_paren_token: L_PAREN@2273..2274 "(" [] [],
                                         selectors: CssSelectorList [
                                             CssCompoundSelector {
@@ -2523,7 +2525,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@2343..2344 ":" [] [],
                                 class: CssPseudoClassFunctionNth {
-                                    name: NTH_CHILD_KW@2344..2353 "nth-child" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@2344..2353 "nth-child" [] [],
+                                    },
                                     l_paren_token: L_PAREN@2353..2354 "(" [] [],
                                     selector: CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNth {
@@ -2580,7 +2584,9 @@ CssRoot {
                                         CssPseudoClassSelector {
                                             colon_token: COLON@2368..2371 ":" [Newline("\n"), Whitespace("\t")] [],
                                             class: CssPseudoClassFunctionSelectorList {
-                                                name: IS_KW@2371..2373 "is" [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@2371..2373 "is" [] [],
+                                                },
                                                 l_paren_token: L_PAREN@2373..2374 "(" [] [],
                                                 selectors: CssSelectorList [
                                                     CssComplexSelector {
@@ -2591,7 +2597,9 @@ CssRoot {
                                                                 CssPseudoClassSelector {
                                                                     colon_token: COLON@2374..2382 ":" [Newline("\n"), Whitespace("      ")] [],
                                                                     class: CssPseudoClassFunctionNth {
-                                                                        name: NTH_CHILD_KW@2382..2391 "nth-child" [] [],
+                                                                        name: CssIdentifier {
+                                                                            value_token: IDENT@2382..2391 "nth-child" [] [],
+                                                                        },
                                                                         l_paren_token: L_PAREN@2391..2392 "(" [] [],
                                                                         selector: CssPseudoClassNthSelector {
                                                                             nth: CssPseudoClassNth {
@@ -4896,7 +4904,8 @@ CssRoot {
                 0: CSS_PSEUDO_CLASS_SELECTOR@2270..2279
                   0: COLON@2270..2271 ":" [] []
                   1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@2271..2279
-                    0: IS_KW@2271..2273 "is" [] []
+                    0: CSS_IDENTIFIER@2271..2273
+                      0: IDENT@2271..2273 "is" [] []
                     1: L_PAREN@2273..2274 "(" [] []
                     2: CSS_SELECTOR_LIST@2274..2278
                       0: CSS_COMPOUND_SELECTOR@2274..2275
@@ -4984,7 +4993,8 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@2343..2365
                 0: COLON@2343..2344 ":" [] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_NTH@2344..2365
-                  0: NTH_CHILD_KW@2344..2353 "nth-child" [] []
+                  0: CSS_IDENTIFIER@2344..2353
+                    0: IDENT@2344..2353 "nth-child" [] []
                   1: L_PAREN@2353..2354 "(" [] []
                   2: CSS_PSEUDO_CLASS_NTH_SELECTOR@2354..2364
                     0: CSS_PSEUDO_CLASS_NTH@2354..2357
@@ -5025,7 +5035,8 @@ CssRoot {
                     0: CSS_PSEUDO_CLASS_SELECTOR@2368..2437
                       0: COLON@2368..2371 ":" [Newline("\n"), Whitespace("\t")] []
                       1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@2371..2437
-                        0: IS_KW@2371..2373 "is" [] []
+                        0: CSS_IDENTIFIER@2371..2373
+                          0: IDENT@2371..2373 "is" [] []
                         1: L_PAREN@2373..2374 "(" [] []
                         2: CSS_SELECTOR_LIST@2374..2432
                           0: CSS_COMPLEX_SELECTOR@2374..2407
@@ -5036,7 +5047,8 @@ CssRoot {
                                 0: CSS_PSEUDO_CLASS_SELECTOR@2374..2405
                                   0: COLON@2374..2382 ":" [Newline("\n"), Whitespace("      ")] []
                                   1: CSS_PSEUDO_CLASS_FUNCTION_NTH@2382..2405
-                                    0: NTH_CHILD_KW@2382..2391 "nth-child" [] []
+                                    0: CSS_IDENTIFIER@2382..2391
+                                      0: IDENT@2382..2391 "nth-child" [] []
                                     1: L_PAREN@2391..2392 "(" [] []
                                     2: CSS_PSEUDO_CLASS_NTH_SELECTOR@2392..2404
                                       0: CSS_PSEUDO_CLASS_NTH@2392..2395
