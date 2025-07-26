@@ -89,7 +89,6 @@ impl Rule for NoDuplicateFontNames {
 
         let mut family_names: HashSet<Text> = HashSet::new();
         let mut family_keywords: HashSet<(Text, bool)> = HashSet::new();
-
         for font_family in font_families {
             let is_keyword = is_font_family_keyword(&font_family.text);
             let is_quoted = font_family.is_quoted;
@@ -304,6 +303,16 @@ fn parse_shorthand_font_families(list: CssGenericComponentValueList) -> Option<V
                     let text = val.to_trimmed_text();
                     let range = val.range();
 
+                    // Last identifier without trailing comma should be treated as a complete font family
+                    if is_last_value_node {
+                        font_families.push(FontFamily {
+                            text: text.clone(),
+                            range,
+                            is_quoted: false,
+                        });
+                        continue;
+                    }
+
                     current_font_texts.push(text);
                     if first_range.is_none() {
                         first_range = Some(range);
@@ -319,26 +328,15 @@ fn parse_shorthand_font_families(list: CssGenericComponentValueList) -> Option<V
                         .to_string();
                     let range = val.range();
 
-                    current_font_texts.push(text.into());
-                    if first_range.is_none() {
-                        first_range = Some(range);
-                    }
-                    last_range = Some(range);
+                    font_families.push(FontFamily {
+                        text: text.into(),
+                        range,
+                        is_quoted: true,
+                    });
                 }
                 _ => {}
             },
         };
-
-        if is_last_value_node {
-            let merged_font = current_font_texts.join(" ");
-            let merged_range = first_range?.cover(last_range?);
-
-            font_families.push(FontFamily {
-                text: merged_font.into(),
-                range: merged_range,
-                is_quoted: false,
-            });
-        }
     }
     Some(font_families)
 }
