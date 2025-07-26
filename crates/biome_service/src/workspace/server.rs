@@ -276,31 +276,6 @@ impl WorkspaceServer {
             .unwrap_or_else(|| self.file_sources.push(document_file_source))
     }
 
-    fn open_file_for_scanner(
-        &self,
-        project_key: ProjectKey,
-        path: BiomePath,
-        trigger: IndexTrigger,
-    ) -> Result<InternalOpenFileResult, WorkspaceError> {
-        match self
-            .module_graph
-            .get_or_insert_path_info(&path, self.fs.as_ref())
-        {
-            Some(path_info) if path_info.is_symlink() => Ok(Default::default()),
-            Some(_) => self.open_file_internal(
-                OpenFileReason::Index(trigger),
-                OpenFileParams {
-                    project_key,
-                    path,
-                    content: FileContent::FromServer,
-                    document_file_source: None,
-                    persist_node_cache: false,
-                },
-            ),
-            None => Err(WorkspaceError::cant_read_file(path.to_string())),
-        }
-    }
-
     #[instrument(
         level = "debug",
         skip(self, params),
@@ -636,59 +611,65 @@ impl WorkspaceServer {
 
                 false
             }
-            PathKind::File { .. } => match scan_kind {
-                ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
-                    // For required files, we don't care if the file is ignored
-                    // by the configuration or not. But we do care it is not
-                    // inside an ignored folder.
-                    if path.is_required_during_scan() {
-                        match ignore_kind {
-                            IgnoreKind::Path => false,
-                            IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
-                                self.projects.is_ignored_by_top_level_config(
-                                    project_key,
-                                    folder_path,
-                                    ignore_kind,
-                                )
-                            }),
-                        }
-                    } else {
-                        true
-                    }
+            PathKind::File { is_symlink } => {
+                if is_symlink {
+                    return Ok(true); // We never index symlinks.
                 }
-                ScanKind::Project => {
-                    if path.is_dependency() {
-                        // During the initial scan, we only care about
-                        // `package.json` files inside `node_modules`, so that
-                        // we can build the project layout and resolve
-                        // dependencies that lead there. The resolved
-                        // dependencies can then be scanned using
-                        // `IndexReason::InitialScanDependency`.
-                        //
-                        // For everything else, dependencies are ignored.
-                        request_kind.trigger() != IndexTrigger::InitialScan
-                            || !path.is_package_json()
-                    } else if path.is_required_during_scan() {
-                        match ignore_kind {
-                            IgnoreKind::Path => false,
-                            IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
-                                self.projects.is_ignored_by_top_level_config(
-                                    project_key,
-                                    folder_path,
-                                    ignore_kind,
-                                )
-                            }),
+
+                match scan_kind {
+                    ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
+                        // For required files, we don't care if the file is ignored
+                        // by the configuration or not. But we do care it is not
+                        // inside an ignored folder.
+                        if path.is_required_during_scan() {
+                            match ignore_kind {
+                                IgnoreKind::Path => false,
+                                IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
+                                    self.projects.is_ignored_by_top_level_config(
+                                        project_key,
+                                        folder_path,
+                                        ignore_kind,
+                                    )
+                                }),
+                            }
+                        } else {
+                            true
                         }
-                    } else {
-                        self.projects.is_ignored_by_top_level_config(
-                            project_key,
-                            &path,
-                            ignore_kind,
-                        )
                     }
+                    ScanKind::Project => {
+                        if path.is_dependency() {
+                            // During the initial scan, we only care about
+                            // `package.json` files inside `node_modules`, so that
+                            // we can build the project layout and resolve
+                            // dependencies that lead there. The resolved
+                            // dependencies can then be scanned using
+                            // `IndexReason::InitialScanDependency`.
+                            //
+                            // For everything else, dependencies are ignored.
+                            request_kind.trigger() != IndexTrigger::InitialScan
+                                || !path.is_package_json()
+                        } else if path.is_required_during_scan() {
+                            match ignore_kind {
+                                IgnoreKind::Path => false,
+                                IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
+                                    self.projects.is_ignored_by_top_level_config(
+                                        project_key,
+                                        folder_path,
+                                        ignore_kind,
+                                    )
+                                }),
+                            }
+                        } else {
+                            self.projects.is_ignored_by_top_level_config(
+                                project_key,
+                                &path,
+                                ignore_kind,
+                            )
+                        }
+                    }
+                    ScanKind::NoScanner => true,
                 }
-                ScanKind::NoScanner => true,
-            },
+            }
         };
 
         Ok(is_ignored)
@@ -848,7 +829,7 @@ impl Workspace for WorkspaceServer {
             let manifest = path.join("package.json");
             if self.fs.path_exists(&manifest) {
                 let trigger = IndexTrigger::InitialScan;
-                self.open_file_for_scanner(project_key, manifest.clone().into(), trigger)?;
+                self.index_file(project_key, manifest.clone(), trigger)?;
                 self.update_project_layout(
                     UpdateKind::AddedOrChanged(OpenFileReason::Index(trigger)),
                     &manifest,
@@ -1732,8 +1713,17 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         path: impl Into<BiomePath>,
         trigger: IndexTrigger,
     ) -> Result<ModuleDependencies, WorkspaceError> {
-        self.open_file_for_scanner(project_key, path.into(), trigger)
-            .map(|result| result.dependencies)
+        self.open_file_internal(
+            OpenFileReason::Index(trigger),
+            OpenFileParams {
+                project_key,
+                path: path.into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+            },
+        )
+        .map(|result| result.dependencies)
     }
 
     fn update_project_config_files(
