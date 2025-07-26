@@ -6,12 +6,12 @@ use biome_css_syntax::{
     AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList, CssGenericProperty,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, Text, TextRange};
+use biome_rowan::{AstNode, SyntaxNodeCast, Text, TextRange};
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
 use biome_string_case::StrLikeExtension;
 use std::collections::HashSet;
 
-use crate::utils::is_font_family_keyword;
+use crate::utils::{is_css_variable, is_font_family_keyword, is_font_shorthand_keyword};
 
 declare_lint_rule! {
     /// Disallow duplicate names within font families.
@@ -73,18 +73,22 @@ impl Rule for NoDuplicateFontNames {
         let property_name = property_name.to_ascii_lowercase_cow();
 
         let is_font_family = property_name == "font-family";
-        let is_font = property_name == "font";
+        let is_font_shorthand = property_name == "font";
 
-        if !is_font_family && !is_font {
+        if !is_font_family && !is_font_shorthand {
             return None;
         }
 
         let value_list = node.value();
 
+        let font_families: Vec<FontFamily> = if is_font_shorthand {
+            parse_shorthand_font_families(value_list)?
+        } else {
+            parse_font_families(value_list)?
+        };
+
         let mut family_names: HashSet<Text> = HashSet::new();
         let mut family_keywords: HashSet<(Text, bool)> = HashSet::new();
-
-        let font_families = parse_font_families(value_list)?;
 
         for font_family in font_families {
             let is_keyword = is_font_family_keyword(&font_family.text);
@@ -215,6 +219,114 @@ fn parse_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFam
                 }
             }
         }
+    }
+    Some(font_families)
+}
+
+// Parse font families from `font` shorthand property value
+fn parse_shorthand_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFamily>> {
+    let mut current_font_texts: Vec<Text> = Vec::new();
+    let mut first_range: Option<TextRange> = None;
+    let mut last_range: Option<TextRange> = None;
+    let mut font_families: Vec<FontFamily> = Vec::new();
+
+    for v in list {
+        let value = v.to_trimmed_text();
+        let lower_case_value = value.text().to_ascii_lowercase_cow();
+
+        // Ignore CSS variables
+        if is_css_variable(&lower_case_value) {
+            continue;
+        }
+
+        // Ignore keywords for other font parts
+        if is_font_shorthand_keyword(&lower_case_value)
+            && !is_font_family_keyword(&lower_case_value)
+        {
+            continue;
+        }
+
+        // Ignore font-sizes
+        if matches!(
+            v,
+            AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::AnyCssDimension(_))
+        ) {
+            continue;
+        }
+
+        // Ignore anything come after a <font-size>/, because it's a line-height
+        if let Some(prev_node) = v.syntax().prev_sibling() {
+            if let Some(prev_prev_node) = prev_node.prev_sibling() {
+                if let Some(slash) = prev_node.cast::<AnyCssGenericComponentValue>() {
+                    if let Some(size) = prev_prev_node.cast::<AnyCssGenericComponentValue>() {
+                        if matches!(
+                            size,
+                            AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::AnyCssDimension(
+                                _
+                            ))
+                        ) && matches!(slash, AnyCssGenericComponentValue::CssGenericDelimiter(_))
+                        {
+                            continue;
+                        }
+                    }
+                };
+            }
+        }
+
+        // Ignore number values
+        if matches!(
+            v,
+            AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::CssNumber(_))
+        ) {
+            continue;
+        }
+
+        match v {
+            AnyCssGenericComponentValue::CssGenericDelimiter(_) => {
+                if !current_font_texts.is_empty() {
+                    let merged_font = current_font_texts.join(" ");
+                    let merged_range = first_range?.cover(last_range?);
+
+                    font_families.push(FontFamily {
+                        text: merged_font.into(),
+                        range: merged_range,
+                        is_quoted: false,
+                    });
+
+                    current_font_texts.clear();
+                    first_range = None;
+                    last_range = None;
+                }
+            }
+            AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
+                AnyCssValue::CssIdentifier(val) => {
+                    let text = val.to_trimmed_text();
+                    let range = val.range();
+
+                    current_font_texts.push(text);
+                    if first_range.is_none() {
+                        first_range = Some(range);
+                    }
+                    last_range = Some(range);
+                }
+
+                AnyCssValue::CssString(val) => {
+                    let text = val
+                        .to_trimmed_string()
+                        .trim_matches(|c| c == '\'' || c == '"')
+                        .trim()
+                        .to_string();
+                    let range = val.range();
+
+                    current_font_texts.push(text.into());
+                    if first_range.is_none() {
+                        first_range = Some(range);
+                    }
+                    last_range = Some(range);
+                }
+                _ => {}
+            },
+        };
     }
     Some(font_families)
 }
