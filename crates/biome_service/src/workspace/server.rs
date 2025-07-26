@@ -45,7 +45,7 @@ use crate::file_handlers::{
 };
 use crate::projects::Projects;
 use crate::scanner::{
-    IndexRequestKind, IndexTrigger, ScanOptions, Scanner, WatcherInstruction,
+    IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
     WorkspaceScannerBridge,
 };
 
@@ -145,7 +145,7 @@ impl WorkspaceServer {
     ///
     /// This method will not return until the watcher stops.
     pub fn start_watcher(&self, mut watcher: Watcher) {
-        watcher.run(&(&self.scanner, self));
+        watcher.run(&ScannerWatcherBridge::new((&self.scanner, self)));
     }
 
     /// Attempts to find the root of a project by searching upwards from the

@@ -174,23 +174,36 @@ pub(crate) trait WorkspaceWatcherBridge {
     fn notify_stopped(&self);
 }
 
-// We implement the `WorkspaceWatcherBridge` on top of the
-// `WorkspaceScannerBridge`. This creates a bit of duplication and indirection,
-// but it forces us to consider how we export workspace functionality a bit more
-// carefully. We want the functionality exposed to the watcher to align with
-// what's exposed to the scanner in general, so this is very much intentional.
-impl<T> WorkspaceWatcherBridge for (&Scanner, &T)
+/// Bridge used to implement `WorkspaceWatcherBridge` on top of the scanner.
+///
+/// This creates a bit of duplication and indirection, compared to implementing
+/// it on the workspace directly, but it forces us to consider how we export
+/// workspace functionality a bit more carefully. We want the functionality
+/// exposed to the watcher to align with what's exposed to the scanner in
+/// general, so this is very much intentional.
+pub(crate) struct ScannerWatcherBridge<'a, W: WorkspaceScannerBridge> {
+    scanner: &'a Scanner,
+    workspace: &'a W,
+}
+
+impl<'a, W: WorkspaceScannerBridge> ScannerWatcherBridge<'a, W> {
+    pub fn new((scanner, workspace): (&'a Scanner, &'a W)) -> Self {
+        Self { scanner, workspace }
+    }
+}
+
+impl<W> WorkspaceWatcherBridge for ScannerWatcherBridge<'_, W>
 where
-    T: WorkspaceScannerBridge,
+    W: WorkspaceScannerBridge,
 {
     #[inline]
     fn fs(&self) -> &dyn FileSystem {
-        self.1.fs()
+        self.workspace.fs()
     }
 
     #[inline]
     fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
-        self.1.find_project_for_path(path)
+        self.workspace.find_project_for_path(path)
     }
 
     #[inline]
@@ -198,11 +211,13 @@ where
         &self,
         path: &Utf8Path,
     ) -> Option<(ProjectKey, ScanKind)> {
-        self.1.find_project_for_path(path).and_then(|project_key| {
-            self.0
-                .get_scan_kind_for_project(project_key)
-                .map(|scan_kind| (project_key, scan_kind))
-        })
+        self.workspace
+            .find_project_for_path(path)
+            .and_then(|project_key| {
+                self.scanner
+                    .get_scan_kind_for_project(project_key)
+                    .map(|scan_kind| (project_key, scan_kind))
+            })
     }
 
     #[inline]
@@ -212,7 +227,7 @@ where
         scan_kind: &ScanKind,
         path: &Utf8Path,
     ) -> Result<bool, WorkspaceError> {
-        self.1.is_ignored(
+        self.workspace.is_ignored(
             project_key,
             scan_kind,
             path,
@@ -225,7 +240,7 @@ where
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
     ) -> Result<(), WorkspaceError> {
-        self.1
+        self.workspace
             .index_file(project_key, path, IndexTrigger::Update)
             .map(|_| ())
     }
@@ -236,32 +251,32 @@ where
             return Ok(()); // file events outside our projects can be safely ignored.
         };
 
-        self.0.index_folder(self.1, project_key, path)
+        self.scanner.index_folder(self.workspace, project_key, path)
     }
 
     #[inline]
     fn insert_watched_folder(&self, path: Utf8PathBuf) -> bool {
-        self.0.insert_watched_folder(path)
+        self.scanner.insert_watched_folder(path)
     }
 
     #[inline]
     fn remove_watched_folders(&self, callback: impl FnMut(&Utf8Path) -> bool) {
-        self.0.remove_watched_folders(callback)
+        self.scanner.remove_watched_folders(callback)
     }
 
     #[inline]
     fn unload_file(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
-        self.1.unload_file(path)
+        self.workspace.unload_file(path)
     }
 
     #[inline]
     fn unload_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
-        self.1.unload_path(path)
+        self.workspace.unload_path(path)
     }
 
     #[inline]
     fn notify_stopped(&self) {
-        self.1.notify(ServiceNotification::WatcherStopped);
+        self.workspace.notify(ServiceNotification::WatcherStopped);
     }
 }
 
