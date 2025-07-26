@@ -4,21 +4,89 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
-<img src="/image.png" /> 
+// should generate diagnostics
+<>
+	<img src="/image.png" />
+	<img src="https://example.com/image.png" />
+	<img src="/image.png" width="200" />
+	<img src="/image.png" height="200" />
+</>
+
 ```
 
 # Diagnostics
 ```
-invalid.jsx:1:1 lint/nursery/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:2 lint/nursery/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing width or height attribute on img element.
   
-  > 1 │ <img src="/image.png" />·
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    1 │ // should generate diagnostics
+    2 │ <>
+  > 3 │ 	<img src="/image.png" />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<img src="https://example.com/image.png" />
+    5 │ 	<img src="/image.png" width="200" />
   
   i Without explicit dimensions, images cause layout shifts (CLS) when loading, harming user experience and SEO.
   
-  i Learn why this matters: web.dev: Image Dimensions, MDN: img attributes
+  i Learn why this matters: web.dev: Image Dimensions, MDN: img attributes.
+  
+
+```
+
+```
+invalid.jsx:4:2 lint/nursery/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing width or height attribute on img element.
+  
+    2 │ <>
+    3 │ 	<img src="/image.png" />
+  > 4 │ 	<img src="https://example.com/image.png" />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<img src="/image.png" width="200" />
+    6 │ 	<img src="/image.png" height="200" />
+  
+  i Without explicit dimensions, images cause layout shifts (CLS) when loading, harming user experience and SEO.
+  
+  i Learn why this matters: web.dev: Image Dimensions, MDN: img attributes.
+  
+
+```
+
+```
+invalid.jsx:5:2 lint/nursery/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing width or height attribute on img element.
+  
+    3 │ 	<img src="/image.png" />
+    4 │ 	<img src="https://example.com/image.png" />
+  > 5 │ 	<img src="/image.png" width="200" />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	<img src="/image.png" height="200" />
+    7 │ </>
+  
+  i Without explicit dimensions, images cause layout shifts (CLS) when loading, harming user experience and SEO.
+  
+  i Learn why this matters: web.dev: Image Dimensions, MDN: img attributes.
+  
+
+```
+
+```
+invalid.jsx:6:2 lint/nursery/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing width or height attribute on img element.
+  
+    4 │ 	<img src="https://example.com/image.png" />
+    5 │ 	<img src="/image.png" width="200" />
+  > 6 │ 	<img src="/image.png" height="200" />
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ </>
+    8 │ 
+  
+  i Without explicit dimensions, images cause layout shifts (CLS) when loading, harming user experience and SEO.
+  
+  i Learn why this matters: web.dev: Image Dimensions, MDN: img attributes.
   
 
 ```

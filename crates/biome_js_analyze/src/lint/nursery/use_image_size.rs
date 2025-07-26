@@ -8,7 +8,7 @@ use biome_rule_options::use_image_size::UseImageSizeOptions;
 declare_lint_rule! {
     /// Enforces that `<img>` elements have both width and height attributes.
     ///
-    /// This rule ensures that `<img>` elements have `width` and `height` attributes
+    /// This rule ensures that `<img>` elements have `width` and `height` attributes.
     ///
     /// ## Examples
     ///
@@ -87,7 +87,7 @@ impl Rule for UseImageSize {
         .note(markup! {
             "Learn why this matters: "
             <Hyperlink href="https://web.dev/optimize-cls/#images-without-dimensions">"web.dev: Image Dimensions"</Hyperlink>", "
-            <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attributes">"MDN: img attributes"</Hyperlink>
+            <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attributes">"MDN: img attributes"</Hyperlink>"."
         });
         Some(diagnostic)
     }
