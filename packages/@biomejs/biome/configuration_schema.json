@@ -1948,6 +1948,13 @@
 					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
+				"operatorLinebreak": {
+					"description": "When breaking binary expressions into multiple lines, whether to break them before or after the binary operator. Defaults to \"after\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/OperatorLinebreak" },
+						{ "type": "null" }
+					]
+				},
 				"quoteProperties": {
 					"description": "When properties in objects are quoted. Defaults to asNeeded.",
 					"anyOf": [
@@ -5029,6 +5036,7 @@
 				{ "description": "`{foo}`", "type": "string", "enum": ["shorthand"] }
 			]
 		},
+		"OperatorLinebreak": { "type": "string", "enum": ["after", "before"] },
 		"OrganizeImportsOptions": {
 			"type": "object",
 			"properties": {

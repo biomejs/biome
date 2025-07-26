@@ -1428,6 +1428,9 @@ impl OverrideSettingPattern {
         {
             options.set_attribute_position(attribute_position);
         }
+        if let Some(operator_line_break) = js_formatter.operator_linebreak {
+            options.set_operator_linebreak(operator_line_break);
+        }
     }
 
     fn apply_overrides_to_json_format_options(&self, options: &mut JsonFormatOptions) {
