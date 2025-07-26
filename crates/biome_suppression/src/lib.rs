@@ -173,14 +173,12 @@ pub fn parse_suppression_comment(
 
         let original_size = line.text_len();
         let line = line.trim_start();
-        let range = base
-            .find(kind.as_str())
-            .map(|start| {
-                let start = TextSize::from(start as u32);
-                let end = start.add(kind.text_len());
-                TextRange::new(start, end)
-            })
-            .expect("To find the suppression prefix");
+        let range = base.find(kind.as_str()).map(|start| {
+            let start = TextSize::from(start as u32);
+            let end = start.add(kind.text_len());
+            TextRange::new(start, end)
+        })?;
+
         Some(
             parse_suppression_line(line, kind, range, original_size - line.text_len()).map_err(
                 |err| SuppressionDiagnostic {
@@ -1117,6 +1115,25 @@ mod tests_biome_ignore_toplevel {
                 message: SuppressionDiagnosticKind::ParseCategory(String::from("unknown")),
                 span: TextRange::new(TextSize::from(20), TextSize::from(27))
             })],
+        );
+    }
+}
+
+#[cfg(test)]
+mod test_biome_ignore_invalid {
+    use super::parse_suppression_comment;
+
+    #[test]
+    fn parse_invalid_suppression() {
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore-all-start lint: explanation")
+                .collect::<Vec<_>>(),
+            vec![]
+        );
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore-all-end lint: explanation")
+                .collect::<Vec<_>>(),
+            vec![]
         );
     }
 }
