@@ -2,7 +2,9 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericProperty};
+use biome_css_syntax::{
+    AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList, CssGenericProperty,
+};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
@@ -59,13 +61,6 @@ pub struct RuleState {
     span: TextRange,
 }
 
-#[derive(Debug)]
-struct FontFamily {
-    text: Text,
-    range: TextRange,
-    is_quoted: bool,
-}
-
 impl Rule for NoDuplicateFontNames {
     type Query = Ast<CssGenericProperty>;
     type State = RuleState;
@@ -86,72 +81,10 @@ impl Rule for NoDuplicateFontNames {
 
         let value_list = node.value();
 
-        let mut current_font_texts: Vec<Text> = Vec::new();
-        let mut first_range: Option<TextRange> = None;
-        let mut last_range: Option<TextRange> = None;
-        let mut font_families: Vec<FontFamily> = Vec::new();
-
-        for c in value_list {
-            let is_last_value_node = c.syntax().next_sibling().is_none();
-            match c {
-                AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
-                    AnyCssValue::CssIdentifier(val) => {
-                        let text = val.to_trimmed_text();
-                        let range = val.range();
-
-                        // Last identifier without trailing comma should be treated as a complete font family
-                        if is_last_value_node {
-                            font_families.push(FontFamily {
-                                text: text.clone(),
-                                range,
-                                is_quoted: false,
-                            });
-                            continue;
-                        }
-
-                        current_font_texts.push(text);
-                        if first_range.is_none() {
-                            first_range = Some(range);
-                        }
-                        last_range = Some(range);
-                    }
-                    AnyCssValue::CssString(val) => {
-                        let text = val
-                            .to_trimmed_string()
-                            .trim_matches(|c| c == '\'' || c == '"')
-                            .trim()
-                            .to_string();
-                        let range = val.range();
-
-                        font_families.push(FontFamily {
-                            text: text.into(),
-                            range,
-                            is_quoted: true,
-                        });
-                    }
-                    _ => {}
-                },
-                AnyCssGenericComponentValue::CssGenericDelimiter(_) => {
-                    if !current_font_texts.is_empty() {
-                        let merged_font = current_font_texts.join(" ");
-                        let merged_range = first_range?.cover(last_range?);
-
-                        font_families.push(FontFamily {
-                            text: merged_font.into(),
-                            range: merged_range,
-                            is_quoted: false,
-                        });
-
-                        current_font_texts.clear();
-                        first_range = None;
-                        last_range = None;
-                    }
-                }
-            }
-        }
-
         let mut family_names: HashSet<Text> = HashSet::new();
         let mut family_keywords: HashSet<(Text, bool)> = HashSet::new();
+
+        let font_families = parse_font_families(value_list)?;
 
         for font_family in font_families {
             let is_keyword = is_font_family_keyword(&font_family.text);
@@ -200,4 +133,88 @@ impl Rule for NoDuplicateFontNames {
             }),
         )
     }
+}
+
+#[derive(Debug)]
+struct FontFamily {
+    text: Text,
+    range: TextRange,
+    is_quoted: bool,
+}
+
+// Parse font families from the CSS property value
+// Extract and normalize each font name to detect duplicate font names
+// in CSS font-family properties
+//
+// Supported patterns:
+// 1. Quoted font names (CssString): "Arial", 'Helvetica', "Fira Sans"
+//    → Remove quotes and treat as font family name
+// 2. Unquoted font names (CssIdentifier): Arial, Fira Sans, Times New Roman
+//    → Multiple identifiers may be concatenated with spaces
+//    → Comma delimiters separate individual font family names
+fn parse_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFamily>> {
+    let mut current_font_texts: Vec<Text> = Vec::new();
+    let mut first_range: Option<TextRange> = None;
+    let mut last_range: Option<TextRange> = None;
+    let mut font_families: Vec<FontFamily> = Vec::new();
+
+    for c in list {
+        let is_last_value_node = c.syntax().next_sibling().is_none();
+        match c {
+            AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
+                AnyCssValue::CssIdentifier(val) => {
+                    let text = val.to_trimmed_text();
+                    let range = val.range();
+
+                    // Last identifier without trailing comma should be treated as a complete font family
+                    if is_last_value_node {
+                        font_families.push(FontFamily {
+                            text: text.clone(),
+                            range,
+                            is_quoted: false,
+                        });
+                        continue;
+                    }
+
+                    current_font_texts.push(text);
+                    if first_range.is_none() {
+                        first_range = Some(range);
+                    }
+                    last_range = Some(range);
+                }
+                AnyCssValue::CssString(val) => {
+                    let text = val
+                        .to_trimmed_string()
+                        .trim_matches(|c| c == '\'' || c == '"')
+                        .trim()
+                        .to_string();
+                    let range = val.range();
+
+                    font_families.push(FontFamily {
+                        text: text.into(),
+                        range,
+                        is_quoted: true,
+                    });
+                }
+                _ => {}
+            },
+            AnyCssGenericComponentValue::CssGenericDelimiter(_) => {
+                if !current_font_texts.is_empty() {
+                    let merged_font = current_font_texts.join(" ");
+                    let merged_range = first_range?.cover(last_range?);
+
+                    font_families.push(FontFamily {
+                        text: merged_font.into(),
+                        range: merged_range,
+                        is_quoted: false,
+                    });
+
+                    current_font_texts.clear();
+                    first_range = None;
+                    last_range = None;
+                }
+            }
+        }
+    }
+    Some(font_families)
 }
