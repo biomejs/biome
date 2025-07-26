@@ -262,7 +262,7 @@ impl Projects {
         path: Utf8PathBuf,
         settings: Settings,
     ) {
-        debug!("Set nested settings for {}", path.as_str());
+        debug!("Set nested settings for {path}");
         self.0.pin().update(project_key, |data| {
             let mut nested_settings = data.nested_settings.clone();
             nested_settings.insert(path.clone(), settings.clone());
@@ -320,8 +320,8 @@ impl Projects {
                 data.root_settings
                     .override_settings
                     .patterns
-                    .first()
-                    .and_then(|pattern| {
+                    .iter()
+                    .find_map(|pattern| {
                         if pattern.is_file_included(file_path) {
                             pattern.files.max_size
                         } else {

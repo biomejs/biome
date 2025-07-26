@@ -977,9 +977,8 @@ pub(crate) trait CommandRunner: Sized {
             }
             (scan_kind, _) => scan_kind,
         };
-        let result = workspace.scan_project_folder(ScanProjectFolderParams {
+        let result = workspace.scan_project(ScanProjectFolderParams {
             project_key: open_project_result.project_key,
-            path: None,
             watch: cli_options.use_server,
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,
