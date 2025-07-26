@@ -44,7 +44,7 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
         &self,
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
-        request_kind: IndexRequestKind,
+        trigger: IndexTrigger,
     ) -> Result<ModuleDependencies, WorkspaceError>;
 
     /// Informs the workspace of the list of nested config files.
@@ -226,11 +226,7 @@ where
         path: impl Into<BiomePath>,
     ) -> Result<(), WorkspaceError> {
         self.1
-            .index_file(
-                project_key,
-                path,
-                IndexRequestKind::Explicit(IndexTrigger::Update),
-            )
+            .index_file(project_key, path, IndexTrigger::Update)
             .map(|_| ())
     }
 

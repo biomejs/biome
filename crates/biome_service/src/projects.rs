@@ -320,8 +320,8 @@ impl Projects {
                 data.root_settings
                     .override_settings
                     .patterns
-                    .first()
-                    .and_then(|pattern| {
+                    .iter()
+                    .find_map(|pattern| {
                         if pattern.is_file_included(file_path) {
                             pattern.files.max_size
                         } else {

@@ -50,6 +50,11 @@ pub struct ModuleGraph {
 }
 
 impl ModuleGraph {
+    /// Returns whether the given `path` is indexed in the module graph.
+    pub fn contains(&self, path: &Utf8Path) -> bool {
+        self.data.pin().contains_key(path)
+    }
+
     /// Returns the module info, such as imports and exports and their types,
     /// for the given `path`.
     pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
@@ -131,6 +136,16 @@ impl ModuleGraph {
             .pin()
             .get_or_insert_with(path.to_path_buf(), || fs.path_info(path).ok())
             .clone()
+    }
+
+    /// Unloads all paths from the graph within the given `path`.
+    pub fn unload_folder(&self, path: &Utf8Path) {
+        let data = self.data.pin();
+        for indexed_path in data.keys() {
+            if indexed_path.starts_with(path) {
+                data.remove(indexed_path);
+            }
+        }
     }
 
     /// Finds an exported symbol by `symbol_name` as exported by `module`.
