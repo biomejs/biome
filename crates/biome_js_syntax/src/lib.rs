@@ -32,7 +32,6 @@ pub mod type_ext;
 mod unescape;
 mod union_ext;
 
-
 pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TokenText, TriviaPieceKind,

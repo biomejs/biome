@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use crate::{
     AnyJsAssignment, AnyJsClassMember, JsArrayAssignmentPattern, JsArrowFunctionExpression,
     JsAssignmentExpression, JsAwaitExpression, JsBlockStatement, JsCallArgumentList,
@@ -14,6 +13,7 @@ use crate::{
     TextRange, TsPropertyParameter,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, declare_node_union};
+use std::collections::HashSet;
 use std::vec::IntoIter;
 
 pub trait ClassMemberAnalyzer {
