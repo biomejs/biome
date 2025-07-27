@@ -13,10 +13,10 @@ use biome_js_type_info::{ScopeId, TypeData, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
-use biome_module_graph::JsExport;
 use biome_module_graph::{
     ImportSymbol, JsImport, JsReexport, ModuleGraph, ModuleResolver, ResolvedPath,
 };
+use biome_module_graph::{JsExport, JsImportPath, JsImportPhase};
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
@@ -1976,9 +1976,10 @@ fn test_resolve_swr_types() {
         .expect("module must exist");
     assert_eq!(
         index_module.static_import_paths.get("swr"),
-        Some(&ResolvedPath::from_path(format!(
-            "{swr_path}/dist/index/index.d.mts"
-        )))
+        Some(&JsImportPath {
+            resolved_path: ResolvedPath::from_path(format!("{swr_path}/dist/index/index.d.mts")),
+            phase: JsImportPhase::Default,
+        })
     );
 
     let swr_index_module = module_graph
@@ -1988,9 +1989,12 @@ fn test_resolve_swr_types() {
         swr_index_module
             .static_import_paths
             .get("../_internal/index.mjs"),
-        Some(&ResolvedPath::from_path(format!(
-            "{swr_path}/dist/_internal/index.d.mts"
-        )))
+        Some(&JsImportPath {
+            resolved_path: ResolvedPath::from_path(format!(
+                "{swr_path}/dist/_internal/index.d.mts"
+            )),
+            phase: JsImportPhase::Default,
+        })
     );
 
     let resolver = Arc::new(ModuleResolver::for_module(
