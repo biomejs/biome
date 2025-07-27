@@ -26,24 +26,15 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"
-// let b1 = {};
-// declare const b2: T[];
-// declare const b3: string;
-// const t1 = b1 || b2 || b3;
+    const SOURCE: &str = r#"async function doStuff(db) {
+    const txStatements: Array<(tx: any) => Promise<number>> = [(tx) => tx.insert().run()];
 
-// function bar<T>(arg: string) {
-//   // arg can never be nullish, so ?. is unnecessary
-//   return arg?.length;
-// }
-
-// const foo = (a) => a;
-
-function bar<T>(arg: string) {
-  // arg can never be nullish, so ?. is unnecessary
-  return arg?.length;
-}
-    "#;
+    db.transaction((tx: any) => {
+        for (const stmt of txStatements) {
+            stmt(tx)
+        }
+    });
+}"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -54,7 +45,7 @@ function bar<T>(arg: string) {
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("nursery", "noUnnecessaryConditions");
+    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
