@@ -6,10 +6,11 @@ use biome_css_syntax::{
     AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList, CssGenericProperty,
 };
 use biome_diagnostics::Severity;
+use biome_rowan::AstNodeList;
 use biome_rowan::{AstNode, SyntaxNodeCast, Text, TextRange};
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
 use biome_string_case::StrLikeExtension;
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 
 use crate::utils::{is_css_variable, is_font_family_keyword, is_font_shorthand_keyword};
 
@@ -87,8 +88,9 @@ impl Rule for NoDuplicateFontNames {
             parse_font_families(value_list)?
         };
 
-        let mut family_names: HashSet<Text> = HashSet::new();
-        let mut family_keywords: HashSet<(Text, bool)> = HashSet::new();
+        let mut family_names: FxHashSet<Text> = FxHashSet::default();
+        let mut family_keywords: FxHashSet<(Text, bool)> = FxHashSet::default();
+
         for font_family in font_families {
             let is_keyword = is_font_family_keyword(&font_family.text);
             let is_quoted = font_family.is_quoted;
@@ -99,23 +101,21 @@ impl Rule for NoDuplicateFontNames {
             // These are technically different and should not be considered duplicates.
             // See: https://github.com/stylelint/stylelint/issues/1284
             if is_keyword {
-                if family_keywords.contains(&(font_family.text.clone(), is_quoted)) {
+                if !family_keywords.insert((font_family.text.clone(), is_quoted)) {
                     return Some(RuleState {
                         value: font_family.text.into(),
                         span: font_family.range,
                     });
                 }
-                family_keywords.insert((font_family.text, is_quoted));
                 continue;
             }
 
-            if family_names.contains(&font_family.text) {
+            if !family_names.insert(font_family.text.clone()) {
                 return Some(RuleState {
                     value: font_family.text.into(),
                     span: font_family.range,
                 });
             }
-            family_names.insert(font_family.text);
         }
 
         None
@@ -161,8 +161,10 @@ fn parse_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFam
     let mut last_range: Option<TextRange> = None;
     let mut font_families: Vec<FontFamily> = Vec::new();
 
-    for c in list {
-        let is_last_value_node = c.syntax().next_sibling().is_none();
+    let len = list.iter().count();
+
+    for (index, c) in list.into_iter().enumerate() {
+        let is_last_value_node = index == len - 1;
         match c {
             AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
                 AnyCssValue::CssIdentifier(val) => {
@@ -186,15 +188,13 @@ fn parse_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFam
                     last_range = Some(range);
                 }
                 AnyCssValue::CssString(val) => {
-                    let text = val
-                        .to_trimmed_string()
-                        .trim_matches(|c| c == '\'' || c == '"')
-                        .trim()
-                        .to_string();
+                    let raw_text = val.to_trimmed_text();
+                    let trimmed = raw_text.trim_matches(|c| c == '\'' || c == '"').trim();
+                    let text: Text = trimmed.to_owned().into();
                     let range = val.range();
 
                     font_families.push(FontFamily {
-                        text: text.into(),
+                        text,
                         range,
                         is_quoted: true,
                     });
@@ -229,8 +229,10 @@ fn parse_shorthand_font_families(list: CssGenericComponentValueList) -> Option<V
     let mut last_range: Option<TextRange> = None;
     let mut font_families: Vec<FontFamily> = Vec::new();
 
-    for v in list {
-        let is_last_value_node = v.syntax().next_sibling().is_none();
+    let len = list.iter().count();
+
+    for (index, v) in list.into_iter().enumerate() {
+        let is_last_value_node = index == len - 1;
         let value = v.to_trimmed_text();
         let lower_case_value = value.text().to_ascii_lowercase_cow();
 
@@ -321,15 +323,13 @@ fn parse_shorthand_font_families(list: CssGenericComponentValueList) -> Option<V
                 }
 
                 AnyCssValue::CssString(val) => {
-                    let text = val
-                        .to_trimmed_string()
-                        .trim_matches(|c| c == '\'' || c == '"')
-                        .trim()
-                        .to_string();
+                    let raw_text = val.to_trimmed_text();
+                    let trimmed = raw_text.trim_matches(|c| c == '\'' || c == '"').trim();
+                    let text: Text = trimmed.to_owned().into();
                     let range = val.range();
 
                     font_families.push(FontFamily {
-                        text: text.into(),
+                        text,
                         range,
                         is_quoted: true,
                     });
