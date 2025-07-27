@@ -84,10 +84,7 @@ impl ClassMemberAnalyzer for JsClassMemberList {
                 // assignments in constructor
                 AnyJsClassMember::JsConstructorClassMember(constructor) => {
                     if let Ok(body) = constructor.body() {
-                        Some(
-                            Self::collect_constructor_mutated_props(&body)
-                                .into_iter(),
-                        )
+                        Some(Self::collect_constructor_mutated_props(&body).into_iter())
                     } else {
                         None
                     }
@@ -455,18 +452,14 @@ impl PropertyMutationVisitor for JsClassMemberList {
                 JsAssignmentExpression::cast_ref(&child).and_then(|expr| expr.left().ok())
             {
                 if let Some(assignment) = left.as_js_array_assignment_pattern().cloned() {
-                    for name in
-                        Self::collect_array_assignment_names(&assignment, this_aliases)
-                    {
+                    for name in Self::collect_array_assignment_names(&assignment, this_aliases) {
                         on_name(name);
                     }
                     return;
                 }
 
                 if let Some(assignment) = left.as_js_object_assignment_pattern().cloned() {
-                    for name in
-                        Self::collect_object_assignment_names(&assignment, this_aliases)
-                    {
+                    for name in Self::collect_object_assignment_names(&assignment, this_aliases) {
                         on_name(name);
                     }
                     return;
@@ -490,9 +483,7 @@ impl PropertyMutationVisitor for JsClassMemberList {
                 });
 
             if let Some(operand) = operand {
-                if let Some(name) =
-                    Self::extract_static_assignment_name(&operand, this_aliases)
-                {
+                if let Some(name) = Self::extract_static_assignment_name(&operand, this_aliases) {
                     on_name(name);
                 }
             } else if let Some(grand_child) = MethodBodyElementOrStatementList::cast_ref(&child) {
