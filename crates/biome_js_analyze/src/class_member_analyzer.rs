@@ -1,94 +1,117 @@
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsClassMember, JsArrayAssignmentPattern, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsAwaitExpression, JsBlockStatement, JsCallArgumentList,
-    JsCallArguments, JsCallExpression, JsClassMemberList, JsConditionalExpression,
-    JsConstructorClassMember, JsElseClause, JsExpressionStatement, JsFunctionBody,
-    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsIfStatement,
+    AnyJsAssignment, AnyJsClassMember, AnyJsExpression, JsArrayAssignmentPattern,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsAwaitExpression, JsBlockStatement,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassMemberList,
+    JsConditionalExpression, JsConstructorClassMember, JsElseClause, JsExpressionStatement,
+    JsFunctionBody, JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsIfStatement,
     JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
-    JsObjectAssignmentPattern, JsObjectExpression, JsObjectMemberList, JsParenthesizedExpression,
-    JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember, JsReturnStatement,
-    JsSetterClassMember, JsSetterObjectMember, JsStatementList, JsStaticMemberAssignment,
-    JsSyntaxKind, JsTemplateElement, JsTemplateElementList, JsTemplateExpression,
-    JsVariableDeclaration, JsVariableDeclarator, JsVariableDeclaratorList, JsVariableStatement,
-    TextRange, TsPropertyParameter,
+    JsObjectAssignmentPattern, JsObjectBindingPattern, JsObjectExpression, JsObjectMemberList,
+    JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression,
+    JsPropertyClassMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
+    JsStatementList, JsStaticMemberExpression, JsSyntaxKind, JsTemplateElement,
+    JsTemplateElementList, JsTemplateExpression, JsVariableDeclaration, JsVariableDeclarator,
+    JsVariableDeclaratorList, JsVariableStatement, TextRange, TsPropertyParameter,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, declare_node_union};
 use std::collections::HashSet;
 use std::vec::IntoIter;
 
 pub trait ClassMemberAnalyzer {
-    fn mutated_properties(&self) -> HashSet<ClassPropertyMutation>;
+    fn write_properties(&self) -> HashSet<ClassPropertyReference>;
+    // class methods and properties
+    fn read_members(&self) -> HashSet<ClassPropertyReference>;
 }
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
-pub struct ClassPropertyMutation {
+pub struct ClassPropertyReference {
     pub name: Text,
     pub range: TextRange,
 }
 
 impl ClassMemberAnalyzer for JsClassMemberList {
-    fn mutated_properties(&self) -> HashSet<ClassPropertyMutation> {
+    fn write_properties(&self) -> HashSet<ClassPropertyReference> {
+        self.visit_members(
+            Self::collect_mutate_prop_from_constructor,
+            Self::collect_mutate_prop_from_body,
+        )
+    }
+
+    fn read_members(&self) -> HashSet<ClassPropertyReference> {
+        self.visit_members(
+            Self::collect_read_member_from_constructor,
+            Self::collect_read_member_from_body,
+        )
+    }
+}
+
+impl ClassMemberAnalyzerVisitor for JsClassMemberList {
+    fn visit_members<F, S, G>(
+        &self,
+        visit_constructor_references: F,
+        visit_method_body_references: G,
+        visit_member_initializer_references: S,
+    ) -> HashSet<ClassPropertyReference>
+    where
+        F: Fn(&JsFunctionBody) -> Vec<ClassPropertyReference>,
+        G: Fn(
+            MethodBodyElementOrStatementList,
+            &JsFunctionBody,
+        ) -> Option<IntoIter<ClassPropertyReference>>,
+        S: Fn(&JsStaticMemberExpression) -> Option<IntoIter<ClassPropertyReference>>,
+    {
         self.iter()
             .filter_map(|member| match member {
-                // assignments in class methods
                 AnyJsClassMember::JsMethodClassMember(method) => {
-                    if let Ok(body) = method.body() {
-                        Self::collect_mutated_props_from_body(
+                    method.body().ok().and_then(|body| {
+                        visit_method_body_references(
                             MethodBodyElementOrStatementList::from(method.clone()),
                             &body,
                         )
-                    } else {
-                        None
-                    }
+                    })
                 }
-                // assignments in setters
                 AnyJsClassMember::JsSetterClassMember(setter) => {
-                    if let Ok(body) = setter.body() {
-                        Self::collect_mutated_props_from_body(
+                    setter.body().ok().and_then(|body| {
+                        visit_method_body_references(
                             MethodBodyElementOrStatementList::from(setter.clone()),
                             &body,
                         )
-                    } else {
-                        None
-                    }
+                    })
                 }
-                // assignments in getters, technically possible, but not recommended
                 AnyJsClassMember::JsGetterClassMember(getter) => {
-                    if let Ok(body) = getter.body() {
-                        Self::collect_mutated_props_from_body(
+                    getter.body().ok().and_then(|body| {
+                        visit_method_body_references(
                             MethodBodyElementOrStatementList::from(getter.clone()),
                             &body,
                         )
-                    } else {
-                        None
-                    }
+                    })
                 }
-                // assignments in property class member if it is an arrow function
                 AnyJsClassMember::JsPropertyClassMember(property) => {
                     if let Ok(expression) = property.value()?.expression() {
                         if let Some(arrow_function) =
-                            JsArrowFunctionExpression::cast(expression.into_syntax())
+                            JsArrowFunctionExpression::cast(expression.clone().into_syntax())
                         {
                             if let Ok(any_js_body) = arrow_function.body() {
                                 if let Some(body) = any_js_body.as_js_function_body() {
-                                    return Self::collect_mutated_props_from_body(
+                                    return visit_method_body_references(
                                         MethodBodyElementOrStatementList::from(arrow_function),
                                         body,
                                     );
                                 }
                             }
                         }
+
+                        if let Some(static_member_expression) = expression.as_js_static_member_expression() {
+                            return visit_member_initializer_references(&static_member_expression);
+                        }
+
+                        // println!("expression is {:?}", expression);
                     };
                     None
                 }
-                // assignments in constructor
-                AnyJsClassMember::JsConstructorClassMember(constructor) => {
-                    if let Ok(body) = constructor.body() {
-                        Some(Self::collect_constructor_mutated_props(&body).into_iter())
-                    } else {
-                        None
-                    }
-                }
+                AnyJsClassMember::JsConstructorClassMember(constructor) => constructor
+                    .body()
+                    .ok()
+                    .map(|body| visit_constructor_references(&body).into_iter()),
                 _ => None,
             })
             .flatten()
@@ -101,7 +124,7 @@ impl ClassMemberAnalyzer for JsClassMemberList {
 #[derive(Clone, Debug)]
 struct ThisAliasesAndTheirScope {
     scope: JsFunctionBody,
-    aliases: HashSet<ClassPropertyMutation>,
+    aliases: HashSet<ClassPropertyReference>,
 }
 
 declare_node_union! {
@@ -138,6 +161,7 @@ declare_node_union! {
     JsAwaitExpression
 }
 
+#[derive(Debug)]
 enum MethodBodyElementOrStatementList {
     CallArgumentsList(JsCallArgumentList),
     MethodBodyElement(AnyJsClassMethodBodyElement),
@@ -203,21 +227,42 @@ impl MethodBodyElementOrStatementList {
     }
 }
 
+trait ClassMemberAnalyzerVisitor {
+    fn visit_members<F, G, S>(
+        &self,
+        collect_constructor_member_references: F,
+        collect_body_member_references: G,
+        visit_member_initializer_references: S,
+    ) -> HashSet<ClassPropertyReference>
+    where
+        F: Fn(&JsFunctionBody) -> Vec<ClassPropertyReference>,
+        S: Fn(&JsFunctionBody) -> Vec<ClassPropertyReference>,
+        G: Fn(
+            MethodBodyElementOrStatementList,
+            &JsFunctionBody,
+        ) -> Option<IntoIter<ClassPropertyReference>>;
+}
+
 trait ThisAliasResolver {
-    fn collect_this_aliases_in_closure(body: &JsFunctionBody) -> Vec<ClassPropertyMutation>;
+    fn collect_this_aliases_in_closure(body: &JsFunctionBody) -> Vec<ClassPropertyReference>;
 
     fn collect_nested_this_aliases(
         element: &MethodBodyElementOrStatementList,
-        parent_aliases: &[ClassPropertyMutation],
+        parent_aliases: &[ClassPropertyReference],
     ) -> Vec<ThisAliasesAndTheirScope>;
 
     fn update_fn_body_and_aliases(
-        parent_aliases: &[ClassPropertyMutation],
+        parent_aliases: &[ClassPropertyReference],
         results: &mut Vec<ThisAliasesAndTheirScope>,
         body: &JsFunctionBody,
     );
 
     fn collect_fn_body_this_aliases(body: &JsFunctionBody) -> Vec<ThisAliasesAndTheirScope>;
+
+    fn is_this_or_alias(
+        object: &AnyJsExpression,
+        this_aliases: &[ThisAliasesAndTheirScope],
+    ) -> bool;
 }
 
 impl ThisAliasResolver for JsClassMemberList {
@@ -229,7 +274,7 @@ impl ThisAliasResolver for JsClassMemberList {
     /// const parent = this;
     /// ```
     /// produces vec![Text(self), Text(parent)]
-    fn collect_this_aliases_in_closure(body: &JsFunctionBody) -> Vec<ClassPropertyMutation> {
+    fn collect_this_aliases_in_closure(body: &JsFunctionBody) -> Vec<ClassPropertyReference> {
         body.statements()
             .iter()
             .filter_map(|node| node.as_js_variable_statement().cloned())
@@ -243,7 +288,7 @@ impl ThisAliasResolver for JsClassMemberList {
                 let id = fields.id.ok()?;
                 let expr = fields.initializer?.expression().ok()?;
 
-                (expr.syntax().first_token()?.text() == "this").then(|| ClassPropertyMutation {
+                (expr.syntax().first_token()?.text() == "this").then(|| ClassPropertyReference {
                     name: id.to_trimmed_text().clone(),
                     range: id.syntax().text_trimmed_range(),
                 })
@@ -256,7 +301,7 @@ impl ThisAliasResolver for JsClassMemberList {
     /// Only collects aliases that are not directly owned by a constructor, as those are not relevant for the current scope.
     fn collect_nested_this_aliases(
         method_body_element_or_statement_list: &MethodBodyElementOrStatementList,
-        parent_this_aliases: &[ClassPropertyMutation],
+        parent_this_aliases: &[ClassPropertyReference],
     ) -> Vec<ThisAliasesAndTheirScope> {
         let mut results = Vec::new();
 
@@ -338,7 +383,7 @@ impl ThisAliasResolver for JsClassMemberList {
 
     /// Update results with current scope aliases if found and returns the updated FnBodyAndThisAliases struct
     fn update_fn_body_and_aliases(
-        parent_this_aliases: &[ClassPropertyMutation],
+        parent_this_aliases: &[ClassPropertyReference],
         results: &mut Vec<ThisAliasesAndTheirScope>,
         body: &JsFunctionBody,
     ) {
@@ -361,26 +406,193 @@ impl ThisAliasResolver for JsClassMemberList {
             &this_variable_aliases,
         )
     }
+
+    /// Checks recursively the assignment operand equals a reference to `this` (e.g. `this.privateProp`)
+    fn is_this_or_alias(
+        object: &AnyJsExpression,
+        this_aliases: &[ThisAliasesAndTheirScope],
+    ) -> bool {
+        if object.as_js_this_expression().is_some() {
+            return true;
+        }
+
+        if let Some(js_identifier_expression) = object.as_js_identifier_expression() {
+            if let Ok(name) = js_identifier_expression.name() {
+                if let Ok(value_token) = name.value_token() {
+                    let name_syntax = name.syntax();
+
+                    return this_aliases.iter().any(
+                        |ThisAliasesAndTheirScope { aliases, scope }| {
+                            let is_alias = aliases.iter().any(|mutation| {
+                                mutation
+                                    .name
+                                    .text()
+                                    .eq(value_token.token_text_trimmed().text())
+                            });
+
+                            let is_within_scope = name_syntax
+                                .ancestors()
+                                .any(|ancestor| ancestor.key() == scope.syntax().key());
+
+                            is_alias && is_within_scope
+                        },
+                    );
+                }
+            }
+        }
+
+        false
+    }
 }
 
-trait PropertyMutationVisitor {
-    fn collect_mutated_props_from_body<T>(
+trait MemberReadVisitor {
+    fn collect_read_member_from_body<T>(
         member: T,
         body: &JsFunctionBody,
-    ) -> Option<IntoIter<ClassPropertyMutation>>
+    ) -> Option<IntoIter<ClassPropertyReference>>
     where
         T: Into<MethodBodyElementOrStatementList>;
 
-    fn collect_constructor_mutated_props(
+    fn collect_read_member_from_constructor(
         constructor_body: &JsFunctionBody,
-    ) -> Vec<ClassPropertyMutation>;
+    ) -> Vec<ClassPropertyReference>;
+
+    fn visit_read_member_in_body<F>(
+        element: &MethodBodyElementOrStatementList,
+        this_aliases: &[ThisAliasesAndTheirScope],
+        on_name: &mut F,
+    ) where
+        F: FnMut(ClassPropertyReference);
+}
+
+impl MemberReadVisitor for JsClassMemberList {
+    /// Iterates over all members of a JavaScript class and collects the names of members that are readonly accessed
+    /// within class methods, setters, or the constructor.
+    /// It analyzes method and setter bodies for assignments and updates to this properties,
+    fn collect_read_member_from_body<T>(
+        member: T,
+        body: &JsFunctionBody,
+    ) -> Option<IntoIter<ClassPropertyReference>>
+    where
+        T: Into<MethodBodyElementOrStatementList>,
+    {
+        let this_aliases = Self::collect_fn_body_this_aliases(body);
+        let mut names = Vec::new();
+        println!("i am dog shit");
+        Self::visit_read_member_in_body(&member.into(), &this_aliases, &mut |name| {
+            names.push(name);
+        });
+
+        Some(names.into_iter())
+    }
+
+    /// Extracts all read only members within function bodies found in CONSTRUCTOR only:
+    /// expression statements (or so called IIFE),
+    /// nested classes methods,
+    /// or inner functions
+    fn collect_read_member_from_constructor(
+        constructor_body: &JsFunctionBody,
+    ) -> Vec<ClassPropertyReference> {
+        let this_variable_aliases: Vec<_> = Self::collect_this_aliases_in_closure(constructor_body);
+
+        let all_descendants_fn_bodies_and_this_aliases: Vec<_> = Self::collect_nested_this_aliases(
+            &MethodBodyElementOrStatementList::from(constructor_body.clone()),
+            &this_variable_aliases,
+        );
+
+        all_descendants_fn_bodies_and_this_aliases
+            .iter()
+            .flat_map(|this_aliases_and_their_scope| {
+                let mut names = Vec::new();
+
+                Self::visit_read_member_in_body(
+                    &MethodBodyElementOrStatementList::from(
+                        this_aliases_and_their_scope.scope.clone(),
+                    ),
+                    std::slice::from_ref(this_aliases_and_their_scope),
+                    &mut |name| {
+                        names.push(name);
+                    },
+                );
+
+                names
+            })
+            .collect::<Vec<_>>()
+    }
+
+    fn visit_read_member_in_body<F>(
+        method_body_element: &MethodBodyElementOrStatementList,
+        this_aliases: &[ThisAliasesAndTheirScope],
+        on_name: &mut F,
+    ) where
+        F: FnMut(ClassPropertyReference),
+    {
+        println!("method_body_element: {:?}", method_body_element);
+        let iter = method_body_element.syntax().preorder();
+
+        for event in iter {
+            match event {
+                biome_rowan::WalkEvent::Enter(node) => {
+                    println!("node is {:?}", node);
+                    // check if right hand side is `this` and left hand side is `{one, two}` e.g. `const {one, two} = this;`
+                    if let Some(binding) = JsObjectBindingPattern::cast_ref(&node) {
+                        if let Some(parent) = binding.syntax().parent()
+                            && let Some(variable_declarator) =
+                                JsVariableDeclarator::cast_ref(&parent)
+                            && let Some(initializer) = variable_declarator.initializer()
+                            && let Ok(expression) = initializer.expression()
+                        {
+                            for declarator in binding.properties() {
+                                if let Some(declarator) = declarator.ok()
+                                    && Self::is_this_or_alias(&expression, this_aliases)
+                                {
+                                    on_name(ClassPropertyReference {
+                                        name: declarator.to_trimmed_text(),
+                                        range: declarator.syntax().text_trimmed_range(),
+                                    });
+                                }
+                            }
+                        }
+                    } else if let Some(static_member) = JsStaticMemberExpression::cast_ref(&node) {
+                        if let Ok(object) = static_member.object() {
+                            if Self::is_this_or_alias(&object, this_aliases) {
+                                if let Ok(member) = static_member.member() {
+                                    on_name(ClassPropertyReference {
+                                        name: member.to_trimmed_text(),
+                                        range: static_member.syntax().text_trimmed_range(),
+                                    });
+                                }
+                            }
+                        }
+                    } else {
+                        // uncomment the following line to debug what other entities should be potentially processed
+                        println!("node is {:?}", node);
+                    }
+                }
+                biome_rowan::WalkEvent::Leave(_) => {}
+            }
+        }
+    }
+}
+
+trait PropertyMutationVisitor {
+    fn collect_mutate_prop_from_body<T>(
+        member: T,
+        body: &JsFunctionBody,
+    ) -> Option<IntoIter<ClassPropertyReference>>
+    where
+        T: Into<MethodBodyElementOrStatementList>;
+
+    fn collect_mutate_prop_from_constructor(
+        constructor_body: &JsFunctionBody,
+    ) -> Vec<ClassPropertyReference>;
 
     fn visit_mutated_props_in_body<F>(
         element: &MethodBodyElementOrStatementList,
         this_aliases: &[ThisAliasesAndTheirScope],
         on_name: &mut F,
     ) where
-        F: FnMut(ClassPropertyMutation);
+        F: FnMut(ClassPropertyReference);
 }
 
 impl PropertyMutationVisitor for JsClassMemberList {
@@ -389,10 +601,10 @@ impl PropertyMutationVisitor for JsClassMemberList {
     /// It analyzes method and setter bodies for assignments and updates to this properties,
     /// and also tracks mutations in the constructor.
     /// The result is a Vec<ClassPropertyMutation> containing all property names that are updated anywhere in the class.
-    fn collect_mutated_props_from_body<T>(
+    fn collect_mutate_prop_from_body<T>(
         member: T,
         body: &JsFunctionBody,
-    ) -> Option<IntoIter<ClassPropertyMutation>>
+    ) -> Option<IntoIter<ClassPropertyReference>>
     where
         T: Into<MethodBodyElementOrStatementList>,
     {
@@ -410,9 +622,9 @@ impl PropertyMutationVisitor for JsClassMemberList {
     /// expression statements (or so called IIFE),
     /// nested classes methods,
     /// or inner functions
-    fn collect_constructor_mutated_props(
+    fn collect_mutate_prop_from_constructor(
         constructor_body: &JsFunctionBody,
-    ) -> Vec<ClassPropertyMutation> {
+    ) -> Vec<ClassPropertyReference> {
         let this_variable_aliases: Vec<_> = Self::collect_this_aliases_in_closure(constructor_body);
 
         let all_descendants_fn_bodies_and_this_aliases: Vec<_> = Self::collect_nested_this_aliases(
@@ -445,7 +657,7 @@ impl PropertyMutationVisitor for JsClassMemberList {
         this_aliases: &[ThisAliasesAndTheirScope],
         on_name: &mut F,
     ) where
-        F: FnMut(ClassPropertyMutation),
+        F: FnMut(ClassPropertyReference),
     {
         method_body_element.syntax().children().for_each(|child| {
             if let Some(left) =
@@ -496,29 +708,25 @@ impl PropertyMutationVisitor for JsClassMemberList {
     }
 }
 
-trait DestructuringResolver {
+/// deals with destructuring of [this.prop, ...this.#private] and {this.prop, ...this.#private}
+trait ThisPatternResolver {
     fn collect_array_assignment_names(
         array_assignment_pattern: &JsArrayAssignmentPattern,
         this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> Vec<ClassPropertyMutation>;
+    ) -> Vec<ClassPropertyReference>;
 
     fn collect_object_assignment_names(
         assignment: &JsObjectAssignmentPattern,
         this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> Vec<ClassPropertyMutation>;
+    ) -> Vec<ClassPropertyReference>;
 
     fn extract_static_assignment_name(
         operand: &AnyJsAssignment,
         this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> Option<ClassPropertyMutation>;
-
-    fn is_this_or_static_assignment(
-        assignment: &JsStaticMemberAssignment,
-        this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> bool;
+    ) -> Option<ClassPropertyReference>;
 }
 
-impl DestructuringResolver for JsClassMemberList {
+impl ThisPatternResolver for JsClassMemberList {
     /// Extracts the names of all properties assigned to this (or its aliases) within the array assignment pattern.
     /// It handles both direct elements and rest elements (e.g., [this.prop, ...this.#private])
     /// and extracts property names that are being assigned via destructuring.
@@ -526,7 +734,7 @@ impl DestructuringResolver for JsClassMemberList {
     fn collect_array_assignment_names(
         array_assignment_pattern: &JsArrayAssignmentPattern,
         this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> Vec<ClassPropertyMutation> {
+    ) -> Vec<ClassPropertyReference> {
         array_assignment_pattern
             .elements()
             .iter()
@@ -565,7 +773,7 @@ impl DestructuringResolver for JsClassMemberList {
     fn collect_object_assignment_names(
         assignment: &JsObjectAssignmentPattern,
         this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> Vec<ClassPropertyMutation> {
+    ) -> Vec<ClassPropertyReference> {
         assignment
             .properties()
             .elements()
@@ -598,73 +806,38 @@ impl DestructuringResolver for JsClassMemberList {
     }
 
     /// Extracts the name of a static member assignment from an AnyJsAssignment node.
-    /// Checks for this or static references, casts to a static member assignment, and retrieves the trimmed name (public or private).
+    /// Checks for this or static references, casts to a static member assignment, and retrieves the trimmed name.
     fn extract_static_assignment_name(
         operand: &AnyJsAssignment,
         this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> Option<ClassPropertyMutation> {
+    ) -> Option<ClassPropertyReference> {
         operand
             .as_js_static_member_assignment()
             .and_then(|assignment| {
-                if Self::is_this_or_static_assignment(assignment, this_aliases) {
-                    assignment.member().ok().and_then(|member| {
-                        member
-                            .as_js_name()
-                            .map(|name| ClassPropertyMutation {
-                                name: name.to_trimmed_text(),
-                                range: name.syntax().text_trimmed_range(),
-                            })
-                            .or_else(|| {
-                                member.as_js_private_name().map(|private_name| {
-                                    ClassPropertyMutation {
-                                        name: private_name.to_trimmed_text(),
-                                        range: private_name.syntax().text_trimmed_range(),
-                                    }
+                if let Ok(object) = assignment.object() {
+                    if Self::is_this_or_alias(&object, this_aliases) {
+                        assignment.member().ok().and_then(|member| {
+                            member
+                                .as_js_name()
+                                .map(|name| ClassPropertyReference {
+                                    name: name.to_trimmed_text(),
+                                    range: name.syntax().text_trimmed_range(),
                                 })
-                            })
-                    })
+                                .or_else(|| {
+                                    member.as_js_private_name().map(|private_name| {
+                                        ClassPropertyReference {
+                                            name: private_name.to_trimmed_text(),
+                                            range: private_name.syntax().text_trimmed_range(),
+                                        }
+                                    })
+                                })
+                        })
+                    } else {
+                        None
+                    }
                 } else {
                     None
                 }
             })
-    }
-
-    /// Checks recursively the assignment operand equals a reference to `this` (e.g. `this.privateProp`)
-    fn is_this_or_static_assignment(
-        assignment: &JsStaticMemberAssignment,
-        this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> bool {
-        if let Ok(object) = assignment.object() {
-            if object.as_js_this_expression().is_some() {
-                return true;
-            }
-
-            if let Some(js_identifier_expression) = object.as_js_identifier_expression() {
-                if let Ok(name) = js_identifier_expression.name() {
-                    if let Ok(value_token) = name.value_token() {
-                        let name_syntax = name.syntax();
-
-                        return this_aliases.iter().any(
-                            |ThisAliasesAndTheirScope { aliases, scope }| {
-                                let is_alias = aliases.iter().any(|mutation| {
-                                    mutation
-                                        .name
-                                        .text()
-                                        .eq(value_token.token_text_trimmed().text())
-                                });
-
-                                let is_within_scope = name_syntax
-                                    .ancestors()
-                                    .any(|ancestor| ancestor.key() == scope.syntax().key());
-
-                                is_alias && is_within_scope
-                            },
-                        );
-                    }
-                }
-            }
-        }
-
-        false
     }
 }

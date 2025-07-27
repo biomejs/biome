@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use crate::class_member_analyzer::{
-    ClassMemberAnalyzer, ClassPropMemberOrConstructorTsParam, ClassPropertyMutation,
+    ClassMemberAnalyzer, ClassPropMemberOrConstructorTsParam, ClassPropertyReference,
 };
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -132,7 +132,7 @@ impl Rule for UseReadonlyClassProperties {
         let root = ctx.query();
         let members = root.members();
         let private_only = !ctx.options().check_all_properties;
-        let mutated_class_property_names = ClassMemberAnalyzer::mutated_properties(&members);
+        let write_properties = ClassMemberAnalyzer::write_properties(&members);
 
         let constructor_params: Vec<_> =
             collect_non_readonly_constructor_parameters(root, private_only);
@@ -150,8 +150,8 @@ impl Rule for UseReadonlyClassProperties {
                 }),
             )
             .filter_map(|prop_or_param| {
-                if mutated_class_property_names.clone().into_iter().any(
-                    |ClassPropertyMutation { name, .. }| {
+                if write_properties.clone().into_iter().any(
+                    |ClassPropertyReference { name, .. }| {
                         if let Some(TextAndRange { text, .. }) =
                             extract_property_or_param_range_and_text(&prop_or_param.clone())
                         {
