@@ -31,21 +31,23 @@ pub struct ClassPropertyReference {
 impl ClassMemberAnalyzer for JsClassMemberList {
     fn write_properties(&self) -> HashSet<ClassPropertyReference> {
         self.visit_members(
-            Self::collect_mutate_prop_from_constructor,
-            Self::collect_mutate_prop_from_body,
+            Self::collect_write_references_from_constructor,
+            Self::collect_write_references_from_method_body,
+            Self::collect_write_references_from_property_member,
         )
     }
 
     fn read_members(&self) -> HashSet<ClassPropertyReference> {
         self.visit_members(
-            Self::collect_read_member_from_constructor,
-            Self::collect_read_member_from_body,
+            Self::collect_read_references_from_constructor,
+            Self::collect_read_references_from_method_body,
+            Self::collect_read_references_from_property_member,
         )
     }
 }
 
 impl ClassMemberAnalyzerVisitor for JsClassMemberList {
-    fn visit_members<F, S, G>(
+    fn visit_members<F, G, S>(
         &self,
         visit_constructor_references: F,
         visit_method_body_references: G,
@@ -100,7 +102,9 @@ impl ClassMemberAnalyzerVisitor for JsClassMemberList {
                             }
                         }
 
-                        if let Some(static_member_expression) = expression.as_js_static_member_expression() {
+                        if let Some(static_member_expression) =
+                            expression.as_js_static_member_expression()
+                        {
                             return visit_member_initializer_references(&static_member_expression);
                         }
 
@@ -236,11 +240,11 @@ trait ClassMemberAnalyzerVisitor {
     ) -> HashSet<ClassPropertyReference>
     where
         F: Fn(&JsFunctionBody) -> Vec<ClassPropertyReference>,
-        S: Fn(&JsFunctionBody) -> Vec<ClassPropertyReference>,
         G: Fn(
             MethodBodyElementOrStatementList,
             &JsFunctionBody,
-        ) -> Option<IntoIter<ClassPropertyReference>>;
+        ) -> Option<IntoIter<ClassPropertyReference>>,
+        S: Fn(&JsStaticMemberExpression) -> Option<IntoIter<ClassPropertyReference>>;
 }
 
 trait ThisAliasResolver {
@@ -446,18 +450,22 @@ impl ThisAliasResolver for JsClassMemberList {
 }
 
 trait MemberReadVisitor {
-    fn collect_read_member_from_body<T>(
+    fn collect_read_references_from_method_body<T>(
         member: T,
         body: &JsFunctionBody,
     ) -> Option<IntoIter<ClassPropertyReference>>
     where
         T: Into<MethodBodyElementOrStatementList>;
 
-    fn collect_read_member_from_constructor(
+    fn collect_read_references_from_property_member(
+        js_static_member_expression: &JsStaticMemberExpression,
+    ) -> Option<IntoIter<ClassPropertyReference>>;
+
+    fn collect_read_references_from_constructor(
         constructor_body: &JsFunctionBody,
     ) -> Vec<ClassPropertyReference>;
 
-    fn visit_read_member_in_body<F>(
+    fn visit_read_references_in_body<F>(
         element: &MethodBodyElementOrStatementList,
         this_aliases: &[ThisAliasesAndTheirScope],
         on_name: &mut F,
@@ -469,7 +477,7 @@ impl MemberReadVisitor for JsClassMemberList {
     /// Iterates over all members of a JavaScript class and collects the names of members that are readonly accessed
     /// within class methods, setters, or the constructor.
     /// It analyzes method and setter bodies for assignments and updates to this properties,
-    fn collect_read_member_from_body<T>(
+    fn collect_read_references_from_method_body<T>(
         member: T,
         body: &JsFunctionBody,
     ) -> Option<IntoIter<ClassPropertyReference>>
@@ -478,10 +486,26 @@ impl MemberReadVisitor for JsClassMemberList {
     {
         let this_aliases = Self::collect_fn_body_this_aliases(body);
         let mut names = Vec::new();
-        println!("i am dog shit");
-        Self::visit_read_member_in_body(&member.into(), &this_aliases, &mut |name| {
+
+        Self::visit_read_references_in_body(&member.into(), &this_aliases, &mut |name| {
             names.push(name);
         });
+
+        Some(names.into_iter())
+    }
+
+    fn collect_read_references_from_property_member(
+        static_member: &JsStaticMemberExpression,
+    ) -> Option<IntoIter<ClassPropertyReference>> {
+        let mut names = Vec::new();
+
+        if let Some(member) = static_member.member().ok() {
+            let name = member.to_trimmed_text();
+            names.push(ClassPropertyReference {
+                name,
+                range: static_member.syntax().text_trimmed_range(),
+            });
+        }
 
         Some(names.into_iter())
     }
@@ -490,7 +514,7 @@ impl MemberReadVisitor for JsClassMemberList {
     /// expression statements (or so called IIFE),
     /// nested classes methods,
     /// or inner functions
-    fn collect_read_member_from_constructor(
+    fn collect_read_references_from_constructor(
         constructor_body: &JsFunctionBody,
     ) -> Vec<ClassPropertyReference> {
         let this_variable_aliases: Vec<_> = Self::collect_this_aliases_in_closure(constructor_body);
@@ -505,7 +529,7 @@ impl MemberReadVisitor for JsClassMemberList {
             .flat_map(|this_aliases_and_their_scope| {
                 let mut names = Vec::new();
 
-                Self::visit_read_member_in_body(
+                Self::visit_read_references_in_body(
                     &MethodBodyElementOrStatementList::from(
                         this_aliases_and_their_scope.scope.clone(),
                     ),
@@ -520,20 +544,18 @@ impl MemberReadVisitor for JsClassMemberList {
             .collect::<Vec<_>>()
     }
 
-    fn visit_read_member_in_body<F>(
+    fn visit_read_references_in_body<F>(
         method_body_element: &MethodBodyElementOrStatementList,
         this_aliases: &[ThisAliasesAndTheirScope],
         on_name: &mut F,
     ) where
         F: FnMut(ClassPropertyReference),
     {
-        println!("method_body_element: {:?}", method_body_element);
         let iter = method_body_element.syntax().preorder();
 
         for event in iter {
             match event {
                 biome_rowan::WalkEvent::Enter(node) => {
-                    println!("node is {:?}", node);
                     // check if right hand side is `this` and left hand side is `{one, two}` e.g. `const {one, two} = this;`
                     if let Some(binding) = JsObjectBindingPattern::cast_ref(&node) {
                         if let Some(parent) = binding.syntax().parent()
@@ -566,7 +588,7 @@ impl MemberReadVisitor for JsClassMemberList {
                         }
                     } else {
                         // uncomment the following line to debug what other entities should be potentially processed
-                        println!("node is {:?}", node);
+                        //  println!("node is {:?}", node);
                     }
                 }
                 biome_rowan::WalkEvent::Leave(_) => {}
@@ -575,19 +597,23 @@ impl MemberReadVisitor for JsClassMemberList {
     }
 }
 
-trait PropertyMutationVisitor {
-    fn collect_mutate_prop_from_body<T>(
+trait PropertyWritesVisitor {
+    fn collect_write_references_from_method_body<T>(
         member: T,
         body: &JsFunctionBody,
     ) -> Option<IntoIter<ClassPropertyReference>>
     where
         T: Into<MethodBodyElementOrStatementList>;
 
-    fn collect_mutate_prop_from_constructor(
+    fn collect_write_references_from_property_member(
+        static_member: &JsStaticMemberExpression,
+    ) -> Option<IntoIter<ClassPropertyReference>>;
+
+    fn collect_write_references_from_constructor(
         constructor_body: &JsFunctionBody,
     ) -> Vec<ClassPropertyReference>;
 
-    fn visit_mutated_props_in_body<F>(
+    fn visit_write_references_in_body<F>(
         element: &MethodBodyElementOrStatementList,
         this_aliases: &[ThisAliasesAndTheirScope],
         on_name: &mut F,
@@ -595,13 +621,13 @@ trait PropertyMutationVisitor {
         F: FnMut(ClassPropertyReference);
 }
 
-impl PropertyMutationVisitor for JsClassMemberList {
+impl PropertyWritesVisitor for JsClassMemberList {
     /// Iterates over all members of a JavaScript class and collects the names of properties that are reassigned (mutated)
     /// within class methods, setters, or the constructor.
     /// It analyzes method and setter bodies for assignments and updates to this properties,
     /// and also tracks mutations in the constructor.
     /// The result is a Vec<ClassPropertyMutation> containing all property names that are updated anywhere in the class.
-    fn collect_mutate_prop_from_body<T>(
+    fn collect_write_references_from_method_body<T>(
         member: T,
         body: &JsFunctionBody,
     ) -> Option<IntoIter<ClassPropertyReference>>
@@ -611,9 +637,17 @@ impl PropertyMutationVisitor for JsClassMemberList {
         let this_aliases = Self::collect_fn_body_this_aliases(body);
         let mut names = Vec::new();
 
-        Self::visit_mutated_props_in_body(&member.into(), &this_aliases, &mut |name| {
+        Self::visit_write_references_in_body(&member.into(), &this_aliases, &mut |name| {
             names.push(name);
         });
+
+        Some(names.into_iter())
+    }
+    // we will eventually need this to handle more complex cases such as this.prop = { method: () => this.anotherProp++} etc.
+    fn collect_write_references_from_property_member(
+        _js_static_member_expression: &JsStaticMemberExpression,
+    ) -> Option<IntoIter<ClassPropertyReference>> {
+        let names = Vec::new();
 
         Some(names.into_iter())
     }
@@ -622,7 +656,7 @@ impl PropertyMutationVisitor for JsClassMemberList {
     /// expression statements (or so called IIFE),
     /// nested classes methods,
     /// or inner functions
-    fn collect_mutate_prop_from_constructor(
+    fn collect_write_references_from_constructor(
         constructor_body: &JsFunctionBody,
     ) -> Vec<ClassPropertyReference> {
         let this_variable_aliases: Vec<_> = Self::collect_this_aliases_in_closure(constructor_body);
@@ -637,7 +671,7 @@ impl PropertyMutationVisitor for JsClassMemberList {
             .flat_map(|this_aliases_and_their_scope| {
                 let mut names = Vec::new();
 
-                Self::visit_mutated_props_in_body(
+                Self::visit_write_references_in_body(
                     &MethodBodyElementOrStatementList::from(
                         this_aliases_and_their_scope.scope.clone(),
                     ),
@@ -652,7 +686,7 @@ impl PropertyMutationVisitor for JsClassMemberList {
             .collect::<Vec<_>>()
     }
 
-    fn visit_mutated_props_in_body<F>(
+    fn visit_write_references_in_body<F>(
         method_body_element: &MethodBodyElementOrStatementList,
         this_aliases: &[ThisAliasesAndTheirScope],
         on_name: &mut F,
@@ -699,7 +733,7 @@ impl PropertyMutationVisitor for JsClassMemberList {
                     on_name(name);
                 }
             } else if let Some(grand_child) = MethodBodyElementOrStatementList::cast_ref(&child) {
-                Self::visit_mutated_props_in_body(&grand_child, this_aliases, on_name);
+                Self::visit_write_references_in_body(&grand_child, this_aliases, on_name);
             } else {
                 // uncomment the following line to debug what other entities should be added to MethodBodyElementOrStatementList
                 // println!("child is {:?}", child);

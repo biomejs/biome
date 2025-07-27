@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 146
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export class BadExample {
+	constructor(private something: string) {}
+
+	example() {
+		const { something } = this
+		return something
+	}
+}
+
+```

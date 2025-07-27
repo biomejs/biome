@@ -27,9 +27,32 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
     const SOURCE: &str = r#"
-class UsedMember {
-	#usedMember = 42;
-	anotherMember = this.#usedMember;
+
+class UsedMember6 {
+	#usedMember;
+
+	foo() {
+		bar(this.#usedMember += 1);
+	}
+}
+
+class UsedMember18 {
+	#usedInInnerClass;
+
+	method(a) {
+		return class {
+			foo = a.#usedInInnerClass;
+		}
+	}
+}
+
+export class ToastService {
+	private _toastId = 0;
+
+	show(message: string, type: string, autoClose: boolean): void {
+		const id = this._toastId++;
+		this.activeToasts.push({ id, message, type, autoClose });
+	}
 }
 
 "#;
