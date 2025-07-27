@@ -22,19 +22,17 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 }
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
-#[ignore]
+// #[ignore]
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"async function doStuff(db) {
-    const txStatements: Array<(tx: any) => Promise<number>> = [(tx) => tx.insert().run()];
+    const SOURCE: &str = r#"
+class UsedMember {
+	#usedMember = 42;
+	anotherMember = this.#usedMember;
+}
 
-    db.transaction((tx: any) => {
-        for (const stmt of txStatements) {
-            stmt(tx)
-        }
-    });
-}"#;
+"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -45,7 +43,7 @@ fn quick_test() {
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
+    let rule_filter = RuleFilter::Rule("correctness", "noUnusedPrivateClassMembers");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 

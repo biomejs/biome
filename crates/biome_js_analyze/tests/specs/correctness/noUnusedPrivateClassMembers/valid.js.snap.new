@@ -1,3 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 146
+expression: valid.js
+---
+# Input
+```js
 /* should not generate diagnostics */
 
 class UsedMember {
@@ -32,11 +39,11 @@ class UsedMember {
 	publicMember = 42;
 }
 
-class UsedMember {
-	#usedMember = 42;
-	anotherMember = this.#usedMember;
-}
-
+// class UsedMember {
+// 	#usedMember = 42;
+// 	anotherMember = this.#usedMember;
+// }
+//
 // class UsedMember {
 // 	#usedMember = 42;
 // 	foo() {
@@ -179,3 +186,5 @@ class C {
 			this.#x = 1;
 	}
 }
+
+```
