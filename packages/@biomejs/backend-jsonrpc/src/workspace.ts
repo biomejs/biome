@@ -7680,7 +7680,9 @@ export interface NoExcessiveLinesPerFunctionOptions {
 export interface NoFloatingPromisesOptions {}
 export interface NoGlobalDirnameFilenameOptions {}
 export interface NoImplicitCoercionOptions {}
-export interface NoImportCyclesOptions {}
+export interface NoImportCyclesOptions {
+	ignoreTypes?: boolean;
+}
 export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
 export interface NoMisusedPromisesOptions {}

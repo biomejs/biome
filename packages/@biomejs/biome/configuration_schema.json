@@ -3326,6 +3326,7 @@
 		},
 		"NoImportCyclesOptions": {
 			"type": "object",
+			"properties": { "ignoreTypes": { "default": true, "type": "boolean" } },
 			"additionalProperties": false
 		},
 		"NoImportantInKeyframeConfiguration": {
