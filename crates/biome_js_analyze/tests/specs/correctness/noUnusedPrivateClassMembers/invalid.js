@@ -52,3 +52,14 @@ class C {
 			this.#usedOnlyInIncrement++;
 	}
 }
+
+// a is not alias to this
+class UsedMember18 {
+	#usedInInnerClass;
+
+	method(a) {
+		return class {
+			foo = a.#usedInInnerClass;
+		}
+	}
+}
