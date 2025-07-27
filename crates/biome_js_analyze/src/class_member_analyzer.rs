@@ -1,4 +1,4 @@
-use crate::{
+use biome_js_syntax::{
     AnyJsAssignment, AnyJsClassMember, JsArrayAssignmentPattern, JsArrowFunctionExpression,
     JsAssignmentExpression, JsAwaitExpression, JsBlockStatement, JsCallArgumentList,
     JsCallArguments, JsCallExpression, JsClassMemberList, JsConditionalExpression,

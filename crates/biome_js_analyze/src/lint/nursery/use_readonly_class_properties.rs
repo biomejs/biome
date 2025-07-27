@@ -134,6 +134,7 @@ impl Rule for UseReadonlyClassProperties {
         let private_only = !ctx.options().check_all_properties;
         let mutated_class_property_names = ClassMemberAnalyzer::mutated_properties(&members);
 
+        println!("Mutated class property names: {:?}", mutated_class_property_names);
         let constructor_params: Vec<_> =
             collect_non_readonly_constructor_parameters(root, private_only);
         let non_readonly_class_property_members =
