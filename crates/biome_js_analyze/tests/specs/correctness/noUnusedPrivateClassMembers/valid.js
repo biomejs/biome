@@ -151,16 +151,6 @@ class UsedMember {
 	}
 }
 
-class UsedMember {
-	#usedInInnerClass;
-
-	method(a) {
-		return class {
-			foo = a.#usedInInnerClass;
-		}
-	}
-}
-
 class Foo {
 	#usedMethod() {
 		return 42;

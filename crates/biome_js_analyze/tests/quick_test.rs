@@ -28,24 +28,14 @@ fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
     const SOURCE: &str = r#"
 
-class UsedMember6 {
-	#usedMember;
-
-	foo() {
-		bar(this.#usedMember += 1);
-	}
-}
-
-class UsedMember18 {
-	#usedInInnerClass;
-
-	method(a) {
-		return class {
-			foo = a.#usedInInnerClass;
-		}
-	}
-}
-
+// class UsedMember6 {
+// 	#usedMember;
+// 
+// 	foo() {
+// 		bar(this.#usedMember += 1);
+// 	}
+// }
+// same will be capture by ++ etc
 export class ToastService {
 	private _toastId = 0;
 
