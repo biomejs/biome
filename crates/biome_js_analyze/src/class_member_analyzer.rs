@@ -156,7 +156,7 @@ where
     }
 }
 
-/// fn visit_fn_body_descendants will only visit the list of descendants listed here, more can be added if necessary
+/// fn collect_nested_this_aliases will only visit the list of descendants listed here, more can be added if necessary
 impl MethodBodyElementOrStatementList {
     fn syntax(&self) -> &SyntaxNode<JsLanguage> {
         match self {
