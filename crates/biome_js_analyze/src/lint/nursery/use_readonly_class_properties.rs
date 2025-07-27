@@ -1,12 +1,12 @@
 use crate::JsRuleAction;
+use crate::class_member_analyzer::{
+    ClassMemberAnalyzer, ClassPropMemberOrConstructorTsParam, ClassPropertyMutation,
+};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::class_member_analyzer::{
-    ClassMemberAnalyzer, ClassPropMemberOrConstructorTsParam, ClassPropertyMutation,
-};
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsPropertyModifier,
     AnyTsPropertyParameterModifier, JsClassDeclaration, JsClassMemberList, JsSyntaxKind,
