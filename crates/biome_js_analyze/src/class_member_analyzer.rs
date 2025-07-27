@@ -18,6 +18,7 @@ use std::vec::IntoIter;
 
 pub trait ClassMemberAnalyzer {
     fn mutated_properties(&self) -> HashSet<ClassPropertyMutation>;
+    fn readonly_members(&self) -> HashSet<ClassPropertyMutation>;
 }
 
 // currently only picks up aliases on top level of the function body, can optionally be extended to
@@ -618,5 +619,10 @@ impl ClassMemberAnalyzer for JsClassMemberList {
             })
             .flatten()
             .collect::<HashSet<_>>()
+    }
+
+    fn readonly_members(&self) -> HashSet<ClassPropertyMutation> {
+        // This method is not implemented in the original code, but can be added if needed.
+        HashSet::new()
     }
 }
