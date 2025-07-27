@@ -5,7 +5,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, JsClassDeclaration, JsSyntaxKind, TsAccessibilityModifier, TsPropertyParameter};
+use biome_js_syntax::{
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, JsClassDeclaration, JsSyntaxKind,
+    TsAccessibilityModifier, TsPropertyParameter,
+};
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TextRange, declare_node_union,
 };
@@ -81,15 +84,9 @@ impl Rule for NoUnusedPrivateClassMembers {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let private_members = get_all_declared_private_members(node);
- 
+
         let reads = ClassMemberAnalyzer::read_members(&node.members());
         let writes = ClassMemberAnalyzer::write_properties(&node.members());
-
-        println!("reads: {:?}", reads);
-        println!("writes: {:?}", writes);
-        private_members.iter().for_each(|member| {
-            println!("Declared private member is: {:?}", member);
-        });
 
         private_members
             .iter()
@@ -103,14 +100,9 @@ impl Rule for NoUnusedPrivateClassMembers {
                     .any(|ClassPropertyReference { name, .. }| private_member.match_js_name(name));
 
                 let is_write_only = !is_read && is_write && private_member.is_accessor();
-                // 
-                // println!(
-                //     "Private member: {:?}, is_read: {}, is_write: {}, is_write_only: {}",
-                //     private_member, is_read, is_write, is_write_only
-                // );
 
                 if is_write_only {
-                   return None;
+                    return None;
                 }
 
                 if !is_read {
