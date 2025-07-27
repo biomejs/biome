@@ -4,9 +4,7 @@ expression: import_patterns
 ---
 SnapshotResult {
     messages: [],
-    matched_ranges: [
-        "2:1-2:27",
-    ],
+    matched_ranges: [],
     rewritten_files: [],
     created_files: [],
 }

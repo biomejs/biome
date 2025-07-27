@@ -1248,8 +1248,10 @@ JsImportBareClause =
 
 // import foo from "mod"
 // import type foo from "mod"
+// import source foo from "mod"
 JsImportDefaultClause =
 	'type'?
+	phase: 'source'?
 	default_specifier: JsDefaultImportSpecifier
 	'from'
 	source: AnyJsModuleSource
