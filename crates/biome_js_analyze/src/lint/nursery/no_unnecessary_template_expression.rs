@@ -6,8 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, JsStringLiteralExpression,
-    JsTemplateChunkElement, JsTemplateElement, JsTemplateExpression,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, JsTemplateExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
@@ -160,7 +159,7 @@ impl Rule for NoUnnecessaryTemplateExpression {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum TemplateSimplification {
+pub enum TemplateSimplification {
     /// Template contains only a single interpolation: `${expr}`
     SingleInterpolation,
     /// Template contains only string interpolations that can be concatenated
@@ -182,7 +181,7 @@ fn analyze_template(template: &JsTemplateExpression) -> Option<TemplateSimplific
     let mut has_interpolation = false;
     let mut all_interpolations_are_strings = true;
 
-    for element in &elements {
+    for (i, element) in elements.iter().enumerate() {
         match element {
             AnyJsTemplateElement::JsTemplateElement(template_element) => {
                 has_interpolation = true;
@@ -191,6 +190,41 @@ fn analyze_template(template: &JsTemplateExpression) -> Option<TemplateSimplific
                 if let Ok(expr) = template_element.expression() {
                     if !is_string_literal(&expr) {
                         all_interpolations_are_strings = false;
+                    }
+
+                    // Check for trailing whitespace preservation pattern
+                    // If this is a whitespace string literal followed by a chunk that starts with newline
+                    if let AnyJsExpression::AnyJsLiteralExpression(
+                        AnyJsLiteralExpression::JsStringLiteralExpression(str_expr),
+                    ) = &expr
+                    {
+                        if let Ok(str_token) = str_expr.value_token() {
+                            let value = str_token.text_trimmed();
+                            // Remove quotes and check if it's only whitespace
+                            let unquoted = value
+                                .trim_start_matches('"')
+                                .trim_start_matches('\'')
+                                .trim_end_matches('"')
+                                .trim_end_matches('\'');
+                            if is_whitespace(unquoted) {
+                                // Check if next element starts with newline
+                                if let Some(next) = elements.get(i + 1) {
+                                    if let AnyJsTemplateElement::JsTemplateChunkElement(
+                                        next_chunk,
+                                    ) = next
+                                    {
+                                        if let Ok(token) = next_chunk.template_chunk_token() {
+                                            if token.text_trimmed().starts_with('\n')
+                                                || token.text_trimmed().starts_with("\r\n")
+                                            {
+                                                // Preserve template for trailing whitespace visibility
+                                                return None;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 } else {
                     all_interpolations_are_strings = false;
@@ -227,6 +261,10 @@ fn is_string_literal(expr: &AnyJsExpression) -> bool {
             _
         ))
     )
+}
+
+fn is_whitespace(s: &str) -> bool {
+    s.chars().all(|c| c.is_whitespace())
 }
 
 fn combine_string_parts(template: &JsTemplateExpression) -> Option<String> {

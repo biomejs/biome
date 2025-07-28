@@ -1,11 +1,3 @@
-// Test data setup
-declare const text: string;
-declare const someVariable: any;
-declare const value: any;
-declare const obj: any;
-declare function getValue(): string;
-declare function fn(): any;
-
 // Single interpolation
 const wrappedText = `${text}`;
 const wrappedNumber = `${42}`;

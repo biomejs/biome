@@ -1,36 +1,5 @@
 /* should not generate diagnostics */
 
-// Test data setup
-declare const name: string;
-declare const obj: any;
-declare const firstName: string;
-declare const lastName: string;
-declare const color: string;
-declare const animal: string;
-declare const obstacle: string;
-declare const content: string;
-declare const a: number;
-declare const b: number;
-declare const c: number;
-declare const d: number;
-declare const isActive: boolean;
-declare const value: any;
-declare const array: string[];
-declare const str: string;
-declare const items: any[];
-declare const MyEnum: { Value: string };
-declare const first: string;
-declare const last: string;
-declare const flag: boolean;
-declare const newValue: any;
-declare let count: number;
-declare const css: any;
-declare const gql: any;
-declare const html: any;
-declare function getValue(): string;
-declare function fn<T>(): T;
-declare function fetchData(): Promise<any>;
-
 // Valid template literals with meaningful interpolations
 const greeting = `Hello, ${name}!`;
 const math = `1 + 1 = ${1 + 1}`;
@@ -109,3 +78,11 @@ const asyncResult = `Data: ${await fetchData()}`;
 function* generator() {
     const yielded = `Yielded: ${yield value}`;
 }
+
+// Template literals with trailing whitespace preservation (should not be simplified)
+const trailingWhitespace = `Line with trailing spaces: ${' '}
+Next line`;
+const trailingTab = `Line with trailing tab: ${'	'}
+Next line`;
+const multipleSpaces = `Indented: ${'    '}
+    Code block`;
