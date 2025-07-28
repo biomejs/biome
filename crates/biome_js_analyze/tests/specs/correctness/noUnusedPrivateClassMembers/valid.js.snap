@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 146
 expression: valid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -11,17 +11,17 @@ class UsedMember {
 	#usedMember = 42;
 
 	method() {
-			return this.#usedMember;
+		return this.#usedMember;
 	}
 }
 
 class UsedMember {
 	#usedMethod() {
-			return 42;
+		return 42;
 	}
 
 	anotherMethod() {
-			return this.#usedMethod();
+		return this.#usedMethod();
 	}
 }
 
@@ -31,7 +31,7 @@ class UsedMember {
 	set #usedAccessor(value) {}
 
 	method() {
-			this.#usedAccessor = 42;
+		this.#usedAccessor = 42;
 	}
 }
 
@@ -55,14 +55,14 @@ class UsedMember {
 	#usedMember;
 
 	foo() {
-			bar(this.#usedMember += 1);
+		bar(this.#usedMember += 1);
 	}
 }
 
 class UsedMember {
 	#usedMember = 42;
 	method() {
-			return someGlobalMethod(this.#usedMember);
+		return someGlobalMethod(this.#usedMember);
 	}
 }
 
@@ -70,11 +70,11 @@ class UsedMember {
 	#usedInOuterClass;
 
 	foo() {
-			return class {};
+		return class {};
 	}
 
 	bar() {
-			return this.#usedInOuterClass;
+		return this.#usedInOuterClass;
 	}
 }
 
@@ -82,39 +82,39 @@ class UsedMember {
 class UsedMember {
 	#usedInForInLoop;
 	method() {
-			for (const bar in this.#usedInForInLoop) {
+		for (const bar in this.#usedInForInLoop) {
 
-			}
+		}
 	}
 }
 
 class UsedMember {
 	#usedInForOfLoop;
 	method() {
-			for (const bar of this.#usedInForOfLoop) {
+		for (const bar of this.#usedInForOfLoop) {
 
-			}
+		}
 	}
 }
 
 class UsedMember {
 	#usedInAssignmentPattern;
 	method() {
-			[bar = 1] = this.#usedInAssignmentPattern;
+		[bar = 1] = this.#usedInAssignmentPattern;
 	}
 }
 
 class UsedMember {
 	#usedInArrayPattern;
 	method() {
-			[bar] = this.#usedInArrayPattern;
+		[bar] = this.#usedInArrayPattern;
 	}
 }
 
 class UsedMember {
 	#usedInAssignmentPattern;
 	method() {
-			[bar] = this.#usedInAssignmentPattern;
+		[bar] = this.#usedInAssignmentPattern;
 	}
 }
 
@@ -122,19 +122,19 @@ class UsedMember {
 	#usedInObjectAssignment;
 
 	method() {
-			({ [this.#usedInObjectAssignment]: a } = foo);
+		({ [this.#usedInObjectAssignment]: a } = foo);
 	}
 }
 
 class UsedMember {
 	set #accessorWithSetterFirst(value) {
-			doSomething(value);
+		doSomething(value);
 	}
 	get #accessorWithSetterFirst() {
-			return something();
+		return something();
 	}
 	method() {
-			this.#accessorWithSetterFirst += 1;
+		this.#accessorWithSetterFirst += 1;
 	}
 }
 
@@ -142,49 +142,48 @@ class UsedMember {
 	set #accessorUsedInMemberAccess(value) {}
 
 	method(a) {
-			[this.#accessorUsedInMemberAccess] = a;
+		[this.#accessorUsedInMemberAccess] = a;
 	}
 }
 
 class UsedMember {
 	get #accessorWithGetterFirst() {
-			return something();
+		return something();
 	}
 	set #accessorWithGetterFirst(value) {
-			doSomething(value);
+		doSomething(value);
 	}
 	method() {
-			this.#accessorWithGetterFirst += 1;
-	}
-}
-
-class UsedMember {
-	#usedInInnerClass;
-
-	method(a) {
-			return class {
-					foo = a.#usedInInnerClass;
-			}
+		this.#accessorWithGetterFirst += 1;
 	}
 }
 
 class Foo {
 	#usedMethod() {
-			return 42;
+		return 42;
 	}
 	anotherMethod() {
-			return this.#usedMethod();
+		return this.#usedMethod();
 	}
 }
 
 class C {
 	set #x(value) {
-			doSomething(value);
+		doSomething(value);
 	}
 
 	foo() {
-			this.#x = 1;
+		this.#x = 1;
 	}
 }
+
+class C {
+	#usedOnlyInIncrement;
+
+	foo() {
+		this.#usedOnlyInIncrement++;
+	}
+}
+
 
 ```
