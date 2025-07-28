@@ -231,6 +231,7 @@ pub(crate) fn parse_import_or_import_equals_declaration(p: &mut JsParser) -> Par
         
         // Special handling for invalid import source syntax
         if clause.is_absent() && p.at(T![source]) {
+            p.bump(T![source]);
             p.error(p.err_builder(
                 "Only `import source x from \"./module\"` is valid.",
                 p.cur_range(),

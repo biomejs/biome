@@ -100,31 +100,31 @@ JsModule {
 ## Diagnostics
 
 ```
-import_source_err.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import_source_err.js:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Only `import source x from "./module"` is valid.
   
   > 1 │ import source { x } from "x";
-      │        ^^^^^^
+      │               ^
     2 │ import source * as x from "x";
     3 │ import type source x from "x";
   
-import_source_err.js:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import_source_err.js:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Only `import source x from "./module"` is valid.
   
     1 │ import source { x } from "x";
   > 2 │ import source * as x from "x";
-      │        ^^^^^^
+      │               ^
     3 │ import type source x from "x";
   
-import_source_err.js:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import_source_err.js:3:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Only `import source x from "./module"` is valid.
   
     1 │ import source { x } from "x";
     2 │ import source * as x from "x";
   > 3 │ import type source x from "x";
-      │             ^^^^^^
+      │                    ^
   
 ```
