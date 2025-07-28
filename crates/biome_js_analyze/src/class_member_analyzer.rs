@@ -593,12 +593,34 @@ impl MemberReadVisitor for JsClassMemberList {
                                 .and_then(|expr| expr.operand().ok())
                         })
                     {
-                        if let Some(name) = Self::extract_static_assignment_name(&operand, this_aliases) {
+                        if let Some(name) =
+                            Self::extract_static_assignment_name(&operand, this_aliases)
+                        {
+                            on_name(name);
+                        }
+                    } else if let Some(assignment) = JsAssignmentExpression::cast_ref(&node)
+                        && let Ok(left) = assignment.left()
+                        && let Ok(operator) = assignment.operator_token()
+                        && let Some(operand) = left.as_any_js_assignment()
+                        && matches!(
+                            operator.kind(),
+                            JsSyntaxKind::PIPE2EQ
+                                | JsSyntaxKind::AMP2EQ
+                                | JsSyntaxKind::SLASHEQ
+                                | JsSyntaxKind::STAREQ
+                                | JsSyntaxKind::PERCENTEQ
+                                | JsSyntaxKind::PLUSEQ
+                                | JsSyntaxKind::QUESTION2EQ
+                        )
+                    {
+                        if let Some(name) =
+                            Self::extract_static_assignment_name(&operand, this_aliases)
+                        {
                             on_name(name);
                         }
                     } else {
                         // uncomment the following line to debug what other entities should be potentially processed
-                         println!("node is {:?}: {:?}",node, node.to_string());
+                        // println!("node is {:?}: {:?}", node, node.to_string());
                     }
                 }
                 biome_rowan::WalkEvent::Leave(_) => {}
