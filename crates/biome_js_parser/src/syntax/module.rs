@@ -227,18 +227,36 @@ pub(crate) fn parse_import_or_import_equals_declaration(p: &mut JsParser) -> Par
             ts_only_syntax_error(p, "'import =' declarations", decl.range(p))
         })
     } else {
-        parse_import_clause(p).or_add_diagnostic(p, |p, range| {
-            expected_any(
-                &["default import", "namespace import", "named import"],
-                range,
-                p,
-            )
-        });
+        let clause = parse_import_clause(p);
+        
+        // Special handling for invalid import source syntax
+        if clause.is_absent() && p.at(T![source]) {
+            p.error(p.err_builder(
+                "Only `import source x from \"./module\"` is valid.",
+                p.cur_range(),
+            ));
+            // Skip the rest of the invalid import statement
+            while !p.at(T![;]) && !p.at(EOF) {
+                p.bump_any();
+            }
+            if p.at(T![;]) {
+                p.bump(T![;]);
+            }
+            Present(import.complete(p, JS_IMPORT))
+        } else {
+            clause.or_add_diagnostic(p, |p, range| {
+                expected_any(
+                    &["default import", "namespace import", "named import"],
+                    range,
+                    p,
+                )
+            });
 
-        let end = p.cur_range().start();
+            let end = p.cur_range().start();
 
-        semi(p, TextRange::new(start, end));
-        Present(import.complete(p, JS_IMPORT))
+            semi(p, TextRange::new(start, end));
+            Present(import.complete(p, JS_IMPORT))
+        }
     };
 
     p.state_mut().duplicate_binding_parent = None;
@@ -287,10 +305,6 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
             } else if matches!(p.nth(1), T![from]) {
                 parse_default_import_specifier(p, m, is_typed)
             } else {
-                p.error(p.err_builder(
-                    "Only `import source x from \"./module\"` is valid.",
-                    p.cur_range(),
-                ));
                 m.abandon(p);
                 return Absent;
             }
