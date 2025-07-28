@@ -5,7 +5,7 @@
 pub(crate) use crate::separated::FormatAstSeparatedListExtension;
 pub(crate) use crate::{
     AsFormat, CssFormatContext, CssFormatter, FormatNodeRule, FormattedIterExt as _, IntoFormat,
-    verbatim::*,
+    format_number_token, format_removed, format_replaced, on_removed, on_skipped, verbatim::*,
 };
 pub(crate) use biome_formatter::prelude::*;
 pub(crate) use biome_rowan::{

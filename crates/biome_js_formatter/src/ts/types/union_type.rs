@@ -169,7 +169,7 @@ impl Format<JsFormatContext> for FormatTypeSetLeadingSeparator<'_> {
                     }
                     write!(f, [token.format(), space()])
                 });
-                format_only_if_breaks(token, &content).fmt(f)
+                format_only_if_breaks(token, &content, on_skipped).fmt(f)
             }
             None => {
                 let content = format_with(|f| {

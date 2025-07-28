@@ -54,7 +54,6 @@ use crate::format_element::document::Document;
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
-use crate::trivia::{format_skipped_token_trivia, format_trimmed_token};
 pub use arguments::{Argument, Arguments};
 use biome_console::markup;
 use biome_deserialize::{
@@ -75,7 +74,6 @@ pub use builders::BestFitting;
 pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
 pub use group_id::GroupId;
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
-use std::marker::PhantomData;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use token::string::Quote;
@@ -1129,43 +1127,6 @@ pub trait FormatRule<T> {
     type Context;
 
     fn fmt(&self, item: &T, f: &mut Formatter<Self::Context>) -> FormatResult<()>;
-}
-
-/// Default implementation for formatting a token
-pub struct FormatToken<C> {
-    context: PhantomData<C>,
-}
-
-impl<C> Default for FormatToken<C> {
-    fn default() -> Self {
-        Self {
-            context: PhantomData,
-        }
-    }
-}
-
-impl<C> FormatRule<SyntaxToken<C::Language>> for FormatToken<C>
-where
-    C: CstFormatContext,
-    C::Language: 'static,
-{
-    type Context = C;
-
-    fn fmt(
-        &self,
-        token: &SyntaxToken<C::Language>,
-        f: &mut Formatter<Self::Context>,
-    ) -> FormatResult<()> {
-        f.state_mut().track_token(token);
-
-        crate::write!(
-            f,
-            [
-                format_skipped_token_trivia(token),
-                format_trimmed_token(token),
-            ]
-        )
-    }
 }
 
 /// Rule that supports customizing how it formats an object of type `T`.
