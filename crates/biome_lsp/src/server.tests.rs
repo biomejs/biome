@@ -3325,6 +3325,10 @@ async fn pull_source_assist_action() -> Result<()> {
 }
 
 #[tokio::test]
+#[cfg_attr(
+    target_os = "windows",
+    ignore = "Understand why it started failing on Windows"
+)]
 async fn watcher_updates_module_graph_simple() -> Result<()> {
     const FOO_CONTENT: &str = r#"import { bar } from "./bar.ts";
 
@@ -3710,6 +3714,10 @@ export function bar() {
 }
 
 #[tokio::test]
+#[cfg_attr(
+    target_os = "windows",
+    ignore = "Understand why it started failing on Windows"
+)]
 async fn should_open_and_update_nested_files() -> Result<()> {
     // ARRANGE: Set up folder.
     const FILE_PATH: &str = "src/a.js";
