@@ -41,10 +41,9 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
       - name: Run format
         run: |
-          depot cargo fmt --all --check
+          cargo fmt --all --check
           taplo format --check
 
   lint:
@@ -62,12 +61,10 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
-
       - name: Run clippy
         run: |
-          depot cargo lint
-          depot cargo run -p rules_check
+          cargo lint
+          cargo run -p rules_check
 
   check-dependencies:
     name: Check Dependencies
@@ -84,11 +81,10 @@ jobs:
           cache: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
       - name: Install udeps
-        run: depot cargo install cargo-udeps --locked
+        run: cargo install cargo-udeps --locked
       - name: Detect unused dependencies using udeps
-        run: depot cargo +nightly udeps --all-targets
+        run: cargo +nightly udeps --all-targets
 
   test:
     name: Test
@@ -109,9 +105,8 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
       - name: Run tests
-        run: depot cargo test --workspace
+        run: cargo test --workspace
 
   e2e-tests:
     name: End-to-end tests
@@ -127,10 +122,8 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
-
       - name: Build Biome debug binary
-        run: depot cargo build --bin biome
+        run: cargo build --bin biome
       - name: Run tests
         run: |
           cd e2e-tests
@@ -150,10 +143,8 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
-
       - name: Run doc command
-        run: depot cargo documentation
+        run: cargo documentation
 
   codegen:
     name: Codegen
@@ -169,20 +160,18 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
-
       - name: Run the grammar codegen
-        run: depot cargo codegen grammar
+        run: cargo codegen grammar
       - name: Run the analyzer codegen
-        run: depot cargo codegen analyzer
+        run: cargo codegen analyzer
       - name: Run the configuration codegen
-        run: depot cargo codegen-configuration
+        run: cargo codegen-configuration
       - name: Run the schema codegen
-        run: depot cargo codegen-schema
+        run: cargo codegen-schema
       - name: Run the bindings codegen
-        run: depot cargo codegen-bindings
+        run: cargo codegen-bindings
       - name: Run the migrate codegen
-        run: depot cargo codegen-migrate
+        run: cargo codegen-migrate
       - name: Check for git diff
         run: |
           if [[ `git status --porcelain` ]]; then

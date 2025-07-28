@@ -35,11 +35,9 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
-
       - name: Run rustfmt
         run: |
-          depot cargo fmt --all --verbose -- --check
+          cargo fmt --all --verbose -- --check
           taplo format --check
 
   lint:
@@ -57,12 +55,10 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
-
       - name: Run cargo check
-        run: depot cargo check --workspace --all-targets --release
+        run: cargo check --workspace --all-targets --release
       - name: Run clippy
-        run: depot cargo lint
+        run: cargo lint
 
   check-dependencies:
     name: Check Dependencies
@@ -79,12 +75,10 @@ jobs:
           cache: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
-
       - name: Install udeps
-        run: depot cargo install cargo-udeps --locked
+        run: cargo install cargo-udeps --locked
       - name: Run udeps
-        run: depot cargo +nightly udeps --all-targets
+        run: cargo +nightly udeps --all-targets
 
   test:
     name: Test
@@ -106,10 +100,8 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
-
       - name: Run tests on ${{ matrix.os }}
-        run: depot cargo test --workspace
+        run: cargo test --workspace
 
   coverage:
     name: Test262 Coverage
@@ -136,12 +128,10 @@ jobs:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: depot/setup-action@v1
-
       - name: Compile
-        run: depot cargo build --release --locked -p xtask_coverage
+        run: cargo build --release --locked -p xtask_coverage
       - name: Run Test262 suite
         continue-on-error: true
-        run: depot cargo coverage
+        run: cargo coverage
       - name: Clean cache
-        run: depot cargo cache --autoclean
+        run: cargo cache --autoclean
