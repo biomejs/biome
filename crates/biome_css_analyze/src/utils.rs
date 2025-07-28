@@ -46,7 +46,7 @@ pub fn is_css_variable(value: &str) -> bool {
 }
 
 /// Get the font-families within a `font` shorthand property value.
-/// TODO: This function should be replaced with `parse_shorthand_font_families`
+// TODO: This function should be replaced with `parse_shorthand_font_families`
 pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue> {
     let mut font_families: Vec<AnyCssValue> = Vec::new();
     for v in value {
@@ -139,16 +139,16 @@ pub fn collect_font_families(
     }
 }
 
-// Parse font families from the CSS property value
-// Extract and normalize each font name to detect duplicate font names
-// in CSS font-family properties
-//
-// Supported patterns:
-// 1. Quoted font names (CssString): "Arial", 'Helvetica', "Fira Sans"
-//    → Remove quotes and treat as font family name
-// 2. Unquoted font names (CssIdentifier): Arial, Fira Sans, Times New Roman
-//    → Multiple identifiers may be concatenated with spaces
-//    → Comma delimiters separate individual font family names
+/// Parse font families from the CSS property value
+/// Extract and normalize each font name to detect duplicate font names
+/// in CSS font-family properties
+///
+/// Supported patterns:
+/// 1. Quoted font names (CssString): "Arial", 'Helvetica', "Fira Sans"
+///    → Remove quotes and treat as font family name
+/// 2. Unquoted font names (CssIdentifier): Arial, Fira Sans, Times New Roman
+///    → Multiple identifiers may be concatenated with spaces
+///    → Comma delimiters separate individual font family names
 fn parse_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFamily>> {
     let mut current_font_texts: Vec<Text> = Vec::new();
     let mut first_range: Option<TextRange> = None;
@@ -215,7 +215,7 @@ fn parse_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFam
     Some(font_families)
 }
 
-// Parse font families from `font` shorthand property value
+/// Parse font families from `font` shorthand property value
 fn parse_shorthand_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFamily>> {
     let mut current_font_texts: Vec<Text> = Vec::new();
     let mut first_range: Option<TextRange> = None;
