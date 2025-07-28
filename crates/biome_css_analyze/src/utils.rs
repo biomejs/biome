@@ -134,8 +134,8 @@ pub fn collect_font_families(
     kind: FontPropertyKind,
 ) -> Option<Vec<FontFamily>> {
     match kind {
-        FontPropertyKind::FontFamily => parse_font_families(list),
-        FontPropertyKind::Shorthand => parse_shorthand_font_families(list),
+        FontPropertyKind::FontFamily => normalize_font_families(list),
+        FontPropertyKind::Shorthand => normalize_shorthand_font_families(list),
     }
 }
 
@@ -149,13 +149,13 @@ pub fn collect_font_families(
 /// 2. Unquoted font names (CssIdentifier): Arial, Fira Sans, Times New Roman
 ///    → Multiple identifiers may be concatenated with spaces
 ///    → Comma delimiters separate individual font family names
-fn parse_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFamily>> {
+fn normalize_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFamily>> {
     let mut current_font_texts: Vec<Text> = Vec::new();
     let mut first_range: Option<TextRange> = None;
     let mut last_range: Option<TextRange> = None;
     let mut font_families: Vec<FontFamily> = Vec::new();
 
-    let len = list.iter().count();
+    let len = list.len();
 
     for (index, c) in list.into_iter().enumerate() {
         let is_last_value_node = index == len - 1;
@@ -216,7 +216,9 @@ fn parse_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFam
 }
 
 /// Parse font families from `font` shorthand property value
-fn parse_shorthand_font_families(list: CssGenericComponentValueList) -> Option<Vec<FontFamily>> {
+fn normalize_shorthand_font_families(
+    list: CssGenericComponentValueList,
+) -> Option<Vec<FontFamily>> {
     let mut current_font_texts: Vec<Text> = Vec::new();
     let mut first_range: Option<TextRange> = None;
     let mut last_range: Option<TextRange> = None;
