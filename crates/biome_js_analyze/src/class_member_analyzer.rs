@@ -597,9 +597,8 @@ impl MemberReadVisitor for JsClassMemberList {
                             on_name(name);
                         }
                     } else {
-                        //add   ++ -- += -= etc  ??= and merge with writes
                         // uncomment the following line to debug what other entities should be potentially processed
-                        // println!("node is {:?}", node);
+                         println!("node is {:?}: {:?}",node, node.to_string());
                     }
                 }
                 biome_rowan::WalkEvent::Leave(_) => {}
