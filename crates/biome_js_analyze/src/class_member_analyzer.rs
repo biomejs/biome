@@ -543,7 +543,7 @@ impl MemberReadVisitor for JsClassMemberList {
             })
             .collect::<Vec<_>>()
     }
-
+    // todo check if type can be simplified !!!!
     fn visit_read_references_in_body<F>(
         method_body_element: &MethodBodyElementOrStatementList,
         this_aliases: &[ThisAliasesAndTheirScope],
@@ -586,10 +586,20 @@ impl MemberReadVisitor for JsClassMemberList {
                                 }
                             }
                         }
+                    } else if let Some(operand) = JsPostUpdateExpression::cast_ref(&node)
+                        .and_then(|expr| expr.operand().ok())
+                        .or_else(|| {
+                            JsPreUpdateExpression::cast_ref(&node.clone())
+                                .and_then(|expr| expr.operand().ok())
+                        })
+                    {
+                        if let Some(name) = Self::extract_static_assignment_name(&operand, this_aliases) {
+                            on_name(name);
+                        }
                     } else {
-                      //add   ++ -- += -= etc  ??= and merge with writes
+                        //add   ++ -- += -= etc  ??= and merge with writes
                         // uncomment the following line to debug what other entities should be potentially processed
-                          println!("node is {:?}", node);
+                        // println!("node is {:?}", node);
                     }
                 }
                 biome_rowan::WalkEvent::Leave(_) => {}

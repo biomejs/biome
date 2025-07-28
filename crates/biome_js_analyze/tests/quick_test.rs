@@ -28,22 +28,15 @@ fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
     const SOURCE: &str = r#"
 
-// class UsedMember6 {
-// 	#usedMember;
-// 
-// 	foo() {
-// 		bar(this.#usedMember += 1);
-// 	}
-// }
-// same will be capture by ++ etc
 export class ToastService {
-	private _toastId = 0;
+  private _toastId = 0;
 
-	show(message: string, type: string, autoClose: boolean): void {
-		const id = this._toastId++;
-		this.activeToasts.push({ id, message, type, autoClose });
-	}
+  show(message: string, type: string, autoClose: boolean): void {
+    const id = this._toastId++;
+    this.activeToasts.push({ id, message, type, autoClose });
+  }
 }
+
 
 "#;
 

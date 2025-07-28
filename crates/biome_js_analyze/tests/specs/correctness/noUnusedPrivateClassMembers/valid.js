@@ -170,3 +170,18 @@ class C {
 	}
 }
 
+class Foo {
+	#usedOnlyInWriteStatement = 5;
+	method() {
+		this.#usedOnlyInWriteStatement += 42;
+	}
+}
+
+class C {
+	#usedOnlyInIncrement;
+
+	foo() {
+		this.#usedOnlyInIncrement++;
+	}
+}
+
