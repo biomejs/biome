@@ -40,7 +40,7 @@ The analyzer allows implementors to create **three different** types of rules:
       - [Multiple Signals](#multiple-signals)
       - [Code Actions](#code-actions)
       - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
-      - [Common Logic Mistakes](#common-logic-mistakes)
+      - [Common Mistakes](#common-mistakes)
         * [Not checking if a variable is global](#not-checking-if-a-variable-is-global)
     + [Testing the Rule](#testing-the-rule)
       - [Quick Test](#quick-test)
@@ -107,6 +107,10 @@ _Biome_ follows a naming convention according to what the rule does:
 We also try to ensure consistency in the naming of rules.
 Please feel free to refer to existing rules for inspiration when naming new ones.
 Here is a non-exhaustive list of common names:
+
+- `use<Framework>...`
+
+  If a rule overwhelmingly applies to a specific framework, it should be named using the `use` or `no` prefix followed by the framework name, eg. `noVueReservedProps`
 
 - `noConstant<Concept>`
 
@@ -406,6 +410,9 @@ declare_lint_rule! {
     }
 }
 ```
+
+> [!TIP]
+> The `version` field indicates what Biome version the rule was released in. The `version` field must be `next`. This allows us flexibility for what version the rule will actually be released in.
 
 ##### Biome lint rules inspired by other lint rules
 
@@ -977,9 +984,9 @@ impl Rule for UseYield {
 }
 ```
 
-#### Common Logic Mistakes
+#### Common Mistakes
 
-There are some common mistakes that can lead to bugs or false positives in lint rules. These tips should help you avoid them and write more robust rules.
+There are some common mistakes that can lead to bugs or false positives in lint rules, or things that reviewers will always ask for. These tips should help you avoid them and write more robust rules.
 
 ##### Not checking if a variable is global
 
@@ -992,6 +999,38 @@ console.log(); // <-- This should not be reported because `console` is redeclare
 ```
 
 To avoid this, you should consult the semantic model to check if the variable is global or not.
+
+##### Avoidable String Allocations
+
+Lots of rules require checking a string. It's tempting to call `to_string()` on something to get an owned string, but this always results in a heap allocation.
+
+Most of the time, you actually want to compare against a `&str`, or a `TokenText`. `TokenText` is most useful for those cases where you actually do need an owned value.
+
+##### Avoidable Deep Indentation
+
+Inherently, syntax trees are quite deeply nested. Biome's syntax data structures make heavy use of the `Result` and `Option` types to represent the absence of a value. It may be tempting to use `unwrap()` or `expect()` to avoid the `Result` and `Option` types, but this is not recommended because those panic. Sometimes, it's not convenient to use the `?` operator. Whatever the case may be, you might end up with something like this:
+
+```rust
+if let Ok(object_member_name) = property_object_member.name() {
+    if let Some(key_name) = object_member_name.name() {
+        if key_name.text().trim() == "data" {
+            if let Ok(value) = property_object_member.value() {
+                match value {
+...
+```
+
+Rust provides comprehensive helper functions to avoid things like this, such as `map`, `filter`, and `and_then`. Which allows you to write code that is more concise and easier to read.
+
+```rust
+property_object_member
+  .name()
+  .ok()
+  .and_then(|n| n.name())
+  .filter(|ident| ident.text().trim() == "data")
+  .and_then(|_| property_object_member.value().ok())
+  .and_then(|value| match value {
+...
+```
 
 ### Testing the Rule
 
