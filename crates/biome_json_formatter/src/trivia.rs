@@ -58,10 +58,10 @@ pub(crate) struct CleanedNumberLiteralText<'a> {
 impl Format<JsonFormatContext> for CleanedNumberLiteralText<'_> {
     fn fmt(&self, f: &mut JsonFormatter) -> FormatResult<()> {
         format_replaced(
-            &self.token,
+            self.token,
             &syntax_token_cow_slice(
                 format_trimmed_number(self.token.text_trimmed(), self.options),
-                &self.token,
+                self.token,
                 self.token.text_trimmed_range().start(),
             ),
         )

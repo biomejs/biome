@@ -303,26 +303,6 @@ impl FormatToken<JsonLanguage, JsonFormatContext> for FormatJsonSyntaxToken {
     }
 }
 
-//
-// impl FormatToken<JsonLanguage> for FormatJsonSyntaxToken {
-//     type Context = JsonFormatContext;
-//     fn format_skipped_token_trivia(
-//         &self,
-//         f: &mut Formatter<JsonFormatContext>,
-//         token: &JsonSyntaxToken,
-//     ) -> FormatResult<()> {
-//         format_skipped_token_trivia(token).fmt(f)
-//     }
-//
-//     fn format_trimmed_token(
-//         &self,
-//         f: &mut Formatter<JsonFormatContext>,
-//         token: &JsonSyntaxToken,
-//     ) -> FormatResult<()> {
-//         format_trimmed_token(token).fmt(f)
-//     }
-// }
-
 impl AsFormat<JsonFormatContext> for JsonSyntaxToken {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatJsonSyntaxToken>;
 
