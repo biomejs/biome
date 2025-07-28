@@ -7,18 +7,21 @@ mod generated;
 mod json;
 mod prelude;
 mod separated;
+mod trivia;
 mod verbatim;
 
 use crate::comments::JsonCommentStyle;
 pub(crate) use crate::context::JsonFormatContext;
 use crate::context::JsonFormatOptions;
 use crate::cst::FormatJsonSyntaxNode;
+pub(crate) use crate::trivia::*;
 use crate::verbatim::{format_bogus_node, format_suppressed_node};
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
+use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
-    FormatToken, TransformSourceMap, write,
+    TransformSourceMap, write,
 };
 use biome_formatter::{Formatted, Printed};
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode, JsonSyntaxToken};
@@ -273,13 +276,58 @@ impl FormatLanguage for JsonFormatLanguage {
 }
 
 /// Format implementation specific to JSON tokens.
-pub(crate) type FormatJsonSyntaxToken = FormatToken<JsonFormatContext>;
+
+#[derive(Debug, Default)]
+pub(crate) struct FormatJsonSyntaxToken;
+
+impl FormatRule<JsonSyntaxToken> for FormatJsonSyntaxToken {
+    type Context = JsonFormatContext;
+
+    fn fmt(&self, token: &JsonSyntaxToken, f: &mut Formatter<Self::Context>) -> FormatResult<()> {
+        f.state_mut().track_token(token);
+
+        self.format_skipped_token_trivia(token, f)?;
+        self.format_trimmed_token_trivia(token, f)?;
+
+        Ok(())
+    }
+}
+
+impl FormatToken<JsonLanguage, JsonFormatContext> for FormatJsonSyntaxToken {
+    fn format_skipped_token_trivia(
+        &self,
+        token: &JsonSyntaxToken,
+        f: &mut Formatter<JsonFormatContext>,
+    ) -> FormatResult<()> {
+        format_skipped_token_trivia(token).fmt(f)
+    }
+}
+
+//
+// impl FormatToken<JsonLanguage> for FormatJsonSyntaxToken {
+//     type Context = JsonFormatContext;
+//     fn format_skipped_token_trivia(
+//         &self,
+//         f: &mut Formatter<JsonFormatContext>,
+//         token: &JsonSyntaxToken,
+//     ) -> FormatResult<()> {
+//         format_skipped_token_trivia(token).fmt(f)
+//     }
+//
+//     fn format_trimmed_token(
+//         &self,
+//         f: &mut Formatter<JsonFormatContext>,
+//         token: &JsonSyntaxToken,
+//     ) -> FormatResult<()> {
+//         format_trimmed_token(token).fmt(f)
+//     }
+// }
 
 impl AsFormat<JsonFormatContext> for JsonSyntaxToken {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatJsonSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, FormatJsonSyntaxToken::default())
+        FormatRefWithRule::new(self, FormatJsonSyntaxToken)
     }
 }
 
@@ -287,7 +335,7 @@ impl IntoFormat<JsonFormatContext> for JsonSyntaxToken {
     type Format = FormatOwnedWithRule<Self, FormatJsonSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, FormatJsonSyntaxToken::default())
+        FormatOwnedWithRule::new(self, FormatJsonSyntaxToken)
     }
 }
 

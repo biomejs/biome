@@ -1,4 +1,6 @@
+use crate::FormatGraphqlSyntaxToken;
 use crate::prelude::*;
+use biome_formatter::trivia::FormatToken;
 use biome_formatter::{format_args, write};
 use biome_graphql_syntax::{
     GraphqlSyntaxToken, GraphqlUnionMemberTypes, GraphqlUnionMemberTypesFields,
@@ -41,6 +43,10 @@ pub struct FormatTypeLeadingSeparator<'a> {
     leading_separator: Option<&'a GraphqlSyntaxToken>,
 }
 
+fn on_skipped(token: &GraphqlSyntaxToken, f: &mut GraphqlFormatter) -> FormatResult<()> {
+    FormatGraphqlSyntaxToken.format_skipped_token_trivia(token, f)
+}
+
 impl Format<GraphqlFormatContext> for FormatTypeLeadingSeparator<'_> {
     fn fmt(&self, f: &mut GraphqlFormatter) -> FormatResult<()> {
         match &self.leading_separator {
@@ -48,7 +54,7 @@ impl Format<GraphqlFormatContext> for FormatTypeLeadingSeparator<'_> {
                 let content = format_with(|f| {
                     write!(f, [soft_line_break_or_space(), token.format(), space()])
                 });
-                write!(f, [format_only_if_breaks(token, &content)])
+                write!(f, [format_only_if_breaks(token, &content, on_skipped)])
             }
             None => {
                 let content = format_with(|f| {
