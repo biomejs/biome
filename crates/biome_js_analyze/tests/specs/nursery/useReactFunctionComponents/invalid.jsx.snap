@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+class Foo extends React.Component {
+  render() {
+    return <div>This is a class component.</div>;
+  }
+}
+
+class Bar extends React.PureComponent {
+  render() {
+    return <div>This is a class component.</div>;
+  }
+}
+
+export class Foo extends React.Component {
+  render() {
+    return <div>This is a class component.</div>;
+  }
+}
+
+export default class Baz extends React.Component {
+  render() {
+    return <div>This is a class component.</div>;
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:1 lint/nursery/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Class components are not allowed. Function components are the preferred way to write components.
+  
+  > 1 │ class Foo extends React.Component {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │   render() {
+  > 3 │     return <div>This is a class component.</div>;
+  > 4 │   }
+  > 5 │ }
+      │ ^
+    6 │ 
+    7 │ class Bar extends React.PureComponent {
+  
+  i Refactor this into a function component.
+  
+
+```
+
+```
+invalid.jsx:7:1 lint/nursery/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Class components are not allowed. Function components are the preferred way to write components.
+  
+     5 │ }
+     6 │ 
+   > 7 │ class Bar extends React.PureComponent {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │   render() {
+   > 9 │     return <div>This is a class component.</div>;
+  > 10 │   }
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ export class Foo extends React.Component {
+  
+  i Refactor this into a function component.
+  
+
+```
+
+```
+invalid.jsx:13:8 lint/nursery/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Class components are not allowed. Function components are the preferred way to write components.
+  
+    11 │ }
+    12 │ 
+  > 13 │ export class Foo extends React.Component {
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 14 │   render() {
+  > 15 │     return <div>This is a class component.</div>;
+  > 16 │   }
+  > 17 │ }
+       │ ^
+    18 │ 
+    19 │ export default class Baz extends React.Component {
+  
+  i Refactor this into a function component.
+  
+
+```
+
+```
+invalid.jsx:19:16 lint/nursery/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Class components are not allowed. Function components are the preferred way to write components.
+  
+    17 │ }
+    18 │ 
+  > 19 │ export default class Baz extends React.Component {
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 20 │   render() {
+  > 21 │     return <div>This is a class component.</div>;
+  > 22 │   }
+  > 23 │ }
+       │ ^
+    24 │ 
+  
+  i Refactor this into a function component.
+  
+
+```

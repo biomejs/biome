@@ -204,6 +204,7 @@ define_categories! {
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-type",
     "lint/nursery/useExportsLast": "https://biomejs.dev/linter/rules/use-exports-last",
     "lint/nursery/useForComponent": "https://biomejs.dev/linter/rules/use-for-component",
+    "lint/nursery/useReactFunctionComponents": "https://biomejs.dev/linter/rules/use-react-function-components",
     "lint/nursery/useGoogleFontPreconnect": "https://biomejs.dev/linter/rules/use-google-font-preconnect",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useIndexOf": "https://biomejs.dev/linter/rules/use-index-of",
