@@ -61,6 +61,7 @@ define_categories! {
     "lint/complexity/noForEach": "https://biomejs.dev/linter/rules/no-for-each",
     "lint/complexity/noStaticOnlyClass": "https://biomejs.dev/linter/rules/no-static-only-class",
     "lint/complexity/noThisInStatic": "https://biomejs.dev/linter/rules/no-this-in-static",
+    "lint/complexity/noUnnecessaryTemplateExpression": "https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
     "lint/complexity/noUselessCatch": "https://biomejs.dev/linter/rules/no-useless-catch",
     "lint/complexity/noUselessConstructor": "https://biomejs.dev/linter/rules/no-useless-constructor",
     "lint/complexity/noUselessContinue": "https://biomejs.dev/linter/rules/no-useless-continue",

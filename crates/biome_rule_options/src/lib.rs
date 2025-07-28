@@ -177,6 +177,7 @@ pub mod no_ts_ignore;
 pub mod no_unassigned_variables;
 pub mod no_undeclared_dependencies;
 pub mod no_undeclared_variables;
+pub mod no_unnecessary_template_expression;
 pub mod no_unknown_at_rule;
 pub mod no_unknown_function;
 pub mod no_unknown_media_feature_name;
