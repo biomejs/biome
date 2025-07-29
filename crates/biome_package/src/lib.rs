@@ -3,6 +3,7 @@
 mod diagnostics;
 mod license;
 mod node_js_package;
+pub mod node_semver;
 
 pub use crate::diagnostics::{ProjectAnalyzeDiagnostic, ProjectDiagnostic};
 use biome_fs::FileSystem;
