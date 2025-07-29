@@ -1755,6 +1755,10 @@ export interface Nursery {
 	 */
 	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
 	/**
+	 * Enforce that components are defined as functions and never as classes.
+	 */
+	useReactFunctionComponents?: RuleConfiguration_for_UseReactFunctionComponentsOptions;
+	/**
 	 * Enforce marking members as readonly if they are never modified outside the constructor.
 	 */
 	useReadonlyClassProperties?: RuleFixConfiguration_for_UseReadonlyClassPropertiesOptions;
@@ -3013,6 +3017,9 @@ export type RuleFixConfiguration_for_UseParseIntRadixOptions =
 export type RuleConfiguration_for_UseQwikClasslistOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseQwikClasslistOptions;
+export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseReactFunctionComponentsOptions;
 export type RuleFixConfiguration_for_UseReadonlyClassPropertiesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions;
@@ -5617,6 +5624,16 @@ export interface RuleWithOptions_for_UseQwikClasslistOptions {
 	 */
 	options: UseQwikClasslistOptions;
 }
+export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseReactFunctionComponentsOptions;
+}
 export interface RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -7844,6 +7861,7 @@ export interface UseNumericSeparatorsOptions {}
 export interface UseObjectSpreadOptions {}
 export interface UseParseIntRadixOptions {}
 export interface UseQwikClasslistOptions {}
+export interface UseReactFunctionComponentsOptions {}
 export interface UseReadonlyClassPropertiesOptions {
 	/**
 	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
@@ -8506,6 +8524,7 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"
+	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIndexOf"

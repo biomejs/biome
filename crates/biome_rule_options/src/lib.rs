@@ -312,6 +312,7 @@ pub mod use_object_spread;
 pub mod use_optional_chain;
 pub mod use_parse_int_radix;
 pub mod use_qwik_classlist;
+pub mod use_react_function_components;
 pub mod use_readonly_class_properties;
 pub mod use_regex_literals;
 pub mod use_self_closing_elements;

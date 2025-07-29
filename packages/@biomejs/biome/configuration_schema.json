@@ -5083,6 +5083,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useReactFunctionComponents": {
+					"description": "Enforce that components are defined as functions and never as classes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useReadonlyClassProperties": {
 					"description": "Enforce marking members as readonly if they are never modified outside the constructor.",
 					"anyOf": [
@@ -10888,6 +10895,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseReactFunctionComponentsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseReadonlyClassPropertiesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13648,6 +13672,16 @@
 			]
 		},
 		"UseQwikClasslistOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseReactFunctionComponentsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseReactFunctionComponentsOptions" }
+			]
+		},
+		"UseReactFunctionComponentsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

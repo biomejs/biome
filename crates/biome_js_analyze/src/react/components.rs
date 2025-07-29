@@ -564,6 +564,7 @@ pub(crate) fn is_react_component_name(name: &str) -> bool {
 declare_node_union! {
     pub AnyPotentialReactComponentDeclaration =
         JsClassExportDefaultDeclaration
+        | JsClassDeclaration
         | JsFunctionExportDefaultDeclaration
         | JsFunctionDeclaration
         | JsVariableDeclarator
@@ -677,6 +678,35 @@ mod test {
         }
 
         source
+    }
+
+    #[test]
+    fn should_handle_unexported_class() {
+        let source = parse_jsx(
+            r#"
+            class Foo extends React.Component {
+              render() {
+                return <div>This is a class component.</div>;
+              }
+            }
+
+            class Foo extends React.PureComponent {
+              render() {
+                return <div>This is a class component.</div>;
+              }
+            }
+            "#,
+        );
+        let components = source
+            .syntax()
+            .descendants()
+            .filter_map(AnyPotentialReactComponentDeclaration::cast)
+            .filter_map(|component| ReactComponentInfo::from_declaration(component.syntax()))
+            .collect::<Vec<_>>();
+        for component in &components {
+            assert!(matches!(component.kind, ReactComponentKind::Class(_)))
+        }
+        assert_eq!(components.len(), 2);
     }
 
     mod from_expression {
