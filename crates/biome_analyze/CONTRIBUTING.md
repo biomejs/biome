@@ -803,12 +803,16 @@ impl Rule for ForLoopCountReferences {
 
 In some rare cases, a rule may require multiple services to be used together. In these cases, you don't need to pull in these services in the rule's `Query`. The rule context provides a `get_service` method to retrieve services by their type.
 
+However, you need to take into consideration that some services are created during a "second phase", for example `SemanticModel` and `ControlFlowGraph` services are created during this phase. If you pull these services when using the `Ast` query, those services won't be available. This means that you must use at least a query that runs during the second phase. The `Semantic` query, for example, runs during the second phase.
+
 ```rust
 let is_root_service = ctx
   .get_service::<IsRoot>()
   .expect("IsRoot service not found.");
 ```
+Where `IsRoot` is the name of the service you want to retrieve. The name of the service is the name of the Rust type that is stored when calling `.insert_service()`.
 
+Refer to the `src/lib.rs` file of the crate, and look at the `.insert_service()` function, and deduce the name of the service from there. Using an incorrect name will result in a panic error at runtime.
 #### Multiple Signals
 
 Some rules require you to find all possible cases upfront in `run` function.
