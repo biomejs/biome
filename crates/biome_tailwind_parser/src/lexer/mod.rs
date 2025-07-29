@@ -90,6 +90,18 @@ impl<'src> TailwindLexer<'src> {
         }
     }
 
+    /// Consume a token in the arbitrary candidate context
+    fn consume_token_arbitrary_candidate(&mut self, current: u8) -> TailwindSyntaxKind {
+        match current {
+            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b':' => self.consume_byte(T![:]),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_PROPERTY, b':'),
+            _ if self.current_kind == T![:] => self.consume_bracketed_thing(TW_VALUE, b']'),
+            _ => self.consume_named_value(),
+        }
+    }
+
     fn consume_bracket(&mut self, byte: u8) -> TailwindSyntaxKind {
         let kind = match byte {
             b'[' => T!['['],
@@ -231,6 +243,9 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
                     TailwindLexContext::Arbitrary => self.consume_token_arbitrary(current),
                     TailwindLexContext::ArbitraryVariant => {
                         self.consume_token_arbitrary_variant(current)
+                    }
+                    TailwindLexContext::ArbitraryCandidate => {
+                        self.consume_token_arbitrary_candidate(current)
                     }
                 },
                 None => EOF,
