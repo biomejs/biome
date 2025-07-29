@@ -6,7 +6,7 @@
 
 - [#7057](https://github.com/biomejs/biome/pull/7057) [`634a667`](https://github.com/biomejs/biome/commit/634a667ac8e9f74a4633895eab4bd4695ffffa1d) Thanks [@mdevils](https://github.com/mdevils)! - Added the rule [`noVueReservedKeys`](https://biomejs.dev/linter/rules/no-vue-reserved-keys/), which prevents the use of reserved Vue keys.
 
-  It prevents the use of Vue reserved keys such as those starting with `# @biomejs/biome (like `$el`, `$data`, `$props`) and keys starting with `\_` in data properties, which can cause conflicts and unexpected behavior in Vue components.
+  It prevents the use of Vue reserved keys such as those starting with like `$el`, `$data`, `$props`) and keys starting with `\_` in data properties, which can cause conflicts and unexpected behavior in Vue components.
 
   ##### Invalid example
 
