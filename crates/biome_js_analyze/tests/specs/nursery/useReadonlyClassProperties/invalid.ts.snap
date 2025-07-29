@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 134
+assertion_line: 146
 expression: invalid.ts
 ---
 # Input
@@ -345,6 +345,15 @@ class TestChildClassExpressionModifiable {
 		};
 	}
 }
+
+export class Test {
+	private field: number;
+
+	constructor() {
+		this.field ??= 1;
+	}
+}
+
 ```
 
 # Diagnostics
@@ -1143,5 +1152,25 @@ invalid.ts:331:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━
   
     331 │ → private·readonly·childClassExpressionModifiable·=·7;
         │           +++++++++                                   
+
+```
+
+```
+invalid.ts:343:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member 'field' is never reassigned.
+  
+    342 │ export class Test {
+  > 343 │ 	private field: number;
+        │ 	        ^^^^^
+    344 │ 
+    345 │ 	constructor() {
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    343 │ → private·readonly·field:·number;
+        │           +++++++++              
 
 ```

@@ -148,19 +148,27 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@6..7 ":" [] [],
-                                selector: FIRST_KW@7..12 "first" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@7..12 "first" [] [],
+                                },
                             },
                             CssPageSelectorPseudo {
                                 colon_token: COLON@12..13 ":" [] [],
-                                selector: RIGHT_KW@13..18 "right" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@13..18 "right" [] [],
+                                },
                             },
                             CssPageSelectorPseudo {
                                 colon_token: COLON@18..19 ":" [] [],
-                                selector: LEFT_KW@19..23 "left" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@19..23 "left" [] [],
+                                },
                             },
                             CssPageSelectorPseudo {
                                 colon_token: COLON@23..24 ":" [] [],
-                                selector: BLANK_KW@24..29 "blank" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@24..29 "blank" [] [],
+                                },
                             },
                         ],
                     },
@@ -172,19 +180,27 @@ CssRoot {
                         pseudos: CssPageSelectorPseudoList [
                             CssPageSelectorPseudo {
                                 colon_token: COLON@35..36 ":" [] [],
-                                selector: FIRST_KW@36..41 "first" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@36..41 "first" [] [],
+                                },
                             },
                             CssPageSelectorPseudo {
                                 colon_token: COLON@41..42 ":" [] [],
-                                selector: RIGHT_KW@42..47 "right" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@42..47 "right" [] [],
+                                },
                             },
                             CssPageSelectorPseudo {
                                 colon_token: COLON@47..48 ":" [] [],
-                                selector: LEFT_KW@48..52 "left" [] [],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@48..52 "left" [] [],
+                                },
                             },
                             CssPageSelectorPseudo {
                                 colon_token: COLON@52..53 ":" [] [],
-                                selector: BLANK_KW@53..59 "blank" [] [Whitespace(" ")],
+                                selector: CssIdentifier {
+                                    value_token: IDENT@53..59 "blank" [] [Whitespace(" ")],
+                                },
                             },
                         ],
                     },
@@ -1621,16 +1637,20 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@6..29
               0: CSS_PAGE_SELECTOR_PSEUDO@6..12
                 0: COLON@6..7 ":" [] []
-                1: FIRST_KW@7..12 "first" [] []
+                1: CSS_IDENTIFIER@7..12
+                  0: IDENT@7..12 "first" [] []
               1: CSS_PAGE_SELECTOR_PSEUDO@12..18
                 0: COLON@12..13 ":" [] []
-                1: RIGHT_KW@13..18 "right" [] []
+                1: CSS_IDENTIFIER@13..18
+                  0: IDENT@13..18 "right" [] []
               2: CSS_PAGE_SELECTOR_PSEUDO@18..23
                 0: COLON@18..19 ":" [] []
-                1: LEFT_KW@19..23 "left" [] []
+                1: CSS_IDENTIFIER@19..23
+                  0: IDENT@19..23 "left" [] []
               3: CSS_PAGE_SELECTOR_PSEUDO@23..29
                 0: COLON@23..24 ":" [] []
-                1: BLANK_KW@24..29 "blank" [] []
+                1: CSS_IDENTIFIER@24..29
+                  0: IDENT@24..29 "blank" [] []
           1: COMMA@29..31 "," [] [Whitespace(" ")]
           2: CSS_PAGE_SELECTOR@31..59
             0: CSS_CUSTOM_IDENTIFIER@31..35
@@ -1638,16 +1658,20 @@ CssRoot {
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@35..59
               0: CSS_PAGE_SELECTOR_PSEUDO@35..41
                 0: COLON@35..36 ":" [] []
-                1: FIRST_KW@36..41 "first" [] []
+                1: CSS_IDENTIFIER@36..41
+                  0: IDENT@36..41 "first" [] []
               1: CSS_PAGE_SELECTOR_PSEUDO@41..47
                 0: COLON@41..42 ":" [] []
-                1: RIGHT_KW@42..47 "right" [] []
+                1: CSS_IDENTIFIER@42..47
+                  0: IDENT@42..47 "right" [] []
               2: CSS_PAGE_SELECTOR_PSEUDO@47..52
                 0: COLON@47..48 ":" [] []
-                1: LEFT_KW@48..52 "left" [] []
+                1: CSS_IDENTIFIER@48..52
+                  0: IDENT@48..52 "left" [] []
               3: CSS_PAGE_SELECTOR_PSEUDO@52..59
                 0: COLON@52..53 ":" [] []
-                1: BLANK_KW@53..59 "blank" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@53..59
+                  0: IDENT@53..59 "blank" [] [Whitespace(" ")]
         2: CSS_PAGE_AT_RULE_BLOCK@59..1814
           0: L_CURLY@59..60 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@60..1812

@@ -34,7 +34,9 @@ CssRoot {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    HAS_KW@1..4 "has" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@1..4 "has" [] [],
+                                    },
                                     L_PAREN@4..6 "(" [] [Whitespace(" ")],
                                     CssRelativeSelectorList [],
                                 ],
@@ -59,7 +61,9 @@ CssRoot {
                             colon_token: COLON@8..10 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    HAS_KW@10..13 "has" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@10..13 "has" [] [],
+                                    },
                                     L_PAREN@13..14 "(" [] [],
                                     CssRelativeSelectorList [],
                                     R_PAREN@14..16 ")" [] [Whitespace(" ")],
@@ -85,7 +89,9 @@ CssRoot {
                             colon_token: COLON@18..20 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    HAS_KW@20..23 "has" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@20..23 "has" [] [],
+                                    },
                                     L_PAREN@23..24 "(" [] [],
                                     CssRelativeSelectorList [],
                                     CssBogus {
@@ -117,7 +123,9 @@ CssRoot {
                             colon_token: COLON@36..38 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    HAS_KW@38..41 "has" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@38..41 "has" [] [],
+                                    },
                                     L_PAREN@41..42 "(" [] [],
                                     CssRelativeSelectorList [],
                                     CssBogus {
@@ -148,7 +156,9 @@ CssRoot {
                             colon_token: COLON@53..55 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    HAS_KW@55..58 "has" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@55..58 "has" [] [],
+                                    },
                                     L_PAREN@58..59 "(" [] [],
                                     CssRelativeSelectorList [],
                                     CssBogus {
@@ -182,7 +192,9 @@ CssRoot {
                             colon_token: COLON@78..80 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    HAS_KW@80..83 "has" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@80..83 "has" [] [],
+                                    },
                                     L_PAREN@83..84 "(" [] [],
                                     CssRelativeSelectorList [
                                         CssRelativeSelector {
@@ -247,7 +259,9 @@ CssRoot {
                             colon_token: COLON@108..110 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    HAS_KW@110..113 "has" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@110..113 "has" [] [],
+                                    },
                                     L_PAREN@113..114 "(" [] [],
                                     CssRelativeSelectorList [
                                         CssRelativeSelector {
@@ -303,7 +317,9 @@ CssRoot {
                             colon_token: COLON@128..130 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    HAS_KW@130..133 "has" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@130..133 "has" [] [],
+                                    },
                                     L_PAREN@133..134 "(" [] [],
                                     CssRelativeSelectorList [
                                         CssRelativeSelector {
@@ -344,7 +360,9 @@ CssRoot {
                             colon_token: COLON@141..143 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    HAS_KW@143..146 "has" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@143..146 "has" [] [],
+                                    },
                                     L_PAREN@146..147 "(" [] [],
                                     CssRelativeSelectorList [
                                         CssRelativeSelector {
@@ -397,7 +415,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..6
               0: COLON@0..1 ":" [] []
               1: CSS_BOGUS_PSEUDO_CLASS@1..6
-                0: HAS_KW@1..4 "has" [] []
+                0: CSS_IDENTIFIER@1..4
+                  0: IDENT@1..4 "has" [] []
                 1: L_PAREN@4..6 "(" [] [Whitespace(" ")]
                 2: CSS_RELATIVE_SELECTOR_LIST@6..6
       1: CSS_DECLARATION_OR_RULE_BLOCK@6..8
@@ -413,7 +432,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@8..16
               0: COLON@8..10 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@10..16
-                0: HAS_KW@10..13 "has" [] []
+                0: CSS_IDENTIFIER@10..13
+                  0: IDENT@10..13 "has" [] []
                 1: L_PAREN@13..14 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@14..14
                 3: R_PAREN@14..16 ")" [] [Whitespace(" ")]
@@ -430,7 +450,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@18..34
               0: COLON@18..20 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@20..34
-                0: HAS_KW@20..23 "has" [] []
+                0: CSS_IDENTIFIER@20..23
+                  0: IDENT@20..23 "has" [] []
                 1: L_PAREN@23..24 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@24..24
                 3: CSS_BOGUS@24..32
@@ -450,7 +471,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@36..51
               0: COLON@36..38 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@38..51
-                0: HAS_KW@38..41 "has" [] []
+                0: CSS_IDENTIFIER@38..41
+                  0: IDENT@38..41 "has" [] []
                 1: L_PAREN@41..42 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@42..42
                 3: CSS_BOGUS@42..51
@@ -469,7 +491,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@53..76
               0: COLON@53..55 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@55..76
-                0: HAS_KW@55..58 "has" [] []
+                0: CSS_IDENTIFIER@55..58
+                  0: IDENT@55..58 "has" [] []
                 1: L_PAREN@58..59 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@59..59
                 3: CSS_BOGUS@59..74
@@ -491,7 +514,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@78..106
               0: COLON@78..80 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@80..106
-                0: HAS_KW@80..83 "has" [] []
+                0: CSS_IDENTIFIER@80..83
+                  0: IDENT@80..83 "has" [] []
                 1: L_PAREN@83..84 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@84..96
                   0: CSS_RELATIVE_SELECTOR@84..95
@@ -533,7 +557,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@108..126
               0: COLON@108..110 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@110..126
-                0: HAS_KW@110..113 "has" [] []
+                0: CSS_IDENTIFIER@110..113
+                  0: IDENT@110..113 "has" [] []
                 1: L_PAREN@113..114 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@114..126
                   0: CSS_RELATIVE_SELECTOR@114..126
@@ -569,7 +594,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@128..139
               0: COLON@128..130 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@130..139
-                0: HAS_KW@130..133 "has" [] []
+                0: CSS_IDENTIFIER@130..133
+                  0: IDENT@130..133 "has" [] []
                 1: L_PAREN@133..134 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@134..139
                   0: CSS_RELATIVE_SELECTOR@134..139
@@ -595,7 +621,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@141..152
               0: COLON@141..143 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@143..152
-                0: HAS_KW@143..146 "has" [] []
+                0: CSS_IDENTIFIER@143..146
+                  0: IDENT@143..146 "has" [] []
                 1: L_PAREN@146..147 "(" [] []
                 2: CSS_RELATIVE_SELECTOR_LIST@147..152
                   0: CSS_RELATIVE_SELECTOR@147..152

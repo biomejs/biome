@@ -3763,8 +3763,8 @@ impl CssPageSelectorPseudo {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn selector(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn selector(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssPageSelectorPseudo {
@@ -3778,7 +3778,7 @@ impl Serialize for CssPageSelectorPseudo {
 #[derive(Serialize)]
 pub struct CssPageSelectorPseudoFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub selector: SyntaxResult<SyntaxToken>,
+    pub selector: SyntaxResult<CssIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssParameter {
@@ -4012,8 +4012,8 @@ impl CssPseudoClassFunctionCompoundSelector {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -4035,7 +4035,7 @@ impl Serialize for CssPseudoClassFunctionCompoundSelector {
 }
 #[derive(Serialize)]
 pub struct CssPseudoClassFunctionCompoundSelectorFields {
-    pub name: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub selector: SyntaxResult<AnyCssCompoundSelector>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -4062,8 +4062,8 @@ impl CssPseudoClassFunctionCompoundSelectorList {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -4085,9 +4085,59 @@ impl Serialize for CssPseudoClassFunctionCompoundSelectorList {
 }
 #[derive(Serialize)]
 pub struct CssPseudoClassFunctionCompoundSelectorListFields {
-    pub name: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub compound_selectors: CssCompoundSelectorList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPseudoClassFunctionCustomIdentifierList {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPseudoClassFunctionCustomIdentifierList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPseudoClassFunctionCustomIdentifierListFields {
+        CssPseudoClassFunctionCustomIdentifierListFields {
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            items: self.items(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn items(&self) -> CssCustomIdentifierList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssPseudoClassFunctionCustomIdentifierList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssPseudoClassFunctionCustomIdentifierListFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub items: CssCustomIdentifierList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4106,14 +4156,14 @@ impl CssPseudoClassFunctionIdentifier {
     }
     pub fn as_fields(&self) -> CssPseudoClassFunctionIdentifierFields {
         CssPseudoClassFunctionIdentifierFields {
-            name_token: self.name_token(),
+            name: self.name(),
             l_paren_token: self.l_paren_token(),
             ident: self.ident(),
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -4135,7 +4185,7 @@ impl Serialize for CssPseudoClassFunctionIdentifier {
 }
 #[derive(Serialize)]
 pub struct CssPseudoClassFunctionIdentifierFields {
-    pub name_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub ident: SyntaxResult<CssIdentifier>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -4162,8 +4212,8 @@ impl CssPseudoClassFunctionNth {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -4185,7 +4235,7 @@ impl Serialize for CssPseudoClassFunctionNth {
 }
 #[derive(Serialize)]
 pub struct CssPseudoClassFunctionNthFields {
-    pub name: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub selector: SyntaxResult<AnyCssPseudoClassNthSelector>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -4206,14 +4256,14 @@ impl CssPseudoClassFunctionRelativeSelectorList {
     }
     pub fn as_fields(&self) -> CssPseudoClassFunctionRelativeSelectorListFields {
         CssPseudoClassFunctionRelativeSelectorListFields {
-            name_token: self.name_token(),
+            name: self.name(),
             l_paren_token: self.l_paren_token(),
             relative_selectors: self.relative_selectors(),
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -4235,7 +4285,7 @@ impl Serialize for CssPseudoClassFunctionRelativeSelectorList {
 }
 #[derive(Serialize)]
 pub struct CssPseudoClassFunctionRelativeSelectorListFields {
-    pub name_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub relative_selectors: CssRelativeSelectorList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -4262,8 +4312,8 @@ impl CssPseudoClassFunctionSelector {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -4285,7 +4335,7 @@ impl Serialize for CssPseudoClassFunctionSelector {
 }
 #[derive(Serialize)]
 pub struct CssPseudoClassFunctionSelectorFields {
-    pub name: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub selector: SyntaxResult<AnyCssSelector>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -4312,8 +4362,8 @@ impl CssPseudoClassFunctionSelectorList {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -4335,7 +4385,7 @@ impl Serialize for CssPseudoClassFunctionSelectorList {
 }
 #[derive(Serialize)]
 pub struct CssPseudoClassFunctionSelectorListFields {
-    pub name: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub selectors: CssSelectorList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -4356,14 +4406,14 @@ impl CssPseudoClassFunctionValueList {
     }
     pub fn as_fields(&self) -> CssPseudoClassFunctionValueListFields {
         CssPseudoClassFunctionValueListFields {
-            name_token: self.name_token(),
+            name: self.name(),
             l_paren_token: self.l_paren_token(),
             values: self.values(),
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -4385,7 +4435,7 @@ impl Serialize for CssPseudoClassFunctionValueList {
 }
 #[derive(Serialize)]
 pub struct CssPseudoClassFunctionValueListFields {
-    pub name_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub values: CssPseudoValueList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -8136,6 +8186,7 @@ pub enum AnyCssPseudoClass {
     CssBogusPseudoClass(CssBogusPseudoClass),
     CssPseudoClassFunctionCompoundSelector(CssPseudoClassFunctionCompoundSelector),
     CssPseudoClassFunctionCompoundSelectorList(CssPseudoClassFunctionCompoundSelectorList),
+    CssPseudoClassFunctionCustomIdentifierList(CssPseudoClassFunctionCustomIdentifierList),
     CssPseudoClassFunctionIdentifier(CssPseudoClassFunctionIdentifier),
     CssPseudoClassFunctionNth(CssPseudoClassFunctionNth),
     CssPseudoClassFunctionRelativeSelectorList(CssPseudoClassFunctionRelativeSelectorList),
@@ -8164,6 +8215,14 @@ impl AnyCssPseudoClass {
     ) -> Option<&CssPseudoClassFunctionCompoundSelectorList> {
         match &self {
             Self::CssPseudoClassFunctionCompoundSelectorList(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_pseudo_class_function_custom_identifier_list(
+        &self,
+    ) -> Option<&CssPseudoClassFunctionCustomIdentifierList> {
+        match &self {
+            Self::CssPseudoClassFunctionCustomIdentifierList(item) => Some(item),
             _ => None,
         }
     }
@@ -13901,6 +13960,64 @@ impl From<CssPseudoClassFunctionCompoundSelectorList> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssPseudoClassFunctionCustomIdentifierList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPseudoClassFunctionCustomIdentifierList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassFunctionCustomIdentifierList")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassFunctionCustomIdentifierList")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssPseudoClassFunctionCustomIdentifierList> for SyntaxNode {
+    fn from(n: CssPseudoClassFunctionCustomIdentifierList) -> Self {
+        n.syntax
+    }
+}
+impl From<CssPseudoClassFunctionCustomIdentifierList> for SyntaxElement {
+    fn from(n: CssPseudoClassFunctionCustomIdentifierList) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssPseudoClassFunctionIdentifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13929,7 +14046,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionIdentifier {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionIdentifier")
-                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
@@ -14042,7 +14159,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionRelativeSelectorList {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionRelativeSelectorList")
-                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
@@ -14213,7 +14330,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionValueList {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionValueList")
-                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
@@ -21126,6 +21243,11 @@ impl From<CssPseudoClassFunctionCompoundSelectorList> for AnyCssPseudoClass {
         Self::CssPseudoClassFunctionCompoundSelectorList(node)
     }
 }
+impl From<CssPseudoClassFunctionCustomIdentifierList> for AnyCssPseudoClass {
+    fn from(node: CssPseudoClassFunctionCustomIdentifierList) -> Self {
+        Self::CssPseudoClassFunctionCustomIdentifierList(node)
+    }
+}
 impl From<CssPseudoClassFunctionIdentifier> for AnyCssPseudoClass {
     fn from(node: CssPseudoClassFunctionIdentifier) -> Self {
         Self::CssPseudoClassFunctionIdentifier(node)
@@ -21166,6 +21288,7 @@ impl AstNode for AnyCssPseudoClass {
     const KIND_SET: SyntaxKindSet<Language> = CssBogusPseudoClass::KIND_SET
         .union(CssPseudoClassFunctionCompoundSelector::KIND_SET)
         .union(CssPseudoClassFunctionCompoundSelectorList::KIND_SET)
+        .union(CssPseudoClassFunctionCustomIdentifierList::KIND_SET)
         .union(CssPseudoClassFunctionIdentifier::KIND_SET)
         .union(CssPseudoClassFunctionNth::KIND_SET)
         .union(CssPseudoClassFunctionRelativeSelectorList::KIND_SET)
@@ -21179,6 +21302,7 @@ impl AstNode for AnyCssPseudoClass {
             CSS_BOGUS_PSEUDO_CLASS
                 | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR
                 | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST
+                | CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST
                 | CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER
                 | CSS_PSEUDO_CLASS_FUNCTION_NTH
                 | CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST
@@ -21199,6 +21323,11 @@ impl AstNode for AnyCssPseudoClass {
             CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST => {
                 Self::CssPseudoClassFunctionCompoundSelectorList(
                     CssPseudoClassFunctionCompoundSelectorList { syntax },
+                )
+            }
+            CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST => {
+                Self::CssPseudoClassFunctionCustomIdentifierList(
+                    CssPseudoClassFunctionCustomIdentifierList { syntax },
                 )
             }
             CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER => {
@@ -21235,6 +21364,7 @@ impl AstNode for AnyCssPseudoClass {
             Self::CssBogusPseudoClass(it) => &it.syntax,
             Self::CssPseudoClassFunctionCompoundSelector(it) => &it.syntax,
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => &it.syntax,
+            Self::CssPseudoClassFunctionCustomIdentifierList(it) => &it.syntax,
             Self::CssPseudoClassFunctionIdentifier(it) => &it.syntax,
             Self::CssPseudoClassFunctionNth(it) => &it.syntax,
             Self::CssPseudoClassFunctionRelativeSelectorList(it) => &it.syntax,
@@ -21249,6 +21379,7 @@ impl AstNode for AnyCssPseudoClass {
             Self::CssBogusPseudoClass(it) => it.syntax,
             Self::CssPseudoClassFunctionCompoundSelector(it) => it.syntax,
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => it.syntax,
+            Self::CssPseudoClassFunctionCustomIdentifierList(it) => it.syntax,
             Self::CssPseudoClassFunctionIdentifier(it) => it.syntax,
             Self::CssPseudoClassFunctionNth(it) => it.syntax,
             Self::CssPseudoClassFunctionRelativeSelectorList(it) => it.syntax,
@@ -21265,6 +21396,7 @@ impl std::fmt::Debug for AnyCssPseudoClass {
             Self::CssBogusPseudoClass(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionCompoundSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssPseudoClassFunctionCustomIdentifierList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionNth(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionRelativeSelectorList(it) => std::fmt::Debug::fmt(it, f),
@@ -21281,6 +21413,7 @@ impl From<AnyCssPseudoClass> for SyntaxNode {
             AnyCssPseudoClass::CssBogusPseudoClass(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => it.into(),
+            AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionNth(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => it.into(),
@@ -24236,6 +24369,11 @@ impl std::fmt::Display for CssPseudoClassFunctionCompoundSelector {
     }
 }
 impl std::fmt::Display for CssPseudoClassFunctionCompoundSelectorList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssPseudoClassFunctionCustomIdentifierList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
