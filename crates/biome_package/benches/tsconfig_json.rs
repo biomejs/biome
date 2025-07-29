@@ -2,7 +2,6 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_json_parser::JsonParserOptions;
 use biome_package::TsConfigJson;
 use divan::Bencher;
-use divan::counter::BytesCount;
 
 fn main() {
     // Run registered benchmarks.
@@ -29,7 +28,6 @@ static GLOBAL: std::alloc::System = std::alloc::System;
 fn bench_tsconfig_json(bencher: Bencher) {
     bencher
         .with_inputs(|| include_str!("tsconfig_bench.json"))
-        .input_counter(BytesCount::of_str)
         .bench_values(|code| {
             deserialize_from_json_str::<TsConfigJson>(
                 code,
