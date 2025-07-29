@@ -4676,6 +4676,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueReservedKeysConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueReservedKeysOptions" }
+			]
+		},
+		"NoVueReservedKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedPropsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4917,6 +4927,13 @@
 					"description": "Disallow the use of useless undefined.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUselessUndefinedConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueReservedKeys": {
+					"description": "Disallow reserved keys in Vue component data and computed properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueReservedKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9386,6 +9403,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoVoidTypeReturnOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoVueReservedKeysOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueReservedKeysOptions" }]
 				}
 			},
 			"additionalProperties": false
