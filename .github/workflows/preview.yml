@@ -26,10 +26,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: depot-windows-2022
+          - os: depot-windows-2022-4
             target: x86_64-pc-windows-msvc
             code-target: win32-x64
-          - os: depot-windows-2022
+          - os: depot-windows-2022-4
             target: aarch64-pc-windows-msvc
             code-target: win32-arm64
           - os: depot-ubuntu-24.04
@@ -82,12 +82,12 @@ jobs:
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
-        if: matrix.os == 'depot-windows-2022'
+        if: matrix.os == 'depot-windows-2022-4'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
       - name: Copy CLI binary
-        if: matrix.os != 'depot-windows-2022'
+        if: matrix.os != 'depot-windows-2022-4'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
