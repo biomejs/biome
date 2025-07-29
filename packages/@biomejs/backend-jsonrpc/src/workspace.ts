@@ -1662,6 +1662,10 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
 	/**
+	 * Disallow reserved keys in Vue component data and computed properties.
+	 */
+	noVueReservedKeys?: RuleConfiguration_for_NoVueReservedKeysOptions;
+	/**
 	 * Disallow reserved names to be used as props.
 	 */
 	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
@@ -2926,6 +2930,9 @@ export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
+export type RuleConfiguration_for_NoVueReservedKeysOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoVueReservedKeysOptions;
 export type RuleConfiguration_for_NoVueReservedPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedPropsOptions;
@@ -5321,6 +5328,16 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	 */
 	options: NoUselessUndefinedOptions;
 }
+export interface RuleWithOptions_for_NoVueReservedKeysOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueReservedKeysOptions;
+}
 export interface RuleWithOptions_for_NoVueReservedPropsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -7715,6 +7732,7 @@ export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
+export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
 export interface UseConsistentObjectDefinitionOptions {
@@ -8402,6 +8420,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"

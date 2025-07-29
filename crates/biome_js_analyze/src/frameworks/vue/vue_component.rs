@@ -2,14 +2,19 @@ use crate::frameworks::vue::vue_call::{is_vue_api_reference, is_vue_compiler_mac
 use crate::services::semantic::Semantic;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsObjectMember, AnyTsType,
-    AnyTsTypeMember, JsCallExpression, JsDefaultImportSpecifier, JsExportDefaultExpressionClause,
-    JsFileSource, JsFunctionDeclaration, JsIdentifierBinding, JsMethodObjectMember,
+    AnyJsArrayElement, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression,
+    AnyJsObjectMember, AnyJsStatement, AnyTsType, AnyTsTypeMember, JsArrowFunctionExpression,
+    JsCallExpression, JsDefaultImportSpecifier, JsExportDefaultExpressionClause, JsFileSource,
+    JsFunctionDeclaration, JsFunctionExpression, JsIdentifierBinding, JsMethodObjectMember,
     JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsPropertyObjectMember,
-    JsShorthandNamedImportSpecifier, JsStringLiteralExpression, TsIdentifierBinding,
-    TsInterfaceDeclaration, TsPropertySignatureTypeMember, TsTypeAliasDeclaration,
+    JsShorthandNamedImportSpecifier, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode,
+    TsIdentifierBinding, TsInterfaceDeclaration, TsPropertySignatureTypeMember,
+    TsTypeAliasDeclaration,
 };
-use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, declare_node_union};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, TextRange, TokenText, declare_node_union,
+};
+use std::iter;
 
 use crate::utils::rename::RenamableNode;
 use enumflags2::{BitFlags, bitflags};
@@ -18,6 +23,8 @@ use enumflags2::{BitFlags, bitflags};
 /// It can match any potential Vue component.
 pub type VueComponentQuery = Semantic<AnyPotentialVueComponent>;
 
+// pub type VueComponentQuery = Semantic<AnyPotentialVueComponent>;
+//
 declare_node_union! {
     pub AnyPotentialVueComponent = JsExportDefaultExpressionClause
         | JsCallExpression
@@ -42,10 +49,14 @@ pub enum VueDeclarationCollectionFilter {
     /// Can be defined via `data` option in Options API.
     /// TODO: Support data() method, need control flow analysis for that.
     Data = 1 << 3,
+    /// Nuxt.js Async Data properties in a Vue component.
+    /// Can be defined via `asyncData` option in Options API.
+    /// TODO: Support asyncData() method, need control flow analysis for that.
+    AsyncData = 1 << 4,
     /// Methods in a Vue component.
-    Method = 1 << 4,
+    Method = 1 << 5,
     /// Computed properties in a Vue component.
-    Computed = 1 << 5,
+    Computed = 1 << 6,
 }
 
 /// An abstraction over multiple ways to define a vue component.
@@ -178,7 +189,8 @@ pub trait VueComponentDeclarations {
     fn declarations(&self, filter: BitFlags<VueDeclarationCollectionFilter>)
     -> Vec<VueDeclaration>;
 
-    /// Returns a "container" for data declarations.
+    /// Returns the `data` group.
+    ///
     /// This is either a `data()` method or an object expression containing data properties.
     /// Examples:
     /// ```js
@@ -190,11 +202,11 @@ pub trait VueComponentDeclarations {
     /// });
     /// ```
     ///
-    fn data_declarations_container(&self) -> Option<AnyVueDataDeclarationsContainer>;
+    fn data_declarations_group(&self) -> Option<AnyVueDataDeclarationsGroup>;
 }
 
 declare_node_union! {
-    pub AnyVueDataDeclarationsContainer = AnyJsExpression | JsMethodObjectMember
+    pub AnyVueDataDeclarationsGroup = JsPropertyObjectMember | JsMethodObjectMember
 }
 
 impl VueComponentDeclarations for VueComponent {
@@ -210,12 +222,12 @@ impl VueComponentDeclarations for VueComponent {
         }
     }
 
-    fn data_declarations_container(&self) -> Option<AnyVueDataDeclarationsContainer> {
+    fn data_declarations_group(&self) -> Option<AnyVueDataDeclarationsGroup> {
         match self {
-            Self::OptionsApi(component) => component.data_declarations_container(),
-            Self::CreateApp(component) => component.data_declarations_container(),
-            Self::DefineComponent(component) => component.data_declarations_container(),
-            Self::Setup(component) => component.data_declarations_container(),
+            Self::OptionsApi(component) => component.data_declarations_group(),
+            Self::CreateApp(component) => component.data_declarations_group(),
+            Self::DefineComponent(component) => component.data_declarations_group(),
+            Self::Setup(component) => component.data_declarations_group(),
         }
     }
 }
@@ -299,7 +311,7 @@ impl VueComponentDeclarations for VueSetupComponent {
         // result
     }
 
-    fn data_declarations_container(&self) -> Option<AnyVueDataDeclarationsContainer> {
+    fn data_declarations_group(&self) -> Option<AnyVueDataDeclarationsGroup> {
         None
     }
 }
@@ -307,6 +319,10 @@ impl VueComponentDeclarations for VueSetupComponent {
 impl VueOptionsApiBasedComponent for VueOptionsApiComponent {
     fn definition_expression(&self) -> Option<AnyJsExpression> {
         self.default_expression_clause.expression().ok()
+    }
+
+    fn setup_func(&self) -> Option<AnyJsExpression> {
+        None
     }
 }
 
@@ -322,6 +338,10 @@ impl VueOptionsApiBasedComponent for VueCreateApp {
         let first_argument = args.first()?.ok()?;
         first_argument.as_any_js_expression().cloned()
     }
+
+    fn setup_func(&self) -> Option<AnyJsExpression> {
+        None
+    }
 }
 
 impl VueOptionsApiBasedComponent for VueDefineComponent {
@@ -336,6 +356,25 @@ impl VueOptionsApiBasedComponent for VueDefineComponent {
         // defineComponent(setup, { props: [...] });
         let last_argument = args.last()?.ok()?;
         last_argument.as_any_js_expression().cloned()
+    }
+
+    fn setup_func(&self) -> Option<AnyJsExpression> {
+        let args = self
+            .call_expression
+            .arguments()
+            .ok()
+            .map(|arguments| arguments.args())?;
+
+        if args.len() == 2 {
+            // defineComponent(setup, { props: [...] });
+            let first_argument = args.first()?.ok()?;
+            first_argument.as_any_js_expression().cloned()
+        } else {
+            // defineComponent({ props: [...] });
+            // If there is only one argument, it is the definition object.
+            // We don't have a setup function in this case.
+            None
+        }
     }
 }
 
@@ -353,9 +392,18 @@ pub trait VueOptionsApiBasedComponent {
     /// ```
     fn definition_expression(&self) -> Option<AnyJsExpression>;
 
-    fn iter_declaration_containers(
-        &self,
-    ) -> Box<dyn Iterator<Item = (TokenText, AnyJsObjectMember)>>
+    /// Returns the expression representing the setup function, if it exists.
+    ///
+    /// Example:
+    /// ```js
+    /// defineComponent(
+    ///    (props, context) => { ... }, // this
+    ///    { props: [...] }
+    /// );
+    /// ```
+    fn setup_func(&self) -> Option<AnyJsExpression>;
+
+    fn iter_declaration_groups(&self) -> Box<dyn Iterator<Item = (TokenText, AnyJsObjectMember)>>
     where
         Self: Sized,
     {
@@ -383,7 +431,18 @@ impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
         filter: BitFlags<VueDeclarationCollectionFilter>,
     ) -> Vec<VueDeclaration> {
         let mut result = vec![];
-        for (name, group_object_member) in self.iter_declaration_containers() {
+
+        if filter.contains(VueDeclarationCollectionFilter::Setup) {
+            if let Some(setup_func) = self.setup_func() {
+                result.extend(
+                    iter_func_return_properties(setup_func.syntax())
+                        .map(AnyVueSetupDeclaration::JsPropertyObjectMember)
+                        .map(VueDeclaration::Setup),
+                );
+            }
+        }
+
+        for (name, group_object_member) in self.iter_declaration_groups() {
             match name.text() {
                 "props" => {
                     if !filter.contains(VueDeclarationCollectionFilter::Prop) {
@@ -425,14 +484,29 @@ impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
                     if !filter.contains(VueDeclarationCollectionFilter::Data) {
                         continue;
                     }
-                    // FIXME: Support data() method, need control flow analysis for that
-                    let AnyJsObjectMember::JsPropertyObjectMember(property) = group_object_member
-                    else {
+                    result.extend(
+                        iter_declaration_group_properties(group_object_member)
+                            .map(VueDeclaration::Data),
+                    );
+                }
+                "asyncData" => {
+                    if !filter.contains(VueDeclarationCollectionFilter::AsyncData) {
                         continue;
-                    };
-                    if let Ok(expression) = property.value() {
-                        result.extend(collect_data_declarations(&expression));
                     }
+                    result.extend(
+                        iter_declaration_group_properties(group_object_member)
+                            .map(VueDeclaration::AsyncData),
+                    );
+                }
+                "setup" => {
+                    if !filter.contains(VueDeclarationCollectionFilter::Setup) {
+                        continue;
+                    }
+                    result.extend(
+                        iter_declaration_group_properties(group_object_member)
+                            .map(AnyVueSetupDeclaration::JsPropertyObjectMember)
+                            .map(VueDeclaration::Setup),
+                    );
                 }
                 _ => {}
             }
@@ -440,24 +514,22 @@ impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
         result
     }
 
-    fn data_declarations_container(&self) -> Option<AnyVueDataDeclarationsContainer> {
-        self.iter_declaration_containers()
-            .find_map(|(name, member)| {
-                if name.text() == "data" {
-                    match member {
-                        AnyJsObjectMember::JsMethodObjectMember(method) => Some(
-                            AnyVueDataDeclarationsContainer::JsMethodObjectMember(method),
-                        ),
-                        AnyJsObjectMember::JsPropertyObjectMember(property) => property
-                            .value()
-                            .ok()
-                            .map(AnyVueDataDeclarationsContainer::AnyJsExpression),
-                        _ => None,
+    fn data_declarations_group(&self) -> Option<AnyVueDataDeclarationsGroup> {
+        self.iter_declaration_groups().find_map(|(name, member)| {
+            if name.text() == "data" {
+                match member {
+                    AnyJsObjectMember::JsMethodObjectMember(method) => {
+                        Some(AnyVueDataDeclarationsGroup::JsMethodObjectMember(method))
                     }
-                } else {
-                    None
+                    AnyJsObjectMember::JsPropertyObjectMember(property) => Some(
+                        AnyVueDataDeclarationsGroup::JsPropertyObjectMember(property),
+                    ),
+                    _ => None,
                 }
-            })
+            } else {
+                None
+            }
+        })
     }
 }
 
@@ -474,8 +546,10 @@ pub enum VueDeclaration {
     SetupImport(AnyVueSetupImportDeclaration),
     /// Data properties in a Vue component.
     /// Can be defined via `data` option in Options API.
-    /// TODO: Support data() method, need control flow analysis for that.
     Data(JsPropertyObjectMember),
+    /// Nuxt.js Async Data properties in a Vue component.
+    /// Can be defined via `asyncData` option in Options API.
+    AsyncData(JsPropertyObjectMember),
     /// Methods in a Vue component.
     Method(AnyVueMethod),
     /// Computed properties in a Vue component.
@@ -495,7 +569,9 @@ impl VueDeclarationName for VueDeclaration {
             Self::Prop(prop) => prop.declaration_name(),
             Self::Setup(setup) => setup.declaration_name(),
             Self::SetupImport(setup) => setup.declaration_name(),
-            Self::Data(object_property) => object_property.declaration_name(),
+            Self::Data(object_property) | Self::AsyncData(object_property) => {
+                object_property.declaration_name()
+            }
             Self::Method(method_or_property) | Self::Computed(method_or_property) => {
                 method_or_property.declaration_name()
             }
@@ -507,7 +583,9 @@ impl VueDeclarationName for VueDeclaration {
             Self::Prop(prop) => prop.declaration_name_range(),
             Self::Setup(setup) => setup.declaration_name_range(),
             Self::SetupImport(setup) => setup.declaration_name_range(),
-            Self::Data(object_property) => object_property.declaration_name_range(),
+            Self::Data(object_property) | Self::AsyncData(object_property) => {
+                object_property.declaration_name_range()
+            }
             Self::Method(method_or_property) | Self::Computed(method_or_property) => {
                 method_or_property.declaration_name_range()
             }
@@ -567,6 +645,7 @@ declare_node_union! {
         // Identifier binding as part of a variable declaration pattern
         JsIdentifierBinding
         | JsFunctionDeclaration
+        | JsPropertyObjectMember
 }
 
 impl VueDeclarationName for AnyVueSetupDeclaration {
@@ -582,6 +661,7 @@ impl VueDeclarationName for AnyVueSetupDeclaration {
                     .ok()?
                     .token_text(),
             ),
+            Self::JsPropertyObjectMember(property) => property.name().ok()?.name(),
         }
     }
 
@@ -595,6 +675,7 @@ impl VueDeclarationName for AnyVueSetupDeclaration {
                 .name_token()
                 .ok()?
                 .text_trimmed_range(),
+            Self::JsPropertyObjectMember(property) => property.name().ok()?.range(),
         })
     }
 }
@@ -788,21 +869,233 @@ fn collect_computed_and_method_declarations(expression: &AnyJsExpression) -> Vec
         .collect()
 }
 
-fn collect_data_declarations(expression: &AnyJsExpression) -> Vec<VueDeclaration> {
-    let AnyJsExpression::JsObjectExpression(object_expression) = expression else {
-        return vec![];
-    };
-    object_expression
-        .members()
-        .iter()
-        .flatten()
-        .filter_map(|member| match member {
-            AnyJsObjectMember::JsPropertyObjectMember(property) => {
-                Some(VueDeclaration::Data(property))
+/// Iterates over properties in a declaration group.
+/// This can be a group defined as an object expression or a method that returns an object.
+/// For example:
+/// ```js
+/// export default {
+///   data: {
+///     someData: 'value',
+///   },
+///   async asyncData() {
+///     return {
+///        someAsyncData: 'value',
+///     };
+///   },
+/// }
+fn iter_declaration_group_properties(
+    container: AnyJsObjectMember,
+) -> Box<dyn Iterator<Item = JsPropertyObjectMember>> {
+    match container {
+        AnyJsObjectMember::JsPropertyObjectMember(property) => {
+            if let Ok(value) = property.value() {
+                if let Some(expression) = value.inner_expression() {
+                    if let AnyJsExpression::JsObjectExpression(object_expression) = expression {
+                        return Box::new(object_expression.members().iter().filter_map(|member| {
+                            if let Ok(AnyJsObjectMember::JsPropertyObjectMember(property)) = member
+                            {
+                                Some(property)
+                            } else {
+                                None
+                            }
+                        }));
+                    } else {
+                        return Box::new(iter_func_return_properties(expression.syntax()));
+                    }
+                }
             }
-            _ => None,
-        })
-        .collect()
+        }
+        AnyJsObjectMember::JsMethodObjectMember(method) => {
+            return Box::new(iter_func_return_properties(method.syntax()));
+        }
+        _ => {}
+    }
+    Box::new(iter::empty())
+}
+
+/// Finds all object properties in a function's return expressions.
+fn iter_func_return_properties(
+    func: &JsSyntaxNode,
+) -> Box<dyn Iterator<Item = JsPropertyObjectMember>> {
+    Box::new(
+        iter_func_return_expressions(func)
+            .filter_map(|expression| {
+                if let Some(AnyJsExpression::JsObjectExpression(object_expression)) =
+                    expression.inner_expression()
+                {
+                    Some(object_expression.members().iter().filter_map(|member| {
+                        if let Ok(AnyJsObjectMember::JsPropertyObjectMember(property)) = member {
+                            Some(property)
+                        } else {
+                            None
+                        }
+                    }))
+                } else {
+                    None
+                }
+            })
+            .flatten(),
+    )
+}
+
+/// Since we can't currently combine ControlFlowGraph with SemanticModel,
+/// we need to analyze the function body to find return values.
+fn iter_func_return_expressions(func: &JsSyntaxNode) -> Box<dyn Iterator<Item = AnyJsExpression>> {
+    match func.kind() {
+        JsSyntaxKind::JS_METHOD_OBJECT_MEMBER => {
+            let method = JsMethodObjectMember::cast_ref(func).unwrap();
+            if let Ok(body) = method.body() {
+                iter_func_block_return_expressions(body.statements().syntax())
+            } else {
+                Box::new(iter::empty())
+            }
+        }
+        JsSyntaxKind::JS_FUNCTION_EXPRESSION => {
+            let function_expression = JsFunctionExpression::cast_ref(func).unwrap();
+            if let Ok(body) = function_expression.body() {
+                iter_func_block_return_expressions(body.statements().syntax())
+            } else {
+                Box::new(iter::empty())
+            }
+        }
+        JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => {
+            let arrow_function = JsArrowFunctionExpression::cast_ref(func).unwrap();
+            if let Ok(body) = arrow_function.body() {
+                match body {
+                    AnyJsFunctionBody::AnyJsExpression(expression) => {
+                        Box::new(iter::once(expression.clone()))
+                    }
+                    AnyJsFunctionBody::JsFunctionBody(body) => {
+                        iter_func_block_return_expressions(body.statements().syntax())
+                    }
+                }
+            } else {
+                Box::new(iter::empty())
+            }
+        }
+        _ => Box::new(iter::empty()),
+    }
+}
+
+/// Iterates over all return expressions in a function block.
+/// Doesn't go into nested functions, but handles control flow statements like `if`, `try`, etc.
+fn iter_func_block_return_expressions(
+    syntax: &JsSyntaxNode,
+) -> Box<dyn Iterator<Item = AnyJsExpression>> {
+    if syntax.kind() == JsSyntaxKind::JS_STATEMENT_LIST {
+        return Box::new(
+            syntax
+                .children()
+                .flat_map(|child| iter_func_block_return_expressions(&child)),
+        );
+    }
+    let Some(statement) = AnyJsStatement::cast_ref(syntax) else {
+        return Box::new(iter::empty());
+    };
+    // Handle more specific cases first
+    match statement {
+        AnyJsStatement::JsReturnStatement(return_statement) => {
+            return Box::new(return_statement.argument().into_iter());
+        }
+        AnyJsStatement::JsBlockStatement(block) => {
+            return iter_func_block_return_expressions(block.statements().syntax());
+        }
+        AnyJsStatement::JsIfStatement(if_statement) => {
+            return Box::new(
+                if_statement
+                    .consequent()
+                    .into_iter()
+                    .flat_map(|consequent| iter_func_block_return_expressions(consequent.syntax()))
+                    .chain(
+                        if_statement
+                            .else_clause()
+                            .into_iter()
+                            .filter_map(|else_clause| {
+                                else_clause
+                                    .alternate()
+                                    .ok()
+                                    .map(|alt| iter_func_block_return_expressions(alt.syntax()))
+                            })
+                            .flatten(),
+                    ),
+            );
+        }
+        AnyJsStatement::JsTryStatement(try_statement) => {
+            return Box::new(
+                try_statement
+                    .body()
+                    .into_iter()
+                    .flat_map(|body| iter_func_block_return_expressions(body.syntax()))
+                    .chain(
+                        try_statement
+                            .catch_clause()
+                            .into_iter()
+                            .filter_map(|catch_clause| {
+                                catch_clause
+                                    .body()
+                                    .ok()
+                                    .map(|body| iter_func_block_return_expressions(body.syntax()))
+                            })
+                            .flatten(),
+                    ),
+            );
+        }
+        AnyJsStatement::JsTryFinallyStatement(try_finally_statement) => {
+            return Box::new(
+                try_finally_statement
+                    .body()
+                    .into_iter()
+                    .flat_map(|body| iter_func_block_return_expressions(body.syntax()))
+                    .chain(
+                        try_finally_statement
+                            .catch_clause()
+                            .into_iter()
+                            .filter_map(|catch_clause| {
+                                catch_clause
+                                    .body()
+                                    .ok()
+                                    .map(|body| iter_func_block_return_expressions(body.syntax()))
+                            })
+                            .flatten(),
+                    )
+                    .chain(
+                        try_finally_statement
+                            .finally_clause()
+                            .into_iter()
+                            .filter_map(|finally_clause| {
+                                finally_clause
+                                    .body()
+                                    .ok()
+                                    .map(|body| iter_func_block_return_expressions(body.syntax()))
+                            })
+                            .flatten(),
+                    ),
+            );
+        }
+        AnyJsStatement::JsSwitchStatement(switch_statement) => {
+            return Box::new(
+                switch_statement.cases().iter().flat_map(|case| {
+                    iter_func_block_return_expressions(case.consequent().syntax())
+                }),
+            );
+        }
+        _ => {}
+    }
+    // Handle similar blocks, i.e. `do`, `for`, `while`, etc.
+    let Some(statement_body) = (match statement {
+        AnyJsStatement::JsDoWhileStatement(statement) => statement.body().ok(),
+        AnyJsStatement::JsForInStatement(statement) => statement.body().ok(),
+        AnyJsStatement::JsForOfStatement(statement) => statement.body().ok(),
+        AnyJsStatement::JsForStatement(statement) => statement.body().ok(),
+        AnyJsStatement::JsLabeledStatement(statement) => statement.body().ok(),
+        AnyJsStatement::JsWhileStatement(statement) => statement.body().ok(),
+        AnyJsStatement::JsWithStatement(statement) => statement.body().ok(),
+        _ => None,
+    }) else {
+        return Box::new(iter::empty());
+    };
+
+    iter_func_block_return_expressions(statement_body.syntax())
 }
 
 // FIXME: Uncomment when <script setup> is supported
