@@ -23,4 +23,3 @@ useTask$(() => {
 });
 ```
 
-The rule detects calls to `useVisibleTask$()` and provides clear diagnostics to help developers use alternative Qwik lifecycle functions like `useTask$()` instead.

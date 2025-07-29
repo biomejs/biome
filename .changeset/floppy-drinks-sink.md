@@ -26,4 +26,3 @@ The `useAnchorHref` rule enforces the presence of an `href` attribute on `<a>` e
 <a href="https://example.com" target="_blank">External</a>
 ```
 
-The rule detects `<a>` elements that are missing the `href` attribute and provides clear diagnostics to help developers ensure all anchor elements are valid links.

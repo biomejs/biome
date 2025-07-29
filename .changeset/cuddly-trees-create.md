@@ -22,4 +22,3 @@ The `useImageSize` rule enforces the use of width and height attributes on `<img
 <img width="100" height="100" src="https://example.com/image.png" />
 ```
 
-The rule detects `<img>` elements that are missing either the `width` or `height` attribute and provides clear diagnostics to help developers add appropriate dimensions for optimal performance and user experience.

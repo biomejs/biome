@@ -69,40 +69,22 @@ impl Rule for NoQwikUseVisibleTask {
             };
 
             for member in obj.members().iter().flatten() {
-                if member
+                let has_idle_strategy = member
                     .as_js_property_object_member()
-                    .and_then(|prop| {
-                        prop.name().ok().and_then(|name_node| {
-                            name_node.name().and_then(|name| {
-                                if name == "strategy" {
-                                    prop.value().ok().and_then(|value| {
-                                        value.as_any_js_literal_expression().and_then(|lit| {
-                                            lit.as_js_string_literal_expression().and_then(
-                                                |str_lit| {
-                                                    str_lit.inner_string_text().ok().and_then(
-                                                        |text| {
-                                                            let trimmed = text
-                                                                .text()
-                                                                .trim_matches(['"', '\'']);
-                                                            if trimmed == "document-idle" {
-                                                                Some(())
-                                                            } else {
-                                                                None
-                                                            }
-                                                        },
-                                                    )
-                                                },
-                                            )
-                                        })
-                                    })
-                                } else {
-                                    None
-                                }
-                            })
+                    .and_then(|prop| prop.name().ok())
+                    .and_then(|name_node| name_node.name())
+                    .is_some_and(|name| name == "strategy")
+                    && member
+                        .as_js_property_object_member()
+                        .and_then(|member| member.value().ok())
+                        .and_then(|value| {
+                            value
+                                .as_any_js_literal_expression()
+                                .and_then(|lit| lit.as_js_string_literal_expression())
+                                .and_then(|str_lit| str_lit.inner_string_text().ok())
                         })
-                    })
-                    .is_some()
-                {
+                        .is_some_and(|text| text == "document-idle");
+                if has_idle_strategy {
                     return None;
                 }
             }
