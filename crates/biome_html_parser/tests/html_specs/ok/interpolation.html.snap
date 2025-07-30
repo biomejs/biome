@@ -41,25 +41,16 @@ HtmlRoot {
                     value_token: HTML_LITERAL@5..53 "Fuga magnam facilis. Voluptatem quaerat porro.{{" [] [],
                 },
                 HtmlContent {
-                    value_token: HTML_LITERAL@53..63 "x => {" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@63..86 "const hello = 'world'" [Newline("\n"), Whitespace("\t")] [],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@86..101 "return hello;" [Newline("\n"), Whitespace("\t")] [],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@101..104 "}" [Newline("\n"), Whitespace("\t")] [],
+                    value_token: HTML_LITERAL@53..104 "x => {\n\tconst hello = 'world'\n\treturn hello;\n\t}" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [],
                 },
                 HtmlContent {
                     value_token: HTML_LITERAL@104..111 "}}" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                 },
                 HtmlContent {
-                    value_token: HTML_LITERAL@111..158 "reprehenderit voluptates minus {{console.log(" [] [Whitespace("  ")],
+                    value_token: HTML_LITERAL@111..125 "reprehenderit" [] [Whitespace(" ")],
                 },
                 HtmlContent {
-                    value_token: HTML_LITERAL@158..179 "short_interpolation )" [] [],
+                    value_token: HTML_LITERAL@125..179 "voluptates minus {{console.log(  short_interpolation )" [] [],
                 },
                 HtmlContent {
                     value_token: HTML_LITERAL@179..182 "}}" [] [Whitespace(" ")],
@@ -100,23 +91,17 @@ HtmlRoot {
       1: HTML_ELEMENT_LIST@5..187
         0: HTML_CONTENT@5..53
           0: HTML_LITERAL@5..53 "Fuga magnam facilis. Voluptatem quaerat porro.{{" [] []
-        1: HTML_CONTENT@53..63
-          0: HTML_LITERAL@53..63 "x => {" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] []
-        2: HTML_CONTENT@63..86
-          0: HTML_LITERAL@63..86 "const hello = 'world'" [Newline("\n"), Whitespace("\t")] []
-        3: HTML_CONTENT@86..101
-          0: HTML_LITERAL@86..101 "return hello;" [Newline("\n"), Whitespace("\t")] []
-        4: HTML_CONTENT@101..104
-          0: HTML_LITERAL@101..104 "}" [Newline("\n"), Whitespace("\t")] []
-        5: HTML_CONTENT@104..111
+        1: HTML_CONTENT@53..104
+          0: HTML_LITERAL@53..104 "x => {\n\tconst hello = 'world'\n\treturn hello;\n\t}" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] []
+        2: HTML_CONTENT@104..111
           0: HTML_LITERAL@104..111 "}}" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-        6: HTML_CONTENT@111..158
-          0: HTML_LITERAL@111..158 "reprehenderit voluptates minus {{console.log(" [] [Whitespace("  ")]
-        7: HTML_CONTENT@158..179
-          0: HTML_LITERAL@158..179 "short_interpolation )" [] []
-        8: HTML_CONTENT@179..182
+        3: HTML_CONTENT@111..125
+          0: HTML_LITERAL@111..125 "reprehenderit" [] [Whitespace(" ")]
+        4: HTML_CONTENT@125..179
+          0: HTML_LITERAL@125..179 "voluptates minus {{console.log(  short_interpolation )" [] []
+        5: HTML_CONTENT@179..182
           0: HTML_LITERAL@179..182 "}}" [] [Whitespace(" ")]
-        9: HTML_CONTENT@182..187
+        6: HTML_CONTENT@182..187
           0: HTML_LITERAL@182..187 "nemo." [] []
       2: HTML_CLOSING_ELEMENT@187..193
         0: L_ANGLE@187..188 "<" [] []

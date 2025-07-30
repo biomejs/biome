@@ -54,6 +54,7 @@ pub enum HtmlSyntaxKind {
     HTML_ATTRIBUTE_LIST,
     HTML_CONTENT,
     HTML_CDATA_SECTION,
+    COMMENT,
     HTML_TEXT_EXPRESSION,
     SVELTE_TEXT_EXPRESSION,
     HTML_BOGUS,
@@ -68,7 +69,15 @@ impl HtmlSyntaxKind {
     pub const fn is_punct(self) -> bool {
         matches!(
             self,
-            L_ANGLE | R_ANGLE | SLASH | EQ | BANG | MINUS | CDATA_START | CDATA_END | FENCE
+            L_ANGLE
+                | R_ANGLE
+                | SLASH
+                | EQ
+                | BANG
+                | MINUS
+                | CDATA_START
+                | CDATA_END
+                | FENCE
                 | L_CURLY
                 | R_CURLY
                 | L_DOUBLE_CURLY

@@ -59,8 +59,11 @@ impl<'src> HtmlLexer<'src> {
             b'/' => self.consume_byte(T![/]),
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
+            b'{' if self.is_at_l_text_expression() => self.consume_l_text_expression(),
+            b'{' => self.consume_byte(T!['{']),
+            b'}' if self.is_at_r_text_expression() => self.consume_r_text_expression(),
+            b'}' => self.consume_byte(T!['}']),
             b'\'' | b'"' => self.consume_string_literal(current),
-            b'-' if self.is_at_frontmatter_edge() => self.consume_frontmatter_edge(),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -86,9 +89,12 @@ impl<'src> HtmlLexer<'src> {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'{' if self.is_at_l_text_expression() => self.consume_l_text_expression(),
+            b'{' => self.consume_byte(T!['{']),
             b'}' if self.is_at_r_text_expression() => self.consume_r_text_expression(),
+            b'}' => self.consume_byte(T!['}']),
             b'!' if self.current() == T![<] => self.consume_byte(T![!]),
             b'/' if self.current() == T![<] => self.consume_byte(T![/]),
+            b'-' if self.is_at_frontmatter_edge() => self.consume_frontmatter_edge(),
             b'<' => {
                 // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -486,7 +492,6 @@ impl<'src> HtmlLexer<'src> {
         self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
     }
 
-
     fn consume_cdata_start(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_start_cdata());
 
@@ -568,7 +573,7 @@ impl<'src> HtmlLexer<'src> {
     /// - See: <https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace>
     fn consume_html_text(&mut self) -> HtmlSyntaxKind {
         let mut whitespace_started = None;
-                let mut seen_newlines = 0;
+        let mut seen_newlines = 0;
 
         let mut closing_expression = None;
         let mut was_escaped = false;
@@ -616,12 +621,9 @@ impl<'src> HtmlLexer<'src> {
                     if was_escaped {
                         was_escaped = false;
                     }
-                    if let Some(checkpoint) = whitespace_started {
-                        // avoid treating the last space as part of the token
-                        self.rewind(checkpoint);
-                        break;
+                    if whitespace_started.is_none() {
+                        whitespace_started = Some(self.checkpoint());
                     }
-                    whitespace_started = Some(self.checkpoint());
                     closing_expression = None;
                     self.advance(1);
                 }

@@ -118,11 +118,9 @@ HtmlRoot {
   1: (empty)
   2: (empty)
   3: HTML_ELEMENT_LIST@0..67
-    0: HTML_CONTENT@0..5
-      0: HTML_LITERAL@0..5 "some" [] [Whitespace(" ")]
-    1: HTML_CONTENT@5..9
-      0: HTML_LITERAL@5..9 "text" [] []
-    2: HTML_ELEMENT@9..21
+    0: HTML_CONTENT@0..9
+      0: HTML_LITERAL@0..9 "some text" [] []
+    1: HTML_ELEMENT@9..21
       0: HTML_OPENING_ELEMENT@9..15
         0: L_ANGLE@9..11 "<" [Newline("\n")] []
         1: HTML_TAG_NAME@11..14

@@ -191,7 +191,9 @@ where
                 let value_token = text.value_token()?;
                 let is_suppressed = f.comments().is_suppressed(text.syntax());
                 if is_suppressed {
-                    builder.entry(HtmlChild::Verbatim(text.into()));
+                    builder.entry(HtmlChild::Verbatim(AnyHtmlElement::AnyHtmlContent(
+                        text.into(),
+                    )));
                     continue;
                 }
                 f.state_mut().track_token(&value_token);

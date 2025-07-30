@@ -47,6 +47,13 @@ pub struct FormatHtmlVerbatimNode<'node> {
     format_comments: bool,
 }
 
+impl FormatHtmlVerbatimNode<'_> {
+    pub fn with_format_comments(mut self, format_comments: bool) -> Self {
+        self.format_comments = format_comments;
+        self
+    }
+}
+
 impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         for element in self.node.descendants_with_tokens(Direction::Next) {

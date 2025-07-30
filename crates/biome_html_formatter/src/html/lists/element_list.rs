@@ -232,7 +232,7 @@ impl FormatHtmlElementList {
                     }
 
                     // HACK: We need the condition on formatting comments because otherwise comments will get printed twice.
-                    let should_format_comments = if let AnyHtmlElement::HtmlContent(content) =
+                    let should_format_comments = if let AnyHtmlElement::AnyHtmlContent(content) =
                         element
                     {
                         let mut has_newline_after_comment = false;

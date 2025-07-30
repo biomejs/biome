@@ -43,6 +43,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_ATTRIBUTE_LIST",
         "HTML_CONTENT",
         "HTML_CDATA_SECTION",
+        "COMMENT",
         "HTML_TEXT_EXPRESSION",
         "SVELTE_TEXT_EXPRESSION",
         // Bogus nodes

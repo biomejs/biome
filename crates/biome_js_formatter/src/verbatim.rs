@@ -38,13 +38,6 @@ pub struct FormatJsVerbatimNode<'node> {
     format_comments: bool,
 }
 
-impl<L: Language> FormatVerbatimNode<'_, L> {
-    pub fn with_format_comments(mut self, format_comments: bool) -> Self {
-        self.format_comments = format_comments;
-        self
-    }
-}
-
 impl Format<JsFormatContext> for FormatJsVerbatimNode<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         for element in self.node.descendants_with_tokens(Direction::Next) {

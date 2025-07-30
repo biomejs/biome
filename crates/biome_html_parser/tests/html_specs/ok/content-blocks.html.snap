@@ -23,6 +23,7 @@ just a concept for the parser to handle.
 ```
 HtmlRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlContent {
@@ -42,11 +43,12 @@ HtmlRoot {
 0: HTML_ROOT@0..550
   0: (empty)
   1: (empty)
-  2: HTML_ELEMENT_LIST@0..549
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..549
     0: HTML_CONTENT@0..199
       0: HTML_LITERAL@0..199 "This document is meant to contain 2 text blocks. This is the first text block,\nand the following will be the second text block. The content of this block is\nintentionally long so that it line breaks." [] []
     1: HTML_CONTENT@199..549
       0: HTML_LITERAL@199..549 "We define the separation of \"blocks\" of text to be 2 line breaks, or 1 empty\nline between them. This is to make it easier for users to suppress formatting\nfor specific blocks, while still preserving whitespace sensitivity. Despite\nthis, the formatter can and will combine separate blocks of content. This is\njust a concept for the parser to handle." [Newline("\n"), Newline("\n")] []
-  3: EOF@549..550 "" [Newline("\n")] []
+  4: EOF@549..550 "" [Newline("\n")] []
 
 ```
