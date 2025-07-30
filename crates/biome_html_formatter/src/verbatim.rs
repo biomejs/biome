@@ -5,7 +5,7 @@ use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::prelude::{
     Tag, dynamic_text, empty_line, expand_parent, format_with, hard_line_break, line_suffix,
-    maybe_space, should_nestle_adjacent_doc_comments, soft_line_break_or_space, space,
+    should_nestle_adjacent_doc_comments, soft_line_break_or_space, space,
 };
 
 use biome_formatter::{
@@ -244,8 +244,8 @@ impl<'a> Format<HtmlFormatContext> for FormatLHtmlLeadingComments<'a> {
             FormatLHtmlLeadingComments::Comments(comments) => comments,
         };
 
-        let mut leading_comments_iter = leading_comments.iter().peekable();
-        while let Some(comment) = leading_comments_iter.next() {
+        let leading_comments_iter = leading_comments.iter().peekable();
+        for comment in leading_comments_iter {
             let format_comment = FormatRefWithRule::new(
                 comment,
                 <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
