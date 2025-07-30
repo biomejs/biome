@@ -2,7 +2,7 @@
     "$schema": "../../../../../../backend-jsonrpc/src/workspace.schema.json",
     "linter": {
         "rules": {
-            "style": {
+            "nursery": {
                 "useConsistentTypeDefinitions": {
                     "options": {
                         "style": "type"

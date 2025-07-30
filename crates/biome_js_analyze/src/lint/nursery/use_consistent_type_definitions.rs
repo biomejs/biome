@@ -6,9 +6,10 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsDeclarationClause, AnyTsType, JsSyntaxKind, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    AnyJsDeclarationClause, AnyTsType, AnyTsTypeMember, JsSyntaxKind, TsInterfaceDeclaration,
+    TsTypeAliasDeclaration,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::use_consistent_type_definitions::{
     ConsistentTypeDefinition, UseConsistentTypeDefinitionsOptions,
 };
@@ -186,19 +187,23 @@ fn convert_interface_to_type_alias(
     let id = interface_decl.id().ok()?;
     let type_params = interface_decl.type_parameters();
     let members = interface_decl.members();
+    let r_curly = interface_decl.r_curly_token().ok()?;
 
     let object_type = make::ts_object_type(
         make::token(JsSyntaxKind::L_CURLY),
         members,
-        make::token(JsSyntaxKind::R_CURLY),
+        make::token(JsSyntaxKind::R_CURLY)
+            .with_leading_trivia_pieces(r_curly.leading_trivia().pieces()),
     );
 
     let mut type_alias_builder = make::ts_type_alias_declaration(
-        make::token(JsSyntaxKind::TYPE_KW),
+        make::token(JsSyntaxKind::TYPE_KW)
+            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
         id,
-        make::token(JsSyntaxKind::EQ),
+        make::token(JsSyntaxKind::EQ).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
         AnyTsType::TsObjectType(object_type),
-    );
+    )
+    .with_semicolon_token(make::token(JsSyntaxKind::SEMICOLON));
 
     if let Some(type_params) = type_params {
         type_alias_builder = type_alias_builder.with_type_parameters(type_params);
@@ -218,12 +223,115 @@ fn convert_type_alias_to_interface(
     if let AnyTsType::TsObjectType(object_type) = ty {
         let members = object_type.members();
 
+        // Check if this is an inline type (all on one line)
+        let object_text = object_type.syntax().to_string();
+        let is_inline = !object_text.contains('\n');
+
+        // For inline types, we need to add proper formatting
+        let (members, l_curly_token, r_curly_token) = if is_inline && !members.is_empty() {
+            // For inline types like { x: number; y: number; }, we need to:
+            // 1. Add a newline after the opening brace
+            // 2. Ensure each member is on its own line with indentation
+            // 3. Add a newline before the closing brace
+
+            let mut formatted_members = Vec::new();
+            let mut is_first = true;
+
+            for member in members {
+                let mut updated_member = member.clone();
+
+                // Get the first token of the member to add leading trivia
+                if let Some(first_token) = member.syntax().first_token() {
+                    let new_first_token = if is_first {
+                        first_token.with_leading_trivia([
+                            (TriviaPieceKind::Newline, "\n"),
+                            (TriviaPieceKind::Whitespace, "    "),
+                        ])
+                    } else {
+                        // For subsequent members, we need to ensure they start on a new line
+                        let has_newline = first_token
+                            .leading_trivia()
+                            .pieces()
+                            .any(|p| p.is_newline());
+                        if has_newline {
+                            first_token.clone()
+                        } else {
+                            first_token.with_leading_trivia([
+                                (TriviaPieceKind::Newline, "\n"),
+                                (TriviaPieceKind::Whitespace, "    "),
+                            ])
+                        }
+                    };
+
+                    // Replace the first token in the member
+                    if let Some(new_syntax) = updated_member
+                        .syntax()
+                        .clone()
+                        .replace_child(first_token.clone().into(), new_first_token.into())
+                    {
+                        if let Some(new_member) = AnyTsTypeMember::cast(new_syntax) {
+                            updated_member = new_member;
+                        }
+                    }
+                }
+
+                // For property signature members, clean up the separator token
+                #[allow(unused_imports)]
+                use biome_js_syntax::TsPropertySignatureTypeMember;
+                if let AnyTsTypeMember::TsPropertySignatureTypeMember(prop) = &updated_member {
+                    if let Some(sep_token) = prop.separator_token() {
+                        // Remove any trailing whitespace from the separator (semicolon)
+                        let clean_sep = sep_token.with_trailing_trivia([]);
+                        if let Some(new_syntax) = updated_member
+                            .syntax()
+                            .clone()
+                            .replace_child(sep_token.into(), clean_sep.into())
+                        {
+                            if let Some(new_member) = AnyTsTypeMember::cast(new_syntax) {
+                                updated_member = new_member;
+                            }
+                        }
+                    }
+                }
+
+                formatted_members.push(updated_member);
+                is_first = false;
+            }
+
+            let new_members = make::ts_type_member_list(formatted_members);
+
+            (
+                new_members,
+                make::token(JsSyntaxKind::L_CURLY),
+                make::token(JsSyntaxKind::R_CURLY)
+                    .with_leading_trivia([(TriviaPieceKind::Newline, "\n")]),
+            )
+        } else {
+            // For already multiline types, preserve the formatting
+            let r_curly = object_type.r_curly_token().ok()?;
+            let has_newline = r_curly
+                .leading_trivia()
+                .pieces()
+                .any(|piece| piece.is_newline() || piece.text().contains('\n'));
+
+            let r_curly_token = if has_newline {
+                make::token(JsSyntaxKind::R_CURLY)
+                    .with_leading_trivia_pieces(r_curly.leading_trivia().pieces())
+            } else {
+                make::token(JsSyntaxKind::R_CURLY)
+                    .with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
+            };
+
+            (members, make::token(JsSyntaxKind::L_CURLY), r_curly_token)
+        };
+
         let mut interface_builder = make::ts_interface_declaration(
-            make::token(JsSyntaxKind::INTERFACE_KW),
+            make::token(JsSyntaxKind::INTERFACE_KW)
+                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
             id,
-            make::token(JsSyntaxKind::L_CURLY),
+            l_curly_token,
             members,
-            make::token(JsSyntaxKind::R_CURLY),
+            r_curly_token,
         );
 
         if let Some(type_params) = type_params {

@@ -1,3 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validType.ts
+---
+# Input
+```ts
 /* should not generate diagnostics */
 // Option: prefer type
 type Foo = {
@@ -30,3 +36,4 @@ type Intersection = { a: string } & { b: number };
 type StringAlias = string;
 type FunctionType = (x: number) => string;
 type TupleType = [string, number];
+```

@@ -9,6 +9,8 @@ type Bar = {
 
 type Point = { x: number; y: number; };
 
+type Nested = { x: {one: string; two: number}; y: {one: string; two: number}; };
+
 type User = {
     name: string;
     age: number;
