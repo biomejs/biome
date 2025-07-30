@@ -31,17 +31,17 @@ pub struct ClassPropertyReference {
 impl ClassMemberAnalyzer for JsClassMemberList {
     fn write_properties(&self) -> HashSet<ClassPropertyReference> {
         self.visit_members(
-            Self::collect_write_references_from_constructor,
-            Self::collect_write_references_from_method_body,
-            Self::collect_write_references_from_property_member,
+            PropertyWritesVisitor::collect_write_references_from_constructor,
+            PropertyWritesVisitor::collect_write_references_from_method_body,
+            PropertyWritesVisitor::collect_write_references_from_property_member,
         )
     }
 
     fn read_members(&self) -> HashSet<ClassPropertyReference> {
         self.visit_members(
-            Self::collect_read_references_from_constructor,
-            Self::collect_read_references_from_method_body,
-            Self::collect_read_references_from_property_member,
+            MemberReadVisitor::collect_read_references_from_constructor,
+            MemberReadVisitor::collect_read_references_from_method_body,
+            MemberReadVisitor::collect_read_references_from_property_member,
         )
     }
 }
@@ -534,16 +534,16 @@ impl MemberReadVisitor {
                     if let Some(binding) = JsObjectBindingPattern::cast_ref(&node) {
                         if let Some(parent) = binding.syntax().parent()
                             && let Some(variable_declarator) =
-                            JsVariableDeclarator::cast_ref(&parent)
+                                JsVariableDeclarator::cast_ref(&parent)
                             && let Some(initializer) = variable_declarator.initializer()
                             && let Ok(expression) = initializer.expression()
                         {
                             for declarator in binding.properties() {
                                 if let Some(declarator) = declarator.ok()
                                     && ThisAliasResolver::is_this_or_alias(
-                                    &expression,
-                                    this_aliases,
-                                )
+                                        &expression,
+                                        this_aliases,
+                                    )
                                 {
                                     on_name(ClassPropertyReference {
                                         name: declarator.to_trimmed_text(),
@@ -570,9 +570,10 @@ impl MemberReadVisitor {
                                 .and_then(|expr| expr.operand().ok())
                         })
                     {
-                        if let Some(name) =
-                            ThisPatternResolver::extract_static_assignment_name(&operand, this_aliases)
-                        {
+                        if let Some(name) = ThisPatternResolver::extract_static_assignment_name(
+                            &operand,
+                            this_aliases,
+                        ) {
                             on_name(name);
                         }
                     } else if let Some(assignment) = JsAssignmentExpression::cast_ref(&node)
@@ -590,9 +591,10 @@ impl MemberReadVisitor {
                                 | JsSyntaxKind::QUESTION2EQ
                         )
                     {
-                        if let Some(name) =
-                            ThisPatternResolver::extract_static_assignment_name(&operand, this_aliases)
-                        {
+                        if let Some(name) = ThisPatternResolver::extract_static_assignment_name(
+                            &operand,
+                            this_aliases,
+                        ) {
                             on_name(name);
                         }
                     } else {
@@ -606,7 +608,7 @@ impl MemberReadVisitor {
     }
 }
 
-struct PropertyWritesVisitor {};
+struct PropertyWritesVisitor {}
 
 impl PropertyWritesVisitor {
     /// Iterates over all members of a JavaScript class and collects the names of properties that are reassigned (mutated)
@@ -687,23 +689,30 @@ impl PropertyWritesVisitor {
                 JsAssignmentExpression::cast_ref(&child).and_then(|expr| expr.left().ok())
             {
                 if let Some(assignment) = left.as_js_array_assignment_pattern().cloned() {
-                    for name in ThisPatternResolver::collect_array_assignment_names(&assignment, this_aliases) {
+                    for name in ThisPatternResolver::collect_array_assignment_names(
+                        &assignment,
+                        this_aliases,
+                    ) {
                         on_name(name);
                     }
                     return;
                 }
 
                 if let Some(assignment) = left.as_js_object_assignment_pattern().cloned() {
-                    for name in ThisPatternResolver::collect_object_assignment_names(&assignment, this_aliases) {
+                    for name in ThisPatternResolver::collect_object_assignment_names(
+                        &assignment,
+                        this_aliases,
+                    ) {
                         on_name(name);
                     }
                     return;
                 }
 
                 if let Some(assignment) = left.as_any_js_assignment().cloned() {
-                    if let Some(name) =
-                        ThisPatternResolver::extract_static_assignment_name(&assignment, this_aliases)
-                    {
+                    if let Some(name) = ThisPatternResolver::extract_static_assignment_name(
+                        &assignment,
+                        this_aliases,
+                    ) {
                         on_name(name);
                     }
                     return;
@@ -718,7 +727,9 @@ impl PropertyWritesVisitor {
                 });
 
             if let Some(operand) = operand {
-                if let Some(name) = ThisPatternResolver::extract_static_assignment_name(&operand, this_aliases) {
+                if let Some(name) =
+                    ThisPatternResolver::extract_static_assignment_name(&operand, this_aliases)
+                {
                     on_name(name);
                 }
             } else if let Some(grand_child) = MethodBodyElementOrStatementList::cast_ref(&child) {
