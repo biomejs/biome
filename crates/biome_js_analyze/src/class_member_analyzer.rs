@@ -247,29 +247,9 @@ trait ClassMemberAnalyzerVisitor {
         S: Fn(&JsStaticMemberExpression) -> Option<IntoIter<ClassPropertyReference>>;
 }
 
-trait ThisAliasResolver {
-    fn collect_this_aliases_in_closure(body: &JsFunctionBody) -> Vec<ClassPropertyReference>;
+struct ThisAliasResolver {}
 
-    fn collect_nested_this_aliases(
-        element: &MethodBodyElementOrStatementList,
-        parent_aliases: &[ClassPropertyReference],
-    ) -> Vec<ThisAliasesAndTheirScope>;
-
-    fn update_fn_body_and_aliases(
-        parent_aliases: &[ClassPropertyReference],
-        results: &mut Vec<ThisAliasesAndTheirScope>,
-        body: &JsFunctionBody,
-    );
-
-    fn collect_fn_body_this_aliases(body: &JsFunctionBody) -> Vec<ThisAliasesAndTheirScope>;
-
-    fn is_this_or_alias(
-        object: &AnyJsExpression,
-        this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> bool;
-}
-
-impl ThisAliasResolver for JsClassMemberList {
+impl ThisAliasResolver {
     /// Process a js function body to find all reassignments/ aliases of this.
     /// It only processes the top level of the function body scope
     /// # Example
@@ -318,7 +298,8 @@ impl ThisAliasResolver for JsClassMemberList {
                 .and_then(JsConstructorClassMember::cast)
                 .is_none()
             {
-                let current_scope_aliases = Self::collect_this_aliases_in_closure(&body);
+                let current_scope_aliases =
+                    ThisAliasResolver::collect_this_aliases_in_closure(&body);
                 let mut this_aliases = HashSet::new();
                 this_aliases.extend(parent_this_aliases.iter().cloned());
                 this_aliases.extend(current_scope_aliases.clone());
@@ -344,13 +325,21 @@ impl ThisAliasResolver for JsClassMemberList {
                     .ok()
                     .and_then(|body| body.as_js_function_body().cloned())
                 {
-                    Self::update_fn_body_and_aliases(parent_this_aliases, &mut results, &body);
+                    ThisAliasResolver::update_fn_body_and_aliases(
+                        parent_this_aliases,
+                        &mut results,
+                        &body,
+                    );
                 }
             }
             // Check function expressions
             else if let Some(func_expr) = JsFunctionExpression::cast(child.clone()) {
                 if let Ok(body) = func_expr.body() {
-                    Self::update_fn_body_and_aliases(parent_this_aliases, &mut results, &body);
+                    ThisAliasResolver::update_fn_body_and_aliases(
+                        parent_this_aliases,
+                        &mut results,
+                        &body,
+                    );
                 }
             }
             // Check arrow functions with block bodies
@@ -358,7 +347,7 @@ impl ThisAliasResolver for JsClassMemberList {
                 if let Ok(body) = arrow_func.body() {
                     if let Some(block) = body.as_any_js_expression() {
                         if let Some(body) = JsFunctionBody::cast(block.syntax().clone()) {
-                            Self::update_fn_body_and_aliases(
+                            ThisAliasResolver::update_fn_body_and_aliases(
                                 parent_this_aliases,
                                 &mut results,
                                 &body,
@@ -370,12 +359,16 @@ impl ThisAliasResolver for JsClassMemberList {
             // Check method definitions
             else if let Some(method) = JsMethodObjectMember::cast(child.clone()) {
                 if let Ok(body) = method.body() {
-                    Self::update_fn_body_and_aliases(parent_this_aliases, &mut results, &body);
+                    ThisAliasResolver::update_fn_body_and_aliases(
+                        parent_this_aliases,
+                        &mut results,
+                        &body,
+                    );
                 }
             }
             // Recurse for other node types and append their results
             else if let Some(child) = MethodBodyElementOrStatementList::cast_ref(&child) {
-                results.extend(Self::collect_nested_this_aliases(
+                results.extend(ThisAliasResolver::collect_nested_this_aliases(
                     &child,
                     parent_this_aliases,
                 ));
@@ -391,7 +384,7 @@ impl ThisAliasResolver for JsClassMemberList {
         results: &mut Vec<ThisAliasesAndTheirScope>,
         body: &JsFunctionBody,
     ) {
-        let current_scope_aliases = Self::collect_this_aliases_in_closure(body);
+        let current_scope_aliases = ThisAliasResolver::collect_this_aliases_in_closure(body);
         let mut this_aliases = HashSet::new();
         this_aliases.extend(parent_this_aliases.iter().cloned());
         this_aliases.extend(current_scope_aliases.clone());
@@ -404,8 +397,9 @@ impl ThisAliasResolver for JsClassMemberList {
 
     /// Extracts all aliases of `this` variable in the immediate body closure and keeps the body for checking scope.
     fn collect_fn_body_this_aliases(body: &JsFunctionBody) -> Vec<ThisAliasesAndTheirScope> {
-        let this_variable_aliases: Vec<_> = Self::collect_this_aliases_in_closure(body);
-        Self::collect_nested_this_aliases(
+        let this_variable_aliases: Vec<_> =
+            ThisAliasResolver::collect_this_aliases_in_closure(body);
+        ThisAliasResolver::collect_nested_this_aliases(
             &MethodBodyElementOrStatementList::from(body.clone()),
             &this_variable_aliases,
         )
@@ -484,7 +478,7 @@ impl MemberReadVisitor for JsClassMemberList {
     where
         T: Into<MethodBodyElementOrStatementList>,
     {
-        let this_aliases = Self::collect_fn_body_this_aliases(body);
+        let this_aliases = ThisAliasResolver::collect_fn_body_this_aliases(body);
         let mut names = Vec::new();
 
         Self::visit_read_references_in_body(&member.into(), &this_aliases, &mut |name| {
@@ -517,12 +511,14 @@ impl MemberReadVisitor for JsClassMemberList {
     fn collect_read_references_from_constructor(
         constructor_body: &JsFunctionBody,
     ) -> Vec<ClassPropertyReference> {
-        let this_variable_aliases: Vec<_> = Self::collect_this_aliases_in_closure(constructor_body);
+        let this_variable_aliases: Vec<_> =
+            ThisAliasResolver::collect_this_aliases_in_closure(constructor_body);
 
-        let all_descendants_fn_bodies_and_this_aliases: Vec<_> = Self::collect_nested_this_aliases(
-            &MethodBodyElementOrStatementList::from(constructor_body.clone()),
-            &this_variable_aliases,
-        );
+        let all_descendants_fn_bodies_and_this_aliases: Vec<_> =
+            ThisAliasResolver::collect_nested_this_aliases(
+                &MethodBodyElementOrStatementList::from(constructor_body.clone()),
+                &this_variable_aliases,
+            );
 
         all_descendants_fn_bodies_and_this_aliases
             .iter()
@@ -566,7 +562,10 @@ impl MemberReadVisitor for JsClassMemberList {
                         {
                             for declarator in binding.properties() {
                                 if let Some(declarator) = declarator.ok()
-                                    && Self::is_this_or_alias(&expression, this_aliases)
+                                    && ThisAliasResolver::is_this_or_alias(
+                                        &expression,
+                                        this_aliases,
+                                    )
                                 {
                                     on_name(ClassPropertyReference {
                                         name: declarator.to_trimmed_text(),
@@ -577,7 +576,7 @@ impl MemberReadVisitor for JsClassMemberList {
                         }
                     } else if let Some(static_member) = JsStaticMemberExpression::cast_ref(&node) {
                         if let Ok(object) = static_member.object() {
-                            if Self::is_this_or_alias(&object, this_aliases) {
+                            if ThisAliasResolver::is_this_or_alias(&object, this_aliases) {
                                 if let Ok(member) = static_member.member() {
                                     on_name(ClassPropertyReference {
                                         name: member.to_trimmed_text(),
@@ -666,7 +665,7 @@ impl PropertyWritesVisitor for JsClassMemberList {
     where
         T: Into<MethodBodyElementOrStatementList>,
     {
-        let this_aliases = Self::collect_fn_body_this_aliases(body);
+        let this_aliases = ThisAliasResolver::collect_fn_body_this_aliases(body);
         let mut names = Vec::new();
 
         Self::visit_write_references_in_body(&member.into(), &this_aliases, &mut |name| {
@@ -691,12 +690,14 @@ impl PropertyWritesVisitor for JsClassMemberList {
     fn collect_write_references_from_constructor(
         constructor_body: &JsFunctionBody,
     ) -> Vec<ClassPropertyReference> {
-        let this_variable_aliases: Vec<_> = Self::collect_this_aliases_in_closure(constructor_body);
+        let this_variable_aliases: Vec<_> =
+            ThisAliasResolver::collect_this_aliases_in_closure(constructor_body);
 
-        let all_descendants_fn_bodies_and_this_aliases: Vec<_> = Self::collect_nested_this_aliases(
-            &MethodBodyElementOrStatementList::from(constructor_body.clone()),
-            &this_variable_aliases,
-        );
+        let all_descendants_fn_bodies_and_this_aliases: Vec<_> =
+            ThisAliasResolver::collect_nested_this_aliases(
+                &MethodBodyElementOrStatementList::from(constructor_body.clone()),
+                &this_variable_aliases,
+            );
 
         all_descendants_fn_bodies_and_this_aliases
             .iter()
@@ -881,7 +882,7 @@ impl ThisPatternResolver for JsClassMemberList {
             .as_js_static_member_assignment()
             .and_then(|assignment| {
                 if let Ok(object) = assignment.object() {
-                    if Self::is_this_or_alias(&object, this_aliases) {
+                    if ThisAliasResolver::is_this_or_alias(&object, this_aliases) {
                         assignment.member().ok().and_then(|member| {
                             member
                                 .as_js_name()
