@@ -1755,6 +1755,14 @@ export interface Nursery {
 	 */
 	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
 	/**
+	 * Disallow use* hooks outside of component$ or other use* hooks.
+	 */
+	useQwikMethodUsage?: RuleConfiguration_for_UseQwikMethodUsageOptions;
+	/**
+	 * Disallow unserializable expressions in Qwik dollar ($) scopes.
+	 */
+	useQwikValidLexicalScope?: RuleConfiguration_for_UseQwikValidLexicalScopeOptions;
+	/**
 	 * Enforce that components are defined as functions and never as classes.
 	 */
 	useReactFunctionComponents?: RuleConfiguration_for_UseReactFunctionComponentsOptions;
@@ -3017,6 +3025,12 @@ export type RuleFixConfiguration_for_UseParseIntRadixOptions =
 export type RuleConfiguration_for_UseQwikClasslistOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseQwikClasslistOptions;
+export type RuleConfiguration_for_UseQwikMethodUsageOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikMethodUsageOptions;
+export type RuleConfiguration_for_UseQwikValidLexicalScopeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikValidLexicalScopeOptions;
 export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseReactFunctionComponentsOptions;
@@ -5624,6 +5638,26 @@ export interface RuleWithOptions_for_UseQwikClasslistOptions {
 	 */
 	options: UseQwikClasslistOptions;
 }
+export interface RuleWithOptions_for_UseQwikMethodUsageOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikMethodUsageOptions;
+}
+export interface RuleWithOptions_for_UseQwikValidLexicalScopeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikValidLexicalScopeOptions;
+}
 export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -7861,6 +7895,8 @@ export interface UseNumericSeparatorsOptions {}
 export interface UseObjectSpreadOptions {}
 export interface UseParseIntRadixOptions {}
 export interface UseQwikClasslistOptions {}
+export type UseQwikMethodUsageOptions = null;
+export interface UseQwikValidLexicalScopeOptions {}
 export interface UseReactFunctionComponentsOptions {}
 export interface UseReadonlyClassPropertiesOptions {
 	/**
@@ -8513,9 +8549,11 @@ export type Category =
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/useQwikClasslist"
+	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
+	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentResponse"
@@ -8532,7 +8570,7 @@ export type Category =
 	| "lint/nursery/useImageSize"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useAnchorHref"
+	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
