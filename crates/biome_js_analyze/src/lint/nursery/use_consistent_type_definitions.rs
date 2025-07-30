@@ -276,8 +276,6 @@ fn convert_type_alias_to_interface(
                 }
 
                 // For property signature members, clean up the separator token
-                #[allow(unused_imports)]
-                use biome_js_syntax::TsPropertySignatureTypeMember;
                 if let AnyTsTypeMember::TsPropertySignatureTypeMember(prop) = &updated_member {
                     if let Some(sep_token) = prop.separator_token() {
                         // Remove any trailing whitespace from the separator (semicolon)
