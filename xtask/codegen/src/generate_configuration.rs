@@ -12,6 +12,7 @@ use quote::{format_ident, quote};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use xtask::*;
+use xtask_codegen::{generate_analyzer_rule_options, get_analyzer_rule_options_path};
 use xtask_codegen::{to_capitalized, update};
 
 // ======= LINT ======
@@ -177,7 +178,7 @@ impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
 }
 
 pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
-    let rule_options_root = project_root().join("crates/biome_rule_options/src/");
+    let rule_options_root = get_analyzer_rule_options_path();
     let lib_root = rule_options_root.join("lib.rs");
     let mut lint_visitor = LintRulesVisitor::default();
     let mut assist_visitor = AssistActionsVisitor::default();
@@ -197,13 +198,13 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     }];
 
     for group in lint_visitor.groups.values() {
-        for (rule_name, _) in group {
+        for rule_name in group.keys() {
             rule_names.insert(rule_name);
         }
     }
 
     for group in assist_visitor.groups.values() {
-        for (rule_name, _) in group {
+        for rule_name in group.keys() {
             rule_names.insert(rule_name);
         }
     }
@@ -215,31 +216,12 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
            pub mod #ident;
         });
 
-        let file_name = format!("{}.rs", snake_rule_name);
+        let file_name = format!("{snake_rule_name}.rs");
         let file_path = rule_options_root.join(file_name);
         if file_path.exists() {
             continue;
         }
-        let struct_name = Ident::new(
-            &format!("{}Options", Case::Pascal.convert(rule_name)),
-            Span::call_site(),
-        );
-
-        let content = quote! {
-            use biome_deserialize_macros::Deserializable;
-            use serde::{Deserialize, Serialize};
-
-            #[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-            #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-            #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-            pub struct #struct_name {}
-        };
-
-        update(
-            file_path.as_path(),
-            &xtask::reformat_without_preamble(content)?,
-            &mode,
-        )?;
+        generate_analyzer_rule_options(rule_name, mode, false)?;
     }
 
     let content = quote! {
@@ -337,7 +319,7 @@ fn generate_for_groups(
         group_idents.push(group_ident);
         group_strings.push(Literal::string(group_name));
         struct_groups.push(generate_group_struct(group_name, &rules, kind));
-        rule_group_names.extend(rules.iter().map(|(rule_name, _)| RuleGroup {
+        rule_group_names.extend(rules.keys().map(|rule_name| RuleGroup {
             rule_name,
             group_name,
         }));
@@ -837,17 +819,13 @@ fn generate_group_struct(
                     }
 
                     Event::Start(tag) => match tag {
-                        Tag::Strong | Tag::Paragraph => {
-                            continue;
-                        }
+                        Tag::Strong | Tag::Paragraph => {}
 
                         _ => panic!("Unimplemented tag {:?}", { tag }),
                     },
 
                     Event::End(tag) => match tag {
-                        TagEnd::Strong | TagEnd::Paragraph => {
-                            continue;
-                        }
+                        TagEnd::Strong | TagEnd::Paragraph => {}
                         _ => panic!("Unimplemented tag {:?}", { tag }),
                     },
 
@@ -871,7 +849,7 @@ fn generate_group_struct(
                 "RuleConfiguration"
             }
         );
-        let rule_base_name = Ident::new(&Case::Snake.convert(&rule), Span::call_site());
+        let rule_base_name = Ident::new(&Case::Snake.convert(rule), Span::call_site());
         let rule_name = Ident::new(
             &format!("{}Options", &to_capitalized(rule)),
             Span::call_site(),
@@ -894,13 +872,8 @@ fn generate_group_struct(
         let rule_option_type = quote! {
             biome_rule_options::#rule_base_name::#rule_name
         };
-        let rule_option = if kind == RuleCategory::Action {
-            quote! { Option<#rule_config_type<#rule_option_type>> }
-        } else {
-            quote! {
-                Option<#rule_config_type<#rule_option_type>>
-            }
-        };
+
+        let rule_option = quote! { Option<#rule_config_type<#rule_option_type>> };
         schema_lines_rules.push(quote! {
             #[doc = #summary]
             #[serde(skip_serializing_if = "Option::is_none")]
@@ -928,15 +901,9 @@ fn generate_group_struct(
             }
         });
 
-        if kind == RuleCategory::Action {
-            get_rule_configuration_line.push(quote! {
-                #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
-            });
-        } else {
-            get_rule_configuration_line.push(quote! {
-                #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
-            });
-        }
+        get_rule_configuration_line.push(quote! {
+            #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
+        });
 
         rule_identifiers.push(rule_identifier);
     }

@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: index.d.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+```

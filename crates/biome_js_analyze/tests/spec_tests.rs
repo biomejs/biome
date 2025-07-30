@@ -6,10 +6,10 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, FileSourceError};
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
@@ -22,9 +22,9 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_suppression_test, "module"}
-tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_multi_rule_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
@@ -112,9 +112,20 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             );
         }
     } else {
-        let Ok(source_type) = input_file.try_into() else {
+        let Ok(source_type): Result<JsFileSource, FileSourceError> = input_file.try_into() else {
             return;
         };
+
+        // TODO: Remove once we have full support of vue files
+        // This is needed to set the language to TypeScript for Vue files
+        // because we can't do it in <script> definition in the current implementation.
+        let source_type = if source_type.as_embedding_kind().is_vue() {
+            JsFileSource::ts().with_embedding_kind(EmbeddingKind::Vue)
+        } else {
+            source_type
+        };
+
+        // if source_type.
         analyze_and_snap(
             &mut snapshot,
             &input_code,
@@ -269,6 +280,8 @@ fn check_code_action(
     options: JsParserOptions,
     root: &AnyJsRoot,
 ) {
+    assert!(!action.mutation.is_empty(), "Mutation must not be empty");
+
     let (new_tree, text_edit) = match action
         .mutation
         .clone()

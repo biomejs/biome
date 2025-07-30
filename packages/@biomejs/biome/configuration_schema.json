@@ -3770,6 +3770,24 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoQuickfixBiomeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoQuickfixBiomeOptions" }
+			]
+		},
+		"NoQuickfixBiomeOptions": {
+			"type": "object",
+			"properties": {
+				"additionalPaths": {
+					"description": "A list of additional JSON files that should be checked.",
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoReExportAllConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4648,6 +4666,26 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueReservedKeysConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueReservedKeysOptions" }
+			]
+		},
+		"NoVueReservedKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoVueReservedPropsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueReservedPropsOptions" }
+			]
+		},
+		"NoVueReservedPropsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4784,6 +4822,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noQuickfixBiome": {
+					"description": "Disallow the use if quickfix.biome inside editor settings file.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQuickfixBiomeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactPropAssign": {
 					"description": "Disallow assigning to React component props.",
 					"anyOf": [
@@ -4865,6 +4910,20 @@
 					"description": "Disallow the use of useless undefined.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUselessUndefinedConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueReservedKeys": {
+					"description": "Disallow reserved keys in Vue component data and computed properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueReservedKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueReservedProps": {
+					"description": "Disallow reserved names to be used as props.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueReservedPropsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4983,6 +5042,13 @@
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReactFunctionComponents": {
+					"description": "Enforce that components are defined as functions and never as classes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7835,6 +7901,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoQuickfixBiomeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoQuickfixBiomeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoReExportAllOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9271,6 +9356,36 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoVueReservedKeysOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueReservedKeysOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoVueReservedPropsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueReservedPropsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoWithOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10673,6 +10788,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseParseIntRadixOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseReactFunctionComponentsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -13416,6 +13548,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseReactFunctionComponentsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseReactFunctionComponentsOptions" }
+			]
+		},
+		"UseReactFunctionComponentsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseReadonlyClassPropertiesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13638,6 +13780,15 @@
 		},
 		"UseUniqueElementIdsOptions": {
 			"type": "object",
+			"properties": {
+				"excludedComponents": {
+					"description": "Component names that accept an `id` prop that does not translate to a DOM element id.",
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" },
+					"uniqueItems": true
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseValidAnchorConfiguration": {

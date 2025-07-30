@@ -33,6 +33,7 @@ fn commonjs_file_rejects_import_statement() {
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
@@ -95,6 +96,7 @@ fn store_embedded_nodes_with_corrent_ranges() {
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 

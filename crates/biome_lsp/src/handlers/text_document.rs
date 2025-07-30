@@ -6,7 +6,8 @@ use crate::{documents::Document, session::Session};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
-    GetFileContentParams, IsPathIgnoredParams, OpenFileParams, OpenProjectParams, ScanKind,
+    GetFileContentParams, IgnoreKind, IsPathIgnoredParams, OpenFileParams, OpenProjectParams,
+    ScanKind,
 };
 use tower_lsp_server::lsp_types;
 use tracing::{debug, error, field, info};
@@ -63,6 +64,7 @@ pub(crate) async fn did_open(
             project_key,
             path: path.clone(),
             features: FeaturesBuilder::new().build(),
+            ignore_kind: IgnoreKind::Ancestors,
         })
         .unwrap_or_default();
 
@@ -110,6 +112,7 @@ pub(crate) async fn did_change(
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(());
     }

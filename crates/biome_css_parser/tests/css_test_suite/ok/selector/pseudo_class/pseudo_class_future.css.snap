@@ -26,7 +26,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: FUTURE_KW@1..7 "future" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@1..7 "future" [] [],
+                                },
                                 l_paren_token: L_PAREN@7..8 "(" [] [],
                                 compound_selectors: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -95,7 +97,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@25..27 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionCompoundSelectorList {
-                                    name: FUTURE_KW@27..33 "future" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@27..33 "future" [] [],
+                                    },
                                     l_paren_token: L_PAREN@33..34 "(" [] [],
                                     compound_selectors: CssCompoundSelectorList [
                                         CssCompoundSelector {
@@ -188,7 +192,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..23
               0: COLON@0..1 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@1..23
-                0: FUTURE_KW@1..7 "future" [] []
+                0: CSS_IDENTIFIER@1..7
+                  0: IDENT@1..7 "future" [] []
                 1: L_PAREN@7..8 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@8..21
                   0: CSS_COMPOUND_SELECTOR@8..9
@@ -237,7 +242,8 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@25..48
                 0: COLON@25..27 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@27..48
-                  0: FUTURE_KW@27..33 "future" [] []
+                  0: CSS_IDENTIFIER@27..33
+                    0: IDENT@27..33 "future" [] []
                   1: L_PAREN@33..34 "(" [] []
                   2: CSS_COMPOUND_SELECTOR_LIST@34..47
                     0: CSS_COMPOUND_SELECTOR@34..35

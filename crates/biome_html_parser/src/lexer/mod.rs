@@ -60,6 +60,7 @@ impl<'src> HtmlLexer<'src> {
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
             b'\'' | b'"' => self.consume_string_literal(current),
+            b'-' if self.is_at_frontmatter_edge() => self.consume_frontmatter_edge(),
             _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
                 // tag names must immediately follow a `<`
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
@@ -84,6 +85,8 @@ impl<'src> HtmlLexer<'src> {
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'{' if self.is_at_l_text_expression() => self.consume_l_text_expression(),
+            b'}' if self.is_at_r_text_expression() => self.consume_r_text_expression(),
             b'!' if self.current() == T![<] => self.consume_byte(T![!]),
             b'/' if self.current() == T![<] => self.consume_byte(T![/]),
             b'<' => {
@@ -420,6 +423,24 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    fn consume_l_text_expression(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.is_at_l_text_expression());
+        self.advance(2);
+        T!["{{"]
+    }
+
+    fn consume_r_text_expression(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.is_at_r_text_expression());
+        self.advance(2);
+        T!["}}"]
+    }
+
+    fn consume_frontmatter_edge(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.is_at_frontmatter_edge());
+        self.advance(3);
+        T![---]
+    }
+
     fn at_start_comment(&mut self) -> bool {
         self.current_byte() == Some(b'<')
             && self.byte_at(1) == Some(b'!')
@@ -456,6 +477,15 @@ impl<'src> HtmlLexer<'src> {
             && self.byte_at(1) == Some(b'-')
             && self.byte_at(2) == Some(b'-')
     }
+
+    fn is_at_l_text_expression(&self) -> bool {
+        self.current_byte() == Some(b'{') && self.byte_at(1) == Some(b'{')
+    }
+
+    fn is_at_r_text_expression(&self) -> bool {
+        self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
+    }
+
 
     fn consume_cdata_start(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_start_cdata());
@@ -538,9 +568,36 @@ impl<'src> HtmlLexer<'src> {
     /// - See: <https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace>
     fn consume_html_text(&mut self) -> HtmlSyntaxKind {
         let mut whitespace_started = None;
-        let mut seen_newlines = 0;
+                let mut seen_newlines = 0;
+
+        let mut closing_expression = None;
+        let mut was_escaped = false;
+
+        if self.is_at_r_text_expression() {
+            return T!["}}"];
+        }
+
         while let Some(current) = self.current_byte() {
             match current {
+                b'\\' => {
+                    was_escaped = true;
+                    whitespace_started = None;
+                    self.advance(1);
+                }
+                b'}' => {
+                    if was_escaped {
+                        self.advance(1);
+                    } else {
+                        if let Some(checkpoint) = closing_expression {
+                            self.rewind(checkpoint);
+                            break;
+                        }
+                        closing_expression = Some(self.checkpoint());
+                        whitespace_started = None;
+                        self.advance(1);
+                    }
+                }
+
                 b'<' => {
                     break;
                 }
@@ -556,9 +613,16 @@ impl<'src> HtmlLexer<'src> {
                     self.advance(1);
                 }
                 b' ' | b'\t' => {
-                    if whitespace_started.is_none() {
-                        whitespace_started = Some(self.checkpoint());
+                    if was_escaped {
+                        was_escaped = false;
                     }
+                    if let Some(checkpoint) = whitespace_started {
+                        // avoid treating the last space as part of the token
+                        self.rewind(checkpoint);
+                        break;
+                    }
+                    whitespace_started = Some(self.checkpoint());
+                    closing_expression = None;
                     self.advance(1);
                 }
                 _ => {

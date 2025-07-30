@@ -278,6 +278,7 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
     let clause = match p.cur() {
         T![*] => parse_import_namespace_clause_rest(p, m),
         T!['{'] => parse_import_named_clause_rest(p, m),
+        T![defer] if matches!(p.nth(1), T![*]) => parse_import_namespace_clause_rest(p, m),
         _ if is_at_identifier_binding(p) => {
             let default_specifier = p.start();
             parse_identifier_binding(p).unwrap();
@@ -343,6 +344,7 @@ fn parse_import_bare_clause(p: &mut JsParser) -> ParsedSyntax {
 }
 
 fn parse_import_namespace_clause_rest(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    p.eat(T![defer]);
     parse_namespace_import_specifier(p).or_add_diagnostic(p, expected_namespace_import);
     p.expect(T![from]);
     parse_module_source(p).or_add_diagnostic(p, expected_module_source);

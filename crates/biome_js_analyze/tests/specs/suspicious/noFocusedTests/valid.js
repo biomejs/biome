@@ -7,3 +7,4 @@ xit("test", () => {})
 describe.each([["a"], ["b"]])("%s", (a) => {});
 it.each([["a"], ["b"]])("%s", (a) => {});
 test.each([["a"], ["b"]])("%s", (a) => {});
+foo.fit();

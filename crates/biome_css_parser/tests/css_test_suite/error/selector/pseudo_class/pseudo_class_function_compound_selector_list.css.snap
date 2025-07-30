@@ -34,7 +34,9 @@ CssRoot {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    PAST_KW@1..5 "past" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@1..5 "past" [] [],
+                                    },
                                     L_PAREN@5..7 "(" [] [Whitespace(" ")],
                                     CssCompoundSelectorList [],
                                 ],
@@ -59,7 +61,9 @@ CssRoot {
                             colon_token: COLON@9..11 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    PAST_KW@11..15 "past" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@11..15 "past" [] [],
+                                    },
                                     L_PAREN@15..16 "(" [] [],
                                     CssCompoundSelectorList [],
                                     R_PAREN@16..18 ")" [] [Whitespace(" ")],
@@ -85,7 +89,9 @@ CssRoot {
                             colon_token: COLON@20..22 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    PAST_KW@22..26 "past" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@22..26 "past" [] [],
+                                    },
                                     L_PAREN@26..27 "(" [] [],
                                     CssCompoundSelectorList [],
                                     CssBogus {
@@ -117,7 +123,9 @@ CssRoot {
                             colon_token: COLON@39..41 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    PAST_KW@41..45 "past" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@41..45 "past" [] [],
+                                    },
                                     L_PAREN@45..46 "(" [] [],
                                     CssCompoundSelectorList [],
                                     CssBogus {
@@ -148,7 +156,9 @@ CssRoot {
                             colon_token: COLON@57..59 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    PAST_KW@59..63 "past" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@59..63 "past" [] [],
+                                    },
                                     L_PAREN@63..64 "(" [] [],
                                     CssCompoundSelectorList [
                                         CssCompoundSelector {
@@ -194,7 +204,9 @@ CssRoot {
                             colon_token: COLON@79..81 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    PAST_KW@81..85 "past" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@81..85 "past" [] [],
+                                    },
                                     L_PAREN@85..86 "(" [] [],
                                     CssCompoundSelectorList [
                                         CssCompoundSelector {
@@ -241,7 +253,9 @@ CssRoot {
                             colon_token: COLON@102..104 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    PAST_KW@104..108 "past" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@104..108 "past" [] [],
+                                    },
                                     L_PAREN@108..109 "(" [] [],
                                     CssCompoundSelectorList [
                                         CssCompoundSelector {
@@ -286,7 +300,9 @@ CssRoot {
                             colon_token: COLON@123..125 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    PAST_KW@125..129 "past" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@125..129 "past" [] [],
+                                    },
                                     L_PAREN@129..130 "(" [] [],
                                     CssCompoundSelectorList [
                                         CssCompoundSelector {
@@ -324,7 +340,9 @@ CssRoot {
                             colon_token: COLON@137..139 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    PAST_KW@139..143 "past" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@139..143 "past" [] [],
+                                    },
                                     L_PAREN@143..144 "(" [] [],
                                     CssCompoundSelectorList [
                                         CssCompoundSelector {
@@ -375,7 +393,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..7
               0: COLON@0..1 ":" [] []
               1: CSS_BOGUS_PSEUDO_CLASS@1..7
-                0: PAST_KW@1..5 "past" [] []
+                0: CSS_IDENTIFIER@1..5
+                  0: IDENT@1..5 "past" [] []
                 1: L_PAREN@5..7 "(" [] [Whitespace(" ")]
                 2: CSS_COMPOUND_SELECTOR_LIST@7..7
       1: CSS_DECLARATION_OR_RULE_BLOCK@7..9
@@ -391,7 +410,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@9..18
               0: COLON@9..11 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@11..18
-                0: PAST_KW@11..15 "past" [] []
+                0: CSS_IDENTIFIER@11..15
+                  0: IDENT@11..15 "past" [] []
                 1: L_PAREN@15..16 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@16..16
                 3: R_PAREN@16..18 ")" [] [Whitespace(" ")]
@@ -408,7 +428,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@20..37
               0: COLON@20..22 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@22..37
-                0: PAST_KW@22..26 "past" [] []
+                0: CSS_IDENTIFIER@22..26
+                  0: IDENT@22..26 "past" [] []
                 1: L_PAREN@26..27 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@27..27
                 3: CSS_BOGUS@27..35
@@ -428,7 +449,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@39..55
               0: COLON@39..41 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@41..55
-                0: PAST_KW@41..45 "past" [] []
+                0: CSS_IDENTIFIER@41..45
+                  0: IDENT@41..45 "past" [] []
                 1: L_PAREN@45..46 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@46..46
                 3: CSS_BOGUS@46..55
@@ -447,7 +469,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@57..77
               0: COLON@57..59 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@59..77
-                0: PAST_KW@59..63 "past" [] []
+                0: CSS_IDENTIFIER@59..63
+                  0: IDENT@59..63 "past" [] []
                 1: L_PAREN@63..64 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@64..68
                   0: CSS_COMPOUND_SELECTOR@64..68
@@ -476,7 +499,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@79..100
               0: COLON@79..81 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@81..100
-                0: PAST_KW@81..85 "past" [] []
+                0: CSS_IDENTIFIER@81..85
+                  0: IDENT@81..85 "past" [] []
                 1: L_PAREN@85..86 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@86..90
                   0: CSS_COMPOUND_SELECTOR@86..90
@@ -506,7 +530,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@102..121
               0: COLON@102..104 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@104..121
-                0: PAST_KW@104..108 "past" [] []
+                0: CSS_IDENTIFIER@104..108
+                  0: IDENT@104..108 "past" [] []
                 1: L_PAREN@108..109 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@109..113
                   0: CSS_COMPOUND_SELECTOR@109..113
@@ -534,7 +559,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@123..135
               0: COLON@123..125 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@125..135
-                0: PAST_KW@125..129 "past" [] []
+                0: CSS_IDENTIFIER@125..129
+                  0: IDENT@125..129 "past" [] []
                 1: L_PAREN@129..130 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@130..135
                   0: CSS_COMPOUND_SELECTOR@130..135
@@ -558,7 +584,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@137..149
               0: COLON@137..139 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@139..149
-                0: PAST_KW@139..143 "past" [] []
+                0: CSS_IDENTIFIER@139..143
+                  0: IDENT@139..143 "past" [] []
                 1: L_PAREN@143..144 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@144..148
                   0: CSS_COMPOUND_SELECTOR@144..148

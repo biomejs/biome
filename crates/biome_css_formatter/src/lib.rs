@@ -7,7 +7,9 @@ mod cst;
 mod generated;
 mod prelude;
 mod separated;
+mod trivia;
 mod utils;
+mod verbatim;
 
 use std::borrow::Cow;
 
@@ -15,13 +17,15 @@ use crate::comments::CssCommentStyle;
 pub(crate) use crate::context::CssFormatContext;
 use crate::context::CssFormatOptions;
 use crate::cst::FormatCssSyntaxNode;
+use crate::prelude::{format_bogus_node, format_suppressed_node};
+pub(crate) use crate::trivia::*;
 use biome_css_syntax::{
     AnyCssDeclarationBlock, AnyCssRule, AnyCssRuleBlock, AnyCssValue, CssLanguage, CssSyntaxKind,
     CssSyntaxNode, CssSyntaxToken,
 };
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
-use biome_formatter::trivia::format_skipped_token_trivia;
+use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
     TransformSourceMap, write,
@@ -304,20 +308,30 @@ impl FormatRule<CssSyntaxToken> for FormatCssSyntaxToken {
     fn fmt(&self, token: &CssSyntaxToken, f: &mut Formatter<Self::Context>) -> FormatResult<()> {
         f.state_mut().track_token(token);
 
-        write!(f, [format_skipped_token_trivia(token)])?;
+        self.format_skipped_token_trivia(token, f)?;
 
         if token.kind().is_contextual_keyword() {
             let original = token.text_trimmed();
             match original.to_ascii_lowercase_cow() {
-                Cow::Borrowed(_) => write!(f, [format_trimmed_token(token)]),
+                Cow::Borrowed(_) => self.format_trimmed_token_trivia(token, f),
                 Cow::Owned(lowercase) => write!(
                     f,
                     [dynamic_text(&lowercase, token.text_trimmed_range().start())]
                 ),
             }
         } else {
-            write!(f, [format_trimmed_token(token)])
+            self.format_trimmed_token_trivia(token, f)
         }
+    }
+}
+
+impl FormatToken<CssLanguage, CssFormatContext> for FormatCssSyntaxToken {
+    fn format_skipped_token_trivia(
+        &self,
+        token: &CssSyntaxToken,
+        f: &mut Formatter<CssFormatContext>,
+    ) -> FormatResult<()> {
+        format_skipped_token_trivia(token).fmt(f)
     }
 }
 

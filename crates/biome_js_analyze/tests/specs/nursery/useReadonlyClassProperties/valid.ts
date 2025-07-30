@@ -596,3 +596,71 @@ class ArrowFunctionWithMutation {
 		this.bar = "init";
 	};
 }
+
+class Counter {
+	private counter: number
+
+	count() {
+		console.log(this.counter++);
+	}
+}
+
+class Counter2 {
+	private counter: number
+
+	count() {
+		const counterString = `${this.counter++}`
+	}
+}
+
+class Counter3 {
+	private counter: number
+
+	async count() {
+		this.counter = 1
+		const counterString = `${this.counter++}`
+	}
+}
+
+class Counter4 {
+	private counter: number
+
+	async count() {
+		await console.log(this.counter++)
+		const counterString = await `${this.counter++}`
+	}
+}
+
+export class Test {
+	private field: number;
+
+	someMethod() {
+		this.field ??= 1;
+	}
+}
+
+export class Test {
+	private field: number;
+
+	someMethod() {
+		this.field &&= 1;
+	}
+}
+
+export class Test {
+	private field: number;
+
+	someMethod() {
+		this.field ||= 1;
+	}
+}
+
+export class ToastService {
+	activeToasts: Array<{ id: number; message: string; type: string; autoClose: boolean }> = [];
+	private _toastId = 0;
+
+	show(message: string, type: string, autoClose: boolean): void {
+		const id = this._toastId++;
+		this.activeToasts.push({id, message, type, autoClose});
+	}
+}

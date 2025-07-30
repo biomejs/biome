@@ -1,6 +1,6 @@
 use biome_rowan::{
     AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxError, SyntaxNode, SyntaxToken,
-    chain_trivia_pieces,
+    chain_trivia_pieces, trim_trailing_trivia_pieces,
 };
 
 /// Returns `true` if `list` is sorted by `get_key`.
@@ -139,11 +139,17 @@ pub fn fix_separators<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
             }
         } else if i != last_index || needs_last_separator {
             // The last node is moved and has no trailing separator.
-            // Thus we build a new separator and remove its trailing whitespaces.
-            if let Some(new_node) = node.clone().trim_trailing_trivia() {
+            // Thus we build a new separator and remove its trailing trivia.
+            *optional_separator = Some(match node.syntax().last_trailing_trivia() {
+                // Transfer the trailing trivia to the separator
+                Some(trivia) => make_separator()
+                    .append_trivia_pieces(trim_trailing_trivia_pieces(trivia.pieces())),
+                _ => make_separator(),
+            });
+
+            if let Some(new_node) = node.clone().with_trailing_trivia_pieces([]) {
                 *node = new_node;
             }
-            *optional_separator = Some(make_separator());
         }
     }
 }

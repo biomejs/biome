@@ -2,10 +2,10 @@ use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement,
     JsArrowFunctionExpression, JsAssignmentOperator, JsFunctionDeclaration, JsLanguage,
-    JsLogicalOperator, JsMethodClassMember, JsMethodObjectMember, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsUnaryOperator,
+    JsLogicalOperator, JsMethodClassMember, JsMethodObjectMember, JsSyntaxNode, JsSyntaxToken,
+    JsUnaryOperator,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeCast, TriviaPiece};
+use biome_rowan::{AstNode, AstSeparatedList, TriviaPiece};
 
 /// Add any leading and trailing trivia from given source node to the token.
 ///
@@ -334,23 +334,19 @@ fn get_boolean_value(node: &AnyJsLiteralExpression) -> bool {
 /// * `true` if the expression is within an async function.
 /// * `false` otherwise.
 pub fn is_in_async_function(node: &JsSyntaxNode) -> bool {
-    node.ancestors()
-        .find_map(|ancestor| match ancestor.kind() {
-            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => ancestor
-                .cast::<JsArrowFunctionExpression>()
-                .and_then(|func| func.async_token()),
-            JsSyntaxKind::JS_FUNCTION_DECLARATION => ancestor
-                .cast::<JsFunctionDeclaration>()
-                .and_then(|func| func.async_token()),
-            JsSyntaxKind::JS_METHOD_CLASS_MEMBER => ancestor
-                .cast::<JsMethodClassMember>()
-                .and_then(|method| method.async_token()),
-            JsSyntaxKind::JS_METHOD_OBJECT_MEMBER => ancestor
-                .cast::<JsMethodObjectMember>()
-                .and_then(|method| method.async_token()),
-            _ => None,
-        })
-        .is_some()
+    for ancestor in node.ancestors() {
+        if let Some(func) = JsArrowFunctionExpression::cast_ref(&ancestor) {
+            return func.async_token().is_some();
+        } else if let Some(func) = JsFunctionDeclaration::cast_ref(&ancestor) {
+            return func.async_token().is_some();
+        } else if let Some(method) = JsMethodClassMember::cast_ref(&ancestor) {
+            return method.async_token().is_some();
+        } else if let Some(method) = JsMethodObjectMember::cast_ref(&ancestor) {
+            return method.async_token().is_some();
+        }
+    }
+
+    false
 }
 
 #[cfg(test)]

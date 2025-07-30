@@ -3386,6 +3386,19 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionCo
         FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_compound_selector_list :: FormatCssPseudoClassFunctionCompoundSelectorList :: default ())
     }
 }
+impl FormatRule < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList > for crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionCustomIdentifierList {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionCustomIdentifierList {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssPseudoClassFunctionCustomIdentifierList , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssPseudoClassFunctionIdentifier>
     for crate::css::pseudo::pseudo_class_function_identifier::FormatCssPseudoClassFunctionIdentifier
 {
@@ -3789,17 +3802,55 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassSelector {
         )
     }
 }
-impl FormatRule < biome_css_syntax :: CssPseudoElementFunctionIdentifier > for crate :: css :: pseudo :: pseudo_element_function_identifier :: FormatCssPseudoElementFunctionIdentifier { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssPseudoElementFunctionIdentifier , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssPseudoElementFunctionIdentifier > :: fmt (self , node , f) } }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssPseudoElementFunctionIdentifier {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssPseudoElementFunctionIdentifier , crate :: css :: pseudo :: pseudo_element_function_identifier :: FormatCssPseudoElementFunctionIdentifier > ;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: css :: pseudo :: pseudo_element_function_identifier :: FormatCssPseudoElementFunctionIdentifier :: default ())
+impl FormatRule<biome_css_syntax::CssPseudoElementFunction>
+    for crate::css::pseudo::pseudo_element_function::FormatCssPseudoElementFunction
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssPseudoElementFunction,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssPseudoElementFunction>::fmt(self, node, f)
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoElementFunctionIdentifier {
-    type Format = FormatOwnedWithRule < biome_css_syntax :: CssPseudoElementFunctionIdentifier , crate :: css :: pseudo :: pseudo_element_function_identifier :: FormatCssPseudoElementFunctionIdentifier > ;
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssPseudoElementFunction {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssPseudoElementFunction,
+        crate::css::pseudo::pseudo_element_function::FormatCssPseudoElementFunction,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::pseudo::pseudo_element_function::FormatCssPseudoElementFunction::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoElementFunction {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssPseudoElementFunction,
+        crate::css::pseudo::pseudo_element_function::FormatCssPseudoElementFunction,
+    >;
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_element_function_identifier :: FormatCssPseudoElementFunctionIdentifier :: default ())
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::pseudo::pseudo_element_function::FormatCssPseudoElementFunction::default(),
+        )
+    }
+}
+impl FormatRule < biome_css_syntax :: CssPseudoElementFunctionCustomIdentifier > for crate :: css :: pseudo :: pseudo_element_function_custom_identifier :: FormatCssPseudoElementFunctionCustomIdentifier { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssPseudoElementFunctionCustomIdentifier , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssPseudoElementFunctionCustomIdentifier > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssPseudoElementFunctionCustomIdentifier {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssPseudoElementFunctionCustomIdentifier , crate :: css :: pseudo :: pseudo_element_function_custom_identifier :: FormatCssPseudoElementFunctionCustomIdentifier > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: pseudo :: pseudo_element_function_custom_identifier :: FormatCssPseudoElementFunctionCustomIdentifier :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoElementFunctionCustomIdentifier {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssPseudoElementFunctionCustomIdentifier , crate :: css :: pseudo :: pseudo_element_function_custom_identifier :: FormatCssPseudoElementFunctionCustomIdentifier > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_element_function_custom_identifier :: FormatCssPseudoElementFunctionCustomIdentifier :: default ())
     }
 }
 impl FormatRule < biome_css_syntax :: CssPseudoElementFunctionSelector > for crate :: css :: selectors :: pseudo_element_function_selector :: FormatCssPseudoElementFunctionSelector { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssPseudoElementFunctionSelector , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssPseudoElementFunctionSelector > :: fmt (self , node , f) } }
@@ -5972,6 +6023,18 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssParameterList {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssPseudoElementFunctionParameterList {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssPseudoElementFunctionParameterList , crate :: css :: lists :: pseudo_element_function_parameter_list :: FormatCssPseudoElementFunctionParameterList > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: lists :: pseudo_element_function_parameter_list :: FormatCssPseudoElementFunctionParameterList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoElementFunctionParameterList {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssPseudoElementFunctionParameterList , crate :: css :: lists :: pseudo_element_function_parameter_list :: FormatCssPseudoElementFunctionParameterList > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: lists :: pseudo_element_function_parameter_list :: FormatCssPseudoElementFunctionParameterList :: default ())
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssPseudoValueList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -7449,6 +7512,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomIdentifier {
         FormatOwnedWithRule::new(
             self,
             crate::css::any::custom_identifier::FormatAnyCssCustomIdentifier::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclaration {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssDeclaration,
+        crate::css::any::declaration::FormatAnyCssDeclaration,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::declaration::FormatAnyCssDeclaration::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclaration {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssDeclaration,
+        crate::css::any::declaration::FormatAnyCssDeclaration,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::declaration::FormatAnyCssDeclaration::default(),
         )
     }
 }

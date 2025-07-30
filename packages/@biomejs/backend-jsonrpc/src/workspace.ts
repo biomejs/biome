@@ -1610,6 +1610,10 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_NoProcessGlobalOptions;
 	/**
+	 * Disallow the use if quickfix.biome inside editor settings file.
+	 */
+	noQuickfixBiome?: RuleFixConfiguration_for_NoQuickfixBiomeOptions;
+	/**
 	 * Disallow assigning to React component props.
 	 */
 	noReactPropAssign?: RuleConfiguration_for_NoReactPropAssignOptions;
@@ -1657,6 +1661,14 @@ export interface Nursery {
 	 * Disallow the use of useless undefined.
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
+	/**
+	 * Disallow reserved keys in Vue component data and computed properties.
+	 */
+	noVueReservedKeys?: RuleConfiguration_for_NoVueReservedKeysOptions;
+	/**
+	 * Disallow reserved names to be used as props.
+	 */
+	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1725,6 +1737,10 @@ export interface Nursery {
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_UseParseIntRadixOptions;
+	/**
+	 * Enforce that components are defined as functions and never as classes.
+	 */
+	useReactFunctionComponents?: RuleConfiguration_for_UseReactFunctionComponentsOptions;
 	/**
 	 * Enforce marking members as readonly if they are never modified outside the constructor.
 	 */
@@ -2879,6 +2895,9 @@ export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoProcessGlobalOptions;
+export type RuleFixConfiguration_for_NoQuickfixBiomeOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoQuickfixBiomeOptions;
 export type RuleConfiguration_for_NoReactPropAssignOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoReactPropAssignOptions;
@@ -2915,6 +2934,12 @@ export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
+export type RuleConfiguration_for_NoVueReservedKeysOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoVueReservedKeysOptions;
+export type RuleConfiguration_for_NoVueReservedPropsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoVueReservedPropsOptions;
 export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAdjacentGetterSetterOptions;
@@ -2963,6 +2988,9 @@ export type RuleFixConfiguration_for_UseObjectSpreadOptions =
 export type RuleFixConfiguration_for_UseParseIntRadixOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseParseIntRadixOptions;
+export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseReactFunctionComponentsOptions;
 export type RuleFixConfiguration_for_UseReadonlyClassPropertiesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions;
@@ -5161,6 +5189,20 @@ export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
 	 */
 	options: NoProcessGlobalOptions;
 }
+export interface RuleWithFixOptions_for_NoQuickfixBiomeOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoQuickfixBiomeOptions;
+}
 export interface RuleWithOptions_for_NoReactPropAssignOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5292,6 +5334,26 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	 * Rule's options
 	 */
 	options: NoUselessUndefinedOptions;
+}
+export interface RuleWithOptions_for_NoVueReservedKeysOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueReservedKeysOptions;
+}
+export interface RuleWithOptions_for_NoVueReservedPropsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueReservedPropsOptions;
 }
 export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
 	/**
@@ -5492,6 +5554,16 @@ export interface RuleWithFixOptions_for_UseParseIntRadixOptions {
 	 * Rule's options
 	 */
 	options: UseParseIntRadixOptions;
+}
+export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseReactFunctionComponentsOptions;
 }
 export interface RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions {
 	/**
@@ -7649,6 +7721,12 @@ export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
+export interface NoQuickfixBiomeOptions {
+	/**
+	 * A list of additional JSON files that should be checked.
+	 */
+	additionalPaths?: string[];
+}
 export interface NoReactPropAssignOptions {}
 export interface NoRestrictedElementsOptions {
 	/**
@@ -7671,6 +7749,8 @@ export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
+export interface NoVueReservedKeysOptions {}
+export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
 export interface UseConsistentObjectDefinitionOptions {
 	/**
@@ -7708,6 +7788,7 @@ export interface UseNamingConventionOptions {
 export interface UseNumericSeparatorsOptions {}
 export interface UseObjectSpreadOptions {}
 export interface UseParseIntRadixOptions {}
+export interface UseReactFunctionComponentsOptions {}
 export interface UseReadonlyClassPropertiesOptions {
 	/**
 	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
@@ -7727,7 +7808,12 @@ export interface UseSortedClassesOptions {
 }
 export interface UseSymbolDescriptionOptions {}
 export interface UseUnifiedTypeSignatureOptions {}
-export interface UseUniqueElementIdsOptions {}
+export interface UseUniqueElementIdsOptions {
+	/**
+	 * Component names that accept an `id` prop that does not translate to a DOM element id.
+	 */
+	excludedComponents?: string[];
+}
 export interface NoAccumulatingSpreadOptions {}
 export interface NoBarrelFileOptions {}
 export interface NoDeleteOptions {}
@@ -8329,6 +8415,7 @@ export type Category =
 	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
+	| "lint/nursery/noQuickfixBiome"
 	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
@@ -8351,6 +8438,8 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueReservedKeys"
+	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
@@ -8360,6 +8449,7 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"
+	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIndexOf"

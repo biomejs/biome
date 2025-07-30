@@ -6,6 +6,7 @@ info: js/module/import/namespace_import.js
 
 ```js
 import * as all from "all"
+import defer * as all from "all"
 ```
 
 
@@ -34,4 +35,5 @@ Expand lists: Auto
 
 ```js
 import * as all from "all";
+import defer * as all from "all";
 ```

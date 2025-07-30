@@ -174,50 +174,50 @@ export = vfile;
 
 ```
 Exports {
-  "basename" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(26))
-  }
-  "contents" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(44))
-  }
-  "cwd" => {
-    ExportOwnExport => JsOwnExport::Type(string)
+  "history" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(49))
   }
   "data" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(34))
   }
-  "default" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(6))
+  "messages" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(35))
+  }
+  "contents" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(44))
+  }
+  "path" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(26))
   }
   "dirname" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(26))
   }
-  "extname" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(26))
-  }
-  "fail" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(40))
-  }
-  "history" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(49))
-  }
-  "info" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(38))
-  }
-  "message" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(38))
-  }
-  "messages" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(35))
-  }
-  "path" => {
+  "basename" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(26))
   }
   "stem" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(26))
   }
+  "extname" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(26))
+  }
+  "cwd" => {
+    ExportOwnExport => JsOwnExport::Type(string)
+  }
   "toString" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(36))
+  }
+  "message" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(38))
+  }
+  "fail" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(40))
+  }
+  "info" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(38))
+  }
+  "default" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(6))
   }
 }
 Imports {
@@ -252,17 +252,13 @@ Module TypeId(5) => Module(0) TypeId(53) | Module(0) TypeId(53) | Module(0) Type
 Module TypeId(6) => Module(0) TypeId(42)
 
 Module TypeId(7) => Namespace {
-    path: [
-        Borrowed(
-            "vfile",
-        ),
-    ],
+    path: Identifier(
+        "vfile",
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "BufferEncoding",
-                ),
+                "BufferEncoding",
             ),
             ty: Resolved(
                 Module(0) TypeId(51),
@@ -270,9 +266,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "VFileContents",
-                ),
+                "VFileContents",
             ),
             ty: Resolved(
                 Module(0) TypeId(44),
@@ -280,9 +274,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "VFileCompatible",
-                ),
+                "VFileCompatible",
             ),
             ty: Resolved(
                 Module(0) TypeId(18),
@@ -290,9 +282,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Settings",
-                ),
+                "Settings",
             ),
             ty: Resolved(
                 Module(0) TypeId(22),
@@ -300,9 +290,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "VFileReporter",
-                ),
+                "VFileReporter",
             ),
             ty: Resolved(
                 Module(0) TypeId(24),
@@ -310,9 +298,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "T",
-                ),
+                "T",
             ),
             ty: Resolved(
                 Module(0) TypeId(23),
@@ -320,9 +306,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "VFileOptions",
-                ),
+                "VFileOptions",
             ),
             ty: Resolved(
                 Module(0) TypeId(46),
@@ -330,9 +314,7 @@ Module TypeId(7) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "VFile",
-                ),
+                "VFile",
             ),
             ty: Resolved(
                 Module(0) TypeId(42),
@@ -370,8 +352,8 @@ Module TypeId(20) => instanceof Module(0) TypeId(23)
 Module TypeId(21) => sync Function {
   accepts: {
     params: [
-      required files: Module(0) TypeId(19) (bindings: files:Module(0) TypeId(19))
-      required options: Module(0) TypeId(20) (bindings: options:Module(0) TypeId(20))
+      required files: Module(0) TypeId(19)
+      required options: Module(0) TypeId(20)
     ]
     type_args: []
   }
@@ -384,7 +366,7 @@ Module TypeId(22) => interface "Settings" {
   members: []
 }
 
-Module TypeId(23) => T = unknown reference
+Module TypeId(23) => T = unknown
 
 Module TypeId(24) => instanceof Module(0) TypeId(21)<Module(0) TypeId(23)>
 
@@ -420,7 +402,7 @@ Module TypeId(32) => Module(0) TypeId(44) | Module(0) TypeId(45) | Module(0) Typ
 Module TypeId(33) => sync Function {
   accepts: {
     params: [
-      optional input: Module(0) TypeId(32) (bindings: input:Module(0) TypeId(32))
+      optional input: Module(0) TypeId(32)
     ]
     type_args: [Module(0) TypeId(31)]
   }
@@ -434,7 +416,7 @@ Module TypeId(35) => instanceof Array<Module(0) TypeId(53)>
 Module TypeId(36) => sync Function {
   accepts: {
     params: [
-      optional encoding: Module(0) TypeId(51) (bindings: encoding:Module(0) TypeId(51))
+      optional encoding: Module(0) TypeId(51)
     ]
     type_args: []
   }
@@ -446,9 +428,9 @@ Module TypeId(37) => Module(0) TypeId(53) | Module(0) TypeId(53) | Module(0) Typ
 Module TypeId(38) => sync Function {
   accepts: {
     params: [
-      required reason: string (bindings: reason:string)
-      optional position: Module(0) TypeId(37) (bindings: position:Module(0) TypeId(37))
-      optional ruleId: string (bindings: ruleId:string)
+      required reason: string
+      optional position: Module(0) TypeId(37)
+      optional ruleId: string
     ]
     type_args: []
   }
@@ -460,9 +442,9 @@ Module TypeId(39) => never
 Module TypeId(40) => sync Function {
   accepts: {
     params: [
-      required reason: string (bindings: reason:string)
-      optional position: Module(0) TypeId(37) (bindings: position:Module(0) TypeId(37))
-      optional ruleId: string (bindings: ruleId:string)
+      required reason: string
+      optional position: Module(0) TypeId(37)
+      optional ruleId: string
     ]
     type_args: []
   }
@@ -519,7 +501,7 @@ Module TypeId(47) => Module(0) TypeId(44) | Module(0) TypeId(45) | Module(0) Typ
 Module TypeId(48) => sync Function {
   accepts: {
     params: [
-      optional input: Module(0) TypeId(47) (bindings: input:Module(0) TypeId(47))
+      optional input: Module(0) TypeId(47)
     ]
     type_args: [Module(0) TypeId(43)]
   }
@@ -535,7 +517,7 @@ Module TypeId(51) => Module(0) TypeId(8) | Module(0) TypeId(9) | Module(0) TypeI
 Module TypeId(52) => sync Function {
   accepts: {
     params: [
-      optional encoding: Module(0) TypeId(51) (bindings: encoding:Module(0) TypeId(51))
+      optional encoding: Module(0) TypeId(51)
     ]
     type_args: []
   }
@@ -549,9 +531,9 @@ Module TypeId(54) => Module(0) TypeId(53) | Module(0) TypeId(53) | Module(0) Typ
 Module TypeId(55) => sync Function {
   accepts: {
     params: [
-      required reason: string (bindings: reason:string)
-      optional position: Module(0) TypeId(54) (bindings: position:Module(0) TypeId(54))
-      optional ruleId: string (bindings: ruleId:string)
+      required reason: string
+      optional position: Module(0) TypeId(54)
+      optional ruleId: string
     ]
     type_args: []
   }
@@ -561,9 +543,9 @@ Module TypeId(55) => sync Function {
 Module TypeId(56) => sync Function {
   accepts: {
     params: [
-      required reason: string (bindings: reason:string)
-      optional position: Module(0) TypeId(54) (bindings: position:Module(0) TypeId(54))
-      optional ruleId: string (bindings: ruleId:string)
+      required reason: string
+      optional position: Module(0) TypeId(54)
+      optional ruleId: string
     ]
     type_args: []
   }

@@ -182,3 +182,11 @@ class DemoProperty {
         }
     }
 }
+
+function useRecursiveHookA() {
+    useRecursiveHookB();
+}
+
+function useRecursiveHookB() {
+    useRecursiveHookA();
+}

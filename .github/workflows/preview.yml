@@ -26,10 +26,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: depot-windows-2022
+          - os: depot-windows-2022-4
             target: x86_64-pc-windows-msvc
             code-target: win32-x64
-          - os: depot-windows-2022
+          - os: depot-windows-2022-4
             target: aarch64-pc-windows-msvc
             code-target: win32-arm64
           - os: depot-ubuntu-24.04
@@ -62,7 +62,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@f3a27926ea13d7be3ee2f4cbb925883cf9442b56 # v2.56.7
+        uses: taiki-e/install-action@c99cc51b309eee71a866715cfa08c922f11cf898 # v2.56.19
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -82,12 +82,12 @@ jobs:
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
-        if: matrix.os == 'depot-windows-2022'
+        if: matrix.os == 'depot-windows-2022-4'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
       - name: Copy CLI binary
-        if: matrix.os != 'depot-windows-2022'
+        if: matrix.os != 'depot-windows-2022-4'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
@@ -116,7 +116,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.88.0-bullseye@sha256:8eb96c7c77c04660a95d5e256869de0a18130f97624ef75c522ea886d4e51d95
+      image: rust:1.88.0-bullseye@sha256:b315f988b86912bafa7afd39a6ded0a497bf850ec36578ca9a3bdd6a14d5db4e
 
     steps:
       - name: Checkout repository

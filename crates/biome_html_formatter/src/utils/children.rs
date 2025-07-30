@@ -6,7 +6,7 @@ use std::{
 use biome_formatter::{
     Buffer, Format, FormatElement, FormatResult, format_args, prelude::*, write,
 };
-use biome_html_syntax::AnyHtmlElement;
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement};
 use biome_rowan::{AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText};
 
 use crate::{HtmlFormatter, context::HtmlFormatContext};
@@ -184,7 +184,7 @@ where
     let mut prev_child_was_content = false;
     for child in children {
         match child {
-            AnyHtmlElement::HtmlContent(text) => {
+            AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(text)) => {
                 // Split the text into words
                 // Keep track if there's any leading/trailing empty line, new line or whitespace
 

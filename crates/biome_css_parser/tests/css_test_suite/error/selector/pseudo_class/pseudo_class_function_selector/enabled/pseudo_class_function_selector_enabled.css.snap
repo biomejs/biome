@@ -31,7 +31,9 @@ CssRoot {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    GLOBAL_KW@1..7 "global" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@1..7 "global" [] [],
+                                    },
                                     L_PAREN@7..9 "(" [] [Whitespace(" ")],
                                 ],
                             },
@@ -55,7 +57,9 @@ CssRoot {
                             colon_token: COLON@11..13 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    GLOBAL_KW@13..19 "global" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@13..19 "global" [] [],
+                                    },
                                     L_PAREN@19..20 "(" [] [],
                                     R_PAREN@20..22 ")" [] [Whitespace(" ")],
                                 ],
@@ -80,7 +84,9 @@ CssRoot {
                             colon_token: COLON@24..26 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    GLOBAL_KW@26..32 "global" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@26..32 "global" [] [],
+                                    },
                                     L_PAREN@32..33 "(" [] [],
                                     CssCompoundSelector {
                                         nesting_selectors: CssNestedSelectorList [],
@@ -124,7 +130,9 @@ CssRoot {
                             colon_token: COLON@49..51 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    GLOBAL_KW@51..57 "global" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@51..57 "global" [] [],
+                                    },
                                     L_PAREN@57..58 "(" [] [],
                                     CssCompoundSelector {
                                         nesting_selectors: CssNestedSelectorList [],
@@ -167,7 +175,9 @@ CssRoot {
                             colon_token: COLON@73..75 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    GLOBAL_KW@75..81 "global" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@75..81 "global" [] [],
+                                    },
                                     L_PAREN@81..82 "(" [] [],
                                     CssComplexSelector {
                                         left: CssCompoundSelector {
@@ -218,7 +228,9 @@ CssRoot {
                             colon_token: COLON@96..98 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    GLOBAL_KW@98..104 "global" [] [],
+                                    CssIdentifier {
+                                        value_token: IDENT@98..104 "global" [] [],
+                                    },
                                     L_PAREN@104..105 "(" [] [],
                                     CssComplexSelector {
                                         left: CssComplexSelector {
@@ -281,7 +293,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..9
               0: COLON@0..1 ":" [] []
               1: CSS_BOGUS_PSEUDO_CLASS@1..9
-                0: GLOBAL_KW@1..7 "global" [] []
+                0: CSS_IDENTIFIER@1..7
+                  0: IDENT@1..7 "global" [] []
                 1: L_PAREN@7..9 "(" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@9..11
         0: L_CURLY@9..10 "{" [] []
@@ -296,7 +309,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@11..22
               0: COLON@11..13 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@13..22
-                0: GLOBAL_KW@13..19 "global" [] []
+                0: CSS_IDENTIFIER@13..19
+                  0: IDENT@13..19 "global" [] []
                 1: L_PAREN@19..20 "(" [] []
                 2: R_PAREN@20..22 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@22..24
@@ -312,7 +326,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@24..47
               0: COLON@24..26 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@26..47
-                0: GLOBAL_KW@26..32 "global" [] []
+                0: CSS_IDENTIFIER@26..32
+                  0: IDENT@26..32 "global" [] []
                 1: L_PAREN@32..33 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@33..37
                   0: CSS_NESTED_SELECTOR_LIST@33..33
@@ -340,7 +355,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@49..71
               0: COLON@49..51 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@51..71
-                0: GLOBAL_KW@51..57 "global" [] []
+                0: CSS_IDENTIFIER@51..57
+                  0: IDENT@51..57 "global" [] []
                 1: L_PAREN@57..58 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@58..62
                   0: CSS_NESTED_SELECTOR_LIST@58..58
@@ -367,7 +383,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@73..94
               0: COLON@73..75 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@75..94
-                0: GLOBAL_KW@75..81 "global" [] []
+                0: CSS_IDENTIFIER@75..81
+                  0: IDENT@75..81 "global" [] []
                 1: L_PAREN@81..82 "(" [] []
                 2: CSS_COMPLEX_SELECTOR@82..94
                   0: CSS_COMPOUND_SELECTOR@82..86
@@ -400,7 +417,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@96..117
               0: COLON@96..98 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@98..117
-                0: GLOBAL_KW@98..104 "global" [] []
+                0: CSS_IDENTIFIER@98..104
+                  0: IDENT@98..104 "global" [] []
                 1: L_PAREN@104..105 "(" [] []
                 2: CSS_COMPLEX_SELECTOR@105..117
                   0: CSS_COMPLEX_SELECTOR@105..116

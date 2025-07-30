@@ -2,17 +2,39 @@ mod astro;
 mod parse_error;
 
 use crate::parser::HtmlParser;
-use crate::syntax::astro::{is_at_fence, parse_astro_fence};
+use crate::syntax::astro::parse_astro_fence;
 use crate::syntax::parse_error::*;
 use crate::token_source::{HtmlEmbeddedLanguage, HtmlLexContext};
+use biome_console::markup;
 use biome_html_syntax::HtmlSyntaxKind::*;
-use biome_html_syntax::{HtmlSyntaxKind, T};
+use biome_html_syntax::{HtmlSyntaxKind, HtmlVariant, T};
 use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
+
+pub(crate) enum HtmlSyntaxFeatures {
+    /// Exclusive to those documents that support front matter at the top of the file
+    Frontmatter,
+    /// Exclusive to those documents that support text expressions
+    TextExpressions,
+}
+
+impl SyntaxFeature for HtmlSyntaxFeatures {
+    type Parser<'source> = HtmlParser<'source>;
+
+    fn is_supported(&self, p: &HtmlParser) -> bool {
+        match self {
+            Self::Frontmatter => p.file_source().is_astro(),
+            Self::TextExpressions => match p.file_source().variant() {
+                HtmlVariant::Standard | HtmlVariant::Astro | HtmlVariant::Svelte => false,
+                HtmlVariant::Vue => true,
+            },
+        }
+    }
+}
 
 const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<], T![/]);
 
@@ -30,8 +52,17 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
 
     p.eat(UNICODE_BOM);
 
-    if is_at_fence(p) {
-        parse_astro_fence(p).ok();
+    if p.at(T![---]) {
+        HtmlSyntaxFeatures::Frontmatter
+            .parse_exclusive_syntax(
+                p,
+                |p| parse_astro_fence(p),
+                |p, m| {
+                    p.err_builder("Frontmatter is only valid inside Astro files.", m.range(p))
+                        .with_hint("Remove it or rename the file to have the .astro extension.")
+                },
+            )
+            .ok();
     }
     parse_doc_type(p).ok();
     ElementList.parse_list(p);
@@ -172,6 +203,19 @@ impl ParseNodeList for ElementList {
         match p.cur() {
             T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
+            T!["{{"] => parse_text_expression(p).or_else(|| {
+                let m = p.start();
+                p.bump_remap_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
+                Present(m.complete(p, HTML_CONTENT))
+            }),
+            T!["}}"] => {
+                // The closing text expression should be handled by other functions.
+                // If we're here, we assume that text expressions are enabled and
+                // we remap to HTML_LITERAL
+                let m = p.start();
+                p.bump_remap_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
+                Present(m.complete(p, HTML_CONTENT))
+            }
             HTML_LITERAL => {
                 let m = p.start();
                 p.bump_with_context(HTML_LITERAL, HtmlLexContext::Regular);
@@ -294,4 +338,39 @@ fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {
     }
     p.expect(T!["]]>"]);
     Present(m.complete(p, HTML_CDATA_SECTION))
+}
+
+/// Parse a text expression, notably:
+///
+/// ```vue
+/// {{ expression }}
+/// ```
+fn parse_text_expression(p: &mut HtmlParser) -> ParsedSyntax {
+    if !HtmlSyntaxFeatures::TextExpressions.is_supported(p) {
+        return Absent;
+    }
+    if !is_at_l_text_expression(p) {
+        return Absent;
+    }
+    let m = p.start();
+    let range = p.cur_range();
+    p.bump_with_context(T!["{{"], HtmlLexContext::OutsideTag);
+
+    while p.at(HTML_LITERAL) {
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
+    }
+    if p.at(T![<]) && !p.at(EOF) {
+        p.error(
+            p.err_builder(markup!("Found a text expression that doesn't have the closing "<Emphasis>"}}"</Emphasis>), p.cur_range())
+                .with_detail(range, "This is where the opening expression was found:"),
+        );
+        m.abandon(p);
+        return Absent;
+    }
+    p.expect_with_context(T!["}}"], HtmlLexContext::OutsideTag);
+    Present(m.complete(p, HTML_TEXT_EXPRESSION))
+}
+
+pub(crate) fn is_at_l_text_expression(p: &mut HtmlParser) -> bool {
+    p.at(T!["{{"])
 }

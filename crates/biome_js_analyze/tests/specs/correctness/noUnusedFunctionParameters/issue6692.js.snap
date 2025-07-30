@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6692.js
+---
+# Input
+```js
+function _A(A) {}
+
+```
+
+# Diagnostics
+```
+issue6692.js:1:13 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+  > 1 │ function _A(A) {}
+      │             ^
+    2 │ 
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+```

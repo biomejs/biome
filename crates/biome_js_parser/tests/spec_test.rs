@@ -182,7 +182,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-type T = import;
+import defer * as feature from "./some-feature.js";
     "#;
 
     let root = parse(code, JsFileSource::ts(), JsParserOptions::default());

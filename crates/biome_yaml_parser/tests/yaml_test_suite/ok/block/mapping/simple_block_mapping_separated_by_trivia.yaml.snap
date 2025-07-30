@@ -1,0 +1,138 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+? a: 10
+# this is another trivia
+c: 30
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockMapping {
+                mapping_start_token: MAPPING_START@0..0 "" [] [],
+                properties: missing (optional),
+                entries: YamlBlockMapEntryList [
+                    YamlBlockMapExplicitEntry {
+                        question_mark_token: QUESTION@0..2 "?" [] [Whitespace(" ")],
+                        key: YamlBlockMapping {
+                            mapping_start_token: MAPPING_START@2..2 "" [] [],
+                            properties: missing (optional),
+                            entries: YamlBlockMapEntryList [
+                                YamlBlockMapImplicitEntry {
+                                    key: YamlFlowYamlNode {
+                                        properties: missing (optional),
+                                        content: YamlPlainScalar {
+                                            value_token: PLAIN_LITERAL@2..3 "a" [] [],
+                                        },
+                                    },
+                                    colon_token: COLON@3..5 ":" [] [Whitespace(" ")],
+                                    value: YamlFlowInBlockNode {
+                                        flow_start_token: FLOW_START@5..5 "" [] [],
+                                        flow: YamlFlowYamlNode {
+                                            properties: missing (optional),
+                                            content: YamlPlainScalar {
+                                                value_token: PLAIN_LITERAL@5..7 "10" [] [],
+                                            },
+                                        },
+                                        flow_end_token: FLOW_END@7..7 "" [] [],
+                                    },
+                                },
+                            ],
+                            mapping_end_token: MAPPING_END@7..8 "" [Newline("\n")] [],
+                        },
+                        colon_token: missing (optional),
+                        value: missing (optional),
+                    },
+                    YamlBlockMapImplicitEntry {
+                        key: YamlFlowYamlNode {
+                            properties: missing (optional),
+                            content: YamlPlainScalar {
+                                value_token: PLAIN_LITERAL@8..34 "c" [Comments("# this is another trivia"), Newline("\n")] [],
+                            },
+                        },
+                        colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
+                        value: YamlFlowInBlockNode {
+                            flow_start_token: FLOW_START@36..36 "" [] [],
+                            flow: YamlFlowYamlNode {
+                                properties: missing (optional),
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@36..38 "30" [] [],
+                                },
+                            },
+                            flow_end_token: FLOW_END@38..38 "" [] [],
+                        },
+                    },
+                ],
+                mapping_end_token: MAPPING_END@38..39 "" [Newline("\n")] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@39..39 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..39
+  0: YAML_DOCUMENT_LIST@0..39
+    0: YAML_DOCUMENT@0..39
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_MAPPING@0..39
+        0: MAPPING_START@0..0 "" [] []
+        1: (empty)
+        2: YAML_BLOCK_MAP_ENTRY_LIST@0..38
+          0: YAML_BLOCK_MAP_EXPLICIT_ENTRY@0..8
+            0: QUESTION@0..2 "?" [] [Whitespace(" ")]
+            1: YAML_BLOCK_MAPPING@2..8
+              0: MAPPING_START@2..2 "" [] []
+              1: (empty)
+              2: YAML_BLOCK_MAP_ENTRY_LIST@2..7
+                0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@2..7
+                  0: YAML_FLOW_YAML_NODE@2..3
+                    0: (empty)
+                    1: YAML_PLAIN_SCALAR@2..3
+                      0: PLAIN_LITERAL@2..3 "a" [] []
+                  1: COLON@3..5 ":" [] [Whitespace(" ")]
+                  2: YAML_FLOW_IN_BLOCK_NODE@5..7
+                    0: FLOW_START@5..5 "" [] []
+                    1: YAML_FLOW_YAML_NODE@5..7
+                      0: (empty)
+                      1: YAML_PLAIN_SCALAR@5..7
+                        0: PLAIN_LITERAL@5..7 "10" [] []
+                    2: FLOW_END@7..7 "" [] []
+              3: MAPPING_END@7..8 "" [Newline("\n")] []
+            2: (empty)
+            3: (empty)
+          1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@8..38
+            0: YAML_FLOW_YAML_NODE@8..34
+              0: (empty)
+              1: YAML_PLAIN_SCALAR@8..34
+                0: PLAIN_LITERAL@8..34 "c" [Comments("# this is another trivia"), Newline("\n")] []
+            1: COLON@34..36 ":" [] [Whitespace(" ")]
+            2: YAML_FLOW_IN_BLOCK_NODE@36..38
+              0: FLOW_START@36..36 "" [] []
+              1: YAML_FLOW_YAML_NODE@36..38
+                0: (empty)
+                1: YAML_PLAIN_SCALAR@36..38
+                  0: PLAIN_LITERAL@36..38 "30" [] []
+              2: FLOW_END@38..38 "" [] []
+        3: MAPPING_END@38..39 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@39..39 "" [] []
+
+```

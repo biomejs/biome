@@ -104,9 +104,9 @@ Module TypeId(17) => instanceof Promise<Module(0) TypeId(16)>
 Module TypeId(18) => sync Function {
   accepts: {
     params: [
-      required key: Module(0) TypeId(22) (bindings: key:Module(0) TypeId(22))
-      optional data: Module(0) TypeId(12) (bindings: data:Module(0) TypeId(12))
-      optional opts: Module(0) TypeId(14) (bindings: opts:Module(0) TypeId(14))
+      required key: Module(0) TypeId(22)
+      optional data: Module(0) TypeId(12)
+      optional opts: Module(0) TypeId(14)
     ]
     type_args: []
   }
@@ -115,9 +115,9 @@ Module TypeId(18) => sync Function {
 
 Module TypeId(19) => any
 
-Module TypeId(20) => Data = unknown reference
+Module TypeId(20) => Data = unknown
 
-Module TypeId(21) => T = unknown reference
+Module TypeId(21) => T = unknown
 
 Module TypeId(22) => unknown
 ```
@@ -184,9 +184,9 @@ Full TypeId(15) => instanceof Promise<Module(0) TypeId(16)>
 Full TypeId(16) => sync Function {
   accepts: {
     params: [
-      required key: Module(0) TypeId(22) (bindings: key:Module(0) TypeId(22))
-      optional data: Module(0) TypeId(12) (bindings: data:Module(0) TypeId(12))
-      optional opts: Module(0) TypeId(14) (bindings: opts:Module(0) TypeId(14))
+      required key: Module(0) TypeId(22)
+      optional data: Module(0) TypeId(12)
+      optional opts: Module(0) TypeId(14)
     ]
     type_args: []
   }
@@ -195,9 +195,9 @@ Full TypeId(16) => sync Function {
 
 Full TypeId(17) => any
 
-Full TypeId(18) => Data = unknown reference
+Full TypeId(18) => Data = unknown
 
-Full TypeId(19) => T = unknown reference
+Full TypeId(19) => T = unknown
 
 Full TypeId(20) => unknown
 ```

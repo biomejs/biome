@@ -1,5 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_compound_selector;
+use crate::syntax::parse_regular_identifier;
 use crate::syntax::selector::{
     eat_or_recover_selector_function_close_token, parse_compound_selector,
 };
@@ -32,7 +33,7 @@ pub(crate) fn parse_pseudo_class_function_compound_selector_list(
 
     let m = p.start();
 
-    p.bump_ts(PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST_SET);
+    parse_regular_identifier(p).ok();
     p.bump(T!['(']);
 
     let list = CompoundSelectorList.parse_list(p);

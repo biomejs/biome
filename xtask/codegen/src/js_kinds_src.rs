@@ -130,6 +130,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "boolean",
         "constructor",
         "declare",
+        "defer",
         "get",
         "infer",
         "is",
@@ -698,6 +699,9 @@ impl Field {
                     ("-->", LanguageKind::Html) => "comment_end",
                     ("<![CDATA[", LanguageKind::Html) => "cdata_start",
                     ("]]>", LanguageKind::Html) => "cdata_end",
+                    ("{{", LanguageKind::Html) => "l_double_curly",
+                    ("}}", LanguageKind::Html) => "r_double_curly",
+
                     _ => name,
                 };
 
