@@ -3788,6 +3788,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoQwikUseVisibleTaskConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoQwikUseVisibleTaskOptions" }
+			]
+		},
+		"NoQwikUseVisibleTaskOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReExportAllConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4829,6 +4839,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noQwikUseVisibleTask": {
+					"description": "Disallow useVisibleTask$() functions in Qwik components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactPropAssign": {
 					"description": "Disallow assigning to React component props.",
 					"anyOf": [
@@ -4938,6 +4955,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAnchorHref": {
+					"description": "Enforces href attribute for \\<a> elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentObjectDefinition": {
 					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
 					"anyOf": [
@@ -4986,6 +5010,13 @@
 					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseGoogleFontPreconnectConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useImageSize": {
+					"description": "Enforces that \\<img> elements have both width and height attributes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5042,6 +5073,13 @@
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikClasslist": {
+					"description": "Prefer using the class prop as a classlist over the classnames helper.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5519,6 +5557,11 @@
 					"description": "Next.js framework rules",
 					"type": "string",
 					"enum": ["next"]
+				},
+				{
+					"description": "Qwik framework rules",
+					"type": "string",
+					"enum": ["qwik"]
 				},
 				{
 					"description": "Vue.js framework rules",
@@ -7920,6 +7963,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoQwikUseVisibleTaskOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoQwikUseVisibleTaskOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoReExportAllOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9486,6 +9544,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseAnchorHrefOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseAnchorHrefOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseAriaActivedescendantWithTabindexOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10341,6 +10414,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseImageSizeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseImageSizeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseImportExtensionsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10788,6 +10876,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseParseIntRadixOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseQwikClasslistOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikClasslistOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -12734,6 +12837,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseAnchorHrefConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseAnchorHrefOptions" }
+			]
+		},
+		"UseAnchorHrefOptions": { "type": "null" },
 		"UseAriaActivedescendantWithTabindexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13268,6 +13378,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseImageSizeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseImageSizeOptions" }
+			]
+		},
+		"UseImageSizeOptions": { "type": "null" },
 		"UseImportExtensionsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13545,6 +13662,16 @@
 			]
 		},
 		"UseParseIntRadixOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikClasslistConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikClasslistOptions" }
+			]
+		},
+		"UseQwikClasslistOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
