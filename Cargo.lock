@@ -1519,9 +1519,15 @@ dependencies = [
  "biome_rowan",
  "biome_tailwind_factory",
  "biome_tailwind_syntax",
+ "biome_test_utils",
  "biome_unicode_table",
  "camino",
+ "insta",
  "mimalloc",
+ "quickcheck",
+ "quickcheck_macros",
+ "tests_macros",
+ "tracing",
 ]
 
 [[package]]

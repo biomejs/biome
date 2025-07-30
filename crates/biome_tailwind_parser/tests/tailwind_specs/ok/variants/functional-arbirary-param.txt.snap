@@ -1,0 +1,72 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+aria-[disabled]:text-red-500
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwFunctionalVariant {
+                    base_token: TW_BASE@0..4 "aria" [] [],
+                    minus_token: DASH@4..5 "-" [] [],
+                    value: TwArbitraryValue {
+                        l_brack_token: L_BRACKET@5..6 "[" [] [],
+                        value_token: TW_VALUE@6..14 "disabled" [] [],
+                        r_brack_token: R_BRACKET@14..15 "]" [] [],
+                    },
+                },
+                COLON@15..16 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@16..20 "text" [] [],
+                minus_token: DASH@20..21 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@21..29 "red-500" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@29..29 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..29
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..29
+    0: TW_FULL_CANDIDATE@0..29
+      0: TW_VARIANT_LIST@0..16
+        0: TW_FUNCTIONAL_VARIANT@0..15
+          0: TW_BASE@0..4 "aria" [] []
+          1: DASH@4..5 "-" [] []
+          2: TW_ARBITRARY_VALUE@5..15
+            0: L_BRACKET@5..6 "[" [] []
+            1: TW_VALUE@6..14 "disabled" [] []
+            2: R_BRACKET@14..15 "]" [] []
+        1: COLON@15..16 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@16..29
+        0: TW_BASE@16..20 "text" [] []
+        1: DASH@20..21 "-" [] []
+        2: TW_NAMED_VALUE@21..29
+          0: TW_VALUE@21..29 "red-500" [] [Newline("\n")]
+        3: (empty)
+      2: (empty)
+  2: EOF@29..29 "" [] []
+
+```

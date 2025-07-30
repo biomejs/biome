@@ -1,0 +1,67 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+text-
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwBogusCandidate {
+                items: [
+                    TW_BASE@0..4 "text" [] [],
+                    DASH@4..6 "-" [] [Newline("\n")],
+                ],
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@6..6 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..6
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..6
+    0: TW_FULL_CANDIDATE@0..6
+      0: TW_VARIANT_LIST@0..0
+      1: TW_BOGUS_CANDIDATE@0..6
+        0: TW_BASE@0..4 "text" [] []
+        1: DASH@4..6 "-" [] [Newline("\n")]
+      2: (empty)
+  2: EOF@6..6 "" [] []
+
+```
+
+## Diagnostics
+
+```
+missing-value.txt:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found 'text-'.
+  
+  > 1 │ text-
+      │ ^^^^^
+    2 │ 
+  
+  i Expected a candidate here.
+  
+  > 1 │ text-
+      │ ^^^^^
+    2 │ 
+  
+```
