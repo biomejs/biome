@@ -1,0 +1,1 @@
+hover:text-red-500
