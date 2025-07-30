@@ -443,31 +443,9 @@ impl ThisAliasResolver {
     }
 }
 
-trait MemberReadVisitor {
-    fn collect_read_references_from_method_body<T>(
-        member: T,
-        body: &JsFunctionBody,
-    ) -> Option<IntoIter<ClassPropertyReference>>
-    where
-        T: Into<MethodBodyElementOrStatementList>;
+struct MemberReadVisitor {}
 
-    fn collect_read_references_from_property_member(
-        js_static_member_expression: &JsStaticMemberExpression,
-    ) -> Option<IntoIter<ClassPropertyReference>>;
-
-    fn collect_read_references_from_constructor(
-        constructor_body: &JsFunctionBody,
-    ) -> Vec<ClassPropertyReference>;
-
-    fn visit_read_references_in_body<F>(
-        element: &MethodBodyElementOrStatementList,
-        this_aliases: &[ThisAliasesAndTheirScope],
-        on_name: &mut F,
-    ) where
-        F: FnMut(ClassPropertyReference);
-}
-
-impl MemberReadVisitor for JsClassMemberList {
+impl MemberReadVisitor {
     /// Iterates over all members of a JavaScript class and collects the names of members that are readonly accessed
     /// within class methods, setters, or the constructor.
     /// It analyzes method and setter bodies for assignments and updates to this properties,
@@ -556,16 +534,16 @@ impl MemberReadVisitor for JsClassMemberList {
                     if let Some(binding) = JsObjectBindingPattern::cast_ref(&node) {
                         if let Some(parent) = binding.syntax().parent()
                             && let Some(variable_declarator) =
-                                JsVariableDeclarator::cast_ref(&parent)
+                            JsVariableDeclarator::cast_ref(&parent)
                             && let Some(initializer) = variable_declarator.initializer()
                             && let Ok(expression) = initializer.expression()
                         {
                             for declarator in binding.properties() {
                                 if let Some(declarator) = declarator.ok()
                                     && ThisAliasResolver::is_this_or_alias(
-                                        &expression,
-                                        this_aliases,
-                                    )
+                                    &expression,
+                                    this_aliases,
+                                )
                                 {
                                     on_name(ClassPropertyReference {
                                         name: declarator.to_trimmed_text(),
@@ -593,7 +571,7 @@ impl MemberReadVisitor for JsClassMemberList {
                         })
                     {
                         if let Some(name) =
-                            Self::extract_static_assignment_name(&operand, this_aliases)
+                            ThisPatternResolver::extract_static_assignment_name(&operand, this_aliases)
                         {
                             on_name(name);
                         }
@@ -613,7 +591,7 @@ impl MemberReadVisitor for JsClassMemberList {
                         )
                     {
                         if let Some(name) =
-                            Self::extract_static_assignment_name(&operand, this_aliases)
+                            ThisPatternResolver::extract_static_assignment_name(&operand, this_aliases)
                         {
                             on_name(name);
                         }
@@ -628,31 +606,9 @@ impl MemberReadVisitor for JsClassMemberList {
     }
 }
 
-trait PropertyWritesVisitor {
-    fn collect_write_references_from_method_body<T>(
-        member: T,
-        body: &JsFunctionBody,
-    ) -> Option<IntoIter<ClassPropertyReference>>
-    where
-        T: Into<MethodBodyElementOrStatementList>;
+struct PropertyWritesVisitor {};
 
-    fn collect_write_references_from_property_member(
-        static_member: &JsStaticMemberExpression,
-    ) -> Option<IntoIter<ClassPropertyReference>>;
-
-    fn collect_write_references_from_constructor(
-        constructor_body: &JsFunctionBody,
-    ) -> Vec<ClassPropertyReference>;
-
-    fn visit_write_references_in_body<F>(
-        element: &MethodBodyElementOrStatementList,
-        this_aliases: &[ThisAliasesAndTheirScope],
-        on_name: &mut F,
-    ) where
-        F: FnMut(ClassPropertyReference);
-}
-
-impl PropertyWritesVisitor for JsClassMemberList {
+impl PropertyWritesVisitor {
     /// Iterates over all members of a JavaScript class and collects the names of properties that are reassigned (mutated)
     /// within class methods, setters, or the constructor.
     /// It analyzes method and setter bodies for assignments and updates to this properties,
@@ -731,14 +687,14 @@ impl PropertyWritesVisitor for JsClassMemberList {
                 JsAssignmentExpression::cast_ref(&child).and_then(|expr| expr.left().ok())
             {
                 if let Some(assignment) = left.as_js_array_assignment_pattern().cloned() {
-                    for name in Self::collect_array_assignment_names(&assignment, this_aliases) {
+                    for name in ThisPatternResolver::collect_array_assignment_names(&assignment, this_aliases) {
                         on_name(name);
                     }
                     return;
                 }
 
                 if let Some(assignment) = left.as_js_object_assignment_pattern().cloned() {
-                    for name in Self::collect_object_assignment_names(&assignment, this_aliases) {
+                    for name in ThisPatternResolver::collect_object_assignment_names(&assignment, this_aliases) {
                         on_name(name);
                     }
                     return;
@@ -746,7 +702,7 @@ impl PropertyWritesVisitor for JsClassMemberList {
 
                 if let Some(assignment) = left.as_any_js_assignment().cloned() {
                     if let Some(name) =
-                        Self::extract_static_assignment_name(&assignment, this_aliases)
+                        ThisPatternResolver::extract_static_assignment_name(&assignment, this_aliases)
                     {
                         on_name(name);
                     }
@@ -762,7 +718,7 @@ impl PropertyWritesVisitor for JsClassMemberList {
                 });
 
             if let Some(operand) = operand {
-                if let Some(name) = Self::extract_static_assignment_name(&operand, this_aliases) {
+                if let Some(name) = ThisPatternResolver::extract_static_assignment_name(&operand, this_aliases) {
                     on_name(name);
                 }
             } else if let Some(grand_child) = MethodBodyElementOrStatementList::cast_ref(&child) {
@@ -775,25 +731,9 @@ impl PropertyWritesVisitor for JsClassMemberList {
     }
 }
 
-/// deals with destructuring of [this.prop, ...this.#private] and {this.prop, ...this.#private}
-trait ThisPatternResolver {
-    fn collect_array_assignment_names(
-        array_assignment_pattern: &JsArrayAssignmentPattern,
-        this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> Vec<ClassPropertyReference>;
+struct ThisPatternResolver {}
 
-    fn collect_object_assignment_names(
-        assignment: &JsObjectAssignmentPattern,
-        this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> Vec<ClassPropertyReference>;
-
-    fn extract_static_assignment_name(
-        operand: &AnyJsAssignment,
-        this_aliases: &[ThisAliasesAndTheirScope],
-    ) -> Option<ClassPropertyReference>;
-}
-
-impl ThisPatternResolver for JsClassMemberList {
+impl ThisPatternResolver {
     /// Extracts the names of all properties assigned to this (or its aliases) within the array assignment pattern.
     /// It handles both direct elements and rest elements (e.g., [this.prop, ...this.#private])
     /// and extracts property names that are being assigned via destructuring.
