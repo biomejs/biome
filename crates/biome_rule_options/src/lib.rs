@@ -253,6 +253,7 @@ pub mod use_consistent_curly_braces;
 pub mod use_consistent_member_accessibility;
 pub mod use_consistent_object_definition;
 pub mod use_consistent_response;
+pub mod use_consistent_type_definitions;
 pub mod use_const;
 pub mod use_date_now;
 pub mod use_default_parameter_last;
