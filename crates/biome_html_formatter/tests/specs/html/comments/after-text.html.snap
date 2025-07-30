@@ -32,4 +32,5 @@ Self close void elements: never
 
 ```html
 Foo
+
 <!-- Bar -->```

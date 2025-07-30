@@ -40,7 +40,11 @@ x => {
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,5 +4,5 @@
+@@ -1,8 +1,7 @@
+-<!--interpolations in html should be treated as normal text-->
+-<div>
++<!--interpolations in html should be treated as normal text--><div>
+   Fuga magnam facilis. Voluptatem quaerat porro.{{ x => { const hello = 'world'
    return hello; } }} Magni consectetur in et molestias neque esse voluptatibus
    voluptas. {{ some_variable }} Eum quia nihil nulla esse. Dolorem asperiores
    vero est error {{ preserve invalid interpolation }} reprehenderit voluptates
@@ -52,8 +56,7 @@ x => {
 # Output
 
 ```html
-<!--interpolations in html should be treated as normal text-->
-<div>
+<!--interpolations in html should be treated as normal text--><div>
   Fuga magnam facilis. Voluptatem quaerat porro.{{ x => { const hello = 'world'
   return hello; } }} Magni consectetur in et molestias neque esse voluptatibus
   voluptas. {{ some_variable }} Eum quia nihil nulla esse. Dolorem asperiores

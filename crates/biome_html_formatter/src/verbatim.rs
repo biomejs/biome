@@ -1,11 +1,16 @@
+use crate::HtmlFormatter;
 use crate::context::HtmlFormatContext;
+use biome_formatter::comments::{CommentKind, SourceComment};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
-use biome_formatter::prelude::{Tag, dynamic_text};
-use biome_formatter::trivia::{FormatLeadingComments, FormatTrailingComments};
+use biome_formatter::prelude::{
+    Tag, dynamic_text, empty_line, expand_parent, format_with, hard_line_break, line_suffix,
+    maybe_space, should_nestle_adjacent_doc_comments, soft_line_break_or_space, space,
+};
+
 use biome_formatter::{
-    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
-    FormatWithRule, LINE_TERMINATORS, normalize_newlines,
+    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatRefWithRule,
+    FormatResult, FormatWithRule, LINE_TERMINATORS, normalize_newlines,
 };
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode};
 use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
@@ -101,7 +106,10 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             let (outside_trimmed_range, in_trimmed_range) =
                 leading_comments.split_at(outside_trimmed_range);
 
-            biome_formatter::write!(f, [FormatLeadingComments::Comments(outside_trimmed_range)])?;
+            biome_formatter::write!(
+                f,
+                [FormatLHtmlLeadingComments::Comments(outside_trimmed_range)]
+            )?;
 
             for comment in in_trimmed_range {
                 comment.mark_formatted();
@@ -158,7 +166,10 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
                 comment.mark_formatted();
             }
 
-            biome_formatter::write!(f, [FormatTrailingComments::Comments(outside_trimmed_range)])?;
+            biome_formatter::write!(
+                f,
+                [FormatLHtmlTrailingComments::Comments(outside_trimmed_range)]
+            )?;
         }
 
         f.write_element(FormatElement::Tag(Tag::EndVerbatim))
@@ -210,5 +221,158 @@ where
             }
             Err(err) => Err(err),
         }
+    }
+}
+
+/// Formats the leading comments of `node`
+pub const fn format_html_leading_comments(node: &HtmlSyntaxNode) -> FormatLHtmlLeadingComments {
+    FormatLHtmlLeadingComments::Node(node)
+}
+
+/// Formats the leading comments of a node.
+#[derive(Debug, Copy, Clone)]
+pub enum FormatLHtmlLeadingComments<'a> {
+    Node(&'a HtmlSyntaxNode),
+    Comments(&'a [SourceComment<HtmlLanguage>]),
+}
+
+impl<'a> Format<HtmlFormatContext> for FormatLHtmlLeadingComments<'a> {
+    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
+        let comments = f.context().comments().clone();
+        let leading_comments = match self {
+            FormatLHtmlLeadingComments::Node(node) => comments.leading_comments(node),
+            FormatLHtmlLeadingComments::Comments(comments) => comments,
+        };
+
+        let mut leading_comments_iter = leading_comments.iter().peekable();
+        while let Some(comment) = leading_comments_iter.next() {
+            let format_comment = FormatRefWithRule::new(
+                comment,
+                <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
+            );
+            biome_formatter::write!(f, [format_comment])?;
+
+            match comment.kind() {
+                CommentKind::Block | CommentKind::InlineBlock => {
+                    unreachable!("Html comments only have line comments")
+                }
+
+                CommentKind::Line => {
+                    // TODO: review logic here
+                    match comment.lines_after() {
+                        0 => {}
+                        1 => {
+                            if comment.lines_before() == 0 {
+                                biome_formatter::write!(f, [soft_line_break_or_space()])?;
+                            } else {
+                                biome_formatter::write!(f, [hard_line_break()])?;
+                            }
+                        }
+                        _ => biome_formatter::write!(f, [empty_line()])?,
+                    }
+                }
+            }
+
+            comment.mark_formatted()
+        }
+
+        Ok(())
+    }
+}
+
+/// Formats the leading comments of `node`
+pub const fn format_html_trailing_comments(node: &HtmlSyntaxNode) -> FormatLHtmlTrailingComments {
+    FormatLHtmlTrailingComments::Node(node)
+}
+
+/// Formats the leading comments of a node.
+#[derive(Debug, Copy, Clone)]
+pub enum FormatLHtmlTrailingComments<'a> {
+    Node(&'a HtmlSyntaxNode),
+    Comments(&'a [SourceComment<HtmlLanguage>]),
+}
+
+impl<'a> Format<HtmlFormatContext> for FormatLHtmlTrailingComments<'a> {
+    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
+        let comments = f.context().comments().clone();
+        let trailing_comments = match self {
+            FormatLHtmlTrailingComments::Node(node) => comments.trailing_comments(node),
+            FormatLHtmlTrailingComments::Comments(comments) => comments,
+        };
+        let mut total_lines_before = 0;
+        let mut previous_comment: Option<
+            &SourceComment<<HtmlFormatContext as CstFormatContext>::Language>,
+        > = None;
+
+        for comment in trailing_comments {
+            total_lines_before += comment.lines_before();
+
+            let format_comment = FormatRefWithRule::new(
+                comment,
+                <HtmlFormatContext as CstFormatContext>::CommentRule::default(),
+            );
+
+            let should_nestle = previous_comment.is_some_and(|previous_comment| {
+                should_nestle_adjacent_doc_comments(previous_comment, comment)
+            });
+
+            // This allows comments at the end of nested structures:
+            // {
+            //   x: 1,
+            //   y: 2
+            //   // A comment
+            // }
+            // Those kinds of comments are almost always leading comments, but
+            // here it doesn't go "outside" the block and turns it into a
+            // trailing comment for `2`. We can simulate the above by checking
+            // if this a comment on its own line; normal trailing comments are
+            // always at the end of another expression.
+            if total_lines_before > 0 {
+                biome_formatter::write!(
+                    f,
+                    [
+                        line_suffix(&format_with(|f| {
+                            match comment.lines_before() {
+                                _ if should_nestle => {}
+                                0 => {
+                                    // If the comment is immediately following a block-like comment,
+                                    // then it can stay on the same line with just a space between.
+                                    // Otherwise, it gets a hard break.
+                                    //
+                                    //   /** hello */ // hi
+                                    //   /**
+                                    //    * docs
+                                    //   */ /* still on the same line */
+                                    if previous_comment.is_some_and(|previous_comment| {
+                                        previous_comment.kind().is_line()
+                                    }) {
+                                        biome_formatter::write!(f, [hard_line_break()])?;
+                                    } else {
+                                        biome_formatter::write!(f, [space()])?;
+                                    }
+                                }
+                                1 => biome_formatter::write!(f, [hard_line_break()])?,
+                                _ => biome_formatter::write!(f, [empty_line()])?,
+                            };
+
+                            biome_formatter::write!(f, [format_comment])
+                        })),
+                        expand_parent()
+                    ]
+                )?;
+            } else {
+                let content = format_with(|f| biome_formatter::write!(f, [format_comment]));
+                if comment.kind().is_line() {
+                    biome_formatter::write!(f, [line_suffix(&content), expand_parent()])?;
+                } else {
+                    biome_formatter::write!(f, [content])?;
+                }
+            }
+
+            previous_comment = Some(comment);
+            comment.mark_formatted();
+        }
+
+        Ok(())
     }
 }

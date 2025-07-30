@@ -5,7 +5,7 @@
 
 pub(crate) use crate::{
     AsFormat, FormatNodeRule, FormatResult, FormatRule, FormattedIterExt, HtmlFormatContext,
-    HtmlFormatter, format_removed, format_replaced, verbatim::*,
+    HtmlFormatter, trivia::*, verbatim::*,
 };
 pub(crate) use biome_formatter::prelude::*;
 pub(crate) use biome_rowan::{AstNode, AstNodeList};

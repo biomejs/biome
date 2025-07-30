@@ -200,7 +200,6 @@ impl ParseNodeList for ElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        dbg!(p.cur());
         match p.cur() {
             T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
