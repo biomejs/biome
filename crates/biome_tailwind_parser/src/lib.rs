@@ -44,7 +44,7 @@ impl TailwindParse {
 
     /// The syntax node represented by this Parse result
     ///
-    /// ```no_run
+    /// ```
     /// # use biome_tailwind_parser::parse_tailwind;
     /// # use biome_tailwind_syntax::TailwindSyntaxKind;
     /// # use biome_rowan::{AstNode, AstNodeList, SyntaxError};

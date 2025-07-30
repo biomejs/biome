@@ -1,0 +1,57 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+text-(--my-color)
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..4 "text" [] [],
+                minus_token: DASH@4..5 "-" [] [],
+                value: TwCssVariableValue {
+                    l_paren_token: L_PAREN@5..6 "(" [] [],
+                    value_token: TW_VALUE@6..16 "--my-color" [] [],
+                    r_paren_token: R_PAREN@16..18 ")" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@18..18 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..18
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..18
+    0: TW_FULL_CANDIDATE@0..18
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..18
+        0: TW_BASE@0..4 "text" [] []
+        1: DASH@4..5 "-" [] []
+        2: TW_CSS_VARIABLE_VALUE@5..18
+          0: L_PAREN@5..6 "(" [] []
+          1: TW_VALUE@6..16 "--my-color" [] []
+          2: R_PAREN@16..18 ")" [] [Newline("\n")]
+        3: (empty)
+      2: (empty)
+  2: EOF@18..18 "" [] []
+
+```

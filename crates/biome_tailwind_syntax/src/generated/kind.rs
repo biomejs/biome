@@ -20,16 +20,16 @@ pub enum TailwindSyntaxKind {
     R_BRACKET,
     L_PAREN,
     R_PAREN,
+    WHITESPACE,
     TW_BASE,
     TW_VALUE,
     TW_SELECTOR,
     TW_PROPERTY,
     ERROR_TOKEN,
     NEWLINE,
-    WHITESPACE,
     TW_ROOT,
     TW_CANDIDATE_LIST,
-    TW_CANDIDATE,
+    TW_FULL_CANDIDATE,
     TW_ARBITRARY_CANDIDATE,
     TW_STATIC_CANDIDATE,
     TW_FUNCTIONAL_CANDIDATE,
@@ -37,16 +37,15 @@ pub enum TailwindSyntaxKind {
     TW_ARBITRARY_VARIANT,
     TW_STATIC_VARIANT,
     TW_FUNCTIONAL_VARIANT,
-    TW_FUNCTIONAL_VARIANT_VALUE,
     TW_NAMED_VALUE,
     TW_ARBITRARY_VALUE,
     TW_CSS_VARIABLE_VALUE,
-    TW_NAMED_MODIFIER,
-    TW_ARBITRARY_MODIFIER,
+    TW_MODIFIER,
     TW_BOGUS,
     TW_BOGUS_CANDIDATE,
     TW_BOGUS_VARIANT,
     TW_BOGUS_MODIFIER,
+    TW_BOGUS_VALUE,
     #[doc(hidden)]
     __LAST,
 }
@@ -55,7 +54,7 @@ impl TailwindSyntaxKind {
     pub const fn is_punct(self) -> bool {
         matches!(
             self,
-            SLASH | BANG | DASH | COLON | L_BRACKET | R_BRACKET | L_PAREN | R_PAREN
+            SLASH | BANG | DASH | COLON | L_BRACKET | R_BRACKET | L_PAREN | R_PAREN | WHITESPACE
         )
     }
     pub const fn is_literal(self) -> bool {
@@ -77,6 +76,7 @@ impl TailwindSyntaxKind {
             R_BRACKET => "]",
             L_PAREN => "(",
             R_PAREN => ")",
+            WHITESPACE => " ",
             TW_BASE => "base",
             TW_VALUE => "value",
             TW_SELECTOR => "selector",
@@ -88,4 +88,4 @@ impl TailwindSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [/] => { $ crate :: TailwindSyntaxKind :: SLASH } ; [!] => { $ crate :: TailwindSyntaxKind :: BANG } ; [-] => { $ crate :: TailwindSyntaxKind :: DASH } ; [:] => { $ crate :: TailwindSyntaxKind :: COLON } ; ['['] => { $ crate :: TailwindSyntaxKind :: L_BRACKET } ; [']'] => { $ crate :: TailwindSyntaxKind :: R_BRACKET } ; ['('] => { $ crate :: TailwindSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: TailwindSyntaxKind :: R_PAREN } ; [ident] => { $ crate :: TailwindSyntaxKind :: IDENT } ; [EOF] => { $ crate :: TailwindSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: TailwindSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: TailwindSyntaxKind :: HASH } ; }
+macro_rules ! T { [/] => { $ crate :: TailwindSyntaxKind :: SLASH } ; [!] => { $ crate :: TailwindSyntaxKind :: BANG } ; [-] => { $ crate :: TailwindSyntaxKind :: DASH } ; [:] => { $ crate :: TailwindSyntaxKind :: COLON } ; ['['] => { $ crate :: TailwindSyntaxKind :: L_BRACKET } ; [']'] => { $ crate :: TailwindSyntaxKind :: R_BRACKET } ; ['('] => { $ crate :: TailwindSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: TailwindSyntaxKind :: R_PAREN } ; [' '] => { $ crate :: TailwindSyntaxKind :: WHITESPACE } ; [ident] => { $ crate :: TailwindSyntaxKind :: IDENT } ; [EOF] => { $ crate :: TailwindSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: TailwindSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: TailwindSyntaxKind :: HASH } ; }
