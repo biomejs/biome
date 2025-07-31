@@ -364,7 +364,10 @@ fn is_ignored_by_top_level_config(
         .root_settings
         .vcs_settings
         .is_ignored(path, root_path);
-
+    eprintln!(
+        "!is_included: {}, is_ignored_by_vcs: {}",
+        !is_included, is_ignored_by_vcs
+    );
     !is_included || is_ignored_by_vcs
 }
 

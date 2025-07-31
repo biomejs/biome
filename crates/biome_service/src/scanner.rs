@@ -77,7 +77,7 @@ pub enum IndexRequestKind {
     Explicit(IndexTrigger),
 
     /// The file is being indexed because it is a dependency of one or more
-    /// files that were explicitely indexed.
+    /// files that were explicitly indexed.
     Dependency(IndexTrigger),
 }
 

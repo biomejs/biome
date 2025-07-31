@@ -288,12 +288,12 @@ impl WorkspaceServer {
     ) -> Result<InternalOpenFileResult, WorkspaceError> {
         let OpenFileParams {
             project_key,
-            path,
+            path: biome_path,
             content,
             document_file_source,
             persist_node_cache,
         } = params;
-        let path: Utf8PathBuf = path.into();
+        let path: Utf8PathBuf = biome_path.clone().into();
 
         if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
             return Ok(Default::default());
@@ -360,8 +360,6 @@ impl WorkspaceServer {
             .and_then(|syntax| syntax.as_ref().ok())
             .map(|parse| parse.root());
 
-        let is_indexed = reason.is_index();
-
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let (embedded_scripts, embedded_styles) = if let Some(DocumentFileSource::Html(_)) =
             self.get_source(file_source_index)
@@ -376,7 +374,9 @@ impl WorkspaceServer {
             (Vec::new(), Vec::new())
         };
 
-        let is_indexed = if is_indexed {
+        // Manifest files should always be added to the documents because we need their
+        // source inside the module graph
+        let is_indexed = if reason.is_index() && !biome_path.is_manifest() {
             // If the request is for indexing, we don't insert any document,
             // we only care about updating the module graph.
             true
@@ -431,7 +431,8 @@ impl WorkspaceServer {
             self.is_indexed(&path)
         };
 
-        if is_indexed {
+        // Manifest files need to update the module graph
+        if is_indexed || biome_path.is_manifest() {
             let dependencies =
                 self.update_service_data(UpdateKind::AddedOrChanged(reason), &path, root)?;
             Ok(InternalOpenFileResult { dependencies })
@@ -617,25 +618,21 @@ impl WorkspaceServer {
                 }
 
                 match scan_kind {
-                    ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => {
-                        // For required files, we don't care if the file is ignored
-                        // by the configuration or not. But we do care it is not
-                        // inside an ignored folder.
-                        if path.is_required_during_scan() {
-                            match ignore_kind {
-                                IgnoreKind::Path => false,
-                                IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
-                                    self.projects.is_ignored_by_top_level_config(
-                                        project_key,
-                                        folder_path,
-                                        ignore_kind,
-                                    )
-                                }),
-                            }
-                        } else {
-                            true
-                        }
-                    }
+                    ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => match ignore_kind
+                    {
+                        IgnoreKind::Path => self.projects.is_ignored_by_top_level_config(
+                            project_key,
+                            &path,
+                            ignore_kind,
+                        ),
+                        IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
+                            self.projects.is_ignored_by_top_level_config(
+                                project_key,
+                                folder_path,
+                                ignore_kind,
+                            )
+                        }),
+                    },
                     ScanKind::Project => {
                         if path.is_dependency() {
                             // During the initial scan, we only care about
@@ -1286,6 +1283,7 @@ impl Workspace for WorkspaceServer {
                         &settings.get_plugins_for_path(&path),
                     )
                     .map_err(WorkspaceError::plugin_errors)?;
+
                 let results = lint(LintParams {
                     parse,
                     settings: &settings,
