@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+"use client";
+
+export default async function MyComponent() {
+  return <div>Hello</div>;
+}
+
+// Another case
+"use client";
+
+async function AnotherComponent() {
+  return <span>World</span>;
+}
+export default AnotherComponent;
+```
+
+# Diagnostics
+```
+invalid.js:3:16 lint/nursery/noAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Async client component MyComponent is not allowed.
+  
+    1 │ "use client";
+    2 │ 
+  > 3 │ export default async function MyComponent() {
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │   return <div>Hello</div>;
+  > 5 │ }
+      │ ^
+    6 │ 
+    7 │ // Another case
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Async client component AnotherComponent is not allowed.
+  
+     8 │ "use client";
+     9 │ 
+  > 10 │ async function AnotherComponent() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 11 │   return <span>World</span>;
+  > 12 │ }
+       │ ^
+    13 │ export default AnotherComponent;
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```

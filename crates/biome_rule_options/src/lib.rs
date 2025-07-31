@@ -12,6 +12,7 @@ pub mod no_aria_hidden_on_focusable;
 pub mod no_aria_unsupported_elements;
 pub mod no_array_index_key;
 pub mod no_assign_in_expressions;
+pub mod no_async_client_component;
 pub mod no_async_promise_executor;
 pub mod no_autofocus;
 pub mod no_await_in_loop;

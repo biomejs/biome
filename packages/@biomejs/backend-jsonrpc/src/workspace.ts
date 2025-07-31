@@ -1551,6 +1551,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Succinct description of the rule.
+	 */
+	noAsyncClientComponent?: RuleConfiguration_for_NoAsyncClientComponentOptions;
+	/**
 	 * Disallow await inside loops.
 	 */
 	noAwaitInLoop?: RuleConfiguration_for_NoAwaitInLoopOptions;
@@ -2867,6 +2871,9 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoAsyncClientComponentOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoAsyncClientComponentOptions;
 export type RuleConfiguration_for_NoAwaitInLoopOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAwaitInLoopOptions;
@@ -5043,6 +5050,16 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 * Rule's options
 	 */
 	options: UseYieldOptions;
+}
+export interface RuleWithOptions_for_NoAsyncClientComponentOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoAsyncClientComponentOptions;
 }
 export interface RuleWithOptions_for_NoAwaitInLoopOptions {
 	/**
@@ -7757,6 +7774,7 @@ export interface UseJsxKeyInIterableOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoAsyncClientComponentOptions {}
 export interface NoAwaitInLoopOptions {}
 export interface NoBitwiseOperatorsOptions {
 	/**
@@ -8464,6 +8482,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/noAsyncClientComponent"
 	| "lint/nursery/noAwaitInLoop"
 	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
@@ -8489,6 +8508,7 @@ export type Category =
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noQuickfixBiome"
+	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
@@ -8508,14 +8528,13 @@ export type Category =
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
-	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
-	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
+	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentResponse"
@@ -8524,20 +8543,20 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"
-	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useGoogleFontPreconnect"
+	| "lint/nursery/useImageSize"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
-	| "lint/nursery/useImageSize"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
 	| "lint/nursery/useObjectSpread"
 	| "lint/nursery/useParseIntRadix"
+	| "lint/nursery/useQwikClasslist"
+	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useReadonlyClassProperties"
 	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"
