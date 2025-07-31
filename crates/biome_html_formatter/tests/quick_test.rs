@@ -13,19 +13,23 @@ mod language {
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
-    let src = r#"---
-layout: foo
----
-Test <a
-href="https://prettier.io">abc</a>.
-
-    "#;
+    //     let src = r#"
+    // <span>foo</span>
+    // <!-- biome-ignore format: reason -->
+    // foo bar baz boof
+    // quick brown fox
+    // "#;
+    let src = r#"
+foo bar baz boof
+<!-- comment -->
+quick brown fox
+"#;
     let source_type = HtmlFileSource::html();
     let tree = parse_html(src, source_type);
     let options = HtmlFormatOptions::new(HtmlFileSource::html())
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())
-        .with_attribute_position(AttributePosition::Multiline);
+        .with_attribute_position(AttributePosition::Auto);
 
     let doc = format_node(options.clone(), &tree.syntax()).unwrap();
     let result = doc.print().unwrap();

@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: suppressions/basic-suppression.html
+---
+# Input
+
+```html
+<!-- biome-ignore format: don't break this -->
+<div>This is some really long content that should be broken on multiple lines. However, it won't because there is a suppression comment. This is the desired behavior.</div>
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+Self close void elements: never
+-----
+
+```html
+<!-- biome-ignore format: don't break this -->
+<div>This is some really long content that should be broken on multiple lines. However, it won't because there is a suppression comment. This is the desired behavior.</div>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: <div>This is some really long content that should be broken on multiple lines. However, it won't because there is a suppression comment. This is the desired behavior.</div>
+```
