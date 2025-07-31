@@ -206,7 +206,10 @@ fn handle_object_assign(node: &JsStaticMemberExpression, model: &SemanticModel) 
     let first = arg_iter.next()?.ok()?;
     let first = first.as_any_js_expression()?;
 
-    if first.as_js_object_expression() == None && first.as_js_array_expression() == None {
+    if first.as_js_object_expression() == None
+        && first.as_js_array_expression() == None
+        && first.as_js_new_expression() == None
+    {
         return None;
     }
 
