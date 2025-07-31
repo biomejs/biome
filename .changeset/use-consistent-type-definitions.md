@@ -35,3 +35,4 @@ type Point = { x: number; y: number; };
 ```
 
 The rule will automatically fix simple cases where conversion is straightforward.
+
