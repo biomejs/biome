@@ -4732,7 +4732,7 @@
 			"type": "object",
 			"properties": {
 				"noAsyncClientComponent": {
-					"description": "Succinct description of the rule.",
+					"description": "Prevent client components from being async functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoAsyncClientComponentConfiguration" },
 						{ "type": "null" }

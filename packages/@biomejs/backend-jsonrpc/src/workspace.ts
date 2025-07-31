@@ -1551,7 +1551,7 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
-	 * Succinct description of the rule.
+	 * Prevent client components from being async functions.
 	 */
 	noAsyncClientComponent?: RuleConfiguration_for_NoAsyncClientComponentOptions;
 	/**
