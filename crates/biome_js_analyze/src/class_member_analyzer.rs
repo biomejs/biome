@@ -384,7 +384,7 @@ impl MemberReadVisitor {
     fn visit_read_references_in_body<F>(
         method_body_element: &JsSyntaxNode,
         this_aliases: &[ThisAliasesAndTheirScope],
-        on_name: &mut F,
+        on_read_name: &mut F,
     ) where
         F: FnMut(ClassPropertyReference),
     {
@@ -408,7 +408,7 @@ impl MemberReadVisitor {
                                         this_aliases,
                                     )
                                 {
-                                    on_name(ClassPropertyReference {
+                                    on_read_name(ClassPropertyReference {
                                         name: declarator.to_trimmed_text(),
                                         range: declarator.syntax().text_trimmed_range(),
                                     });
@@ -419,7 +419,7 @@ impl MemberReadVisitor {
                         if let Ok(object) = static_member.object() {
                             if ThisAliasResolver::is_this_or_alias(&object, this_aliases) {
                                 if let Ok(member) = static_member.member() {
-                                    on_name(ClassPropertyReference {
+                                    on_read_name(ClassPropertyReference {
                                         name: member.to_trimmed_text(),
                                         range: static_member.syntax().text_trimmed_range(),
                                     });
@@ -437,7 +437,7 @@ impl MemberReadVisitor {
                             &operand,
                             this_aliases,
                         ) {
-                            on_name(name);
+                            on_read_name(name);
                         }
                     } else if let Some(assignment) = JsAssignmentExpression::cast_ref(&node)
                         && let Ok(left) = assignment.left()
@@ -458,11 +458,8 @@ impl MemberReadVisitor {
                             &operand,
                             this_aliases,
                         ) {
-                            on_name(name);
+                            on_read_name(name);
                         }
-                    } else {
-                        // uncomment the following line to debug what other entities should be potentially processed
-                        // println!("node is {:?}: {:?}", node, node.to_string());
                     }
                 }
                 biome_rowan::WalkEvent::Leave(_) => {}
@@ -538,7 +535,7 @@ impl PropertyWritesVisitor {
     fn visit_write_references_in_body<F>(
         method_body_element: &JsSyntaxNode,
         this_aliases: &[ThisAliasesAndTheirScope],
-        on_name: &mut F,
+        on_write_name: &mut F,
     ) where
         F: FnMut(ClassPropertyReference),
     {
@@ -550,32 +547,23 @@ impl PropertyWritesVisitor {
                     if let Some(left) =
                         JsAssignmentExpression::cast_ref(&node).and_then(|expr| expr.left().ok())
                     {
-                        if let Some(assignment) = left.as_js_array_assignment_pattern().cloned() {
-                            for name in ThisPatternResolver::collect_array_assignment_names(
-                                &assignment,
-                                this_aliases,
-                            ) {
-                                on_name(name);
-                            }
+                        if let Some(array) = left.as_js_array_assignment_pattern().cloned() {
+                            ThisPatternResolver::collect_array_assignment_names(&array, this_aliases)
+                                .into_iter()
+                                .for_each(on_write_name);
                             return;
                         }
 
-                        if let Some(assignment) = left.as_js_object_assignment_pattern().cloned() {
-                            for name in ThisPatternResolver::collect_object_assignment_names(
-                                &assignment,
-                                this_aliases,
-                            ) {
-                                on_name(name);
-                            }
+                        if let Some(object) = left.as_js_object_assignment_pattern().cloned() {
+                            ThisPatternResolver::collect_object_assignment_names(&object, this_aliases)
+                                .into_iter()
+                                .for_each(on_write_name);
                             return;
                         }
 
                         if let Some(assignment) = left.as_any_js_assignment().cloned() {
-                            if let Some(name) = ThisPatternResolver::extract_static_assignment_name(
-                                &assignment,
-                                this_aliases,
-                            ) {
-                                on_name(name);
+                            if let Some(name) = ThisPatternResolver::extract_static_assignment_name(&assignment, this_aliases) {
+                                on_write_name(name);
                             }
                             return;
                         }
@@ -593,7 +581,7 @@ impl PropertyWritesVisitor {
                             &operand,
                             this_aliases,
                         ) {
-                            on_name(name);
+                            on_write_name(name);
                         }
                     }
                 }
