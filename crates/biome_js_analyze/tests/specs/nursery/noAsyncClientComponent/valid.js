@@ -1,0 +1,20 @@
+/* should not generate diagnostics */
+
+// No "use client" directive - async function is allowed
+export default async function MyComponent() {
+  return <div>Hello</div>;
+}
+
+// "use client" but function name doesn't start with uppercase
+"use client";
+
+export default async function myFunction() {
+  return 'not a component';
+}
+
+// "use client" but not async
+"use client";
+
+export default function MyComponent() {
+  return <div>Hello</div>;
+}

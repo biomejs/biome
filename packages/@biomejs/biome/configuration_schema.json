@@ -2449,6 +2449,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAsyncClientComponentConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoAsyncClientComponentOptions" }
+			]
+		},
+		"NoAsyncClientComponentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAsyncPromiseExecutorConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4774,6 +4784,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAsyncClientComponent": {
+					"description": "Prevent client components from being async functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoAsyncClientComponentConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAwaitInLoop": {
 					"description": "Disallow await inside loops.",
 					"anyOf": [
@@ -5891,6 +5908,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoAssignInExpressionsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoAsyncClientComponentOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoAsyncClientComponentOptions" }]
 				}
 			},
 			"additionalProperties": false

@@ -1552,6 +1552,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Prevent client components from being async functions.
+	 */
+	noAsyncClientComponent?: RuleConfiguration_for_NoAsyncClientComponentOptions;
+	/**
 	 * Disallow await inside loops.
 	 */
 	noAwaitInLoop?: RuleConfiguration_for_NoAwaitInLoopOptions;
@@ -2888,6 +2892,9 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoAsyncClientComponentOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoAsyncClientComponentOptions;
 export type RuleConfiguration_for_NoAwaitInLoopOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAwaitInLoopOptions;
@@ -5079,6 +5086,16 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 * Rule's options
 	 */
 	options: UseYieldOptions;
+}
+export interface RuleWithOptions_for_NoAsyncClientComponentOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoAsyncClientComponentOptions;
 }
 export interface RuleWithOptions_for_NoAwaitInLoopOptions {
 	/**
@@ -7851,6 +7868,7 @@ export interface UseJsxKeyInIterableOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoAsyncClientComponentOptions {}
 export interface NoAwaitInLoopOptions {}
 export interface NoBitwiseOperatorsOptions {
 	/**
@@ -8576,6 +8594,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/noAsyncClientComponent"
 	| "lint/nursery/noAwaitInLoop"
 	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
