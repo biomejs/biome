@@ -124,7 +124,7 @@ impl<L: Language> From<SyntaxNode<L>> for SyntaxElement<L> {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct SyntaxElementKey {
     node_data: NonNull<()>,
     offset: TextSize,
