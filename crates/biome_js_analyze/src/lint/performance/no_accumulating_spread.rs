@@ -200,9 +200,18 @@ fn handle_object_assign(node: &JsStaticMemberExpression, model: &SemanticModel) 
 
     let call_expression = node.parent::<JsCallExpression>()?;
     let arguments = call_expression.arguments().ok()?;
-    let reference = arguments
-        .args()
-        .first()?
+
+    let mut arg_iter = arguments.args().iter();
+
+    let first = arg_iter.next()?.ok()?;
+    let first = first.as_any_js_expression()?;
+
+    if first.as_js_object_expression() == None && first.as_js_array_expression() == None {
+        return None;
+    }
+
+    let reference = arg_iter
+        .next()?
         .ok()?
         .as_any_js_expression()?
         .as_js_identifier_expression()?
