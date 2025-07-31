@@ -8,8 +8,6 @@
 
 mod fs_proxy;
 
-use std::collections::BTreeSet;
-
 use biome_fs::BiomePath;
 use biome_js_syntax::AnyJsRoot;
 use biome_js_type_info::ImportSymbol;
@@ -19,6 +17,7 @@ use biome_resolver::{FsWithResolverProxy, PathInfo};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::{HashMap, HashMapRef, LocalGuard};
 use rustc_hash::FxBuildHasher;
+use std::collections::BTreeSet;
 
 use crate::{JsExport, JsModuleInfo, JsOwnExport, js_module_info::JsModuleVisitor};
 
@@ -71,7 +70,7 @@ impl ModuleGraph {
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
-        added_or_updated_paths: &[(&BiomePath, AnyJsRoot)],
+        added_or_updated_paths: &[(BiomePath, AnyJsRoot)],
         removed_paths: &[&BiomePath],
     ) {
         // Make sure all directories are registered for the added/updated paths.

@@ -816,7 +816,7 @@ impl WorkspaceServer {
                     return;
                 };
 
-                (&[(path, root)] as &[_], &[] as &[_])
+                (&[(path.clone(), root)] as &[_], &[] as &[_])
             }
             WatcherSignalKind::Removed => (&[] as &[_], &[path] as &[_]),
         };

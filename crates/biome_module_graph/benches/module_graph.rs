@@ -1,10 +1,6 @@
-use biome_fs::{BiomePath, FileSystem, MemoryFileSystem};
+use biome_fs::{BiomePath, FileSystem};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource};
-use biome_module_graph::ModuleGraph;
-use biome_project_layout::ProjectLayout;
-use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
-use std::time::Duration;
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -21,60 +17,8 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[cfg(all(target_env = "musl", target_os = "linux", target_arch = "aarch64"))]
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
-fn bench_module_graph(criterion: &mut Criterion) {
-    let cases = [
-        (
-            "react/index.d.ts",
-            include_bytes!(
-                "../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"
-            ) as &[u8],
-        ),
-        (
-            "@next/font/google/index.d.ts",
-            include_bytes!("./next_font_google.d.ts") as &[u8],
-        ),
-        // FIXME: enable it once the perf reaches a decent number
-        // (
-        //     "RedisCommander.d.ts",
-        //     include_bytes!("./RedisCommander.d.ts") as &[u8],
-        // ),
-    ];
 
-    let mut group = criterion.benchmark_group("module_graph");
-    group.sample_size(10);
-    group.measurement_time(Duration::from_secs(60));
-
-    for (name, content) in cases {
-        group.bench_with_input(BenchmarkId::from_parameter(name), content, |b, content| {
-            let fs = MemoryFileSystem::default();
-            fs.insert(name.into(), content);
-
-            let added_paths = [BiomePath::new(name)];
-            let added_paths = get_added_paths(&fs, &added_paths);
-
-            b.iter(|| {
-                let module_graph = ModuleGraph::default();
-                module_graph.update_graph_for_js_paths(
-                    &fs,
-                    &ProjectLayout::default(),
-                    &added_paths,
-                    &[],
-                );
-                criterion::black_box(())
-            })
-        });
-    }
-
-    group.finish();
-}
-
-criterion_group!(module_graph, bench_module_graph);
-criterion_main!(module_graph);
-
-fn get_added_paths<'a>(
-    fs: &dyn FileSystem,
-    paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, AnyJsRoot)> {
+fn get_added_paths(fs: &dyn FileSystem, paths: &[BiomePath]) -> Vec<(BiomePath, AnyJsRoot)> {
     paths
         .iter()
         .filter_map(|path| {
@@ -89,7 +33,88 @@ fn get_added_paths<'a>(
                 );
                 parsed.try_tree()
             })?;
-            Some((path, root))
+            Some((path.clone(), root))
         })
         .collect()
+}
+
+#[divan::bench_group(name = "module_graph")]
+mod bench_module_graph {
+    use crate::get_added_paths;
+    use biome_fs::{BiomePath, MemoryFileSystem};
+    use biome_module_graph::ModuleGraph;
+    use biome_project_layout::ProjectLayout;
+    use divan::Bencher;
+
+    #[divan::bench(name = "react/index.d.ts")]
+    fn react(b: Bencher) {
+        b.with_inputs(|| {
+            let content = include_bytes!(
+                "../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"
+            ) as &[u8];
+
+            let fs = MemoryFileSystem::default();
+
+            fs.insert("react/index.d.ts".into(), content);
+
+            let added_paths = [BiomePath::new("react/index.d.ts")];
+            let added_paths = get_added_paths(&fs, &added_paths);
+
+            (fs, added_paths)
+        }).bench_refs(|(fs, added_paths)| {
+            let module_graph = ModuleGraph::default();
+            module_graph.update_graph_for_js_paths(
+                fs,
+                &ProjectLayout::default(),
+                added_paths,
+                &[],
+            );
+            divan::black_box(())
+        })
+    }
+
+    #[divan::bench(name = "@next/font/google/index.d.ts")]
+    fn next_font(b: Bencher) {
+        b.with_inputs(|| {
+            let content = include_bytes!("./next_font_google.d.ts") as &[u8];
+
+            let fs = MemoryFileSystem::default();
+
+            fs.insert("@next/font/google/index.d.ts".into(), content);
+            let added_paths = [BiomePath::new("@next/font/google/index.d.ts")];
+            let added_paths = get_added_paths(&fs, &added_paths);
+
+            (fs, added_paths)
+        })
+        .bench_refs(|(fs, added_paths)| {
+            let module_graph = ModuleGraph::default();
+            module_graph.update_graph_for_js_paths(fs, &ProjectLayout::default(), added_paths, &[]);
+            divan::black_box(())
+        })
+    }
+
+    #[divan::bench(name = "RedisCommander.d.ts")]
+    fn redis_commander(b: Bencher) {
+        b.with_inputs(|| {
+            let content = include_bytes!("./RedisCommander.d.ts") as &[u8];
+
+            let fs = MemoryFileSystem::default();
+
+            fs.insert("RedisCommander.d.ts".into(), content);
+
+            let added_paths = [BiomePath::new("RedisCommander.d.ts")];
+            let added_paths = get_added_paths(&fs, &added_paths);
+
+            (fs, added_paths)
+        })
+        .bench_refs(|(fs, added_paths)| {
+            let module_graph = ModuleGraph::default();
+            module_graph.update_graph_for_js_paths(fs, &ProjectLayout::default(), added_paths, &[]);
+            divan::black_box(())
+        })
+    }
+}
+
+fn main() {
+    divan::main()
 }

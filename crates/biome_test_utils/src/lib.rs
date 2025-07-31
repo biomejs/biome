@@ -193,10 +193,7 @@ pub fn module_graph_for_test_file(
 }
 
 /// Loads and parses files from the file system to pass them to service methods.
-pub fn get_added_paths<'a>(
-    fs: &dyn FileSystem,
-    paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, AnyJsRoot)> {
+pub fn get_added_paths(fs: &dyn FileSystem, paths: &[BiomePath]) -> Vec<(BiomePath, AnyJsRoot)> {
     paths
         .iter()
         .filter_map(|path| {
@@ -211,7 +208,7 @@ pub fn get_added_paths<'a>(
                 );
                 parsed.try_tree()
             })?;
-            Some((path, root))
+            Some((path.clone(), root))
         })
         .collect()
 }
