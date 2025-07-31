@@ -1,18 +1,13 @@
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsClassMember, AnyJsExpression, JsArrayAssignmentPattern,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsAwaitExpression, JsBlockStatement,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassMemberList,
-    JsConditionalExpression, JsConstructorClassMember, JsElseClause, JsExpressionStatement,
-    JsFunctionBody, JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsIfStatement,
-    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
-    JsObjectAssignmentPattern, JsObjectBindingPattern, JsObjectExpression, JsObjectMemberList,
-    JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsPropertyClassMember, JsReturnStatement, JsSetterClassMember, JsSetterObjectMember,
-    JsStatementList, JsStaticMemberExpression, JsSyntaxKind, JsTemplateElement,
-    JsTemplateElementList, JsTemplateExpression, JsVariableDeclaration, JsVariableDeclarator,
-    JsVariableDeclaratorList, JsVariableStatement, TextRange, TsPropertyParameter,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsClassMemberList, JsConstructorClassMember,
+    JsFunctionBody, JsFunctionExpression, JsMethodObjectMember, JsObjectAssignmentPattern,
+    JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember,
+    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange,
+    TsPropertyParameter,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, declare_node_union};
+
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, Text, declare_node_union};
 use std::collections::HashSet;
 use std::vec::IntoIter;
 
@@ -55,38 +50,23 @@ impl ClassMemberAnalyzerVisitor for JsClassMemberList {
     ) -> HashSet<ClassPropertyReference>
     where
         F: Fn(&JsFunctionBody) -> Vec<ClassPropertyReference>,
-        G: Fn(
-            MethodBodyElementOrStatementList,
-            &JsFunctionBody,
-        ) -> Option<IntoIter<ClassPropertyReference>>,
+        G: Fn(&JsSyntaxNode, &JsFunctionBody) -> Option<IntoIter<ClassPropertyReference>>,
         S: Fn(&JsStaticMemberExpression) -> Option<IntoIter<ClassPropertyReference>>,
     {
         self.iter()
             .filter_map(|member| match member {
-                AnyJsClassMember::JsMethodClassMember(method) => {
-                    method.body().ok().and_then(|body| {
-                        visit_method_body_references(
-                            MethodBodyElementOrStatementList::from(method.clone()),
-                            &body,
-                        )
-                    })
-                }
-                AnyJsClassMember::JsSetterClassMember(setter) => {
-                    setter.body().ok().and_then(|body| {
-                        visit_method_body_references(
-                            MethodBodyElementOrStatementList::from(setter.clone()),
-                            &body,
-                        )
-                    })
-                }
-                AnyJsClassMember::JsGetterClassMember(getter) => {
-                    getter.body().ok().and_then(|body| {
-                        visit_method_body_references(
-                            MethodBodyElementOrStatementList::from(getter.clone()),
-                            &body,
-                        )
-                    })
-                }
+                AnyJsClassMember::JsMethodClassMember(method) => method
+                    .body()
+                    .ok()
+                    .and_then(|body| visit_method_body_references(method.syntax(), &body)),
+                AnyJsClassMember::JsSetterClassMember(setter) => setter
+                    .body()
+                    .ok()
+                    .and_then(|body| visit_method_body_references(setter.syntax(), &body)),
+                AnyJsClassMember::JsGetterClassMember(getter) => getter
+                    .body()
+                    .ok()
+                    .and_then(|body| visit_method_body_references(getter.syntax(), &body)),
                 AnyJsClassMember::JsPropertyClassMember(property) => {
                     if let Ok(expression) = property.value()?.expression() {
                         if let Some(arrow_function) =
@@ -95,7 +75,7 @@ impl ClassMemberAnalyzerVisitor for JsClassMemberList {
                             if let Ok(any_js_body) = arrow_function.body() {
                                 if let Some(body) = any_js_body.as_js_function_body() {
                                     return visit_method_body_references(
-                                        MethodBodyElementOrStatementList::from(arrow_function),
+                                        arrow_function.syntax(),
                                         body,
                                     );
                                 }
@@ -135,102 +115,6 @@ declare_node_union! {
     pub ClassPropMemberOrConstructorTsParam = JsPropertyClassMember | TsPropertyParameter
 }
 
-declare_node_union! {
-    pub AnyJsClassMethodBodyElement =
-    JsArrowFunctionExpression |
-    JsBlockStatement |
-    JsCallArguments |
-    JsCallExpression |
-    JsConditionalExpression |
-    JsConstructorClassMember |
-    JsElseClause |
-    JsExpressionStatement |
-    JsFunctionBody |
-    JsGetterClassMember |
-    JsGetterObjectMember |
-    JsIfStatement |
-    JsInitializerClause |
-    JsMethodClassMember |
-    JsMethodObjectMember |
-    JsObjectExpression |
-    JsParenthesizedExpression |
-    JsReturnStatement |
-    JsSetterClassMember |
-    JsSetterObjectMember |
-    JsTemplateElement |
-    JsTemplateExpression |
-    JsVariableDeclaration |
-    JsVariableDeclarator |
-    JsVariableStatement |
-    JsAwaitExpression
-}
-
-#[derive(Debug)]
-enum MethodBodyElementOrStatementList {
-    CallArgumentsList(JsCallArgumentList),
-    MethodBodyElement(AnyJsClassMethodBodyElement),
-    ObjectMemberList(JsObjectMemberList),
-    StatementList(JsStatementList),
-    TemplateElementList(JsTemplateElementList),
-    VariableDeclaratorList(JsVariableDeclaratorList),
-}
-
-impl<T> From<T> for MethodBodyElementOrStatementList
-where
-    T: Into<AnyJsClassMethodBodyElement>,
-{
-    fn from(member: T) -> Self {
-        Self::MethodBodyElement(member.into())
-    }
-}
-
-/// fn collect_nested_this_aliases will only visit the list of descendants listed here, more can be added if necessary
-impl MethodBodyElementOrStatementList {
-    fn syntax(&self) -> &SyntaxNode<JsLanguage> {
-        match self {
-            Self::CallArgumentsList(node) => node.syntax(),
-            Self::MethodBodyElement(node) => node.syntax(),
-            Self::ObjectMemberList(list) => list.syntax(),
-            Self::StatementList(list) => list.syntax(),
-            Self::TemplateElementList(list) => list.syntax(),
-            Self::VariableDeclaratorList(list) => list.syntax(),
-        }
-    }
-
-    fn as_js_function_body(&self) -> Option<JsFunctionBody> {
-        match self {
-            Self::MethodBodyElement(AnyJsClassMethodBodyElement::JsFunctionBody(body)) => {
-                Some(body.clone())
-            }
-            _ => None,
-        }
-    }
-
-    fn cast_ref(syntax_node: &SyntaxNode<JsLanguage>) -> Option<Self> {
-        JsObjectMemberList::cast_ref(syntax_node)
-            .map(|e| Self::ObjectMemberList(e.clone()))
-            .or_else(|| {
-                JsStatementList::cast_ref(syntax_node).map(|e| Self::StatementList(e.clone()))
-            })
-            .or_else(|| {
-                JsVariableDeclaratorList::cast_ref(syntax_node)
-                    .map(|e| Self::VariableDeclaratorList(e.clone()))
-            })
-            .or_else(|| {
-                JsCallArgumentList::cast_ref(syntax_node)
-                    .map(|e| Self::CallArgumentsList(e.clone()))
-            })
-            .or_else(|| {
-                AnyJsClassMethodBodyElement::cast_ref(syntax_node)
-                    .map(|e| Self::MethodBodyElement(e.clone()))
-            })
-            .or_else(|| {
-                JsTemplateElementList::cast_ref(syntax_node)
-                    .map(|e| Self::TemplateElementList(e.clone()))
-            })
-    }
-}
-
 trait ClassMemberAnalyzerVisitor {
     fn visit_members<F, G, S>(
         &self,
@@ -240,24 +124,13 @@ trait ClassMemberAnalyzerVisitor {
     ) -> HashSet<ClassPropertyReference>
     where
         F: Fn(&JsFunctionBody) -> Vec<ClassPropertyReference>,
-        G: Fn(
-            MethodBodyElementOrStatementList,
-            &JsFunctionBody,
-        ) -> Option<IntoIter<ClassPropertyReference>>,
+        G: Fn(&JsSyntaxNode, &JsFunctionBody) -> Option<IntoIter<ClassPropertyReference>>,
         S: Fn(&JsStaticMemberExpression) -> Option<IntoIter<ClassPropertyReference>>;
 }
 
 struct ThisAliasResolver {}
 
 impl ThisAliasResolver {
-    /// Process a js function body to find all reassignments/ aliases of this.
-    /// It only processes the top level of the function body scope
-    /// # Example
-    /// ``` js
-    /// var self = this;
-    /// const parent = this;
-    /// ```
-    /// produces vec![Text(self), Text(parent)]
     fn collect_this_aliases_in_closure(body: &JsFunctionBody) -> Vec<ClassPropertyReference> {
         body.statements()
             .iter()
@@ -280,20 +153,17 @@ impl ThisAliasResolver {
             .collect()
     }
 
-    /// Finds recursively function bodies in a syntax node AND collects all this aliases applicable to the current fn body.
-    /// e.g. var self = this; var another_self = this; ends up with this_aliases: [self, another_self]
-    /// Only collects aliases that are not directly owned by a constructor, as those are not relevant for the current scope.
+    // todo use walker instead of recursion
     fn collect_nested_this_aliases(
-        method_body_element_or_statement_list: &MethodBodyElementOrStatementList,
+        body_element: &JsSyntaxNode,
         parent_this_aliases: &[ClassPropertyReference],
     ) -> Vec<ThisAliasesAndTheirScope> {
         let mut results = Vec::new();
 
         // First check if this node itself is a function body
-        if let Some(body) = method_body_element_or_statement_list.as_js_function_body() {
+        if let Some(body) = JsFunctionBody::cast_ref(body_element) {
             // Only add if it's not directly owned by a constructor
-            if method_body_element_or_statement_list
-                .syntax()
+            if body_element
                 .parent()
                 .and_then(JsConstructorClassMember::cast)
                 .is_none()
@@ -312,7 +182,7 @@ impl ThisAliasResolver {
         }
 
         // Collect function bodies from children
-        for child in method_body_element_or_statement_list.syntax().children() {
+        for child in body_element.children() {
             if child.kind() == JsSyntaxKind::JS_CLASS_EXPRESSION {
                 // Skip class expressions, scope of `this` changes to the nested class
                 break;
@@ -366,8 +236,9 @@ impl ThisAliasResolver {
                     );
                 }
             }
+            // TODO do something about this stuff/ possibly use walker again instead of recursion
             // Recurse for other node types and append their results
-            else if let Some(child) = MethodBodyElementOrStatementList::cast_ref(&child) {
+            else {
                 results.extend(ThisAliasResolver::collect_nested_this_aliases(
                     &child,
                     parent_this_aliases,
@@ -399,10 +270,7 @@ impl ThisAliasResolver {
     fn collect_fn_body_this_aliases(body: &JsFunctionBody) -> Vec<ThisAliasesAndTheirScope> {
         let this_variable_aliases: Vec<_> =
             ThisAliasResolver::collect_this_aliases_in_closure(body);
-        ThisAliasResolver::collect_nested_this_aliases(
-            &MethodBodyElementOrStatementList::from(body.clone()),
-            &this_variable_aliases,
-        )
+        ThisAliasResolver::collect_nested_this_aliases(body.syntax(), &this_variable_aliases)
     }
 
     /// Checks recursively the assignment operand equals a reference to `this` (e.g. `this.privateProp`)
@@ -449,17 +317,14 @@ impl MemberReadVisitor {
     /// Iterates over all members of a JavaScript class and collects the names of members that are readonly accessed
     /// within class methods, setters, or the constructor.
     /// It analyzes method and setter bodies for assignments and updates to this properties,
-    fn collect_read_references_from_method_body<T>(
-        member: T,
+    fn collect_read_references_from_method_body(
+        member: &JsSyntaxNode,
         body: &JsFunctionBody,
-    ) -> Option<IntoIter<ClassPropertyReference>>
-    where
-        T: Into<MethodBodyElementOrStatementList>,
-    {
+    ) -> Option<IntoIter<ClassPropertyReference>> {
         let this_aliases = ThisAliasResolver::collect_fn_body_this_aliases(body);
         let mut names = Vec::new();
 
-        Self::visit_read_references_in_body(&member.into(), &this_aliases, &mut |name| {
+        Self::visit_read_references_in_body(&member, &this_aliases, &mut |name| {
             names.push(name);
         });
 
@@ -494,7 +359,7 @@ impl MemberReadVisitor {
 
         let all_descendants_fn_bodies_and_this_aliases: Vec<_> =
             ThisAliasResolver::collect_nested_this_aliases(
-                &MethodBodyElementOrStatementList::from(constructor_body.clone()),
+                constructor_body.syntax(),
                 &this_variable_aliases,
             );
 
@@ -504,9 +369,7 @@ impl MemberReadVisitor {
                 let mut names = Vec::new();
 
                 Self::visit_read_references_in_body(
-                    &MethodBodyElementOrStatementList::from(
-                        this_aliases_and_their_scope.scope.clone(),
-                    ),
+                    this_aliases_and_their_scope.scope.syntax(),
                     std::slice::from_ref(this_aliases_and_their_scope),
                     &mut |name| {
                         names.push(name);
@@ -519,13 +382,13 @@ impl MemberReadVisitor {
     }
     // todo check if type can be simplified !!!!
     fn visit_read_references_in_body<F>(
-        method_body_element: &MethodBodyElementOrStatementList,
+        method_body_element: &JsSyntaxNode,
         this_aliases: &[ThisAliasesAndTheirScope],
         on_name: &mut F,
     ) where
         F: FnMut(ClassPropertyReference),
     {
-        let iter = method_body_element.syntax().preorder();
+        let iter = method_body_element.preorder();
 
         for event in iter {
             match event {
@@ -616,17 +479,14 @@ impl PropertyWritesVisitor {
     /// It analyzes method and setter bodies for assignments and updates to this properties,
     /// and also tracks mutations in the constructor.
     /// The result is a Vec<ClassPropertyMutation> containing all property names that are updated anywhere in the class.
-    fn collect_write_references_from_method_body<T>(
-        member: T,
+    fn collect_write_references_from_method_body(
+        member: &JsSyntaxNode,
         body: &JsFunctionBody,
-    ) -> Option<IntoIter<ClassPropertyReference>>
-    where
-        T: Into<MethodBodyElementOrStatementList>,
-    {
+    ) -> Option<IntoIter<ClassPropertyReference>> {
         let this_aliases = ThisAliasResolver::collect_fn_body_this_aliases(body);
         let mut names = Vec::new();
 
-        Self::visit_write_references_in_body(&member.into(), &this_aliases, &mut |name| {
+        Self::visit_write_references_in_body(&member, &this_aliases, &mut |name| {
             names.push(name);
         });
 
@@ -653,7 +513,7 @@ impl PropertyWritesVisitor {
 
         let all_descendants_fn_bodies_and_this_aliases: Vec<_> =
             ThisAliasResolver::collect_nested_this_aliases(
-                &MethodBodyElementOrStatementList::from(constructor_body.clone()),
+                constructor_body.syntax(),
                 &this_variable_aliases,
             );
 
@@ -663,9 +523,7 @@ impl PropertyWritesVisitor {
                 let mut names = Vec::new();
 
                 Self::visit_write_references_in_body(
-                    &MethodBodyElementOrStatementList::from(
-                        this_aliases_and_their_scope.scope.clone(),
-                    ),
+                    this_aliases_and_their_scope.scope.syntax(),
                     std::slice::from_ref(this_aliases_and_their_scope),
                     &mut |name| {
                         names.push(name);
@@ -678,67 +536,70 @@ impl PropertyWritesVisitor {
     }
 
     fn visit_write_references_in_body<F>(
-        method_body_element: &MethodBodyElementOrStatementList,
+        method_body_element: &JsSyntaxNode,
         this_aliases: &[ThisAliasesAndTheirScope],
         on_name: &mut F,
     ) where
         F: FnMut(ClassPropertyReference),
     {
-        method_body_element.syntax().children().for_each(|child| {
-            if let Some(left) =
-                JsAssignmentExpression::cast_ref(&child).and_then(|expr| expr.left().ok())
-            {
-                if let Some(assignment) = left.as_js_array_assignment_pattern().cloned() {
-                    for name in ThisPatternResolver::collect_array_assignment_names(
-                        &assignment,
-                        this_aliases,
-                    ) {
-                        on_name(name);
-                    }
-                    return;
-                }
+        let iter = method_body_element.preorder();
 
-                if let Some(assignment) = left.as_js_object_assignment_pattern().cloned() {
-                    for name in ThisPatternResolver::collect_object_assignment_names(
-                        &assignment,
-                        this_aliases,
-                    ) {
-                        on_name(name);
-                    }
-                    return;
-                }
+        for event in iter {
+            match event {
+                biome_rowan::WalkEvent::Enter(node) => {
+                    if let Some(left) =
+                        JsAssignmentExpression::cast_ref(&node).and_then(|expr| expr.left().ok())
+                    {
+                        if let Some(assignment) = left.as_js_array_assignment_pattern().cloned() {
+                            for name in ThisPatternResolver::collect_array_assignment_names(
+                                &assignment,
+                                this_aliases,
+                            ) {
+                                on_name(name);
+                            }
+                            return;
+                        }
 
-                if let Some(assignment) = left.as_any_js_assignment().cloned() {
-                    if let Some(name) = ThisPatternResolver::extract_static_assignment_name(
-                        &assignment,
-                        this_aliases,
-                    ) {
-                        on_name(name);
-                    }
-                    return;
-                }
-            }
+                        if let Some(assignment) = left.as_js_object_assignment_pattern().cloned() {
+                            for name in ThisPatternResolver::collect_object_assignment_names(
+                                &assignment,
+                                this_aliases,
+                            ) {
+                                on_name(name);
+                            }
+                            return;
+                        }
 
-            let operand = JsPostUpdateExpression::cast_ref(&child)
-                .and_then(|expr| expr.operand().ok())
-                .or_else(|| {
-                    JsPreUpdateExpression::cast_ref(&child.clone())
+                        if let Some(assignment) = left.as_any_js_assignment().cloned() {
+                            if let Some(name) = ThisPatternResolver::extract_static_assignment_name(
+                                &assignment,
+                                this_aliases,
+                            ) {
+                                on_name(name);
+                            }
+                            return;
+                        }
+                    }
+
+                    let operand = JsPostUpdateExpression::cast_ref(&node)
                         .and_then(|expr| expr.operand().ok())
-                });
+                        .or_else(|| {
+                            JsPreUpdateExpression::cast_ref(&node.clone())
+                                .and_then(|expr| expr.operand().ok())
+                        });
 
-            if let Some(operand) = operand {
-                if let Some(name) =
-                    ThisPatternResolver::extract_static_assignment_name(&operand, this_aliases)
-                {
-                    on_name(name);
+                    if let Some(operand) = operand {
+                        if let Some(name) = ThisPatternResolver::extract_static_assignment_name(
+                            &operand,
+                            this_aliases,
+                        ) {
+                            on_name(name);
+                        }
+                    }
                 }
-            } else if let Some(grand_child) = MethodBodyElementOrStatementList::cast_ref(&child) {
-                Self::visit_write_references_in_body(&grand_child, this_aliases, on_name);
-            } else {
-                // uncomment the following line to debug what other entities should be added to MethodBodyElementOrStatementList
-                // println!("child is {:?}", child);
+                biome_rowan::WalkEvent::Leave(_) => {}
             }
-        });
+        }
     }
 }
 
