@@ -2,6 +2,7 @@
 
 #[macro_use]
 mod generated;
+pub mod metadata;
 mod syntax_node;
 
 pub use self::generated::*;
