@@ -28,6 +28,10 @@ type Config = {
     retries: number;
 };
 
+type Comments /* comment 1 */ = /* comment 2 */ { /* comment 3 */
+    /* comment 4 */ lorem: /* comment 5 */ boolean; /* comment 6 */
+/* comment 7 */ };
+
 // These should be valid and not trigger errors
 type Union = { a: string } | { b: number };
 type Intersection = { a: string } & { b: number };
@@ -207,7 +211,7 @@ invalid.ts:19:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━
   > 23 │ };
        │ ^^
     24 │ 
-    25 │ // These should be valid and not trigger errors
+    25 │ type Comments /* comment 1 */ = /* comment 2 */ { /* comment 3 */
   
   i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
   
@@ -223,7 +227,39 @@ invalid.ts:19:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━
     23    │ - };
        23 │ + }
     24 24 │   
-    25 25 │   // These should be valid and not trigger errors
+    25 25 │   type Comments /* comment 1 */ = /* comment 2 */ { /* comment 3 */
+  
+
+```
+
+```
+invalid.ts:25:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the type detected.
+  
+    23 │ };
+    24 │ 
+  > 25 │ type Comments /* comment 1 */ = /* comment 2 */ { /* comment 3 */
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 26 │     /* comment 4 */ lorem: /* comment 5 */ boolean; /* comment 6 */
+  > 27 │ /* comment 7 */ };
+       │ ^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ // These should be valid and not trigger errors
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use interface.
+  
+    23 23 │   };
+    24 24 │   
+    25    │ - type·Comments·/*·comment·1·*/·=·/*·comment·2·*/·{·/*·comment·3·*/
+       25 │ + interface·Comments·/*·comment·1·*/·{
+    26 26 │       /* comment 4 */ lorem: /* comment 5 */ boolean; /* comment 6 */
+    27    │ - /*·comment·7·*/·};
+       27 │ + /*·comment·7·*/·}
+    28 28 │   
+    29 29 │   // These should be valid and not trigger errors
   
 
 ```

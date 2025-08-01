@@ -29,6 +29,10 @@ interface Config {
     retries: number;
 }
 
+interface /* comment 1 */ Comments /* comment 2 */ { /* comment 3 */
+    /* comment 4 */ lorem:/* comment 5 */ boolean/* comment 6 */
+/* comment 7 */ }
+
 // These should not trigger errors as interfaces cannot represent these
 type Union = { a: string } | { b: number };
 type Intersection = { a: string } & { b: number };
@@ -181,7 +185,7 @@ invalidType.ts:20:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━�
   > 24 │ }
        │ ^
     25 │ 
-    26 │ // These should not trigger errors as interfaces cannot represent these
+    26 │ interface /* comment 1 */ Comments /* comment 2 */ { /* comment 3 */
   
   i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
   
@@ -197,7 +201,39 @@ invalidType.ts:20:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━�
     24    │ - }
        24 │ + };
     25 25 │   
-    26 26 │   // These should not trigger errors as interfaces cannot represent these
+    26 26 │   interface /* comment 1 */ Comments /* comment 2 */ { /* comment 3 */
+  
+
+```
+
+```
+invalidType.ts:26:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the interface detected.
+  
+    24 │ }
+    25 │ 
+  > 26 │ interface /* comment 1 */ Comments /* comment 2 */ { /* comment 3 */
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 27 │     /* comment 4 */ lorem:/* comment 5 */ boolean/* comment 6 */
+  > 28 │ /* comment 7 */ }
+       │ ^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ // These should not trigger errors as interfaces cannot represent these
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use type alias.
+  
+    24 24 │   }
+    25 25 │   
+    26    │ - interface·/*·comment·1·*/·Comments·/*·comment·2·*/·{·/*·comment·3·*/
+       26 │ + type·Comments·/*·comment·2·*/·=·{·/*·comment·3·*/
+    27 27 │       /* comment 4 */ lorem:/* comment 5 */ boolean/* comment 6 */
+    28    │ - /*·comment·7·*/·}
+       28 │ + /*·comment·7·*/·};
+    29 29 │   
+    30 30 │   // These should not trigger errors as interfaces cannot represent these
   
 
 ```
