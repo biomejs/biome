@@ -5595,6 +5595,11 @@
 					"description": "For rules that require querying multiple files inside a project",
 					"type": "string",
 					"enum": ["project"]
+				},
+				{
+					"description": "Tailwind CSS rules",
+					"type": "string",
+					"enum": ["tailwind"]
 				}
 			]
 		},
