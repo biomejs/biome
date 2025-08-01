@@ -111,23 +111,34 @@ impl Rule for NoNextAsyncClientComponent {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let declaration = ctx.query();
-        let component_name = state.as_ref().map_or("Component", |token| token.text());
 
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                declaration.range(),
-                markup! {
-                    "Async client component "<Emphasis>{component_name}</Emphasis>" is not allowed."
-                },
-            )
-            .note(markup! {
-                "Client components with \"use client\" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle."
-            })
-            .note(markup! {
-                "Consider using useEffect for async operations inside the component, or remove the \"use client\" directive if this should be a server component."
-            }),
-        )
+        Some(match state {
+            Some(component_name) => {
+                let name_text = component_name.text();
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    declaration.range(),
+                    markup! {
+                        "Async client component "<Emphasis>{name_text}</Emphasis>" is not allowed."
+                    },
+                )
+            }
+            None => {
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    declaration.range(),
+                    markup! {
+                        "Async client component is not allowed."
+                    },
+                )
+            }
+        }
+        .note(markup! {
+            "Client components with \"use client\" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle."
+        })
+        .note(markup! {
+            "Consider using useEffect for async operations inside the component, or remove the \"use client\" directive if this should be a server component."
+        }))
     }
 }
 
