@@ -53,8 +53,15 @@ declare_lint_rule! {
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "style": "interface"
+    ///         "style": "type"
     ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options,expect_diagnostic
+    /// interface Point {
+    ///   x: number;
+    ///   y: number;
     /// }
     /// ```
     ///
