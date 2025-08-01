@@ -10,13 +10,11 @@ export default async function MyComponent() {
   return <div>Hello</div>;
 }
 
-// Another case
-"use client";
-
 async function AnotherComponent() {
   return <span>World</span>;
 }
 export default AnotherComponent;
+
 ```
 
 # Diagnostics
@@ -33,7 +31,7 @@ invalid.js:3:16 lint/nursery/noAsyncClientComponent ━━━━━━━━━�
   > 5 │ }
       │ ^
     6 │ 
-    7 │ // Another case
+    7 │ async function AnotherComponent() {
   
   i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
   
@@ -43,18 +41,19 @@ invalid.js:3:16 lint/nursery/noAsyncClientComponent ━━━━━━━━━�
 ```
 
 ```
-invalid.js:10:1 lint/nursery/noAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/nursery/noAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Async client component AnotherComponent is not allowed.
   
-     8 │ "use client";
-     9 │ 
-  > 10 │ async function AnotherComponent() {
+     5 │ }
+     6 │ 
+   > 7 │ async function AnotherComponent() {
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 11 │   return <span>World</span>;
-  > 12 │ }
+   > 8 │   return <span>World</span>;
+   > 9 │ }
        │ ^
-    13 │ export default AnotherComponent;
+    10 │ export default AnotherComponent;
+    11 │ 
   
   i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
   
