@@ -194,10 +194,11 @@ fn convert_interface_to_type_alias(
     let id = interface_decl.id().ok()?;
     let type_params = interface_decl.type_parameters();
     let members = interface_decl.members();
+    let l_curly = interface_decl.l_curly_token().ok()?;
     let r_curly = interface_decl.r_curly_token().ok()?;
 
     let object_type = make::ts_object_type(
-        make::token(JsSyntaxKind::L_CURLY),
+        l_curly,
         members,
         make::token(JsSyntaxKind::R_CURLY)
             .with_leading_trivia_pieces(r_curly.leading_trivia().pieces()),
