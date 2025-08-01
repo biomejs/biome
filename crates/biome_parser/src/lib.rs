@@ -295,6 +295,18 @@ pub trait Parser: Sized {
         self.do_bump(kind);
     }
 
+    /// Bumps the current token regardless of its kind and advances to the next token using
+    /// the new context.
+    fn bump_any_with_context(&mut self, context: <Self::Source as BumpWithContext>::Context)
+    where
+        Self::Source: BumpWithContext,
+    {
+        let kind = self.cur();
+        assert_ne!(kind, Self::Kind::EOF);
+
+        self.do_bump_with_context(kind, context);
+    }
+
     /// Consumes the current token if `kind` matches and lexes the next token using the
     /// specified `context.
     fn bump_with_context(

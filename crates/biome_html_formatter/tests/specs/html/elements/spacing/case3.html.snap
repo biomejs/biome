@@ -7,7 +7,7 @@ snapshot_kind: text
 
 ```html
 <!-- foo -->
-<!-- foo -->
+<!-- bar -->
 
 
 
@@ -36,13 +36,7 @@ Self close void elements: never
 
 ```html
 <!-- foo -->
-<!-- foo -->
+<!-- bar -->
+
 test
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"<!-- foo -->" => 0..12
-"<!-- foo -->\n" => 13..26

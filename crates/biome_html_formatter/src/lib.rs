@@ -1,7 +1,6 @@
 #![deny(clippy::use_self)]
 
-use crate::prelude::{format_bogus_node, format_suppressed_node};
-pub(crate) use crate::trivia::*;
+use crate::prelude::*;
 use biome_formatter::comments::Comments;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
@@ -224,7 +223,7 @@ where
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the leading comments.
     fn fmt_leading_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_leading_comments(node.syntax()).fmt(f)
+        format_html_leading_comments(node.syntax()).fmt(f)
     }
 
     /// Formats the [dangling comments](biome_formatter::comments#dangling-comments) of the node.
@@ -245,7 +244,7 @@ where
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
     fn fmt_trailing_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_trailing_comments(node.syntax()).fmt(f)
+        format_html_trailing_comments(node.syntax()).fmt(f)
     }
 }
 
