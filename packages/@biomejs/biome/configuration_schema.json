@@ -2449,16 +2449,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoAsyncClientComponentConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoAsyncClientComponentOptions" }
-			]
-		},
-		"NoAsyncClientComponentOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoAsyncPromiseExecutorConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3639,6 +3629,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNextAsyncClientComponentConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoNextAsyncClientComponentOptions" }
+			]
+		},
+		"NoNextAsyncClientComponentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNodejsModulesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4784,13 +4784,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"noAsyncClientComponent": {
-					"description": "Prevent client components from being async functions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoAsyncClientComponentConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noAwaitInLoop": {
 					"description": "Disallow await inside loops.",
 					"anyOf": [
@@ -4883,6 +4876,13 @@
 						{
 							"$ref": "#/definitions/NoNestedComponentDefinitionsConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"noNextAsyncClientComponent": {
+					"description": "Prevent client components from being async functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoNextAsyncClientComponentConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5908,21 +5908,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoAssignInExpressionsOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNoAsyncClientComponentOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoAsyncClientComponentOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -7804,6 +7789,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoNestedTernaryOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoNextAsyncClientComponentOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoNextAsyncClientComponentOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
