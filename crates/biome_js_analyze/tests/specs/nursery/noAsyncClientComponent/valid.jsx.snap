@@ -1,20 +1,12 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid.js
+expression: valid.jsx
 ---
 # Input
-```js
+```jsx
 /* should not generate diagnostics */
 
 export default async function MyComponent() {
-  return <div>Hello</div>;
-}
-
-export default async function myFunction() {
-  return 'not a component';
-}
-
-export default function MyComponent() {
   return <div>Hello</div>;
 }
 
