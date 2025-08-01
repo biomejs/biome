@@ -7,7 +7,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsRoot;
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_async_client_component::NoAsyncClientComponentOptions;
 
 declare_lint_rule! {
@@ -61,7 +61,7 @@ declare_lint_rule! {
 
 impl Rule for NoAsyncClientComponent {
     type Query = Ast<AnyPotentialReactComponentDeclaration>;
-    type State = String;
+    type State = Option<TokenText>;
     type Signals = Option<Self::State>;
     type Options = NoAsyncClientComponentOptions;
 
@@ -77,16 +77,8 @@ impl Rule for NoAsyncClientComponent {
         // Check if we're in a module with "use client" directive
         let root = ctx.root();
         let has_use_client = match root {
-            AnyJsRoot::JsModule(module) => module.directives().iter().any(|directive| {
-                directive
-                    .inner_string_text()
-                    .is_ok_and(|text| text.text() == "use client")
-            }),
-            AnyJsRoot::JsScript(script) => script.directives().iter().any(|directive| {
-                directive
-                    .inner_string_text()
-                    .is_ok_and(|text| text.text() == "use client")
-            }),
+            AnyJsRoot::JsModule(module) => has_use_client_directive(module.directives()),
+            AnyJsRoot::JsScript(script) => has_use_client_directive(script.directives()),
             _ => false,
         };
 
@@ -109,23 +101,24 @@ impl Rule for NoAsyncClientComponent {
             return None;
         }
 
-        let component_name = component.name.or(component.name_hint).map_or_else(
-            || "Component".to_string(),
-            |token| token.text_trimmed().to_string(),
-        );
+        let component_name = component
+            .name
+            .or(component.name_hint)
+            .map(|token| token.token_text_trimmed());
 
         Some(component_name)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let declaration = ctx.query();
+        let component_name = state.as_ref().map_or("Component", |token| token.text());
 
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 declaration.range(),
                 markup! {
-                    "Async client component "<Emphasis>{state}</Emphasis>" is not allowed."
+                    "Async client component "<Emphasis>{component_name}</Emphasis>" is not allowed."
                 },
             )
             .note(markup! {
@@ -136,4 +129,14 @@ impl Rule for NoAsyncClientComponent {
             }),
         )
     }
+}
+
+fn has_use_client_directive(
+    directives: impl IntoIterator<Item = biome_js_syntax::JsDirective>,
+) -> bool {
+    directives.into_iter().any(|directive| {
+        directive
+            .inner_string_text()
+            .is_ok_and(|text| text.text() == "use client")
+    })
 }
