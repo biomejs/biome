@@ -188,6 +188,7 @@ pub mod no_unknown_pseudo_element;
 pub mod no_unknown_type_selector;
 pub mod no_unknown_unit;
 pub mod no_unmatchable_anb_selector;
+pub mod no_unnecessary_conditions;
 pub mod no_unreachable;
 pub mod no_unreachable_super;
 pub mod no_unresolved_imports;

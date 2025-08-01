@@ -269,7 +269,7 @@ pub(crate) fn analyze_and_snap(
         *snapshot = snapshot.replace('\\', "/");
     }
 
-    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }
 
 fn check_code_action(

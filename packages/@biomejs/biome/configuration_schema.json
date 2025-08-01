@@ -4311,6 +4311,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnnecessaryConditionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnnecessaryConditionsOptions" }
+			]
+		},
+		"NoUnnecessaryConditionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnreachableConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4927,6 +4937,13 @@
 					"description": "Disallow unknown at-rules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnknownAtRuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnnecessaryConditions": {
+					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnnecessaryConditionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8771,6 +8788,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnmatchableAnbSelectorOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUnnecessaryConditionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnnecessaryConditionsOptions" }]
 				}
 			},
 			"additionalProperties": false
