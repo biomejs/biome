@@ -1,11 +1,13 @@
 pub mod thematic_break_block;
+pub mod atx_headings;
 
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::{
+    prelude::{ParsedSyntax::{self, *}, TokenSource},
     Parser,
-    prelude::ParsedSyntax::{self, *},
 };
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
+use atx_headings::{at_atx_heading, parse_atx_heading};
 
 use crate::MarkdownParser;
 
@@ -25,7 +27,9 @@ pub(crate) fn parse_block_list(p: &mut MarkdownParser) -> ParsedSyntax {
 }
 
 pub(crate) fn parse_any_block(p: &mut MarkdownParser) {
-    if at_indent_code_block(p) {
+    if at_atx_heading(p) {
+        let _ = parse_atx_heading(p);
+    } else if at_indent_code_block(p) {
         parse_indent_code_block(p);
     } else if at_thematic_break_block(p) {
         let break_block = try_parse(p, |p| {
@@ -36,8 +40,10 @@ pub(crate) fn parse_any_block(p: &mut MarkdownParser) {
             Ok(break_block)
         });
         if break_block.is_err() {
-            parse_paragraph(p);
+            let _ = parse_paragraph(p);
         }
+    } else {
+        let _ = parse_paragraph(p);
     }
 }
 
@@ -49,8 +55,41 @@ pub(crate) fn parse_indent_code_block(_p: &mut MarkdownParser) {
     todo!()
 }
 
-pub(crate) fn parse_paragraph(_p: &mut MarkdownParser) {
-    todo!()
+pub(crate) fn parse_paragraph(p: &mut MarkdownParser) -> ParsedSyntax {
+    let m = p.start();
+
+    // Parse paragraph content until a blank line, EOF, or another block element
+    parse_paragraph_line(p);
+
+    // Additional lines in the paragraph
+    while !p.at(T![EOF]) &&
+          !is_blank_line(p) &&
+          !at_atx_heading(p) &&
+          !at_thematic_break_block(p) &&
+          !at_indent_code_block(p) {
+        parse_paragraph_line(p);
+    }
+
+    Present(m.complete(p, MD_PARAGRAPH))
+}
+
+// Helper to check if we're at a blank line
+fn is_blank_line(p: &mut MarkdownParser) -> bool {
+    // A simple check for a blank line - just newline or whitespace followed by newline
+    p.at(NEWLINE) || (p.at(WHITESPACE) && p.nth(1) == NEWLINE)
+}
+
+// Renamed to be clearer that this parses a single line of paragraph content
+pub(crate) fn parse_paragraph_line(p: &mut MarkdownParser) {
+    // Parse until end of line or end of file
+    while !p.at(T![EOF]) && !p.at(NEWLINE) {
+        p.bump(p.source().current());
+    }
+
+    // Consume the newline if present
+    if p.at(NEWLINE) {
+        p.bump(NEWLINE);
+    }
 }
 
 /// Attempt to parse some input with the given parsing function. If parsing
