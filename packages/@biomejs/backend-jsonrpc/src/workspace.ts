@@ -898,7 +898,8 @@ export type RuleDomain =
 	| "next"
 	| "qwik"
 	| "vue"
-	| "project";
+	| "project"
+	| "tailwind";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
