@@ -1551,10 +1551,6 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
-	 * Prevent client components from being async functions.
-	 */
-	noAsyncClientComponent?: RuleConfiguration_for_NoAsyncClientComponentOptions;
-	/**
 	 * Disallow await inside loops.
 	 */
 	noAwaitInLoop?: RuleConfiguration_for_NoAwaitInLoopOptions;
@@ -1606,6 +1602,10 @@ export interface Nursery {
 	 * Disallows defining React components inside other components.
 	 */
 	noNestedComponentDefinitions?: RuleConfiguration_for_NoNestedComponentDefinitionsOptions;
+	/**
+	 * Prevent client components from being async functions.
+	 */
+	noNextAsyncClientComponent?: RuleConfiguration_for_NoNextAsyncClientComponentOptions;
 	/**
 	 * Disallow use event handlers on non-interactive elements.
 	 */
@@ -2871,9 +2871,6 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
-export type RuleConfiguration_for_NoAsyncClientComponentOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoAsyncClientComponentOptions;
 export type RuleConfiguration_for_NoAwaitInLoopOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAwaitInLoopOptions;
@@ -2913,6 +2910,9 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNestedComponentDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNestedComponentDefinitionsOptions;
+export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoNextAsyncClientComponentOptions;
 export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNoninteractiveElementInteractionsOptions;
@@ -5051,16 +5051,6 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 */
 	options: UseYieldOptions;
 }
-export interface RuleWithOptions_for_NoAsyncClientComponentOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoAsyncClientComponentOptions;
-}
 export interface RuleWithOptions_for_NoAwaitInLoopOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5210,6 +5200,16 @@ export interface RuleWithOptions_for_NoNestedComponentDefinitionsOptions {
 	 * Rule's options
 	 */
 	options: NoNestedComponentDefinitionsOptions;
+}
+export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoNextAsyncClientComponentOptions;
 }
 export interface RuleWithOptions_for_NoNoninteractiveElementInteractionsOptions {
 	/**
@@ -7774,7 +7774,6 @@ export interface UseJsxKeyInIterableOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
-export interface NoAsyncClientComponentOptions {}
 export interface NoAwaitInLoopOptions {}
 export interface NoBitwiseOperatorsOptions {
 	/**
@@ -7806,6 +7805,7 @@ export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
+export interface NoNextAsyncClientComponentOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
 export interface NoQuickfixBiomeOptions {
@@ -8482,7 +8482,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/noAsyncClientComponent"
+	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noAwaitInLoop"
 	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"

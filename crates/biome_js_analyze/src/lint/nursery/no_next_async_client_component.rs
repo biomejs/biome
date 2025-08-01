@@ -8,7 +8,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsRoot;
 use biome_rowan::{AstNode, TokenText};
-use biome_rule_options::no_async_client_component::NoAsyncClientComponentOptions;
+use biome_rule_options::no_next_async_client_component::NoNextAsyncClientComponentOptions;
 
 declare_lint_rule! {
     /// Prevent client components from being async functions.
@@ -48,9 +48,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub NoAsyncClientComponent {
+    pub NoNextAsyncClientComponent {
         version: "next",
-        name: "noAsyncClientComponent",
+        name: "noNextAsyncClientComponent",
         language: "js",
         sources: &[RuleSource::EslintNext("no-async-client-component").same()],
         recommended: false,
@@ -59,11 +59,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for NoAsyncClientComponent {
+impl Rule for NoNextAsyncClientComponent {
     type Query = Ast<AnyPotentialReactComponentDeclaration>;
     type State = Option<TokenText>;
     type Signals = Option<Self::State>;
-    type Options = NoAsyncClientComponentOptions;
+    type Options = NoNextAsyncClientComponentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let declaration = ctx.query();
