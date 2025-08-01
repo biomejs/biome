@@ -22,7 +22,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// "use client";
     ///
     /// export default async function MyComponent() {
@@ -32,7 +32,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// "use client";
     ///
     /// export default function MyComponent() {
@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js
+    /// ```jsx
     /// // No "use client" directive - server component can be async
     /// export default async function ServerComponent() {
     ///   const data = await fetch('/api/data');
