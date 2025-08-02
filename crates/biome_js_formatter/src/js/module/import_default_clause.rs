@@ -11,6 +11,7 @@ impl FormatNodeRule<JsImportDefaultClause> for FormatJsImportDefaultClause {
     fn fmt_fields(&self, node: &JsImportDefaultClause, f: &mut JsFormatter) -> FormatResult<()> {
         let JsImportDefaultClauseFields {
             type_token,
+            phase_token,
             default_specifier,
             from_token,
             source,
@@ -19,6 +20,10 @@ impl FormatNodeRule<JsImportDefaultClause> for FormatJsImportDefaultClause {
 
         if let Some(type_token) = type_token {
             write!(f, [type_token.format(), space()])?;
+        }
+
+        if let Some(phase_token) = phase_token {
+            write!(f, [phase_token.format(), space()])?;
         }
 
         write![

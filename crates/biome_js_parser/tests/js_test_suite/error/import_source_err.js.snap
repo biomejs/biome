@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```js
+import source { x } from "x";
+import source * as x from "x";
+import type source x from "x";
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+                SOURCE_KW@7..14 "source" [] [Whitespace(" ")],
+                L_CURLY@14..16 "{" [] [Whitespace(" ")],
+                IDENT@16..18 "x" [] [Whitespace(" ")],
+                R_CURLY@18..20 "}" [] [Whitespace(" ")],
+                FROM_KW@20..25 "from" [] [Whitespace(" ")],
+                JS_STRING_LITERAL@25..28 "\"x\"" [] [],
+                SEMICOLON@28..29 ";" [] [],
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                IMPORT_KW@29..37 "import" [Newline("\n")] [Whitespace(" ")],
+                SOURCE_KW@37..44 "source" [] [Whitespace(" ")],
+                STAR@44..46 "*" [] [Whitespace(" ")],
+                AS_KW@46..49 "as" [] [Whitespace(" ")],
+                IDENT@49..51 "x" [] [Whitespace(" ")],
+                FROM_KW@51..56 "from" [] [Whitespace(" ")],
+                JS_STRING_LITERAL@56..59 "\"x\"" [] [],
+                SEMICOLON@59..60 ";" [] [],
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                IMPORT_KW@60..68 "import" [Newline("\n")] [Whitespace(" ")],
+                TYPE_KW@68..73 "type" [] [Whitespace(" ")],
+                SOURCE_KW@73..80 "source" [] [Whitespace(" ")],
+                IDENT@80..82 "x" [] [Whitespace(" ")],
+                FROM_KW@82..87 "from" [] [Whitespace(" ")],
+                JS_STRING_LITERAL@87..90 "\"x\"" [] [],
+                SEMICOLON@90..91 ";" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@91..91 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..91
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..91
+    0: JS_BOGUS_STATEMENT@0..29
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: SOURCE_KW@7..14 "source" [] [Whitespace(" ")]
+      2: L_CURLY@14..16 "{" [] [Whitespace(" ")]
+      3: IDENT@16..18 "x" [] [Whitespace(" ")]
+      4: R_CURLY@18..20 "}" [] [Whitespace(" ")]
+      5: FROM_KW@20..25 "from" [] [Whitespace(" ")]
+      6: JS_STRING_LITERAL@25..28 "\"x\"" [] []
+      7: SEMICOLON@28..29 ";" [] []
+    1: JS_BOGUS_STATEMENT@29..60
+      0: IMPORT_KW@29..37 "import" [Newline("\n")] [Whitespace(" ")]
+      1: SOURCE_KW@37..44 "source" [] [Whitespace(" ")]
+      2: STAR@44..46 "*" [] [Whitespace(" ")]
+      3: AS_KW@46..49 "as" [] [Whitespace(" ")]
+      4: IDENT@49..51 "x" [] [Whitespace(" ")]
+      5: FROM_KW@51..56 "from" [] [Whitespace(" ")]
+      6: JS_STRING_LITERAL@56..59 "\"x\"" [] []
+      7: SEMICOLON@59..60 ";" [] []
+    2: JS_BOGUS_STATEMENT@60..91
+      0: IMPORT_KW@60..68 "import" [Newline("\n")] [Whitespace(" ")]
+      1: TYPE_KW@68..73 "type" [] [Whitespace(" ")]
+      2: SOURCE_KW@73..80 "source" [] [Whitespace(" ")]
+      3: IDENT@80..82 "x" [] [Whitespace(" ")]
+      4: FROM_KW@82..87 "from" [] [Whitespace(" ")]
+      5: JS_STRING_LITERAL@87..90 "\"x\"" [] []
+      6: SEMICOLON@90..91 ";" [] []
+  4: EOF@91..91 "" [] []
+
+```
+
+## Diagnostics
+
+```
+import_source_err.js:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Only `import source x from "./module"` is valid.
+  
+  > 1 │ import source { x } from "x";
+      │               ^
+    2 │ import source * as x from "x";
+    3 │ import type source x from "x";
+  
+import_source_err.js:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Only `import source x from "./module"` is valid.
+  
+    1 │ import source { x } from "x";
+  > 2 │ import source * as x from "x";
+      │               ^
+    3 │ import type source x from "x";
+  
+import_source_err.js:3:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Only `import source x from "./module"` is valid.
+  
+    1 │ import source { x } from "x";
+    2 │ import source * as x from "x";
+  > 3 │ import type source x from "x";
+      │                    ^
+  
+```

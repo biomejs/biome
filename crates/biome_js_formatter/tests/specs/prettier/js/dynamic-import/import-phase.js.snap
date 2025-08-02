@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/dynamic-import/import-phase.js
+---
+# Input
+
+```js
+import.source(`data:text/javascript,
+    console.log("RUN");
+`)
+
+import.source(String.raw`data:text/javascript,
+    console.log("RUN");
+`)
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,9 @@
+-import.source(`data:text/javascript,
++import.
++source(`data:text/javascript,
+     console.log("RUN");
+ `);
+ 
+-import.source(String.raw`data:text/javascript,
++import.
++source(String.raw`data:text/javascript,
+     console.log("RUN");
+ `);
+```
+
+# Output
+
+```js
+import.
+source(`data:text/javascript,
+    console.log("RUN");
+`);
+
+import.
+source(String.raw`data:text/javascript,
+    console.log("RUN");
+`);
+```
+
+# Errors
+```
+import-phase.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `meta` following an import keyword, but found none
+  
+  > 1 │ import.source(`data:text/javascript,
+      │        ^^^^^^
+    2 │     console.log("RUN");
+    3 │ `)
+  
+import-phase.js:5:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `meta` following an import keyword, but found none
+  
+    3 │ `)
+    4 │ 
+  > 5 │ import.source(String.raw`data:text/javascript,
+      │        ^^^^^^
+    6 │     console.log("RUN");
+    7 │ `)
+  
+
+```

@@ -144,6 +144,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "object",
         "set",
         "string",
+        "source",
         "symbol",
         "type",
         "undefined",

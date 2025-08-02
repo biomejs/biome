@@ -987,6 +987,7 @@ impl<'src> JsLexer<'src> {
             b"new" => NEW_KW,
             b"null" => NULL_KW,
             b"return" => RETURN_KW,
+            b"source" => SOURCE_KW,
             b"super" => SUPER_KW,
             b"switch" => SWITCH_KW,
             b"this" => THIS_KW,
