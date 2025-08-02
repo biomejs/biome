@@ -17,7 +17,7 @@ export default AnotherComponent;
 ```
 invalidExportDef.jsx:3:1 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Async client component AnotherComponent is not allowed.
+  ! The component AnotherComponent is an async client component, which is not allowed.
   
     1 │ "use client";
     2 │ 
