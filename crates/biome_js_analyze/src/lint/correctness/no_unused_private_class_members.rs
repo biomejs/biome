@@ -265,26 +265,22 @@ impl AnyMember {
                     .name()
                     .ok()
                     .and_then(|n| n.name())
-                    .map(|name| name.text().eq(token))
-                    .unwrap_or(false),
+                    .is_some_and(|name| name.text().eq(token)),
                 AnyJsClassMember::JsMethodClassMember(member) => member
                     .name()
                     .ok()
                     .and_then(|n| n.name())
-                    .map(|name| name.text().eq(token))
-                    .unwrap_or(false),
+                    .is_some_and(|name| name.text().eq(token)),
                 AnyJsClassMember::JsPropertyClassMember(member) => member
                     .name()
                     .ok()
                     .and_then(|n| n.name())
-                    .map(|name| name.text().eq(token))
-                    .unwrap_or(false),
+                    .is_some_and(|name| name.text().eq(token)),
                 AnyJsClassMember::JsSetterClassMember(member) => member
                     .name()
                     .ok()
                     .and_then(|n| n.name())
-                    .map(|name| name.text().eq(token))
-                    .unwrap_or(false),
+                    .is_some_and(|name| name.text().eq(token)),
                 _ => false,
             },
             Self::TsPropertyParameter(ts_property) => ts_property
@@ -301,8 +297,7 @@ impl AnyMember {
                         .name_token()
                         .ok(),
                 })
-                .map(|name_token| name_token.text().eq(token))
-                .unwrap_or(false),
+                .is_some_and(|name_token| name_token.text().eq(token)),
         }
     }
 }

@@ -66,7 +66,7 @@ pub fn class_member_references(list: &JsClassMemberList) -> References {
                     if let Some(static_member_expression) =
                         expression.as_js_static_member_expression()
                     {
-                        return collect_references_from_property_member(&static_member_expression);
+                        return collect_references_from_property_member(static_member_expression);
                     }
                 };
                 None
@@ -402,7 +402,7 @@ fn collect_references_from_body(
     let mut writes = Vec::new();
 
     visit_references_in_body(
-        &member,
+        member,
         &this_aliases,
         &mut |name| {
             writes.push(name);
@@ -483,7 +483,7 @@ fn visit_references_in_body<F, S>(
                                 | JsSyntaxKind::QUESTION2EQ
                         )
                         && let Some(name) = ThisPatternResolver::extract_static_assignment_name(
-                            &operand,
+                            operand,
                             this_aliases,
                         )
                     {
@@ -546,20 +546,14 @@ fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> Ref
     let mut reads = Vec::new();
     let mut writes = Vec::new();
 
-    all_descendants_fn_bodies_and_this_aliases
-        .iter()
-        .for_each(|this_aliases_and_their_scope| {
-            visit_references_in_body(
-                this_aliases_and_their_scope.scope.syntax(),
-                std::slice::from_ref(this_aliases_and_their_scope),
-                &mut |name| {
-                    writes.push(name);
-                },
-                &mut |name| {
-                    reads.push(name);
-                },
-            );
-        });
+    for this_scope in all_descendants_fn_bodies_and_this_aliases.iter() {
+        visit_references_in_body(
+            this_scope.scope.syntax(),
+            std::slice::from_ref(this_scope),
+            &mut |name| writes.push(name),
+            &mut |name| reads.push(name),
+        );
+    }
 
     References {
         reads: reads.into_iter().collect(),
@@ -575,7 +569,7 @@ fn collect_references_from_property_member(
     let mut reads = Vec::new();
     let writes = Vec::new();
 
-    if let Some(member) = static_member.member().ok() {
+    if let Ok(member) = static_member.member() {
         let name = member.to_trimmed_text();
         reads.push(ClassPropertyReference {
             name,
@@ -613,11 +607,11 @@ fn is_within_scope_without_shadowing(
             return true;
         }
 
-        match JsSyntaxKind::from(ancestor.kind()) {
+        match ancestor.kind() {
             JsSyntaxKind::JS_FUNCTION_BODY
             | JsSyntaxKind::JS_CLASS_EXPRESSION
             | JsSyntaxKind::JS_CLASS_DECLARATION => return false,
-            _ => continue,
+            _ => {}
         }
     }
 
