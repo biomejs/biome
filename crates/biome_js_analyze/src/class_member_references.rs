@@ -86,24 +86,27 @@ pub fn class_member_references(list: &JsClassMemberList) -> References {
     }
 }
 
+/// Represents a function body and all `this` aliases valid within its lexical scope.
 #[derive(Clone, Debug)]
-struct ThisAliasesAndTheirScope {
+struct ScopedThisAliases {
     scope: JsFunctionBody,
     aliases: HashSet<ClassPropertyReference>,
 }
 
-struct NestedThisAliasVisitor<'a> {
-    skip_depths: Vec<TextRange>,
-    results: Vec<ThisAliasesAndTheirScope>,
-    parent_this_aliases: &'a [ClassPropertyReference],
+/// A visitor that collects `this` aliases in nested function scopes,
+/// while skipping class expressions and tracking inherited aliases.
+struct ScopedThisAliasVisitor<'a> {
+    skipped_ranges: Vec<TextRange>,
+    inherited_aliases: &'a [ClassPropertyReference],
+    scoped_this_aliases: Vec<ScopedThisAliases>,
 }
 // can not implement `Visitor` directly because it requires a new ctx that can not be created here
-impl NestedThisAliasVisitor<'_> {
+impl ScopedThisAliasVisitor<'_> {
     fn visit(&mut self, event: &WalkEvent<SyntaxNode<JsLanguage>>) {
         match event {
             WalkEvent::Enter(node) => {
                 if self
-                    .skip_depths
+                    .skipped_ranges
                     .iter()
                     .any(|range| range.contains_range(node.text_range()))
                 {
@@ -111,7 +114,7 @@ impl NestedThisAliasVisitor<'_> {
                 }
 
                 if node.kind() == JsSyntaxKind::JS_CLASS_EXPRESSION {
-                    self.skip_depths.push(node.text_range());
+                    self.skipped_ranges.push(node.text_range());
                     return;
                 }
 
@@ -126,10 +129,10 @@ impl NestedThisAliasVisitor<'_> {
                         let current_scope_aliases =
                             ThisAliasResolver::collect_local_this_aliases(&body);
                         let mut this_aliases = HashSet::new();
-                        this_aliases.extend(self.parent_this_aliases.iter().cloned());
+                        this_aliases.extend(self.inherited_aliases.iter().cloned());
                         this_aliases.extend(current_scope_aliases);
 
-                        self.results.push(ThisAliasesAndTheirScope {
+                        self.scoped_this_aliases.push(ScopedThisAliases {
                             scope: body.clone(),
                             aliases: this_aliases,
                         });
@@ -145,10 +148,10 @@ impl NestedThisAliasVisitor<'_> {
                     let current_scope_aliases =
                         ThisAliasResolver::collect_local_this_aliases(&body);
                     let mut this_aliases = HashSet::new();
-                    this_aliases.extend(self.parent_this_aliases.iter().cloned());
+                    this_aliases.extend(self.inherited_aliases.iter().cloned());
                     this_aliases.extend(current_scope_aliases.clone());
 
-                    self.results.push(ThisAliasesAndTheirScope {
+                    self.scoped_this_aliases.push(ScopedThisAliases {
                         scope: body.clone(),
                         aliases: this_aliases,
                     });
@@ -156,9 +159,9 @@ impl NestedThisAliasVisitor<'_> {
             }
 
             WalkEvent::Leave(node) => {
-                if let Some(last) = self.skip_depths.last() {
+                if let Some(last) = self.skipped_ranges.last() {
                     if *last == node.text_range() {
-                        self.skip_depths.pop();
+                        self.skipped_ranges.pop();
                     }
                 }
             }
@@ -166,14 +169,14 @@ impl NestedThisAliasVisitor<'_> {
     }
 }
 
-#[derive(Clone, Debug)]
-struct ThisAliasResolver {}
 
 /// `ThisAliasResolver` provides methods to collect and check `this` aliases within JavaScript functions.
 ///
 /// - `collect_local_this_aliases`: Collects local aliases of `this` in a function body.
 /// - `collect_all_nested_this_aliases`: Recursively collects `this` aliases in nested function bodies.
 /// - `is_this_or_alias`: Checks if a given expression is a reference to `this` or any of its aliases.
+struct ThisAliasResolver {}
+
 impl ThisAliasResolver {
     fn collect_local_this_aliases(body: &JsFunctionBody) -> Vec<ClassPropertyReference> {
         body.statements()
@@ -188,8 +191,9 @@ impl ThisAliasResolver {
             .filter_map(|fields| {
                 let id = fields.id.ok()?;
                 let expr = fields.initializer?.expression().ok()?;
+                let unwrapped = unwrap_expression(&expr);
 
-                (expr.syntax().first_token()?.text() == "this").then(|| ClassPropertyReference {
+                (unwrapped.syntax().first_token()?.text_trimmed() == "this").then(|| ClassPropertyReference {
                     name: id.to_trimmed_text().clone(),
                     range: id.syntax().text_trimmed_range(),
                 })
@@ -200,11 +204,11 @@ impl ThisAliasResolver {
     fn collect_all_nested_this_aliases(
         body_element: &JsSyntaxNode,
         parent_this_aliases: &[ClassPropertyReference],
-    ) -> Vec<ThisAliasesAndTheirScope> {
-        let mut visitor = NestedThisAliasVisitor {
-            skip_depths: vec![],
-            results: vec![],
-            parent_this_aliases,
+    ) -> Vec<ScopedThisAliases> {
+        let mut visitor = ScopedThisAliasVisitor {
+            skipped_ranges: vec![],
+            scoped_this_aliases: vec![],
+            inherited_aliases: parent_this_aliases,
         };
 
         let iter = body_element.preorder();
@@ -213,13 +217,13 @@ impl ThisAliasResolver {
             visitor.visit(&event);
         }
 
-        visitor.results
+        visitor.scoped_this_aliases
     }
 
     /// Checks recursively the assignment operand equals a reference to `this` (e.g. `this.privateProp`)
     fn is_this_or_alias(
         object: &AnyJsExpression,
-        this_aliases: &[ThisAliasesAndTheirScope],
+        this_aliases: &[ScopedThisAliases],
     ) -> bool {
         if object.as_js_this_expression().is_some() {
             return true;
@@ -233,7 +237,7 @@ impl ThisAliasResolver {
 
             this_aliases
                 .iter()
-                .any(|ThisAliasesAndTheirScope { aliases, scope }| {
+                .any(|ScopedThisAliases { aliases, scope }| {
                     let is_alias = aliases.iter().any(|mutation| {
                         mutation
                             .name
@@ -262,7 +266,7 @@ struct ThisPatternResolver {}
 impl ThisPatternResolver {
     fn collect_array_assignment_names(
         array_assignment_pattern: &JsArrayAssignmentPattern,
-        this_aliases: &[ThisAliasesAndTheirScope],
+        this_aliases: &[ScopedThisAliases],
     ) -> Vec<ClassPropertyReference> {
         array_assignment_pattern
             .elements()
@@ -301,7 +305,7 @@ impl ThisPatternResolver {
     /// Collects assignment names from a JavaScript object assignment pattern, e.g. `{...this.#value}`.
     fn collect_object_assignment_names(
         assignment: &JsObjectAssignmentPattern,
-        this_aliases: &[ThisAliasesAndTheirScope],
+        this_aliases: &[ScopedThisAliases],
     ) -> Vec<ClassPropertyReference> {
         assignment
             .properties()
@@ -338,7 +342,7 @@ impl ThisPatternResolver {
     /// Checks for this or static references, casts to a static member assignment, and retrieves the trimmed name.
     fn extract_static_assignment_name(
         operand: &AnyJsAssignment,
-        this_aliases: &[ThisAliasesAndTheirScope],
+        this_aliases: &[ScopedThisAliases],
     ) -> Option<ClassPropertyReference> {
         operand
             .as_js_static_member_assignment()
@@ -407,7 +411,7 @@ fn collect_references_from_body(
 /// - Writes via assignments and destructuring patterns involving `this` or its aliases
 fn visit_references_in_body<F, S>(
     method_body_element: &JsSyntaxNode,
-    this_aliases: &[ThisAliasesAndTheirScope],
+    this_aliases: &[ScopedThisAliases],
     on_write_match: &mut F,
     on_read_match: &mut S,
 ) where
@@ -569,4 +573,19 @@ fn collect_references_from_property_member(
         reads: reads.into_iter().collect(),
         writes: writes.into_iter().collect(),
     })
+}
+
+/// Recursively unwraps expressions like parentheses to find the inner expression.
+fn unwrap_expression(expr: &AnyJsExpression) -> AnyJsExpression {
+    match expr {
+        AnyJsExpression::JsParenthesizedExpression(paren_expr) => {
+            if let Ok(inner) = paren_expr.expression() {
+                let cloned_inner = inner.clone();
+                unwrap_expression(&cloned_inner)
+            } else {
+                expr.clone()
+            }
+        }
+        _ => expr.clone(),
+    }
 }
