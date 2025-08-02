@@ -1,16 +1,15 @@
+use crate::services::module_graph::ResolvedImports;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::AnyJsImportLike;
+use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_module_graph::{JsModuleInfo, ResolvedPath};
 use biome_rowan::AstNode;
 use biome_rule_options::no_import_cycles::NoImportCyclesOptions;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
-
-use crate::services::module_graph::ResolvedImports;
 
 declare_lint_rule! {
     /// Prevent import cycles.
@@ -84,6 +83,59 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// **`types.ts`**
+    /// ```ts
+    /// import type { bar } from "./qux.ts";
+    ///
+    /// export type Foo = {
+    ///   bar: typeof bar;
+    /// };
+    /// ```
+    ///
+    /// **`qux.ts`**
+    /// ```ts
+    /// import type { Foo } from "./types.ts";
+    ///
+    /// export function bar(foo: Foo) {
+    ///     console.log(foo);
+    /// }
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// The rule provides the options described below.
+    ///
+    /// ### `ignoreTypes`
+    ///
+    /// Ignores the cycles made by type-only imports. Enabled by default.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignoreTypes": false
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// **`types.ts`**
+    /// ```ts
+    /// import type { bar } from "./qux.ts";
+    ///
+    /// export type Foo = {
+    ///   bar: typeof bar;
+    /// };
+    /// ```
+    ///
+    /// **`qux.ts`**
+    /// ```js,use_options
+    /// import type { Foo } from "./types.ts";
+    ///
+    /// export function bar(foo: Foo) {
+    ///     console.log(foo);
+    /// }
+    /// ```
     pub NoImportCycles {
         version: "2.0.0",
         name: "noImportCycles",
@@ -110,6 +162,11 @@ impl Rule for NoImportCycles {
         let resolved_path = module_info
             .get_import_path_by_js_node(node)
             .and_then(ResolvedPath::as_path)?;
+
+        let options = ctx.options();
+        if options.ignore_types && is_type_import(node) {
+            return None;
+        }
 
         let imports = ctx.module_info_for_path(resolved_path)?;
         find_cycle(ctx, resolved_path, imports)
@@ -147,6 +204,25 @@ impl Rule for NoImportCycles {
             )
             .note(note),
         )
+    }
+}
+
+/// Checks if the node is a type-only import.
+/// Note that named imports with only type bindings are not considered as a type-only imports,
+/// as it still cause an evaluation of the module after erasing the specifiers.
+fn is_type_import(node: &AnyJsImportLike) -> bool {
+    if let AnyJsImportLike::JsModuleSource(node) = node
+        && let Some(parent) = node.syntax().parent()
+        && let Some(import) = AnyJsImportClause::cast(parent)
+    {
+        match import {
+            AnyJsImportClause::JsImportDefaultClause(clause) => clause.type_token().is_some(),
+            AnyJsImportClause::JsImportNamedClause(clause) => clause.type_token().is_some(),
+            AnyJsImportClause::JsImportNamespaceClause(clause) => clause.type_token().is_some(),
+            _ => false,
+        }
+    } else {
+        false
     }
 }
 
