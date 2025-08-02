@@ -28,6 +28,13 @@ declare_node_union! {
     pub ClassPropMemberOrConstructorTsParam = JsPropertyClassMember | TsPropertyParameter
 }
 
+/// Collects all `this` property references used within the members of a JavaScript class.
+///
+/// This function traverses a `JsClassMemberList` and extracts property references from method bodies,
+/// getters, setters, arrow functions assigned to properties, and constructors. It aggregates both
+/// read and write references to `this` properties across all supported member types.
+///
+/// Returns a `References` struct containing the combined set of read and write references.
 pub fn class_member_references(list: &JsClassMemberList) -> References {
     let all_references: Vec<References> = list
         .iter()
@@ -478,8 +485,7 @@ fn visit_references_in_body<F, S>(
                     if let Some(array) = left.as_js_array_assignment_pattern().cloned() {
                         ThisPatternResolver::collect_array_assignment_names(&array, this_aliases)
                             .into_iter()
-                            .for_each(on_write_match);
-                        return;
+                            .for_each(&mut *on_write_match);
                     }
 
                     if let Some(object) = left.as_js_object_assignment_pattern().cloned() {
