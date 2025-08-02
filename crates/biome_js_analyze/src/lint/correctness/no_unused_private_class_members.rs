@@ -1,7 +1,5 @@
 use crate::JsRuleAction;
-use crate::class_member_references::{
-    ClassPropertyReference, References, class_member_references,
-};
+use crate::class_member_references::{ClassPropertyReference, References, class_member_references};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -33,7 +31,7 @@ declare_lint_rule! {
     ///   #usedOnlyInWrite = 5;
     ///
     ///   method() {
-    ///        this.#usedOnlyInWrite = 212;
+    ///	    this.#usedOnlyInWrite = 212;
     ///   }
     /// }
     /// ```
@@ -57,7 +55,7 @@ declare_lint_rule! {
     ///   #usedMember = 42;
     ///
     ///   method() {
-    ///        return this.#usedMember;
+    ///	    return this.#usedMember;
     ///   }
     /// }
     /// ```
@@ -88,7 +86,6 @@ impl Rule for NoUnusedPrivateClassMembers {
         let private_members = get_all_declared_private_members(node);
 
         let References { reads, writes } = class_member_references(&node.members());
-        println!("Reads: {reads:?}, Writes: {writes:?}");
 
         private_members
             .iter()

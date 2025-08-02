@@ -125,6 +125,11 @@ impl ScopedThisAliasVisitor<'_> {
                     return;
                 }
 
+                if node.kind() == JsSyntaxKind::JS_CLASS_DECLARATION {
+                    self.skipped_ranges.push(node.text_range());
+                    return;
+                }
+
                 if let Some(body) = JsFunctionBody::cast_ref(node) {
                     // Only process if not part of constructor
                     let is_constructor = node
@@ -176,7 +181,6 @@ impl ScopedThisAliasVisitor<'_> {
     }
 }
 
-
 /// `ThisAliasResolver` provides methods to collect and check `this` aliases within JavaScript functions.
 ///
 /// - `collect_local_this_aliases`: Collects local aliases of `this` in a function body.
@@ -200,9 +204,11 @@ impl ThisAliasResolver {
                 let expr = fields.initializer?.expression().ok()?;
                 let unwrapped = unwrap_expression(&expr);
 
-                (unwrapped.syntax().first_token()?.text_trimmed() == "this").then(|| ClassPropertyReference {
-                    name: id.to_trimmed_text().clone(),
-                    range: id.syntax().text_trimmed_range(),
+                (unwrapped.syntax().first_token()?.text_trimmed() == "this").then(|| {
+                    ClassPropertyReference {
+                        name: id.to_trimmed_text().clone(),
+                        range: id.syntax().text_trimmed_range(),
+                    }
                 })
             })
             .collect()
@@ -227,16 +233,19 @@ impl ThisAliasResolver {
         visitor.scoped_this_aliases
     }
 
-    /// Checks recursively the assignment operand equals a reference to `this` (e.g. `this.privateProp`)
     fn is_this_or_alias(
-        object: &AnyJsExpression,
+        js_expression: &AnyJsExpression,
         this_aliases: &[ScopedThisAliases],
     ) -> bool {
-        if object.as_js_this_expression().is_some() {
-            return true;
+        if let Some(this_expr) = js_expression.as_js_this_expression() {
+            let syntax = this_expr.syntax();
+
+            return this_aliases.iter().any(|ScopedThisAliases { scope, .. }| {
+                is_within_scope_without_shadowing(syntax, scope.syntax())
+            });
         }
 
-        if let Some(js_identifier_expression) = object.as_js_identifier_expression()
+        if let Some(js_identifier_expression) = js_expression.as_js_identifier_expression()
             && let Ok(name) = js_identifier_expression.name()
             && let Ok(value_token) = name.value_token()
         {
@@ -252,9 +261,8 @@ impl ThisAliasResolver {
                             .eq(value_token.token_text_trimmed().text())
                     });
 
-                    let is_within_scope = name_syntax
-                        .ancestors()
-                        .any(|ancestor| ancestor.key() == scope.syntax().key());
+                    let is_within_scope =
+                        is_within_scope_without_shadowing(name_syntax, scope.syntax());
 
                     is_alias && is_within_scope
                 })
@@ -594,4 +602,24 @@ fn unwrap_expression(expr: &AnyJsExpression) -> AnyJsExpression {
         }
         _ => expr.clone(),
     }
+}
+
+fn is_within_scope_without_shadowing(
+    name_syntax: &SyntaxNode<JsLanguage>,
+    scope: &SyntaxNode<JsLanguage>,
+) -> bool {
+    for ancestor in name_syntax.ancestors() {
+        if ancestor.key() == scope.key() {
+            return true;
+        }
+
+        match JsSyntaxKind::from(ancestor.kind()) {
+            JsSyntaxKind::JS_FUNCTION_BODY
+            | JsSyntaxKind::JS_CLASS_EXPRESSION
+            | JsSyntaxKind::JS_CLASS_DECLARATION => return false,
+            _ => continue,
+        }
+    }
+
+    false
 }
