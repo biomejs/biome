@@ -20,6 +20,7 @@ use std::sync::{Arc, LazyLock};
 mod a11y;
 pub mod assist;
 mod ast_utils;
+mod class_member_references;
 mod frameworks;
 pub mod globals;
 pub mod lint;
