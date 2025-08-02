@@ -45,7 +45,7 @@ fn quick_test() {
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("correctness", "noUnusedPrivateClassMembers");
+    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
