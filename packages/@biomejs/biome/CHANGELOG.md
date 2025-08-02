@@ -1,5 +1,91 @@
 # @biomejs/biome
 
+## 2.1.4
+
+### Patch Changes
+
+- [#6887](https://github.com/biomejs/biome/pull/6887) [`0cc38f5`](https://github.com/biomejs/biome/commit/0cc38f59cd9ddf0fdcd12d6f8cb3642743cc4406) Thanks [@ptkagori](https://github.com/ptkagori)! - Added the [`noQwikUseVisibleTask`](https://biomejs.dev/linter/rules/no-qwik-use-visible-task) rule to Qwik.
+
+  This rule is intended for use in Qwik applications to warn about the use of `useVisibleTask$()` functions which require careful consideration before use.
+
+  **Invalid:**
+
+  ```js
+  useVisibleTask$(() => {
+    console.log("Component is visible");
+  });
+  ```
+
+  **Valid:**
+
+  ```js
+  useTask$(() => {
+    console.log("Task executed");
+  });
+  ```
+
+- [#6887](https://github.com/biomejs/biome/pull/6887) [`0cc38f5`](https://github.com/biomejs/biome/commit/0cc38f59cd9ddf0fdcd12d6f8cb3642743cc4406) Thanks [@ptkagori](https://github.com/ptkagori)! - Added the [`useImageSize`](https://biomejs.dev/linter/rules/use-image-size) rule to Biome.
+
+  The `useImageSize` rule enforces the use of width and height attributes on `<img>` elements for performance reasons. This rule is intended to prevent layout shifts and improve Core Web Vitals by ensuring images have explicit dimensions.
+
+  **Invalid:**
+
+  ```jsx
+  <img src="/image.png" />
+  <img src="https://example.com/image.png" />
+  <img src="/image.png" width="200" />
+  <img src="/image.png" height="200" />
+  ```
+
+  **Valid:**
+
+  ```jsx
+  <img width="200" height="600" src="/static/images/portrait-01.webp" />
+  <img width="100" height="100" src="https://example.com/image.png" />
+  ```
+
+- [#6887](https://github.com/biomejs/biome/pull/6887) [`0cc38f5`](https://github.com/biomejs/biome/commit/0cc38f59cd9ddf0fdcd12d6f8cb3642743cc4406) Thanks [@ptkagori](https://github.com/ptkagori)! - Added the [`useAnchorHref`](https://biomejs.dev/linter/rules/use-anchor-href) rule to Biome.
+
+  The `useAnchorHref` rule enforces the presence of an `href` attribute on `<a>` elements in JSX. This rule is intended to ensure that anchor elements are always valid and accessible.
+
+  **Invalid:**
+
+  ```jsx
+  <a>Link</a>
+  ```
+
+  ```jsx
+  <a target="_blank">External</a>
+  ```
+
+  **Valid:**
+
+  ```jsx
+  <a href="/home">Home</a>
+  ```
+
+  ```jsx
+  <a href="https://example.com" target="_blank">
+    External
+  </a>
+  ```
+
+- [#6887](https://github.com/biomejs/biome/pull/6887) [`0cc38f5`](https://github.com/biomejs/biome/commit/0cc38f59cd9ddf0fdcd12d6f8cb3642743cc4406) Thanks [@ptkagori](https://github.com/ptkagori)! - Added the [`useQwikClasslist`](https://biomejs.dev/linter/rules/use-qwik-classlist) rule to Biome.
+
+  This rule is intended for use in Qwik applications to encourage the use of the built-in `class` prop (which accepts a string, object, or array) instead of the `classnames` utility library.
+
+  **Invalid:**
+
+  ```jsx
+  <div class={classnames({ active: true, disabled: false })} />
+  ```
+
+  **Valid:**
+
+  ```jsx
+  <div classlist={{ active: true, disabled: false }} />
+  ```
+
 ## 2.1.3
 
 ### Patch Changes
