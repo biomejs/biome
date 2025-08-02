@@ -8,7 +8,7 @@ class UsedMember {
 	}
 }
 
-class UsedMember {
+class UsedMember2 {
 	#usedMethod() {
 		return 42;
 	}
@@ -18,8 +18,7 @@ class UsedMember {
 	}
 }
 
-
-class UsedMember {
+class UsedMember3 {
 	get #usedAccessor() {}
 	set #usedAccessor(value) {}
 
@@ -28,23 +27,23 @@ class UsedMember {
 	}
 }
 
-class UsedMember {
+class UsedMember4 {
 	publicMember = 42;
 }
 
-class UsedMember {
+class UsedMember5 {
 	#usedMember = 42;
 	anotherMember = this.#usedMember;
 }
 
-class UsedMember {
+class UsedMember6 {
 	#usedMember = 42;
 	foo() {
 		this.#usedMember = this.#usedMember;
 	}
 }
 
-class UsedMember {
+class UsedMember7 {
 	#usedMember;
 
 	foo() {
@@ -52,14 +51,14 @@ class UsedMember {
 	}
 }
 
-class UsedMember {
+class UsedMember8 {
 	#usedMember = 42;
 	method() {
 		return someGlobalMethod(this.#usedMember);
 	}
 }
 
-class UsedMember {
+class UsedMember9 {
 	#usedInOuterClass;
 
 	foo() {
@@ -71,8 +70,7 @@ class UsedMember {
 	}
 }
 
-
-class UsedMember {
+class UsedMember10 {
 	#usedInForInLoop;
 	method() {
 		for (const bar in this.#usedInForInLoop) {
@@ -81,7 +79,7 @@ class UsedMember {
 	}
 }
 
-class UsedMember {
+class UsedMember11 {
 	#usedInForOfLoop;
 	method() {
 		for (const bar of this.#usedInForOfLoop) {
@@ -90,28 +88,28 @@ class UsedMember {
 	}
 }
 
-class UsedMember {
+class UsedMember12 {
 	#usedInAssignmentPattern;
 	method() {
 		[bar = 1] = this.#usedInAssignmentPattern;
 	}
 }
 
-class UsedMember {
+class UsedMember13 {
 	#usedInArrayPattern;
 	method() {
 		[bar] = this.#usedInArrayPattern;
 	}
 }
 
-class UsedMember {
+class UsedMember14 {
 	#usedInAssignmentPattern;
 	method() {
 		[bar] = this.#usedInAssignmentPattern;
 	}
 }
 
-class UsedMember {
+class UsedMember15 {
 	#usedInObjectAssignment;
 
 	method() {
@@ -119,7 +117,7 @@ class UsedMember {
 	}
 }
 
-class UsedMember {
+class UsedMember16 {
 	set #accessorWithSetterFirst(value) {
 		doSomething(value);
 	}
@@ -131,7 +129,7 @@ class UsedMember {
 	}
 }
 
-class UsedMember {
+class UsedMember17 {
 	set #accessorUsedInMemberAccess(value) {}
 
 	method(a) {
@@ -139,7 +137,7 @@ class UsedMember {
 	}
 }
 
-class UsedMember {
+class UsedMember18 {
 	get #accessorWithGetterFirst() {
 		return something();
 	}
@@ -170,11 +168,10 @@ class C {
 	}
 }
 
-class C {
+class C2 {
 	#usedOnlyInIncrement;
 
 	foo() {
 		this.#usedOnlyInIncrement++;
 	}
 }
-
