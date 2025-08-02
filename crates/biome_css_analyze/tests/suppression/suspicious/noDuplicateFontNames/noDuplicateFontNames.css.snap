@@ -76,7 +76,7 @@ noDuplicateFontNames.css:2:44 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
 ```
 noDuplicateFontNames.css:3:35 lint/suspicious/noDuplicateFontNames  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate font names are redundant and unnecessary: LucidaGrande
+  × Duplicate font names are redundant and unnecessary: Lucida Grande
   
     1 │ a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
     2 │ a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }

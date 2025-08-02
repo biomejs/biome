@@ -2,14 +2,14 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericProperty};
+use biome_css_syntax::CssGenericProperty;
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
 use biome_string_case::StrLikeExtension;
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 
-use crate::utils::{find_font_family, is_font_family_keyword};
+use crate::utils::{FontFamily, FontPropertyKind, collect_font_families, is_font_family_keyword};
 
 declare_lint_rule! {
     /// Disallow duplicate names within font families.
@@ -71,78 +71,52 @@ impl Rule for NoDuplicateFontNames {
         let property_name = property_name.to_ascii_lowercase_cow();
 
         let is_font_family = property_name == "font-family";
-        let is_font = property_name == "font";
+        let is_font_shorthand = property_name == "font";
 
-        if !is_font_family && !is_font {
+        if !is_font_family && !is_font_shorthand {
             return None;
         }
 
-        let mut unquoted_family_names: HashSet<String> = HashSet::new();
-        let mut family_names: HashSet<String> = HashSet::new();
         let value_list = node.value();
-        let font_families = if is_font {
-            find_font_family(value_list)
+
+        let kind = if is_font_shorthand {
+            FontPropertyKind::Shorthand
         } else {
-            value_list
-                .into_iter()
-                .filter_map(|v| match v {
-                    AnyCssGenericComponentValue::AnyCssValue(value) => Some(value),
-                    _ => None,
-                })
-                .collect()
+            FontPropertyKind::FontFamily
         };
 
-        for css_value in font_families {
-            match css_value {
-                // A generic family name like `sans-serif` or unquoted font name.
-                AnyCssValue::CssIdentifier(val) => {
-                    let font_name = val.to_trimmed_text();
+        let font_families: Vec<FontFamily> = collect_font_families(value_list, kind)?;
 
-                    // check the case: "Arial", Arial
-                    // we ignore the case of the font name is a keyword(context: https://github.com/stylelint/stylelint/issues/1284)
-                    // e.g "sans-serif", sans-serif
-                    if family_names.contains(font_name.text())
-                        && !is_font_family_keyword(&font_name)
-                    {
-                        return Some(RuleState {
-                            value: font_name.into(),
-                            span: val.range(),
-                        });
-                    }
+        let mut family_names: FxHashSet<Text> = FxHashSet::default();
+        let mut family_keywords: FxHashSet<(Text, bool)> = FxHashSet::default();
 
-                    // check the case: sans-self, sans-self
-                    if unquoted_family_names.contains(font_name.text()) {
-                        return Some(RuleState {
-                            value: font_name.into(),
-                            span: val.range(),
-                        });
-                    }
-                    unquoted_family_names.insert(font_name.text().into());
+        for font_family in font_families {
+            let is_keyword = is_font_family_keyword(&font_family.text);
+            let is_quoted = font_family.is_quoted;
+
+            // Keywords require special handling based on quote status:
+            // - Quoted keywords ("sans-serif") are treated as actual font names
+            // - Unquoted keywords (sans-serif) are treated as CSS generic font families
+            // These are technically different and should not be considered duplicates.
+            // See: https://github.com/stylelint/stylelint/issues/1284
+            if is_keyword {
+                if !family_keywords.insert((font_family.text.clone(), is_quoted)) {
+                    return Some(RuleState {
+                        value: font_family.text.into(),
+                        span: font_family.range,
+                    });
                 }
-                // A font family name. e.g "Lucida Grande", "Arial".
-                AnyCssValue::CssString(val) => {
-                    // FIXME: avoid String allocation
-                    let normalized_font_name: String = val
-                        .to_trimmed_text()
-                        .chars()
-                        .filter(|&c| c != '\'' && c != '\"' && !c.is_whitespace())
-                        .collect();
+                continue;
+            }
 
-                    if family_names.contains(&normalized_font_name)
-                        || unquoted_family_names
-                            .iter()
-                            .any(|name| *name == normalized_font_name.as_str())
-                    {
-                        return Some(RuleState {
-                            value: normalized_font_name.into(),
-                            span: val.range(),
-                        });
-                    }
-                    family_names.insert(normalized_font_name);
-                }
-                _ => {}
+            if !family_names.insert(font_family.text.clone()) {
+                return Some(RuleState {
+                    value: font_family.text.into(),
+                    span: font_family.range,
+                });
             }
         }
+
         None
     }
 
