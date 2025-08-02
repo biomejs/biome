@@ -1,4 +1,6 @@
+use crate::FormatGraphqlSyntaxToken;
 use crate::prelude::*;
+use biome_formatter::trivia::FormatToken;
 use biome_formatter::write;
 use biome_graphql_syntax::{GraphqlStringValue, GraphqlStringValueFields, TextLen};
 
@@ -65,7 +67,7 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
                 join.finish()
             });
 
-            write!(f, [format_replaced(&token, &content)])
+            FormatGraphqlSyntaxToken.format_replaced(&token, &content, f)
         } else {
             write![f, [graphql_string_literal_token.format()]]
         }

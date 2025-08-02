@@ -1,0 +1,323 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+text-sm leading-[10px] hover:text-xl/[100px] hover:focus:aria-[checked]:text-red-500 flex items-center gap-2 has-[:disabled]:opacity-50 [&_input]:disabled:cursor-not-allowed
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..4 "text" [] [],
+                minus_token: DASH@4..5 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@5..7 "sm" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@7..8 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@8..15 "leading" [] [],
+                minus_token: DASH@15..16 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@16..17 "[" [] [],
+                    value_token: TW_VALUE@17..21 "10px" [] [],
+                    r_brack_token: R_BRACKET@21..22 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@22..23 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwStaticVariant {
+                    base_token: TW_BASE@23..28 "hover" [] [],
+                },
+                COLON@28..29 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@29..33 "text" [] [],
+                minus_token: DASH@33..34 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@34..36 "xl" [] [],
+                },
+                modifier: TwModifier {
+                    slash_token: SLASH@36..37 "/" [] [],
+                    value: TwArbitraryValue {
+                        l_brack_token: L_BRACKET@37..38 "[" [] [],
+                        value_token: TW_VALUE@38..43 "100px" [] [],
+                        r_brack_token: R_BRACKET@43..44 "]" [] [],
+                    },
+                },
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@44..45 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwStaticVariant {
+                    base_token: TW_BASE@45..50 "hover" [] [],
+                },
+                COLON@50..51 ":" [] [],
+                TwStaticVariant {
+                    base_token: TW_BASE@51..56 "focus" [] [],
+                },
+                COLON@56..57 ":" [] [],
+                TwFunctionalVariant {
+                    base_token: TW_BASE@57..61 "aria" [] [],
+                    minus_token: DASH@61..62 "-" [] [],
+                    value: TwArbitraryValue {
+                        l_brack_token: L_BRACKET@62..63 "[" [] [],
+                        value_token: TW_VALUE@63..70 "checked" [] [],
+                        r_brack_token: R_BRACKET@70..71 "]" [] [],
+                    },
+                },
+                COLON@71..72 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@72..76 "text" [] [],
+                minus_token: DASH@76..77 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@77..84 "red-500" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@84..85 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@85..89 "flex" [] [],
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@89..90 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@90..95 "items" [] [],
+                minus_token: DASH@95..96 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@96..102 "center" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@102..103 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@103..106 "gap" [] [],
+                minus_token: DASH@106..107 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@107..108 "2" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@108..109 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwFunctionalVariant {
+                    base_token: TW_BASE@109..112 "has" [] [],
+                    minus_token: DASH@112..113 "-" [] [],
+                    value: TwArbitraryValue {
+                        l_brack_token: L_BRACKET@113..114 "[" [] [],
+                        value_token: TW_VALUE@114..123 ":disabled" [] [],
+                        r_brack_token: R_BRACKET@123..124 "]" [] [],
+                    },
+                },
+                COLON@124..125 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@125..132 "opacity" [] [],
+                minus_token: DASH@132..133 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@133..135 "50" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@135..136 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwArbitraryVariant {
+                    l_brack_token: L_BRACKET@136..137 "[" [] [],
+                    selector_token: TW_SELECTOR@137..144 "&_input" [] [],
+                    r_brack_token: R_BRACKET@144..145 "]" [] [],
+                },
+                COLON@145..146 ":" [] [],
+                TwStaticVariant {
+                    base_token: TW_BASE@146..154 "disabled" [] [],
+                },
+                COLON@154..155 ":" [] [],
+            ],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@155..161 "cursor" [] [],
+                minus_token: DASH@161..162 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@162..174 "not-allowed" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@174..174 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..174
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..174
+    0: TW_FULL_CANDIDATE@0..7
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..7
+        0: TW_BASE@0..4 "text" [] []
+        1: DASH@4..5 "-" [] []
+        2: TW_NAMED_VALUE@5..7
+          0: TW_VALUE@5..7 "sm" [] []
+        3: (empty)
+      2: (empty)
+    1: WHITESPACE@7..8 " " [] []
+    2: TW_FULL_CANDIDATE@8..22
+      0: TW_VARIANT_LIST@8..8
+      1: TW_FUNCTIONAL_CANDIDATE@8..22
+        0: TW_BASE@8..15 "leading" [] []
+        1: DASH@15..16 "-" [] []
+        2: TW_ARBITRARY_VALUE@16..22
+          0: L_BRACKET@16..17 "[" [] []
+          1: TW_VALUE@17..21 "10px" [] []
+          2: R_BRACKET@21..22 "]" [] []
+        3: (empty)
+      2: (empty)
+    3: WHITESPACE@22..23 " " [] []
+    4: TW_FULL_CANDIDATE@23..44
+      0: TW_VARIANT_LIST@23..29
+        0: TW_STATIC_VARIANT@23..28
+          0: TW_BASE@23..28 "hover" [] []
+        1: COLON@28..29 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@29..44
+        0: TW_BASE@29..33 "text" [] []
+        1: DASH@33..34 "-" [] []
+        2: TW_NAMED_VALUE@34..36
+          0: TW_VALUE@34..36 "xl" [] []
+        3: TW_MODIFIER@36..44
+          0: SLASH@36..37 "/" [] []
+          1: TW_ARBITRARY_VALUE@37..44
+            0: L_BRACKET@37..38 "[" [] []
+            1: TW_VALUE@38..43 "100px" [] []
+            2: R_BRACKET@43..44 "]" [] []
+      2: (empty)
+    5: WHITESPACE@44..45 " " [] []
+    6: TW_FULL_CANDIDATE@45..84
+      0: TW_VARIANT_LIST@45..72
+        0: TW_STATIC_VARIANT@45..50
+          0: TW_BASE@45..50 "hover" [] []
+        1: COLON@50..51 ":" [] []
+        2: TW_STATIC_VARIANT@51..56
+          0: TW_BASE@51..56 "focus" [] []
+        3: COLON@56..57 ":" [] []
+        4: TW_FUNCTIONAL_VARIANT@57..71
+          0: TW_BASE@57..61 "aria" [] []
+          1: DASH@61..62 "-" [] []
+          2: TW_ARBITRARY_VALUE@62..71
+            0: L_BRACKET@62..63 "[" [] []
+            1: TW_VALUE@63..70 "checked" [] []
+            2: R_BRACKET@70..71 "]" [] []
+        5: COLON@71..72 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@72..84
+        0: TW_BASE@72..76 "text" [] []
+        1: DASH@76..77 "-" [] []
+        2: TW_NAMED_VALUE@77..84
+          0: TW_VALUE@77..84 "red-500" [] []
+        3: (empty)
+      2: (empty)
+    7: WHITESPACE@84..85 " " [] []
+    8: TW_FULL_CANDIDATE@85..89
+      0: TW_VARIANT_LIST@85..85
+      1: TW_STATIC_CANDIDATE@85..89
+        0: TW_BASE@85..89 "flex" [] []
+      2: (empty)
+    9: WHITESPACE@89..90 " " [] []
+    10: TW_FULL_CANDIDATE@90..102
+      0: TW_VARIANT_LIST@90..90
+      1: TW_FUNCTIONAL_CANDIDATE@90..102
+        0: TW_BASE@90..95 "items" [] []
+        1: DASH@95..96 "-" [] []
+        2: TW_NAMED_VALUE@96..102
+          0: TW_VALUE@96..102 "center" [] []
+        3: (empty)
+      2: (empty)
+    11: WHITESPACE@102..103 " " [] []
+    12: TW_FULL_CANDIDATE@103..108
+      0: TW_VARIANT_LIST@103..103
+      1: TW_FUNCTIONAL_CANDIDATE@103..108
+        0: TW_BASE@103..106 "gap" [] []
+        1: DASH@106..107 "-" [] []
+        2: TW_NAMED_VALUE@107..108
+          0: TW_VALUE@107..108 "2" [] []
+        3: (empty)
+      2: (empty)
+    13: WHITESPACE@108..109 " " [] []
+    14: TW_FULL_CANDIDATE@109..135
+      0: TW_VARIANT_LIST@109..125
+        0: TW_FUNCTIONAL_VARIANT@109..124
+          0: TW_BASE@109..112 "has" [] []
+          1: DASH@112..113 "-" [] []
+          2: TW_ARBITRARY_VALUE@113..124
+            0: L_BRACKET@113..114 "[" [] []
+            1: TW_VALUE@114..123 ":disabled" [] []
+            2: R_BRACKET@123..124 "]" [] []
+        1: COLON@124..125 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@125..135
+        0: TW_BASE@125..132 "opacity" [] []
+        1: DASH@132..133 "-" [] []
+        2: TW_NAMED_VALUE@133..135
+          0: TW_VALUE@133..135 "50" [] []
+        3: (empty)
+      2: (empty)
+    15: WHITESPACE@135..136 " " [] []
+    16: TW_FULL_CANDIDATE@136..174
+      0: TW_VARIANT_LIST@136..155
+        0: TW_ARBITRARY_VARIANT@136..145
+          0: L_BRACKET@136..137 "[" [] []
+          1: TW_SELECTOR@137..144 "&_input" [] []
+          2: R_BRACKET@144..145 "]" [] []
+        1: COLON@145..146 ":" [] []
+        2: TW_STATIC_VARIANT@146..154
+          0: TW_BASE@146..154 "disabled" [] []
+        3: COLON@154..155 ":" [] []
+      1: TW_FUNCTIONAL_CANDIDATE@155..174
+        0: TW_BASE@155..161 "cursor" [] []
+        1: DASH@161..162 "-" [] []
+        2: TW_NAMED_VALUE@162..174
+          0: TW_VALUE@162..174 "not-allowed" [] [Newline("\n")]
+        3: (empty)
+      2: (empty)
+  2: EOF@174..174 "" [] []
+
+```

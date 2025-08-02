@@ -158,19 +158,19 @@ impl CommentKind {
 #[derive(Debug, Clone)]
 pub struct SourceComment<L: Language> {
     /// The number of lines appearing before this comment
-    pub(crate) lines_before: u32,
+    pub lines_before: u32,
 
-    pub(crate) lines_after: u32,
+    pub lines_after: u32,
 
     /// The comment piece
-    pub(crate) piece: SyntaxTriviaPieceComments<L>,
+    pub piece: SyntaxTriviaPieceComments<L>,
 
     /// The kind of the comment.
-    pub(crate) kind: CommentKind,
+    pub kind: CommentKind,
 
     /// Whether the comment has been formatted or not.
     #[cfg(debug_assertions)]
-    pub(crate) formatted: Cell<bool>,
+    pub formatted: Cell<bool>,
 }
 
 impl<L: Language> SourceComment<L> {

@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/basics/comment.html
+---
+# Input
+
+```html
+<!--hello world-->
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-<!--hello world-->
++<!--hello world-->
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<!--hello world-->```

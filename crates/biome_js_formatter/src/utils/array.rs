@@ -53,7 +53,14 @@ where
                             write!(f, [format_removed(separator)])?;
                         }
                         _ => {
-                            write!(f, [format_only_if_breaks(separator, &separator.format())])?;
+                            write!(
+                                f,
+                                [format_only_if_breaks(
+                                    separator,
+                                    &separator.format(),
+                                    on_skipped
+                                )]
+                            )?;
                         }
                     }
                 } else {

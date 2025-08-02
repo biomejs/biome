@@ -1,0 +1,119 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+import { component$ } from "@builder.io/qwik";
+import classnames from "classnames";
+import styles from "./MyComponent.module.css";
+
+export default component$((props) => {
+  return (
+    <div class={classnames(
+      styles.container,
+      "p-8",
+      {
+        "text-green-500": props.isHighAttention,
+        "text-slate-500": !props.isHighAttention,
+      },
+      { active: true }
+    )}>
+      Hello world!
+    </div>
+  );
+});
+
+// Invalid: classnames with spread props
+export const SpreadPropsInvalid = (props) => (
+  <div {...props} class={classnames('foo', { bar: true })} />
+);
+
+// Invalid: classnames in nested call
+export const NestedClassnamesInvalid = () => (
+  <div class={classnames(classnames('foo', { bar: true }))} />
+); 
+```
+
+# Diagnostics
+```
+invalid.jsx:7:10 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid third-party classnames utilities with Qwik components
+  
+     5 │ export default component$((props) => {
+     6 │   return (
+   > 7 │     <div class={classnames(
+       │          ^^^^^^^^^^^^^^^^^^
+   > 8 │       styles.container,
+        ...
+  > 14 │       { active: true }
+  > 15 │     )}>
+       │     ^^
+    16 │       Hello world!
+    17 │     </div>
+  
+  i Qwik's built-in class prop handles:
+    - Conditional classes via objects: class={{ active: isActive }}
+    - Dynamic string concatenation
+    - Array combinations
+    
+    External utilities break Qwik's:
+    - Fine-grained reactivity tracking
+    - Resumability optimizations
+  
+  i Use native Qwik class binding as shown in Qwik Rendering: Class Bindings (Official Docs).
+  
+
+```
+
+```
+invalid.jsx:23:19 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid third-party classnames utilities with Qwik components
+  
+    21 │ // Invalid: classnames with spread props
+    22 │ export const SpreadPropsInvalid = (props) => (
+  > 23 │   <div {...props} class={classnames('foo', { bar: true })} />
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ );
+    25 │ 
+  
+  i Qwik's built-in class prop handles:
+    - Conditional classes via objects: class={{ active: isActive }}
+    - Dynamic string concatenation
+    - Array combinations
+    
+    External utilities break Qwik's:
+    - Fine-grained reactivity tracking
+    - Resumability optimizations
+  
+  i Use native Qwik class binding as shown in Qwik Rendering: Class Bindings (Official Docs).
+  
+
+```
+
+```
+invalid.jsx:28:8 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid third-party classnames utilities with Qwik components
+  
+    26 │ // Invalid: classnames in nested call
+    27 │ export const NestedClassnamesInvalid = () => (
+  > 28 │   <div class={classnames(classnames('foo', { bar: true }))} />
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ );·
+  
+  i Qwik's built-in class prop handles:
+    - Conditional classes via objects: class={{ active: isActive }}
+    - Dynamic string concatenation
+    - Array combinations
+    
+    External utilities break Qwik's:
+    - Fine-grained reactivity tracking
+    - Resumability optimizations
+  
+  i Use native Qwik class binding as shown in Qwik Rendering: Class Bindings (Official Docs).
+  
+
+```

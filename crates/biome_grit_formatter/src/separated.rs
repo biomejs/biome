@@ -4,11 +4,19 @@ use biome_formatter::{
 };
 
 use crate::prelude::*;
+use crate::{AsFormat, GritFormatContext, cst::FormatGritSyntaxToken};
+use biome_formatter::trivia::FormatToken;
 use biome_grit_syntax::{GritLanguage, GritSyntaxToken};
 use biome_rowan::{AstNode, AstSeparatedListElementsIterator};
 use std::marker::PhantomData;
 
-use crate::{AsFormat, GritFormatContext, cst::FormatGritSyntaxToken};
+fn on_skipped(token: &GritSyntaxToken, f: &mut GritFormatter) -> FormatResult<()> {
+    FormatGritSyntaxToken.format_skipped_token_trivia(token, f)
+}
+
+fn on_removed(token: &GritSyntaxToken, f: &mut GritFormatter) -> FormatResult<()> {
+    FormatGritSyntaxToken.format_removed(token, f)
+}
 
 #[derive(Clone)]
 pub(crate) struct GritFormatSeparatedElementRule<N>
@@ -35,10 +43,11 @@ where
     }
 }
 
-type GritFormatSeparatedIter<Node> = FormatSeparatedIter<
+type GritFormatSeparatedIter<Node, C> = FormatSeparatedIter<
     AstSeparatedListElementsIterator<GritLanguage, Node>,
     Node,
     GritFormatSeparatedElementRule<Node>,
+    C,
 >;
 
 /// AST Separated list formatting extension methods
@@ -51,11 +60,16 @@ pub(crate) trait FormatAstSeparatedListExtension:
     /// created by calling the `separator_factory` function.
     /// The last trailing separator in the list will only be printed
     /// if the outer group breaks.
-    fn format_separated(&self, separator: &'static str) -> GritFormatSeparatedIter<Self::Node> {
+    fn format_separated(
+        &self,
+        separator: &'static str,
+    ) -> GritFormatSeparatedIter<Self::Node, GritFormatContext> {
         GritFormatSeparatedIter::new(
             self.elements(),
             separator,
             GritFormatSeparatedElementRule { node: PhantomData },
+            on_skipped,
+            on_removed,
         )
     }
 }

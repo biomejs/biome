@@ -514,7 +514,8 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
     );
     assert!(
         last_token.token_text_trimmed().is_empty(),
-        "the EOF token may not contain any data except trailing whitespace"
+        "the EOF token may not contain any data except trailing whitespace, but found \"{}\"",
+        last_token.token_text_trimmed()
     );
 }
 

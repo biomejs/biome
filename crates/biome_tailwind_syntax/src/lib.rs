@@ -9,7 +9,7 @@ pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKi
 pub use syntax_node::*;
 
 use crate::TailwindSyntaxKind::{
-    TW_BOGUS, TW_BOGUS_CANDIDATE, TW_BOGUS_MODIFIER, TW_BOGUS_VARIANT,
+    TW_BOGUS, TW_BOGUS_CANDIDATE, TW_BOGUS_MODIFIER, TW_BOGUS_VALUE, TW_BOGUS_VARIANT,
 };
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind};
 
@@ -40,8 +40,10 @@ impl biome_rowan::SyntaxKind for TailwindSyntaxKind {
     fn to_bogus(&self) -> Self {
         match self {
             kind if AnyTwCandidate::can_cast(*kind) => TW_BOGUS_CANDIDATE,
+            kind if AnyTwFullCandidate::can_cast(*kind) => TW_BOGUS_CANDIDATE,
             kind if AnyTwVariant::can_cast(*kind) => TW_BOGUS_VARIANT,
             kind if AnyTwModifier::can_cast(*kind) => TW_BOGUS_MODIFIER,
+            kind if AnyTwValue::can_cast(*kind) => TW_BOGUS_VALUE,
             _ => TW_BOGUS,
         }
     }
@@ -65,7 +67,7 @@ impl biome_rowan::SyntaxKind for TailwindSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self, Self::NEWLINE | Self::WHITESPACE)
+        matches!(self, Self::NEWLINE)
     }
 
     fn to_string(&self) -> Option<&'static str> {
@@ -78,9 +80,10 @@ impl TryFrom<TailwindSyntaxKind> for TriviaPieceKind {
 
     fn try_from(value: TailwindSyntaxKind) -> Result<Self, Self::Error> {
         if value.is_trivia() {
+            // We intentionally don't consider whitespace to be trivia because it's a required part of the syntax.
+            // There must be spaces between Candidates in order for tailwind to parse them.
             match value {
                 TailwindSyntaxKind::NEWLINE => Ok(Self::Newline),
-                TailwindSyntaxKind::WHITESPACE => Ok(Self::Whitespace),
                 _ => unreachable!("Not Trivia"),
             }
         } else {

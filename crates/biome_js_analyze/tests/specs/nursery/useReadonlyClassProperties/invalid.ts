@@ -338,3 +338,11 @@ class TestChildClassExpressionModifiable {
 		};
 	}
 }
+
+export class Test {
+	private field: number;
+
+	constructor() {
+		this.field ??= 1;
+	}
+}

@@ -3788,6 +3788,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoQwikUseVisibleTaskConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoQwikUseVisibleTaskOptions" }
+			]
+		},
+		"NoQwikUseVisibleTaskOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReExportAllConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4666,6 +4676,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueReservedKeysConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueReservedKeysOptions" }
+			]
+		},
+		"NoVueReservedKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedPropsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4819,6 +4839,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noQwikUseVisibleTask": {
+					"description": "Disallow useVisibleTask$() functions in Qwik components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactPropAssign": {
 					"description": "Disallow assigning to React component props.",
 					"anyOf": [
@@ -4903,6 +4930,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueReservedKeys": {
+					"description": "Disallow reserved keys in Vue component data and computed properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueReservedKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueReservedProps": {
 					"description": "Disallow reserved names to be used as props.",
 					"anyOf": [
@@ -4918,6 +4952,13 @@
 					"description": "Enforce that getters and setters for the same property are adjacent in class and object definitions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseAdjacentGetterSetterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useAnchorHref": {
+					"description": "Enforces href attribute for \\<a> elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4969,6 +5010,13 @@
 					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseGoogleFontPreconnectConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useImageSize": {
+					"description": "Enforces that \\<img> elements have both width and height attributes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5025,6 +5073,20 @@
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikClasslist": {
+					"description": "Prefer using the class prop as a classlist over the classnames helper.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReactFunctionComponents": {
+					"description": "Enforce that components are defined as functions and never as classes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5497,6 +5559,11 @@
 					"enum": ["next"]
 				},
 				{
+					"description": "Qwik framework rules",
+					"type": "string",
+					"enum": ["qwik"]
+				},
+				{
 					"description": "Vue.js framework rules",
 					"type": "string",
 					"enum": ["vue"]
@@ -5505,6 +5572,11 @@
 					"description": "For rules that require querying multiple files inside a project",
 					"type": "string",
 					"enum": ["project"]
+				},
+				{
+					"description": "Tailwind CSS rules",
+					"type": "string",
+					"enum": ["tailwind"]
 				}
 			]
 		},
@@ -7896,6 +7968,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoQwikUseVisibleTaskOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoQwikUseVisibleTaskOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoReExportAllOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9332,6 +9419,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoVueReservedKeysOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueReservedKeysOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoVueReservedPropsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9443,6 +9545,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseAnchorContentOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseAnchorHrefOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseAnchorHrefOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -10302,6 +10419,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseImageSizeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseImageSizeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseImportExtensionsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10749,6 +10881,38 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseParseIntRadixOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseQwikClasslistOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikClasslistOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseReactFunctionComponentsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -12678,6 +12842,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseAnchorHrefConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseAnchorHrefOptions" }
+			]
+		},
+		"UseAnchorHrefOptions": { "type": "null" },
 		"UseAriaActivedescendantWithTabindexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13212,6 +13383,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseImageSizeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseImageSizeOptions" }
+			]
+		},
+		"UseImageSizeOptions": { "type": "null" },
 		"UseImportExtensionsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13489,6 +13667,26 @@
 			]
 		},
 		"UseParseIntRadixOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikClasslistConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikClasslistOptions" }
+			]
+		},
+		"UseQwikClasslistOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseReactFunctionComponentsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseReactFunctionComponentsOptions" }
+			]
+		},
+		"UseReactFunctionComponentsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

@@ -1,4 +1,6 @@
+use crate::FormatGraphqlSyntaxToken;
 use crate::prelude::*;
+use biome_formatter::trivia::FormatToken;
 use biome_formatter::write;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlNameReference, GraphqlUnionMemberTypeList};
 use biome_rowan::AstSeparatedElement;
@@ -37,7 +39,7 @@ impl Format<GraphqlFormatContext> for FormatTypeVariant {
 
         if let Some(token) = separator {
             if self.last {
-                write!(f, [format_removed(token)])?;
+                FormatGraphqlSyntaxToken.format_removed(token, f)?;
             } else {
                 write![f, [soft_line_break_or_space(), token.format()]]?;
             }

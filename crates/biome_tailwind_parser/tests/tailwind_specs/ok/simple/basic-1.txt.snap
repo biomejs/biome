@@ -1,0 +1,53 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+bg-red-500
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@3..11 "red-500" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@11..11 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..11
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..11
+    0: TW_FULL_CANDIDATE@0..11
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..11
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_NAMED_VALUE@3..11
+          0: TW_VALUE@3..11 "red-500" [] [Newline("\n")]
+        3: (empty)
+      2: (empty)
+  2: EOF@11..11 "" [] []
+
+```

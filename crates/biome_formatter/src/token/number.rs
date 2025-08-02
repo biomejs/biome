@@ -1,10 +1,6 @@
-use biome_rowan::{Language, SyntaxToken};
 use biome_string_case::StrLikeExtension;
 use std::borrow::Cow;
 use std::num::NonZeroUsize;
-
-use crate::prelude::*;
-use crate::{CstFormatContext, Format};
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct NumberFormatOptions {
@@ -21,42 +17,6 @@ impl NumberFormatOptions {
         Self {
             keep_one_trailing_decimal_zero: true,
         }
-    }
-}
-
-pub fn format_number_token<L>(
-    token: &SyntaxToken<L>,
-    options: NumberFormatOptions,
-) -> CleanedNumberLiteralText<L>
-where
-    L: Language,
-{
-    CleanedNumberLiteralText { token, options }
-}
-
-pub struct CleanedNumberLiteralText<'token, L>
-where
-    L: Language,
-{
-    token: &'token SyntaxToken<L>,
-    options: NumberFormatOptions,
-}
-
-impl<L, C> Format<C> for CleanedNumberLiteralText<'_, L>
-where
-    L: Language + 'static,
-    C: CstFormatContext<Language = L>,
-{
-    fn fmt(&self, f: &mut Formatter<C>) -> FormatResult<()> {
-        format_replaced(
-            self.token,
-            &syntax_token_cow_slice(
-                format_trimmed_number(self.token.text_trimmed(), self.options),
-                self.token,
-                self.token.text_trimmed_range().start(),
-            ),
-        )
-        .fmt(f)
     }
 }
 
@@ -77,7 +37,7 @@ struct FormatNumberLiteralExponent {
     first_non_zero_index: Option<NonZeroUsize>,
 }
 // Regex-free version of https://github.com/prettier/prettier/blob/ca246afacee8e6d5db508dae01730c9523bbff1d/src/common/util.js#L341-L356
-fn format_trimmed_number(text: &str, options: NumberFormatOptions) -> Cow<str> {
+pub fn format_trimmed_number(text: &str, options: NumberFormatOptions) -> Cow<str> {
     use FormatNumberLiteralState::*;
 
     let text = text.to_ascii_lowercase_cow();

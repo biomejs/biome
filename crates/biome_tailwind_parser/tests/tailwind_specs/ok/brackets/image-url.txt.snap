@@ -1,0 +1,57 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+bg-[url(/img/mountains.jpg)]
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@3..4 "[" [] [],
+                    value_token: TW_VALUE@4..27 "url(/img/mountains.jpg)" [] [],
+                    r_brack_token: R_BRACKET@27..29 "]" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@29..29 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..29
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..29
+    0: TW_FULL_CANDIDATE@0..29
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..29
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_ARBITRARY_VALUE@3..29
+          0: L_BRACKET@3..4 "[" [] []
+          1: TW_VALUE@4..27 "url(/img/mountains.jpg)" [] []
+          2: R_BRACKET@27..29 "]" [] [Newline("\n")]
+        3: (empty)
+      2: (empty)
+  2: EOF@29..29 "" [] []
+
+```

@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 146
+expression: invalid-methods.vue
+---
+# Input
+```ts
+<script>
+export default {
+    methods: {
+        $el() {},
+        $data: () => {},
+        $props: () => ({}),
+        $options: function() {},
+    }
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-methods.vue:4:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $el is reserved in Vue.
+  
+    2 │ export default {
+    3 │     methods: {
+  > 4 │         $el() {},
+      │         ^^^
+    5 │         $data: () => {},
+    6 │         $props: () => ({}),
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```
+
+```
+invalid-methods.vue:5:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $data is reserved in Vue.
+  
+    3 │     methods: {
+    4 │         $el() {},
+  > 5 │         $data: () => {},
+      │         ^^^^^
+    6 │         $props: () => ({}),
+    7 │         $options: function() {},
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```
+
+```
+invalid-methods.vue:6:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $props is reserved in Vue.
+  
+    4 │         $el() {},
+    5 │         $data: () => {},
+  > 6 │         $props: () => ({}),
+      │         ^^^^^^
+    7 │         $options: function() {},
+    8 │     }
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```
+
+```
+invalid-methods.vue:7:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $options is reserved in Vue.
+  
+    5 │         $data: () => {},
+    6 │         $props: () => ({}),
+  > 7 │         $options: function() {},
+      │         ^^^^^^^^
+    8 │     }
+    9 │ };
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```

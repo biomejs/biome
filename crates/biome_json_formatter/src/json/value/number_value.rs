@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::token::number::{NumberFormatOptions, format_number_token};
+use biome_formatter::token::number::NumberFormatOptions;
 use biome_json_syntax::JsonNumberValue;
 
 #[derive(Debug, Clone, Default)]

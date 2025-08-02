@@ -35,12 +35,14 @@ The analyzer allows implementors to create **three different** types of rules:
         * [Testing & Documenting Rule Options](#testing--documenting-rule-options)
       - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
       - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
-      - [Semantic Model](#semantic-model)
-        * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+      - [Services](#services)
+        - [Semantic Model](#semantic-model)
+          * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+        - [Using Multiple Services in a Rule](#using-multiple-services-in-a-rule)
       - [Multiple Signals](#multiple-signals)
       - [Code Actions](#code-actions)
       - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
-      - [Common Logic Mistakes](#common-logic-mistakes)
+      - [Common Mistakes](#common-mistakes)
         * [Not checking if a variable is global](#not-checking-if-a-variable-is-global)
     + [Testing the Rule](#testing-the-rule)
       - [Quick Test](#quick-test)
@@ -107,6 +109,10 @@ _Biome_ follows a naming convention according to what the rule does:
 We also try to ensure consistency in the naming of rules.
 Please feel free to refer to existing rules for inspiration when naming new ones.
 Here is a non-exhaustive list of common names:
+
+- `use<Framework>...`
+
+  If a rule overwhelmingly applies to a specific framework, it should be named using the `use` or `no` prefix followed by the framework name, eg. `noVueReservedProps`
 
 - `noConstant<Concept>`
 
@@ -406,6 +412,9 @@ declare_lint_rule! {
     }
 }
 ```
+
+> [!TIP]
+> The `version` field indicates what Biome version the rule was released in. The `version` field must be `next`. This allows us flexibility for what version the rule will actually be released in.
 
 ##### Biome lint rules inspired by other lint rules
 
@@ -733,12 +742,15 @@ When creating a new node like this, we internally prefix them with `Any*` and po
 
 The type `AnyFunctionLike` implements the trait `AstNode`, which means that it implements all methods such as `syntax`, `children`, etc.
 
-#### Semantic Model
+#### Services
+
+There are times when a rule requires quite advanced knowledge of the behavior of language, such as control flow or where bindings are declared. Biome provides "services" to provide this type of information, so it can be calculated once and reused across multiple rules.
+
+##### Semantic Model
 
 The semantic model provides information about the references of a binding (declaration) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
 
-
-##### How to use the query `Semantic<>` in a lint rule
+###### How to use the query `Semantic<>` in a lint rule
 
 We have a for loop that creates an index `i`, and we need to identify where this index is used inside the body of the loop
 
@@ -787,6 +799,20 @@ impl Rule for ForLoopCountReferences {
 }
 ```
 
+##### Using Multiple Services in a Rule
+
+In some rare cases, a rule may require multiple services to be used together. In these cases, you don't need to pull in these services in the rule's `Query`. The rule context provides a `get_service` method to retrieve services by their type.
+
+However, you need to take into consideration that some services are created during a "second phase", for example `SemanticModel` and `ControlFlowGraph` services are created during this phase. If you pull these services when using the `Ast` query, those services won't be available. This means that you must use at least a query that runs during the second phase. The `Semantic` query, for example, runs during the second phase.
+
+```rust
+let is_root_service = ctx
+  .get_service::<IsRoot>()
+  .expect("IsRoot service not found.");
+```
+Where `IsRoot` is the name of the service you want to retrieve. The name of the service is the name of the Rust type that is stored when calling `.insert_service()`.
+
+Refer to the `src/lib.rs` file of the crate, and look at the `.insert_service()` function, and deduce the name of the service from there. Using an incorrect name will result in a panic error at runtime.
 #### Multiple Signals
 
 Some rules require you to find all possible cases upfront in `run` function.
@@ -977,9 +1003,9 @@ impl Rule for UseYield {
 }
 ```
 
-#### Common Logic Mistakes
+#### Common Mistakes
 
-There are some common mistakes that can lead to bugs or false positives in lint rules. These tips should help you avoid them and write more robust rules.
+There are some common mistakes that can lead to bugs or false positives in lint rules, or things that reviewers will always ask for. These tips should help you avoid them and write more robust rules.
 
 ##### Not checking if a variable is global
 
@@ -992,6 +1018,38 @@ console.log(); // <-- This should not be reported because `console` is redeclare
 ```
 
 To avoid this, you should consult the semantic model to check if the variable is global or not.
+
+##### Avoidable String Allocations
+
+Lots of rules require checking a string. It's tempting to call `to_string()` on something to get an owned string, but this always results in a heap allocation.
+
+Most of the time, you actually want to compare against a `&str`, or a `TokenText`. `TokenText` is most useful for those cases where you actually do need an owned value.
+
+##### Avoidable Deep Indentation
+
+Inherently, syntax trees are quite deeply nested. Biome's syntax data structures make heavy use of the `Result` and `Option` types to represent the absence of a value. It may be tempting to use `unwrap()` or `expect()` to avoid the `Result` and `Option` types, but this is not recommended because those panic. Sometimes, it's not convenient to use the `?` operator. Whatever the case may be, you might end up with something like this:
+
+```rust
+if let Ok(object_member_name) = property_object_member.name() {
+    if let Some(key_name) = object_member_name.name() {
+        if key_name.text().trim() == "data" {
+            if let Ok(value) = property_object_member.value() {
+                match value {
+...
+```
+
+Rust provides comprehensive helper functions to avoid things like this, such as `map`, `filter`, and `and_then`. Which allows you to write code that is more concise and easier to read.
+
+```rust
+property_object_member
+  .name()
+  .ok()
+  .and_then(|n| n.name())
+  .filter(|ident| ident.text().trim() == "data")
+  .and_then(|_| property_object_member.value().ok())
+  .and_then(|value| match value {
+...
+```
 
 ### Testing the Rule
 

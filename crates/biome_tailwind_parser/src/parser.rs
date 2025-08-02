@@ -1,9 +1,9 @@
-use crate::token_source::TailwindTokenSource;
+use crate::token_source::{TailwindTokenSource, TailwindTokenSourceCheckpoint};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
-use biome_parser::prelude::*;
 use biome_parser::tree_sink::LosslessTreeSink;
 use biome_parser::{Parser, ParserContext};
+use biome_parser::{ParserContextCheckpoint, prelude::*};
 use biome_tailwind_factory::TailwindSyntaxFactory;
 use biome_tailwind_syntax::{TailwindLanguage, TailwindSyntaxKind};
 
@@ -37,6 +37,18 @@ impl<'source> TailwindParser<'source> {
 
         (events, diagnostics, trivia)
     }
+
+    pub fn checkpoint(&self) -> TailwindParserCheckpoint {
+        TailwindParserCheckpoint {
+            parser: self.context.checkpoint(),
+            token_source: self.source.checkpoint(),
+        }
+    }
+
+    pub fn rewind(&mut self, checkpoint: TailwindParserCheckpoint) {
+        self.context.rewind(checkpoint.parser);
+        self.source.rewind(checkpoint.token_source);
+    }
 }
 
 impl<'src> Parser for TailwindParser<'src> {
@@ -58,4 +70,9 @@ impl<'src> Parser for TailwindParser<'src> {
     fn source_mut(&mut self) -> &mut Self::Source {
         &mut self.source
     }
+}
+
+pub struct TailwindParserCheckpoint {
+    parser: ParserContextCheckpoint,
+    token_source: TailwindTokenSourceCheckpoint,
 }

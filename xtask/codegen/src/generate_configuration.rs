@@ -198,13 +198,13 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     }];
 
     for group in lint_visitor.groups.values() {
-        for (rule_name, _) in group {
+        for rule_name in group.keys() {
             rule_names.insert(rule_name);
         }
     }
 
     for group in assist_visitor.groups.values() {
-        for (rule_name, _) in group {
+        for rule_name in group.keys() {
             rule_names.insert(rule_name);
         }
     }
@@ -216,7 +216,7 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
            pub mod #ident;
         });
 
-        let file_name = format!("{}.rs", snake_rule_name);
+        let file_name = format!("{snake_rule_name}.rs");
         let file_path = rule_options_root.join(file_name);
         if file_path.exists() {
             continue;
@@ -319,7 +319,7 @@ fn generate_for_groups(
         group_idents.push(group_ident);
         group_strings.push(Literal::string(group_name));
         struct_groups.push(generate_group_struct(group_name, &rules, kind));
-        rule_group_names.extend(rules.iter().map(|(rule_name, _)| RuleGroup {
+        rule_group_names.extend(rules.keys().map(|rule_name| RuleGroup {
             rule_name,
             group_name,
         }));
@@ -819,17 +819,13 @@ fn generate_group_struct(
                     }
 
                     Event::Start(tag) => match tag {
-                        Tag::Strong | Tag::Paragraph => {
-                            continue;
-                        }
+                        Tag::Strong | Tag::Paragraph => {}
 
                         _ => panic!("Unimplemented tag {:?}", { tag }),
                     },
 
                     Event::End(tag) => match tag {
-                        TagEnd::Strong | TagEnd::Paragraph => {
-                            continue;
-                        }
+                        TagEnd::Strong | TagEnd::Paragraph => {}
                         _ => panic!("Unimplemented tag {:?}", { tag }),
                     },
 
@@ -853,7 +849,7 @@ fn generate_group_struct(
                 "RuleConfiguration"
             }
         );
-        let rule_base_name = Ident::new(&Case::Snake.convert(&rule), Span::call_site());
+        let rule_base_name = Ident::new(&Case::Snake.convert(rule), Span::call_site());
         let rule_name = Ident::new(
             &format!("{}Options", &to_capitalized(rule)),
             Span::call_site(),
@@ -876,13 +872,8 @@ fn generate_group_struct(
         let rule_option_type = quote! {
             biome_rule_options::#rule_base_name::#rule_name
         };
-        let rule_option = if kind == RuleCategory::Action {
-            quote! { Option<#rule_config_type<#rule_option_type>> }
-        } else {
-            quote! {
-                Option<#rule_config_type<#rule_option_type>>
-            }
-        };
+
+        let rule_option = quote! { Option<#rule_config_type<#rule_option_type>> };
         schema_lines_rules.push(quote! {
             #[doc = #summary]
             #[serde(skip_serializing_if = "Option::is_none")]
@@ -910,15 +901,9 @@ fn generate_group_struct(
             }
         });
 
-        if kind == RuleCategory::Action {
-            get_rule_configuration_line.push(quote! {
-                #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
-            });
-        } else {
-            get_rule_configuration_line.push(quote! {
-                #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
-            });
-        }
+        get_rule_configuration_line.push(quote! {
+            #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
+        });
 
         rule_identifiers.push(rule_identifier);
     }

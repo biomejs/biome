@@ -1,0 +1,1 @@
+border              focus:outline-none

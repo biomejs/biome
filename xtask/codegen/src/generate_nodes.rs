@@ -11,6 +11,19 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         .nodes
         .iter()
         .map(|node| {
+            if node.name.ends_with("Root") && let Some(last) = node.fields.last() {
+                match last {
+                    field @ Field::Token { kind, .. } => {
+                        if let TokenKind::Single(k) = kind && k == "EOF" {
+                            // do nothing
+                        } else {
+                            panic!("The last field of the root node to be an EOF token. Instead, got {field:?}")
+                        }
+                    }
+                    field => panic!("The last field of the root node to be an EOF token. Instead, got {field:?}"),
+                }
+            }
+
             let name = format_ident!("{}", node.name);
             let node_kind = format_ident!("{}", Case::Constant.convert(node.name.as_str()));
             let needs_dynamic_slots = node.dynamic;
@@ -1000,16 +1013,17 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
         };
         let token: TokenStream = token.parse().unwrap();
         quote! { T![#token] }
+    } else if name == " " {
+        quote! { T![' '] }
+    }
+    // `$`, `[`, and `]` is valid syntax in rust and it's part of macros,
+    // so we need to decorate the tokens with quotes
+    else if should_token_be_quoted(name) {
+        let token = Literal::string(name);
+        quote! { T![#token] }
     } else {
-        // `$`, `[`, and `]` is valid syntax in rust and it's part of macros,
-        // so we need to decorate the tokens with quotes
-        if should_token_be_quoted(name) {
-            let token = Literal::string(name);
-            quote! { T![#token] }
-        } else {
-            let token: TokenStream = name.parse().unwrap();
-            quote! { T![#token] }
-        }
+        let token: TokenStream = name.parse().unwrap();
+        quote! { T![#token] }
     }
 }
 
@@ -1168,7 +1182,7 @@ pub(crate) fn group_fields_for_ordering(node: &AstNodeSrc) -> Vec<Vec<&Field>> {
     groups
 }
 
-/// Whether or not a token should be surrounded by quotes when being printed in the generated code.
+/// Whether or not a token should be surrounded by **double quotes** when being printed in the generated code.
 ///
 /// Some tokens need to be quoted in the `T![]` macro because they conflict with Rust syntax.
 pub fn should_token_be_quoted(token: &str) -> bool {

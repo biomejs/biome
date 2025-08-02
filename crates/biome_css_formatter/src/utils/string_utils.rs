@@ -10,7 +10,6 @@ use biome_formatter::token::string::normalize_string;
 use biome_formatter::{
     Format, FormatResult,
     prelude::{dynamic_text, write},
-    trivia::format_replaced,
 };
 use biome_rowan::SyntaxToken;
 use biome_string_case::StrLikeExtension;

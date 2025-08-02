@@ -37,8 +37,11 @@ HtmlRoot {
                         HtmlContent {
                             value_token: HTML_LITERAL@17..19 "<" [Newline("\n")] [],
                         },
-                        HtmlContent {
-                            value_token: HTML_LITERAL@19..29 "/template>" [] [],
+                        HtmlBogusElement {
+                            items: [
+                                SLASH@19..20 "/" [] [],
+                                HTML_LITERAL@20..29 "template>" [] [],
+                            ],
                         },
                     ],
                 },
@@ -69,8 +72,9 @@ HtmlRoot {
         1: HTML_LITERAL@14..17 "xyz" [] []
         2: HTML_CONTENT@17..19
           0: HTML_LITERAL@17..19 "<" [Newline("\n")] []
-        3: HTML_CONTENT@19..29
-          0: HTML_LITERAL@19..29 "/template>" [] []
+        3: HTML_BOGUS_ELEMENT@19..29
+          0: SLASH@19..20 "/" [] []
+          1: HTML_LITERAL@20..29 "template>" [] []
   4: EOF@29..30 "" [Newline("\n")] []
 
 ```
@@ -95,6 +99,21 @@ vue_unclosed_expression.vue:3:1 parse ━━━━━━━━━━━━━━
       │ 	^^
     3 │ </template>
     4 │ 
+  
+vue_unclosed_expression.vue:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ <template>
+    2 │ 	{{xyz
+  > 3 │ </template>
+      │  ^^^^^^^^^^
+    4 │ 
+  
+  i Expected one of:
+  
+  - element
+  - text
   
 vue_unclosed_expression.vue:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

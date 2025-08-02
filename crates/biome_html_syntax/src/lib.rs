@@ -32,7 +32,7 @@ impl From<HtmlSyntaxKind> for u16 {
 
 impl HtmlSyntaxKind {
     pub fn is_comments(self) -> bool {
-        matches!(self, Self::HTML_COMMENT)
+        matches!(self, Self::COMMENT)
     }
 
     #[inline]
@@ -102,7 +102,7 @@ impl TryFrom<HtmlSyntaxKind> for TriviaPieceKind {
             }
         } else if value.is_comments() {
             match value {
-                HtmlSyntaxKind::HTML_COMMENT => Ok(Self::SingleLineComment),
+                HtmlSyntaxKind::COMMENT => Ok(Self::SingleLineComment),
                 _ => unreachable!("Not Comment"),
             }
         } else {

@@ -1,0 +1,268 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: issue6516.jsonc
+---
+# Input
+```json
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "beta"
+  },
+  "formatter": {
+    "enabled": false, // TODO: enable when https://github.com/biomejs/biome/issues/5879 is implemented
+    "useEditorconfig": true,
+    "indentStyle": "space",
+    "lineWidth": 120
+  },
+  "files": {
+    "ignoreUnknown": true,
+    // Adding folders to the ignore list is GREAT for performance because it prevents biome from descending into them
+    // and having to verify whether each individual file is ignored
+    "ignore": [
+      "**/*.d.ts",
+      ".github/*",
+      ".vscode/*",
+      "build/*",
+      "coverage/*",
+      "dist/*",
+      "docs/*",
+      "node_modules/*",
+      "public/*",
+      "typedoc/*",
+      "src/data/tms.ts" // this file is just too big
+    ]
+  },
+
+  "organizeImports": { "enabled": false }, // TODO: Enable in Biome 2.0
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true, // see https://biomejs.dev/linter/rules/#recommended-rules
+      "correctness": {
+        "noUndeclaredVariables": "off", // handled by TypeScript
+        "noUnusedVariables": "error",
+        "noSwitchDeclarations": "error",
+        "noVoidTypeReturn": "warn", // TODO: Refactor and make this an error
+        "noUnusedImports": "off" // Handled by ESLint until multi-line disable is added (in Biome 2.0)
+      },
+      "style": {
+        "noVar": "error",
+        "useEnumInitializers": "off", // large enums like Moves/Species would make this cumbersome
+        "useBlockStatements": "error",
+        "useConst": "error",
+        "useImportType": "error",
+        "noNonNullAssertion": "off", // TODO: fix all non-null assertions in non-test files and turn this on
+        "noParameterAssign": "off", // TODO: add this?
+        "useExponentiationOperator": "off", // Too typo-prone and easy to mixup with standard multiplication (* vs **)
+        "useDefaultParameterLast": "error",
+        "useSingleVarDeclarator": "off",
+        "useNodejsImportProtocol": "error",
+        "useTemplate": "off", // string concatenation is faster: https://stackoverflow.com/questions/29055518/are-es6-template-literals-faster-than-string-concatenation
+        "noNamespaceImport": "error",
+        "noInferrableTypes": "off", // Explicit > Implicit
+        "useConsistentArrayType": "error", // Standardize on `T[]`
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["kebab-case"],
+            "requireAscii": true,
+            "strictCase": false
+          }
+        }
+      },
+      "suspicious": {
+        "noDoubleEquals": "error",
+        "noExplicitAny": "off", // TODO: Refactor and make this an error
+        "noAssignInExpressions": "warn",
+        "noPrototypeBuiltins": "error",
+        "noFallthroughSwitchClause": "error", // Prevents accidental automatic fallthroughs in switch cases (use disable comment if needed)
+        "noImplicitAnyLet": "warn", // TODO: Refactor and make this an error
+        "noRedeclare": "error",
+        "noGlobalIsNan": "error",
+        "noAsyncPromiseExecutor": "warn", // TODO: Refactor and make this an error
+        "useDefaultSwitchClauseLast": "warn" // TODO: make error?
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "info", // TODO: Refactor and make this an error
+        "useLiteralKeys": "off",
+        "noForEach": "off", // Foreach vs for of is not that simple.
+        "noUselessSwitchCase": "off", // Explicit > Implicit
+        "noUselessConstructor": "error",
+        "noBannedTypes": "warn", // TODO: refactor and make an error
+        "useRegexLiterals": "off" // Was broken for some reason; TODO: re-enable
+      },
+      "nursery": {
+        "noCommonJs": "error"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": { "quoteStyle": "double", "arrowParentheses": "always" }
+  },
+  "overrides": [
+    {
+      "include": ["test/**"],
+      "javascript": { "globals": [] },
+      "linter": {
+        "rules": {
+          "performance": {
+            "noDelete": "off" // TODO: evaluate if this is necessary for the test(s) to function
+          },
+          "style": {
+            "noNamespaceImport": "off", // this is required for `vi.spyOn` to work in some tests
+            "noNonNullAssertion": "off" // tests are able to make assumptions about the game state that normally can't be made
+          }
+        }
+      }
+    },
+    {
+      // This section is to improve the bug tester workflow
+      "include": ["src/overrides.ts"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "off"
+          },
+          "style": {
+            "useImportType": "off"
+          }
+        }
+      }
+    }
+  ]
+}
+
+```
+
+# Diagnostics
+```
+issue6516.jsonc:47:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to suspicious/noVar.
+  
+    45 │       },
+    46 │       "style": {
+  > 47 │         "noVar": "error",
+       │         ^^^^^^^
+    48 │         "useEnumInitializers": "off", // large enums like Moves/Species would make this cumbersome
+    49 │         "useBlockStatements": "error",
+  
+  i Safe fix: Move the lint rule.
+  
+     45  45 │         },
+     46  46 │         "style": {
+     47     │ - ········"noVar":·"error",
+     48     │ - ········"useEnumInitializers":·"off",·//·large·enums·like·Moves/Species·would·make·this·cumbersome
+         47 │ + ········"useEnumInitializers":·"off",·//·large·enums·like·Moves/Species·would·make·this·cumbersome
+     49  48 │           "useBlockStatements": "error",
+     50  49 │           "useConst": "error",
+    ······· │ 
+     79  78 │           "noGlobalIsNan": "error",
+     80  79 │           "noAsyncPromiseExecutor": "warn", // TODO: Refactor and make this an error
+     81     │ - ········"useDefaultSwitchClauseLast":·"warn"·//·TODO:·make·error?
+         80 │ + ········"useDefaultSwitchClauseLast":·"warn",·//·TODO:·make·error?
+         81 │ + ········"noVar":·"error"
+     82  82 │         },
+     83  83 │         "complexity": {
+  
+
+```
+
+```
+issue6516.jsonc:59:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to performance/noNamespaceImport.
+  
+    57 │         "useNodejsImportProtocol": "error",
+    58 │         "useTemplate": "off", // string concatenation is faster: https://stackoverflow.com/questions/29055518/are-es6-template-literals-faster-than-string-concatenation
+  > 59 │         "noNamespaceImport": "error",
+       │         ^^^^^^^^^^^^^^^^^^^
+    60 │         "noInferrableTypes": "off", // Explicit > Implicit
+    61 │         "useConsistentArrayType": "error", // Standardize on `T[]`
+  
+  i Safe fix: Move the lint rule.
+  
+     57  57 │           "useNodejsImportProtocol": "error",
+     58  58 │           "useTemplate": "off", // string concatenation is faster: https://stackoverflow.com/questions/29055518/are-es6-template-literals-faster-than-string-concatenation
+     59     │ - ········"noNamespaceImport":·"error",
+     60     │ - ········"noInferrableTypes":·"off",·//·Explicit·>·Implicit
+         59 │ + ········"noInferrableTypes":·"off",·//·Explicit·>·Implicit
+     61  60 │           "useConsistentArrayType": "error", // Standardize on `T[]`
+     62  61 │           "useFilenamingConvention": {
+    ······· │ 
+     92  91 │         "nursery": {
+     93  92 │           "noCommonJs": "error"
+     94     │ - ······}
+         93 │ + ······},
+         94 │ + ······"performance":·{·
+         95 │ + ········"noNamespaceImport":·"error"·}
+     95  96 │       }
+     96  97 │     },
+  
+
+```
+
+```
+issue6516.jsonc:93:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been promoted to style/noCommonJs.
+  
+    91 │       },
+    92 │       "nursery": {
+  > 93 │         "noCommonJs": "error"
+       │         ^^^^^^^^^^^^
+    94 │       }
+    95 │     }
+  
+  i Safe fix: Move the lint rule.
+  
+     67  67 │               "strictCase": false
+     68  68 │             }
+     69     │ - ········}
+         69 │ + ········},
+         70 │ + ········"noCommonJs":·"error"
+     70  71 │         },
+     71  72 │         "suspicious": {
+    ······· │ 
+     91  92 │         },
+     92  93 │         "nursery": {
+     93     │ - ········"noCommonJs":·"error"
+     94  94 │         }
+     95  95 │       }
+  
+
+```
+
+```
+issue6516.jsonc:110:13 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been moved to performance/noNamespaceImport.
+  
+    108 │           },
+    109 │           "style": {
+  > 110 │             "noNamespaceImport": "off", // this is required for `vi.spyOn` to work in some tests
+        │             ^^^^^^^^^^^^^^^^^^^
+    111 │             "noNonNullAssertion": "off" // tests are able to make assumptions about the game state that normally can't be made
+    112 │           }
+  
+  i Safe fix: Move the lint rule.
+  
+    105 105 │           "rules": {
+    106 106 │             "performance": {
+    107     │ - ············"noDelete":·"off"·//·TODO:·evaluate·if·this·is·necessary·for·the·test(s)·to·function
+    108     │ - ··········},
+    109     │ - ··········"style":·{
+    110     │ - ············"noNamespaceImport":·"off",·//·this·is·required·for·`vi.spyOn`·to·work·in·some·tests
+        107 │ + ············"noDelete":·"off",·//·TODO:·evaluate·if·this·is·necessary·for·the·test(s)·to·function
+        108 │ + ············"noNamespaceImport":·"off"
+        109 │ + ··········},
+        110 │ + ··········"style":·{
+    111 111 │               "noNonNullAssertion": "off" // tests are able to make assumptions about the game state that normally can't be made
+    112 112 │             }
+  
+
+```

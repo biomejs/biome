@@ -1,0 +1,61 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+bg-primary/10
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@3..10 "primary" [] [],
+                },
+                modifier: TwModifier {
+                    slash_token: SLASH@10..11 "/" [] [],
+                    value: TwNamedValue {
+                        value_token: TW_VALUE@11..14 "10" [] [Newline("\n")],
+                    },
+                },
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@14..14 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..14
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..14
+    0: TW_FULL_CANDIDATE@0..14
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..14
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_NAMED_VALUE@3..10
+          0: TW_VALUE@3..10 "primary" [] []
+        3: TW_MODIFIER@10..14
+          0: SLASH@10..11 "/" [] []
+          1: TW_NAMED_VALUE@11..14
+            0: TW_VALUE@11..14 "10" [] [Newline("\n")]
+      2: (empty)
+  2: EOF@14..14 "" [] []
+
+```

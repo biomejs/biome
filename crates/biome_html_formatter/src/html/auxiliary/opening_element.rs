@@ -45,11 +45,19 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
             r_angle_token,
         } = node.as_fields();
 
+        let l_angle_token = l_angle_token?;
         let name = name?;
         let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &name);
         let is_canonical_html_tag = is_canonical_html_tag(&name);
 
         let bracket_same_line = f.options().bracket_same_line().value();
+
+        // if this isn't whitespace sensitive, and there is a comment trivia
+        // we must add a newline right after the comment.
+        if !is_whitespace_sensitive && l_angle_token.has_leading_comments() {
+            write!(f, [hard_line_break()])?;
+        }
+
         write!(f, [l_angle_token.format(), name.format()])?;
 
         write!(

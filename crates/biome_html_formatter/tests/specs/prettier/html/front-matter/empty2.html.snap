@@ -50,5 +50,20 @@ empty2.html:1:1 parse ━━━━━━━━━━━━━━━━━━━�
   
   i Remove it or rename the file to have the .astro extension.
   
+empty2.html:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    4 │ <div>
+  > 5 │ ---
+      │ ^^^
+    6 │ </div>
+    7 │ 
+  
+  i Expected one of:
+  
+  - element
+  - text
+  
 
 ```

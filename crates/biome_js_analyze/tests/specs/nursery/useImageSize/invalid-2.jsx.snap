@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-2.jsx
+---
+# Input
+```jsx
+// Invalid: missing width and height
+<img src="https://example.com/image.png" /> 
+```
+
+# Diagnostics
+```
+invalid-2.jsx:2:1 lint/nursery/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing width or height attribute on img element.
+  
+    1 │ // Invalid: missing width and height
+  > 2 │ <img src="https://example.com/image.png" />·
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Without explicit dimensions, images cause layout shifts (CLS) when loading, harming user experience and SEO.
+  
+  i Learn why this matters: web.dev: Image Dimensions, MDN: img attributes
+  
+
+```

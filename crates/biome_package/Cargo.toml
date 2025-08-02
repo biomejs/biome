@@ -27,13 +27,12 @@ biome_rowan              = { workspace = true }
 biome_text_size          = { workspace = true }
 camino                   = { workspace = true }
 indexmap                 = { workspace = true }
-node-semver              = "2.2.0"
 rustc-hash               = { workspace = true }
 serde                    = { workspace = true }
 static_assertions        = { workspace = true }
 
 [dev-dependencies]
-criterion    = { package = "codspeed-criterion-compat", version = "=3.0.3" }
+divan        = { package = "codspeed-divan-compat", version = "*" }
 insta        = { workspace = true }
 tests_macros = { path = "../tests_macros" }
 
@@ -54,3 +53,7 @@ name    = "package_json"
 [[bench]]
 harness = false
 name    = "tsconfig_json"
+
+[[bench]]
+harness = false
+name    = "semver"

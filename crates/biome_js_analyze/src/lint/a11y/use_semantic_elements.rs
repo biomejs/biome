@@ -5,8 +5,8 @@ use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsxAttribute, JsxOpeningElement};
-use biome_rowan::AstNode;
+use biome_js_syntax::{JsxAttribute, JsxOpeningElement, JsxSelfClosingElement};
+use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::use_semantic_elements::UseSemanticElementsOptions;
 
 declare_lint_rule! {
@@ -25,6 +25,14 @@ declare_lint_rule! {
     ///
     /// ```jsx,expect_diagnostic
     /// <div role="separator"></div>
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div role="checkbox" />
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div role="separator" />
     /// ```
     ///
     /// ### Valid
@@ -53,15 +61,24 @@ declare_lint_rule! {
     }
 }
 
+declare_node_union! {
+    pub AnyOpeningElement = JsxOpeningElement | JsxSelfClosingElement
+}
+
 impl Rule for UseSemanticElements {
-    type Query = Ast<JsxOpeningElement>;
+    type Query = Ast<AnyOpeningElement>;
     type State = JsxAttribute;
     type Signals = Option<Self::State>;
     type Options = UseSemanticElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let role_attribute = node.find_attribute_by_name("role")?;
+        let role_attribute = match node {
+            AnyOpeningElement::JsxOpeningElement(node) => node.find_attribute_by_name("role")?,
+            AnyOpeningElement::JsxSelfClosingElement(node) => {
+                node.find_attribute_by_name("role")?
+            }
+        };
         let role_value = role_attribute.as_static_value()?;
         let role_value = role_value.as_string_constant()?;
 

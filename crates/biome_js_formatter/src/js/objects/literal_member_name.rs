@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
-use biome_formatter::token::number::{NumberFormatOptions, format_number_token};
+use biome_formatter::token::number::NumberFormatOptions;
 use biome_formatter::write;
 use biome_js_syntax::JsLiteralMemberNameFields;
 use biome_js_syntax::{JsLiteralMemberName, JsSyntaxKind};

@@ -30,10 +30,11 @@ where
     }
 }
 
-type CssFormatSeparatedIter<Node> = FormatSeparatedIter<
+type CssFormatSeparatedIter<Node, C> = FormatSeparatedIter<
     AstSeparatedListElementsIterator<CssLanguage, Node>,
     Node,
     CssFormatSeparatedElementRule<Node>,
+    C,
 >;
 
 /// AST Separated list formatting extension methods
@@ -46,11 +47,16 @@ pub(crate) trait FormatAstSeparatedListExtension:
     /// calling the `separator_factory` function. The last trailing separator
     /// will not be printed by default. Use `with_trailing_separator` to add it
     /// in where necessary.
-    fn format_separated(&self, separator: &'static str) -> CssFormatSeparatedIter<Self::Node> {
+    fn format_separated(
+        &self,
+        separator: &'static str,
+    ) -> CssFormatSeparatedIter<Self::Node, CssFormatContext> {
         CssFormatSeparatedIter::new(
             self.elements(),
             separator,
             CssFormatSeparatedElementRule { node: PhantomData },
+            on_skipped,
+            on_removed,
         )
         .with_trailing_separator(TrailingSeparator::Disallowed)
     }
@@ -94,10 +100,11 @@ where
     }
 }
 
-type CssFormatSeparatedIterWithOptions<Node, Options> = FormatSeparatedIter<
+type CssFormatSeparatedIterWithOptions<Node, Options, C> = FormatSeparatedIter<
     AstSeparatedListElementsIterator<CssLanguage, Node>,
     Node,
     CssFormatSeparatedElementRuleWithOptions<Node, Options>,
+    C,
 >;
 
 /// AST Separated list formatting extension methods with options
@@ -115,11 +122,13 @@ pub(crate) trait FormatAstSeparatedListWithOptionsExtension<O>:
         &self,
         separator: &'static str,
         options: O,
-    ) -> CssFormatSeparatedIterWithOptions<Self::Node, O> {
+    ) -> CssFormatSeparatedIterWithOptions<Self::Node, O, CssFormatContext> {
         FormatSeparatedIter::new(
             self.elements(),
             separator,
             CssFormatSeparatedElementRuleWithOptions::new(options),
+            on_skipped,
+            on_removed,
         )
         .with_trailing_separator(TrailingSeparator::Disallowed)
     }

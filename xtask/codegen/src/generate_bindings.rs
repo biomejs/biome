@@ -207,7 +207,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
     items.extend(declarations.into_iter().map(|(decl, description)| {
         let mut export = make::token(T![export]);
         if let Some(description) = description {
-            let comment = format!("/**\n\t* {} \n\t */\n", description);
+            let comment = format!("/**\n\t* {description} \n\t */\n");
             let trivia = vec![
                 (TriviaPieceKind::Newline, "\n"),
                 (TriviaPieceKind::MultiLineComment, comment.as_str()),

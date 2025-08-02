@@ -1,13 +1,11 @@
-use std::borrow::Cow;
-
 use crate::prelude::*;
+use crate::{HtmlFormatter, context::HtmlFormatContext};
 use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
 use biome_html_syntax::HtmlLanguage;
 use biome_rowan::{Language, SyntaxToken};
 use biome_string_case::StrLikeExtension;
-
-use crate::{HtmlFormatter, context::HtmlFormatContext};
+use std::borrow::Cow;
 
 // TODO: deduplicate with CSS formatter's version of this, move to `biome_formatter`.
 pub(crate) struct FormatTokenAsLowercase<L: Language> {

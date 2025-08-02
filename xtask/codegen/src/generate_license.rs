@@ -33,8 +33,8 @@ const URL: &str =
     "https://raw.githubusercontent.com/spdx/license-list-data/master/json/licenses.json";
 pub(crate) fn generate_license(mode: Mode) -> Result<()> {
     let request = get(URL);
-    let result = request.call()?;
-    let license_list = result.into_json::<LicenseList>()?;
+    let mut result = request.call()?;
+    let license_list = result.body_mut().read_json::<LicenseList>()?;
     let config_root = project_root().join("crates/biome_package/src/license");
 
     let tokens = create_data(license_list).expect("To write data into file");

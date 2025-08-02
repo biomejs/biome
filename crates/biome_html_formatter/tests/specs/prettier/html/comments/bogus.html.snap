@@ -1,0 +1,78 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/comments/bogus.html
+---
+# Input
+
+```html
+<? hello ?>
+<!- world ->
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+-<? hello ?>
++< ? hello ?>
+ <!- world ->
+```
+
+# Output
+
+```html
+< ? hello ?>
+<!- world ->
+```
+
+# Errors
+```
+bogus.html:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unescaped `<` bracket character. Expected a tag or escaped character.
+  
+  > 1 │ <? hello ?>
+      │ ^
+    2 │ <!- world ->
+    3 │ 
+  
+  i Replace this character with `&lt;` to escape it.
+  
+bogus.html:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '!'.
+  
+    1 │ <? hello ?>
+  > 2 │ <!- world ->
+      │  ^
+    3 │ 
+  
+  i Expected an element name here.
+  
+    1 │ <? hello ?>
+  > 2 │ <!- world ->
+      │  ^
+    3 │ 
+  
+bogus.html:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead the file ends
+  
+    1 │ <? hello ?>
+    2 │ <!- world ->
+  > 3 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ <? hello ?>
+    2 │ <!- world ->
+  > 3 │ 
+      │ 
+  
+
+```
