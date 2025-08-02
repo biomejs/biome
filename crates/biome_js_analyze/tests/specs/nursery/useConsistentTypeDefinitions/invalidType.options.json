@@ -1,0 +1,14 @@
+{
+    "$schema": "../../../../../../backend-jsonrpc/src/workspace.schema.json",
+    "linter": {
+        "rules": {
+            "nursery": {
+                "useConsistentTypeDefinitions": {
+                    "options": {
+                        "style": "type"
+                    }
+                }
+            }
+        }
+    }
+}

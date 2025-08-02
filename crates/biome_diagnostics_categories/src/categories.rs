@@ -201,6 +201,7 @@ define_categories! {
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useConsistentResponse": "https://biomejs.dev/linter/rules/use-consistent-response",
+    "lint/nursery/useConsistentTypeDefinitions": "https://biomejs.dev/linter/rules/use-consistent-type-definitions",
     "lint/nursery/useExhaustiveSwitchCases": "https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
     "lint/nursery/useExplicitFunctionReturnType": "https://biomejs.dev/linter/rules/use-explicit-type",
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-type",

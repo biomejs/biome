@@ -1,0 +1,41 @@
+/* should not generate diagnostics */
+// Default: prefer interface
+interface Foo {
+    prop: string;
+}
+
+interface Bar {
+    method(): void;
+}
+
+interface Point {
+    x: number;
+    y: number;
+}
+
+interface User {
+    name: string;
+    age: number;
+}
+
+interface Config {
+    apiUrl: string;
+    timeout: number;
+    retries: number;
+}
+
+// Type aliases should be used for these cases
+type Union = { a: string } | { b: number };
+type Intersection = { a: string } & { b: number };
+type Conditional<T> = T extends string ? { a: string } : { b: number };
+type StringAlias = string;
+type NumberAlias = number;
+type FunctionType = (x: number) => string;
+type TupleType = [string, number];
+type MappedType<T> = { [K in keyof T]: string };
+type Nullable<T> = T | null;
+
+// Interfaces can extend
+interface ExtendedInterface extends Foo {
+    extra: boolean;
+}
