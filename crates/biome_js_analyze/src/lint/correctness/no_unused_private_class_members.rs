@@ -1,21 +1,20 @@
+use crate::JsRuleAction;
+use crate::class_member_references::{ClassPropertyReference, References, class_member_references};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, AnyJsName,
-    JsAssignmentExpression, JsAssignmentOperator, JsClassDeclaration, JsSyntaxKind, JsSyntaxNode,
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, JsClassDeclaration, JsSyntaxKind,
     TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
-    declare_node_union,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TextRange, declare_node_union,
 };
 use biome_rule_options::no_unused_private_class_members::NoUnusedPrivateClassMembersOptions;
 use rustc_hash::FxHashSet;
-
-use crate::{JsRuleAction, utils::is_node_equal};
+use std::collections::HashSet;
 
 declare_lint_rule! {
     /// Disallow unused private class members
@@ -84,13 +83,35 @@ impl Rule for NoUnusedPrivateClassMembers {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let private_members: FxHashSet<AnyMember> = get_all_declared_private_members(node);
-        if private_members.is_empty() {
-            Vec::new()
-        } else {
-            traverse_members_usage(node.syntax(), private_members)
-        }
-        .into_boxed_slice()
+        let private_members = get_all_declared_private_members(node);
+
+        let References { reads, writes } = class_member_references(&node.members());
+
+        private_members
+            .iter()
+            .filter_map(|private_member| {
+                let is_read = reads
+                    .iter()
+                    .any(|ClassPropertyReference { name, .. }| private_member.match_js_name(name));
+
+                let is_write = writes
+                    .iter()
+                    .any(|ClassPropertyReference { name, .. }| private_member.match_js_name(name));
+
+                let is_write_only = !is_read && is_write && private_member.is_accessor();
+
+                if is_write_only {
+                    return None;
+                }
+
+                if !is_read {
+                    Some(private_member.clone())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<AnyMember>>()
+            .into()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -117,58 +138,13 @@ impl Rule for NoUnusedPrivateClassMembers {
     }
 }
 
-/// Check for private member usage
-/// if the member usage is found, we remove it from the hashmap
-fn traverse_members_usage(
-    syntax: &JsSyntaxNode,
-    mut private_members: FxHashSet<AnyMember>,
-) -> Vec<AnyMember> {
-    let iter = syntax.preorder();
-
-    for event in iter {
-        match event {
-            biome_rowan::WalkEvent::Enter(node) => {
-                if let Some(js_name) = AnyJsName::cast(node) {
-                    private_members.retain(|private_member| {
-                        let member_being_used =
-                            private_member.match_js_name(&js_name) == Some(true);
-
-                        if !member_being_used {
-                            return true;
-                        }
-
-                        let is_write_only =
-                            is_write_only(&js_name) == Some(true) && !private_member.is_accessor();
-                        let is_in_update_expression = is_in_update_expression(&js_name);
-
-                        if is_in_update_expression || is_write_only {
-                            return true;
-                        }
-
-                        false
-                    });
-
-                    if private_members.is_empty() {
-                        break;
-                    }
-                }
-            }
-            biome_rowan::WalkEvent::Leave(_) => {}
-        }
-    }
-
-    private_members.into_iter().collect()
-}
-
-fn get_all_declared_private_members(
-    class_declaration: &JsClassDeclaration,
-) -> FxHashSet<AnyMember> {
+fn get_all_declared_private_members(class_declaration: &JsClassDeclaration) -> HashSet<AnyMember> {
     class_declaration
         .members()
         .iter()
         .map(AnyMember::AnyJsClassMember)
         .chain(get_constructor_params(class_declaration))
-        .filter(|member| member.is_private() == Some(true))
+        .filter(|member| member.is_private())
         .collect()
 }
 
@@ -199,56 +175,6 @@ fn get_constructor_params(class_declaration: &JsClassDeclaration) -> FxHashSet<A
     FxHashSet::default()
 }
 
-/// Check whether the provided `AnyJsName` is part of a potentially write-only assignment expression.
-/// This function inspects the syntax tree around the given `AnyJsName` to check whether it is involved in an assignment operation and whether that assignment can be write-only.
-///
-/// # Returns
-///
-/// - `Some(true)`: If the `js_name` is in a write-only assignment.
-/// - `Some(false)`: If the `js_name` is in a assignments that also reads like shorthand operators
-/// - `None`: If the parent is not present or grand parent is not a JsAssignmentExpression
-///
-/// # Examples of write only expressions
-///
-/// ```js
-/// this.usedOnlyInWrite = 2;
-/// this.usedOnlyInWrite = this.usedOnlyInWrite;
-/// ```
-///
-fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
-    let parent = js_name.syntax().parent()?;
-    let grand_parent = parent.parent()?;
-    let assignment_expression = JsAssignmentExpression::cast(grand_parent)?;
-    let left = assignment_expression.left().ok()?;
-
-    if !is_node_equal(left.syntax(), &parent) {
-        return Some(false);
-    }
-
-    if !matches!(
-        assignment_expression.operator(),
-        Ok(JsAssignmentOperator::Assign)
-    ) {
-        let kind = assignment_expression.syntax().parent().kind();
-        return Some(
-            kind.is_some_and(|kind| matches!(kind, JsSyntaxKind::JS_EXPRESSION_STATEMENT)),
-        );
-    }
-
-    Some(true)
-}
-
-fn is_in_update_expression(js_name: &AnyJsName) -> bool {
-    let grand_parent = js_name.syntax().grand_parent();
-
-    grand_parent.kind().is_some_and(|kind| {
-        matches!(
-            kind,
-            JsSyntaxKind::JS_POST_UPDATE_EXPRESSION | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
-        )
-    })
-}
-
 impl AnyMember {
     fn is_accessor(&self) -> bool {
         matches!(
@@ -257,13 +183,16 @@ impl AnyMember {
         )
     }
 
-    fn is_private(&self) -> Option<bool> {
+    fn is_private(&self) -> bool {
         match self {
             Self::AnyJsClassMember(member) => {
+                let name = member.name().ok().flatten();
+
                 let is_es_private = matches!(
-                    member.name().ok()??,
-                    AnyJsClassMemberName::JsPrivateClassMemberName(_)
+                    name,
+                    Some(AnyJsClassMemberName::JsPrivateClassMemberName(_))
                 );
+
                 let is_ts_private = match member {
                     AnyJsClassMember::JsGetterClassMember(member) => member
                         .modifiers()
@@ -288,15 +217,13 @@ impl AnyMember {
                     _ => false,
                 };
 
-                Some(is_es_private || is_ts_private)
+                is_es_private || is_ts_private
             }
-            Self::TsPropertyParameter(param) => Some(
-                param
-                    .modifiers()
-                    .iter()
-                    .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
-                    .any(|accessibility| accessibility.is_private()),
-            ),
+            Self::TsPropertyParameter(param) => param
+                .modifiers()
+                .iter()
+                .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
+                .any(|accessibility| accessibility.is_private()),
         }
     }
 
@@ -328,41 +255,54 @@ impl AnyMember {
         }
     }
 
-    fn match_js_name(&self, js_name: &AnyJsName) -> Option<bool> {
-        let value_token = js_name.value_token().ok()?;
-        let token = value_token.text_trimmed();
+    fn match_js_name(&self, text: &Text) -> bool {
+        let token = text.text().trim();
+        let token = token.strip_prefix('#').unwrap_or(token);
 
         match self {
             Self::AnyJsClassMember(member) => match member {
-                AnyJsClassMember::JsGetterClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
-                }
-                AnyJsClassMember::JsMethodClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
-                }
-                AnyJsClassMember::JsPropertyClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
-                }
-                AnyJsClassMember::JsSetterClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
-                }
-                _ => None,
+                AnyJsClassMember::JsGetterClassMember(member) => member
+                    .name()
+                    .ok()
+                    .and_then(|n| n.name())
+                    .map(|name| name.text().eq(token))
+                    .unwrap_or(false),
+                AnyJsClassMember::JsMethodClassMember(member) => member
+                    .name()
+                    .ok()
+                    .and_then(|n| n.name())
+                    .map(|name| name.text().eq(token))
+                    .unwrap_or(false),
+                AnyJsClassMember::JsPropertyClassMember(member) => member
+                    .name()
+                    .ok()
+                    .and_then(|n| n.name())
+                    .map(|name| name.text().eq(token))
+                    .unwrap_or(false),
+                AnyJsClassMember::JsSetterClassMember(member) => member
+                    .name()
+                    .ok()
+                    .and_then(|n| n.name())
+                    .map(|name| name.text().eq(token))
+                    .unwrap_or(false),
+                _ => false,
             },
-            Self::TsPropertyParameter(ts_property) => match ts_property.formal_parameter().ok()? {
-                AnyJsFormalParameter::JsBogusParameter(_)
-                | AnyJsFormalParameter::JsMetavariable(_) => None,
-                AnyJsFormalParameter::JsFormalParameter(param) => Some(
-                    param
+            Self::TsPropertyParameter(ts_property) => ts_property
+                .formal_parameter()
+                .ok()
+                .and_then(|param| match param {
+                    AnyJsFormalParameter::JsBogusParameter(_)
+                    | AnyJsFormalParameter::JsMetavariable(_) => None,
+                    AnyJsFormalParameter::JsFormalParameter(param) => param
                         .binding()
                         .ok()?
                         .as_any_js_binding()?
                         .as_js_identifier_binding()?
                         .name_token()
-                        .ok()?
-                        .text_trimmed()
-                        == token,
-                ),
-            },
+                        .ok(),
+                })
+                .map(|name_token| name_token.text().eq(token))
+                .unwrap_or(false),
         }
     }
 }
