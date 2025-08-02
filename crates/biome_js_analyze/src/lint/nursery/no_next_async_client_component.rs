@@ -119,7 +119,7 @@ impl Rule for NoNextAsyncClientComponent {
                     rule_category!(),
                     declaration.range(),
                     markup! {
-                        "Async client component "<Emphasis>{name_text}</Emphasis>" is not allowed."
+                        "The component "<Emphasis>{name_text}</Emphasis>" is an async client component, which is not allowed."
                     },
                 )
             }
@@ -128,7 +128,7 @@ impl Rule for NoNextAsyncClientComponent {
                     rule_category!(),
                     declaration.range(),
                     markup! {
-                        "Async client component is not allowed."
+                        "Async client component are not allowed."
                     },
                 )
             }

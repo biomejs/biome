@@ -16,7 +16,7 @@ export default async function MyComponent() {
 ```
 invalid.jsx:3:16 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Async client component MyComponent is not allowed.
+  ! The component MyComponent is an async client component, which is not allowed.
   
     1 │ "use client";
     2 │ 
