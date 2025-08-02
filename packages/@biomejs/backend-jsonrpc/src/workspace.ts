@@ -1515,6 +1515,10 @@ export interface Correctness {
 	 */
 	recommended?: boolean;
 	/**
+	 * Enforce the use of variables within the scope they are defined.
+	 */
+	useBlockScopedVar?: RuleConfiguration_for_UseBlockScopedVarOptions;
+	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
 	useExhaustiveDependencies?: RuleFixConfiguration_for_UseExhaustiveDependenciesOptions;
@@ -2844,6 +2848,9 @@ export type RuleFixConfiguration_for_NoVoidElementsWithChildrenOptions =
 export type RuleConfiguration_for_NoVoidTypeReturnOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVoidTypeReturnOptions;
+export type RuleConfiguration_for_UseBlockScopedVarOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseBlockScopedVarOptions;
 export type RuleFixConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveDependenciesOptions;
@@ -4948,6 +4955,16 @@ export interface RuleWithOptions_for_NoVoidTypeReturnOptions {
 	 * Rule's options
 	 */
 	options: NoVoidTypeReturnOptions;
+}
+export interface RuleWithOptions_for_UseBlockScopedVarOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseBlockScopedVarOptions;
 }
 export interface RuleWithFixOptions_for_UseExhaustiveDependenciesOptions {
 	/**
@@ -7727,6 +7744,7 @@ export interface NoUnusedVariablesOptions {
 }
 export interface NoVoidElementsWithChildrenOptions {}
 export interface NoVoidTypeReturnOptions {}
+export interface UseBlockScopedVarOptions {}
 export interface UseExhaustiveDependenciesOptions {
 	/**
 	 * List of hooks of which the dependencies should be validated.
@@ -8456,6 +8474,7 @@ export type Category =
 	| "lint/correctness/noUnusedVariables"
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
+	| "lint/correctness/useBlockScopedVar"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useImportExtensions"
