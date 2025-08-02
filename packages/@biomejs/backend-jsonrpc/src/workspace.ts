@@ -1648,6 +1648,10 @@ export interface Nursery {
 	 */
 	noUnknownAtRule?: RuleConfiguration_for_NoUnknownAtRuleOptions;
 	/**
+	 * Disallow unnecessary type-based conditions that can be statically determined as redundant.
+	 */
+	noUnnecessaryConditions?: RuleConfiguration_for_NoUnnecessaryConditionsOptions;
+	/**
 	 * Warn when importing non-existing exports.
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
@@ -2940,6 +2944,9 @@ export type RuleConfiguration_for_NoUnassignedVariablesOptions =
 export type RuleConfiguration_for_NoUnknownAtRuleOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnknownAtRuleOptions;
+export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnnecessaryConditionsOptions;
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
@@ -5316,6 +5323,16 @@ export interface RuleWithOptions_for_NoUnknownAtRuleOptions {
 	 * Rule's options
 	 */
 	options: NoUnknownAtRuleOptions;
+}
+export interface RuleWithOptions_for_NoUnnecessaryConditionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnnecessaryConditionsOptions;
 }
 export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	/**
@@ -7815,6 +7832,7 @@ export interface NoShadowOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
 export interface NoUnknownAtRuleOptions {}
+export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
@@ -8490,6 +8508,7 @@ export type Category =
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noQuickfixBiome"
+	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
@@ -8506,17 +8525,17 @@ export type Category =
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
-	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
-	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
+	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentResponse"
@@ -8525,20 +8544,20 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"
-	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useGoogleFontPreconnect"
+	| "lint/nursery/useImageSize"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
-	| "lint/nursery/useImageSize"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
 	| "lint/nursery/useObjectSpread"
 	| "lint/nursery/useParseIntRadix"
+	| "lint/nursery/useQwikClasslist"
+	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useReadonlyClassProperties"
 	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"

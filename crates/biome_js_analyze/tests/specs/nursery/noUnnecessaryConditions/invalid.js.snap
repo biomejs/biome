@@ -1,0 +1,957 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// should generate diagnostics
+
+// Always truthy literal conditions
+if (true) {
+  console.log("always runs");
+}
+
+if (42) {
+  console.log("always runs");
+}
+
+if ("hello") {
+  console.log("always runs");
+}
+
+if ({}) {
+  console.log("always runs");
+}
+
+if ([]) {
+  console.log("always runs");
+}
+
+// Always falsy literal conditions
+if (false) {
+  console.log("never runs");
+}
+
+if (0) {
+  console.log("never runs");
+}
+
+if ("") {
+  console.log("never runs");
+}
+
+if (null) {
+  console.log("never runs");
+}
+
+if (undefined) {
+  console.log("never runs");
+}
+
+if (   undefined   ) {
+	console.log("never runs");
+}
+
+
+// Unnecessary logical OR with always truthy left side
+const result1 = {} || "fallback";  // Left side is always truthy
+
+// Unnecessary logical AND short-circuiting
+const result2 = true && "result";  // Left side is always true
+
+// Unnecessary ternary conditions
+const result3 = true ? "yes" : "no";  // Condition is always true
+const result4 = false ? "yes" : "no";  // Condition is always false
+
+// Unnecessary comparisons with literals
+const comp1 = true === true;  // Always true
+const comp2 = false === true;  // Always false
+const comp3 = 5 > 3;  // Always true
+const comp3 = 3 < 5;  // Always true
+const comp3 = 1 === 1;  // Always true
+const comp4 = "a" === "b";  // Always false
+
+// While loops with constant conditions
+while (true) {
+  console.log("infinite loop");
+  break;
+}
+
+while (false) {
+  console.log("never runs");
+}
+
+// Do-while with constant conditions
+do {
+  console.log("runs once");
+} while (false);
+
+// For loops with constant conditions
+for (; true;) {
+  break;
+}
+
+for (; false;) {
+  console.log("never runs");
+}
+
+// Unnecessary nullish coalescing with non-nullish literals
+const nullish1 = "hello" ?? "default";  // Left side is never nullish
+const nullish2 = 42 ?? 0;  // Left side is never nullish
+const nullish3 = {} ?? {};  // Left side is never nullish
+
+// Logical expressions with mixed literals
+const mixed1 = true || false;  // Left side makes right irrelevant
+const mixed2 = false && true;  // Left side makes right irrelevant
+const mixed3 = null ?? "default";  // Left side is always nullish
+const mixed4 = undefined ?? "default";  // Left side is always nullish
+
+// Unnecessary optional chaining on literals (if supported)
+const optional1 = "hello"?.length;  // String is never nullish
+const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
+
+// Function expressions with constant conditions
+const fn1 = function() {
+  if (true) return "always";
+};
+
+const fn2 = () => {
+  return false ? "never" : "always";
+};
+
+// Nested constant conditions
+if (true) {
+  if (false) {
+    console.log("never runs");
+  }
+}
+
+// Switch with constant discriminant
+switch (true) {
+  case true:
+    console.log("always matches");
+    break;
+  case false:
+    console.log("never matches");
+    break;
+}
+
+// Object property access with constants
+const obj = {};
+if (obj) {  // Object literal is always truthy
+  console.log("always runs");
+}
+
+// Array access with constants
+const arr = [];
+if (arr) {  // Array literal is always truthy
+  console.log("always runs");
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    3 │ // Always truthy literal conditions
+  > 4 │ if (true) {
+      │     ^^^^
+    5 │   console.log("always runs");
+    6 │ }
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+     6 │ }
+     7 │ 
+   > 8 │ if (42) {
+       │     ^^
+     9 │   console.log("always runs");
+    10 │ }
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:12:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    10 │ }
+    11 │ 
+  > 12 │ if ("hello") {
+       │     ^^^^^^^
+    13 │   console.log("always runs");
+    14 │ }
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:16:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    14 │ }
+    15 │ 
+  > 16 │ if ({}) {
+       │     ^^
+    17 │   console.log("always runs");
+    18 │ }
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:20:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    18 │ }
+    19 │ 
+  > 20 │ if ([]) {
+       │     ^^
+    21 │   console.log("always runs");
+    22 │ }
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:25:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    24 │ // Always falsy literal conditions
+  > 25 │ if (false) {
+       │     ^^^^^
+    26 │   console.log("never runs");
+    27 │ }
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:29:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    27 │ }
+    28 │ 
+  > 29 │ if (0) {
+       │     ^
+    30 │   console.log("never runs");
+    31 │ }
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:33:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    31 │ }
+    32 │ 
+  > 33 │ if ("") {
+       │     ^^
+    34 │   console.log("never runs");
+    35 │ }
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:37:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    35 │ }
+    36 │ 
+  > 37 │ if (null) {
+       │     ^^^^
+    38 │   console.log("never runs");
+    39 │ }
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:41:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    39 │ }
+    40 │ 
+  > 41 │ if (undefined) {
+       │     ^^^^^^^^^
+    42 │   console.log("never runs");
+    43 │ }
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:45:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    43 │ }
+    44 │ 
+  > 45 │ if (   undefined   ) {
+       │        ^^^^^^^^^
+    46 │ 	console.log("never runs");
+    47 │ }
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:51:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    50 │ // Unnecessary logical OR with always truthy left side
+  > 51 │ const result1 = {} || "fallback";  // Left side is always truthy
+       │                 ^^
+    52 │ 
+    53 │ // Unnecessary logical AND short-circuiting
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:54:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    53 │ // Unnecessary logical AND short-circuiting
+  > 54 │ const result2 = true && "result";  // Left side is always true
+       │                 ^^^^
+    55 │ 
+    56 │ // Unnecessary ternary conditions
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:57:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    56 │ // Unnecessary ternary conditions
+  > 57 │ const result3 = true ? "yes" : "no";  // Condition is always true
+       │                 ^^^^
+    58 │ const result4 = false ? "yes" : "no";  // Condition is always false
+    59 │ 
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:58:17 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    56 │ // Unnecessary ternary conditions
+    57 │ const result3 = true ? "yes" : "no";  // Condition is always true
+  > 58 │ const result4 = false ? "yes" : "no";  // Condition is always false
+       │                 ^^^^^
+    59 │ 
+    60 │ // Unnecessary comparisons with literals
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:61:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison will always have the same result.
+  
+    60 │ // Unnecessary comparisons with literals
+  > 61 │ const comp1 = true === true;  // Always true
+       │               ^^^^^^^^^^^^^
+    62 │ const comp2 = false === true;  // Always false
+    63 │ const comp3 = 5 > 3;  // Always true
+  
+  i Based on the types being compared, this condition is redundant.
+  
+  i Remove the comparison.
+  
+
+```
+
+```
+invalid.js:62:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison will always have the same result.
+  
+    60 │ // Unnecessary comparisons with literals
+    61 │ const comp1 = true === true;  // Always true
+  > 62 │ const comp2 = false === true;  // Always false
+       │               ^^^^^^^^^^^^^^
+    63 │ const comp3 = 5 > 3;  // Always true
+    64 │ const comp3 = 3 < 5;  // Always true
+  
+  i Based on the types being compared, this condition is redundant.
+  
+  i Remove the comparison.
+  
+
+```
+
+```
+invalid.js:63:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison will always have the same result.
+  
+    61 │ const comp1 = true === true;  // Always true
+    62 │ const comp2 = false === true;  // Always false
+  > 63 │ const comp3 = 5 > 3;  // Always true
+       │               ^^^^^
+    64 │ const comp3 = 3 < 5;  // Always true
+    65 │ const comp3 = 1 === 1;  // Always true
+  
+  i Based on the types being compared, this condition is redundant.
+  
+  i Remove the comparison.
+  
+
+```
+
+```
+invalid.js:64:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison will always have the same result.
+  
+    62 │ const comp2 = false === true;  // Always false
+    63 │ const comp3 = 5 > 3;  // Always true
+  > 64 │ const comp3 = 3 < 5;  // Always true
+       │               ^^^^^
+    65 │ const comp3 = 1 === 1;  // Always true
+    66 │ const comp4 = "a" === "b";  // Always false
+  
+  i Based on the types being compared, this condition is redundant.
+  
+  i Remove the comparison.
+  
+
+```
+
+```
+invalid.js:65:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison will always have the same result.
+  
+    63 │ const comp3 = 5 > 3;  // Always true
+    64 │ const comp3 = 3 < 5;  // Always true
+  > 65 │ const comp3 = 1 === 1;  // Always true
+       │               ^^^^^^^
+    66 │ const comp4 = "a" === "b";  // Always false
+    67 │ 
+  
+  i Based on the types being compared, this condition is redundant.
+  
+  i Remove the comparison.
+  
+
+```
+
+```
+invalid.js:66:15 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison will always have the same result.
+  
+    64 │ const comp3 = 3 < 5;  // Always true
+    65 │ const comp3 = 1 === 1;  // Always true
+  > 66 │ const comp4 = "a" === "b";  // Always false
+       │               ^^^^^^^^^^^
+    67 │ 
+    68 │ // While loops with constant conditions
+  
+  i Based on the types being compared, this condition is redundant.
+  
+  i Remove the comparison.
+  
+
+```
+
+```
+invalid.js:69:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    68 │ // While loops with constant conditions
+  > 69 │ while (true) {
+       │        ^^^^
+    70 │   console.log("infinite loop");
+    71 │   break;
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:74:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    72 │ }
+    73 │ 
+  > 74 │ while (false) {
+       │        ^^^^^
+    75 │   console.log("never runs");
+    76 │ }
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:81:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    79 │ do {
+    80 │   console.log("runs once");
+  > 81 │ } while (false);
+       │          ^^^^^
+    82 │ 
+    83 │ // For loops with constant conditions
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:84:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    83 │ // For loops with constant conditions
+  > 84 │ for (; true;) {
+       │        ^^^^
+    85 │   break;
+    86 │ }
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:88:8 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    86 │ }
+    87 │ 
+  > 88 │ for (; false;) {
+       │        ^^^^^
+    89 │   console.log("never runs");
+    90 │ }
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:93:18 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Coalescing is unnecessary for this type.
+  
+    92 │ // Unnecessary nullish coalescing with non-nullish literals
+  > 93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+       │                  ^^^^^^^
+    94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+    95 │ const nullish3 = {} ?? {};  // Left side is never nullish
+  
+  i This is a nullish coalescing operator, which is unnecessary.
+  
+    92 │ // Unnecessary nullish coalescing with non-nullish literals
+  > 93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+       │                          ^^
+    94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+    95 │ const nullish3 = {} ?? {};  // Left side is never nullish
+  
+  i The type being accessed is guaranteed to be non-nullish, making coalescing redundant.
+  
+
+```
+
+```
+invalid.js:94:18 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Coalescing is unnecessary for this type.
+  
+    92 │ // Unnecessary nullish coalescing with non-nullish literals
+    93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+  > 94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+       │                  ^^
+    95 │ const nullish3 = {} ?? {};  // Left side is never nullish
+    96 │ 
+  
+  i This is a nullish coalescing operator, which is unnecessary.
+  
+    92 │ // Unnecessary nullish coalescing with non-nullish literals
+    93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+  > 94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+       │                     ^^
+    95 │ const nullish3 = {} ?? {};  // Left side is never nullish
+    96 │ 
+  
+  i The type being accessed is guaranteed to be non-nullish, making coalescing redundant.
+  
+
+```
+
+```
+invalid.js:95:18 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Coalescing is unnecessary for this type.
+  
+    93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+    94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+  > 95 │ const nullish3 = {} ?? {};  // Left side is never nullish
+       │                  ^^
+    96 │ 
+    97 │ // Logical expressions with mixed literals
+  
+  i This is a nullish coalescing operator, which is unnecessary.
+  
+    93 │ const nullish1 = "hello" ?? "default";  // Left side is never nullish
+    94 │ const nullish2 = 42 ?? 0;  // Left side is never nullish
+  > 95 │ const nullish3 = {} ?? {};  // Left side is never nullish
+       │                     ^^
+    96 │ 
+    97 │ // Logical expressions with mixed literals
+  
+  i The type being accessed is guaranteed to be non-nullish, making coalescing redundant.
+  
+
+```
+
+```
+invalid.js:98:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+     97 │ // Logical expressions with mixed literals
+   > 98 │ const mixed1 = true || false;  // Left side makes right irrelevant
+        │                ^^^^
+     99 │ const mixed2 = false && true;  // Left side makes right irrelevant
+    100 │ const mixed3 = null ?? "default";  // Left side is always nullish
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:99:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+     97 │ // Logical expressions with mixed literals
+     98 │ const mixed1 = true || false;  // Left side makes right irrelevant
+   > 99 │ const mixed2 = false && true;  // Left side makes right irrelevant
+        │                ^^^^^
+    100 │ const mixed3 = null ?? "default";  // Left side is always nullish
+    101 │ const mixed4 = undefined ?? "default";  // Left side is always nullish
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:100:16 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Coalescing is unnecessary for this type.
+  
+     98 │ const mixed1 = true || false;  // Left side makes right irrelevant
+     99 │ const mixed2 = false && true;  // Left side makes right irrelevant
+  > 100 │ const mixed3 = null ?? "default";  // Left side is always nullish
+        │                ^^^^
+    101 │ const mixed4 = undefined ?? "default";  // Left side is always nullish
+    102 │ 
+  
+  i This is a nullish coalescing operator, which is unnecessary.
+  
+     98 │ const mixed1 = true || false;  // Left side makes right irrelevant
+     99 │ const mixed2 = false && true;  // Left side makes right irrelevant
+  > 100 │ const mixed3 = null ?? "default";  // Left side is always nullish
+        │                ^^^^
+    101 │ const mixed4 = undefined ?? "default";  // Left side is always nullish
+    102 │ 
+  
+  i The type being accessed is guaranteed to be non-nullish, making coalescing redundant.
+  
+
+```
+
+```
+invalid.js:104:19 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Optional chaining is unnecessary for this type.
+  
+    103 │ // Unnecessary optional chaining on literals (if supported)
+  > 104 │ const optional1 = "hello"?.length;  // String is never nullish
+        │                   ^^^^^^^
+    105 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
+    106 │ 
+  
+  i Remove the optional chaining.
+  
+    103 │ // Unnecessary optional chaining on literals (if supported)
+  > 104 │ const optional1 = "hello"?.length;  // String is never nullish
+        │                          ^^
+    105 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
+    106 │ 
+  
+  i The type being accessed is guaranteed to be non-nullish, making optional chaining redundant.
+  
+
+```
+
+```
+invalid.js:105:19 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Optional chaining is unnecessary for this type.
+  
+    103 │ // Unnecessary optional chaining on literals (if supported)
+    104 │ const optional1 = "hello"?.length;  // String is never nullish
+  > 105 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
+        │                   ^^^^^^^^^
+    106 │ 
+    107 │ // Function expressions with constant conditions
+  
+  i Remove the optional chaining.
+  
+    103 │ // Unnecessary optional chaining on literals (if supported)
+    104 │ const optional1 = "hello"?.length;  // String is never nullish
+  > 105 │ const optional2 = [1, 2, 3]?.[0];  // Array is never nullish
+        │                            ^^
+    106 │ 
+    107 │ // Function expressions with constant conditions
+  
+  i The type being accessed is guaranteed to be non-nullish, making optional chaining redundant.
+  
+
+```
+
+```
+invalid.js:109:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    107 │ // Function expressions with constant conditions
+    108 │ const fn1 = function() {
+  > 109 │   if (true) return "always";
+        │       ^^^^
+    110 │ };
+    111 │ 
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:113:10 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    112 │ const fn2 = () => {
+  > 113 │   return false ? "never" : "always";
+        │          ^^^^^
+    114 │ };
+    115 │ 
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:117:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    116 │ // Nested constant conditions
+  > 117 │ if (true) {
+        │     ^^^^
+    118 │   if (false) {
+    119 │     console.log("never runs");
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:118:7 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy based on the type.
+  
+    116 │ // Nested constant conditions
+    117 │ if (true) {
+  > 118 │   if (false) {
+        │       ^^^^^
+    119 │     console.log("never runs");
+    120 │   }
+  
+  i The type being checked can never be truthy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:124:9 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    123 │ // Switch with constant discriminant
+  > 124 │ switch (true) {
+        │         ^^^^
+    125 │   case true:
+    126 │     console.log("always matches");
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:135:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    133 │ // Object property access with constants
+    134 │ const obj = {};
+  > 135 │ if (obj) {  // Object literal is always truthy
+        │     ^^^
+    136 │   console.log("always runs");
+    137 │ }
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```
+
+```
+invalid.js:141:5 lint/nursery/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy based on the type.
+  
+    139 │ // Array access with constants
+    140 │ const arr = [];
+  > 141 │ if (arr) {  // Array literal is always truthy
+        │     ^^^
+    142 │   console.log("always runs");
+    143 │ }
+  
+  i The type being checked can never be falsy, making this condition redundant.
+  
+  i Remove the condition.
+  
+
+```

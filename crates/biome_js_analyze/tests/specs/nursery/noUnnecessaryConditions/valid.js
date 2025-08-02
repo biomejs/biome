@@ -1,0 +1,175 @@
+// should not generate diagnostics
+
+// Boolean variables - condition is necessary
+let bool1 = Math.random() > 0.5;
+let bool2 = Math.random() > 0.5;
+
+if (bool1) {
+  console.log("might run");
+}
+
+if (bool1 && bool2) {
+  console.log("might run");
+}
+
+// Variables that could be falsy
+let str = getString();
+let num = getNumber();
+let obj = getObject();
+
+if (str) {
+  console.log("str is truthy");
+}
+
+if (num) {
+  console.log("num is truthy");
+}
+
+if (obj) {
+  console.log("obj is truthy");
+}
+
+// Functions that return unknown values
+function getString() {
+  return Math.random() > 0.5 ? "hello" : "";
+}
+
+function getNumber() {
+  return Math.random() > 0.5 ? 42 : 0;
+}
+
+function getObject() {
+  return Math.random() > 0.5 ? {} : null;
+}
+
+// Logical OR with potentially falsy left side
+function testOr(value) {
+  return value || "default";  // value could be falsy
+}
+
+// Nullish coalescing with potentially nullish values
+function testNullish(value) {
+  return value ?? "default";  // value could be null or undefined
+}
+
+// Comparisons with variables
+function testComparisons(a, b) {
+  return a === b;  // Result depends on runtime values
+}
+
+// Loops with dynamic conditions
+function testLoop(items) {
+  let i = 0;
+  while (i < items.length) {  // Dynamic condition
+    console.log(items[i]);
+    i++;
+  }
+}
+
+// Ternary with dynamic condition
+function testTernary(condition) {
+  return condition ? "yes" : "no";  // Dynamic condition
+}
+
+// Short-circuit evaluation with side effects
+function testSideEffects(condition) {
+  return condition && callFunction();  // callFunction might have side effects
+}
+
+function callFunction() {
+  console.log("side effect");
+  return true;
+}
+
+// Function parameters that could be anything
+function handleParam(param) {
+  if (param) {  // param could be falsy
+    return param.toString();
+  }
+}
+
+// Array method conditions
+function filterTruthy(items) {
+  return items.filter(item => item);  // Necessary to filter out falsy values
+}
+
+// Object property checks
+function checkProperty(obj, prop) {
+  if (obj && obj[prop]) {  // Both checks are dynamic
+    return obj[prop];
+  }
+}
+
+// Mixed logical expressions with variables
+function testMixed(a, b) {
+  return a || b;  // Both could be falsy
+  return a && b;  // Either could be falsy
+}
+
+// Complex expressions
+function complexCondition(x, y, z) {
+  if (x && (y || z)) {  // All dynamic
+    return "complex";
+  }
+}
+
+// Nested function calls
+function nested() {
+  return getBoolean() && (getString() || getNumber());
+}
+
+function getBoolean() {
+  return Math.random() > 0.5;
+}
+
+// Switch with dynamic discriminant
+function testSwitch(value) {
+  switch (value) {
+    case "a":
+      return "first";
+    case "b":
+      return "second";
+    default:
+      return "default";
+  }
+}
+
+// Try-catch conditions
+function tryCatch() {
+  try {
+    const result = riskyOperation();
+    if (result) {  // result could be falsy
+      return result;
+    }
+  } catch (e) {
+    if (e) {  // e could theoretically be falsy
+      console.error(e);
+    }
+  }
+}
+
+function riskyOperation() {
+  if (Math.random() > 0.5) {
+    throw new Error("Random error");
+  }
+  return Math.random() > 0.5 ? "success" : null;
+}
+
+// Array access with dynamic indices
+function dynamicAccess(arr, index) {
+  if (arr[index]) {  // Could be undefined
+    return arr[index];
+  }
+}
+
+// Optional chaining with potentially undefined properties
+function testOptionalChaining(obj) {
+  return obj?.someProperty;  // obj or someProperty could be undefined
+}
+
+// Destructuring with defaults
+function testDestructuring({ prop = false } = {}) {
+  if (prop) {  // prop could be the default false
+    return "truthy";
+  }
+}
