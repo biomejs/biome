@@ -60,7 +60,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoQuickfixBiome {
-        version: "next",
+        version: "2.1.3",
         name: "noQuickfixBiome",
         language: "json",
         recommended: true,
