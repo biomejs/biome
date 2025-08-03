@@ -2,14 +2,26 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::CssGenericProperty;
+use biome_css_syntax::{CssGenericProperty, CssSyntaxKind};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, Text, TextRange};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
 use biome_string_case::StrLikeExtension;
 use rustc_hash::FxHashSet;
 
 use crate::utils::{FontFamily, FontPropertyKind, collect_font_families, is_font_family_keyword};
+
+fn normalize_font_name(font_name: &str) -> String {
+    let trimmed = font_name.trim();
+
+    if (trimmed.starts_with('"') && trimmed.ends_with('"'))
+        || (trimmed.starts_with('\'') && trimmed.ends_with('\''))
+    {
+        trimmed[1..trimmed.len() - 1].trim().to_string()
+    } else {
+        trimmed.to_string()
+    }
+}
 
 declare_lint_rule! {
     /// Disallow duplicate names within font families.
@@ -85,14 +97,36 @@ impl Rule for NoDuplicateFontNames {
             FontPropertyKind::FontFamily
         };
 
-        let font_families: Vec<FontFamily> = collect_font_families(value_list, kind)?;
+        let font_families: Vec<FontFamily> = collect_font_families(value_list, kind);
 
-        let mut family_names: FxHashSet<Text> = FxHashSet::default();
-        let mut family_keywords: FxHashSet<(Text, bool)> = FxHashSet::default();
+        let mut family_names: FxHashSet<String> = FxHashSet::default();
+        let mut family_keywords: FxHashSet<(String, bool)> = FxHashSet::default();
 
         for font_family in font_families {
-            let is_keyword = is_font_family_keyword(&font_family.text);
-            let is_quoted = font_family.is_quoted;
+            let text = if font_family.tokens.len() == 1 {
+                font_family.tokens.first()?.token_text_trimmed().to_string()
+            } else {
+                font_family
+                    .tokens
+                    .iter()
+                    .map(|token| token.token_text_trimmed())
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            };
+
+            let is_keyword = is_font_family_keyword(&text);
+            let is_quoted = font_family
+                .tokens
+                .iter()
+                .any(|token| token.kind() == CssSyntaxKind::CSS_STRING_LITERAL);
+
+            let range = if font_family.tokens.len() == 1 {
+                font_family.tokens.first()?.text_trimmed_range()
+            } else {
+                let start = font_family.tokens.first()?.text_trimmed_range();
+                let end = font_family.tokens.last()?.text_trimmed_range();
+                start.cover(end)
+            };
 
             // Keywords require special handling based on quote status:
             // - Quoted keywords ("sans-serif") are treated as actual font names
@@ -100,19 +134,20 @@ impl Rule for NoDuplicateFontNames {
             // These are technically different and should not be considered duplicates.
             // See: https://github.com/stylelint/stylelint/issues/1284
             if is_keyword {
-                if !family_keywords.insert((font_family.text.clone(), is_quoted)) {
+                if !family_keywords.insert((text.clone(), is_quoted)) {
                     return Some(RuleState {
-                        value: font_family.text.into(),
-                        span: font_family.range,
+                        value: text.into(),
+                        span: range,
                     });
                 }
                 continue;
             }
 
-            if !family_names.insert(font_family.text.clone()) {
+            let normalized_text = normalize_font_name(&text);
+            if !family_names.insert(normalized_text) {
                 return Some(RuleState {
-                    value: font_family.text.into(),
-                    span: font_family.range,
+                    value: text.into(),
+                    span: range,
                 });
             }
         }

@@ -117,7 +117,7 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
 
 #[derive(Debug, Clone)]
 pub struct FontFamily {
-    tokens: Vec<CssSyntaxToken>,
+    pub tokens: Vec<CssSyntaxToken>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
