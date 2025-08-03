@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{CssGenericProperty, CssSyntaxKind};
+use biome_css_syntax::{CssGenericProperty, CssSyntaxKind, CssSyntaxToken, inner_string_text};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
@@ -10,18 +10,6 @@ use biome_string_case::StrLikeExtension;
 use rustc_hash::FxHashSet;
 
 use crate::utils::{FontFamily, FontPropertyKind, collect_font_families, is_font_family_keyword};
-
-fn normalize_font_name(font_name: &str) -> String {
-    let trimmed = font_name.trim();
-
-    if (trimmed.starts_with('"') && trimmed.ends_with('"'))
-        || (trimmed.starts_with('\'') && trimmed.ends_with('\''))
-    {
-        trimmed[1..trimmed.len() - 1].trim().to_string()
-    } else {
-        trimmed.to_string()
-    }
-}
 
 declare_lint_rule! {
     /// Disallow duplicate names within font families.
@@ -103,18 +91,20 @@ impl Rule for NoDuplicateFontNames {
         let mut family_keywords: FxHashSet<(String, bool)> = FxHashSet::default();
 
         for font_family in font_families {
-            let text = if font_family.tokens.len() == 1 {
-                font_family.tokens.first()?.token_text_trimmed().to_string()
+            let inner_text = if font_family.tokens.len() == 1 {
+                inner_string_text(font_family.tokens.first()?)
+                    .trim()
+                    .to_string()
             } else {
                 font_family
                     .tokens
                     .iter()
-                    .map(|token| token.token_text_trimmed())
+                    .map(inner_string_text)
                     .collect::<Vec<_>>()
                     .join(" ")
             };
 
-            let is_keyword = is_font_family_keyword(&text);
+            let is_keyword = is_font_family_keyword(&inner_text);
             let is_quoted = font_family
                 .tokens
                 .iter()
@@ -134,19 +124,20 @@ impl Rule for NoDuplicateFontNames {
             // These are technically different and should not be considered duplicates.
             // See: https://github.com/stylelint/stylelint/issues/1284
             if is_keyword {
-                if !family_keywords.insert((text.clone(), is_quoted)) {
+                if !family_keywords.insert((inner_text.clone(), is_quoted)) {
+                    let original_text = get_original_text(&font_family.tokens)?;
                     return Some(RuleState {
-                        value: text.into(),
+                        value: original_text.into(),
                         span: range,
                     });
                 }
                 continue;
             }
 
-            let normalized_text = normalize_font_name(&text);
-            if !family_names.insert(normalized_text) {
+            if !family_names.insert(inner_text.clone()) {
+                let original_text = get_original_text(&font_family.tokens)?;
                 return Some(RuleState {
-                    value: text.into(),
+                    value: original_text.into(),
                     span: range,
                 });
             }
@@ -168,6 +159,20 @@ impl Rule for NoDuplicateFontNames {
             .note(markup! {
                 "Remove duplicate font names within the property"
             }),
+        )
+    }
+}
+
+fn get_original_text(tokens: &[CssSyntaxToken]) -> Option<String> {
+    if tokens.len() == 1 {
+        tokens.first().map(|t| t.token_text_trimmed().to_string())
+    } else {
+        Some(
+            tokens
+                .iter()
+                .map(|t| t.token_text_trimmed())
+                .collect::<Vec<_>>()
+                .join(" "),
         )
     }
 }
