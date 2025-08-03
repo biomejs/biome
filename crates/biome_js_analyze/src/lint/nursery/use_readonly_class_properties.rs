@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use crate::class_member_references::{
-    ClassPropMemberOrConstructorTsParam, ClassMemberReference, ClassMemberReferences,
+    ClassMemberReference, ClassMemberReferences, ClassPropMemberOrConstructorTsParam,
     class_member_references,
 };
 use biome_analyze::{

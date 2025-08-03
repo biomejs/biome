@@ -1,5 +1,7 @@
 use crate::JsRuleAction;
-use crate::class_member_references::{ClassMemberReference, ClassMemberReferences, class_member_references};
+use crate::class_member_references::{
+    ClassMemberReference, ClassMemberReferences, class_member_references,
+};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
