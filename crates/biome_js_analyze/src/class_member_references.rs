@@ -13,15 +13,15 @@ use biome_rowan::{
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
-pub struct ClassPropertyReference {
+pub struct ClassMemberReference {
     pub name: Text,
     pub range: TextRange,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct References {
-    pub reads: HashSet<ClassPropertyReference>,
-    pub writes: HashSet<ClassPropertyReference>,
+    pub reads: HashSet<ClassMemberReference>,
+    pub writes: HashSet<ClassMemberReference>,
 }
 
 declare_node_union! {
@@ -97,14 +97,14 @@ pub fn class_member_references(list: &JsClassMemberList) -> References {
 #[derive(Clone, Debug)]
 struct ScopedThisAliases {
     scope: JsFunctionBody,
-    aliases: HashSet<ClassPropertyReference>,
+    aliases: HashSet<ClassMemberReference>,
 }
 
 /// A visitor that collects `this` aliases in nested function scopes,
 /// while skipping class expressions and tracking inherited aliases.
 struct ScopedThisAliasVisitor<'a> {
     skipped_ranges: Vec<TextRange>,
-    inherited_aliases: &'a [ClassPropertyReference],
+    inherited_aliases: &'a [ClassMemberReference],
     scoped_this_aliases: Vec<ScopedThisAliases>,
 }
 // can not implement `Visitor` directly because it requires a new ctx that can not be created here
@@ -189,7 +189,7 @@ impl ScopedThisAliasVisitor<'_> {
 struct ThisAliasResolver {}
 
 impl ThisAliasResolver {
-    fn collect_local_this_aliases(body: &JsFunctionBody) -> Vec<ClassPropertyReference> {
+    fn collect_local_this_aliases(body: &JsFunctionBody) -> Vec<ClassMemberReference> {
         body.statements()
             .iter()
             .filter_map(|node| node.as_js_variable_statement().cloned())
@@ -205,7 +205,7 @@ impl ThisAliasResolver {
                 let unwrapped = unwrap_expression(&expr);
 
                 (unwrapped.syntax().first_token()?.text_trimmed() == "this").then(|| {
-                    ClassPropertyReference {
+                    ClassMemberReference {
                         name: id.to_trimmed_text().clone(),
                         range: id.syntax().text_trimmed_range(),
                     }
@@ -216,7 +216,7 @@ impl ThisAliasResolver {
 
     fn collect_all_nested_this_aliases(
         body_element: &JsSyntaxNode,
-        parent_this_aliases: &[ClassPropertyReference],
+        parent_this_aliases: &[ClassMemberReference],
     ) -> Vec<ScopedThisAliases> {
         let mut visitor = ScopedThisAliasVisitor {
             skipped_ranges: vec![],
@@ -282,7 +282,7 @@ impl ThisPatternResolver {
     fn collect_array_assignment_names(
         array_assignment_pattern: &JsArrayAssignmentPattern,
         this_aliases: &[ScopedThisAliases],
-    ) -> Vec<ClassPropertyReference> {
+    ) -> Vec<ClassMemberReference> {
         array_assignment_pattern
             .elements()
             .iter()
@@ -321,7 +321,7 @@ impl ThisPatternResolver {
     fn collect_object_assignment_names(
         assignment: &JsObjectAssignmentPattern,
         this_aliases: &[ScopedThisAliases],
-    ) -> Vec<ClassPropertyReference> {
+    ) -> Vec<ClassMemberReference> {
         assignment
             .properties()
             .elements()
@@ -358,7 +358,7 @@ impl ThisPatternResolver {
     fn extract_static_assignment_name(
         operand: &AnyJsAssignment,
         this_aliases: &[ScopedThisAliases],
-    ) -> Option<ClassPropertyReference> {
+    ) -> Option<ClassMemberReference> {
         operand
             .as_js_static_member_assignment()
             .and_then(|assignment| {
@@ -368,13 +368,13 @@ impl ThisPatternResolver {
                     assignment.member().ok().and_then(|member| {
                         member
                             .as_js_name()
-                            .map(|name| ClassPropertyReference {
+                            .map(|name| ClassMemberReference {
                                 name: name.to_trimmed_text(),
                                 range: name.syntax().text_trimmed_range(),
                             })
                             .or_else(|| {
                                 member.as_js_private_name().map(|private_name| {
-                                    ClassPropertyReference {
+                                    ClassMemberReference {
                                         name: private_name.to_trimmed_text(),
                                         range: private_name.syntax().text_trimmed_range(),
                                     }
@@ -430,8 +430,8 @@ fn visit_references_in_body<F, S>(
     on_write_match: &mut F,
     on_read_match: &mut S,
 ) where
-    F: FnMut(ClassPropertyReference),
-    S: FnMut(ClassPropertyReference),
+    F: FnMut(ClassMemberReference),
+    S: FnMut(ClassMemberReference),
 {
     let iter = method_body_element.preorder();
 
@@ -448,7 +448,7 @@ fn visit_references_in_body<F, S>(
                         if let Some(declarator) = declarator.ok()
                             && ThisAliasResolver::is_this_or_alias(&expression, this_aliases)
                         {
-                            on_read_match(ClassPropertyReference {
+                            on_read_match(ClassMemberReference {
                                 name: declarator.to_trimmed_text(),
                                 range: declarator.syntax().text_trimmed_range(),
                             });
@@ -461,7 +461,7 @@ fn visit_references_in_body<F, S>(
                     && ThisAliasResolver::is_this_or_alias(&object, this_aliases)
                     && let Ok(member) = static_member.member()
                 {
-                    on_read_match(ClassPropertyReference {
+                    on_read_match(ClassMemberReference {
                         name: member.to_trimmed_text(),
                         range: static_member.syntax().text_trimmed_range(),
                     });
@@ -571,7 +571,7 @@ fn collect_references_from_property_member(
 
     if let Ok(member) = static_member.member() {
         let name = member.to_trimmed_text();
-        reads.push(ClassPropertyReference {
+        reads.push(ClassMemberReference {
             name,
             range: static_member.syntax().text_trimmed_range(),
         });

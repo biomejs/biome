@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use crate::class_member_references::{
-    ClassPropMemberOrConstructorTsParam, ClassPropertyReference, References,
+    ClassPropMemberOrConstructorTsParam, ClassMemberReference, References,
     class_member_references,
 };
 use biome_analyze::{
@@ -154,7 +154,7 @@ impl Rule for UseReadonlyClassProperties {
                 if writes
                     .clone()
                     .into_iter()
-                    .any(|ClassPropertyReference { name, .. }| {
+                    .any(|ClassMemberReference { name, .. }| {
                         if let Some(TextAndRange { text, .. }) =
                             extract_property_or_param_range_and_text(&prop_or_param.clone())
                         {
