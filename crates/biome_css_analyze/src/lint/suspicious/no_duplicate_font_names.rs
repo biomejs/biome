@@ -118,11 +118,11 @@ impl Rule for NoDuplicateFontNames {
                 start.cover(end)
             };
 
-            // Keywords require special handling based on quote status:
-            // - Quoted keywords ("sans-serif") are treated as actual font names
+            // Generic font family keywords require special handling based on quote status:
             // - Unquoted keywords (sans-serif) are treated as CSS generic font families
+            // - Quoted keywords ("sans-serif") are treated as actual font names
             // These are technically different and should not be considered duplicates.
-            // See: https://github.com/stylelint/stylelint/issues/1284
+            // see: https://www.w3.org/TR/css-fonts-4/#family-name-value:~:text=Note%20that%20%3Cgeneric%2Dfamily%3E%20keywords%20cannot%20be%20quoted%20(otherwise%20they%20are%20interpreted%20as%20a%20%3Cfamily%2Dname%3E).
             if is_keyword {
                 if !family_keywords.insert((inner_text.clone(), is_quoted)) {
                     let original_text = get_original_text(&font_family.tokens)?;
