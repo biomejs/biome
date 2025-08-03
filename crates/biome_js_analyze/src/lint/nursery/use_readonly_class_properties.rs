@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use crate::class_member_references::{
-    ClassPropMemberOrConstructorTsParam, ClassMemberReference, References,
+    ClassPropMemberOrConstructorTsParam, ClassMemberReference, ClassMemberReferences,
     class_member_references,
 };
 use biome_analyze::{
@@ -133,7 +133,7 @@ impl Rule for UseReadonlyClassProperties {
         let root = ctx.query();
         let members = root.members();
         let private_only = !ctx.options().check_all_properties;
-        let References { writes, .. } = class_member_references(&members);
+        let ClassMemberReferences { writes, .. } = class_member_references(&members);
 
         let constructor_params: Vec<_> =
             collect_non_readonly_constructor_parameters(root, private_only);

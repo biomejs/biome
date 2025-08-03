@@ -19,7 +19,7 @@ pub struct ClassMemberReference {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct References {
+pub struct ClassMemberReferences {
     pub reads: HashSet<ClassMemberReference>,
     pub writes: HashSet<ClassMemberReference>,
 }
@@ -34,9 +34,9 @@ declare_node_union! {
 /// getters, setters, arrow functions assigned to properties, and constructors. It aggregates both
 /// read and write references to `this` properties across all supported member types.
 ///
-/// Returns a `References` struct containing the combined set of read and write references.
-pub fn class_member_references(list: &JsClassMemberList) -> References {
-    let all_references: Vec<References> = list
+/// Returns a `ClassMemberReferences` struct containing the combined set of read and write references.
+pub fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
+    let all_references: Vec<ClassMemberReferences> = list
         .iter()
         .filter_map(|member| match member {
             AnyJsClassMember::JsMethodClassMember(method) => method
@@ -87,7 +87,7 @@ pub fn class_member_references(list: &JsClassMemberList) -> References {
         combined_writes.extend(refs.writes);
     }
 
-    References {
+    ClassMemberReferences {
         reads: combined_reads,
         writes: combined_writes,
     }
@@ -393,7 +393,7 @@ impl ThisPatternResolver {
 fn collect_references_from_body(
     member: &JsSyntaxNode,
     body: &JsFunctionBody,
-) -> Option<References> {
+) -> Option<ClassMemberReferences> {
     let this_variable_aliases: Vec<_> = ThisAliasResolver::collect_local_this_aliases(body);
     let this_aliases =
         ThisAliasResolver::collect_all_nested_this_aliases(body.syntax(), &this_variable_aliases);
@@ -412,7 +412,7 @@ fn collect_references_from_body(
         },
     );
 
-    Some(References {
+    Some(ClassMemberReferences {
         reads: reads.into_iter().collect(),
         writes: writes.into_iter().collect(),
     })
@@ -534,7 +534,7 @@ fn visit_references_in_body<F, S>(
 
 /// Collects read and write references to `this` members within a class constructor body,
 /// including any nested functions that capture `this` via aliasing.
-fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> References {
+fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> ClassMemberReferences {
     let this_variable_aliases: Vec<_> =
         ThisAliasResolver::collect_local_this_aliases(constructor_body);
 
@@ -555,7 +555,7 @@ fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> Ref
         );
     }
 
-    References {
+    ClassMemberReferences {
         reads: reads.into_iter().collect(),
         writes: writes.into_iter().collect(),
     }
@@ -565,7 +565,7 @@ fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> Ref
 /// such as `this.prop` or `this.#privateProp`.
 fn collect_references_from_property_member(
     static_member: &JsStaticMemberExpression,
-) -> Option<References> {
+) -> Option<ClassMemberReferences> {
     let mut reads = Vec::new();
     let writes = Vec::new();
 
@@ -577,7 +577,7 @@ fn collect_references_from_property_member(
         });
     }
 
-    Some(References {
+    Some(ClassMemberReferences {
         reads: reads.into_iter().collect(),
         writes: writes.into_iter().collect(),
     })

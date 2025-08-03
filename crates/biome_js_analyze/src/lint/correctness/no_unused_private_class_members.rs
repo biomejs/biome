@@ -1,5 +1,5 @@
 use crate::JsRuleAction;
-use crate::class_member_references::{ClassMemberReference, References, class_member_references};
+use crate::class_member_references::{ClassMemberReference, ClassMemberReferences, class_member_references};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -85,7 +85,7 @@ impl Rule for NoUnusedPrivateClassMembers {
         let node = ctx.query();
         let private_members = get_all_declared_private_members(node);
 
-        let References { reads, writes } = class_member_references(&node.members());
+        let ClassMemberReferences { reads, writes } = class_member_references(&node.members());
 
         private_members
             .iter()
