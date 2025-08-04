@@ -126,6 +126,7 @@ pub mod no_negation_else;
 pub mod no_nested_component_definitions;
 pub mod no_nested_ternary;
 pub mod no_nodejs_modules;
+pub mod no_non_null_asserted_optional_chain;
 pub mod no_non_null_assertion;
 pub mod no_noninteractive_element_interactions;
 pub mod no_noninteractive_element_to_interactive_role;
