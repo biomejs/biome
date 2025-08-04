@@ -100,10 +100,12 @@ impl Matcher<GritQueryContext> for GritNodePattern {
         // Check if we need to handle import structure transformation
         let needs_import_transformation = self.is_import_transformation_needed(node.kind());
 
-        if node.kind() != self.kind && !are_import_kinds_compatible(self.kind, node.kind())
-            && !needs_import_transformation {
-                return Ok(false);
-            }
+        if node.kind() != self.kind
+            && !are_import_kinds_compatible(self.kind, node.kind())
+            && !needs_import_transformation
+        {
+            return Ok(false);
+        }
 
         if self.args.is_empty() {
             return Ok(true);
@@ -141,11 +143,10 @@ impl Matcher<GritQueryContext> for GritNodePattern {
 
                 // Helper function
                 let get_child = |source: u32| {
-                    node.child_by_slot_index(source)
-                        .map_or(
-                            GritResolvedPattern::from_empty_binding(node.clone(), *slot_index),
-                            GritResolvedPattern::from_node_binding,
-                        )
+                    node.child_by_slot_index(source).map_or(
+                        GritResolvedPattern::from_empty_binding(node.clone(), *slot_index),
+                        GritResolvedPattern::from_node_binding,
+                    )
                 };
 
                 // Import slot mapping table
