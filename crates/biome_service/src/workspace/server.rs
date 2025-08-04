@@ -614,11 +614,7 @@ impl WorkspaceServer {
                 match scan_kind {
                     ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => match ignore_kind
                     {
-                        IgnoreKind::Path => self.projects.is_ignored_by_top_level_config(
-                            project_key,
-                            &path,
-                            ignore_kind,
-                        ),
+                        IgnoreKind::Path => !path.is_required_during_scan(),
                         IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
                             self.projects.is_ignored_by_top_level_config(
                                 project_key,

@@ -5,13 +5,16 @@
 //!
 //! No real watcher is instantiated in these tests.
 
+use std::collections::BTreeMap;
+
 use biome_fs::{BiomePath, MemoryFileSystem};
 use camino::Utf8PathBuf;
 
 use crate::scanner::workspace_bridges::ScannerWatcherBridge;
 use crate::test_utils::setup_workspace_and_open_project_and_get_watcher_instruction_receiver;
 use crate::workspace::{
-    ChangeFileParams, CloseFileParams, FileContent, GetFileContentParams, OpenFileParams,
+    ChangeFileParams, CloseFileParams, FileContent, GetFileContentParams, GetModuleGraphParams,
+    OpenFileParams,
 };
 use crate::{WatcherInstruction, Workspace};
 
@@ -65,6 +68,19 @@ fn close_modified_file_from_client_before_watcher() {
 
     assert_eq!(content, FILE_CONTENT_MODIFIED);
 
+    let module_graph = workspace
+        .get_module_graph(GetModuleGraphParams {})
+        .expect("can get module graph");
+
+    assert_eq!(
+        module_graph
+            .data
+            .get(file_path.as_str())
+            .map(|module_info| module_info.static_import_paths.clone()),
+        Some(BTreeMap::from([("fooo".to_string(), "fooo".to_string())])),
+        "index should've updated to the client state"
+    );
+
     workspace
         .close_file(CloseFileParams {
             project_key,
@@ -84,15 +100,16 @@ fn close_modified_file_from_client_before_watcher() {
         .index_file(project_key, file_path.clone())
         .expect("path to be updated by us");
 
-    let content = workspace
-        .get_file_content(GetFileContentParams {
-            project_key,
-            path: BiomePath::new(&file_path),
-        })
-        .expect("can still get file content");
+    let module_graph = workspace
+        .get_module_graph(GetModuleGraphParams {})
+        .expect("can get module graph");
 
     assert_eq!(
-        content, FILE_CONTENT,
-        "content should've reverted to the filesystem state"
+        module_graph
+            .data
+            .get(file_path.as_str())
+            .map(|module_info| module_info.static_import_paths.clone()),
+        Some(BTreeMap::from([("foo".to_string(), "foo".to_string())])),
+        "index should've reverted to the filesystem state"
     );
 }

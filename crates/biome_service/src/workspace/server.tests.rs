@@ -26,6 +26,16 @@ fn commonjs_file_rejects_import_statement() {
         })
         .unwrap();
 
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/a.js"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
     match workspace.get_parse("/project/a.js".into()) {
         Ok(parse) => {
             insta::assert_debug_snapshot!(parse.diagnostics(), @r###"
@@ -69,12 +79,12 @@ fn store_embedded_nodes_with_current_ranges() {
     let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
 
     workspace
-        .scan_project(ScanProjectParams {
+        .open_file(OpenFileParams {
             project_key,
-            watch: false,
-            force: false,
-            scan_kind: ScanKind::Project,
-            verbose: false,
+            path: BiomePath::new("/project/file.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
         })
         .unwrap();
 

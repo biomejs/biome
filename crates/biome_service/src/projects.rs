@@ -125,6 +125,8 @@ impl Projects {
             .map(|data| data.root_settings.clone())
     }
 
+    /// Returns whether a path is ignored based on the
+    /// `files.experimentalScannerIgnores` setting only.
     pub fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
         self.0.pin().get(&project_key).is_none_or(|data| {
             let ignore_entries = &data.root_settings.files.scanner_ignore_entries;
