@@ -1354,6 +1354,7 @@ version = "0.0.1"
 dependencies = [
  "biome_package",
  "biome_parser",
+ "biome_rowan",
  "camino",
  "papaya",
  "rustc-hash 2.1.1",

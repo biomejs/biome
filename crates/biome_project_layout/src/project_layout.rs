@@ -1,5 +1,5 @@
 use biome_package::{NodeJsPackage, Package, PackageJson, TsConfigJson};
-use biome_parser::AnyParse;
+use biome_rowan::SendNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
@@ -124,7 +124,7 @@ impl ProjectLayout {
     /// parsing the manifest on demand.
     ///
     /// See also [Self::insert_node_manifest()].
-    pub fn insert_serialized_node_manifest(&self, path: Utf8PathBuf, manifest: AnyParse) {
+    pub fn insert_serialized_node_manifest(&self, path: Utf8PathBuf, manifest: &SendNode) {
         self.0.pin().update_or_insert_with(
             path,
             |data| {
@@ -137,7 +137,7 @@ impl ProjectLayout {
                         .map(|package| package.tsconfig.clone())
                         .unwrap_or_default(),
                 };
-                node_js_package.insert_serialized_manifest(&manifest.tree());
+                node_js_package.insert_serialized_manifest(&manifest.to_language_root());
 
                 PackageData {
                     node_package: Some(node_js_package),
@@ -145,7 +145,7 @@ impl ProjectLayout {
             },
             || {
                 let mut node_js_package = NodeJsPackage::default();
-                node_js_package.insert_serialized_manifest(&manifest.tree());
+                node_js_package.insert_serialized_manifest(&manifest.to_language_root());
 
                 PackageData {
                     node_package: Some(node_js_package),
@@ -156,7 +156,7 @@ impl ProjectLayout {
 
     /// Inserts a `tsconfig.json` manifest for the package at the given `path`,
     /// parsing the manifest on demand.
-    pub fn insert_serialized_tsconfig(&self, path: Utf8PathBuf, manifest: AnyParse) {
+    pub fn insert_serialized_tsconfig(&self, path: Utf8PathBuf, manifest: &SendNode) {
         self.0.pin().update_or_insert_with(
             path,
             |data| {
@@ -169,7 +169,7 @@ impl ProjectLayout {
                     diagnostics: Default::default(),
                     tsconfig: Default::default(),
                 };
-                node_js_package.insert_serialized_tsconfig(&manifest.tree());
+                node_js_package.insert_serialized_tsconfig(&manifest.to_language_root());
 
                 PackageData {
                     node_package: Some(node_js_package),
@@ -177,7 +177,7 @@ impl ProjectLayout {
             },
             || {
                 let mut node_js_package = NodeJsPackage::default();
-                node_js_package.insert_serialized_tsconfig(&manifest.tree());
+                node_js_package.insert_serialized_tsconfig(&manifest.to_language_root());
 
                 PackageData {
                     node_package: Some(node_js_package),

@@ -17,6 +17,7 @@ workspace = true
 [dependencies]
 biome_package = { workspace = true }
 biome_parser  = { workspace = true }
+biome_rowan   = { workspace = true }
 camino        = { workspace = true }
 papaya        = { workspace = true }
 rustc-hash    = { workspace = true }

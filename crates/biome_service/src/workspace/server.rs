@@ -355,10 +355,6 @@ impl WorkspaceServer {
 
             Some(Ok(parsed.any_parse))
         };
-        let root = syntax
-            .as_ref()
-            .and_then(|syntax| syntax.as_ref().ok())
-            .map(|parse| parse.root());
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let (embedded_scripts, embedded_styles) = if let Some(DocumentFileSource::Html(_)) =
@@ -374,9 +370,7 @@ impl WorkspaceServer {
             (Vec::new(), Vec::new())
         };
 
-        // Manifest files should always be added to the documents because we need their
-        // source inside the module graph
-        let is_indexed = if reason.is_index() && !biome_path.is_manifest() {
+        let is_indexed = if reason.is_index() {
             // If the request is for indexing, we don't insert any document,
             // we only care about updating the module graph.
             true
@@ -432,9 +426,9 @@ impl WorkspaceServer {
         };
 
         // Manifest files need to update the module graph
-        if is_indexed || biome_path.is_manifest() {
+        if is_indexed && let Some(root) = syntax.and_then(Result::ok).map(AnyParse::into_root) {
             let dependencies =
-                self.update_service_data(UpdateKind::AddedOrChanged(reason), &path, root)?;
+                self.update_service_data(&path, UpdateKind::AddedOrChanged(reason, root))?;
             Ok(InternalOpenFileResult { dependencies })
         } else {
             // If the document was never opened by the scanner, we don't care
@@ -675,8 +669,8 @@ impl WorkspaceServer {
     /// Updates the [ProjectLayout] for the given `path`.
     pub(super) fn update_project_layout(
         &self,
-        signal_kind: UpdateKind,
         path: &Utf8Path,
+        update_kind: &UpdateKind,
     ) -> Result<(), WorkspaceError> {
         let filename = path.file_name();
         if filename.is_some_and(|filename| filename == "package.json") {
@@ -685,11 +679,10 @@ impl WorkspaceServer {
                 .map(|parent| parent.to_path_buf())
                 .ok_or_else(WorkspaceError::not_found)?;
 
-            match signal_kind {
-                UpdateKind::AddedOrChanged(_) => {
-                    let parsed = self.get_parse(path)?;
+            match update_kind {
+                UpdateKind::AddedOrChanged(_, root) => {
                     self.project_layout
-                        .insert_serialized_node_manifest(package_path, parsed);
+                        .insert_serialized_node_manifest(package_path, root);
                 }
                 UpdateKind::Removed => {
                     self.project_layout.remove_package(&package_path);
@@ -701,11 +694,10 @@ impl WorkspaceServer {
                 .map(|parent| parent.to_path_buf())
                 .ok_or_else(WorkspaceError::not_found)?;
 
-            match signal_kind {
-                UpdateKind::AddedOrChanged(_) => {
-                    let parsed = self.get_parse(path)?;
+            match update_kind {
+                UpdateKind::AddedOrChanged(_, root) => {
                     self.project_layout
-                        .insert_serialized_tsconfig(package_path, parsed);
+                        .insert_serialized_tsconfig(package_path, root);
                 }
                 UpdateKind::Removed => {
                     self.project_layout
@@ -717,22 +709,20 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    /// Updates the given `path` with an optional `root` in the module graph.
+    /// Updates the given `path` in the module graph.
     ///
-    /// Returns the module dependencies of the `path` if `signal_kind` is
-    /// [`WatcherSignalKind::AddedOrChanged`]. For other signal kinds, no
-    /// dependencies are determined.
-    #[tracing::instrument(level = "debug", skip(self, root))]
+    /// Returns the module dependencies of the `path` if `update_kind` is
+    /// [`UpdateKind::AddedOrChanged`]. For other signal kinds, no dependencies
+    /// are determined.
+    #[tracing::instrument(level = "debug", skip(self))]
     fn update_module_graph_internal(
         &self,
-        signal_kind: UpdateKind,
         path: &BiomePath,
-        root: Option<SendNode>,
+        update_kind: &UpdateKind,
     ) -> ModuleDependencies {
-        let (added_or_changed_paths, removed_paths) = match signal_kind {
-            UpdateKind::AddedOrChanged(_) => {
-                let Some(root) = root.and_then(SendNode::into_node).and_then(AnyJsRoot::cast)
-                else {
+        let (added_or_changed_paths, removed_paths) = match update_kind {
+            UpdateKind::AddedOrChanged(_, root) => {
+                let Some(root) = SendNode::into_node(root.clone()).and_then(AnyJsRoot::cast) else {
                     return Default::default();
                 };
 
@@ -751,25 +741,24 @@ impl WorkspaceServer {
 
     /// Updates the state of any services relevant to the given `path`.
     ///
-    /// Returns the module dependencies of the `path` if `signal_kind` is
-    /// [`WatcherSignalKind::AddedOrChanged`]. For other signal kinds, no
-    /// dependencies are determined.
-    #[instrument(level = "debug", skip(self, path, root))]
+    /// Returns the module dependencies of the `path` if `update_kind` is
+    /// [`UpdateKind::AddedOrChanged`]. For other signal kinds, no dependencies
+    /// are determined.
+    #[instrument(level = "debug", skip(self, path))]
     fn update_service_data(
         &self,
-        signal_kind: UpdateKind,
         path: &Utf8Path,
-        root: Option<SendNode>,
+        update_kind: UpdateKind,
     ) -> Result<ModuleDependencies, WorkspaceError> {
         let path = BiomePath::from(path);
-        if path.is_config() || path.is_manifest() {
-            self.update_project_layout(signal_kind, &path)?;
+        if path.is_manifest() {
+            self.update_project_layout(&path, &update_kind)?;
         }
 
-        let dependencies = self.update_module_graph_internal(signal_kind, &path, root);
+        let dependencies = self.update_module_graph_internal(&path, &update_kind);
 
-        match signal_kind {
-            UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan)) => {
+        match update_kind {
+            UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan), _) => {
                 // We'll send a single signal at the end of the scan.
             }
             _ => {
@@ -827,10 +816,6 @@ impl Workspace for WorkspaceServer {
             if self.fs.path_exists(&manifest) {
                 let trigger = IndexTrigger::InitialScan;
                 self.index_file(project_key, manifest.clone(), trigger)?;
-                self.update_project_layout(
-                    UpdateKind::AddedOrChanged(OpenFileReason::Index(trigger)),
-                    &manifest,
-                )?;
             }
             return Ok(ScanProjectResult {
                 diagnostics: Vec::new(),
@@ -1222,9 +1207,8 @@ impl Workspace for WorkspaceServer {
 
         if self.is_indexed(&path) {
             let dependencies = self.update_service_data(
-                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest),
                 &path,
-                Some(root),
+                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root),
             )?;
             if !dependencies.is_empty()
                 && let Some(project_path) = self.projects.get_project_path(project_key)
@@ -1579,14 +1563,14 @@ impl Workspace for WorkspaceServer {
 
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
         let parsed = self.get_parse(params.path.as_path())?;
-        let signal = match params.update_kind {
+        let update_kind = match params.update_kind {
             super::UpdateKind::AddOrUpdate => {
-                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest)
+                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed.root())
             }
             super::UpdateKind::Remove => UpdateKind::Removed,
         };
 
-        self.update_module_graph_internal(signal, &params.path, Some(parsed.root()));
+        self.update_module_graph_internal(&params.path, &update_kind);
         Ok(())
     }
 
@@ -1856,7 +1840,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
     }
 
     fn unload_file(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
-        self.update_service_data(UpdateKind::Removed, path, None)
+        self.update_service_data(path, UpdateKind::Removed)
             .map(|_| ())
     }
 
@@ -1900,11 +1884,21 @@ impl OpenFileReason {
     }
 }
 
-/// Kind of update being reported.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// Kind of update being performed.
 pub enum UpdateKind {
-    AddedOrChanged(OpenFileReason),
+    AddedOrChanged(OpenFileReason, SendNode),
     Removed,
+}
+
+impl Debug for UpdateKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AddedOrChanged(reason, _) => {
+                f.debug_tuple("AddedOrChanged").field(reason).finish()
+            }
+            Self::Removed => write!(f, "Removed"),
+        }
+    }
 }
 
 /// Sets up the global Rayon thread pool the first time it's called.

@@ -2,13 +2,13 @@ use crate::green::GreenElement;
 use crate::syntax::SyntaxTrivia;
 use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::{
-    Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
+    AstNode, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
     SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent, cursor,
 };
 use biome_text_size::{TextRange, TextSize};
 #[cfg(feature = "serde")]
 use serde::Serialize;
-use std::any::TypeId;
+use std::any::{TypeId, type_name};
 use std::fmt::{Debug, Formatter};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
@@ -837,6 +837,24 @@ impl SendNode {
         } else {
             None
         }
+    }
+
+    /// Downcasts this node to a language-specific root node.
+    ///
+    /// ## Panics
+    ///
+    /// If the node is not of the right language.
+    pub fn to_language_root<N>(&self) -> N
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        N::unwrap_cast(self.clone().into_node().unwrap_or_else(|| {
+            panic!(
+                "could not downcast root node to language {}",
+                type_name::<N::Language>()
+            )
+        }))
     }
 }
 

@@ -683,6 +683,10 @@ impl AnyParse {
         self.root.clone()
     }
 
+    pub fn into_root(self) -> SendNode {
+        self.root
+    }
+
     pub fn syntax<L>(&self) -> SyntaxNode<L>
     where
         L: Language + 'static,
