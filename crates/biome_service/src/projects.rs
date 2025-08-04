@@ -286,8 +286,7 @@ impl Projects {
         self.0
             .pin()
             .iter()
-            .find(|(_, project_data)| path.starts_with(&project_data.path))
-            .map(|(key, _)| *key)
+            .find_map(|(key, project_data)| path.starts_with(&project_data.path).then_some(*key))
     }
 
     /// Checks whether the given `path` belongs to project with the given path

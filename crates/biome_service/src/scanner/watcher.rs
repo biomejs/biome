@@ -209,13 +209,12 @@ impl Watcher {
                 let path = Utf8PathBuf::from_path_buf(path).ok()?;
                 workspace
                     .find_project_with_scan_kind_for_path(&path)
-                    .filter(|(project_key, scan_kind)| {
-                        match workspace.is_ignored(*project_key, scan_kind, &path) {
-                            Ok(is_ignored) => !is_ignored,
-                            Err(_) => false,
+                    .and_then(|(project_key, scan_kind)| {
+                        match workspace.is_ignored(project_key, &scan_kind, &path) {
+                            Ok(is_ignored) => (!is_ignored).then_some(path),
+                            Err(_) => None,
                         }
                     })
-                    .map(|_| path)
             })
             .collect()
     }

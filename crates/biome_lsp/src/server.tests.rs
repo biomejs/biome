@@ -1,6 +1,6 @@
 #![expect(clippy::mutable_key_type)]
 use std::any::type_name;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fmt::Display;
 use std::slice;
 use std::str::FromStr;
@@ -12,9 +12,9 @@ use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_service::Watcher;
 use biome_service::workspace::{
-    GetFileContentParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams,
-    ScanProjectResult,
+    FileContent, GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams, OpenProjectResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams, ScanProjectResult,
 };
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{Sender, channel};
@@ -3414,6 +3414,21 @@ export function bar() {
         .expect("scan_project returned an error");
     assert_eq!(result.diagnostics.len(), 0);
 
+    let _: () = server
+        .request(
+            "biome/open_file",
+            "open_file",
+            OpenFileParams {
+                project_key,
+                path: fs.working_directory.join("foo.ts").into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+            },
+        )
+        .await?
+        .expect("open_file returned an error");
+
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
         .request(
@@ -3611,6 +3626,21 @@ export function bar() {
         .expect("scan_project returned an error");
     assert_eq!(result.diagnostics.len(), 0);
 
+    let _: () = server
+        .request(
+            "biome/open_file",
+            "open_file",
+            OpenFileParams {
+                project_key,
+                path: fs.working_directory.join("foo.ts").into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+            },
+        )
+        .await?
+        .expect("open_file returned an error");
+
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
         .request(
@@ -3769,20 +3799,23 @@ async fn should_open_and_update_nested_files() -> Result<()> {
         .expect("result must not be empty");
     assert_eq!(result.diagnostics.len(), 0);
 
-    // ASSERT: File should be loaded.
-    let content: String = server
+    // ASSERT: File should be indexed.
+    let result: GetModuleGraphResult = server
         .request(
-            "biome/get_file_content",
-            "get_file_content",
-            GetFileContentParams {
-                project_key,
-                path: fs.working_directory.join(FILE_PATH).into(),
-            },
+            "biome/get_module_graph",
+            "get_module_graph",
+            GetModuleGraphParams {},
         )
         .await
-        .expect("get file content error")
-        .expect("content must not be empty");
-    assert_eq!(content, FILE_CONTENT_BEFORE);
+        .expect("get module graph error")
+        .expect("result must not be empty");
+    assert_eq!(
+        result
+            .data
+            .get(fs.working_directory.join(FILE_PATH).as_str())
+            .map(|module_info| module_info.static_import_paths.clone()),
+        Some(BTreeMap::from([("foo".to_string(), "foo".to_string())]))
+    );
 
     // ACT: Update the file content.
     clear_notifications!(factory.service_rx);
@@ -3790,39 +3823,44 @@ async fn should_open_and_update_nested_files() -> Result<()> {
         .expect("cannot update file");
     await_notification!(factory.service_rx);
 
-    // ASSERT: File content should have updated.
-    let content: String = server
+    // ASSERT: Index should have updated.
+    let result: GetModuleGraphResult = server
         .request(
-            "biome/get_file_content",
-            "get_file_content",
-            GetFileContentParams {
-                project_key,
-                path: fs.working_directory.join(FILE_PATH).into(),
-            },
+            "biome/get_module_graph",
+            "get_module_graph",
+            GetModuleGraphParams {},
         )
         .await
-        .expect("get file content error")
-        .expect("content must not be empty");
-
-    assert_eq!(content, FILE_CONTENT_AFTER);
+        .expect("get module graph error")
+        .expect("result must not be empty");
+    assert_eq!(
+        result
+            .data
+            .get(fs.working_directory.join(FILE_PATH).as_str())
+            .map(|module_info| module_info.static_import_paths.clone()),
+        Some(BTreeMap::from([("bar".to_string(), "bar".to_string())]))
+    );
 
     // ACT: Remove the directory.
     clear_notifications!(factory.service_rx);
     std::fs::remove_dir_all(fs.working_directory.join("src")).expect("cannot remove dir");
     await_notification!(factory.service_rx);
 
-    // ASSERT: File content should have been unloaded.
-    let result: Result<Option<String>> = server
+    // ASSERT: File should be unloaded from the index.
+    let result: GetModuleGraphResult = server
         .request(
-            "biome/get_file_content",
-            "get_file_content",
-            GetFileContentParams {
-                project_key,
-                path: fs.working_directory.join(FILE_PATH).into(),
-            },
+            "biome/get_module_graph",
+            "get_module_graph",
+            GetModuleGraphParams {},
         )
-        .await;
-    assert!(result.is_err(), "expected error, received: {result:?}");
+        .await
+        .expect("get module graph error")
+        .expect("result must not be empty");
+    assert!(
+        !result
+            .data
+            .contains_key(fs.working_directory.join(FILE_PATH).as_str())
+    );
 
     // ARRANGE: Shutdown server.
     server.shutdown().await?;

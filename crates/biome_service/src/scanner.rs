@@ -162,6 +162,11 @@ impl Scanner {
             });
         }
 
+        let scanned_project = ScannedProject {
+            scan_kind: scan_options.scan_kind.clone_without_targeting_info(),
+            watched: scan_options.watch,
+        };
+
         let result = self.scan(
             workspace,
             project_key,
@@ -169,6 +174,8 @@ impl Scanner {
             IndexTrigger::InitialScan,
             scan_options,
         )?;
+
+        self.projects.pin().insert(project_key, scanned_project);
 
         workspace.notify(ServiceNotification::IndexUpdated);
 

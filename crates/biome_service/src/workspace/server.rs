@@ -663,7 +663,8 @@ impl WorkspaceServer {
     }
 
     /// Updates the [ProjectLayout] for the given `path`.
-    pub(super) fn update_project_layout(
+    #[instrument(level = "debug", skip(self))]
+    fn update_project_layout(
         &self,
         path: &Utf8Path,
         update_kind: &UpdateKind,
@@ -740,7 +741,6 @@ impl WorkspaceServer {
     /// Returns the module dependencies of the `path` if `update_kind` is
     /// [`UpdateKind::AddedOrChanged`]. For other signal kinds, no dependencies
     /// are determined.
-    #[instrument(level = "debug", skip(self, path))]
     fn update_service_data(
         &self,
         path: &Utf8Path,
