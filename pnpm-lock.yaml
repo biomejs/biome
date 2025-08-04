@@ -15,8 +15,8 @@ importers:
         specifier: 2.29.5
         version: 2.29.5
       '@types/node':
-        specifier: 22.16.5
-        version: 22.16.5
+        specifier: 22.17.0
+        version: 22.17.0
 
   benchmark:
     devDependencies:
@@ -648,9 +648,6 @@ packages:
 
   '@types/node@20.19.9':
     resolution: {integrity: sha512-cuVNgarYWZqxRJDQHEB58GEONhOK79QVR/qYx4S7kcUObQvUwvFnYxJuuHUKm2aieN9X3yZB4LZsuYNU1Qphsw==}
-
-  '@types/node@22.16.5':
-    resolution: {integrity: sha512-bJFoMATwIGaxxx8VJPeM8TonI8t579oRvgAuT8zFugJsJZgzqv0Fu8Mhp68iecjzG7cnN3mO2dJQ5uUM2EFrgQ==}
 
   '@types/node@22.17.0':
     resolution: {integrity: sha512-bbAKTCqX5aNVryi7qXVMi+OkB3w/OyblodicMbvE38blyAz7GxXf6XYhklokijuPwwVg9sDLKRxt0ZHXQwZVfQ==}
@@ -2094,10 +2091,6 @@ snapshots:
   '@types/node@12.20.55': {}
 
   '@types/node@20.19.9':
-    dependencies:
-      undici-types: 6.21.0
-
-  '@types/node@22.16.5':
     dependencies:
       undici-types: 6.21.0
 
