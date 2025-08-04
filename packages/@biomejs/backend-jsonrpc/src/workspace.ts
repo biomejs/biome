@@ -8979,17 +8979,29 @@ export interface GetModuleGraphResult {
 }
 export interface SerializedJsModuleInfo {
 	/**
-	 * Dynamic imports
+	 * Dynamic imports.
 	 */
-	dynamic_imports: string[];
+	dynamicImports: string[];
 	/**
-	 * Exported symbols
+	 * Exported symbols.
 	 */
 	exports: string[];
 	/**
-	 * Static imports
+	* Map of all the paths from static imports in the module.
+
+Maps from the source specifier name to the absolute path it resolves to. Specifiers that could not be resolved to an absolute will map to the specifier itself.
+
+## Example
+
+```json { "./foo": "/absolute/path/to/foo.js", "react": "react" } ``` 
 	 */
-	static_imports: Record<string, string>;
+	staticImportPaths: Record<string, string>;
+	/**
+	* Map of all static imports found in the module.
+
+Maps from the local imported name to the absolute path it resolves to. 
+	 */
+	staticImports: Record<string, string>;
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;

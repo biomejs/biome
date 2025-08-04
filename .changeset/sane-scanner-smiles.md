@@ -14,4 +14,4 @@ The change in the scanner also has a more nuanced impact: Previously, if you use
 
 As a user you should notice better scanner performance (if you have project rules enabled), and hopefully you need to worry less about configuring [`files.experimentalScannerIgnores`](https://biomejs.dev/reference/configuration/#filesexperimentalscannerignores). Eventually our goal is still to deprecate that setting, so if you're using it today, we encourage you to see which ignores are still necessary there, and whether you can achieve the same effect by ignoring paths using `files.includes` instead.
 
-None of these changes affect the parser if no project rules are enabled.
+None of these changes affect the scanner if no project rules are enabled.
