@@ -3742,6 +3742,7 @@ impl JsImportDefaultClause {
     pub fn as_fields(&self) -> JsImportDefaultClauseFields {
         JsImportDefaultClauseFields {
             type_token: self.type_token(),
+            phase_token: self.phase_token(),
             default_specifier: self.default_specifier(),
             from_token: self.from_token(),
             source: self.source(),
@@ -3751,17 +3752,20 @@ impl JsImportDefaultClause {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
+    pub fn phase_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
     pub fn default_specifier(&self) -> SyntaxResult<JsDefaultImportSpecifier> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
     pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
-        support::required_node(&self.syntax, 3usize)
+        support::required_node(&self.syntax, 4usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
-        support::node(&self.syntax, 4usize)
+        support::node(&self.syntax, 5usize)
     }
 }
 impl Serialize for JsImportDefaultClause {
@@ -3775,6 +3779,7 @@ impl Serialize for JsImportDefaultClause {
 #[derive(Serialize)]
 pub struct JsImportDefaultClauseFields {
     pub type_token: Option<SyntaxToken>,
+    pub phase_token: Option<SyntaxToken>,
     pub default_specifier: SyntaxResult<JsDefaultImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
     pub source: SyntaxResult<AnyJsModuleSource>,
@@ -20724,6 +20729,10 @@ impl std::fmt::Debug for JsImportDefaultClause {
                 .field(
                     "type_token",
                     &support::DebugOptionalElement(self.type_token()),
+                )
+                .field(
+                    "phase_token",
+                    &support::DebugOptionalElement(self.phase_token()),
                 )
                 .field(
                     "default_specifier",
