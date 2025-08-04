@@ -47,8 +47,8 @@ pub fn is_css_variable(value: &str) -> bool {
     value.to_ascii_lowercase_cow().starts_with("var(")
 }
 
-/// Get the font-families within a `font` shorthand property value.
 // TODO: This function should be replaced with `parse_shorthand_font_families`
+/// Get the font-families within a `font` shorthand property value.
 pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue> {
     let mut font_families: Vec<AnyCssValue> = Vec::new();
     for v in value {
