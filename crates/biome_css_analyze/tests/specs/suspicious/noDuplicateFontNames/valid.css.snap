@@ -13,5 +13,6 @@ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif; }
 
 /* Issue 6064: https: //github.com/biomejs/biome/issues/6064 */
 a { font-family: Fira Sans, Droid Sans, sans-serif; }
+a { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif; }
 a { font: 16px/1.5 Open Sans, Segoe UI, system-ui; }
 ```
