@@ -6,9 +6,10 @@ Fixed [#6965](https://github.com/biomejs/biome/issues/6965): Implemented smarter
 
 Previously, if project rules were enabled, Biome's scanner would scan all dependencies regardless of whether they were used by/reachable from source files or not. While this worked for a first version, it was far from optimal.
 
-The new scanner first scans everything listed under the `files.includes` setting, and then descends into the dependencies that were discovered there, including transitive dependencies. This has two main advantages:
+The new scanner first scans everything listed under the `files.includes` setting, and then descends into the dependencies that were discovered there, including transitive dependencies. This has three main advantages:
 * Dependencies that are not reachable from your source files don't get indexed.
 * Dependencies that have multiple type definitions, such as those with separate definitions for CommonJS and ESM imports, only have the relevant definitions indexed.
+* If `vcs.useIgnoreFile` is enabled, `.gitignore` gets respected as well. Assuming you have folders such as `build/` or `dist/` configured there, those will be automatically ignored by the scanner.
 
 The change in the scanner also has a more nuanced impact: Previously, if you used `files.includes` to ignore a file in an included folder, the scanner would still index this file. Now the file is fully ignored, _unless you import it_.
 
