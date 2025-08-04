@@ -117,6 +117,23 @@ invalid.css:6:75 lint/suspicious/noDuplicateFontNames ━━━━━━━━�
 ```
 
 ```
+invalid.css:8:36 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate font names are redundant and unnecessary: Fira Sans
+  
+     6 │ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
+     7 │ 
+   > 8 │ a { font-family: Fira Sans, Arial, Fira Sans; }
+       │                                    ^^^^^^^^^
+     9 │ a { font-family: "Droid Sans", Droid Sans, serif; }
+    10 │ a { font: 16px Helvetica Neue, "Helvetica Neue", sans-serif; }
+  
+  i Remove duplicate font names within the property
+  
+
+```
+
+```
 invalid.css:9:32 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate font names are redundant and unnecessary: Droid Sans

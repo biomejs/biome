@@ -16,7 +16,6 @@ use crate::keywords::{
 use biome_css_syntax::{
     AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList, CssSyntaxToken,
 };
-use biome_rowan::AstNodeList;
 use biome_rowan::{AstNode, SyntaxNodeCast};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
@@ -47,7 +46,7 @@ pub fn is_css_variable(value: &str) -> bool {
     value.to_ascii_lowercase_cow().starts_with("var(")
 }
 
-// TODO: This function should be replaced with `parse_shorthand_font_families`
+// TODO: This function should be replaced with `normalize_shorthand_font_families`
 /// Get the font-families within a `font` shorthand property value.
 pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue> {
     let mut font_families: Vec<AnyCssValue> = Vec::new();
@@ -115,8 +114,15 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
     font_families
 }
 
+/// Represents a font family parsed from CSS font properties.
+///
+/// A font family can consist of:
+/// - A single token (for quoted strings like `"Arial"`)
+/// - Multiple tokens (for unquoted identifiers like `Times New Roman`)
 #[derive(Debug, Clone)]
 pub struct FontFamily {
+    /// The tokens that make up this font family. For quoted strings, this will be a single token.
+    /// For unquoted identifiers, this may be multiple tokens.
     pub tokens: Vec<CssSyntaxToken>,
 }
 
@@ -152,30 +158,18 @@ fn normalize_font_families(list: CssGenericComponentValueList) -> Vec<FontFamily
     let mut current_font_texts: Vec<CssSyntaxToken> = Vec::new();
     let mut font_families: Vec<FontFamily> = Vec::new();
 
-    let len = list.len();
-
-    for (index, c) in list.into_iter().enumerate() {
-        let is_last_value_node = index == len - 1;
-        match c {
+    for value in list {
+        match value {
             AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
                 AnyCssValue::CssIdentifier(val) => {
-                    let text = val.value_token().ok().unwrap();
-
-                    if is_last_value_node {
-                        font_families.push(FontFamily {
-                            tokens: vec![text.clone()],
-                        });
-                        continue;
+                    if let Ok(text) = val.value_token() {
+                        current_font_texts.push(text);
                     }
-
-                    current_font_texts.push(text.clone());
                 }
                 AnyCssValue::CssString(val) => {
-                    let text = val.value_token().ok().unwrap();
-
-                    font_families.push(FontFamily {
-                        tokens: vec![text.clone()],
-                    });
+                    if let Ok(text) = val.value_token() {
+                        font_families.push(FontFamily { tokens: vec![text] });
+                    }
                 }
                 _ => {}
             },
@@ -190,6 +184,13 @@ fn normalize_font_families(list: CssGenericComponentValueList) -> Vec<FontFamily
             }
         }
     }
+
+    if !current_font_texts.is_empty() {
+        font_families.push(FontFamily {
+            tokens: current_font_texts,
+        });
+    }
+
     font_families
 }
 
@@ -198,10 +199,7 @@ fn normalize_shorthand_font_families(list: CssGenericComponentValueList) -> Vec<
     let mut current_font_texts: Vec<CssSyntaxToken> = Vec::new();
     let mut font_families: Vec<FontFamily> = Vec::new();
 
-    let len = list.len();
-
-    for (index, value) in list.into_iter().enumerate() {
-        let is_last_value_node = index == len - 1;
+    for value in list {
         let raw_value = value.to_trimmed_text();
         let lower_case_value = raw_value.text().to_ascii_lowercase_cow();
 
@@ -225,20 +223,22 @@ fn normalize_shorthand_font_families(list: CssGenericComponentValueList) -> Vec<
             continue;
         }
 
-        // Ignore anything that comes after a <font-size>/ (line-height)
+        // Ignore anything that comes after a <font-size>/ pattern (which indicates line-height)
+        // In font shorthand: "16px/1.5" where 16px is font-size and 1.5 is line-height
+        // We need to check: prev_prev_node (font-size) + prev_node (slash) + current node
         if let Some(prev_node) = value.syntax().prev_sibling() {
             if let Some(prev_prev_node) = prev_node.prev_sibling() {
-                if let Some(slash) = prev_node.cast::<AnyCssGenericComponentValue>() {
-                    if let Some(size) = prev_prev_node.cast::<AnyCssGenericComponentValue>() {
-                        if matches!(
-                            size,
-                            AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::AnyCssDimension(
-                                _
-                            ))
-                        ) && matches!(slash, AnyCssGenericComponentValue::CssGenericDelimiter(_))
-                        {
-                            continue;
-                        }
+                // Check if prev_node is a slash delimiter and prev_prev_node is a dimension (font-size)
+                if let (Some(slash), Some(size)) = (
+                    prev_node.cast::<AnyCssGenericComponentValue>(),
+                    prev_prev_node.cast::<AnyCssGenericComponentValue>(),
+                ) {
+                    if matches!(
+                        size,
+                        AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::AnyCssDimension(_))
+                    ) && matches!(slash, AnyCssGenericComponentValue::CssGenericDelimiter(_))
+                    {
+                        continue;
                     }
                 }
             }
@@ -253,6 +253,21 @@ fn normalize_shorthand_font_families(list: CssGenericComponentValueList) -> Vec<
         }
 
         match value {
+            AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
+                AnyCssValue::CssIdentifier(val) => {
+                    if let Ok(text) = val.value_token() {
+                        current_font_texts.push(text);
+                    }
+                }
+                AnyCssValue::CssString(val) => {
+                    if let Ok(raw_text) = val.value_token() {
+                        font_families.push(FontFamily {
+                            tokens: vec![raw_text],
+                        });
+                    }
+                }
+                _ => {}
+            },
             AnyCssGenericComponentValue::CssGenericDelimiter(_) => {
                 if !current_font_texts.is_empty() {
                     font_families.push(FontFamily {
@@ -262,30 +277,15 @@ fn normalize_shorthand_font_families(list: CssGenericComponentValueList) -> Vec<
                     current_font_texts.clear();
                 }
             }
-            AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
-                AnyCssValue::CssIdentifier(val) => {
-                    let text = val.value_token().ok().unwrap();
-
-                    if is_last_value_node {
-                        font_families.push(FontFamily {
-                            tokens: vec![text.clone()],
-                        });
-                        continue;
-                    }
-
-                    current_font_texts.push(text.clone());
-                }
-                AnyCssValue::CssString(val) => {
-                    let raw_text = val.value_token().ok().unwrap();
-
-                    font_families.push(FontFamily {
-                        tokens: vec![raw_text.clone()],
-                    });
-                }
-                _ => {}
-            },
         }
     }
+
+    if !current_font_texts.is_empty() {
+        font_families.push(FontFamily {
+            tokens: current_font_texts,
+        });
+    }
+
     font_families
 }
 
