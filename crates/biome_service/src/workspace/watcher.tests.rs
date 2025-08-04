@@ -30,12 +30,10 @@ fn should_not_open_an_ignored_file_inside_vcs_ignore_file() {
     let (watcher_tx, _) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         })
         .expect("can open project");
 
@@ -78,12 +76,10 @@ fn should_not_open_an_ignored_file_inside_file_includes() {
     let (watcher_tx, _) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         })
         .expect("can open project");
 
@@ -126,12 +122,10 @@ fn close_file_through_watcher_before_client() {
     let (watcher_tx, _) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         })
         .expect("can open project");
 
@@ -192,12 +186,10 @@ fn close_file_from_client_before_watcher() {
     let (watcher_tx, _) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         })
         .expect("can open project");
 
@@ -259,12 +251,10 @@ fn close_modified_file_from_client_before_watcher() {
     let (watcher_tx, rx) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         })
         .expect("can open project");
 
@@ -339,12 +329,10 @@ fn should_not_open_a_source_file_with_scan_kind_known_files() {
     let (watcher_tx, watcher_rx) = unbounded();
     let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
     let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         })
         .expect("can open project");
 
