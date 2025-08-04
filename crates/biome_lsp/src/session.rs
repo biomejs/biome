@@ -20,9 +20,9 @@ use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, SupportsFeatureParams,
 };
-use biome_service::workspace::{FileFeaturesResult, ServiceDataNotification};
+use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_service::workspace::{ScanKind, ScanProjectFolderParams};
+use biome_service::workspace::{ScanKind, ScanProjectParams};
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use futures::StreamExt;
@@ -89,11 +89,11 @@ pub(crate) struct Session {
 
     pub(crate) cancellation: Arc<Notify>,
 
-    /// Receiver for service data notifications.
+    /// Receiver for service notifications.
     ///
     /// If we receive a notification here, diagnostics for open documents are
     /// all refreshed.
-    service_data_rx: watch::Receiver<ServiceDataNotification>,
+    service_rx: watch::Receiver<ServiceNotification>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -190,7 +190,7 @@ impl Session {
         client: Client,
         workspace: Arc<dyn Workspace>,
         cancellation: Arc<Notify>,
-        service_data_rx: watch::Receiver<ServiceDataNotification>,
+        service_rx: watch::Receiver<ServiceNotification>,
     ) -> Self {
         let config = RwLock::new(ExtensionSettings::new());
         Self {
@@ -204,7 +204,7 @@ impl Session {
             extension_settings: config,
             cancellation,
             notified_broken_configuration: AtomicBool::new(false),
-            service_data_rx,
+            service_rx,
         }
     }
 
@@ -230,16 +230,16 @@ impl Session {
 
         let session = self.clone();
         spawn(async move {
-            let mut service_data_rx = session.service_data_rx.clone();
+            let mut service_data_rx = session.service_rx.clone();
             while let Ok(()) = service_data_rx.changed().await {
-                match *session.service_data_rx.borrow() {
-                    ServiceDataNotification::Updated => {
+                match *session.service_rx.borrow() {
+                    ServiceNotification::IndexUpdated => {
                         let session = session.clone();
                         spawn(async move {
                             session.update_all_diagnostics().await;
                         });
                     }
-                    ServiceDataNotification::Stop => {
+                    ServiceNotification::WatcherStopped => {
                         break;
                     }
                 }
@@ -319,14 +319,9 @@ impl Session {
 
         // Spawn the scan in the background, to avoid timing out the LSP request.
         let session = self.clone();
-        let project_path = path.clone();
-        spawn(async move {
-            session
-                .scan_project_folder(project_key, project_path, scan_kind)
-                .await
-        })
-        .await
-        .expect("Scanning task to complete successfully");
+        spawn(async move { session.scan_project(project_key, scan_kind).await })
+            .await
+            .expect("Scanning task to complete successfully");
     }
 
     /// Get a [`Document`] matching the provided [`Uri`]
@@ -664,25 +659,21 @@ impl Session {
     }
 
     #[instrument(level = "debug", skip(self))]
-    pub(crate) async fn scan_project_folder(
+    pub(crate) async fn scan_project(
         self: &Arc<Self>,
         project_key: ProjectKey,
-        project_path: BiomePath,
         scan_kind: ScanKind,
     ) {
         let session = self.clone();
 
         spawn_blocking(move || {
-            let result = session
-                .workspace
-                .scan_project_folder(ScanProjectFolderParams {
-                    project_key,
-                    path: Some(project_path),
-                    watch: true,
-                    force: false,
-                    scan_kind,
-                    verbose: false,
-                });
+            let result = session.workspace.scan_project(ScanProjectParams {
+                project_key,
+                watch: true,
+                force: false,
+                scan_kind,
+                verbose: false,
+            });
 
             match result {
                 Ok(result) => {

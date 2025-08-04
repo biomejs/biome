@@ -10,4 +10,4 @@ Added new functions to the `@biomejs/wasm-*` packages:
 - `isPathIgnored`: returns whether the input path is ignored.
 - `updateModuleGraph`: updates the internal module graph of the input path.
 - `getModuleGraph`: it returns a serialized version of the internal module graph.
-- `scanProjectFolder`: scans the files and directories in the project to build the internal module graph.
+- `scanProject`: scans the files and directories in the project to build the internal module graph.

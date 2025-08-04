@@ -1,9 +1,9 @@
-use super::*;
-use crate::workspace::ScanKind;
 use biome_fs::MemoryFileSystem;
 use biome_rowan::TextSize;
-use crossbeam::channel::bounded;
-use tokio::sync::watch;
+
+use crate::test_utils::setup_workspace_and_open_project;
+
+use super::*;
 
 #[test]
 fn commonjs_file_rejects_import_statement() {
@@ -14,22 +14,11 @@ fn commonjs_file_rejects_import_statement() {
     fs.insert(Utf8PathBuf::from("/project/a.js"), FILE_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/package.json"), MANIFEST_CONTENT);
 
-    let (watcher_tx, _) = bounded(0);
-    let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
-    let result = workspace
-        .open_project(OpenProjectParams {
-            path: BiomePath::new("/"),
-            open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
-        })
-        .unwrap();
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
-            project_key: result.project_key,
-            path: Some(BiomePath::new("/")),
+        .scan_project(ScanProjectParams {
+            project_key,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
@@ -62,7 +51,7 @@ fn commonjs_file_rejects_import_statement() {
 }
 
 #[test]
-fn store_embedded_nodes_with_corrent_ranges() {
+fn store_embedded_nodes_with_current_ranges() {
     const FILE_CONTENT: &str = r#"<html>
     <head>
         <style>
@@ -77,22 +66,11 @@ fn store_embedded_nodes_with_corrent_ranges() {
     let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/file.html"), FILE_CONTENT);
 
-    let (watcher_tx, _) = bounded(0);
-    let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_data_tx, None);
-    let result = workspace
-        .open_project(OpenProjectParams {
-            path: BiomePath::new("/"),
-            open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
-        })
-        .unwrap();
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
-            project_key: result.project_key,
-            path: Some(BiomePath::new("/")),
+        .scan_project(ScanProjectParams {
+            project_key,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,

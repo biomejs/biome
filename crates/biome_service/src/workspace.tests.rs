@@ -21,7 +21,7 @@ use crate::{Workspace, WorkspaceError};
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
     GetFileContentParams, GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams,
-    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectFolderParams,
+    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams,
     UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
 
@@ -332,9 +332,8 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
@@ -425,9 +424,8 @@ fn too_large_files_are_tracked_but_not_parsed() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
@@ -486,9 +484,8 @@ fn plugins_are_loaded_and_used_during_analysis() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
@@ -556,9 +553,8 @@ language css;
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
@@ -622,9 +618,8 @@ fn plugins_may_use_invalid_span() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
@@ -742,9 +737,8 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,

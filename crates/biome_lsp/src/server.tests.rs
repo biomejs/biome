@@ -10,11 +10,11 @@ use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
-use biome_service::WorkspaceWatcher;
+use biome_service::Watcher;
 use biome_service::workspace::{
     GetFileContentParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind,
-    ScanProjectFolderParams, ScanProjectFolderResult,
+    OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams,
+    ScanProjectResult,
 };
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{Sender, channel};
@@ -3365,13 +3365,13 @@ export function bar() {
     fs.create_file("foo.ts", FOO_CONTENT);
     fs.create_file("bar.ts", BAR_CONTENT);
 
-    let (mut watcher, instruction_channel) = WorkspaceWatcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new()?;
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
     spawn_blocking(move || {
-        watcher.run(workspace.as_ref());
+        workspace.start_watcher(watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3398,13 +3398,12 @@ export function bar() {
         .expect("open_project returned an error");
 
     // ARRANGE: Scanning the project folder initializes the service data.
-    let result: ScanProjectFolderResult = server
+    let result: ScanProjectResult = server
         .request(
-            "biome/scan_project_folder",
-            "scan_project_folder",
-            ScanProjectFolderParams {
+            "biome/scan_project",
+            "scan_project",
+            ScanProjectParams {
                 project_key,
-                path: None,
                 watch: true,
                 force: false,
                 scan_kind: ScanKind::Project,
@@ -3412,7 +3411,7 @@ export function bar() {
             },
         )
         .await?
-        .expect("scan_project_folder returned an error");
+        .expect("scan_project returned an error");
     assert_eq!(result.diagnostics.len(), 0);
 
     // ACT: Pull diagnostics.
@@ -3441,9 +3440,9 @@ export function bar() {
     );
 
     // ARRANGE: Remove `bar.ts`.
-    clear_notifications!(factory.service_data_rx);
+    clear_notifications!(factory.service_rx);
     std::fs::remove_file(fs.working_directory.join("bar.ts")).expect("Cannot remove bar.ts");
-    await_notification!(factory.service_data_rx);
+    await_notification!(factory.service_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3467,9 +3466,9 @@ export function bar() {
     assert_eq!(result.diagnostics.len(), 0);
 
     // ARRANGE: Recreate `bar.ts`.
-    clear_notifications!(factory.service_data_rx);
+    clear_notifications!(factory.service_rx);
     fs.create_file("bar.ts", BAR_CONTENT);
-    await_notification!(factory.service_data_rx);
+    await_notification!(factory.service_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3497,9 +3496,9 @@ export function bar() {
     );
 
     // ARRANGE: Fix `bar.ts`.
-    clear_notifications!(factory.service_data_rx);
+    clear_notifications!(factory.service_rx);
     fs.create_file("bar.ts", BAR_CONTENT_FIXED);
-    await_notification!(factory.service_data_rx);
+    await_notification!(factory.service_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3563,13 +3562,13 @@ export function bar() {
     fs.create_file("foo.ts", FOO_CONTENT);
     fs.create_file("utils/bar.ts", BAR_CONTENT);
 
-    let (mut watcher, instruction_channel) = WorkspaceWatcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new()?;
 
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
     spawn_blocking(move || {
-        watcher.run(workspace.as_ref());
+        workspace.start_watcher(watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3596,13 +3595,12 @@ export function bar() {
         .expect("open_project returned an error");
 
     // ARRANGE: Scanning the project folder initializes the service data.
-    let result: ScanProjectFolderResult = server
+    let result: ScanProjectResult = server
         .request(
-            "biome/scan_project_folder",
-            "scan_project_folder",
-            ScanProjectFolderParams {
+            "biome/scan_project",
+            "scan_project",
+            ScanProjectParams {
                 project_key,
-                path: Some(BiomePath::new(fs.working_directory.as_path())),
                 watch: true,
                 force: false,
                 scan_kind: ScanKind::Project,
@@ -3610,7 +3608,7 @@ export function bar() {
             },
         )
         .await?
-        .expect("scan_project_folder returned an error");
+        .expect("scan_project returned an error");
     assert_eq!(result.diagnostics.len(), 0);
 
     // ACT: Pull diagnostics.
@@ -3639,13 +3637,13 @@ export function bar() {
     );
 
     // ARRANGE: Move `utils` directory.
-    clear_notifications!(factory.service_data_rx);
+    clear_notifications!(factory.service_rx);
     std::fs::rename(
         fs.working_directory.join("utils"),
         fs.working_directory.join("bin"),
     )
     .expect("Cannot move utils");
-    await_notification!(factory.service_data_rx);
+    await_notification!(factory.service_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3670,13 +3668,13 @@ export function bar() {
     assert_eq!(result.diagnostics.len(), 0);
 
     // ARRANGE: Move `utils` back.
-    clear_notifications!(factory.service_data_rx);
+    clear_notifications!(factory.service_rx);
     std::fs::rename(
         fs.working_directory.join("bin"),
         fs.working_directory.join("utils"),
     )
     .expect("Cannot restore utils");
-    await_notification!(factory.service_data_rx);
+    await_notification!(factory.service_rx);
 
     // ACT: Pull diagnostics.
     let result: PullDiagnosticsResult = server
@@ -3719,14 +3717,14 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     let mut fs = TemporaryFs::new("should_open_and_update_nested_files");
     fs.create_file(FILE_PATH, FILE_CONTENT_BEFORE);
 
-    let (mut watcher, instruction_channel) = WorkspaceWatcher::new()?;
+    let (watcher, instruction_channel) = Watcher::new()?;
 
     // ARRANGE: Start server.
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
     spawn_blocking(move || {
-        watcher.run(workspace.as_ref());
+        workspace.start_watcher(watcher);
     });
 
     let (service, client) = factory.create().into_inner();
@@ -3754,13 +3752,12 @@ async fn should_open_and_update_nested_files() -> Result<()> {
         .expect("open_project returned an error");
 
     // ACT: Scanning the project folder initialises the service data.
-    let result: ScanProjectFolderResult = server
+    let result: ScanProjectResult = server
         .request(
-            "biome/scan_project_folder",
-            "scan_project_folder",
-            ScanProjectFolderParams {
+            "biome/scan_project",
+            "scan_project",
+            ScanProjectParams {
                 project_key,
-                path: None,
                 watch: true,
                 force: false,
                 scan_kind: ScanKind::Project,
@@ -3768,7 +3765,7 @@ async fn should_open_and_update_nested_files() -> Result<()> {
             },
         )
         .await
-        .expect("scan_project_folder returned an error")
+        .expect("scan_project returned an error")
         .expect("result must not be empty");
     assert_eq!(result.diagnostics.len(), 0);
 
@@ -3788,10 +3785,10 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     assert_eq!(content, FILE_CONTENT_BEFORE);
 
     // ACT: Update the file content.
-    clear_notifications!(factory.service_data_rx);
+    clear_notifications!(factory.service_rx);
     std::fs::write(fs.working_directory.join(FILE_PATH), FILE_CONTENT_AFTER)
         .expect("cannot update file");
-    await_notification!(factory.service_data_rx);
+    await_notification!(factory.service_rx);
 
     // ASSERT: File content should have updated.
     let content: String = server
@@ -3810,9 +3807,9 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     assert_eq!(content, FILE_CONTENT_AFTER);
 
     // ACT: Remove the directory.
-    clear_notifications!(factory.service_data_rx);
+    clear_notifications!(factory.service_rx);
     std::fs::remove_dir_all(fs.working_directory.join("src")).expect("cannot remove dir");
-    await_notification!(factory.service_data_rx);
+    await_notification!(factory.service_rx);
 
     // ASSERT: File content should have been unloaded.
     let result: Result<Option<String>> = server

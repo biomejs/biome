@@ -6,7 +6,7 @@ use biome_fs::{BiomePath, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
 use biome_service::workspace::{
     GetFileContentParams, GetTypeInfoParams, OpenProjectParams, OpenProjectResult, ScanKind,
-    ScanProjectFolderParams, UpdateSettingsParams, server,
+    ScanProjectParams, UpdateSettingsParams, server,
 };
 use camino::Utf8PathBuf;
 
@@ -49,9 +49,8 @@ fn test_scanner_only_loads_type_definitions_from_node_modules() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
@@ -69,7 +68,7 @@ fn test_scanner_only_loads_type_definitions_from_node_modules() {
         "package.json should be loaded"
     );
 
-    let mtd_file_content_result = workspace.get_file_content(GetFileContentParams {
+    let d_mts_file_content_result = workspace.get_file_content(GetFileContentParams {
         project_key,
         path: BiomePath::new(format!(
             "{fixtures_path}/node_modules/shared/dist/index.d.mts"
@@ -77,21 +76,20 @@ fn test_scanner_only_loads_type_definitions_from_node_modules() {
     });
 
     assert!(
-        mtd_file_content_result.is_err(),
-        "index.d.mts should not be stored"
+        d_mts_file_content_result.is_err(),
+        "index.d.mts should not be stored (only its type info should be)"
     );
 
-    let d_mts_result = workspace.get_type_info(GetTypeInfoParams {
+    let d_mts_type_info_result = workspace.get_type_info(GetTypeInfoParams {
         project_key,
         path: BiomePath::new(format!(
             "{fixtures_path}/node_modules/shared/dist/index.d.mts"
         )),
     });
 
-    dbg!(&d_mts_result);
     assert!(
-        d_mts_result.is_ok_and(|result| !result.is_empty()),
-        "Type definitions should be loaded"
+        d_mts_type_info_result.is_ok_and(|result| !result.is_empty()),
+        "Type definitions should be loaded from .d.mts"
     );
 
     let js_result = workspace.get_file_content(GetFileContentParams {
@@ -99,7 +97,54 @@ fn test_scanner_only_loads_type_definitions_from_node_modules() {
         path: BiomePath::new(format!("{fixtures_path}/node_modules/shared/dist/index.js")),
     });
 
-    assert!(js_result.is_err(), "JS file should be ignored");
+    assert!(
+        js_result.is_err(),
+        ".js file in dependencies should be ignored"
+    );
+
+    let d_ts_type_info_result = workspace.get_type_info(GetTypeInfoParams {
+        project_key,
+        path: BiomePath::new(format!(
+            "{fixtures_path}/node_modules/shared/dist/index.d.ts"
+        )),
+    });
+
+    assert!(
+        d_ts_type_info_result.is_err(),
+        "Type definitions should be ignored from .d.ts file, because the resolver never pointed here"
+    );
+
+    let js_result = workspace.get_file_content(GetFileContentParams {
+        project_key,
+        path: BiomePath::new(format!(
+            "{fixtures_path}/node_modules/shared/dist/index.mjs"
+        )),
+    });
+
+    assert!(
+        js_result.is_err(),
+        ".mjs file in dependencies should be ignored"
+    );
+
+    let unused_d_ts_file_content_result = workspace.get_file_content(GetFileContentParams {
+        project_key,
+        path: BiomePath::new(format!("{fixtures_path}/node_modules/unused/index.d.ts")),
+    });
+
+    assert!(
+        unused_d_ts_file_content_result.is_err(),
+        "index.d.ts should not be stored because the dependency is unused"
+    );
+
+    let unused_d_ts_type_info_result = workspace.get_type_info(GetTypeInfoParams {
+        project_key,
+        path: BiomePath::new(format!("{fixtures_path}/node_modules/unused/index.d.ts")),
+    });
+
+    assert!(
+        unused_d_ts_type_info_result.is_err(),
+        "index.d.ts should not be indexed because the dependency is unused"
+    );
 }
 
 #[test]
@@ -139,9 +184,8 @@ fn test_scanner_ignored_files_are_not_loaded() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
@@ -208,9 +252,8 @@ fn test_scanner_required_files_are_only_ignored_in_ignored_directories() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,

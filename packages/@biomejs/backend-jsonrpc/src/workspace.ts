@@ -8780,19 +8780,11 @@ Target paths must be absolute.
 			};
 	  }
 	| "project";
-export interface ScanProjectFolderParams {
+export interface ScanProjectParams {
 	/**
 	 * Forces scanning of the folder, even if it is already being watched.
 	 */
 	force: boolean;
-	/**
-	* Optional path within the project to scan.
-
-If omitted, the project is scanned from its root folder.
-
-This is a potential optimization that allows scanning to be limited to a subset of the full project. Clients should specify it to indicate which part of the project they are interested in. The server may or may not use this to avoid scanning parts that are irrelevant to clients. 
-	 */
-	path?: BiomePath;
 	projectKey: ProjectKey;
 	scanKind: ScanKind;
 	verbose: boolean;
@@ -8803,7 +8795,7 @@ Does nothing if the watcher is already watching this path.
 	 */
 	watch: boolean;
 }
-export interface ScanProjectFolderResult {
+export interface ScanProjectResult {
 	/**
 	 * A list of child configuration files found inside the project
 	 */
@@ -9209,9 +9201,7 @@ export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
 	openProject(params: OpenProjectParams): Promise<OpenProjectResult>;
-	scanProjectFolder(
-		params: ScanProjectFolderParams,
-	): Promise<ScanProjectFolderResult>;
+	scanProject(params: ScanProjectParams): Promise<ScanProjectResult>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
@@ -9253,8 +9243,8 @@ export function createWorkspace(transport: Transport): Workspace {
 		openProject(params) {
 			return transport.request("biome/open_project", params);
 		},
-		scanProjectFolder(params) {
-			return transport.request("biome/scan_project_folder", params);
+		scanProject(params) {
+			return transport.request("biome/scan_project", params);
 		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);

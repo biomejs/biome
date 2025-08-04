@@ -35,7 +35,7 @@ use biome_service::configuration::{LoadedConfiguration, load_configuration, load
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FixFileMode, OpenProjectParams, ScanKind, ScanProjectFolderParams, UpdateSettingsParams,
+    FixFileMode, OpenProjectParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
 use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
@@ -977,9 +977,8 @@ pub(crate) trait CommandRunner: Sized {
             }
             (scan_kind, _) => scan_kind,
         };
-        let result = workspace.scan_project_folder(ScanProjectFolderParams {
+        let result = workspace.scan_project(ScanProjectParams {
             project_key: open_project_result.project_key,
-            path: None,
             watch: cli_options.use_server,
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,

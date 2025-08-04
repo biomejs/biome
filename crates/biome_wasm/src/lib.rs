@@ -8,7 +8,7 @@ use biome_service::workspace::{
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
     GetFormatterIRParams, GetModuleGraphParams, GetRegisteredTypesParams, GetSemanticModelParams,
     GetSyntaxTreeParams, GetTypeInfoParams, OpenProjectParams, PathIsIgnoredParams,
-    PullActionsParams, PullDiagnosticsParams, RenameParams, ScanProjectFolderParams,
+    PullActionsParams, PullDiagnosticsParams, RenameParams, ScanProjectParams,
     UpdateModuleGraphParams, UpdateSettingsParams,
 };
 use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
@@ -113,17 +113,14 @@ impl Workspace {
             .map_err(into_error)
     }
 
-    #[wasm_bindgen(js_name = scanProjectFolder)]
-    pub fn scan_project_folder(
-        &self,
-        params: IScanProjectFolderParams,
-    ) -> Result<IScanProjectFolderResult, Error> {
-        let params: ScanProjectFolderParams =
+    #[wasm_bindgen(js_name = scanProject)]
+    pub fn scan_project(&self, params: IScanProjectParams) -> Result<IScanProjectResult, Error> {
+        let params: ScanProjectParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
-        let result = self.inner.scan_project_folder(params).map_err(into_error)?;
+        let result = self.inner.scan_project(params).map_err(into_error)?;
 
         to_value(&result)
-            .map(IScanProjectFolderResult::from)
+            .map(IScanProjectResult::from)
             .map_err(into_error)
     }
 

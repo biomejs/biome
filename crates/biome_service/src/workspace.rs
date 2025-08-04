@@ -53,24 +53,21 @@
 
 mod client;
 mod document;
-mod scanner;
 mod server;
-mod watcher;
 
-pub use document::{EmbeddedCssContent, EmbeddedJsContent};
+use std::{
+    borrow::Cow,
+    fmt::{Debug, Display, Formatter},
+    panic::RefUnwindSafe,
+    str,
+    sync::Arc,
+    time::Duration,
+};
 
-use crate::file_handlers::Capabilities;
-pub use crate::file_handlers::DocumentFileSource;
-use crate::projects::ProjectKey;
-use crate::settings::Settings;
-pub use crate::workspace::scanner::ScanKind;
-use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::{ActionCategory, RuleCategories};
-use biome_configuration::Configuration;
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::{Configuration, analyzer::RuleSelector};
 use biome_console::{Markup, MarkupBuf, markup};
-use biome_diagnostics::CodeSuggestion;
-use biome_diagnostics::serde::Diagnostic;
+use biome_diagnostics::{CodeSuggestion, serde::Diagnostic};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
@@ -79,31 +76,39 @@ use biome_module_graph::SerializedJsModuleInfo;
 use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
-pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-use core::str;
 use crossbeam::channel::bounded;
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
-#[cfg(feature = "schema")]
-use schemars::{r#gen::SchemaGenerator, schema::Schema};
+use serde::{Deserialize, Serialize};
 pub use server::WorkspaceServer;
 use smallvec::SmallVec;
-use std::fmt::{Debug, Display, Formatter};
-use std::sync::Arc;
-use std::time::Duration;
-use std::{borrow::Cow, panic::RefUnwindSafe};
 use tokio::sync::watch;
 use tracing::debug;
 
+#[cfg(feature = "schema")]
+use schemars::{r#gen::SchemaGenerator, schema::Schema};
+
+pub use crate::{
+    WorkspaceError,
+    file_handlers::{Capabilities, DocumentFileSource},
+    projects::ProjectKey,
+    scanner::ScanKind,
+    settings::Settings,
+};
+
+pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
+pub use document::{EmbeddedCssContent, EmbeddedJsContent};
+pub use server::OpenFileReason;
+
 /// Notification regarding a workspace's service data.
 #[derive(Clone, Copy, Debug)]
-pub enum ServiceDataNotification {
-    /// Notifies of any kind of update to the service data.
-    Updated,
+pub enum ServiceNotification {
+    /// Notifies that some file or folder's index has been updated.
+    IndexUpdated,
 
     /// Workspace watcher has stopped and no more service data updates are
     /// expected.
-    Stop,
+    WatcherStopped,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1060,7 +1065,7 @@ pub struct RenameResult {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct ScanProjectFolderResult {
+pub struct ScanProjectResult {
     /// Diagnostics reported while scanning the project.
     pub diagnostics: Vec<Diagnostic>,
 
@@ -1253,18 +1258,8 @@ pub struct OpenProjectResult {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct ScanProjectFolderParams {
+pub struct ScanProjectParams {
     pub project_key: ProjectKey,
-
-    /// Optional path within the project to scan.
-    ///
-    /// If omitted, the project is scanned from its root folder.
-    ///
-    /// This is a potential optimization that allows scanning to be limited to
-    /// a subset of the full project. Clients should specify it to indicate
-    /// which part of the project they are interested in. The server may or may
-    /// not use this to avoid scanning parts that are irrelevant to clients.
-    pub path: Option<BiomePath>,
 
     /// Whether the watcher should watch this path.
     ///
@@ -1323,7 +1318,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// project will default settings.
     ///
     /// Note: Opening a project does not mean the project is ready for use. You
-    /// probably want to follow it up with a call to `scan_project_folder()` or
+    /// probably want to follow it up with a call to `scan_project()` or
     /// explicitly load settings into the project using `update_settings()`.
     ///
     /// Returns the key of the opened project and the [ScanKind] of this project.
@@ -1334,8 +1329,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// The `scan_kind` can be used to tell the scanner how it should scan the project.
     fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
 
-    /// Scans the given project from a given path, and initializes all settings
-    /// and service data.
+    /// Scans the given project, and initializes all settings and service data.
     ///
     /// The first time you call this method, it may take a long time since it
     /// will traverse the entire project folder recursively, parse all included
@@ -1344,17 +1338,14 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ///
     /// Follow-up calls may be much faster as they can reuse cached data.
     ///
-    /// This method also registers file watchers to make sure the cache remains
-    /// up-to-date, if indicated in the `params`.
-    fn scan_project_folder(
-        &self,
-        params: ScanProjectFolderParams,
-    ) -> Result<ScanProjectFolderResult, WorkspaceError>;
+    /// If [`ScanProjectParams::watch`] is `true`, this method also
+    /// registers file watchers to make sure the cache remains up-to-date.
+    fn scan_project(&self, params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError>;
 
     /// Updates the global settings for the given project.
     ///
     /// TODO: This method should not be used in combination with
-    /// `scan_project_folder()`. When scanning is enabled, the server should
+    /// `scan_project()`. When scanning is enabled, the server should
     /// manage project settings on its own.
     fn update_settings(
         &self,
@@ -1373,7 +1364,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// they'll probably just kill the daemon anyway.)
     ///
     /// If a file watcher was registered as a result of a call to
-    /// `scan_project_folder()`, it will also be unregistered.
+    /// `scan_project()`, it will also be unregistered.
     fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError>;
 
     // #endregion
@@ -1546,13 +1537,8 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 /// Convenience function for constructing a server instance of [Workspace]
 pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
     let (watcher_tx, _) = bounded(0);
-    let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    Box::new(WorkspaceServer::new(
-        fs,
-        watcher_tx,
-        service_data_tx,
-        threads,
-    ))
+    let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
+    Box::new(WorkspaceServer::new(fs, watcher_tx, service_tx, threads))
 }
 
 /// Convenience function for constructing a client instance of [Workspace]
