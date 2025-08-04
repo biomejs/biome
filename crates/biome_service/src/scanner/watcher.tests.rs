@@ -122,6 +122,8 @@ fn should_index_on_create_and_unload_on_delete() {
 
         assert!(mock_bridge.watched_folders.pin().contains(project_path));
 
+        thread::sleep(Duration::from_millis(200));
+
         fs::write(&file_path, "import 'foo';").expect("can create file");
 
         bridge_rx
