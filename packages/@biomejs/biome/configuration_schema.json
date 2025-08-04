@@ -3632,6 +3632,18 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNonNullAssertedOptionalChainConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithNoNonNullAssertedOptionalChainOptions"
+				}
+			]
+		},
+		"NoNonNullAssertedOptionalChainOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNonNullAssertionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4826,6 +4838,15 @@
 					"anyOf": [
 						{
 							"$ref": "#/definitions/NoNestedComponentDefinitionsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
+				"noNonNullAssertedOptionalChain": {
+					"description": "Disallow non-null assertions after optional chaining expressions.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
 						},
 						{ "type": "null" }
 					]
@@ -7718,6 +7739,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoNodejsModulesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoNonNullAssertedOptionalChainOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoNonNullAssertedOptionalChainOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
