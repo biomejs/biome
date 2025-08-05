@@ -37,13 +37,11 @@ jobs:
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
           channel: stable
+          bins: hyperfine
           cache-target: release
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install hyperfine
-        run: cargo install hyperfine
 
       - name: Compile on PR Branch
         run: |
