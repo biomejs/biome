@@ -11,4 +11,4 @@ pub use js_module_info::{
     JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport, ModuleResolver,
     SerializedJsModuleInfo,
 };
-pub use module_graph::{ModuleGraph, SUPPORTED_EXTENSIONS};
+pub use module_graph::{ModuleDependencies, ModuleGraph, SUPPORTED_EXTENSIONS};

@@ -82,7 +82,7 @@ impl JsModuleInfo {
         }
     }
 
-    /// Returns a serializable version of this module
+    /// Returns a serializable representation of this module.
     pub fn dump(&self) -> SerializedJsModuleInfo {
         SerializedJsModuleInfo {
             static_imports: self
@@ -91,7 +91,20 @@ impl JsModuleInfo {
                 .map(|(text, static_import)| {
                     (text.to_string(), static_import.specifier.to_string())
                 })
-                .collect::<BTreeMap<_, _>>(),
+                .collect(),
+
+            static_import_paths: self
+                .static_import_paths
+                .iter()
+                .map(|(specifier, resolved)| {
+                    (
+                        specifier.to_string(),
+                        resolved
+                            .as_ref()
+                            .map_or_else(|_| specifier.to_string(), ToString::to_string),
+                    )
+                })
+                .collect(),
 
             exports: self
                 .exports
@@ -372,12 +385,33 @@ fn scope_id_for_range(scope_by_range: &Lapper<u32, ScopeId>, range: TextRange) -
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SerializedJsModuleInfo {
-    /// Static imports
-    static_imports: BTreeMap<String, String>,
-    /// Dynamic imports
-    dynamic_imports: BTreeSet<String>,
-    /// Exported symbols
-    exports: BTreeSet<String>,
+    /// Map of all static imports found in the module.
+    ///
+    /// Maps from the local imported name to the absolute path it resolves to.
+    pub static_imports: BTreeMap<String, String>,
+
+    /// Map of all the paths from static imports in the module.
+    ///
+    /// Maps from the source specifier name to the absolute path it resolves to.
+    /// Specifiers that could not be resolved to an absolute will map to the
+    /// specifier itself.
+    ///
+    /// ## Example
+    ///
+    /// ```json
+    /// {
+    ///   "./foo": "/absolute/path/to/foo.js",
+    ///   "react": "react"
+    /// }
+    /// ```
+    pub static_import_paths: BTreeMap<String, String>,
+
+    /// Dynamic imports.
+    pub dynamic_imports: BTreeSet<String>,
+
+    /// Exported symbols.
+    pub exports: BTreeSet<String>,
 }

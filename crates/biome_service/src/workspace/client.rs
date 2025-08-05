@@ -3,9 +3,9 @@ use super::{
     FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
     GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetSemanticModelParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
-    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams,
+    ScanProjectResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
+    UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -110,11 +110,8 @@ where
         self.request("biome/open_project", params)
     }
 
-    fn scan_project_folder(
-        &self,
-        params: ScanProjectFolderParams,
-    ) -> Result<ScanProjectFolderResult, WorkspaceError> {
-        self.request("biome/scan_project_folder", params)
+    fn scan_project(&self, params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError> {
+        self.request("biome/scan_project", params)
     }
 
     #[instrument(level = "info", skip_all)]

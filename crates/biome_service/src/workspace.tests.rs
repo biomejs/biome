@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::num::NonZeroU64;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -20,9 +21,9 @@ use crate::{Workspace, WorkspaceError};
 
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
-    GetFileContentParams, GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams,
-    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectFolderParams,
-    UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
+    GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
+    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateKind,
+    UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
@@ -328,9 +329,8 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
@@ -338,21 +338,26 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
         })
         .unwrap();
 
-    macro_rules! assert_file_a_content {
-        () => {
+    macro_rules! assert_file_a_index {
+        () => {{
+            let module_graph = workspace
+                .get_module_graph(GetModuleGraphParams {})
+                .expect("can get module graph");
+
             assert_eq!(
-                workspace
-                    .get_file_content(GetFileContentParams {
-                        project_key,
-                        path: BiomePath::new("/project/a.ts"),
-                    })
-                    .unwrap(),
-                String::from_utf8(FILE_A_CONTENT.to_vec()).unwrap(),
+                module_graph
+                    .data
+                    .get("/project/a.ts")
+                    .map(|module_info| module_info.static_import_paths.clone()),
+                Some(BTreeMap::from([(
+                    "./b.ts".to_string(),
+                    "/project/b.ts".replace('/', std::path::MAIN_SEPARATOR_STR),
+                )])),
             );
-        };
+        }};
     }
 
-    assert_file_a_content!();
+    assert_file_a_index!();
 
     workspace
         .open_file(OpenFileParams {
@@ -364,7 +369,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
         })
         .unwrap();
 
-    assert_file_a_content!();
+    assert_file_a_index!();
 
     workspace
         .close_file(CloseFileParams {
@@ -373,20 +378,17 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
         })
         .unwrap();
 
-    assert_file_a_content!();
+    assert_file_a_index!();
 
     workspace
         .close_project(CloseProjectParams { project_key })
         .unwrap();
 
-    assert!(
-        workspace
-            .get_file_content(GetFileContentParams {
-                project_key,
-                path: BiomePath::new("/project/a.ts"),
-            })
-            .is_err_and(|error| matches!(error, WorkspaceError::NotFound(_)))
-    );
+    let module_graph = workspace
+        .get_module_graph(GetModuleGraphParams {})
+        .expect("can get module graph");
+
+    assert!(!module_graph.data.contains_key("/project/a.ts"));
 }
 
 #[test]
@@ -419,13 +421,12 @@ fn too_large_files_are_tracked_but_not_parsed() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .open_file(OpenFileParams {
             project_key,
-            path: None,
-            watch: false,
-            force: false,
-            scan_kind: ScanKind::Project,
-            verbose: false,
+            path: BiomePath::new("/project/a.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
         })
         .unwrap();
 
@@ -478,13 +479,12 @@ fn plugins_are_loaded_and_used_during_analysis() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .open_file(OpenFileParams {
             project_key,
-            path: None,
-            watch: false,
-            force: false,
-            scan_kind: ScanKind::Project,
-            verbose: false,
+            path: BiomePath::new("/project/a.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
         })
         .unwrap();
 
@@ -546,13 +546,12 @@ language css;
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .open_file(OpenFileParams {
             project_key,
-            path: None,
-            watch: false,
-            force: false,
-            scan_kind: ScanKind::Project,
-            verbose: false,
+            path: BiomePath::new("/project/a.css"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
         })
         .unwrap();
 
@@ -610,13 +609,12 @@ fn plugins_may_use_invalid_span() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .open_file(OpenFileParams {
             project_key,
-            path: None,
-            watch: false,
-            force: false,
-            scan_kind: ScanKind::Project,
-            verbose: false,
+            path: BiomePath::new("/project/a.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
         })
         .unwrap();
 
@@ -728,9 +726,8 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
@@ -739,6 +736,16 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
         .unwrap();
 
     for (path, expect_diagnosis_count) in [("/project/a.ts", 1), ("/project/lib/b.ts", 2)] {
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(path),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+            })
+            .unwrap();
+
         let result = workspace
             .pull_diagnostics(PullDiagnosticsParams {
                 project_key,
@@ -876,12 +883,10 @@ fn debug_module_graph() {
     let fs = MemoryFileSystem::default();
 
     let workspace = server(Arc::new(fs), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
-            only_rules: Some(Vec::new()),
-            skip_rules: None,
         })
         .unwrap();
 

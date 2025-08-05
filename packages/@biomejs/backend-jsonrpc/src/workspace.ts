@@ -8954,19 +8954,11 @@ export interface OpenProjectResult {
 	 */
 	projectKey: ProjectKey;
 }
-export interface ScanProjectFolderParams {
+export interface ScanProjectParams {
 	/**
 	 * Forces scanning of the folder, even if it is already being watched.
 	 */
 	force: boolean;
-	/**
-	* Optional path within the project to scan.
-
-If omitted, the project is scanned from its root folder.
-
-This is a potential optimization that allows scanning to be limited to a subset of the full project. Clients should specify it to indicate which part of the project they are interested in. The server may or may not use this to avoid scanning parts that are irrelevant to clients. 
-	 */
-	path?: BiomePath;
 	projectKey: ProjectKey;
 	scanKind: ScanKind;
 	verbose: boolean;
@@ -8997,7 +8989,7 @@ Target paths must be absolute.
 			};
 	  }
 	| "project";
-export interface ScanProjectFolderResult {
+export interface ScanProjectResult {
 	/**
 	 * A list of child configuration files found inside the project
 	 */
@@ -9181,17 +9173,29 @@ export interface GetModuleGraphResult {
 }
 export interface SerializedJsModuleInfo {
 	/**
-	 * Dynamic imports
+	 * Dynamic imports.
 	 */
-	dynamic_imports: string[];
+	dynamicImports: string[];
 	/**
-	 * Exported symbols
+	 * Exported symbols.
 	 */
 	exports: string[];
 	/**
-	 * Static imports
+	* Map of all the paths from static imports in the module.
+
+Maps from the source specifier name to the absolute path it resolves to. Specifiers that could not be resolved to an absolute will map to the specifier itself.
+
+## Example
+
+```json { "./foo": "/absolute/path/to/foo.js", "react": "react" } ``` 
 	 */
-	static_imports: Record<string, string>;
+	staticImportPaths: Record<string, string>;
+	/**
+	* Map of all static imports found in the module.
+
+Maps from the local imported name to the absolute path it resolves to. 
+	 */
+	staticImports: Record<string, string>;
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
@@ -9404,9 +9408,7 @@ export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
 	openProject(params: OpenProjectParams): Promise<OpenProjectResult>;
-	scanProjectFolder(
-		params: ScanProjectFolderParams,
-	): Promise<ScanProjectFolderResult>;
+	scanProject(params: ScanProjectParams): Promise<ScanProjectResult>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
@@ -9448,8 +9450,8 @@ export function createWorkspace(transport: Transport): Workspace {
 		openProject(params) {
 			return transport.request("biome/open_project", params);
 		},
-		scanProjectFolder(params) {
-			return transport.request("biome/scan_project_folder", params);
+		scanProject(params) {
+			return transport.request("biome/scan_project", params);
 		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);

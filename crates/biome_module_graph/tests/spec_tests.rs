@@ -92,7 +92,8 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
     }"#,
         JsonParserOptions::default(),
     );
-    project_layout.insert_serialized_tsconfig("/".into(), tsconfig_json.into());
+    project_layout
+        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
 
     project_layout.insert_node_manifest(
         "/node_modules/shared".into(),
@@ -1498,7 +1499,8 @@ fn test_resolve_react_types() {
     );
 
     let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
-    project_layout.insert_serialized_tsconfig("/".into(), tsconfig_json.into());
+    project_layout
+        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
