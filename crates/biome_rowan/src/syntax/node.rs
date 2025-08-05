@@ -362,6 +362,23 @@ impl<L: Language> SyntaxNode<L> {
             .map(NodeOrToken::from)
     }
 
+    /// Traverses the subtree rooted at the current node (including the current
+    /// node) in preorder, excluding tokens, as long as `predicate` returns
+    /// `true`.
+    ///
+    /// `predicate` is used to prune subtrees that fail the predicate test. Any
+    /// time `predicate` returns `false`, that node **as well as its children**
+    /// are skipped during the traversal.
+    pub fn pruned_descendents<P: Fn(&Self) -> bool>(
+        &self,
+        predicate: P,
+    ) -> impl Iterator<Item = Self> + use<L, P> {
+        PrunedDescendents {
+            preorder: self.preorder(),
+            predicate,
+        }
+    }
+
     /// Traverse the subtree rooted at the current node (including the current
     /// node) in preorder, excluding tokens.
     pub fn preorder(&self) -> Preorder<L> {
@@ -915,6 +932,31 @@ impl<L: Language> Iterator for Preorder<L> {
     type Item = WalkEvent<SyntaxNode<L>>;
     fn next(&mut self) -> Option<Self::Item> {
         self.raw.next().map(|it| it.map(SyntaxNode::from))
+    }
+}
+
+pub struct PrunedDescendents<L: Language, P: Fn(&SyntaxNode<L>) -> bool> {
+    preorder: Preorder<L>,
+    predicate: P,
+}
+
+impl<L: Language, P: Fn(&SyntaxNode<L>) -> bool> Iterator for PrunedDescendents<L, P> {
+    type Item = SyntaxNode<L>;
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.preorder.next() {
+                Some(WalkEvent::Enter(node)) => {
+                    let predicate = &self.predicate;
+                    if predicate(&node) {
+                        break Some(node);
+                    } else {
+                        self.preorder.skip_subtree();
+                    }
+                }
+                Some(WalkEvent::Leave(_)) => {}
+                None => break None,
+            }
+        }
     }
 }
 
