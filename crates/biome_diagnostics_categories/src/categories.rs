@@ -217,6 +217,7 @@ define_categories! {
     "lint/nursery/useIterableCallbackReturn": "https://biomejs.dev/linter/rules/use-iterable-callback-return",
     "lint/nursery/useJsonImportAttribute": "https://biomejs.dev/linter/rules/use-json-import-attribute",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
+    "lint/nursery/useMaxParams": "https://biomejs.dev/linter/rules/use-max-params",
     "lint/nursery/useNamedOperation": "https://biomejs.dev/linter/rules/use-named-operation",
     "lint/nursery/useNamingConvention": "https://biomejs.dev/linter/rules/use-naming-convention",
     "lint/nursery/useNumericSeparators": "https://biomejs.dev/linter/rules/use-numeric-separators",
