@@ -1009,6 +1009,28 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
                         range: Range {
                             start: Position {
                                 line: 0,
+                                character: 16,
+                            },
+                            end: Position {
+                                line: 0,
+                                character: 20,
+                            },
+                        },
+                        severity: Some(lsp::DiagnosticSeverity::ERROR),
+                        code: Some(lsp::NumberOrString::String(String::from(
+                            "syntax/correctness/noDuplicatePrivateClassMembers",
+                        ))),
+                        code_description: None,
+                        source: Some(String::from("biome")),
+                        message: String::from("Duplicate private class member \"#foo\"",),
+                        related_information: None,
+                        tags: None,
+                        data: None,
+                    },
+                    lsp::Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 0,
                                 character: 10,
                             },
                             end: Position {
@@ -1059,28 +1081,6 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
                         message: String::from(
                             "This private class member is defined but never used.",
                         ),
-                        related_information: None,
-                        tags: None,
-                        data: None,
-                    },
-                    lsp::Diagnostic {
-                        range: Range {
-                            start: Position {
-                                line: 0,
-                                character: 16,
-                            },
-                            end: Position {
-                                line: 0,
-                                character: 20,
-                            },
-                        },
-                        severity: Some(lsp::DiagnosticSeverity::ERROR),
-                        code: Some(lsp::NumberOrString::String(String::from(
-                            "syntax/correctness/noDuplicatePrivateClassMembers",
-                        ))),
-                        code_description: None,
-                        source: Some(String::from("biome")),
-                        message: String::from("Duplicate private class member \"#foo\"",),
                         related_information: None,
                         tags: None,
                         data: None,

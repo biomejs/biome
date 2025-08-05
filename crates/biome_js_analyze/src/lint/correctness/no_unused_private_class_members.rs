@@ -1,8 +1,14 @@
+use crate::{
+    JsRuleAction,
+    services::semantic::Semantic,
+    utils::{is_node_equal, rename::RenameSymbolExtensions},
+};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, AnyJsName,
     JsAssignmentExpression, JsClassDeclaration, JsSyntaxKind, JsSyntaxNode,
@@ -14,8 +20,6 @@ use biome_rowan::{
 };
 use biome_rule_options::no_unused_private_class_members::NoUnusedPrivateClassMembersOptions;
 use rustc_hash::FxHashSet;
-
-use crate::{JsRuleAction, utils::is_node_equal};
 
 declare_lint_rule! {
     /// Disallow unused private class members
@@ -76,9 +80,27 @@ declare_node_union! {
     pub AnyMember = AnyJsClassMember | TsPropertyParameter
 }
 
+#[derive(Debug, Clone)]
+pub enum UnusedMemberAction {
+    RemoveMember(AnyMember),
+    RemovePrivateModifier {
+        member: AnyMember,
+        rename_with_underscore: bool,
+    },
+}
+
+impl UnusedMemberAction {
+    fn property_range(&self) -> Option<TextRange> {
+        match self {
+            Self::RemoveMember(member) => member.property_range(),
+            Self::RemovePrivateModifier { member, .. } => member.property_range(),
+        }
+    }
+}
+
 impl Rule for NoUnusedPrivateClassMembers {
-    type Query = Ast<JsClassDeclaration>;
-    type State = AnyMember;
+    type Query = Semantic<JsClassDeclaration>;
+    type State = UnusedMemberAction;
     type Signals = Box<[Self::State]>;
     type Options = NoUnusedPrivateClassMembersOptions;
 
@@ -88,32 +110,123 @@ impl Rule for NoUnusedPrivateClassMembers {
         if private_members.is_empty() {
             Vec::new()
         } else {
-            traverse_members_usage(node.syntax(), private_members)
+            let mut results = Vec::new();
+            let unused_members = traverse_members_usage(node.syntax(), private_members);
+
+            for member in unused_members {
+                match &member {
+                    AnyMember::AnyJsClassMember(_) => {
+                        results.push(UnusedMemberAction::RemoveMember(member));
+                    }
+                    AnyMember::TsPropertyParameter(ts_property_param) => {
+                        // Check if the parameter is also unused in constructor body using semantic analysis
+                        let should_rename =
+                            check_ts_property_parameter_usage(ctx, ts_property_param);
+                        results.push(UnusedMemberAction::RemovePrivateModifier {
+                            member,
+                            rename_with_underscore: should_rename,
+                        });
+                    }
+                }
+            }
+            results
         }
         .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.property_range(),
-            markup! {
-                "This private class member is defined but never used."
-            },
-        ))
+        match state {
+            UnusedMemberAction::RemoveMember(_) => Some(RuleDiagnostic::new(
+                rule_category!(),
+                state.property_range(),
+                markup! {
+                    "This private class member is defined but never used."
+                },
+            )),
+            UnusedMemberAction::RemovePrivateModifier {
+                rename_with_underscore,
+                ..
+            } => {
+                if *rename_with_underscore {
+                    Some(RuleDiagnostic::new(
+                        rule_category!(),
+                        state.property_range(),
+                        markup! {
+                            "This private class member is defined but never used."
+                        },
+                    ))
+                } else {
+                    Some(RuleDiagnostic::new(
+                        rule_category!(),
+                        state.property_range(),
+                        markup! {
+                            "This parameter is never used outside of the constructor."
+                        },
+                    ))
+                }
+            }
+        }
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
 
-        mutation.remove_node(state.clone());
-
-        Some(JsRuleAction::new(
-            ctx.metadata().action_category(ctx.category(), ctx.group()),
-            ctx.metadata().applicability(),
-            markup! { "Remove unused declaration." }.to_owned(),
-            mutation,
-        ))
+        match state {
+            UnusedMemberAction::RemoveMember(member) => {
+                mutation.remove_node(member.clone());
+                Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! { "Remove unused declaration." }.to_owned(),
+                    mutation,
+                ))
+            }
+            UnusedMemberAction::RemovePrivateModifier {
+                member,
+                rename_with_underscore,
+            } => {
+                if let AnyMember::TsPropertyParameter(ts_property_param) = member {
+                    // Remove the private modifier
+                    let modifiers = ts_property_param.modifiers();
+                    for modifier in modifiers.iter() {
+                        if let Some(accessibility_modifier) =
+                            TsAccessibilityModifier::cast(modifier.into_syntax())
+                        {
+                            if accessibility_modifier.is_private() {
+                                mutation.remove_node(accessibility_modifier);
+                                break;
+                            }
+                        }
+                    }
+                    // If needed, rename with underscore prefix
+                    if *rename_with_underscore {
+                        if let Ok(AnyJsFormalParameter::JsFormalParameter(param)) =
+                            ts_property_param.formal_parameter()
+                        {
+                            let binding = param.binding().ok()?;
+                            let identifier_binding =
+                                binding.as_any_js_binding()?.as_js_identifier_binding()?;
+                            let name_token = identifier_binding.name_token().ok()?;
+                            let name_trimmed = name_token.text_trimmed();
+                            let new_name = format!("_{name_trimmed}");
+                            if !mutation.rename_node_declaration(
+                                ctx.model(),
+                                identifier_binding,
+                                &new_name,
+                            ) {
+                                return None;
+                            }
+                        }
+                    }
+                }
+                Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! { "Remove private modifier" }.to_owned(),
+                    mutation,
+                ))
+            }
+        }
     }
 }
 
@@ -158,6 +271,42 @@ fn traverse_members_usage(
     }
 
     private_members.into_iter().collect()
+}
+
+/// Check if a TsPropertyParameter is also unused as a function parameter
+fn check_ts_property_parameter_usage(
+    ctx: &RuleContext<NoUnusedPrivateClassMembers>,
+    ts_property_param: &TsPropertyParameter,
+) -> bool {
+    if let Ok(AnyJsFormalParameter::JsFormalParameter(param)) = ts_property_param.formal_parameter()
+        && let Ok(binding) = param.binding()
+        && let Some(identifier_binding) = binding
+            .as_any_js_binding()
+            .and_then(|b| b.as_js_identifier_binding())
+    {
+        let name_token = match identifier_binding.name_token() {
+            Ok(token) => token,
+            Err(_) => return false,
+        };
+
+        let name = name_token.text_trimmed();
+
+        if name.starts_with('_') {
+            return false;
+        }
+
+        if identifier_binding
+            .all_references(ctx.model())
+            .next()
+            .is_some()
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    false
 }
 
 fn get_all_declared_private_members(
