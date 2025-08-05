@@ -135,13 +135,37 @@ impl Rule for NoUnusedPrivateClassMembers {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.property_range(),
-            markup! {
-                "This private class member is defined but never used."
-            },
-        ))
+        match state {
+            UnusedMemberAction::RemoveMember(_) => Some(RuleDiagnostic::new(
+                rule_category!(),
+                state.property_range(),
+                markup! {
+                    "This private class member is defined but never used."
+                },
+            )),
+            UnusedMemberAction::RemovePrivateModifier {
+                rename_with_underscore,
+                ..
+            } => {
+                if *rename_with_underscore {
+                    Some(RuleDiagnostic::new(
+                        rule_category!(),
+                        state.property_range(),
+                        markup! {
+                            "This private class member is defined but never used."
+                        },
+                    ))
+                } else {
+                    Some(RuleDiagnostic::new(
+                        rule_category!(),
+                        state.property_range(),
+                        markup! {
+                            "This parameter is never used outside of the constructor."
+                        },
+                    ))
+                }
+            }
+        }
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

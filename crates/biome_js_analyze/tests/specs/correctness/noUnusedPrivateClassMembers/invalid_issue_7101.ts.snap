@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 146
 expression: invalid_issue_7101.ts
 ---
 # Input
@@ -67,7 +66,7 @@ invalid_issue_7101.ts:2:50 lint/correctness/noUnusedPrivateClassMembers  FIXABLE
 ```
 invalid_issue_7101.ts:9:23 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
 
-  ! This private class member is defined but never used.
+  ! This parameter is never used outside of the constructor.
   
      8 │ class TSPartiallyUsedPrivateConstructor {
    > 9 │   constructor(private param: number) {
