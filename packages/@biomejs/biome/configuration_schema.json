@@ -726,6 +726,20 @@
 				}
 			]
 		},
+		"ConsistentTypeDefinition": {
+			"oneOf": [
+				{
+					"description": "Prefer using `interface` for object type definitions",
+					"type": "string",
+					"enum": ["interface"]
+				},
+				{
+					"description": "Prefer using `type` for object type definitions",
+					"type": "string",
+					"enum": ["type"]
+				}
+			]
+		},
 		"Convention": {
 			"type": "object",
 			"properties": {
@@ -4975,6 +4989,15 @@
 					"description": "Use static Response methods instead of new Response() constructor when possible.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseConsistentResponseConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentTypeDefinitions": {
+					"description": "Enforce type definitions to consistently use either interface or type.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -9915,6 +9938,27 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseConsistentTypeDefinitionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseConsistentTypeDefinitionsOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseConstOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13066,6 +13110,22 @@
 		},
 		"UseConsistentResponseOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConsistentTypeDefinitionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseConsistentTypeDefinitionsOptions" }
+			]
+		},
+		"UseConsistentTypeDefinitionsOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"default": "interface",
+					"allOf": [{ "$ref": "#/definitions/ConsistentTypeDefinition" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseConstConfiguration": {

@@ -1696,6 +1696,10 @@ export interface Nursery {
 	 */
 	useConsistentResponse?: RuleFixConfiguration_for_UseConsistentResponseOptions;
 	/**
+	 * Enforce type definitions to consistently use either interface or type.
+	 */
+	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
+	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
 	useExhaustiveSwitchCases?: RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions;
@@ -2973,6 +2977,9 @@ export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 export type RuleFixConfiguration_for_UseConsistentResponseOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentResponseOptions;
+export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -5443,6 +5450,20 @@ export interface RuleWithFixOptions_for_UseConsistentResponseOptions {
 	 */
 	options: UseConsistentResponseOptions;
 }
+export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentTypeDefinitionsOptions;
+}
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -7831,6 +7852,9 @@ export interface UseConsistentObjectDefinitionOptions {
 	syntax?: ObjectPropertySyntax;
 }
 export interface UseConsistentResponseOptions {}
+export interface UseConsistentTypeDefinitionsOptions {
+	style?: ConsistentTypeDefinition;
+}
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
 export interface UseExportsLastOptions {}
@@ -8156,6 +8180,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type CustomRestrictedElements = Record<string, string>;
 export type ObjectPropertySyntax = "explicit" | "shorthand";
+export type ConsistentTypeDefinition = "interface" | "type";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -8520,6 +8545,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentResponse"
+	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
