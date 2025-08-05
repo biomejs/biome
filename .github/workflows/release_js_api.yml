@@ -6,7 +6,7 @@ on:
 jobs:
   check:
     name: Check version
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm-small
     outputs:
       version: ${{ env.version }}
       prerelease: ${{ env.prerelease }}
@@ -105,7 +105,7 @@ jobs:
 
   publish:
     name: Publish
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04 # Must be a GitHub hosted runner for provenance
     needs: build
     environment: npm-publish
     permissions:

@@ -14,7 +14,7 @@ env:
 jobs:
   version:
     name: Generate version
-    runs-on: ubuntu-24.04
+    runs-on: depot-ubuntu-24.04-arm-small
     outputs:
       version: ${{ env.version }}
     steps:
@@ -29,16 +29,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: depot-windows-2022-4
+          - os: depot-windows-2022-16
             target: x86_64-pc-windows-msvc
             code-target: win32-x64
-          - os: depot-windows-2022-4
+          - os: depot-windows-2022-16
             target: aarch64-pc-windows-msvc
             code-target: win32-arm64
-          - os: depot-ubuntu-24.04
+          - os: depot-ubuntu-24.04-16
             target: x86_64-unknown-linux-musl
             code-target: linux-x64-musl
-          - os: depot-ubuntu-24.04-arm
+          - os: depot-ubuntu-24.04-arm-16
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
           - os: depot-macos-14
@@ -114,10 +114,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: depot-ubuntu-24.04
+          - os: depot-ubuntu-24.04-16
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-          - os: depot-ubuntu-24.04-arm
+          - os: depot-ubuntu-24.04-arm-16
             target: aarch64-unknown-linux-gnu
             code-target: linux-arm64
 
@@ -193,7 +193,7 @@ jobs:
 
   publish:
     name: Publish
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04 # Must be a GitHub hosted runner for provenance
     needs:
       - build
       - build-gnu
