@@ -1,6 +1,6 @@
 use biome_configuration::Configuration;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_fs::{BiomePath, FileSystem, OsFileSystem, TemporaryFs};
+use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 use biome_json_parser::JsonParserOptions;
 use camino::Utf8PathBuf;
 
@@ -14,7 +14,7 @@ use crate::workspace::{GetFileContentParams, ScanKind, ScanProjectParams, Update
 fn scanner_doesnt_show_errors_for_inaccessible_files() {
     use std::os::unix::fs::PermissionsExt;
 
-    let mut fs = TemporaryFs::new("scanner_doesnt_show_errors_for_inaccessible_files");
+    let mut fs = biome_fs::TemporaryFs::new("scanner_doesnt_show_errors_for_inaccessible_files");
     fs.create_file("a.js", "import 'foo';");
 
     let permissions = PermissionsExt::from_mode(0o000);
