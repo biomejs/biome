@@ -139,7 +139,10 @@ impl ModuleGraph {
     }
 
     /// Unloads all paths from the graph within the given `path`.
-    pub fn unload_folder(&self, path: &Utf8Path) {
+    ///
+    /// This method works both for unloading folders as well as individual
+    /// files.
+    pub fn unload_path(&self, path: &Utf8Path) {
         let data = self.data.pin();
         for indexed_path in data.keys() {
             if indexed_path.starts_with(path) {

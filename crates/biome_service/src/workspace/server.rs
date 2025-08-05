@@ -964,7 +964,7 @@ impl Workspace for WorkspaceServer {
             }
         }
 
-        self.module_graph.unload_folder(&project_path);
+        self.module_graph.unload_path(&project_path);
         self.project_layout.unload_folder(&project_path);
 
         Ok(())
@@ -1848,11 +1848,8 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         // folder, the scanner will ignore it.
         self.scanner.unload_folder(path.to_path_buf());
 
-        for document_path in self.documents.pin().keys() {
-            if document_path.starts_with(path) {
-                self.unload_file(document_path)?;
-            }
-        }
+        self.module_graph.unload_path(path);
+        self.project_layout.unload_folder(path);
 
         Ok(())
     }
