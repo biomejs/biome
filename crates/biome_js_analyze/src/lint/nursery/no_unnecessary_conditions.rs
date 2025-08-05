@@ -23,7 +23,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts,expect_diagnostic,ignore
+    /// ```ts
     /// function head<T>(items: T[]) {
     ///   if (items) {  // This check is unnecessary
     ///     return items[0].toUpperCase();
@@ -31,14 +31,14 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,expect_diagnostic,ignore
+    /// ```ts
     /// function foo(arg: 'bar' | 'baz') {
     ///   if (arg) {  // This check is unnecessary
     ///   }
     /// }
     /// ```
     ///
-    /// ```ts,expect_diagnostic,ignore
+    /// ```ts
     /// function bar(arg: string) {
     ///   return arg?.length;  // ?. is unnecessary
     /// }
