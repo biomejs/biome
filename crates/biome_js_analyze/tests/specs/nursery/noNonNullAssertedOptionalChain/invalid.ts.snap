@@ -1,0 +1,219 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+// https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-non-null-asserted-optional-chain.test.ts
+
+// Basic optional chaining with non-null assertion
+foo?.bar!;
+
+// Computed member access with optional chaining and non-null assertion
+foo?.["bar"]!;
+
+// Optional chaining method call with non-null assertion
+foo?.bar()!;
+
+// Optional chaining call with non-null assertion
+foo.bar?.()!;
+
+// Parenthesized optional chaining with non-null assertion
+(foo?.bar)!.baz;
+
+// Parenthesized optional chaining call with non-null assertion
+(foo?.bar)!().baz;
+
+// Parenthesized optional chaining with non-null assertion (standalone)
+(foo?.bar)!;
+
+// Parenthesized optional chaining call with non-null assertion (standalone)
+(foo?.bar)!();
+
+// Nested parenthesized optional chaining with non-null assertion
+(foo?.bar!);
+
+// Nested parenthesized optional chaining call with non-null assertion
+(foo?.bar!)();
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    3 │ // Basic optional chaining with non-null assertion
+  > 4 │ foo?.bar!;
+      │ ^^^^^^^^^
+    5 │ 
+    6 │ // Computed member access with optional chaining and non-null assertion
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    6 │ // Computed member access with optional chaining and non-null assertion
+  > 7 │ foo?.["bar"]!;
+      │ ^^^^^^^^^^^^^
+    8 │ 
+    9 │ // Optional chaining method call with non-null assertion
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+```
+
+```
+invalid.ts:10:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+     9 │ // Optional chaining method call with non-null assertion
+  > 10 │ foo?.bar()!;
+       │ ^^^^^^^^^^^
+    11 │ 
+    12 │ // Optional chaining call with non-null assertion
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+```
+
+```
+invalid.ts:13:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    12 │ // Optional chaining call with non-null assertion
+  > 13 │ foo.bar?.()!;
+       │ ^^^^^^^^^^^^
+    14 │ 
+    15 │ // Parenthesized optional chaining with non-null assertion
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+```
+
+```
+invalid.ts:16:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    15 │ // Parenthesized optional chaining with non-null assertion
+  > 16 │ (foo?.bar)!.baz;
+       │ ^^^^^^^^^^^
+    17 │ 
+    18 │ // Parenthesized optional chaining call with non-null assertion
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+```
+
+```
+invalid.ts:19:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    18 │ // Parenthesized optional chaining call with non-null assertion
+  > 19 │ (foo?.bar)!().baz;
+       │ ^^^^^^^^^^^
+    20 │ 
+    21 │ // Parenthesized optional chaining with non-null assertion (standalone)
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+```
+
+```
+invalid.ts:22:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    21 │ // Parenthesized optional chaining with non-null assertion (standalone)
+  > 22 │ (foo?.bar)!;
+       │ ^^^^^^^^^^^
+    23 │ 
+    24 │ // Parenthesized optional chaining call with non-null assertion (standalone)
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+```
+
+```
+invalid.ts:25:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    24 │ // Parenthesized optional chaining call with non-null assertion (standalone)
+  > 25 │ (foo?.bar)!();
+       │ ^^^^^^^^^^^
+    26 │ 
+    27 │ // Nested parenthesized optional chaining with non-null assertion
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+```
+
+```
+invalid.ts:28:2 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    27 │ // Nested parenthesized optional chaining with non-null assertion
+  > 28 │ (foo?.bar!);
+       │  ^^^^^^^^^
+    29 │ 
+    30 │ // Nested parenthesized optional chaining call with non-null assertion
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+```
+
+```
+invalid.ts:31:2 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion after optional chaining.
+  
+    30 │ // Nested parenthesized optional chaining call with non-null assertion
+  > 31 │ (foo?.bar!)();
+       │  ^^^^^^^^^
+    32 │ 
+  
+  i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
+  
+  i Consider using the nullish coalescing operator `??` or optional chaining throughout the chain instead.
+  
+
+```
