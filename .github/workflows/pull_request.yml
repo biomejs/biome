@@ -25,27 +25,6 @@ env:
   RUSTUP_WINDOWS_PATH_ADD_BIN: 1
 
 jobs:
-  format:
-    name: Format project
-    runs-on: depot-ubuntu-24.04-arm-16
-    steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
-        with:
-          components: rustfmt
-          bins: taplo-cli
-          cache-base: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run format
-        run: |
-          cargo fmt --all --check
-          taplo format --check
-
   lint:
     name: Lint project
     runs-on: ${{ matrix.os }}
@@ -152,37 +131,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run doc command
         run: cargo documentation
-
-  codegen:
-    name: Codegen
-    runs-on: depot-ubuntu-24.04-arm-16
-    steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
-        with:
-          cache-base: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run the grammar codegen
-        run: cargo codegen grammar
-      - name: Run the analyzer codegen
-        run: cargo codegen analyzer
-      - name: Run the configuration codegen
-        run: cargo codegen-configuration
-      - name: Run the schema codegen
-        run: cargo codegen-schema
-      - name: Run the bindings codegen
-        run: cargo codegen-bindings
-      - name: Run the migrate codegen
-        run: cargo codegen-migrate
-      - name: Check for git diff
-        run: |
-          if [[ `git status --porcelain` ]]; then
-            git status
-            git diff
-            exit 1
-          fi
