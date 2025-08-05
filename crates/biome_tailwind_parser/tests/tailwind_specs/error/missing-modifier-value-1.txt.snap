@@ -1,0 +1,84 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+bg-green-500/!
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@3..12 "green-500" [] [],
+                },
+                modifier: TwBogusModifier {
+                    items: [
+                        SLASH@12..13 "/" [] [],
+                        TwBogusModifier {
+                            items: [
+                                ERROR_TOKEN@13..13 "" [] [],
+                            ],
+                        },
+                    ],
+                },
+            },
+            excl_token: BANG@13..15 "!" [] [Newline("\n")],
+        },
+    ],
+    eof_token: EOF@15..15 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..15
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..15
+    0: TW_FULL_CANDIDATE@0..15
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..13
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_NAMED_VALUE@3..12
+          0: TW_VALUE@3..12 "green-500" [] []
+        3: TW_BOGUS_MODIFIER@12..13
+          0: SLASH@12..13 "/" [] []
+          1: TW_BOGUS_MODIFIER@13..13
+            0: ERROR_TOKEN@13..13 "" [] []
+      2: BANG@13..15 "!" [] [Newline("\n")]
+  2: EOF@15..15 "" [] []
+
+```
+
+## Diagnostics
+
+```
+missing-modifier-value-1.txt:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found ''.
+  
+  > 1 │ bg-green-500/!
+      │              
+    2 │ 
+  
+  i Expected a value here.
+  
+  > 1 │ bg-green-500/!
+      │              
+    2 │ 
+  
+```

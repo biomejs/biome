@@ -1,0 +1,265 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+// Default: prefer interface
+type Foo = {
+    prop: string;
+};
+
+type Bar = {
+    method(): void;
+};
+
+type Point = { x: number; y: number; };
+
+type Nested = { x: {one: string; two: number}; y: {one: string; two: number}; };
+
+type User = {
+    name: string;
+    age: number;
+};
+
+type Config = {
+    apiUrl: string;
+    timeout: number;
+    retries: number;
+};
+
+type Comments /* comment 1 */ = /* comment 2 */ { /* comment 3 */
+    /* comment 4 */ lorem: /* comment 5 */ boolean; /* comment 6 */
+/* comment 7 */ };
+
+// These should be valid and not trigger errors
+type Union = { a: string } | { b: number };
+type Intersection = { a: string } & { b: number };
+type Conditional<T> = T extends string ? { a: string } : { b: number };
+interface ValidInterface {
+    prop: string;
+}
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the type detected.
+  
+    1 │ // Default: prefer interface
+  > 2 │ type Foo = {
+      │ ^^^^^^^^^^^^
+  > 3 │     prop: string;
+  > 4 │ };
+      │ ^^
+    5 │ 
+    6 │ type Bar = {
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use interface.
+  
+     1  1 │   // Default: prefer interface
+     2    │ - type·Foo·=·{
+        2 │ + interface·Foo·{
+     3  3 │       prop: string;
+     4    │ - };
+        4 │ + }
+     5  5 │   
+     6  6 │   type Bar = {
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the type detected.
+  
+     4 │ };
+     5 │ 
+   > 6 │ type Bar = {
+       │ ^^^^^^^^^^^^
+   > 7 │     method(): void;
+   > 8 │ };
+       │ ^^
+     9 │ 
+    10 │ type Point = { x: number; y: number; };
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use interface.
+  
+     4  4 │   };
+     5  5 │   
+     6    │ - type·Bar·=·{
+        6 │ + interface·Bar·{
+     7  7 │       method(): void;
+     8    │ - };
+        8 │ + }
+     9  9 │   
+    10 10 │   type Point = { x: number; y: number; };
+  
+
+```
+
+```
+invalid.ts:10:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the type detected.
+  
+     8 │ };
+     9 │ 
+  > 10 │ type Point = { x: number; y: number; };
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ type Nested = { x: {one: string; two: number}; y: {one: string; two: number}; };
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use interface.
+  
+     8  8 │   };
+     9  9 │   
+    10    │ - type·Point·=·{·x:·number;·y:·number;·};
+       10 │ + interface·Point·{
+       11 │ + ····x:·number;
+       12 │ + ····y:·number;
+       13 │ + }
+    11 14 │   
+    12 15 │   type Nested = { x: {one: string; two: number}; y: {one: string; two: number}; };
+  
+
+```
+
+```
+invalid.ts:12:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the type detected.
+  
+    10 │ type Point = { x: number; y: number; };
+    11 │ 
+  > 12 │ type Nested = { x: {one: string; two: number}; y: {one: string; two: number}; };
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ type User = {
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use interface.
+  
+    10 10 │   type Point = { x: number; y: number; };
+    11 11 │   
+    12    │ - type·Nested·=·{·x:·{one:·string;·two:·number};·y:·{one:·string;·two:·number};·};
+       12 │ + interface·Nested·{
+       13 │ + ····x:·{one:·string;·two:·number};
+       14 │ + ····y:·{one:·string;·two:·number};
+       15 │ + }
+    13 16 │   
+    14 17 │   type User = {
+  
+
+```
+
+```
+invalid.ts:14:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the type detected.
+  
+    12 │ type Nested = { x: {one: string; two: number}; y: {one: string; two: number}; };
+    13 │ 
+  > 14 │ type User = {
+       │ ^^^^^^^^^^^^^
+  > 15 │     name: string;
+  > 16 │     age: number;
+  > 17 │ };
+       │ ^^
+    18 │ 
+    19 │ type Config = {
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use interface.
+  
+    12 12 │   type Nested = { x: {one: string; two: number}; y: {one: string; two: number}; };
+    13 13 │   
+    14    │ - type·User·=·{
+       14 │ + interface·User·{
+    15 15 │       name: string;
+    16 16 │       age: number;
+    17    │ - };
+       17 │ + }
+    18 18 │   
+    19 19 │   type Config = {
+  
+
+```
+
+```
+invalid.ts:19:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the type detected.
+  
+    17 │ };
+    18 │ 
+  > 19 │ type Config = {
+       │ ^^^^^^^^^^^^^^^
+  > 20 │     apiUrl: string;
+  > 21 │     timeout: number;
+  > 22 │     retries: number;
+  > 23 │ };
+       │ ^^
+    24 │ 
+    25 │ type Comments /* comment 1 */ = /* comment 2 */ { /* comment 3 */
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use interface.
+  
+    17 17 │   };
+    18 18 │   
+    19    │ - type·Config·=·{
+       19 │ + interface·Config·{
+    20 20 │       apiUrl: string;
+    21 21 │       timeout: number;
+    22 22 │       retries: number;
+    23    │ - };
+       23 │ + }
+    24 24 │   
+    25 25 │   type Comments /* comment 1 */ = /* comment 2 */ { /* comment 3 */
+  
+
+```
+
+```
+invalid.ts:25:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the type detected.
+  
+    23 │ };
+    24 │ 
+  > 25 │ type Comments /* comment 1 */ = /* comment 2 */ { /* comment 3 */
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 26 │     /* comment 4 */ lorem: /* comment 5 */ boolean; /* comment 6 */
+  > 27 │ /* comment 7 */ };
+       │ ^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ // These should be valid and not trigger errors
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use interface.
+  
+    23 23 │   };
+    24 24 │   
+    25    │ - type·Comments·/*·comment·1·*/·=·/*·comment·2·*/·{·/*·comment·3·*/
+       25 │ + interface·Comments·/*·comment·1·*/·{
+    26 26 │       /* comment 4 */ lorem: /* comment 5 */ boolean; /* comment 6 */
+    27    │ - /*·comment·7·*/·};
+       27 │ + /*·comment·7·*/·}
+    28 28 │   
+    29 29 │   // These should be valid and not trigger errors
+  
+
+```

@@ -249,9 +249,10 @@ pub trait Parser: Sized {
         assert_eq!(
             kind,
             self.cur(),
-            "expected {:?} but at {:?}",
+            "expected {:?} but at {:?} -- text: \"{}\"",
             kind,
-            self.cur()
+            self.cur(),
+            self.cur_text(),
         );
 
         self.do_bump(kind)
@@ -261,9 +262,10 @@ pub trait Parser: Sized {
     fn bump_ts(&mut self, kinds: TokenSet<Self::Kind>) {
         assert!(
             kinds.contains(self.cur()),
-            "expected {:?} but at {:?}",
+            "expected {:?} but at {:?} -- text: \"{}\"",
             kinds,
-            self.cur()
+            self.cur(),
+            self.cur_text(),
         );
 
         self.bump_any()
@@ -293,6 +295,18 @@ pub trait Parser: Sized {
         self.do_bump(kind);
     }
 
+    /// Bumps the current token regardless of its kind and advances to the next token using
+    /// the new context.
+    fn bump_any_with_context(&mut self, context: <Self::Source as BumpWithContext>::Context)
+    where
+        Self::Source: BumpWithContext,
+    {
+        let kind = self.cur();
+        assert_ne!(kind, Self::Kind::EOF);
+
+        self.do_bump_with_context(kind, context);
+    }
+
     /// Consumes the current token if `kind` matches and lexes the next token using the
     /// specified `context.
     fn bump_with_context(
@@ -305,9 +319,10 @@ pub trait Parser: Sized {
         assert_eq!(
             kind,
             self.cur(),
-            "expected {:?} but at {:?}",
+            "expected {:?} but at {:?} -- text: \"{}\"",
             kind,
-            self.cur()
+            self.cur(),
+            self.cur_text(),
         );
 
         self.do_bump_with_context(kind, context);

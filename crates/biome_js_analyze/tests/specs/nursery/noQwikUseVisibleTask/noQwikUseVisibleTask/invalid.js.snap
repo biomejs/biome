@@ -1,0 +1,307 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+useVisibleTask$(() => {
+  console.log('Component is visible');
+});
+
+useVisibleTask$(({ cleanup }) => {
+  const subscription = someObservable.subscribe();
+  cleanup(() => subscription.unsubscribe());
+});
+
+useVisibleTask$(() => {
+  document.title = 'New Title';
+}, { eagerness: 'visible' });
+
+const MyComponent = component$(() => {
+  useVisibleTask$(() => {
+    console.log('Component mounted');
+  });
+  return <div>Hello</div>;
+});
+
+export const App = component$(() => {
+  useVisibleTask$(({ track }) => {
+    track(() => state.value);
+    console.log('State changed');
+  });
+  return <div>App</div>;
+});
+
+function setupComponent() {
+  useVisibleTask$(() => {
+    // Setup logic
+  });
+}
+
+const setup = () => {
+  useVisibleTask$(() => {
+    // Setup in arrow function
+  });
+};
+
+class MyClass {
+  constructor() {
+    useVisibleTask$(() => {
+      // Setup in constructor
+    });
+  }
+}
+
+useVisibleTask$(() => {
+  console.log('First task');
+});
+
+useVisibleTask$(() => {
+  console.log('Second task');
+});
+
+useVisibleTask$(({ track, cleanup }) => {
+  const interval = setInterval(() => {
+    track(() => count.value);
+    console.log('Count:', count.value);
+  }, 1000);
+  cleanup(() => clearInterval(interval));
+}); 
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+  > 1 │ useVisibleTask$(() => {
+      │ ^^^^^^^^^^^^^^^
+    2 │   console.log('Component is visible');
+    3 │ });
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+    3 │ });
+    4 │ 
+  > 5 │ useVisibleTask$(({ cleanup }) => {
+      │ ^^^^^^^^^^^^^^^
+    6 │   const subscription = someObservable.subscribe();
+    7 │   cleanup(() => subscription.unsubscribe());
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+     8 │ });
+     9 │ 
+  > 10 │ useVisibleTask$(() => {
+       │ ^^^^^^^^^^^^^^^
+    11 │   document.title = 'New Title';
+    12 │ }, { eagerness: 'visible' });
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```
+
+```
+invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+    14 │ const MyComponent = component$(() => {
+  > 15 │   useVisibleTask$(() => {
+       │   ^^^^^^^^^^^^^^^
+    16 │     console.log('Component mounted');
+    17 │   });
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```
+
+```
+invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+    21 │ export const App = component$(() => {
+  > 22 │   useVisibleTask$(({ track }) => {
+       │   ^^^^^^^^^^^^^^^
+    23 │     track(() => state.value);
+    24 │     console.log('State changed');
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```
+
+```
+invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+    29 │ function setupComponent() {
+  > 30 │   useVisibleTask$(() => {
+       │   ^^^^^^^^^^^^^^^
+    31 │     // Setup logic
+    32 │   });
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```
+
+```
+invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+    35 │ const setup = () => {
+  > 36 │   useVisibleTask$(() => {
+       │   ^^^^^^^^^^^^^^^
+    37 │     // Setup in arrow function
+    38 │   });
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```
+
+```
+invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+    41 │ class MyClass {
+    42 │   constructor() {
+  > 43 │     useVisibleTask$(() => {
+       │     ^^^^^^^^^^^^^^^
+    44 │       // Setup in constructor
+    45 │     });
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+    47 │ }
+    48 │ 
+  > 49 │ useVisibleTask$(() => {
+       │ ^^^^^^^^^^^^^^^
+    50 │   console.log('First task');
+    51 │ });
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```
+
+```
+invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+    51 │ });
+    52 │ 
+  > 53 │ useVisibleTask$(() => {
+       │ ^^^^^^^^^^^^^^^
+    54 │   console.log('Second task');
+    55 │ });
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```
+
+```
+invalid.js:57:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid useVisibleTask$ for non-interactive initialization
+  
+    55 │ });
+    56 │ 
+  > 57 │ useVisibleTask$(({ track, cleanup }) => {
+       │ ^^^^^^^^^^^^^^^
+    58 │   const interval = setInterval(() => {
+    59 │     track(() => count.value);
+  
+  i This hook executes immediately on component mount without user interaction, potentially:
+    - Hurting performance (blocking hydration)
+    - Causing layout shifts (CLS)
+    - Breaking SSR compatibility
+  
+  i Check the Qwik documentation for suitable alternatives.
+  
+
+```

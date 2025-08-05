@@ -1,0 +1,120 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+text-[ text-sm bg-red-500
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..4 "text" [] [],
+                minus_token: DASH@4..5 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@5..6 "[" [] [],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@6..7 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@7..11 "text" [] [],
+                minus_token: DASH@11..12 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@12..14 "sm" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@14..15 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@15..17 "bg" [] [],
+                minus_token: DASH@17..18 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@18..26 "red-500" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@26..26 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..26
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..26
+    0: TW_FULL_CANDIDATE@0..6
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..6
+        0: TW_BASE@0..4 "text" [] []
+        1: DASH@4..5 "-" [] []
+        2: TW_BOGUS_VALUE@5..6
+          0: L_BRACKET@5..6 "[" [] []
+        3: (empty)
+      2: (empty)
+    1: WHITESPACE@6..7 " " [] []
+    2: TW_FULL_CANDIDATE@7..14
+      0: TW_VARIANT_LIST@7..7
+      1: TW_FUNCTIONAL_CANDIDATE@7..14
+        0: TW_BASE@7..11 "text" [] []
+        1: DASH@11..12 "-" [] []
+        2: TW_NAMED_VALUE@12..14
+          0: TW_VALUE@12..14 "sm" [] []
+        3: (empty)
+      2: (empty)
+    3: WHITESPACE@14..15 " " [] []
+    4: TW_FULL_CANDIDATE@15..26
+      0: TW_VARIANT_LIST@15..15
+      1: TW_FUNCTIONAL_CANDIDATE@15..26
+        0: TW_BASE@15..17 "bg" [] []
+        1: DASH@17..18 "-" [] []
+        2: TW_NAMED_VALUE@18..26
+          0: TW_VALUE@18..26 "red-500" [] [Newline("\n")]
+        3: (empty)
+      2: (empty)
+  2: EOF@26..26 "" [] []
+
+```
+
+## Diagnostics
+
+```
+incomplete-arbirary-value-2.txt:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '['.
+  
+  > 1 │ text-[ text-sm bg-red-500
+      │      ^
+    2 │ 
+  
+  i Expected a value here.
+  
+  > 1 │ text-[ text-sm bg-red-500
+      │      ^
+    2 │ 
+  
+```

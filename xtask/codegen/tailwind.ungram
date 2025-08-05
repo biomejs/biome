@@ -6,23 +6,23 @@
 //
 // Legend:
 //
-//   //          				-- comment
-//   Name =      				-- non-terminal definition
-//   'ident'     				-- token (terminal)
-//   A B         				-- sequence
-//   A | B       				-- alternation
-//   A*          				-- zero or more repetition
-//   (A (',' A)* ','?)	-- repetition of node A separated by ',' and allowing a trailing comma
-//   (A (',' A)*)	      -- repetition of node A separated by ',' without a trailing comma
-//   A?          				-- zero or one repetition
-//   (A)         				-- same as A
-//   label:A     				-- suggested name for field of AST node
+//	 //									-- comment
+//	 Name =							-- non-terminal definition
+//	 'ident'		 				-- token (terminal)
+//	 A B				 				-- sequence
+//	 A | B			 				-- alternation
+//	 A*									-- zero or more repetition
+//	 (A (',' A)* ','?)	-- repetition of node A separated by ',' and allowing a trailing comma
+//	 (A (',' A)*)				-- repetition of node A separated by ',' without a trailing comma
+//	 A?									-- zero or one repetition
+//	 (A)				 				-- same as A
+//	 label:A		 				-- suggested name for field of AST node
 
 // NOTES
 //
 // - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
 // - Bogus nodes are special nodes used to keep track of broken code; they are
-//   not part of the grammar but they will appear inside the green tree
+//	 not part of the grammar but they will appear inside the green tree
 
 
 ///////////////
@@ -40,18 +40,24 @@ TwBogus = SyntaxElement*
 TwBogusCandidate = SyntaxElement*
 TwBogusVariant = SyntaxElement*
 TwBogusModifier = SyntaxElement*
+TwBogusValue = SyntaxElement*
 
 // Reference:
 // https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/candidate.ts
 // https://github.com/tailwindlabs/tailwindcss/blob/fa3f45f02c7153876f0e01088b4b5b27bd8e5e96/packages/tailwindcss/src/candidate.ts
 // Note that this document uses the terminology "base" instead of "root". A base is the identifier that tailwind maps to a CSS property.
 
-TwRoot = TwCandidateList
+TwRoot =
+	bom: 'UNICODE_BOM'?
+	candidates: TwCandidateList
+	eof: 'EOF'
 
-TwCandidateList = AnyTwCandidate*
+TwCandidateList = (AnyTwFullCandidate (' ' AnyTwFullCandidate)* ' '?)
+
+AnyTwFullCandidate = TwFullCandidate | TwBogusCandidate
 
 // A Candidate is essentially a CSS class from an end user perspective. It's what the end user puts inside the `class` attribute in their HTML, separated by spaces.
-TwCandidate =
+TwFullCandidate =
 	variants: TwVariantList
 	candidate: AnyTwCandidate
 	'!'?
@@ -84,14 +90,13 @@ TwStaticCandidate =
 // bg-[#ff0000]
 // w-1/2
 TwFunctionalCandidate =
-  base: 'tw_base'
-  '-'
-  value: AnyTwValue
-  modifier: AnyTwModifier?
+	base: 'tw_base'
+	'-'
+	value: AnyTwValue
+	modifier: AnyTwModifier?
 
 // The list of variants must end with a colon.
-//TwVariantList = (AnyTwVariant (':' AnyTwVariant)* ':')
-TwVariantList = AnyTwVariant*
+TwVariantList = (AnyTwVariant (':' AnyTwVariant)* ':'?)
 
 // A Variant is a selector that modifies what the Candidate applies to.
 AnyTwVariant = TwArbitraryVariant | TwStaticVariant | TwFunctionalVariant | TwBogusVariant
@@ -100,26 +105,27 @@ AnyTwVariant = TwArbitraryVariant | TwStaticVariant | TwFunctionalVariant | TwBo
 // [&_p]:text-red-500
 // ^^^^^
 TwArbitraryVariant =
-  '['
-  selector: 'tw_selector'
-  ']'
+	'['
+	selector: 'tw_selector'
+	']'
 
 // Static variants are variants that don't take any arguments.
 //
 // hover:text-red-500
 // ^^^^^
 TwStaticVariant =
-  selector: 'tw_selector'
+	base: 'tw_base'
 
+// aria-disabled:text-red-500
+// ^^^^^^^^^^^^^
+// aria-[disabled]:text-red-500
+// ^^^^^^^^^^^^^^^
 TwFunctionalVariant =
 	base: 'tw_base'
-	value: TwFunctionalVariantValue?
-
-TwFunctionalVariantValue =
 	'-'
 	value: AnyTwValue
 
-AnyTwValue = TwNamedValue | TwArbitraryValue | TwCssVariableValue
+AnyTwValue = TwNamedValue | TwArbitraryValue | TwCssVariableValue | TwBogusValue
 
 // bg-red-500
 //    ^^^^^^^
@@ -133,25 +139,19 @@ TwArbitraryValue =
 	value: 'tw_value'
 	']'
 
-// bg-[#ff0000]
-//    ^^^^^^^^^
+// bg-(--brand-primary)
+//    ^^^^^^^^^^^^^^^^^
 TwCssVariableValue =
 	'('
 	value: 'tw_value'
 	')'
 
-AnyTwModifier = TwNamedModifier | TwArbitraryModifier | TwBogusModifier
+AnyTwModifier = TwModifier | TwBogusModifier
 
 // text-red-500/50
 //             ^^^
-TwNamedModifier =
-	'/'
-	value: 'tw_value'
-
 // text-red-500/[50%]
 //             ^^^^^^
-TwArbitraryModifier =
+TwModifier =
 	'/'
-	'['
-	value: 'tw_value'
-	']'
+	value: AnyTwValue

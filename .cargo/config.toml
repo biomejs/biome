@@ -33,7 +33,7 @@ documentation = """
     --no-deps
 """
 format = "fmt --all --verbose"
-lint = "clippy --workspace --all-targets -- --deny warnings"
+lint = "clippy --workspace --all-features --all-targets -- --deny warnings"
 new-crate = "run -p xtask_codegen -- new-crate"
 
 [profile.release]

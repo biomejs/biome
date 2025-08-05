@@ -1,10 +1,12 @@
 #![deny(clippy::use_self)]
 
+use crate::prelude::*;
 use biome_formatter::comments::Comments;
+use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
-use biome_formatter::{FormatLanguage, FormatResult, FormatToken, Formatted, write};
+use biome_formatter::{FormatLanguage, FormatResult, Formatted, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, SyntaxToken};
 use comments::HtmlCommentStyle;
 use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
@@ -18,7 +20,9 @@ mod generated;
 mod html;
 pub(crate) mod prelude;
 mod svelte;
+mod trivia;
 pub mod utils;
+mod verbatim;
 
 /// Formats a Html file based on its features.
 ///
@@ -157,7 +161,32 @@ impl FormatLanguage for HtmlFormatLanguage {
 }
 
 pub(crate) type HtmlFormatter<'buf> = Formatter<'buf, HtmlFormatContext>;
-pub(crate) type FormatHtmlSyntaxToken = FormatToken<HtmlFormatContext>;
+
+#[derive(Debug, Default)]
+pub(crate) struct FormatHtmlSyntaxToken;
+
+impl FormatRule<SyntaxToken<HtmlLanguage>> for FormatHtmlSyntaxToken {
+    type Context = HtmlFormatContext;
+
+    fn fmt(&self, token: &HtmlSyntaxToken, f: &mut Formatter<Self::Context>) -> FormatResult<()> {
+        f.state_mut().track_token(token);
+
+        self.format_skipped_token_trivia(token, f)?;
+        self.format_trimmed_token_trivia(token, f)?;
+
+        Ok(())
+    }
+}
+
+impl FormatToken<HtmlLanguage, HtmlFormatContext> for FormatHtmlSyntaxToken {
+    fn format_skipped_token_trivia(
+        &self,
+        token: &HtmlSyntaxToken,
+        f: &mut Formatter<HtmlFormatContext>,
+    ) -> FormatResult<()> {
+        format_skipped_token_trivia(token).fmt(f)
+    }
+}
 
 // Rule for formatting a Html [AstNode].
 pub(crate) trait FormatNodeRule<N>
@@ -194,7 +223,7 @@ where
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the leading comments.
     fn fmt_leading_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_leading_comments(node.syntax()).fmt(f)
+        format_html_leading_comments(node.syntax()).fmt(f)
     }
 
     /// Formats the [dangling comments](biome_formatter::comments#dangling-comments) of the node.
@@ -215,7 +244,7 @@ where
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
     fn fmt_trailing_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_trailing_comments(node.syntax()).fmt(f)
+        format_html_trailing_comments(node.syntax()).fmt(f)
     }
 }
 
@@ -233,7 +262,7 @@ impl AsFormat<HtmlFormatContext> for HtmlSyntaxToken {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatHtmlSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, FormatHtmlSyntaxToken::default())
+        FormatRefWithRule::new(self, FormatHtmlSyntaxToken)
     }
 }
 
@@ -241,7 +270,7 @@ impl IntoFormat<HtmlFormatContext> for HtmlSyntaxToken {
     type Format = FormatOwnedWithRule<Self, FormatHtmlSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, FormatHtmlSyntaxToken::default())
+        FormatOwnedWithRule::new(self, FormatHtmlSyntaxToken)
     }
 }
 

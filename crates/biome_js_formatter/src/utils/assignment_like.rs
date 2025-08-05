@@ -5,6 +5,7 @@ use crate::ts::bindings::type_parameters::FormatTsTypeParametersOptions;
 use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
+use crate::verbatim::format_suppressed_node;
 use biome_formatter::{CstFormatContext, FormatOptions, VecBuffer, format_args, write};
 use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::{

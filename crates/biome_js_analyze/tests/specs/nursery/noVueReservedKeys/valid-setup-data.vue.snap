@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 146
+expression: valid-setup-data.vue
+---
+# Input
+```ts
+<script>
+export default {
+    props: ['foo'],
+    computed: {
+        bar() {}
+    },
+    data: () => ({
+        dat: null
+    }),
+    methods: {
+        _foo () {},
+        test () {
+        }
+    },
+    setup() {
+        return {
+            _bar: () => {}
+        }
+    }
+};
+</script>
+
+```

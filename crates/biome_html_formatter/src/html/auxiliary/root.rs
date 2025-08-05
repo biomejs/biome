@@ -27,10 +27,7 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
 
         html.format().fmt(f)?;
 
-        if let Ok(eof) = eof_token {
-            eof.format().fmt(f)?;
-        }
-        write!(f, [hard_line_break()])?;
+        write!(f, [hard_line_break(), format_removed(&eof_token?)])?;
 
         Ok(())
     }

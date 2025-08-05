@@ -1,3 +1,4 @@
+use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
 use biome_css_syntax::{
     CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionRelativeSelectorListFields,
@@ -15,7 +16,7 @@ impl FormatNodeRule<CssPseudoClassFunctionRelativeSelectorList>
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         let CssPseudoClassFunctionRelativeSelectorListFields {
-            name_token,
+            name,
             l_paren_token,
             relative_selectors,
             r_paren_token,
@@ -24,7 +25,8 @@ impl FormatNodeRule<CssPseudoClassFunctionRelativeSelectorList>
         write!(
             f,
             [
-                name_token.format(),
+                name.format()?
+                    .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent(&relative_selectors.format()),

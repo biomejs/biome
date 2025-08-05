@@ -1,0 +1,239 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidType.ts
+---
+# Input
+```ts
+// Option: prefer type
+interface Foo {
+    prop: string;
+}
+
+interface Bar {
+    method(): void;
+}
+
+interface Point {
+    x: number;
+    y: number;
+}
+
+interface User {
+    name: string;
+    age: number;
+}
+
+interface Config {
+    apiUrl: string;
+    timeout: number;
+    retries: number;
+}
+
+interface /* comment 1 */ Comments /* comment 2 */ { /* comment 3 */
+    /* comment 4 */ lorem:/* comment 5 */ boolean/* comment 6 */
+/* comment 7 */ }
+
+// These should not trigger errors as interfaces cannot represent these
+type Union = { a: string } | { b: number };
+type Intersection = { a: string } & { b: number };
+type StringAlias = string;
+```
+
+# Diagnostics
+```
+invalidType.ts:2:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the interface detected.
+  
+    1 │ // Option: prefer type
+  > 2 │ interface Foo {
+      │ ^^^^^^^^^^^^^^^
+  > 3 │     prop: string;
+  > 4 │ }
+      │ ^
+    5 │ 
+    6 │ interface Bar {
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use type alias.
+  
+     1  1 │   // Option: prefer type
+     2    │ - interface·Foo·{
+        2 │ + type·Foo·=·{
+     3  3 │       prop: string;
+     4    │ - }
+        4 │ + };
+     5  5 │   
+     6  6 │   interface Bar {
+  
+
+```
+
+```
+invalidType.ts:6:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the interface detected.
+  
+     4 │ }
+     5 │ 
+   > 6 │ interface Bar {
+       │ ^^^^^^^^^^^^^^^
+   > 7 │     method(): void;
+   > 8 │ }
+       │ ^
+     9 │ 
+    10 │ interface Point {
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use type alias.
+  
+     4  4 │   }
+     5  5 │   
+     6    │ - interface·Bar·{
+        6 │ + type·Bar·=·{
+     7  7 │       method(): void;
+     8    │ - }
+        8 │ + };
+     9  9 │   
+    10 10 │   interface Point {
+  
+
+```
+
+```
+invalidType.ts:10:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the interface detected.
+  
+     8 │ }
+     9 │ 
+  > 10 │ interface Point {
+       │ ^^^^^^^^^^^^^^^^^
+  > 11 │     x: number;
+  > 12 │     y: number;
+  > 13 │ }
+       │ ^
+    14 │ 
+    15 │ interface User {
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use type alias.
+  
+     8  8 │   }
+     9  9 │   
+    10    │ - interface·Point·{
+       10 │ + type·Point·=·{
+    11 11 │       x: number;
+    12 12 │       y: number;
+    13    │ - }
+       13 │ + };
+    14 14 │   
+    15 15 │   interface User {
+  
+
+```
+
+```
+invalidType.ts:15:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the interface detected.
+  
+    13 │ }
+    14 │ 
+  > 15 │ interface User {
+       │ ^^^^^^^^^^^^^^^^
+  > 16 │     name: string;
+  > 17 │     age: number;
+  > 18 │ }
+       │ ^
+    19 │ 
+    20 │ interface Config {
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use type alias.
+  
+    13 13 │   }
+    14 14 │   
+    15    │ - interface·User·{
+       15 │ + type·User·=·{
+    16 16 │       name: string;
+    17 17 │       age: number;
+    18    │ - }
+       18 │ + };
+    19 19 │   
+    20 20 │   interface Config {
+  
+
+```
+
+```
+invalidType.ts:20:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the interface detected.
+  
+    18 │ }
+    19 │ 
+  > 20 │ interface Config {
+       │ ^^^^^^^^^^^^^^^^^^
+  > 21 │     apiUrl: string;
+  > 22 │     timeout: number;
+  > 23 │     retries: number;
+  > 24 │ }
+       │ ^
+    25 │ 
+    26 │ interface /* comment 1 */ Comments /* comment 2 */ { /* comment 3 */
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use type alias.
+  
+    18 18 │   }
+    19 19 │   
+    20    │ - interface·Config·{
+       20 │ + type·Config·=·{
+    21 21 │       apiUrl: string;
+    22 22 │       timeout: number;
+    23 23 │       retries: number;
+    24    │ - }
+       24 │ + };
+    25 25 │   
+    26 26 │   interface /* comment 1 */ Comments /* comment 2 */ { /* comment 3 */
+  
+
+```
+
+```
+invalidType.ts:26:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use of the interface detected.
+  
+    24 │ }
+    25 │ 
+  > 26 │ interface /* comment 1 */ Comments /* comment 2 */ { /* comment 3 */
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 27 │     /* comment 4 */ lorem:/* comment 5 */ boolean/* comment 6 */
+  > 28 │ /* comment 7 */ }
+       │ ^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ // These should not trigger errors as interfaces cannot represent these
+  
+  i The codebase should use a consistent coding style for the definition of types. This improves the readability and consistency.
+  
+  i Unsafe fix: Use type alias.
+  
+    24 24 │   }
+    25 25 │   
+    26    │ - interface·/*·comment·1·*/·Comments·/*·comment·2·*/·{·/*·comment·3·*/
+       26 │ + type·Comments·/*·comment·2·*/·=·{·/*·comment·3·*/
+    27 27 │       /* comment 4 */ lorem:/* comment 5 */ boolean/* comment 6 */
+    28    │ - /*·comment·7·*/·}
+       28 │ + /*·comment·7·*/·};
+    29 29 │   
+    30 30 │   // These should not trigger errors as interfaces cannot represent these
+  
+
+```

@@ -3,23 +3,24 @@ use std::str::FromStr;
 
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClass, AnyJsClassMember, AnyJsDeclaration,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsDeclaration,
     AnyJsDeclarationClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
-    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
+    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
     JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsForInStatement,
     JsForOfStatement, JsForVariableDeclaration, JsFormalParameter, JsFunctionBody,
-    JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsLogicalExpression,
-    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameters, JsReferenceIdentifier, JsReturnStatement,
-    JsSetterObjectMember, JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator,
-    JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
-    TsExternalModuleDeclaration, TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType,
-    TsReturnTypeAnnotation, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
-    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember, JsInitializerClause,
+    JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember, JsNewExpression,
+    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsPropertyClassMember,
+    JsPropertyObjectMember, JsReferenceIdentifier, JsReturnStatement, JsSetterObjectMember,
+    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
+    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
+    TsInterfaceDeclaration, TsModuleDeclaration, TsReferenceType, TsReturnTypeAnnotation,
+    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
+    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, SyntaxResult, Text, TokenText};
 
@@ -2292,16 +2293,16 @@ fn is_direct_class_or_object_member(node: &JsSyntaxNode) -> bool {
                 ) {
                     None
                 } else {
-                    Some(matches!(
-                        node,
-                        AnyJsExpression::JsObjectExpression(_)
-                            | AnyJsExpression::JsClassExpression(_)
-                    ))
+                    Some(false)
                 }
-            } else if AnyJsClass::can_cast(node.kind()) {
-                Some(true)
             } else {
-                None
+                Some(
+                    JsInitializerClause::can_cast(node.kind())
+                        && node
+                            .parent()
+                            .is_some_and(|parent| JsPropertyClassMember::can_cast(parent.kind()))
+                        || JsPropertyObjectMember::can_cast(node.kind()),
+                )
             }
         })
         .unwrap_or_default()
@@ -2548,7 +2549,7 @@ fn type_from_function_body(
 ) -> TypeData {
     let mut return_types: Vec<_> = body
         .syntax()
-        .descendants()
+        .pruned_descendents(|node| !AnyJsFunction::can_cast(node.kind()))
         .filter_map(JsReturnStatement::cast)
         .map(|return_statement| {
             return_statement.argument().map_or(

@@ -1,0 +1,42 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<!-- Hello World -->
+123
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlContent {
+            value_token: HTML_LITERAL@0..24 "123" [Comments("<!-- Hello World -->"), Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@24..25 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..25
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..24
+    0: HTML_CONTENT@0..24
+      0: HTML_LITERAL@0..24 "123" [Comments("<!-- Hello World -->"), Newline("\n")] []
+  4: EOF@24..25 "" [Newline("\n")] []
+
+```

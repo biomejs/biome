@@ -32,8 +32,6 @@ fn scanner_doesnt_show_errors_for_inaccessible_files() {
         .open_project(OpenProjectParams {
             path: BiomePath::new(fs.cli_path()),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         })
         .unwrap();
     let project_key = result.project_key;

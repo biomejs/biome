@@ -31,12 +31,10 @@ fn test_scanner_only_loads_type_definitions_from_node_modules() {
     let fs = OsFileSystem::new(fixtures_path.clone());
 
     let workspace = server(Arc::new(fs), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: fixtures_path.clone().into(),
             open_uninitialized: true,
-            only_rules: None,
-            skip_rules: None,
         })
         .unwrap();
 
@@ -108,12 +106,10 @@ fn test_scanner_ignored_files_are_not_loaded() {
     let fs = OsFileSystem::new(fixtures_path.clone());
 
     let workspace = server(Arc::new(fs), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: fixtures_path.clone().into(),
             open_uninitialized: true,
-            only_rules: None,
-            skip_rules: None,
         })
         .unwrap();
 
@@ -177,12 +173,10 @@ fn test_scanner_required_files_are_only_ignored_in_ignored_directories() {
     let fs = OsFileSystem::new(fixtures_path.clone());
 
     let workspace = server(Arc::new(fs), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: fixtures_path.clone().into(),
             open_uninitialized: true,
-            only_rules: None,
-            skip_rules: None,
         })
         .unwrap();
 

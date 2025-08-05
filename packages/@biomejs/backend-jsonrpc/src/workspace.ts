@@ -903,7 +903,8 @@ export type RuleDomain =
 	| "next"
 	| "qwik"
 	| "vue"
-	| "project";
+	| "project"
+	| "tailwind";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
@@ -1608,6 +1609,10 @@ export interface Nursery {
 	 */
 	noNestedComponentDefinitions?: RuleConfiguration_for_NoNestedComponentDefinitionsOptions;
 	/**
+	 * Disallow non-null assertions after optional chaining expressions.
+	 */
+	noNonNullAssertedOptionalChain?: RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions;
+	/**
 	 * Disallow use event handlers on non-interactive elements.
 	 */
 	noNoninteractiveElementInteractions?: RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions;
@@ -1615,6 +1620,14 @@ export interface Nursery {
 	 * Disallow the use of process global.
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_NoProcessGlobalOptions;
+	/**
+	 * Disallow the use if quickfix.biome inside editor settings file.
+	 */
+	noQuickfixBiome?: RuleFixConfiguration_for_NoQuickfixBiomeOptions;
+	/**
+	 * Disallow useVisibleTask$() functions in Qwik components.
+	 */
+	noQwikUseVisibleTask?: RuleConfiguration_for_NoQwikUseVisibleTaskOptions;
 	/**
 	 * Disallow assigning to React component props.
 	 */
@@ -1644,6 +1657,10 @@ export interface Nursery {
 	 */
 	noUnknownAtRule?: RuleConfiguration_for_NoUnknownAtRuleOptions;
 	/**
+	 * Disallow unnecessary type-based conditions that can be statically determined as redundant.
+	 */
+	noUnnecessaryConditions?: RuleConfiguration_for_NoUnnecessaryConditionsOptions;
+	/**
 	 * Warn when importing non-existing exports.
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
@@ -1664,6 +1681,10 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
 	/**
+	 * Disallow reserved keys in Vue component data and computed properties.
+	 */
+	noVueReservedKeys?: RuleConfiguration_for_NoVueReservedKeysOptions;
+	/**
 	 * Disallow reserved names to be used as props.
 	 */
 	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
@@ -1676,6 +1697,10 @@ export interface Nursery {
 	 */
 	useAdjacentGetterSetter?: RuleConfiguration_for_UseAdjacentGetterSetterOptions;
 	/**
+	 * Enforces href attribute for \<a> elements.
+	 */
+	useAnchorHref?: RuleConfiguration_for_UseAnchorHrefOptions;
+	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
@@ -1683,6 +1708,10 @@ export interface Nursery {
 	 * Use static Response methods instead of new Response() constructor when possible.
 	 */
 	useConsistentResponse?: RuleFixConfiguration_for_UseConsistentResponseOptions;
+	/**
+	 * Enforce type definitions to consistently use either interface or type.
+	 */
+	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
 	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
@@ -1703,6 +1732,10 @@ export interface Nursery {
 	 * Ensure the preconnect attribute is used when using Google Fonts.
 	 */
 	useGoogleFontPreconnect?: RuleFixConfiguration_for_UseGoogleFontPreconnectOptions;
+	/**
+	 * Enforces that \<img> elements have both width and height attributes.
+	 */
+	useImageSize?: RuleConfiguration_for_UseImageSizeOptions;
 	/**
 	 * Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.
 	 */
@@ -1735,6 +1768,14 @@ export interface Nursery {
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_UseParseIntRadixOptions;
+	/**
+	 * Prefer using the class prop as a classlist over the classnames helper.
+	 */
+	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
+	/**
+	 * Enforce that components are defined as functions and never as classes.
+	 */
+	useReactFunctionComponents?: RuleConfiguration_for_UseReactFunctionComponentsOptions;
 	/**
 	 * Enforce marking members as readonly if they are never modified outside the constructor.
 	 */
@@ -2883,12 +2924,21 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNestedComponentDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNestedComponentDefinitionsOptions;
+export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions;
 export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNoninteractiveElementInteractionsOptions;
 export type RuleFixConfiguration_for_NoProcessGlobalOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoProcessGlobalOptions;
+export type RuleFixConfiguration_for_NoQuickfixBiomeOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoQuickfixBiomeOptions;
+export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
 export type RuleConfiguration_for_NoReactPropAssignOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoReactPropAssignOptions;
@@ -2910,6 +2960,9 @@ export type RuleConfiguration_for_NoUnassignedVariablesOptions =
 export type RuleConfiguration_for_NoUnknownAtRuleOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnknownAtRuleOptions;
+export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnnecessaryConditionsOptions;
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
@@ -2925,18 +2978,27 @@ export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
+export type RuleConfiguration_for_NoVueReservedKeysOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoVueReservedKeysOptions;
 export type RuleConfiguration_for_NoVueReservedPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedPropsOptions;
 export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAdjacentGetterSetterOptions;
+export type RuleConfiguration_for_UseAnchorHrefOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseAnchorHrefOptions;
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
 export type RuleFixConfiguration_for_UseConsistentResponseOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentResponseOptions;
+export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -2952,6 +3014,9 @@ export type RuleConfiguration_for_UseForComponentOptions =
 export type RuleFixConfiguration_for_UseGoogleFontPreconnectOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseGoogleFontPreconnectOptions;
+export type RuleConfiguration_for_UseImageSizeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseImageSizeOptions;
 export type RuleFixConfiguration_for_UseIndexOfOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseIndexOfOptions;
@@ -2976,6 +3041,12 @@ export type RuleFixConfiguration_for_UseObjectSpreadOptions =
 export type RuleFixConfiguration_for_UseParseIntRadixOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseParseIntRadixOptions;
+export type RuleConfiguration_for_UseQwikClasslistOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikClasslistOptions;
+export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseReactFunctionComponentsOptions;
 export type RuleFixConfiguration_for_UseReadonlyClassPropertiesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions;
@@ -5155,6 +5226,16 @@ export interface RuleWithOptions_for_NoNestedComponentDefinitionsOptions {
 	 */
 	options: NoNestedComponentDefinitionsOptions;
 }
+export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoNonNullAssertedOptionalChainOptions;
+}
 export interface RuleWithOptions_for_NoNoninteractiveElementInteractionsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5178,6 +5259,30 @@ export interface RuleWithFixOptions_for_NoProcessGlobalOptions {
 	 * Rule's options
 	 */
 	options: NoProcessGlobalOptions;
+}
+export interface RuleWithFixOptions_for_NoQuickfixBiomeOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoQuickfixBiomeOptions;
+}
+export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoQwikUseVisibleTaskOptions;
 }
 export interface RuleWithOptions_for_NoReactPropAssignOptions {
 	/**
@@ -5253,6 +5358,16 @@ export interface RuleWithOptions_for_NoUnknownAtRuleOptions {
 	 */
 	options: NoUnknownAtRuleOptions;
 }
+export interface RuleWithOptions_for_NoUnnecessaryConditionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnnecessaryConditionsOptions;
+}
 export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5311,6 +5426,16 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	 */
 	options: NoUselessUndefinedOptions;
 }
+export interface RuleWithOptions_for_NoVueReservedKeysOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueReservedKeysOptions;
+}
 export interface RuleWithOptions_for_NoVueReservedPropsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5330,6 +5455,16 @@ export interface RuleWithOptions_for_UseAdjacentGetterSetterOptions {
 	 * Rule's options
 	 */
 	options: UseAdjacentGetterSetterOptions;
+}
+export interface RuleWithOptions_for_UseAnchorHrefOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseAnchorHrefOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	/**
@@ -5358,6 +5493,20 @@ export interface RuleWithFixOptions_for_UseConsistentResponseOptions {
 	 * Rule's options
 	 */
 	options: UseConsistentResponseOptions;
+}
+export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentTypeDefinitionsOptions;
 }
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
@@ -5416,6 +5565,16 @@ export interface RuleWithFixOptions_for_UseGoogleFontPreconnectOptions {
 	 * Rule's options
 	 */
 	options: UseGoogleFontPreconnectOptions;
+}
+export interface RuleWithOptions_for_UseImageSizeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseImageSizeOptions;
 }
 export interface RuleWithFixOptions_for_UseIndexOfOptions {
 	/**
@@ -5520,6 +5679,26 @@ export interface RuleWithFixOptions_for_UseParseIntRadixOptions {
 	 * Rule's options
 	 */
 	options: UseParseIntRadixOptions;
+}
+export interface RuleWithOptions_for_UseQwikClasslistOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikClasslistOptions;
+}
+export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseReactFunctionComponentsOptions;
 }
 export interface RuleWithFixOptions_for_UseReadonlyClassPropertiesOptions {
 	/**
@@ -7676,8 +7855,16 @@ export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
+export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
+export interface NoQuickfixBiomeOptions {
+	/**
+	 * A list of additional JSON files that should be checked.
+	 */
+	additionalPaths?: string[];
+}
+export interface NoQwikUseVisibleTaskOptions {}
 export interface NoReactPropAssignOptions {}
 export interface NoRestrictedElementsOptions {
 	/**
@@ -7695,13 +7882,16 @@ export interface NoShadowOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
 export interface NoUnknownAtRuleOptions {}
+export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
+export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
+export type UseAnchorHrefOptions = null;
 export interface UseConsistentObjectDefinitionOptions {
 	/**
 	 * The preferred syntax to enforce.
@@ -7709,11 +7899,15 @@ export interface UseConsistentObjectDefinitionOptions {
 	syntax?: ObjectPropertySyntax;
 }
 export interface UseConsistentResponseOptions {}
+export interface UseConsistentTypeDefinitionsOptions {
+	style?: ConsistentTypeDefinition;
+}
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
 export interface UseExportsLastOptions {}
 export interface UseForComponentOptions {}
 export interface UseGoogleFontPreconnectOptions {}
+export type UseImageSizeOptions = null;
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
@@ -7738,6 +7932,8 @@ export interface UseNamingConventionOptions {
 export interface UseNumericSeparatorsOptions {}
 export interface UseObjectSpreadOptions {}
 export interface UseParseIntRadixOptions {}
+export interface UseQwikClasslistOptions {}
+export interface UseReactFunctionComponentsOptions {}
 export interface UseReadonlyClassPropertiesOptions {
 	/**
 	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
@@ -8035,6 +8231,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type CustomRestrictedElements = Record<string, string>;
 export type ObjectPropertySyntax = "explicit" | "shorthand";
+export type ConsistentTypeDefinition = "interface" | "type";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -8385,8 +8582,11 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNestedComponentDefinitions"
+	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
+	| "lint/nursery/noQuickfixBiome"
+	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
@@ -8403,23 +8603,28 @@ export type Category =
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
+	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentResponse"
+	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"
 	| "lint/nursery/useGoogleFontPreconnect"
+	| "lint/nursery/useImageSize"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
@@ -8430,6 +8635,8 @@ export type Category =
 	| "lint/nursery/useNumericSeparators"
 	| "lint/nursery/useObjectSpread"
 	| "lint/nursery/useParseIntRadix"
+	| "lint/nursery/useQwikClasslist"
+	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useReadonlyClassProperties"
 	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"
@@ -8733,10 +8940,6 @@ export interface BacktraceSymbol {
 }
 export interface OpenProjectParams {
 	/**
-	 * Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
-	 */
-	onlyRules?: RuleCode[];
-	/**
 	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
 	 */
 	openUninitialized: boolean;
@@ -8744,42 +8947,13 @@ export interface OpenProjectParams {
 	 * The path to open
 	 */
 	path: BiomePath;
-	/**
-	 * Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
-	 */
-	skipRules?: RuleCode[];
 }
-export type RuleCode = string;
 export interface OpenProjectResult {
 	/**
 	 * A unique identifier for this project
 	 */
 	projectKey: ProjectKey;
-	/**
-	 * How to scan this project
-	 */
-	scanKind: ScanKind;
 }
-export type ScanKind =
-	| "noScanner"
-	| "knownFiles"
-	| {
-			targetedKnownFiles: {
-				/**
-				 * Determines whether the file scanner should descend into subdirectories of the target paths.
-				 */
-				descendFromTargets: boolean;
-				/**
-	* The paths to target by the scanner.
-
-If a target path indicates a folder, all files within are scanned as well.
-
-Target paths must be absolute. 
-	 */
-				targetPaths: BiomePath[];
-			};
-	  }
-	| "project";
 export interface ScanProjectFolderParams {
 	/**
 	 * Forces scanning of the folder, even if it is already being watched.
@@ -8803,6 +8977,26 @@ Does nothing if the watcher is already watching this path.
 	 */
 	watch: boolean;
 }
+export type ScanKind =
+	| "noScanner"
+	| "knownFiles"
+	| {
+			targetedKnownFiles: {
+				/**
+				 * Determines whether the file scanner should descend into subdirectories of the target paths.
+				 */
+				descendFromTargets: boolean;
+				/**
+	* The paths to target by the scanner.
+
+If a target path indicates a folder, all files within are scanned as well.
+
+Target paths must be absolute. 
+	 */
+				targetPaths: BiomePath[];
+			};
+	  }
+	| "project";
 export interface ScanProjectFolderResult {
 	/**
 	 * A list of child configuration files found inside the project
@@ -9015,6 +9209,7 @@ export interface PullDiagnosticsParams {
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
+export type RuleCode = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];

@@ -26,14 +26,10 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"async function doStuff(db) {
-    const txStatements: Array<(tx: any) => Promise<number>> = [(tx) => tx.insert().run()];
-
-    db.transaction((tx: any) => {
-        for (const stmt of txStatements) {
-            stmt(tx)
-        }
-    });
+    const SOURCE: &str = r#"function head<T>(items: T[]) {
+  if (items) {  // This check is unnecessary
+    return items[0].toUpperCase();
+  }
 }"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
@@ -45,7 +41,7 @@ fn quick_test() {
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
+    let rule_filter = RuleFilter::Rule("nursery", "noUnnecessaryConditions");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 

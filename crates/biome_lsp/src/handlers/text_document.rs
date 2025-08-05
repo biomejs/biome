@@ -3,11 +3,10 @@ use std::sync::Arc;
 use crate::diagnostics::LspError;
 use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
-use biome_fs::BiomePath;
+use biome_configuration::ConfigurationPathHint;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
-    GetFileContentParams, IgnoreKind, OpenFileParams, OpenProjectParams, PathIsIgnoredParams,
-    ScanKind,
+    GetFileContentParams, IgnoreKind, OpenFileParams, PathIsIgnoredParams,
 };
 use tower_lsp_server::lsp_types;
 use tracing::{debug, error, field, info};
@@ -35,26 +34,28 @@ pub(crate) async fn did_open(
         Some(project_key) => project_key,
         None => {
             info!("No open project for path: {path:?}. Opening new project.");
-            let parent_path = BiomePath::new(
-                path.parent()
-                    .map(|parent| parent.to_path_buf())
-                    .unwrap_or_default(),
-            );
-            let result = session.workspace.open_project(OpenProjectParams {
-                path: parent_path.clone(),
-                open_uninitialized: true,
-                skip_rules: None,
-                only_rules: None,
-            })?;
-            let scan_kind = if result.scan_kind.is_none() {
-                ScanKind::KnownFiles
-            } else {
-                result.scan_kind
-            };
-            session
-                .insert_and_scan_project(result.project_key, parent_path, scan_kind)
+            let parent_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .unwrap_or_default();
+            let status = session
+                .load_biome_configuration_file(ConfigurationPathHint::FromLsp(parent_path))
                 .await;
-            result.project_key
+            debug!("Configuration status: {status:?}");
+            session.set_configuration_status(status);
+
+            if status.is_loaded() {
+                match session.project_for_path(&path) {
+                    Some(project_key) => project_key,
+                    None => {
+                        error!("Could not find project for {path}");
+                        return Ok(());
+                    }
+                }
+            } else {
+                error!("Configuration could not be loaded for {path}");
+                return Ok(());
+            }
         }
     };
 
