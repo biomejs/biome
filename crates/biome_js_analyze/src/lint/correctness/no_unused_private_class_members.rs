@@ -218,8 +218,8 @@ fn get_constructor_params(class_declaration: &JsClassDeclaration) -> FxHashSet<A
 /// # Examples of expressions that are NOT write-only
 ///
 /// ```js
-/// return this.#val++;  // increment expression used as return value
-/// return this.#val = 1; //assignment used as expression
+/// return this.#val++;   // increment expression used as return value
+/// return this.#val = 1; // assignment used as expression
 /// ```
 ///
 fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
