@@ -1,4 +1,4 @@
-/* Basic Tailwind CSS 4.0 directives test */
+/* Simple Tailwind CSS 4.0 integration test */
 
 @theme {
   --color-primary: #3b82f6;
@@ -20,8 +20,7 @@
 
 @source "./base.css";
 
-@reference "./theme.css";
-
-@config "./tailwind.config.js";
-
-@plugin "@tailwindcss/typography";
+.example {
+  color: rgb(255 0 0 / --alpha(0.5));
+  margin: --spacing(4);
+}

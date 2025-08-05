@@ -1,0 +1,2236 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/* --alpha() function */
+.test-alpha-basic {
+  color: rgb(255 0 0 / --alpha(0.5));
+  background: hsl(200 100% 50% / --alpha(0.8));
+}
+
+.test-alpha-with-variables {
+  border-color: rgb(0 255 0 / --alpha(var(--opacity-50)));
+  box-shadow: 0 4px 6px rgb(0 0 0 / --alpha(var(--shadow-opacity)));
+}
+
+.test-alpha-in-complex-values {
+  background: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / --alpha(1)),
+    rgb(255 255 255 / --alpha(0))
+  );
+}
+
+.test-alpha-multiple-shadows {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / --alpha(0.1)),
+    0 4px 6px rgb(0 0 0 / --alpha(0.05));
+}
+
+.test-alpha-with-calc {
+  background: rgb(100 100 100 / --alpha(calc(var(--base-opacity) * 0.5)));
+}
+
+.test-alpha-decimal-values {
+  color: rgb(255 128 0 / --alpha(0.25));
+  border: 1px solid rgb(0 0 0 / --alpha(0.125));
+}
+
+.test-alpha-integer-values {
+  background: rgb(255 255 255 / --alpha(1));
+  color: rgb(0 0 0 / --alpha(0));
+}
+
+.test-alpha-empty-params {
+  opacity: --alpha();
+}
+
+.test-alpha-nested-functions {
+  background: rgb(255 255 255 / --alpha(var(--dynamic-opacity, 0.8)));
+}
+
+.test-alpha-with-hsl-modern-syntax {
+  background: hsl(240 100% 50% / --alpha(0.6));
+  border-color: hsl(120 75% 50% / --alpha(var(--border-alpha)));
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..26 "." [Comments("/* --alpha() function */"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@26..43 "test-alpha-basic" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@43..44 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@44..52 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@52..54 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@54..57 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@57..58 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@58..62 "255" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@62..64 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@64..66 "0" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@66..68 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@68..75 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@75..76 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@76..79 "0.5" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@79..80 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@80..81 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@81..82 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@82..95 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@95..97 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@97..100 "hsl" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@100..101 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@101..105 "200" [] [Whitespace(" ")],
+                                                            },
+                                                            CssPercentage {
+                                                                value_token: CSS_NUMBER_LITERAL@105..108 "100" [] [],
+                                                                percent_token: PERCENT@108..110 "%" [] [Whitespace(" ")],
+                                                            },
+                                                            CssPercentage {
+                                                                value_token: CSS_NUMBER_LITERAL@110..112 "50" [] [],
+                                                                percent_token: PERCENT@112..114 "%" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@114..116 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@116..123 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@123..124 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@124..127 "0.8" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@127..128 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@128..129 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@129..130 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@130..132 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@132..135 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@135..161 "test-alpha-with-variables" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@161..162 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@162..177 "border-color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@177..179 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@179..182 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@182..183 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@183..185 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@185..189 "255" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@189..191 "0" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@191..193 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@193..200 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@200..201 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssFunction {
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@201..204 "var" [] [],
+                                                                            },
+                                                                            l_paren_token: L_PAREN@204..205 "(" [] [],
+                                                                            items: CssParameterList [
+                                                                                CssParameter {
+                                                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                                                        css_component_value_list: CssComponentValueList [
+                                                                                            CssDashedIdentifier {
+                                                                                                value_token: IDENT@205..217 "--opacity-50" [] [],
+                                                                                            },
+                                                                                        ],
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                            r_paren_token: R_PAREN@217..218 ")" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@218..219 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@219..220 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@220..221 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@221..234 "box-shadow" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@234..236 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@236..238 "0" [] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@238..239 "4" [] [],
+                                        unit_token: IDENT@239..242 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@242..243 "6" [] [],
+                                        unit_token: IDENT@243..246 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@246..249 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@249..250 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@250..252 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@252..254 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@254..256 "0" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@256..258 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@258..265 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@265..266 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssFunction {
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@266..269 "var" [] [],
+                                                                            },
+                                                                            l_paren_token: L_PAREN@269..270 "(" [] [],
+                                                                            items: CssParameterList [
+                                                                                CssParameter {
+                                                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                                                        css_component_value_list: CssComponentValueList [
+                                                                                            CssDashedIdentifier {
+                                                                                                value_token: IDENT@270..286 "--shadow-opacity" [] [],
+                                                                                            },
+                                                                                        ],
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                            r_paren_token: R_PAREN@286..287 ")" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@287..288 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@288..289 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@289..290 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@290..292 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@292..295 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@295..324 "test-alpha-in-complex-values" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@324..325 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@325..338 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@338..340 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@340..355 "linear-gradient" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@355..356 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@356..364 "to" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                                        },
+                                                        CssIdentifier {
+                                                            value_token: IDENT@364..370 "bottom" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            COMMA@370..371 "," [] [],
+                                            CssParameter {
+                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssFunction {
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@371..379 "rgb" [Newline("\n"), Whitespace("    ")] [],
+                                                            },
+                                                            l_paren_token: L_PAREN@379..380 "(" [] [],
+                                                            items: CssParameterList [
+                                                                CssParameter {
+                                                                    any_css_expression: CssBinaryExpression {
+                                                                        left: CssListOfComponentValuesExpression {
+                                                                            css_component_value_list: CssComponentValueList [
+                                                                                CssNumber {
+                                                                                    value_token: CSS_NUMBER_LITERAL@380..384 "255" [] [Whitespace(" ")],
+                                                                                },
+                                                                                CssNumber {
+                                                                                    value_token: CSS_NUMBER_LITERAL@384..388 "255" [] [Whitespace(" ")],
+                                                                                },
+                                                                                CssNumber {
+                                                                                    value_token: CSS_NUMBER_LITERAL@388..392 "255" [] [Whitespace(" ")],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                        operator_token: SLASH@392..394 "/" [] [Whitespace(" ")],
+                                                                        right: CssListOfComponentValuesExpression {
+                                                                            css_component_value_list: CssComponentValueList [
+                                                                                CssTailwindAlphaFunction {
+                                                                                    __alpha_token: _ALPHA_KW@394..401 "--alpha" [] [],
+                                                                                    l_paren_token: L_PAREN@401..402 "(" [] [],
+                                                                                    value: CssListOfComponentValuesExpression {
+                                                                                        css_component_value_list: CssComponentValueList [
+                                                                                            CssNumber {
+                                                                                                value_token: CSS_NUMBER_LITERAL@402..403 "1" [] [],
+                                                                                            },
+                                                                                        ],
+                                                                                    },
+                                                                                    r_paren_token: R_PAREN@403..404 ")" [] [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    },
+                                                                },
+                                                            ],
+                                                            r_paren_token: R_PAREN@404..405 ")" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            COMMA@405..406 "," [] [],
+                                            CssParameter {
+                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssFunction {
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@406..414 "rgb" [Newline("\n"), Whitespace("    ")] [],
+                                                            },
+                                                            l_paren_token: L_PAREN@414..415 "(" [] [],
+                                                            items: CssParameterList [
+                                                                CssParameter {
+                                                                    any_css_expression: CssBinaryExpression {
+                                                                        left: CssListOfComponentValuesExpression {
+                                                                            css_component_value_list: CssComponentValueList [
+                                                                                CssNumber {
+                                                                                    value_token: CSS_NUMBER_LITERAL@415..419 "255" [] [Whitespace(" ")],
+                                                                                },
+                                                                                CssNumber {
+                                                                                    value_token: CSS_NUMBER_LITERAL@419..423 "255" [] [Whitespace(" ")],
+                                                                                },
+                                                                                CssNumber {
+                                                                                    value_token: CSS_NUMBER_LITERAL@423..427 "255" [] [Whitespace(" ")],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                        operator_token: SLASH@427..429 "/" [] [Whitespace(" ")],
+                                                                        right: CssListOfComponentValuesExpression {
+                                                                            css_component_value_list: CssComponentValueList [
+                                                                                CssTailwindAlphaFunction {
+                                                                                    __alpha_token: _ALPHA_KW@429..436 "--alpha" [] [],
+                                                                                    l_paren_token: L_PAREN@436..437 "(" [] [],
+                                                                                    value: CssListOfComponentValuesExpression {
+                                                                                        css_component_value_list: CssComponentValueList [
+                                                                                            CssNumber {
+                                                                                                value_token: CSS_NUMBER_LITERAL@437..438 "0" [] [],
+                                                                                            },
+                                                                                        ],
+                                                                                    },
+                                                                                    r_paren_token: R_PAREN@438..439 ")" [] [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    },
+                                                                },
+                                                            ],
+                                                            r_paren_token: R_PAREN@439..440 ")" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@440..444 ")" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@444..445 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@445..447 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@447..450 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@450..478 "test-alpha-multiple-shadows" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@478..479 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@479..492 "box-shadow" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@492..493 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@493..500 "0" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@500..501 "1" [] [],
+                                        unit_token: IDENT@501..504 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@504..505 "2" [] [],
+                                        unit_token: IDENT@505..508 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@508..511 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@511..512 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@512..514 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@514..516 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@516..518 "0" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@518..520 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@520..527 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@527..528 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@528..531 "0.1" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@531..532 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@532..533 ")" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@533..534 "," [] [],
+                                    },
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@534..541 "0" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@541..542 "4" [] [],
+                                        unit_token: IDENT@542..545 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@545..546 "6" [] [],
+                                        unit_token: IDENT@546..549 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@549..552 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@552..553 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@553..555 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@555..557 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@557..559 "0" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@559..561 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@561..568 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@568..569 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@569..573 "0.05" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@573..574 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@574..575 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@575..576 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@576..578 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@578..581 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@581..602 "test-alpha-with-calc" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@602..603 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@603..616 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@616..618 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@618..621 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@621..622 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@622..626 "100" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@626..630 "100" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@630..634 "100" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@634..636 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@636..643 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@643..644 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssFunction {
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@644..648 "calc" [] [],
+                                                                            },
+                                                                            l_paren_token: L_PAREN@648..649 "(" [] [],
+                                                                            items: CssParameterList [
+                                                                                CssParameter {
+                                                                                    any_css_expression: CssBinaryExpression {
+                                                                                        left: CssListOfComponentValuesExpression {
+                                                                                            css_component_value_list: CssComponentValueList [
+                                                                                                CssFunction {
+                                                                                                    name: CssIdentifier {
+                                                                                                        value_token: IDENT@649..652 "var" [] [],
+                                                                                                    },
+                                                                                                    l_paren_token: L_PAREN@652..653 "(" [] [],
+                                                                                                    items: CssParameterList [
+                                                                                                        CssParameter {
+                                                                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                                                                css_component_value_list: CssComponentValueList [
+                                                                                                                    CssDashedIdentifier {
+                                                                                                                        value_token: IDENT@653..667 "--base-opacity" [] [],
+                                                                                                                    },
+                                                                                                                ],
+                                                                                                            },
+                                                                                                        },
+                                                                                                    ],
+                                                                                                    r_paren_token: R_PAREN@667..669 ")" [] [Whitespace(" ")],
+                                                                                                },
+                                                                                            ],
+                                                                                        },
+                                                                                        operator_token: STAR@669..671 "*" [] [Whitespace(" ")],
+                                                                                        right: CssListOfComponentValuesExpression {
+                                                                                            css_component_value_list: CssComponentValueList [
+                                                                                                CssNumber {
+                                                                                                    value_token: CSS_NUMBER_LITERAL@671..674 "0.5" [] [],
+                                                                                                },
+                                                                                            ],
+                                                                                        },
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                            r_paren_token: R_PAREN@674..675 ")" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@675..676 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@676..677 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@677..678 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@678..680 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@680..683 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@683..709 "test-alpha-decimal-values" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@709..710 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@710..718 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@718..720 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@720..723 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@723..724 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@724..728 "255" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@728..732 "128" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@732..734 "0" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@734..736 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@736..743 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@743..744 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@744..748 "0.25" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@748..749 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@749..750 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@750..751 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@751..760 "border" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@760..762 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@762..763 "1" [] [],
+                                        unit_token: IDENT@763..766 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@766..772 "solid" [] [Whitespace(" ")],
+                                    },
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@772..775 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@775..776 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@776..778 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@778..780 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@780..782 "0" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@782..784 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@784..791 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@791..792 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@792..797 "0.125" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@797..798 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@798..799 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@799..800 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@800..802 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@802..805 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@805..831 "test-alpha-integer-values" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@831..832 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@832..845 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@845..847 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@847..850 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@850..851 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@851..855 "255" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@855..859 "255" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@859..863 "255" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@863..865 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@865..872 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@872..873 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@873..874 "1" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@874..875 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@875..876 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@876..877 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@877..885 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@885..887 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@887..890 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@890..891 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@891..893 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@893..895 "0" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@895..897 "0" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@897..899 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@899..906 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@906..907 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@907..908 "0" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@908..909 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@909..910 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@910..911 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@911..913 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@913..916 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@916..940 "test-alpha-empty-params" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@940..941 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@941..951 "opacity" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@951..953 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssTailwindAlphaFunction {
+                                        __alpha_token: _ALPHA_KW@953..960 "--alpha" [] [],
+                                        l_paren_token: L_PAREN@960..961 "(" [] [],
+                                        value: missing (optional),
+                                        r_paren_token: R_PAREN@961..962 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@962..963 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@963..965 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@965..968 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@968..996 "test-alpha-nested-functions" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@996..997 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@997..1010 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@1010..1012 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@1012..1015 "rgb" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@1015..1016 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@1016..1020 "255" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@1020..1024 "255" [] [Whitespace(" ")],
+                                                            },
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@1024..1028 "255" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@1028..1030 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@1030..1037 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@1037..1038 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssFunction {
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@1038..1041 "var" [] [],
+                                                                            },
+                                                                            l_paren_token: L_PAREN@1041..1042 "(" [] [],
+                                                                            items: CssParameterList [
+                                                                                CssParameter {
+                                                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                                                        css_component_value_list: CssComponentValueList [
+                                                                                            CssDashedIdentifier {
+                                                                                                value_token: IDENT@1042..1059 "--dynamic-opacity" [] [],
+                                                                                            },
+                                                                                        ],
+                                                                                    },
+                                                                                },
+                                                                                COMMA@1059..1061 "," [] [Whitespace(" ")],
+                                                                                CssParameter {
+                                                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                                                        css_component_value_list: CssComponentValueList [
+                                                                                            CssNumber {
+                                                                                                value_token: CSS_NUMBER_LITERAL@1061..1064 "0.8" [] [],
+                                                                                            },
+                                                                                        ],
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                            r_paren_token: R_PAREN@1064..1065 ")" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@1065..1066 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@1066..1067 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1067..1068 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@1068..1070 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@1070..1073 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1073..1107 "test-alpha-with-hsl-modern-syntax" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@1107..1108 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1108..1121 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@1121..1123 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@1123..1126 "hsl" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@1126..1127 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@1127..1131 "240" [] [Whitespace(" ")],
+                                                            },
+                                                            CssPercentage {
+                                                                value_token: CSS_NUMBER_LITERAL@1131..1134 "100" [] [],
+                                                                percent_token: PERCENT@1134..1136 "%" [] [Whitespace(" ")],
+                                                            },
+                                                            CssPercentage {
+                                                                value_token: CSS_NUMBER_LITERAL@1136..1138 "50" [] [],
+                                                                percent_token: PERCENT@1138..1140 "%" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@1140..1142 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@1142..1149 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@1149..1150 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@1150..1153 "0.6" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@1153..1154 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@1154..1155 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1155..1156 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@1156..1171 "border-color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@1171..1173 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@1173..1176 "hsl" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@1176..1177 "(" [] [],
+                                        items: CssParameterList [
+                                            CssParameter {
+                                                any_css_expression: CssBinaryExpression {
+                                                    left: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@1177..1181 "120" [] [Whitespace(" ")],
+                                                            },
+                                                            CssPercentage {
+                                                                value_token: CSS_NUMBER_LITERAL@1181..1183 "75" [] [],
+                                                                percent_token: PERCENT@1183..1185 "%" [] [Whitespace(" ")],
+                                                            },
+                                                            CssPercentage {
+                                                                value_token: CSS_NUMBER_LITERAL@1185..1187 "50" [] [],
+                                                                percent_token: PERCENT@1187..1189 "%" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    },
+                                                    operator_token: SLASH@1189..1191 "/" [] [Whitespace(" ")],
+                                                    right: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssTailwindAlphaFunction {
+                                                                __alpha_token: _ALPHA_KW@1191..1198 "--alpha" [] [],
+                                                                l_paren_token: L_PAREN@1198..1199 "(" [] [],
+                                                                value: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssFunction {
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@1199..1202 "var" [] [],
+                                                                            },
+                                                                            l_paren_token: L_PAREN@1202..1203 "(" [] [],
+                                                                            items: CssParameterList [
+                                                                                CssParameter {
+                                                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                                                        css_component_value_list: CssComponentValueList [
+                                                                                            CssDashedIdentifier {
+                                                                                                value_token: IDENT@1203..1217 "--border-alpha" [] [],
+                                                                                            },
+                                                                                        ],
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                            r_paren_token: R_PAREN@1217..1218 ")" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@1218..1219 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@1219..1220 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@1220..1221 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@1221..1223 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@1223..1224 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..1224
+  0: (empty)
+  1: CSS_RULE_LIST@0..1223
+    0: CSS_QUALIFIED_RULE@0..132
+      0: CSS_SELECTOR_LIST@0..43
+        0: CSS_COMPOUND_SELECTOR@0..43
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..43
+            0: CSS_CLASS_SELECTOR@0..43
+              0: DOT@0..26 "." [Comments("/* --alpha() function */"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@26..43
+                0: IDENT@26..43 "test-alpha-basic" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@43..132
+        0: L_CURLY@43..44 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@44..130
+          0: CSS_DECLARATION_WITH_SEMICOLON@44..82
+            0: CSS_DECLARATION@44..81
+              0: CSS_GENERIC_PROPERTY@44..81
+                0: CSS_IDENTIFIER@44..52
+                  0: IDENT@44..52 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@52..54 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@54..81
+                  0: CSS_FUNCTION@54..81
+                    0: CSS_IDENTIFIER@54..57
+                      0: IDENT@54..57 "rgb" [] []
+                    1: L_PAREN@57..58 "(" [] []
+                    2: CSS_PARAMETER_LIST@58..80
+                      0: CSS_PARAMETER@58..80
+                        0: CSS_BINARY_EXPRESSION@58..80
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@58..66
+                            0: CSS_COMPONENT_VALUE_LIST@58..66
+                              0: CSS_NUMBER@58..62
+                                0: CSS_NUMBER_LITERAL@58..62 "255" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@62..64
+                                0: CSS_NUMBER_LITERAL@62..64 "0" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@64..66
+                                0: CSS_NUMBER_LITERAL@64..66 "0" [] [Whitespace(" ")]
+                          1: SLASH@66..68 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@68..80
+                            0: CSS_COMPONENT_VALUE_LIST@68..80
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@68..80
+                                0: _ALPHA_KW@68..75 "--alpha" [] []
+                                1: L_PAREN@75..76 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@76..79
+                                  0: CSS_COMPONENT_VALUE_LIST@76..79
+                                    0: CSS_NUMBER@76..79
+                                      0: CSS_NUMBER_LITERAL@76..79 "0.5" [] []
+                                3: R_PAREN@79..80 ")" [] []
+                    3: R_PAREN@80..81 ")" [] []
+              1: (empty)
+            1: SEMICOLON@81..82 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@82..130
+            0: CSS_DECLARATION@82..129
+              0: CSS_GENERIC_PROPERTY@82..129
+                0: CSS_IDENTIFIER@82..95
+                  0: IDENT@82..95 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@95..97 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@97..129
+                  0: CSS_FUNCTION@97..129
+                    0: CSS_IDENTIFIER@97..100
+                      0: IDENT@97..100 "hsl" [] []
+                    1: L_PAREN@100..101 "(" [] []
+                    2: CSS_PARAMETER_LIST@101..128
+                      0: CSS_PARAMETER@101..128
+                        0: CSS_BINARY_EXPRESSION@101..128
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@101..114
+                            0: CSS_COMPONENT_VALUE_LIST@101..114
+                              0: CSS_NUMBER@101..105
+                                0: CSS_NUMBER_LITERAL@101..105 "200" [] [Whitespace(" ")]
+                              1: CSS_PERCENTAGE@105..110
+                                0: CSS_NUMBER_LITERAL@105..108 "100" [] []
+                                1: PERCENT@108..110 "%" [] [Whitespace(" ")]
+                              2: CSS_PERCENTAGE@110..114
+                                0: CSS_NUMBER_LITERAL@110..112 "50" [] []
+                                1: PERCENT@112..114 "%" [] [Whitespace(" ")]
+                          1: SLASH@114..116 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@116..128
+                            0: CSS_COMPONENT_VALUE_LIST@116..128
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@116..128
+                                0: _ALPHA_KW@116..123 "--alpha" [] []
+                                1: L_PAREN@123..124 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@124..127
+                                  0: CSS_COMPONENT_VALUE_LIST@124..127
+                                    0: CSS_NUMBER@124..127
+                                      0: CSS_NUMBER_LITERAL@124..127 "0.8" [] []
+                                3: R_PAREN@127..128 ")" [] []
+                    3: R_PAREN@128..129 ")" [] []
+              1: (empty)
+            1: SEMICOLON@129..130 ";" [] []
+        2: R_CURLY@130..132 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@132..292
+      0: CSS_SELECTOR_LIST@132..161
+        0: CSS_COMPOUND_SELECTOR@132..161
+          0: CSS_NESTED_SELECTOR_LIST@132..132
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@132..161
+            0: CSS_CLASS_SELECTOR@132..161
+              0: DOT@132..135 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@135..161
+                0: IDENT@135..161 "test-alpha-with-variables" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@161..292
+        0: L_CURLY@161..162 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@162..290
+          0: CSS_DECLARATION_WITH_SEMICOLON@162..221
+            0: CSS_DECLARATION@162..220
+              0: CSS_GENERIC_PROPERTY@162..220
+                0: CSS_IDENTIFIER@162..177
+                  0: IDENT@162..177 "border-color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@177..179 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@179..220
+                  0: CSS_FUNCTION@179..220
+                    0: CSS_IDENTIFIER@179..182
+                      0: IDENT@179..182 "rgb" [] []
+                    1: L_PAREN@182..183 "(" [] []
+                    2: CSS_PARAMETER_LIST@183..219
+                      0: CSS_PARAMETER@183..219
+                        0: CSS_BINARY_EXPRESSION@183..219
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@183..191
+                            0: CSS_COMPONENT_VALUE_LIST@183..191
+                              0: CSS_NUMBER@183..185
+                                0: CSS_NUMBER_LITERAL@183..185 "0" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@185..189
+                                0: CSS_NUMBER_LITERAL@185..189 "255" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@189..191
+                                0: CSS_NUMBER_LITERAL@189..191 "0" [] [Whitespace(" ")]
+                          1: SLASH@191..193 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@193..219
+                            0: CSS_COMPONENT_VALUE_LIST@193..219
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@193..219
+                                0: _ALPHA_KW@193..200 "--alpha" [] []
+                                1: L_PAREN@200..201 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@201..218
+                                  0: CSS_COMPONENT_VALUE_LIST@201..218
+                                    0: CSS_FUNCTION@201..218
+                                      0: CSS_IDENTIFIER@201..204
+                                        0: IDENT@201..204 "var" [] []
+                                      1: L_PAREN@204..205 "(" [] []
+                                      2: CSS_PARAMETER_LIST@205..217
+                                        0: CSS_PARAMETER@205..217
+                                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@205..217
+                                            0: CSS_COMPONENT_VALUE_LIST@205..217
+                                              0: CSS_DASHED_IDENTIFIER@205..217
+                                                0: IDENT@205..217 "--opacity-50" [] []
+                                      3: R_PAREN@217..218 ")" [] []
+                                3: R_PAREN@218..219 ")" [] []
+                    3: R_PAREN@219..220 ")" [] []
+              1: (empty)
+            1: SEMICOLON@220..221 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@221..290
+            0: CSS_DECLARATION@221..289
+              0: CSS_GENERIC_PROPERTY@221..289
+                0: CSS_IDENTIFIER@221..234
+                  0: IDENT@221..234 "box-shadow" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@234..236 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@236..289
+                  0: CSS_NUMBER@236..238
+                    0: CSS_NUMBER_LITERAL@236..238 "0" [] [Whitespace(" ")]
+                  1: CSS_REGULAR_DIMENSION@238..242
+                    0: CSS_NUMBER_LITERAL@238..239 "4" [] []
+                    1: IDENT@239..242 "px" [] [Whitespace(" ")]
+                  2: CSS_REGULAR_DIMENSION@242..246
+                    0: CSS_NUMBER_LITERAL@242..243 "6" [] []
+                    1: IDENT@243..246 "px" [] [Whitespace(" ")]
+                  3: CSS_FUNCTION@246..289
+                    0: CSS_IDENTIFIER@246..249
+                      0: IDENT@246..249 "rgb" [] []
+                    1: L_PAREN@249..250 "(" [] []
+                    2: CSS_PARAMETER_LIST@250..288
+                      0: CSS_PARAMETER@250..288
+                        0: CSS_BINARY_EXPRESSION@250..288
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@250..256
+                            0: CSS_COMPONENT_VALUE_LIST@250..256
+                              0: CSS_NUMBER@250..252
+                                0: CSS_NUMBER_LITERAL@250..252 "0" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@252..254
+                                0: CSS_NUMBER_LITERAL@252..254 "0" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@254..256
+                                0: CSS_NUMBER_LITERAL@254..256 "0" [] [Whitespace(" ")]
+                          1: SLASH@256..258 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@258..288
+                            0: CSS_COMPONENT_VALUE_LIST@258..288
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@258..288
+                                0: _ALPHA_KW@258..265 "--alpha" [] []
+                                1: L_PAREN@265..266 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@266..287
+                                  0: CSS_COMPONENT_VALUE_LIST@266..287
+                                    0: CSS_FUNCTION@266..287
+                                      0: CSS_IDENTIFIER@266..269
+                                        0: IDENT@266..269 "var" [] []
+                                      1: L_PAREN@269..270 "(" [] []
+                                      2: CSS_PARAMETER_LIST@270..286
+                                        0: CSS_PARAMETER@270..286
+                                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@270..286
+                                            0: CSS_COMPONENT_VALUE_LIST@270..286
+                                              0: CSS_DASHED_IDENTIFIER@270..286
+                                                0: IDENT@270..286 "--shadow-opacity" [] []
+                                      3: R_PAREN@286..287 ")" [] []
+                                3: R_PAREN@287..288 ")" [] []
+                    3: R_PAREN@288..289 ")" [] []
+              1: (empty)
+            1: SEMICOLON@289..290 ";" [] []
+        2: R_CURLY@290..292 "}" [Newline("\n")] []
+    2: CSS_QUALIFIED_RULE@292..447
+      0: CSS_SELECTOR_LIST@292..324
+        0: CSS_COMPOUND_SELECTOR@292..324
+          0: CSS_NESTED_SELECTOR_LIST@292..292
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@292..324
+            0: CSS_CLASS_SELECTOR@292..324
+              0: DOT@292..295 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@295..324
+                0: IDENT@295..324 "test-alpha-in-complex-values" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@324..447
+        0: L_CURLY@324..325 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@325..445
+          0: CSS_DECLARATION_WITH_SEMICOLON@325..445
+            0: CSS_DECLARATION@325..444
+              0: CSS_GENERIC_PROPERTY@325..444
+                0: CSS_IDENTIFIER@325..338
+                  0: IDENT@325..338 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@338..340 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@340..444
+                  0: CSS_FUNCTION@340..444
+                    0: CSS_IDENTIFIER@340..355
+                      0: IDENT@340..355 "linear-gradient" [] []
+                    1: L_PAREN@355..356 "(" [] []
+                    2: CSS_PARAMETER_LIST@356..440
+                      0: CSS_PARAMETER@356..370
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@356..370
+                          0: CSS_COMPONENT_VALUE_LIST@356..370
+                            0: CSS_IDENTIFIER@356..364
+                              0: IDENT@356..364 "to" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                            1: CSS_IDENTIFIER@364..370
+                              0: IDENT@364..370 "bottom" [] []
+                      1: COMMA@370..371 "," [] []
+                      2: CSS_PARAMETER@371..405
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@371..405
+                          0: CSS_COMPONENT_VALUE_LIST@371..405
+                            0: CSS_FUNCTION@371..405
+                              0: CSS_IDENTIFIER@371..379
+                                0: IDENT@371..379 "rgb" [Newline("\n"), Whitespace("    ")] []
+                              1: L_PAREN@379..380 "(" [] []
+                              2: CSS_PARAMETER_LIST@380..404
+                                0: CSS_PARAMETER@380..404
+                                  0: CSS_BINARY_EXPRESSION@380..404
+                                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@380..392
+                                      0: CSS_COMPONENT_VALUE_LIST@380..392
+                                        0: CSS_NUMBER@380..384
+                                          0: CSS_NUMBER_LITERAL@380..384 "255" [] [Whitespace(" ")]
+                                        1: CSS_NUMBER@384..388
+                                          0: CSS_NUMBER_LITERAL@384..388 "255" [] [Whitespace(" ")]
+                                        2: CSS_NUMBER@388..392
+                                          0: CSS_NUMBER_LITERAL@388..392 "255" [] [Whitespace(" ")]
+                                    1: SLASH@392..394 "/" [] [Whitespace(" ")]
+                                    2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@394..404
+                                      0: CSS_COMPONENT_VALUE_LIST@394..404
+                                        0: CSS_TAILWIND_ALPHA_FUNCTION@394..404
+                                          0: _ALPHA_KW@394..401 "--alpha" [] []
+                                          1: L_PAREN@401..402 "(" [] []
+                                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@402..403
+                                            0: CSS_COMPONENT_VALUE_LIST@402..403
+                                              0: CSS_NUMBER@402..403
+                                                0: CSS_NUMBER_LITERAL@402..403 "1" [] []
+                                          3: R_PAREN@403..404 ")" [] []
+                              3: R_PAREN@404..405 ")" [] []
+                      3: COMMA@405..406 "," [] []
+                      4: CSS_PARAMETER@406..440
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@406..440
+                          0: CSS_COMPONENT_VALUE_LIST@406..440
+                            0: CSS_FUNCTION@406..440
+                              0: CSS_IDENTIFIER@406..414
+                                0: IDENT@406..414 "rgb" [Newline("\n"), Whitespace("    ")] []
+                              1: L_PAREN@414..415 "(" [] []
+                              2: CSS_PARAMETER_LIST@415..439
+                                0: CSS_PARAMETER@415..439
+                                  0: CSS_BINARY_EXPRESSION@415..439
+                                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@415..427
+                                      0: CSS_COMPONENT_VALUE_LIST@415..427
+                                        0: CSS_NUMBER@415..419
+                                          0: CSS_NUMBER_LITERAL@415..419 "255" [] [Whitespace(" ")]
+                                        1: CSS_NUMBER@419..423
+                                          0: CSS_NUMBER_LITERAL@419..423 "255" [] [Whitespace(" ")]
+                                        2: CSS_NUMBER@423..427
+                                          0: CSS_NUMBER_LITERAL@423..427 "255" [] [Whitespace(" ")]
+                                    1: SLASH@427..429 "/" [] [Whitespace(" ")]
+                                    2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@429..439
+                                      0: CSS_COMPONENT_VALUE_LIST@429..439
+                                        0: CSS_TAILWIND_ALPHA_FUNCTION@429..439
+                                          0: _ALPHA_KW@429..436 "--alpha" [] []
+                                          1: L_PAREN@436..437 "(" [] []
+                                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@437..438
+                                            0: CSS_COMPONENT_VALUE_LIST@437..438
+                                              0: CSS_NUMBER@437..438
+                                                0: CSS_NUMBER_LITERAL@437..438 "0" [] []
+                                          3: R_PAREN@438..439 ")" [] []
+                              3: R_PAREN@439..440 ")" [] []
+                    3: R_PAREN@440..444 ")" [Newline("\n"), Whitespace("  ")] []
+              1: (empty)
+            1: SEMICOLON@444..445 ";" [] []
+        2: R_CURLY@445..447 "}" [Newline("\n")] []
+    3: CSS_QUALIFIED_RULE@447..578
+      0: CSS_SELECTOR_LIST@447..478
+        0: CSS_COMPOUND_SELECTOR@447..478
+          0: CSS_NESTED_SELECTOR_LIST@447..447
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@447..478
+            0: CSS_CLASS_SELECTOR@447..478
+              0: DOT@447..450 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@450..478
+                0: IDENT@450..478 "test-alpha-multiple-shadows" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@478..578
+        0: L_CURLY@478..479 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@479..576
+          0: CSS_DECLARATION_WITH_SEMICOLON@479..576
+            0: CSS_DECLARATION@479..575
+              0: CSS_GENERIC_PROPERTY@479..575
+                0: CSS_IDENTIFIER@479..492
+                  0: IDENT@479..492 "box-shadow" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@492..493 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@493..575
+                  0: CSS_NUMBER@493..500
+                    0: CSS_NUMBER_LITERAL@493..500 "0" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                  1: CSS_REGULAR_DIMENSION@500..504
+                    0: CSS_NUMBER_LITERAL@500..501 "1" [] []
+                    1: IDENT@501..504 "px" [] [Whitespace(" ")]
+                  2: CSS_REGULAR_DIMENSION@504..508
+                    0: CSS_NUMBER_LITERAL@504..505 "2" [] []
+                    1: IDENT@505..508 "px" [] [Whitespace(" ")]
+                  3: CSS_FUNCTION@508..533
+                    0: CSS_IDENTIFIER@508..511
+                      0: IDENT@508..511 "rgb" [] []
+                    1: L_PAREN@511..512 "(" [] []
+                    2: CSS_PARAMETER_LIST@512..532
+                      0: CSS_PARAMETER@512..532
+                        0: CSS_BINARY_EXPRESSION@512..532
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@512..518
+                            0: CSS_COMPONENT_VALUE_LIST@512..518
+                              0: CSS_NUMBER@512..514
+                                0: CSS_NUMBER_LITERAL@512..514 "0" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@514..516
+                                0: CSS_NUMBER_LITERAL@514..516 "0" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@516..518
+                                0: CSS_NUMBER_LITERAL@516..518 "0" [] [Whitespace(" ")]
+                          1: SLASH@518..520 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@520..532
+                            0: CSS_COMPONENT_VALUE_LIST@520..532
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@520..532
+                                0: _ALPHA_KW@520..527 "--alpha" [] []
+                                1: L_PAREN@527..528 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@528..531
+                                  0: CSS_COMPONENT_VALUE_LIST@528..531
+                                    0: CSS_NUMBER@528..531
+                                      0: CSS_NUMBER_LITERAL@528..531 "0.1" [] []
+                                3: R_PAREN@531..532 ")" [] []
+                    3: R_PAREN@532..533 ")" [] []
+                  4: CSS_GENERIC_DELIMITER@533..534
+                    0: COMMA@533..534 "," [] []
+                  5: CSS_NUMBER@534..541
+                    0: CSS_NUMBER_LITERAL@534..541 "0" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                  6: CSS_REGULAR_DIMENSION@541..545
+                    0: CSS_NUMBER_LITERAL@541..542 "4" [] []
+                    1: IDENT@542..545 "px" [] [Whitespace(" ")]
+                  7: CSS_REGULAR_DIMENSION@545..549
+                    0: CSS_NUMBER_LITERAL@545..546 "6" [] []
+                    1: IDENT@546..549 "px" [] [Whitespace(" ")]
+                  8: CSS_FUNCTION@549..575
+                    0: CSS_IDENTIFIER@549..552
+                      0: IDENT@549..552 "rgb" [] []
+                    1: L_PAREN@552..553 "(" [] []
+                    2: CSS_PARAMETER_LIST@553..574
+                      0: CSS_PARAMETER@553..574
+                        0: CSS_BINARY_EXPRESSION@553..574
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@553..559
+                            0: CSS_COMPONENT_VALUE_LIST@553..559
+                              0: CSS_NUMBER@553..555
+                                0: CSS_NUMBER_LITERAL@553..555 "0" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@555..557
+                                0: CSS_NUMBER_LITERAL@555..557 "0" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@557..559
+                                0: CSS_NUMBER_LITERAL@557..559 "0" [] [Whitespace(" ")]
+                          1: SLASH@559..561 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@561..574
+                            0: CSS_COMPONENT_VALUE_LIST@561..574
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@561..574
+                                0: _ALPHA_KW@561..568 "--alpha" [] []
+                                1: L_PAREN@568..569 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@569..573
+                                  0: CSS_COMPONENT_VALUE_LIST@569..573
+                                    0: CSS_NUMBER@569..573
+                                      0: CSS_NUMBER_LITERAL@569..573 "0.05" [] []
+                                3: R_PAREN@573..574 ")" [] []
+                    3: R_PAREN@574..575 ")" [] []
+              1: (empty)
+            1: SEMICOLON@575..576 ";" [] []
+        2: R_CURLY@576..578 "}" [Newline("\n")] []
+    4: CSS_QUALIFIED_RULE@578..680
+      0: CSS_SELECTOR_LIST@578..602
+        0: CSS_COMPOUND_SELECTOR@578..602
+          0: CSS_NESTED_SELECTOR_LIST@578..578
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@578..602
+            0: CSS_CLASS_SELECTOR@578..602
+              0: DOT@578..581 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@581..602
+                0: IDENT@581..602 "test-alpha-with-calc" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@602..680
+        0: L_CURLY@602..603 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@603..678
+          0: CSS_DECLARATION_WITH_SEMICOLON@603..678
+            0: CSS_DECLARATION@603..677
+              0: CSS_GENERIC_PROPERTY@603..677
+                0: CSS_IDENTIFIER@603..616
+                  0: IDENT@603..616 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@616..618 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@618..677
+                  0: CSS_FUNCTION@618..677
+                    0: CSS_IDENTIFIER@618..621
+                      0: IDENT@618..621 "rgb" [] []
+                    1: L_PAREN@621..622 "(" [] []
+                    2: CSS_PARAMETER_LIST@622..676
+                      0: CSS_PARAMETER@622..676
+                        0: CSS_BINARY_EXPRESSION@622..676
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@622..634
+                            0: CSS_COMPONENT_VALUE_LIST@622..634
+                              0: CSS_NUMBER@622..626
+                                0: CSS_NUMBER_LITERAL@622..626 "100" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@626..630
+                                0: CSS_NUMBER_LITERAL@626..630 "100" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@630..634
+                                0: CSS_NUMBER_LITERAL@630..634 "100" [] [Whitespace(" ")]
+                          1: SLASH@634..636 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@636..676
+                            0: CSS_COMPONENT_VALUE_LIST@636..676
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@636..676
+                                0: _ALPHA_KW@636..643 "--alpha" [] []
+                                1: L_PAREN@643..644 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@644..675
+                                  0: CSS_COMPONENT_VALUE_LIST@644..675
+                                    0: CSS_FUNCTION@644..675
+                                      0: CSS_IDENTIFIER@644..648
+                                        0: IDENT@644..648 "calc" [] []
+                                      1: L_PAREN@648..649 "(" [] []
+                                      2: CSS_PARAMETER_LIST@649..674
+                                        0: CSS_PARAMETER@649..674
+                                          0: CSS_BINARY_EXPRESSION@649..674
+                                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@649..669
+                                              0: CSS_COMPONENT_VALUE_LIST@649..669
+                                                0: CSS_FUNCTION@649..669
+                                                  0: CSS_IDENTIFIER@649..652
+                                                    0: IDENT@649..652 "var" [] []
+                                                  1: L_PAREN@652..653 "(" [] []
+                                                  2: CSS_PARAMETER_LIST@653..667
+                                                    0: CSS_PARAMETER@653..667
+                                                      0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@653..667
+                                                        0: CSS_COMPONENT_VALUE_LIST@653..667
+                                                          0: CSS_DASHED_IDENTIFIER@653..667
+                                                            0: IDENT@653..667 "--base-opacity" [] []
+                                                  3: R_PAREN@667..669 ")" [] [Whitespace(" ")]
+                                            1: STAR@669..671 "*" [] [Whitespace(" ")]
+                                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@671..674
+                                              0: CSS_COMPONENT_VALUE_LIST@671..674
+                                                0: CSS_NUMBER@671..674
+                                                  0: CSS_NUMBER_LITERAL@671..674 "0.5" [] []
+                                      3: R_PAREN@674..675 ")" [] []
+                                3: R_PAREN@675..676 ")" [] []
+                    3: R_PAREN@676..677 ")" [] []
+              1: (empty)
+            1: SEMICOLON@677..678 ";" [] []
+        2: R_CURLY@678..680 "}" [Newline("\n")] []
+    5: CSS_QUALIFIED_RULE@680..802
+      0: CSS_SELECTOR_LIST@680..709
+        0: CSS_COMPOUND_SELECTOR@680..709
+          0: CSS_NESTED_SELECTOR_LIST@680..680
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@680..709
+            0: CSS_CLASS_SELECTOR@680..709
+              0: DOT@680..683 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@683..709
+                0: IDENT@683..709 "test-alpha-decimal-values" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@709..802
+        0: L_CURLY@709..710 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@710..800
+          0: CSS_DECLARATION_WITH_SEMICOLON@710..751
+            0: CSS_DECLARATION@710..750
+              0: CSS_GENERIC_PROPERTY@710..750
+                0: CSS_IDENTIFIER@710..718
+                  0: IDENT@710..718 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@718..720 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@720..750
+                  0: CSS_FUNCTION@720..750
+                    0: CSS_IDENTIFIER@720..723
+                      0: IDENT@720..723 "rgb" [] []
+                    1: L_PAREN@723..724 "(" [] []
+                    2: CSS_PARAMETER_LIST@724..749
+                      0: CSS_PARAMETER@724..749
+                        0: CSS_BINARY_EXPRESSION@724..749
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@724..734
+                            0: CSS_COMPONENT_VALUE_LIST@724..734
+                              0: CSS_NUMBER@724..728
+                                0: CSS_NUMBER_LITERAL@724..728 "255" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@728..732
+                                0: CSS_NUMBER_LITERAL@728..732 "128" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@732..734
+                                0: CSS_NUMBER_LITERAL@732..734 "0" [] [Whitespace(" ")]
+                          1: SLASH@734..736 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@736..749
+                            0: CSS_COMPONENT_VALUE_LIST@736..749
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@736..749
+                                0: _ALPHA_KW@736..743 "--alpha" [] []
+                                1: L_PAREN@743..744 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@744..748
+                                  0: CSS_COMPONENT_VALUE_LIST@744..748
+                                    0: CSS_NUMBER@744..748
+                                      0: CSS_NUMBER_LITERAL@744..748 "0.25" [] []
+                                3: R_PAREN@748..749 ")" [] []
+                    3: R_PAREN@749..750 ")" [] []
+              1: (empty)
+            1: SEMICOLON@750..751 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@751..800
+            0: CSS_DECLARATION@751..799
+              0: CSS_GENERIC_PROPERTY@751..799
+                0: CSS_IDENTIFIER@751..760
+                  0: IDENT@751..760 "border" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@760..762 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@762..799
+                  0: CSS_REGULAR_DIMENSION@762..766
+                    0: CSS_NUMBER_LITERAL@762..763 "1" [] []
+                    1: IDENT@763..766 "px" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@766..772
+                    0: IDENT@766..772 "solid" [] [Whitespace(" ")]
+                  2: CSS_FUNCTION@772..799
+                    0: CSS_IDENTIFIER@772..775
+                      0: IDENT@772..775 "rgb" [] []
+                    1: L_PAREN@775..776 "(" [] []
+                    2: CSS_PARAMETER_LIST@776..798
+                      0: CSS_PARAMETER@776..798
+                        0: CSS_BINARY_EXPRESSION@776..798
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@776..782
+                            0: CSS_COMPONENT_VALUE_LIST@776..782
+                              0: CSS_NUMBER@776..778
+                                0: CSS_NUMBER_LITERAL@776..778 "0" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@778..780
+                                0: CSS_NUMBER_LITERAL@778..780 "0" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@780..782
+                                0: CSS_NUMBER_LITERAL@780..782 "0" [] [Whitespace(" ")]
+                          1: SLASH@782..784 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@784..798
+                            0: CSS_COMPONENT_VALUE_LIST@784..798
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@784..798
+                                0: _ALPHA_KW@784..791 "--alpha" [] []
+                                1: L_PAREN@791..792 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@792..797
+                                  0: CSS_COMPONENT_VALUE_LIST@792..797
+                                    0: CSS_NUMBER@792..797
+                                      0: CSS_NUMBER_LITERAL@792..797 "0.125" [] []
+                                3: R_PAREN@797..798 ")" [] []
+                    3: R_PAREN@798..799 ")" [] []
+              1: (empty)
+            1: SEMICOLON@799..800 ";" [] []
+        2: R_CURLY@800..802 "}" [Newline("\n")] []
+    6: CSS_QUALIFIED_RULE@802..913
+      0: CSS_SELECTOR_LIST@802..831
+        0: CSS_COMPOUND_SELECTOR@802..831
+          0: CSS_NESTED_SELECTOR_LIST@802..802
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@802..831
+            0: CSS_CLASS_SELECTOR@802..831
+              0: DOT@802..805 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@805..831
+                0: IDENT@805..831 "test-alpha-integer-values" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@831..913
+        0: L_CURLY@831..832 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@832..911
+          0: CSS_DECLARATION_WITH_SEMICOLON@832..877
+            0: CSS_DECLARATION@832..876
+              0: CSS_GENERIC_PROPERTY@832..876
+                0: CSS_IDENTIFIER@832..845
+                  0: IDENT@832..845 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@845..847 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@847..876
+                  0: CSS_FUNCTION@847..876
+                    0: CSS_IDENTIFIER@847..850
+                      0: IDENT@847..850 "rgb" [] []
+                    1: L_PAREN@850..851 "(" [] []
+                    2: CSS_PARAMETER_LIST@851..875
+                      0: CSS_PARAMETER@851..875
+                        0: CSS_BINARY_EXPRESSION@851..875
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@851..863
+                            0: CSS_COMPONENT_VALUE_LIST@851..863
+                              0: CSS_NUMBER@851..855
+                                0: CSS_NUMBER_LITERAL@851..855 "255" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@855..859
+                                0: CSS_NUMBER_LITERAL@855..859 "255" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@859..863
+                                0: CSS_NUMBER_LITERAL@859..863 "255" [] [Whitespace(" ")]
+                          1: SLASH@863..865 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@865..875
+                            0: CSS_COMPONENT_VALUE_LIST@865..875
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@865..875
+                                0: _ALPHA_KW@865..872 "--alpha" [] []
+                                1: L_PAREN@872..873 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@873..874
+                                  0: CSS_COMPONENT_VALUE_LIST@873..874
+                                    0: CSS_NUMBER@873..874
+                                      0: CSS_NUMBER_LITERAL@873..874 "1" [] []
+                                3: R_PAREN@874..875 ")" [] []
+                    3: R_PAREN@875..876 ")" [] []
+              1: (empty)
+            1: SEMICOLON@876..877 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@877..911
+            0: CSS_DECLARATION@877..910
+              0: CSS_GENERIC_PROPERTY@877..910
+                0: CSS_IDENTIFIER@877..885
+                  0: IDENT@877..885 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@885..887 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@887..910
+                  0: CSS_FUNCTION@887..910
+                    0: CSS_IDENTIFIER@887..890
+                      0: IDENT@887..890 "rgb" [] []
+                    1: L_PAREN@890..891 "(" [] []
+                    2: CSS_PARAMETER_LIST@891..909
+                      0: CSS_PARAMETER@891..909
+                        0: CSS_BINARY_EXPRESSION@891..909
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@891..897
+                            0: CSS_COMPONENT_VALUE_LIST@891..897
+                              0: CSS_NUMBER@891..893
+                                0: CSS_NUMBER_LITERAL@891..893 "0" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@893..895
+                                0: CSS_NUMBER_LITERAL@893..895 "0" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@895..897
+                                0: CSS_NUMBER_LITERAL@895..897 "0" [] [Whitespace(" ")]
+                          1: SLASH@897..899 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@899..909
+                            0: CSS_COMPONENT_VALUE_LIST@899..909
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@899..909
+                                0: _ALPHA_KW@899..906 "--alpha" [] []
+                                1: L_PAREN@906..907 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@907..908
+                                  0: CSS_COMPONENT_VALUE_LIST@907..908
+                                    0: CSS_NUMBER@907..908
+                                      0: CSS_NUMBER_LITERAL@907..908 "0" [] []
+                                3: R_PAREN@908..909 ")" [] []
+                    3: R_PAREN@909..910 ")" [] []
+              1: (empty)
+            1: SEMICOLON@910..911 ";" [] []
+        2: R_CURLY@911..913 "}" [Newline("\n")] []
+    7: CSS_QUALIFIED_RULE@913..965
+      0: CSS_SELECTOR_LIST@913..940
+        0: CSS_COMPOUND_SELECTOR@913..940
+          0: CSS_NESTED_SELECTOR_LIST@913..913
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@913..940
+            0: CSS_CLASS_SELECTOR@913..940
+              0: DOT@913..916 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@916..940
+                0: IDENT@916..940 "test-alpha-empty-params" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@940..965
+        0: L_CURLY@940..941 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@941..963
+          0: CSS_DECLARATION_WITH_SEMICOLON@941..963
+            0: CSS_DECLARATION@941..962
+              0: CSS_GENERIC_PROPERTY@941..962
+                0: CSS_IDENTIFIER@941..951
+                  0: IDENT@941..951 "opacity" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@951..953 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@953..962
+                  0: CSS_TAILWIND_ALPHA_FUNCTION@953..962
+                    0: _ALPHA_KW@953..960 "--alpha" [] []
+                    1: L_PAREN@960..961 "(" [] []
+                    2: (empty)
+                    3: R_PAREN@961..962 ")" [] []
+              1: (empty)
+            1: SEMICOLON@962..963 ";" [] []
+        2: R_CURLY@963..965 "}" [Newline("\n")] []
+    8: CSS_QUALIFIED_RULE@965..1070
+      0: CSS_SELECTOR_LIST@965..996
+        0: CSS_COMPOUND_SELECTOR@965..996
+          0: CSS_NESTED_SELECTOR_LIST@965..965
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@965..996
+            0: CSS_CLASS_SELECTOR@965..996
+              0: DOT@965..968 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@968..996
+                0: IDENT@968..996 "test-alpha-nested-functions" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@996..1070
+        0: L_CURLY@996..997 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@997..1068
+          0: CSS_DECLARATION_WITH_SEMICOLON@997..1068
+            0: CSS_DECLARATION@997..1067
+              0: CSS_GENERIC_PROPERTY@997..1067
+                0: CSS_IDENTIFIER@997..1010
+                  0: IDENT@997..1010 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@1010..1012 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1012..1067
+                  0: CSS_FUNCTION@1012..1067
+                    0: CSS_IDENTIFIER@1012..1015
+                      0: IDENT@1012..1015 "rgb" [] []
+                    1: L_PAREN@1015..1016 "(" [] []
+                    2: CSS_PARAMETER_LIST@1016..1066
+                      0: CSS_PARAMETER@1016..1066
+                        0: CSS_BINARY_EXPRESSION@1016..1066
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1016..1028
+                            0: CSS_COMPONENT_VALUE_LIST@1016..1028
+                              0: CSS_NUMBER@1016..1020
+                                0: CSS_NUMBER_LITERAL@1016..1020 "255" [] [Whitespace(" ")]
+                              1: CSS_NUMBER@1020..1024
+                                0: CSS_NUMBER_LITERAL@1020..1024 "255" [] [Whitespace(" ")]
+                              2: CSS_NUMBER@1024..1028
+                                0: CSS_NUMBER_LITERAL@1024..1028 "255" [] [Whitespace(" ")]
+                          1: SLASH@1028..1030 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1030..1066
+                            0: CSS_COMPONENT_VALUE_LIST@1030..1066
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@1030..1066
+                                0: _ALPHA_KW@1030..1037 "--alpha" [] []
+                                1: L_PAREN@1037..1038 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1038..1065
+                                  0: CSS_COMPONENT_VALUE_LIST@1038..1065
+                                    0: CSS_FUNCTION@1038..1065
+                                      0: CSS_IDENTIFIER@1038..1041
+                                        0: IDENT@1038..1041 "var" [] []
+                                      1: L_PAREN@1041..1042 "(" [] []
+                                      2: CSS_PARAMETER_LIST@1042..1064
+                                        0: CSS_PARAMETER@1042..1059
+                                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1042..1059
+                                            0: CSS_COMPONENT_VALUE_LIST@1042..1059
+                                              0: CSS_DASHED_IDENTIFIER@1042..1059
+                                                0: IDENT@1042..1059 "--dynamic-opacity" [] []
+                                        1: COMMA@1059..1061 "," [] [Whitespace(" ")]
+                                        2: CSS_PARAMETER@1061..1064
+                                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1061..1064
+                                            0: CSS_COMPONENT_VALUE_LIST@1061..1064
+                                              0: CSS_NUMBER@1061..1064
+                                                0: CSS_NUMBER_LITERAL@1061..1064 "0.8" [] []
+                                      3: R_PAREN@1064..1065 ")" [] []
+                                3: R_PAREN@1065..1066 ")" [] []
+                    3: R_PAREN@1066..1067 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1067..1068 ";" [] []
+        2: R_CURLY@1068..1070 "}" [Newline("\n")] []
+    9: CSS_QUALIFIED_RULE@1070..1223
+      0: CSS_SELECTOR_LIST@1070..1107
+        0: CSS_COMPOUND_SELECTOR@1070..1107
+          0: CSS_NESTED_SELECTOR_LIST@1070..1070
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@1070..1107
+            0: CSS_CLASS_SELECTOR@1070..1107
+              0: DOT@1070..1073 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@1073..1107
+                0: IDENT@1073..1107 "test-alpha-with-hsl-modern-syntax" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@1107..1223
+        0: L_CURLY@1107..1108 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@1108..1221
+          0: CSS_DECLARATION_WITH_SEMICOLON@1108..1156
+            0: CSS_DECLARATION@1108..1155
+              0: CSS_GENERIC_PROPERTY@1108..1155
+                0: CSS_IDENTIFIER@1108..1121
+                  0: IDENT@1108..1121 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@1121..1123 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1123..1155
+                  0: CSS_FUNCTION@1123..1155
+                    0: CSS_IDENTIFIER@1123..1126
+                      0: IDENT@1123..1126 "hsl" [] []
+                    1: L_PAREN@1126..1127 "(" [] []
+                    2: CSS_PARAMETER_LIST@1127..1154
+                      0: CSS_PARAMETER@1127..1154
+                        0: CSS_BINARY_EXPRESSION@1127..1154
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1127..1140
+                            0: CSS_COMPONENT_VALUE_LIST@1127..1140
+                              0: CSS_NUMBER@1127..1131
+                                0: CSS_NUMBER_LITERAL@1127..1131 "240" [] [Whitespace(" ")]
+                              1: CSS_PERCENTAGE@1131..1136
+                                0: CSS_NUMBER_LITERAL@1131..1134 "100" [] []
+                                1: PERCENT@1134..1136 "%" [] [Whitespace(" ")]
+                              2: CSS_PERCENTAGE@1136..1140
+                                0: CSS_NUMBER_LITERAL@1136..1138 "50" [] []
+                                1: PERCENT@1138..1140 "%" [] [Whitespace(" ")]
+                          1: SLASH@1140..1142 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1142..1154
+                            0: CSS_COMPONENT_VALUE_LIST@1142..1154
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@1142..1154
+                                0: _ALPHA_KW@1142..1149 "--alpha" [] []
+                                1: L_PAREN@1149..1150 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1150..1153
+                                  0: CSS_COMPONENT_VALUE_LIST@1150..1153
+                                    0: CSS_NUMBER@1150..1153
+                                      0: CSS_NUMBER_LITERAL@1150..1153 "0.6" [] []
+                                3: R_PAREN@1153..1154 ")" [] []
+                    3: R_PAREN@1154..1155 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1155..1156 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@1156..1221
+            0: CSS_DECLARATION@1156..1220
+              0: CSS_GENERIC_PROPERTY@1156..1220
+                0: CSS_IDENTIFIER@1156..1171
+                  0: IDENT@1156..1171 "border-color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@1171..1173 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@1173..1220
+                  0: CSS_FUNCTION@1173..1220
+                    0: CSS_IDENTIFIER@1173..1176
+                      0: IDENT@1173..1176 "hsl" [] []
+                    1: L_PAREN@1176..1177 "(" [] []
+                    2: CSS_PARAMETER_LIST@1177..1219
+                      0: CSS_PARAMETER@1177..1219
+                        0: CSS_BINARY_EXPRESSION@1177..1219
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1177..1189
+                            0: CSS_COMPONENT_VALUE_LIST@1177..1189
+                              0: CSS_NUMBER@1177..1181
+                                0: CSS_NUMBER_LITERAL@1177..1181 "120" [] [Whitespace(" ")]
+                              1: CSS_PERCENTAGE@1181..1185
+                                0: CSS_NUMBER_LITERAL@1181..1183 "75" [] []
+                                1: PERCENT@1183..1185 "%" [] [Whitespace(" ")]
+                              2: CSS_PERCENTAGE@1185..1189
+                                0: CSS_NUMBER_LITERAL@1185..1187 "50" [] []
+                                1: PERCENT@1187..1189 "%" [] [Whitespace(" ")]
+                          1: SLASH@1189..1191 "/" [] [Whitespace(" ")]
+                          2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1191..1219
+                            0: CSS_COMPONENT_VALUE_LIST@1191..1219
+                              0: CSS_TAILWIND_ALPHA_FUNCTION@1191..1219
+                                0: _ALPHA_KW@1191..1198 "--alpha" [] []
+                                1: L_PAREN@1198..1199 "(" [] []
+                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1199..1218
+                                  0: CSS_COMPONENT_VALUE_LIST@1199..1218
+                                    0: CSS_FUNCTION@1199..1218
+                                      0: CSS_IDENTIFIER@1199..1202
+                                        0: IDENT@1199..1202 "var" [] []
+                                      1: L_PAREN@1202..1203 "(" [] []
+                                      2: CSS_PARAMETER_LIST@1203..1217
+                                        0: CSS_PARAMETER@1203..1217
+                                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1203..1217
+                                            0: CSS_COMPONENT_VALUE_LIST@1203..1217
+                                              0: CSS_DASHED_IDENTIFIER@1203..1217
+                                                0: IDENT@1203..1217 "--border-alpha" [] []
+                                      3: R_PAREN@1217..1218 ")" [] []
+                                3: R_PAREN@1218..1219 ")" [] []
+                    3: R_PAREN@1219..1220 ")" [] []
+              1: (empty)
+            1: SEMICOLON@1220..1221 ";" [] []
+        2: R_CURLY@1221..1223 "}" [Newline("\n")] []
+  2: EOF@1223..1224 "" [Newline("\n")] []
+
+```

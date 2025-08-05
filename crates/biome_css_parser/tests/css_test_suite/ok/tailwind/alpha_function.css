@@ -1,0 +1,51 @@
+/* --alpha() function */
+.test-alpha-basic {
+  color: rgb(255 0 0 / --alpha(0.5));
+  background: hsl(200 100% 50% / --alpha(0.8));
+}
+
+.test-alpha-with-variables {
+  border-color: rgb(0 255 0 / --alpha(var(--opacity-50)));
+  box-shadow: 0 4px 6px rgb(0 0 0 / --alpha(var(--shadow-opacity)));
+}
+
+.test-alpha-in-complex-values {
+  background: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / --alpha(1)),
+    rgb(255 255 255 / --alpha(0))
+  );
+}
+
+.test-alpha-multiple-shadows {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / --alpha(0.1)),
+    0 4px 6px rgb(0 0 0 / --alpha(0.05));
+}
+
+.test-alpha-with-calc {
+  background: rgb(100 100 100 / --alpha(calc(var(--base-opacity) * 0.5)));
+}
+
+.test-alpha-decimal-values {
+  color: rgb(255 128 0 / --alpha(0.25));
+  border: 1px solid rgb(0 0 0 / --alpha(0.125));
+}
+
+.test-alpha-integer-values {
+  background: rgb(255 255 255 / --alpha(1));
+  color: rgb(0 0 0 / --alpha(0));
+}
+
+.test-alpha-empty-params {
+  opacity: --alpha();
+}
+
+.test-alpha-nested-functions {
+  background: rgb(255 255 255 / --alpha(var(--dynamic-opacity, 0.8)));
+}
+
+.test-alpha-with-hsl-modern-syntax {
+  background: hsl(240 100% 50% / --alpha(0.6));
+  border-color: hsl(120 75% 50% / --alpha(var(--border-alpha)));
+}

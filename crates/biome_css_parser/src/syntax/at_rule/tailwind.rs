@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_block;
 use crate::syntax::parse_error::{expected_identifier, expected_string};
-use crate::syntax::{is_at_identifier, parse_regular_identifier};
+use crate::syntax::{is_at_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::parsed_syntax::ParsedSyntax;
@@ -82,7 +82,7 @@ pub(crate) fn parse_custom_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     // Parse selector - can be a string or parenthesized expression
     if p.at(CSS_STRING_LITERAL) {
-        p.bump(CSS_STRING_LITERAL);
+        parse_string(p).or_add_diagnostic(p, expected_string);
     } else if p.at(T!['(']) {
         p.bump(T!['(']);
         // Parse the selector expression inside parentheses
@@ -137,13 +137,7 @@ pub(crate) fn parse_config_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T![config]);
-
-    if !p.at(CSS_STRING_LITERAL) {
-        p.error(expected_string(p, p.cur_range()));
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    }
-
-    p.bump(CSS_STRING_LITERAL);
+    parse_string(p).or_add_diagnostic(p, expected_string);
     p.expect(T![;]);
 
     Present(m.complete(p, CSS_CONFIG_AT_RULE))
@@ -157,13 +151,7 @@ pub(crate) fn parse_plugin_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T![plugin]);
-
-    if !p.at(CSS_STRING_LITERAL) {
-        p.error(expected_string(p, p.cur_range()));
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    }
-
-    p.bump(CSS_STRING_LITERAL);
+    parse_string(p).or_add_diagnostic(p, expected_string);
     p.expect(T![;]);
 
     Present(m.complete(p, CSS_PLUGIN_AT_RULE))
@@ -177,13 +165,7 @@ pub(crate) fn parse_source_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T![source]);
-
-    if !p.at(CSS_STRING_LITERAL) {
-        p.error(expected_string(p, p.cur_range()));
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    }
-
-    p.bump(CSS_STRING_LITERAL);
+    parse_string(p).or_add_diagnostic(p, expected_string);
     p.expect(T![;]);
 
     Present(m.complete(p, CSS_SOURCE_AT_RULE))
@@ -197,13 +179,7 @@ pub(crate) fn parse_reference_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T![reference]);
-
-    if !p.at(CSS_STRING_LITERAL) {
-        p.error(expected_string(p, p.cur_range()));
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
-    }
-
-    p.bump(CSS_STRING_LITERAL);
+    parse_string(p).or_add_diagnostic(p, expected_string);
     p.expect(T![;]);
 
     Present(m.complete(p, CSS_REFERENCE_AT_RULE))
