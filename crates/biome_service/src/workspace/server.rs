@@ -1848,8 +1848,12 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         // folder, the scanner will ignore it.
         self.scanner.unload_folder(path.to_path_buf());
 
+        // Unloads all descendants of the path.
         self.module_graph.unload_path(path);
         self.project_layout.unload_folder(path);
+
+        // Finally unloads the path itself.
+        self.unload_file(path)?;
 
         Ok(())
     }

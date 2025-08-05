@@ -3812,15 +3812,18 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     assert_eq!(
         result
             .data
-            .get(fs.working_directory.join(FILE_PATH).as_str())
+            .get(fs.working_directory.join("src").join("a.js").as_str())
             .map(|module_info| module_info.static_import_paths.clone()),
         Some(BTreeMap::from([("foo".to_string(), "foo".to_string())]))
     );
 
     // ACT: Update the file content.
     clear_notifications!(factory.service_rx);
-    std::fs::write(fs.working_directory.join(FILE_PATH), FILE_CONTENT_AFTER)
-        .expect("cannot update file");
+    std::fs::write(
+        fs.working_directory.join("src").join("a.js"),
+        FILE_CONTENT_AFTER,
+    )
+    .expect("cannot update file");
     await_notification!(factory.service_rx);
 
     // ASSERT: Index should have updated.
@@ -3836,7 +3839,7 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     assert_eq!(
         result
             .data
-            .get(fs.working_directory.join(FILE_PATH).as_str())
+            .get(fs.working_directory.join("src").join("a.js").as_str())
             .map(|module_info| module_info.static_import_paths.clone()),
         Some(BTreeMap::from([("bar".to_string(), "bar".to_string())]))
     );
@@ -3859,7 +3862,7 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     assert!(
         !result
             .data
-            .contains_key(fs.working_directory.join(FILE_PATH).as_str())
+            .contains_key(fs.working_directory.join("src").join("a.js").as_str())
     );
 
     // ARRANGE: Shutdown server.
