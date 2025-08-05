@@ -1227,54 +1227,56 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&path)?;
         let language = self.get_file_source(&path);
         let capabilities = self.features.get_capabilities(language);
-        let (diagnostics, errors, skipped_diagnostics) =
-            if let Some(lint) = capabilities.analyzer.lint {
-                let settings = self
-                    .projects
-                    .get_settings_based_on_path(project_key, &path)
-                    .ok_or_else(WorkspaceError::no_project)?;
+        let (diagnostics, errors, skipped_diagnostics) = if (categories.is_lint()
+            || categories.is_assist())
+            && let Some(lint) = capabilities.analyzer.lint
+        {
+            let settings = self
+                .projects
+                .get_settings_based_on_path(project_key, &path)
+                .ok_or_else(WorkspaceError::no_project)?;
 
-                let plugins = self
-                    .get_analyzer_plugins_for_project(
-                        settings.source_path().unwrap_or_default().as_path(),
-                        &settings.get_plugins_for_path(&path),
-                    )
-                    .map_err(WorkspaceError::plugin_errors)?;
-
-                let results = lint(LintParams {
-                    parse,
-                    settings: &settings,
-                    path: &path,
-                    only,
-                    skip,
-                    language,
-                    categories,
-                    module_graph: self.module_graph.clone(),
-                    project_layout: self.project_layout.clone(),
-                    suppression_reason: None,
-                    enabled_rules,
-                    pull_code_actions,
-                    plugins: if categories.contains(RuleCategory::Lint) {
-                        plugins
-                    } else {
-                        Vec::new()
-                    },
-                });
-
-                (
-                    results.diagnostics,
-                    results.errors,
-                    results.skipped_diagnostics,
+            let plugins = self
+                .get_analyzer_plugins_for_project(
+                    settings.source_path().unwrap_or_default().as_path(),
+                    &settings.get_plugins_for_path(&path),
                 )
-            } else {
-                let parse_diagnostics = parse.into_diagnostics();
-                let errors = parse_diagnostics
-                    .iter()
-                    .filter(|diag| diag.severity() <= Severity::Error)
-                    .count();
+                .map_err(WorkspaceError::plugin_errors)?;
 
-                (parse_diagnostics, errors, 0)
-            };
+            let results = lint(LintParams {
+                parse,
+                settings: &settings,
+                path: &path,
+                only,
+                skip,
+                language,
+                categories,
+                module_graph: self.module_graph.clone(),
+                project_layout: self.project_layout.clone(),
+                suppression_reason: None,
+                enabled_rules,
+                pull_code_actions,
+                plugins: if categories.is_lint() {
+                    plugins
+                } else {
+                    Vec::new()
+                },
+            });
+
+            (
+                results.diagnostics,
+                results.errors,
+                results.skipped_diagnostics,
+            )
+        } else {
+            let parse_diagnostics = parse.into_diagnostics();
+            let errors = parse_diagnostics
+                .iter()
+                .filter(|diag| diag.severity() <= Severity::Error)
+                .count();
+
+            (parse_diagnostics, errors, 0)
+        };
 
         info!(
             "Pulled {:?} diagnostic(s), skipped {:?} diagnostic(s) from {}",
