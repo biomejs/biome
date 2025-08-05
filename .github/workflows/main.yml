@@ -17,7 +17,7 @@ env:
 jobs:
   format:
     name: Format Rust Files
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -25,8 +25,6 @@ jobs:
         run: git config core.longpaths true
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
@@ -46,8 +44,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
@@ -62,21 +58,18 @@ jobs:
 
   check-dependencies:
     name: Check Dependencies
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
           channel: nightly
+          bins: cargo-udeps
           cache: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install udeps
-        run: cargo install cargo-udeps --locked
       - name: Run udeps
         run: cargo +nightly udeps --all-targets
 
@@ -86,14 +79,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: depot-windows-2022
+          - os: depot-windows-2022-16
           - os: depot-ubuntu-24.04-arm-16
-          - os: depot-macos-latest
+          - os: depot-macos-14
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:
@@ -109,18 +100,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-latest, depot-ubuntu-24.04-arm-16 ]
+        os: [ depot-windows-2022-16, depot-ubuntu-24.04-arm-16 ]
     steps:
       # ref: https://github.com/orgs/community/discussions/26952
       - name: Support longpaths
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'depot-windows-2022-16'
         run: git config --system core.longpaths true
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: recursive
-      - name: Free Disk Space
-        uses: ./.github/actions/free-disk-space
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
         with:

@@ -13,7 +13,9 @@ use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
-use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
+use biome_service::configuration::{
+    LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
+};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
@@ -105,7 +107,7 @@ struct InitializeParams {
     workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 #[repr(u8)]
 pub(crate) enum ConfigurationStatus {
     /// The configuration file was properly loaded
@@ -703,7 +705,7 @@ impl Session {
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
-    async fn load_biome_configuration_file(
+    pub(super) async fn load_biome_configuration_file(
         self: &Arc<Self>,
         base_path: ConfigurationPathHint,
     ) -> ConfigurationStatus {
@@ -781,13 +783,8 @@ impl Session {
         let register_result = self.workspace.open_project(OpenProjectParams {
             path: path.as_path().into(),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         });
-        let OpenProjectResult {
-            project_key,
-            scan_kind,
-        } = match register_result {
+        let OpenProjectResult { project_key } = match register_result {
             Ok(result) => result,
             Err(error) => {
                 error!("Failed to register the project folder: {error}");
@@ -796,6 +793,7 @@ impl Session {
             }
         };
 
+        let scan_kind = ProjectScanComputer::new(&configuration).compute();
         let scan_kind = if scan_kind.is_none() {
             ScanKind::KnownFiles
         } else {
@@ -890,7 +888,7 @@ impl Session {
     }
 
     /// Updates the status of the configuration
-    fn set_configuration_status(&self, status: ConfigurationStatus) {
+    pub(super) fn set_configuration_status(&self, status: ConfigurationStatus) {
         self.notified_broken_configuration
             .store(false, Ordering::Relaxed);
         self.configuration_status

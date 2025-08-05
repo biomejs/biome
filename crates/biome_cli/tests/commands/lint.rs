@@ -4080,6 +4080,64 @@ bar();"#
 }
 
 #[test]
+fn linter_enables_project_domain_based_on_extended_config() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{ "extends": ["biome.base.json"] }"#.as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.base.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noFloatingPromises": "on"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/foo.ts");
+    fs.insert(
+        file.into(),
+        r#"export function foo(): Foo {}
+
+export async function bar() {}"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/index.ts");
+    fs.insert(
+        file.into(),
+        r#"import { foo, bar } from "./foo.ts";
+
+fn(foo());
+
+bar();"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_enables_project_domain_based_on_extended_config",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_apply_root_settings_with_stdin_file_path() {
     let mut fs = TemporaryFs::new("should_apply_root_settings_with_stdin_file_path");
 

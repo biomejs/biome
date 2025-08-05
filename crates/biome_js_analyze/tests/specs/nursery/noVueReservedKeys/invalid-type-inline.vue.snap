@@ -1,0 +1,29 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 146
+expression: invalid-type-inline.vue
+---
+# Input
+```ts
+<script setup lang="ts">
+defineProps<{$el: string}>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-type-inline.vue:2:14 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $el is reserved in Vue.
+  
+    1 │ <script setup lang="ts">
+  > 2 │ defineProps<{$el: string}>();
+      │              ^^^
+    3 │ </script>
+    4 │ 
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```

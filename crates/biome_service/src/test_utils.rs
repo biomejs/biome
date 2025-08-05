@@ -34,12 +34,10 @@ pub(super) fn setup_workspace_and_open_project_and_get_watcher_instruction_recei
     let (watcher_tx, watcher_rx) = unbounded();
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
     let workspace = WorkspaceServer::new(Arc::new(fs), watcher_tx, service_tx, None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new(project_path),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         })
         .expect("can open project");
 

@@ -70,7 +70,6 @@ AnyHtmlElement =
 	HtmlSelfClosingElement
 	| HtmlElement
 	| AnyHtmlContent
-	| HtmlComment
 	| HtmlCdataSection
 	| HtmlBogusElement
 
@@ -125,12 +124,6 @@ HtmlClosingElement =
 	'/'
 	name: HtmlTagName
 	'>'
-
-// <!-- comment -->
-HtmlComment =
-	'<!--'
-	content: 'html_literal'
-	'-->'
 
 // <![CDATA[example]]>
 // Reference: https://html.spec.whatwg.org/multipage/syntax.html#cdata-sections

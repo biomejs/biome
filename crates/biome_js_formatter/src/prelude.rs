@@ -3,7 +3,8 @@
 
 pub(crate) use crate::{
     AsFormat as _, FormatNodeRule, FormattedIterExt, JsFormatContext, JsFormatter,
-    comments::JsComments,
+    comments::JsComments, format_number_token, format_or_verbatim, format_removed, format_replaced,
+    on_removed, on_skipped,
 };
 pub use biome_formatter::prelude::*;
 pub use biome_formatter::separated::TrailingSeparator;

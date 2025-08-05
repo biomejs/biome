@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+  <a>Link</a>
+  <a target="_blank">External</a>
+  <a href="">Empty</a>
+  <a href="   ">Whitespace</a>
+  <a href={null}>Null</a>
+  <a href={undefined}>Undefined</a>
+</> 
+```
+
+# Diagnostics
+```
+invalid.jsx:2:3 lint/nursery/useAnchorHref ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing required href attribute on a element
+  
+    1 │ <>
+  > 2 │   <a>Link</a>
+      │   ^^^
+    3 │   <a target="_blank">External</a>
+    4 │   <a href="">Empty</a>
+  
+  i Anchor tags without href attributes are inaccessible to keyboard navigation and screen readers, violating WCAG 2.2 Success Criterion 4.1.2 (Name, Role, Value).
+  
+  i Use href for navigation or <button> for actions. Reference: WCAG 4.1.2
+  
+
+```
+
+```
+invalid.jsx:3:3 lint/nursery/useAnchorHref ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing required href attribute on a element
+  
+    1 │ <>
+    2 │   <a>Link</a>
+  > 3 │   <a target="_blank">External</a>
+      │   ^^^^^^^^^^^^^^^^^^^
+    4 │   <a href="">Empty</a>
+    5 │   <a href="   ">Whitespace</a>
+  
+  i Anchor tags without href attributes are inaccessible to keyboard navigation and screen readers, violating WCAG 2.2 Success Criterion 4.1.2 (Name, Role, Value).
+  
+  i Use href for navigation or <button> for actions. Reference: WCAG 4.1.2
+  
+
+```

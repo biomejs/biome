@@ -31,7 +31,9 @@ use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
 use biome_resolver::FsWithResolverProxy;
-use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
+use biome_service::configuration::{
+    LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
+};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
@@ -921,27 +923,20 @@ pub(crate) trait CommandRunner: Sized {
         let paths = self.get_files_to_process(fs, &configuration)?;
         let paths = validated_paths_for_execution(paths, &execution, &working_dir)?;
 
-        let params = if let TraversalMode::Lint { only, skip, .. } = execution.traversal_mode() {
-            OpenProjectParams {
-                path: BiomePath::new(project_dir),
-                open_uninitialized: true,
-                only_rules: Some(only.clone()),
-                skip_rules: Some(skip.clone()),
-            }
-        } else {
-            OpenProjectParams {
-                path: BiomePath::new(project_dir),
-                open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
-            }
-        };
-
         // Open the project
-        let open_project_result = workspace.open_project(params)?;
+        let open_project_result = workspace.open_project(OpenProjectParams {
+            path: BiomePath::new(project_dir),
+            open_uninitialized: true,
+        })?;
 
+        let scan_kind_computer =
+            if let TraversalMode::Lint { only, skip, .. } = execution.traversal_mode() {
+                ProjectScanComputer::new(&configuration).with_rule_selectors(skip, only)
+            } else {
+                ProjectScanComputer::new(&configuration)
+            };
         let scan_kind = derive_best_scan_kind(
-            open_project_result.scan_kind,
+            scan_kind_computer.compute(),
             &execution,
             &root_configuration_dir,
             &working_dir,

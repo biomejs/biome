@@ -1,0 +1,76 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+aria-[foo:text-sm
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..4 "aria" [] [],
+                minus_token: DASH@4..5 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@5..6 "[" [] [],
+                        TW_SELECTOR@6..18 "foo:text-sm" [] [Newline("\n")],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@18..18 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..18
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..18
+    0: TW_FULL_CANDIDATE@0..18
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..18
+        0: TW_BASE@0..4 "aria" [] []
+        1: DASH@4..5 "-" [] []
+        2: TW_BOGUS_VALUE@5..18
+          0: L_BRACKET@5..6 "[" [] []
+          1: TW_SELECTOR@6..18 "foo:text-sm" [] [Newline("\n")]
+        3: (empty)
+      2: (empty)
+  2: EOF@18..18 "" [] []
+
+```
+
+## Diagnostics
+
+```
+incomplete-arbitrary-variant.txt:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[foo:text-sm'.
+  
+  > 1 │ aria-[foo:text-sm
+      │      ^^^^^^^^^^^^
+    2 │ 
+  
+  i Expected a value here.
+  
+  > 1 │ aria-[foo:text-sm
+      │      ^^^^^^^^^^^^
+    2 │ 
+  
+```

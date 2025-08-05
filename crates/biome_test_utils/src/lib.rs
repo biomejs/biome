@@ -514,7 +514,8 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
     );
     assert!(
         last_token.token_text_trimmed().is_empty(),
-        "the EOF token may not contain any data except trailing whitespace"
+        "the EOF token may not contain any data except trailing whitespace, but found \"{}\"",
+        last_token.token_text_trimmed()
     );
 }
 
@@ -544,7 +545,7 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
 pub fn assert_diagnostics_expectation_comment<L: Language>(
     file_path: &Utf8Path,
     syntax: &SyntaxNode<L>,
-    diagnostics_quantity: usize,
+    diagnostics: Vec<String>,
 ) {
     let no_diagnostics_comment_text = "should not generate diagnostics";
     let diagnostics_comment_text = "should generate diagnostics";
@@ -582,11 +583,14 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
         None
     });
 
-    let has_diagnostics = diagnostics_quantity > 0;
+    let has_diagnostics = !diagnostics.is_empty();
     match diagnostic_comment {
         Some(Diagnostics::ShouldNotGenerateDiagnostics) => {
             if has_diagnostics {
-                panic!("This test should not generate diagnostics\nFile: {file_path}",);
+                panic!(
+                    "This test should not generate diagnostics\nFile: {file_path}\n\nDiagnostics: {}",
+                    diagnostics.join("\n")
+                );
             }
         }
         Some(Diagnostics::ShouldGenerateDiagnostics) => {

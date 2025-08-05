@@ -7,7 +7,7 @@ use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{ParseBlockBody, parse_declaration_or_at_rule_list_block};
 use crate::syntax::{
     is_at_any_declaration_with_semicolon, is_at_identifier, parse_any_declaration_with_semicolon,
-    parse_custom_identifier_with_keywords,
+    parse_custom_identifier_with_keywords, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -150,7 +150,8 @@ pub(crate) fn parse_page_selector_pseudo(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![:]);
 
-    let kind = if p.eat_ts(PAGE_SELECTOR_PSEUDO_SET) {
+    let kind = if p.at_ts(PAGE_SELECTOR_PSEUDO_SET) {
+        parse_regular_identifier(p).ok();
         CSS_PAGE_SELECTOR_PSEUDO
     } else {
         CSS_BOGUS_PAGE_SELECTOR_PSEUDO

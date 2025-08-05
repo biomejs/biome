@@ -6,13 +6,13 @@ use crate::session::{
 };
 use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
+use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::workspace::{
-    CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult, ScanKind,
-    ServiceNotification,
+    CloseProjectParams, RageEntry, RageParams, RageResult, ServiceNotification,
 };
 use biome_service::{WatcherInstruction, WorkspaceServer};
 use crossbeam::channel::{Sender, bounded};
@@ -412,39 +412,14 @@ impl LanguageServer for LSPServer {
 
         for added in &params.event.added {
             if let Ok(project_path) = self.session.file_path(&added.uri) {
-                let result = self
+                let status = self
                     .session
-                    .workspace
-                    .open_project(OpenProjectParams {
-                        path: project_path.clone(),
-                        open_uninitialized: true,
-                        only_rules: None,
-                        skip_rules: None,
-                    })
-                    .map_err(LspError::from);
-
-                match result {
-                    Ok(result) => {
-                        let scan_kind = if result.scan_kind.is_none() {
-                            ScanKind::KnownFiles
-                        } else {
-                            result.scan_kind
-                        };
-                        self.session
-                            .insert_and_scan_project(
-                                result.project_key,
-                                project_path.clone(),
-                                scan_kind,
-                            )
-                            .await;
-
-                        self.session.update_all_diagnostics().await;
-                    }
-                    Err(err) => {
-                        error!("Failed to add project to the workspace: {err}");
-                        self.notify_error(err).await;
-                    }
-                }
+                    .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(
+                        project_path.to_path_buf(),
+                    ))
+                    .await;
+                debug!("Configuration status: {status:?}");
+                self.session.set_configuration_status(status);
             }
         }
     }

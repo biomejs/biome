@@ -1,3 +1,4 @@
+// should generate diagnostics
 <>
     <div role="checkbox" ></div>
     <div role="radio" ></div>

@@ -726,6 +726,20 @@
 				}
 			]
 		},
+		"ConsistentTypeDefinition": {
+			"oneOf": [
+				{
+					"description": "Prefer using `interface` for object type definitions",
+					"type": "string",
+					"enum": ["interface"]
+				},
+				{
+					"description": "Prefer using `type` for object type definitions",
+					"type": "string",
+					"enum": ["type"]
+				}
+			]
+		},
 		"Convention": {
 			"type": "object",
 			"properties": {
@@ -3593,6 +3607,18 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNonNullAssertedOptionalChainConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithNoNonNullAssertedOptionalChainOptions"
+				}
+			]
+		},
+		"NoNonNullAssertedOptionalChainOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNonNullAssertionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3742,6 +3768,34 @@
 			]
 		},
 		"NoPrototypeBuiltinsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoQuickfixBiomeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoQuickfixBiomeOptions" }
+			]
+		},
+		"NoQuickfixBiomeOptions": {
+			"type": "object",
+			"properties": {
+				"additionalPaths": {
+					"description": "A list of additional JSON files that should be checked.",
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoQwikUseVisibleTaskConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoQwikUseVisibleTaskOptions" }
+			]
+		},
+		"NoQwikUseVisibleTaskOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -4235,6 +4289,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnnecessaryConditionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnnecessaryConditionsOptions" }
+			]
+		},
+		"NoUnnecessaryConditionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnreachableConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4626,6 +4690,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueReservedKeysConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueReservedKeysOptions" }
+			]
+		},
+		"NoVueReservedKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedPropsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4756,6 +4830,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noNonNullAssertedOptionalChain": {
+					"description": "Disallow non-null assertions after optional chaining expressions.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noNoninteractiveElementInteractions": {
 					"description": "Disallow use event handlers on non-interactive elements.",
 					"anyOf": [
@@ -4769,6 +4852,20 @@
 					"description": "Disallow the use of process global.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoProcessGlobalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noQuickfixBiome": {
+					"description": "Disallow the use if quickfix.biome inside editor settings file.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQuickfixBiomeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noQwikUseVisibleTask": {
+					"description": "Disallow useVisibleTask$() functions in Qwik components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4821,6 +4918,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnnecessaryConditions": {
+					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnnecessaryConditionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnresolvedImports": {
 					"description": "Warn when importing non-existing exports.",
 					"anyOf": [
@@ -4856,6 +4960,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueReservedKeys": {
+					"description": "Disallow reserved keys in Vue component data and computed properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueReservedKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueReservedProps": {
 					"description": "Disallow reserved names to be used as props.",
 					"anyOf": [
@@ -4874,6 +4985,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAnchorHref": {
+					"description": "Enforces href attribute for \\<a> elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentObjectDefinition": {
 					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
 					"anyOf": [
@@ -4887,6 +5005,15 @@
 					"description": "Use static Response methods instead of new Response() constructor when possible.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseConsistentResponseConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentTypeDefinitions": {
+					"description": "Enforce type definitions to consistently use either interface or type.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -4922,6 +5049,13 @@
 					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseGoogleFontPreconnectConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useImageSize": {
+					"description": "Enforces that \\<img> elements have both width and height attributes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4978,6 +5112,20 @@
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikClasslist": {
+					"description": "Prefer using the class prop as a classlist over the classnames helper.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReactFunctionComponents": {
+					"description": "Enforce that components are defined as functions and never as classes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5527,6 +5675,11 @@
 					"description": "For rules that require querying multiple files inside a project",
 					"type": "string",
 					"enum": ["project"]
+				},
+				{
+					"description": "Tailwind CSS rules",
+					"type": "string",
+					"enum": ["tailwind"]
 				}
 			]
 		},
@@ -7649,6 +7802,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoNonNullAssertedOptionalChainOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoNonNullAssertedOptionalChainOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoNonNullAssertionOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -7895,6 +8065,40 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoPrototypeBuiltinsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoQuickfixBiomeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoQuickfixBiomeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoQwikUseVisibleTaskOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoQwikUseVisibleTaskOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -8630,6 +8834,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoUnnecessaryConditionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnnecessaryConditionsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoUnreachableOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9335,6 +9554,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoVueReservedKeysOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueReservedKeysOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoVueReservedPropsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9446,6 +9680,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseAnchorContentOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseAnchorHrefOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseAnchorHrefOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -9797,6 +10046,27 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseConsistentResponseOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseConsistentTypeDefinitionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseConsistentTypeDefinitionsOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -10305,6 +10575,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseImageSizeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseImageSizeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseImportExtensionsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10752,6 +11037,38 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseParseIntRadixOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseQwikClasslistOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikClasslistOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseReactFunctionComponentsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -12688,6 +13005,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseAnchorHrefConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseAnchorHrefOptions" }
+			]
+		},
+		"UseAnchorHrefOptions": { "type": "null" },
 		"UseAriaActivedescendantWithTabindexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -12905,6 +13229,22 @@
 		},
 		"UseConsistentResponseOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConsistentTypeDefinitionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseConsistentTypeDefinitionsOptions" }
+			]
+		},
+		"UseConsistentTypeDefinitionsOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"default": "interface",
+					"allOf": [{ "$ref": "#/definitions/ConsistentTypeDefinition" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseConstConfiguration": {
@@ -13222,6 +13562,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseImageSizeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseImageSizeOptions" }
+			]
+		},
+		"UseImageSizeOptions": { "type": "null" },
 		"UseImportExtensionsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13499,6 +13846,26 @@
 			]
 		},
 		"UseParseIntRadixOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikClasslistConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikClasslistOptions" }
+			]
+		},
+		"UseQwikClasslistOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseReactFunctionComponentsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseReactFunctionComponentsOptions" }
+			]
+		},
+		"UseReactFunctionComponentsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

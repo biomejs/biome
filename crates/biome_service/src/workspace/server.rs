@@ -4,7 +4,6 @@ use std::sync::{Arc, Mutex};
 
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
-use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::bool::Bool;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::vcs::VcsClientKind;
@@ -36,7 +35,7 @@ use tokio::sync::watch;
 use tracing::{info, instrument, warn};
 
 use crate::Watcher;
-use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
+use crate::configuration::{LoadedConfiguration, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::html::{extract_embedded_scripts, parse_embedded_styles};
 use crate::file_handlers::{
@@ -59,7 +58,7 @@ pub struct WorkspaceServer {
     /// metadata.
     projects: Projects,
 
-    /// The layout of projects and their internal packages.
+    //     /// The layout of projects and their internal packages.
     project_layout: Arc<ProjectLayout>,
 
     /// Module graph tracking inferred information across modules.
@@ -156,12 +155,7 @@ impl WorkspaceServer {
     ///
     /// An error may be returned if no top-level `biome.json` can be found, or
     /// if there is an error opening a config file.
-    fn find_project_root(
-        &self,
-        path: BiomePath,
-        only_rules: Vec<RuleSelector>,
-        skip_rules: Vec<RuleSelector>,
-    ) -> Result<(Utf8PathBuf, ScanKind), WorkspaceError> {
+    fn find_project_root(&self, path: BiomePath) -> Result<Utf8PathBuf, WorkspaceError> {
         let path: Utf8PathBuf = path.into();
 
         for ancestor in path.ancestors() {
@@ -193,12 +187,7 @@ impl WorkspaceServer {
                 let found = configuration.root.is_none_or(|root| root.value());
                 // Found our root config!
                 if found {
-                    let scan_kind = ProjectScanComputer::new(
-                        &configuration,
-                        skip_rules.as_slice(),
-                        only_rules.as_slice(),
-                    );
-                    return Ok((ancestor.to_path_buf(), scan_kind.compute()));
+                    return Ok(ancestor.to_path_buf());
                 }
             }
         }
@@ -768,28 +757,16 @@ impl WorkspaceServer {
 
 impl Workspace for WorkspaceServer {
     fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
-        let (path, scan_kind) = if params.open_uninitialized {
+        let path = if params.open_uninitialized {
             let path = params.path.to_path_buf();
-            self.find_project_root(
-                params.path,
-                params.only_rules.unwrap_or_default(),
-                params.skip_rules.unwrap_or_default(),
-            )
-            .unwrap_or((path, ScanKind::NoScanner))
+            self.find_project_root(params.path).unwrap_or(path)
         } else {
-            self.find_project_root(
-                params.path,
-                params.only_rules.unwrap_or_default(),
-                params.skip_rules.unwrap_or_default(),
-            )?
+            self.find_project_root(params.path)?
         };
 
         let project_key = self.projects.insert_project(path);
 
-        Ok(OpenProjectResult {
-            project_key,
-            scan_kind,
-        })
+        Ok(OpenProjectResult { project_key })
     }
 
     fn scan_project(

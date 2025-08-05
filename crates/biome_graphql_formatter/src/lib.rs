@@ -6,21 +6,26 @@ mod cst;
 mod generated;
 mod graphql;
 mod prelude;
+mod trivia;
 mod utils;
+mod verbatim;
 
 use crate::comments::GraphqlCommentStyle;
 pub(crate) use crate::context::GraphqlFormatContext;
 use crate::context::GraphqlFormatOptions;
 use crate::cst::FormatGraphqlSyntaxNode;
+use crate::prelude::{format_bogus_node, format_suppressed_node};
+pub(crate) use crate::trivia::*;
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
+use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
-    FormatToken, TransformSourceMap, write,
+    TransformSourceMap, write,
 };
 use biome_formatter::{Formatted, Printed};
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxNode, GraphqlSyntaxToken};
-use biome_rowan::{AstNode, SyntaxNode, TextRange};
+use biome_rowan::{AstNode, SyntaxNode, SyntaxToken, TextRange};
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
@@ -235,13 +240,41 @@ where
 }
 
 /// Format implementation specific to Graphql tokens.
-pub(crate) type FormatGraphqlSyntaxToken = FormatToken<GraphqlFormatContext>;
+#[derive(Debug, Default)]
+pub(crate) struct FormatGraphqlSyntaxToken;
+
+impl FormatRule<SyntaxToken<GraphqlLanguage>> for FormatGraphqlSyntaxToken {
+    type Context = GraphqlFormatContext;
+
+    fn fmt(
+        &self,
+        token: &GraphqlSyntaxToken,
+        f: &mut Formatter<Self::Context>,
+    ) -> FormatResult<()> {
+        f.state_mut().track_token(token);
+
+        self.format_skipped_token_trivia(token, f)?;
+        self.format_trimmed_token_trivia(token, f)?;
+
+        Ok(())
+    }
+}
+
+impl FormatToken<GraphqlLanguage, GraphqlFormatContext> for FormatGraphqlSyntaxToken {
+    fn format_skipped_token_trivia(
+        &self,
+        token: &GraphqlSyntaxToken,
+        f: &mut Formatter<GraphqlFormatContext>,
+    ) -> FormatResult<()> {
+        format_skipped_token_trivia(token).fmt(f)
+    }
+}
 
 impl AsFormat<GraphqlFormatContext> for GraphqlSyntaxToken {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatGraphqlSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, FormatGraphqlSyntaxToken::default())
+        FormatRefWithRule::new(self, FormatGraphqlSyntaxToken)
     }
 }
 
@@ -249,7 +282,7 @@ impl IntoFormat<GraphqlFormatContext> for GraphqlSyntaxToken {
     type Format = FormatOwnedWithRule<Self, FormatGraphqlSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, FormatGraphqlSyntaxToken::default())
+        FormatOwnedWithRule::new(self, FormatGraphqlSyntaxToken)
     }
 }
 
