@@ -90,12 +90,12 @@ jobs:
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
-        if: matrix.os == 'depot-windows-2022-4'
+        if: matrix.os == 'depot-windows-2022-16'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
       - name: Copy CLI binary
-        if: matrix.os != 'depot-windows-2022-4'
+        if: matrix.os != 'depot-windows-2022-16'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
