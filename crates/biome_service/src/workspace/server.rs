@@ -58,7 +58,7 @@ pub struct WorkspaceServer {
     /// metadata.
     projects: Projects,
 
-    //     /// The layout of projects and their internal packages.
+    /// The layout of projects and their internal packages.
     project_layout: Arc<ProjectLayout>,
 
     /// Module graph tracking inferred information across modules.

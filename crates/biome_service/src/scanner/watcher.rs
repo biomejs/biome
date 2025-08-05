@@ -133,7 +133,7 @@ impl Watcher {
                         self.unwatch_folder(workspace, path);
                     }
                     Ok(WatcherInstruction::ReindexFile(path)) => {
-                        Self::resync_file(workspace, &path);
+                        Self::reindex_file(workspace, &path);
                     }
                     Ok(WatcherInstruction::Stop) | Err(_) => {
                         debug!("stop");
@@ -301,9 +301,9 @@ impl Watcher {
         Self::index_path(workspace, to)
     }
 
-    /// Reopens an individual file if the watcher (still) has interest in it.
+    /// Reindexes an individual file if the watcher (still) has interest in it.
     #[tracing::instrument(level = "debug", skip(workspace))]
-    fn resync_file(workspace: &impl WorkspaceWatcherBridge, path: &Utf8Path) {
+    fn reindex_file(workspace: &impl WorkspaceWatcherBridge, path: &Utf8Path) {
         let Some(project_key) = workspace.find_project_for_path(path) else {
             return; // file events outside our projects can be safely ignored.
         };
