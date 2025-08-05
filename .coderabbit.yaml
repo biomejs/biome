@@ -10,6 +10,8 @@ reviews:
   review_status: true
   collapse_walkthrough: false
   estimate_code_review_effort: false
+  sequence_diagrams: false
+  changed_files_summary: false
   auto_review:
     enabled: true
     drafts: false
