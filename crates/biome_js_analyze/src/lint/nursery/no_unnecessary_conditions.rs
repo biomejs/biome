@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
     JsCallExpression, JsCatchClause, JsComputedMemberExpression, JsConditionalExpression,
     JsDoWhileStatement, JsForStatement, JsIfStatement, JsLogicalExpression, JsLogicalOperator,
-    JsStaticMemberExpression, JsSwitchStatement, JsWhileStatement,
+    JsStaticMemberExpression, JsSwitchStatement, JsWhileStatement, inner_string_text,
 };
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions;
@@ -304,48 +304,41 @@ fn check_condition_necessity(
 
     // Only detect obvious literal cases to avoid false positives
     match expr {
-        AnyJsExpression::AnyJsLiteralExpression(literal_expr) => {
-            match literal_expr {
-                AnyJsLiteralExpression::JsBooleanLiteralExpression(bool_expr) => {
-                    if let Ok(literal) = bool_expr.value_token() {
-                        if literal.text_trimmed() == "true" {
+        AnyJsExpression::AnyJsLiteralExpression(literal_expr) => match literal_expr {
+            AnyJsLiteralExpression::JsBooleanLiteralExpression(bool_expr) => {
+                if let Ok(literal) = bool_expr.value_token() {
+                    if literal.text_trimmed() == "true" {
+                        return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
+                    } else if literal.text_trimmed() == "false" {
+                        return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
+                    }
+                }
+            }
+            AnyJsLiteralExpression::JsNumberLiteralExpression(num_expr) => {
+                if let Ok(literal) = num_expr.value_token() {
+                    if let Ok(value) = literal.text_trimmed().parse::<f64>() {
+                        if value != 0.0 && !value.is_nan() {
                             return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
-                        } else if literal.text_trimmed() == "false" {
+                        } else if value == 0.0 {
                             return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
                         }
                     }
                 }
-                AnyJsLiteralExpression::JsNumberLiteralExpression(num_expr) => {
-                    if let Ok(literal) = num_expr.value_token() {
-                        if let Ok(value) = literal.text_trimmed().parse::<f64>() {
-                            if value != 0.0 && !value.is_nan() {
-                                return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
-                            } else if value == 0.0 {
-                                return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
-                            }
-                        }
-                    }
-                }
-                AnyJsLiteralExpression::JsStringLiteralExpression(str_expr) => {
-                    if let Ok(literal) = str_expr.value_token() {
-                        let text = literal.text_trimmed();
-                        // Remove quotes to get actual string content
-                        if text.len() >= 2 {
-                            let content = &text[1..text.len() - 1]; // Remove surrounding quotes
-                            return if content.is_empty() {
-                                Some(IssueKind::AlwaysFalsyCondition(expr.range()))
-                            } else {
-                                Some(IssueKind::AlwaysTruthyCondition(expr.range()))
-                            };
-                        }
-                    }
-                }
-                AnyJsLiteralExpression::JsNullLiteralExpression(_) => {
-                    return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
-                }
-                _ => {}
             }
-        }
+            AnyJsLiteralExpression::JsStringLiteralExpression(str_expr) => {
+                if let Ok(literal) = str_expr.value_token() {
+                    return if inner_string_text(&literal) {
+                        Some(IssueKind::AlwaysFalsyCondition(expr.range()))
+                    } else {
+                        Some(IssueKind::AlwaysTruthyCondition(expr.range()))
+                    };
+                }
+            }
+            AnyJsLiteralExpression::JsNullLiteralExpression(_) => {
+                return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
+            }
+            _ => {}
+        },
         AnyJsExpression::JsObjectExpression(_) => {
             // Object literals are always truthy
             return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
