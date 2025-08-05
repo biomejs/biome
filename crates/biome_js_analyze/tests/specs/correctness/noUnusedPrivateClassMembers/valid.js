@@ -179,3 +179,27 @@ class C {
 			this.#x = 1;
 	}
 }
+
+// issue #6994
+class UsedAssignmentExpr {
+  #val = 0;
+  method() {
+    return this.#val = 1
+  }
+}
+
+// issue #6933
+class UsedPreUpdateExpr {
+  #val = 0;
+  method() {
+    return ++this.#val;
+  }
+}
+
+// issue #6933
+class UsedPostUpdateExpr {
+  #val = 0;
+  method() {
+    return this.#val++;
+  }
+}

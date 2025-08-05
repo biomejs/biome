@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, AnyJsName,
-    JsAssignmentExpression, JsAssignmentOperator, JsClassDeclaration, JsSyntaxKind, JsSyntaxNode,
+    JsAssignmentExpression, JsClassDeclaration, JsSyntaxKind, JsSyntaxNode,
     TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
@@ -215,6 +215,13 @@ fn get_constructor_params(class_declaration: &JsClassDeclaration) -> FxHashSet<A
 /// this.usedOnlyInWrite = this.usedOnlyInWrite;
 /// ```
 ///
+/// # Examples of expressions that are NOT write-only
+///
+/// ```js
+/// return this.#val++;   // increment expression used as return value
+/// return this.#val = 1; // assignment used as expression
+/// ```
+///
 fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
     let parent = js_name.syntax().parent()?;
     let grand_parent = parent.parent()?;
@@ -225,28 +232,26 @@ fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
         return Some(false);
     }
 
-    if !matches!(
-        assignment_expression.operator(),
-        Ok(JsAssignmentOperator::Assign)
-    ) {
-        let kind = assignment_expression.syntax().parent().kind();
-        return Some(
-            kind.is_some_and(|kind| matches!(kind, JsSyntaxKind::JS_EXPRESSION_STATEMENT)),
-        );
-    }
-
-    Some(true)
+    // If it's not a direct child of expression statement, its result is being used
+    let kind = assignment_expression.syntax().parent().kind();
+    Some(kind.is_some_and(|kind| matches!(kind, JsSyntaxKind::JS_EXPRESSION_STATEMENT)))
 }
 
 fn is_in_update_expression(js_name: &AnyJsName) -> bool {
-    let grand_parent = js_name.syntax().grand_parent();
+    let Some(grand_parent) = js_name.syntax().grand_parent() else {
+        return false;
+    };
 
-    grand_parent.kind().is_some_and(|kind| {
-        matches!(
-            kind,
-            JsSyntaxKind::JS_POST_UPDATE_EXPRESSION | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
-        )
-    })
+    // If it's not a direct child of expression statement, its result is being used
+    let kind = grand_parent.parent().kind();
+    if !kind.is_some_and(|kind| matches!(kind, JsSyntaxKind::JS_EXPRESSION_STATEMENT)) {
+        return false;
+    }
+
+    matches!(
+        grand_parent.kind(),
+        JsSyntaxKind::JS_POST_UPDATE_EXPRESSION | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
+    )
 }
 
 impl AnyMember {
