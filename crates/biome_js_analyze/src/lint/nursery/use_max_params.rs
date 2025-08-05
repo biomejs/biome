@@ -68,7 +68,7 @@ declare_lint_rule! {
     ///
     /// ### max
     ///
-    /// The maximum number of parameters allowed (default: 7).
+    /// The maximum number of parameters allowed (default: 4).
     ///
     pub UseMaxParams {
         version: "next",

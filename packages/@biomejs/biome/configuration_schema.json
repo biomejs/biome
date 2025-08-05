@@ -13722,8 +13722,8 @@
 			"type": "object",
 			"properties": {
 				"max": {
-					"description": "Maximum number of parameters allowed (default: 7)",
-					"default": 7,
+					"description": "Maximum number of parameters allowed (default: 4)",
+					"default": 4,
 					"type": "integer",
 					"format": "uint8",
 					"minimum": 0.0

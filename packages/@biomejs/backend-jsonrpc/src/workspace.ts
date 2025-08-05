@@ -7941,7 +7941,7 @@ export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
 export interface UseMaxParamsOptions {
 	/**
-	 * Maximum number of parameters allowed (default: 7)
+	 * Maximum number of parameters allowed (default: 4)
 	 */
 	max?: number;
 }

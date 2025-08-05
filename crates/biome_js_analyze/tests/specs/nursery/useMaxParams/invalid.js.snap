@@ -48,7 +48,7 @@ const obj = {
 ```
 invalid.js:1:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Function has 8 parameters, but only 7 are allowed.
+  ! Function has 8 parameters, but only 4 are allowed.
   
   > 1 │ function tooManyParams(a, b, c, d, e, f, g, h) {
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -68,7 +68,7 @@ invalid.js:1:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━
 ```
 invalid.js:5:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Function has 9 parameters, but only 7 are allowed.
+  ! Function has 9 parameters, but only 4 are allowed.
   
     3 │ }
     4 │ 
@@ -90,7 +90,7 @@ invalid.js:5:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━
 ```
 invalid.js:9:13 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Function has 8 parameters, but only 7 are allowed.
+  ! Function has 8 parameters, but only 4 are allowed.
   
      7 │ }
      8 │ 
@@ -112,7 +112,7 @@ invalid.js:9:13 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 invalid.js:13:13 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Function has 9 parameters, but only 7 are allowed.
+  ! Function has 9 parameters, but only 4 are allowed.
   
     11 │ };
     12 │ 
@@ -134,7 +134,7 @@ invalid.js:13:13 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 invalid.js:17:16 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Function has 8 parameters, but only 7 are allowed.
+  ! Function has 8 parameters, but only 4 are allowed.
   
     15 │ };
     16 │ 
@@ -156,7 +156,7 @@ invalid.js:17:16 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 invalid.js:21:16 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Function has 9 parameters, but only 7 are allowed.
+  ! Function has 9 parameters, but only 4 are allowed.
   
     19 │ };
     20 │ 
@@ -175,7 +175,7 @@ invalid.js:21:16 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 invalid.js:24:5 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Function has 8 parameters, but only 7 are allowed.
+  ! Function has 8 parameters, but only 4 are allowed.
   
     23 │ class MyClass {
   > 24 │     method(a, b, c, d, e, f, g, h) {
@@ -196,7 +196,7 @@ invalid.js:24:5 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 invalid.js:28:5 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Function has 9 parameters, but only 7 are allowed.
+  ! Function has 9 parameters, but only 4 are allowed.
   
     26 │     }
     27 │ 
@@ -218,7 +218,7 @@ invalid.js:28:5 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 invalid.js:34:5 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Function has 8 parameters, but only 7 are allowed.
+  ! Function has 8 parameters, but only 4 are allowed.
   
     33 │ const obj = {
   > 34 │     method(a, b, c, d, e, f, g, h) {

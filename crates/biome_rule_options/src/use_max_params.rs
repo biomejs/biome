@@ -5,12 +5,12 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseMaxParamsOptions {
-    /// Maximum number of parameters allowed (default: 7)
+    /// Maximum number of parameters allowed (default: 4)
     pub max: u8,
 }
 
 impl Default for UseMaxParamsOptions {
     fn default() -> Self {
-        Self { max: 7 }
+        Self { max: 4 }
     }
 }
