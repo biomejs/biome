@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added `useConsistentTypeDefinitions` rule.
+Added the [`useConsistentTypeDefinitions`](https://biomejs.dev/rules/use-consistent-type-definitions) rule.
 
 This rule enforces consistent usage of either `interface` or `type` for object type definitions in TypeScript.
 
