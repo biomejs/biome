@@ -186,6 +186,7 @@ class C {
 	}
 }
 
+// issue #6994
 class UsedAssignmentExpr {
   #val = 0;
   method() {
@@ -193,6 +194,7 @@ class UsedAssignmentExpr {
   }
 }
 
+// issue #6933
 class UsedPreUpdateExpr {
   #val = 0;
   method() {
@@ -200,7 +202,7 @@ class UsedPreUpdateExpr {
   }
 }
 
-
+// issue #6933
 class UsedPostUpdateExpr {
   #val = 0;
   method() {
