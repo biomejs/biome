@@ -39,7 +39,7 @@ impl GraphqlFileSource {
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
         match extension {
-            "graphql" | "gql" => Ok(Self::default()),
+            "graphqls" | "graphql" | "gql" => Ok(Self::default()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -52,7 +52,7 @@ impl GraphqlFileSource {
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
-            "graphql" | "gql" => Ok(Self::default()),
+            "graphqls" | "graphql" | "gql" => Ok(Self::default()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }
