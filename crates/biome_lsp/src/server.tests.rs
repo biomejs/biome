@@ -604,15 +604,13 @@ async fn document_lifecycle() -> Result<()> {
 
     // `open_project()` will return an existing key if called with a path
     // for an existing project.
-    let OpenProjectResult { project_key, .. } = server
+    let OpenProjectResult { project_key } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
             },
         )
         .await?
@@ -666,15 +664,13 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 
         // `open_project()` will return an existing key if called with a path
         // for an existing project.
-        let OpenProjectResult { project_key, .. } = server
+        let OpenProjectResult { project_key } = server
             .request(
                 "biome/open_project",
                 "open_project",
                 OpenProjectParams {
                     path: BiomePath::new(""),
                     open_uninitialized: true,
-                    only_rules: None,
-                    skip_rules: None,
                 },
             )
             .await?
@@ -712,15 +708,13 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 
         // `open_project()` will return an existing key if called with a path
         // for an existing project.
-        let OpenProjectResult { project_key, .. } = server
+        let OpenProjectResult { project_key } = server
             .request(
                 "biome/open_project",
                 "open_project",
                 OpenProjectParams {
                     path: BiomePath::new(""),
                     open_uninitialized: true,
-                    only_rules: None,
-                    skip_rules: None,
                 },
             )
             .await?
@@ -2561,15 +2555,13 @@ isSpreadAssignment;
 
     // `open_project()` will return an existing key if called with a path
     // for an existing project.
-    let OpenProjectResult { project_key, .. } = server
+    let OpenProjectResult { project_key } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
-                skip_rules: None,
-                only_rules: None,
             },
         )
         .await?
@@ -3383,15 +3375,13 @@ export function bar() {
 
     server.initialize().await?;
 
-    let OpenProjectResult { project_key, .. } = server
+    let OpenProjectResult { project_key } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: fs.working_directory.clone().into(),
                 open_uninitialized: true,
-                skip_rules: None,
-                only_rules: None,
             },
         )
         .await?
@@ -3581,15 +3571,13 @@ export function bar() {
 
     server.initialize().await?;
 
-    let OpenProjectResult { project_key, .. } = server
+    let OpenProjectResult { project_key } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: fs.working_directory.clone().into(),
                 open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
             },
         )
         .await?
@@ -3739,15 +3727,13 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     server.initialize().await?;
 
     // ARRANGE: Open project.
-    let OpenProjectResult { project_key, .. } = server
+    let OpenProjectResult { project_key } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: fs.working_directory.clone().into(),
                 open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
             },
         )
         .await?

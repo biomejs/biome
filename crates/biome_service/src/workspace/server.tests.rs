@@ -21,8 +21,6 @@ fn commonjs_file_rejects_import_statement() {
         .open_project(OpenProjectParams {
             path: BiomePath::new("/"),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         })
         .unwrap();
 
@@ -84,8 +82,6 @@ fn store_embedded_nodes_with_corrent_ranges() {
         .open_project(OpenProjectParams {
             path: BiomePath::new("/"),
             open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
         })
         .unwrap();
 
