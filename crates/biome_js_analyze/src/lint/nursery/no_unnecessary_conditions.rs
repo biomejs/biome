@@ -327,7 +327,7 @@ fn check_condition_necessity(
             }
             AnyJsLiteralExpression::JsStringLiteralExpression(str_expr) => {
                 if let Ok(literal) = str_expr.value_token() {
-                    return if inner_string_text(&literal) {
+                    return if inner_string_text(&literal).is_empty() {
                         Some(IssueKind::AlwaysFalsyCondition(expr.range()))
                     } else {
                         Some(IssueKind::AlwaysTruthyCondition(expr.range()))
