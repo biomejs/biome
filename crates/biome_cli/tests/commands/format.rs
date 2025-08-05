@@ -174,7 +174,7 @@ const SPACING_GRAPHQLS_SANITY_BEFORE: &str = r#"  scalar Time
 
 "#;
 
-const SPACING_GRAPHQLS_SANITY_BEFORE: &str = r#"scalar Time
+const SPACING_GRAPHQLS_SANITY_AFTER: &str = r#"scalar Time
 scalar UUID
 
 type User {
