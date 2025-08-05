@@ -82,7 +82,7 @@ declare_node_union! {
 
 #[derive(Debug, Clone)]
 pub enum UnusedMemberAction {
-    Remove(AnyMember),
+    RemoveMember(AnyMember),
     RemovePrivateModifier {
         member: AnyMember,
         rename_with_underscore: bool,
@@ -92,7 +92,7 @@ pub enum UnusedMemberAction {
 impl UnusedMemberAction {
     fn property_range(&self) -> Option<TextRange> {
         match self {
-            Self::Remove(member) => member.property_range(),
+            Self::RemoveMember(member) => member.property_range(),
             Self::RemovePrivateModifier { member, .. } => member.property_range(),
         }
     }
@@ -116,7 +116,7 @@ impl Rule for NoUnusedPrivateClassMembers {
             for member in unused_members {
                 match &member {
                     AnyMember::AnyJsClassMember(_) => {
-                        results.push(UnusedMemberAction::Remove(member));
+                        results.push(UnusedMemberAction::RemoveMember(member));
                     }
                     AnyMember::TsPropertyParameter(ts_property_param) => {
                         // Check if the parameter is also unused in constructor body using semantic analysis
@@ -148,7 +148,7 @@ impl Rule for NoUnusedPrivateClassMembers {
         let mut mutation = ctx.root().begin();
 
         match state {
-            UnusedMemberAction::Remove(member) => {
+            UnusedMemberAction::RemoveMember(member) => {
                 mutation.remove_node(member.clone());
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -255,34 +255,31 @@ fn check_ts_property_parameter_usage(
     ts_property_param: &TsPropertyParameter,
 ) -> bool {
     if let Ok(AnyJsFormalParameter::JsFormalParameter(param)) = ts_property_param.formal_parameter()
+        && let Ok(binding) = param.binding()
+        && let Some(identifier_binding) = binding
+            .as_any_js_binding()
+            .and_then(|b| b.as_js_identifier_binding())
     {
-        if let Ok(binding) = param.binding() {
-            if let Some(identifier_binding) = binding
-                .as_any_js_binding()
-                .and_then(|b| b.as_js_identifier_binding())
-            {
-                let name_token = match identifier_binding.name_token() {
-                    Ok(token) => token,
-                    Err(_) => return false,
-                };
+        let name_token = match identifier_binding.name_token() {
+            Ok(token) => token,
+            Err(_) => return false,
+        };
 
-                let name = name_token.text_trimmed();
+        let name = name_token.text_trimmed();
 
-                if name.starts_with('_') {
-                    return false;
-                }
-
-                if identifier_binding
-                    .all_references(ctx.model())
-                    .next()
-                    .is_some()
-                {
-                    return false;
-                }
-
-                return true;
-            }
+        if name.starts_with('_') {
+            return false;
         }
+
+        if identifier_binding
+            .all_references(ctx.model())
+            .next()
+            .is_some()
+        {
+            return false;
+        }
+
+        return true;
     }
 
     false
