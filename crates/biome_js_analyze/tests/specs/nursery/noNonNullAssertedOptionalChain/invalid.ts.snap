@@ -4,6 +4,8 @@ expression: invalid.ts
 ---
 # Input
 ```ts
+// https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-non-null-asserted-optional-chain.test.ts
+
 // Basic optional chaining with non-null assertion
 foo?.bar!;
 
@@ -33,19 +35,20 @@ foo.bar?.()!;
 
 // Nested parenthesized optional chaining call with non-null assertion
 (foo?.bar!)();
+
 ```
 
 # Diagnostics
 ```
-invalid.ts:2:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:4:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
-    1 │ // Basic optional chaining with non-null assertion
-  > 2 │ foo?.bar!;
+    3 │ // Basic optional chaining with non-null assertion
+  > 4 │ foo?.bar!;
       │ ^^^^^^^^^
-    3 │ 
-    4 │ // Computed member access with optional chaining and non-null assertion
+    5 │ 
+    6 │ // Computed member access with optional chaining and non-null assertion
   
   i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
   
@@ -55,15 +58,15 @@ invalid.ts:2:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━
 ```
 
 ```
-invalid.ts:5:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:7:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
-    4 │ // Computed member access with optional chaining and non-null assertion
-  > 5 │ foo?.["bar"]!;
+    6 │ // Computed member access with optional chaining and non-null assertion
+  > 7 │ foo?.["bar"]!;
       │ ^^^^^^^^^^^^^
-    6 │ 
-    7 │ // Optional chaining method call with non-null assertion
+    8 │ 
+    9 │ // Optional chaining method call with non-null assertion
   
   i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
   
@@ -73,15 +76,15 @@ invalid.ts:5:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━
 ```
 
 ```
-invalid.ts:8:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:10:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
-     7 │ // Optional chaining method call with non-null assertion
-   > 8 │ foo?.bar()!;
+     9 │ // Optional chaining method call with non-null assertion
+  > 10 │ foo?.bar()!;
        │ ^^^^^^^^^^^
-     9 │ 
-    10 │ // Optional chaining call with non-null assertion
+    11 │ 
+    12 │ // Optional chaining call with non-null assertion
   
   i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
   
@@ -91,15 +94,15 @@ invalid.ts:8:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━
 ```
 
 ```
-invalid.ts:11:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
-    10 │ // Optional chaining call with non-null assertion
-  > 11 │ foo.bar?.()!;
+    12 │ // Optional chaining call with non-null assertion
+  > 13 │ foo.bar?.()!;
        │ ^^^^^^^^^^^^
-    12 │ 
-    13 │ // Parenthesized optional chaining with non-null assertion
+    14 │ 
+    15 │ // Parenthesized optional chaining with non-null assertion
   
   i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
   
@@ -109,15 +112,15 @@ invalid.ts:11:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:14:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:16:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
-    13 │ // Parenthesized optional chaining with non-null assertion
-  > 14 │ (foo?.bar)!.baz;
+    15 │ // Parenthesized optional chaining with non-null assertion
+  > 16 │ (foo?.bar)!.baz;
        │ ^^^^^^^^^^^
-    15 │ 
-    16 │ // Parenthesized optional chaining call with non-null assertion
+    17 │ 
+    18 │ // Parenthesized optional chaining call with non-null assertion
   
   i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
   
@@ -127,15 +130,15 @@ invalid.ts:14:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:17:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:19:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
-    16 │ // Parenthesized optional chaining call with non-null assertion
-  > 17 │ (foo?.bar)!().baz;
+    18 │ // Parenthesized optional chaining call with non-null assertion
+  > 19 │ (foo?.bar)!().baz;
        │ ^^^^^^^^^^^
-    18 │ 
-    19 │ // Parenthesized optional chaining with non-null assertion (standalone)
+    20 │ 
+    21 │ // Parenthesized optional chaining with non-null assertion (standalone)
   
   i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
   
@@ -145,15 +148,15 @@ invalid.ts:17:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:20:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:22:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
-    19 │ // Parenthesized optional chaining with non-null assertion (standalone)
-  > 20 │ (foo?.bar)!;
+    21 │ // Parenthesized optional chaining with non-null assertion (standalone)
+  > 22 │ (foo?.bar)!;
        │ ^^^^^^^^^^^
-    21 │ 
-    22 │ // Parenthesized optional chaining call with non-null assertion (standalone)
+    23 │ 
+    24 │ // Parenthesized optional chaining call with non-null assertion (standalone)
   
   i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
   
@@ -163,15 +166,15 @@ invalid.ts:20:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:23:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:25:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
-    22 │ // Parenthesized optional chaining call with non-null assertion (standalone)
-  > 23 │ (foo?.bar)!();
+    24 │ // Parenthesized optional chaining call with non-null assertion (standalone)
+  > 25 │ (foo?.bar)!();
        │ ^^^^^^^^^^^
-    24 │ 
-    25 │ // Nested parenthesized optional chaining with non-null assertion
+    26 │ 
+    27 │ // Nested parenthesized optional chaining with non-null assertion
   
   i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
   
@@ -181,15 +184,15 @@ invalid.ts:23:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:26:2 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:28:2 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
-    25 │ // Nested parenthesized optional chaining with non-null assertion
-  > 26 │ (foo?.bar!);
+    27 │ // Nested parenthesized optional chaining with non-null assertion
+  > 28 │ (foo?.bar!);
        │  ^^^^^^^^^
-    27 │ 
-    28 │ // Nested parenthesized optional chaining call with non-null assertion
+    29 │ 
+    30 │ // Nested parenthesized optional chaining call with non-null assertion
   
   i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
   
@@ -199,13 +202,14 @@ invalid.ts:26:2 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:29:2 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:31:2 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
-    28 │ // Nested parenthesized optional chaining call with non-null assertion
-  > 29 │ (foo?.bar!)();
+    30 │ // Nested parenthesized optional chaining call with non-null assertion
+  > 31 │ (foo?.bar!)();
        │  ^^^^^^^^^
+    32 │ 
   
   i Optional chaining already handles nullish values. Using non-null assertion defeats its purpose and may cause runtime errors.
   

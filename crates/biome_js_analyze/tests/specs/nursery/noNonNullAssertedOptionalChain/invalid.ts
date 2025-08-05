@@ -1,3 +1,5 @@
+// https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/tests/rules/no-non-null-asserted-optional-chain.test.ts
+
 // Basic optional chaining with non-null assertion
 foo?.bar!;
 
