@@ -923,6 +923,18 @@ impl<'src> CssLexer<'src> {
             b"composes" => COMPOSES_KW,
             b"position-try" => POSITION_TRY_KW,
             b"view-transition" => VIEW_TRANSITION_KW,
+            // Tailwind CSS 4.0 keywords
+            b"theme" => THEME_KW,
+            b"utility" => UTILITY_KW,
+            b"variant" => VARIANT_KW,
+            b"custom-variant" => CUSTOM_VARIANT_KW,
+            b"apply" => APPLY_KW,
+            b"source" => SOURCE_KW,
+            b"reference" => REFERENCE_KW,
+            b"config" => CONFIG_KW,
+            b"plugin" => PLUGIN_KW,
+            b"--alpha" => _ALPHA_KW,
+            b"--spacing" => _SPACING_KW,
             _ => IDENT,
         }
     }

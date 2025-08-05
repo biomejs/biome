@@ -20,6 +20,7 @@ mod property;
 mod scope;
 mod starting_style;
 mod supports;
+mod tailwind;
 mod unknown;
 mod value;
 mod view_transition;
@@ -44,9 +45,15 @@ use crate::syntax::at_rule::property::parse_property_at_rule;
 use crate::syntax::at_rule::scope::parse_scope_at_rule;
 use crate::syntax::at_rule::starting_style::parse_starting_style_at_rule;
 use crate::syntax::at_rule::supports::parse_supports_at_rule;
+use crate::syntax::at_rule::tailwind::{
+    parse_apply_at_rule, parse_config_at_rule, parse_custom_variant_at_rule, parse_plugin_at_rule,
+    parse_reference_at_rule, parse_source_at_rule, parse_theme_at_rule, parse_utility_at_rule,
+    parse_variant_at_rule,
+};
 use crate::syntax::at_rule::unknown::{is_at_unknown_at_rule, parse_unknown_at_rule};
 use crate::syntax::at_rule::value::parse_value_at_rule;
 use crate::syntax::at_rule::view_transition::parse_view_transition_at_rule;
+
 use crate::syntax::parse_error::expected_any_at_rule;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -84,6 +91,22 @@ pub(crate) fn parse_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    // Try Tailwind directives first when enabled
+    if p.options().is_tailwind_directives_enabled() {
+        match p.cur() {
+            T![theme] => return parse_theme_at_rule(p),
+            T![utility] => return parse_utility_at_rule(p),
+            T![variant] => return parse_variant_at_rule(p),
+            T![custom_variant] => return parse_custom_variant_at_rule(p),
+            T![apply] => return parse_apply_at_rule(p),
+            T![source] => return parse_source_at_rule(p),
+            T![reference] => return parse_reference_at_rule(p),
+            T![config] => return parse_config_at_rule(p),
+            T![plugin] => return parse_plugin_at_rule(p),
+            _ => {}
+        }
+    }
+
     match p.cur() {
         T![charset] => parse_charset_at_rule(p),
         T![color_profile] => parse_color_profile_at_rule(p),

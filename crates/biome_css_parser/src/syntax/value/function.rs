@@ -19,7 +19,7 @@ use biome_parser::{Parser, TokenSet, token_set};
 /// It's used to quickly determine if the parser is positioned at a relevant function.
 #[inline]
 pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
-    is_at_url_function(p) || is_at_function(p)
+    is_at_url_function(p) || is_at_function(p) || is_at_tailwind_function(p)
 }
 
 /// Parses any recognized CSS function at the current position in the `CssParser`.
@@ -35,6 +35,8 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_url_function(p) {
         parse_url_function(p)
+    } else if is_at_tailwind_function(p) {
+        parse_tailwind_function(p)
     } else {
         parse_function(p)
     }
@@ -257,4 +259,58 @@ pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> Pa
     let m = p.start();
     CssComponentValueList.parse_list(p);
     Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
+}
+
+/// Checks if the current position is at a Tailwind function
+pub(crate) fn is_at_tailwind_function(p: &mut CssParser) -> bool {
+    if !p.options().is_tailwind_directives_enabled() {
+        return false;
+    }
+
+    p.at(T![__alpha]) || p.at(T![__spacing])
+}
+
+/// Parses Tailwind CSS 4.0 functions
+pub(crate) fn parse_tailwind_function(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_tailwind_function(p) {
+        return Absent;
+    }
+
+    if p.at(T![__alpha]) {
+        parse_alpha_function(p)
+    } else if p.at(T![__spacing]) {
+        parse_spacing_function(p)
+    } else {
+        Absent
+    }
+}
+
+fn parse_alpha_function(p: &mut CssParser) -> ParsedSyntax {
+    // --alpha(0.5) or --alpha(var(--opacity))
+    let m = p.start();
+    p.bump(T![__alpha]);
+    p.expect(T!['(']);
+
+    // Parse optional expression parameter
+    if !p.at(T![')']) {
+        parse_any_expression(p).ok();
+    }
+
+    p.expect(T![')']);
+    Present(m.complete(p, CSS_TAILWIND_ALPHA_FUNCTION))
+}
+
+fn parse_spacing_function(p: &mut CssParser) -> ParsedSyntax {
+    // --spacing(4) or --spacing(var(--spacing-base))
+    let m = p.start();
+    p.bump(T![__spacing]);
+    p.expect(T!['(']);
+
+    // Parse optional expression parameter
+    if !p.at(T![')']) {
+        parse_any_expression(p).ok();
+    }
+
+    p.expect(T![')']);
+    Present(m.complete(p, CSS_TAILWIND_SPACING_FUNCTION))
 }

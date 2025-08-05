@@ -24,7 +24,7 @@ use biome_analyze::{
 use biome_configuration::css::{
     CssAllowWrongLineCommentsEnabled, CssAssistConfiguration, CssAssistEnabled,
     CssFormatterConfiguration, CssFormatterEnabled, CssLinterConfiguration, CssLinterEnabled,
-    CssModulesEnabled, CssParserConfiguration,
+    CssModulesEnabled, CssParserConfiguration, CssTailwindDirectivesEnabled,
 };
 use biome_css_analyze::analyze;
 use biome_css_formatter::context::CssFormatOptions;
@@ -102,6 +102,7 @@ impl From<CssAssistConfiguration> for CssAssistSettings {
 pub struct CssParserSettings {
     pub allow_wrong_line_comments: Option<CssAllowWrongLineCommentsEnabled>,
     pub css_modules_enabled: Option<CssModulesEnabled>,
+    pub tailwind_directives: Option<CssTailwindDirectivesEnabled>,
 }
 
 impl From<CssParserConfiguration> for CssParserSettings {
@@ -109,6 +110,7 @@ impl From<CssParserConfiguration> for CssParserSettings {
         Self {
             allow_wrong_line_comments: configuration.allow_wrong_line_comments,
             css_modules_enabled: configuration.css_modules,
+            tailwind_directives: configuration.tailwind_directives,
         }
     }
 }
@@ -126,6 +128,10 @@ impl CssParserSettings {
 
     pub fn allow_wrong_line_comments(&self) -> bool {
         self.allow_wrong_line_comments.unwrap_or_default().into()
+    }
+
+    pub fn tailwind_directives_enabled(&self) -> bool {
+        self.tailwind_directives.unwrap_or_default().into()
     }
 }
 
@@ -386,6 +392,7 @@ fn parse(
             .unwrap_or_default()
             .into(),
         grit_metavariables: false,
+        tailwind_directives: false,
     };
 
     settings

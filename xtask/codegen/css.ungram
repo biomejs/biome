@@ -641,6 +641,16 @@ AnyCssAtRule =
 	| CssValueAtRule
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
+	// Tailwind CSS 4.0 at rules
+	| CssThemeAtRule
+	| CssSourceAtRule
+	| CssUtilityAtRule
+	| CssVariantAtRule
+	| CssCustomVariantAtRule
+	| CssApplyAtRule
+	| CssReferenceAtRule
+	| CssConfigAtRule
+	| CssPluginAtRule
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
 	| CssBogusAtRule
@@ -1719,6 +1729,8 @@ CssRatio =
 AnyCssFunction =
 	CssFunction
 	| CssUrlFunction
+	| CssTailwindAlphaFunction
+	| CssTailwindSpacingFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -1755,6 +1767,24 @@ AnyCssUrlModifier =
 AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
+
+// Tailwind CSS 4.0 --alpha() function
+// color: rgb(255 0 0 / --alpha(0.5));
+//                     ^^^^^^^^^^^^^^
+CssTailwindAlphaFunction =
+	'--alpha'
+	'('
+	value: AnyCssExpression?
+	')'
+
+// Tailwind CSS 4.0 --spacing() function
+// margin: --spacing(4);
+//         ^^^^^^^^^^^^
+CssTailwindSpacingFunction =
+	'--spacing'
+	'('
+	value: AnyCssExpression?
+	')'
 
 CssParameterList = CssParameter (',' CssParameter)* ','?
 
@@ -1847,3 +1877,71 @@ CssUrlValueRaw = value: 'css_url_value_raw_literal'
 
 // https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-css/grammar.js
 CssMetavariable = value: 'grit_metavariable'
+
+
+// Tailwind
+
+// Tailwind 4.0 @theme directive
+// @theme { --color-primary: #3b82f6; }
+CssThemeAtRule =
+    'theme'
+    block: AnyCssDeclarationBlock
+
+// Tailwind 4.0 @utility directive
+// @utility tab-4 { tab-size: 4; }
+CssUtilityAtRule =
+    'utility'
+    name: CssIdentifier
+    block: AnyCssDeclarationBlock
+
+// Tailwind 4.0 @variant directive
+// @variant dark { background: black; }
+CssVariantAtRule =
+    'variant'
+    name: CssIdentifier
+    block: AnyCssDeclarationBlock
+
+// Tailwind 4.0 @custom-variant directive
+// @custom-variant theme-midnight (&:where([data-theme="midnight"] *));
+CssCustomVariantAtRule =
+    'custom-variant'
+    name: CssIdentifier
+    selector: CssString
+    ';'
+
+// Tailwind 4.0 @apply directive (enhanced)
+// @apply text-lg font-bold;
+CssApplyAtRule =
+    'apply'
+    classes: CssApplyClassList
+    ';'
+
+CssApplyClassList = CssIdentifier*
+
+// Tailwind 4.0 @source directive
+// @source "../node_modules/@my-company/ui-lib";
+CssSourceAtRule =
+    'source'
+    path: CssString
+    ';'
+
+// Tailwind 4.0 @reference directive
+// @reference "../../app.css";
+CssReferenceAtRule =
+    'reference'
+    path: CssString
+    ';'
+
+// Tailwind 4.0 @config directive (compatibility)
+// @config "../../tailwind.config.js";
+CssConfigAtRule =
+    'config'
+    path: CssString
+    ';'
+
+// Tailwind 4.0 @plugin directive (compatibility)
+// @plugin "@tailwindcss/typography";
+CssPluginAtRule =
+    'plugin'
+    name: CssString
+    ';'

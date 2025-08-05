@@ -1,0 +1,27 @@
+/* Basic Tailwind CSS 4.0 directives test */
+
+@theme {
+  --color-primary: #3b82f6;
+  --spacing-base: 1rem;
+}
+
+@utility center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@variant dark {
+  background: black;
+  color: white;
+}
+
+@apply text-lg font-bold;
+
+@source "./base.css";
+
+@reference "./theme.css";
+
+@config "./tailwind.config.js";
+
+@plugin "@tailwindcss/typography";

@@ -6,6 +6,20 @@ use biome_css_syntax::{
     *,
 };
 use biome_rowan::AstNode;
+pub fn css_apply_at_rule(
+    apply_token: SyntaxToken,
+    classes: CssApplyClassList,
+    semicolon_token: SyntaxToken,
+) -> CssApplyAtRule {
+    CssApplyAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_APPLY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(apply_token)),
+            Some(SyntaxElement::Node(classes.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn css_at_rule(at_token: SyntaxToken, rule: AnyCssAtRule) -> CssAtRule {
     CssAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_AT_RULE,
@@ -288,6 +302,20 @@ impl CssCompoundSelectorBuilder {
         ))
     }
 }
+pub fn css_config_at_rule(
+    config_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> CssConfigAtRule {
+    CssConfigAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONFIG_AT_RULE,
+        [
+            Some(SyntaxElement::Token(config_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn css_container_and_query(
     left: AnyCssContainerQueryInParens,
     and_token: SyntaxToken,
@@ -480,6 +508,22 @@ pub fn css_custom_identifier(value_token: SyntaxToken) -> CssCustomIdentifier {
     CssCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CUSTOM_IDENTIFIER,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_custom_variant_at_rule(
+    custom_variant_token: SyntaxToken,
+    name: CssIdentifier,
+    selector: CssString,
+    semicolon_token: SyntaxToken,
+) -> CssCustomVariantAtRule {
+    CssCustomVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_VARIANT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(custom_variant_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
     ))
 }
 pub fn css_dashed_identifier(value_token: SyntaxToken) -> CssDashedIdentifier {
@@ -1364,6 +1408,20 @@ pub fn css_percentage(value_token: SyntaxToken, percent_token: SyntaxToken) -> C
         ],
     ))
 }
+pub fn css_plugin_at_rule(
+    plugin_token: SyntaxToken,
+    name: CssString,
+    semicolon_token: SyntaxToken,
+) -> CssPluginAtRule {
+    CssPluginAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PLUGIN_AT_RULE,
+        [
+            Some(SyntaxElement::Token(plugin_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn css_position_try_at_rule(
     position_try_token: SyntaxToken,
     name: CssDashedIdentifier,
@@ -1832,6 +1890,20 @@ pub fn css_ratio(
         ],
     ))
 }
+pub fn css_reference_at_rule(
+    reference_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> CssReferenceAtRule {
+    CssReferenceAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_REFERENCE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(reference_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn css_regular_dimension(
     value_token: SyntaxToken,
     unit_token: SyntaxToken,
@@ -1987,6 +2059,20 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
         [Some(SyntaxElement::Node(start.into_syntax()))],
     ))
 }
+pub fn css_source_at_rule(
+    source_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> CssSourceAtRule {
+    CssSourceAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SOURCE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(source_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn css_starting_style_at_rule(
     starting_style_token: SyntaxToken,
     block: AnyCssConditionalBlock,
@@ -2100,6 +2186,90 @@ pub fn css_supports_or_condition(
             Some(SyntaxElement::Node(left.into_syntax())),
             Some(SyntaxElement::Token(or_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_tailwind_alpha_function(
+    __alpha_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+) -> CssTailwindAlphaFunctionBuilder {
+    CssTailwindAlphaFunctionBuilder {
+        __alpha_token,
+        l_paren_token,
+        r_paren_token,
+        value: None,
+    }
+}
+pub struct CssTailwindAlphaFunctionBuilder {
+    __alpha_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    value: Option<AnyCssExpression>,
+}
+impl CssTailwindAlphaFunctionBuilder {
+    pub fn with_value(mut self, value: AnyCssExpression) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> CssTailwindAlphaFunction {
+        CssTailwindAlphaFunction::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_TAILWIND_ALPHA_FUNCTION,
+            [
+                Some(SyntaxElement::Token(self.__alpha_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn css_tailwind_spacing_function(
+    __spacing_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+) -> CssTailwindSpacingFunctionBuilder {
+    CssTailwindSpacingFunctionBuilder {
+        __spacing_token,
+        l_paren_token,
+        r_paren_token,
+        value: None,
+    }
+}
+pub struct CssTailwindSpacingFunctionBuilder {
+    __spacing_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    value: Option<AnyCssExpression>,
+}
+impl CssTailwindSpacingFunctionBuilder {
+    pub fn with_value(mut self, value: AnyCssExpression) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> CssTailwindSpacingFunction {
+        CssTailwindSpacingFunction::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_TAILWIND_SPACING_FUNCTION,
+            [
+                Some(SyntaxElement::Token(self.__spacing_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn css_theme_at_rule(
+    theme_token: SyntaxToken,
+    block: AnyCssDeclarationBlock,
+) -> CssThemeAtRule {
+    CssThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_THEME_AT_RULE,
+        [
+            Some(SyntaxElement::Token(theme_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
@@ -2282,6 +2452,20 @@ pub fn css_url_value_raw(value_token: SyntaxToken) -> CssUrlValueRaw {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn css_utility_at_rule(
+    utility_token: SyntaxToken,
+    name: CssIdentifier,
+    block: AnyCssDeclarationBlock,
+) -> CssUtilityAtRule {
+    CssUtilityAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UTILITY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(utility_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_value_at_rule(
     value_token: SyntaxToken,
     clause: AnyCssValueAtRuleClause,
@@ -2352,6 +2536,20 @@ pub fn css_value_at_rule_named_import_specifier(
         ],
     ))
 }
+pub fn css_variant_at_rule(
+    variant_token: SyntaxToken,
+    name: CssIdentifier,
+    block: AnyCssDeclarationBlock,
+) -> CssVariantAtRule {
+    CssVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VARIANT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(variant_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_view_transition_at_rule(
     view_transition_token: SyntaxToken,
     block: AnyCssDeclarationBlock,
@@ -2362,6 +2560,18 @@ pub fn css_view_transition_at_rule(
             Some(SyntaxElement::Token(view_transition_token)),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
+    ))
+}
+pub fn css_apply_class_list<I>(items: I) -> CssApplyClassList
+where
+    I: IntoIterator<Item = CssIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssApplyClassList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_APPLY_CLASS_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList

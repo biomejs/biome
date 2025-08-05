@@ -8,11 +8,14 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssAtRule, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
+            AnyCssAtRule::CssApplyAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssBogusAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssCharsetAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssColorProfileAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssConfigAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssContainerAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssCounterStyleAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssCustomVariantAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssDocumentAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssFontFaceAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssFontFeatureValuesAtRule(node) => node.format().fmt(f),
@@ -23,14 +26,20 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
             AnyCssAtRule::CssMediaAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssNamespaceAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssPageAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssPluginAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssPositionTryAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssPropertyAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssReferenceAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssScopeAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssSourceAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssStartingStyleAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssSupportsAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssThemeAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssUnknownBlockAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssUnknownValueAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssUtilityAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssValueAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssVariantAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssViewTransitionAtRule(node) => node.format().fmt(f),
         }
     }

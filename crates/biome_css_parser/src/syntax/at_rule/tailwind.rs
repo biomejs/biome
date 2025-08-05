@@ -1,0 +1,210 @@
+use crate::parser::CssParser;
+use crate::syntax::block::parse_declaration_block;
+use crate::syntax::parse_error::{expected_identifier, expected_string};
+use crate::syntax::{is_at_identifier, parse_regular_identifier};
+use biome_css_syntax::CssSyntaxKind::*;
+use biome_css_syntax::T;
+use biome_parser::parsed_syntax::ParsedSyntax;
+use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
+use biome_parser::prelude::*;
+
+// @theme { --color-primary: #3b82f6; }
+pub(crate) fn parse_theme_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.options().is_tailwind_directives_enabled() || !p.at(T![theme]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![theme]);
+
+    parse_declaration_block(p);
+
+    Present(m.complete(p, CSS_THEME_AT_RULE))
+}
+
+// @utility tab-4 { tab-size: 4; }
+pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.options().is_tailwind_directives_enabled() || !p.at(T![utility]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![utility]);
+
+    if !is_at_identifier(p) {
+        p.error(expected_identifier(p, p.cur_range()));
+        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+    }
+
+    parse_regular_identifier(p).ok();
+
+    parse_declaration_block(p);
+
+    Present(m.complete(p, CSS_UTILITY_AT_RULE))
+}
+
+// @variant dark { background: black; }
+pub(crate) fn parse_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.options().is_tailwind_directives_enabled() || !p.at(T![variant]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![variant]);
+
+    if !is_at_identifier(p) {
+        p.error(expected_identifier(p, p.cur_range()));
+        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+    }
+
+    parse_regular_identifier(p).ok();
+
+    parse_declaration_block(p);
+
+    Present(m.complete(p, CSS_VARIANT_AT_RULE))
+}
+
+// @custom-variant theme-midnight (&:where([data-theme="midnight"] *));
+pub(crate) fn parse_custom_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.options().is_tailwind_directives_enabled() || !p.at(T![custom_variant]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![custom_variant]);
+
+    if !is_at_identifier(p) {
+        p.error(expected_identifier(p, p.cur_range()));
+        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+    }
+
+    parse_regular_identifier(p).ok();
+
+    // Parse selector - can be a string or parenthesized expression
+    if p.at(CSS_STRING_LITERAL) {
+        p.bump(CSS_STRING_LITERAL);
+    } else if p.at(T!['(']) {
+        p.bump(T!['(']);
+        // Parse the selector expression inside parentheses
+        let mut paren_count = 1;
+        while paren_count > 0 && !p.at(EOF) {
+            if p.at(T!['(']) {
+                paren_count += 1;
+            } else if p.at(T![')']) {
+                paren_count -= 1;
+            }
+            if paren_count > 0 {
+                p.bump_any();
+            }
+        }
+        p.expect(T![')']);
+    } else {
+        p.error(expected_string(p, p.cur_range()));
+        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+    }
+
+    p.expect(T![;]);
+
+    Present(m.complete(p, CSS_CUSTOM_VARIANT_AT_RULE))
+}
+
+// @apply text-lg font-bold;
+pub(crate) fn parse_apply_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.options().is_tailwind_directives_enabled() || !p.at(T![apply]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![apply]);
+
+    // Parse class list
+    let class_list = p.start();
+    while is_at_identifier(p) && !p.at(T![;]) && !p.at(EOF) {
+        parse_regular_identifier(p).ok();
+    }
+    class_list.complete(p, CSS_APPLY_CLASS_LIST);
+
+    p.expect(T![;]);
+
+    Present(m.complete(p, CSS_APPLY_AT_RULE))
+}
+
+// @config "../../tailwind.config.js";
+pub(crate) fn parse_config_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.options().is_tailwind_directives_enabled() || !p.at(T![config]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![config]);
+
+    if !p.at(CSS_STRING_LITERAL) {
+        p.error(expected_string(p, p.cur_range()));
+        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+    }
+
+    p.bump(CSS_STRING_LITERAL);
+    p.expect(T![;]);
+
+    Present(m.complete(p, CSS_CONFIG_AT_RULE))
+}
+
+// @plugin "@tailwindcss/typography";
+pub(crate) fn parse_plugin_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.options().is_tailwind_directives_enabled() || !p.at(T![plugin]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![plugin]);
+
+    if !p.at(CSS_STRING_LITERAL) {
+        p.error(expected_string(p, p.cur_range()));
+        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+    }
+
+    p.bump(CSS_STRING_LITERAL);
+    p.expect(T![;]);
+
+    Present(m.complete(p, CSS_PLUGIN_AT_RULE))
+}
+
+// @source "../node_modules/@my-company/ui-lib";
+pub(crate) fn parse_source_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.options().is_tailwind_directives_enabled() || !p.at(T![source]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![source]);
+
+    if !p.at(CSS_STRING_LITERAL) {
+        p.error(expected_string(p, p.cur_range()));
+        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+    }
+
+    p.bump(CSS_STRING_LITERAL);
+    p.expect(T![;]);
+
+    Present(m.complete(p, CSS_SOURCE_AT_RULE))
+}
+
+// @reference "../../app.css";
+pub(crate) fn parse_reference_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !p.options().is_tailwind_directives_enabled() || !p.at(T![reference]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![reference]);
+
+    if !p.at(CSS_STRING_LITERAL) {
+        p.error(expected_string(p, p.cur_range()));
+        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+    }
+
+    p.bump(CSS_STRING_LITERAL);
+    p.expect(T![;]);
+
+    Present(m.complete(p, CSS_REFERENCE_AT_RULE))
+}

@@ -9,6 +9,8 @@ impl FormatRule<AnyCssFunction> for FormatAnyCssFunction {
     fn fmt(&self, node: &AnyCssFunction, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssFunction::CssFunction(node) => node.format().fmt(f),
+            AnyCssFunction::CssTailwindAlphaFunction(node) => node.format().fmt(f),
+            AnyCssFunction::CssTailwindSpacingFunction(node) => node.format().fmt(f),
             AnyCssFunction::CssUrlFunction(node) => node.format().fmt(f),
         }
     }
