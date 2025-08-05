@@ -498,3 +498,38 @@ fn test_resolve_type_definitions_with_custom_type_roots() {
         )))
     );
 }
+
+#[test]
+fn test_resolve_type_definitions_without_type_specification() {
+    let base_dir = get_fixtures_path("resolver_cases_5");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["types", "import", "default"],
+        default_files: &["index"],
+        extensions: &["ts", "js"],
+        resolve_types: true,
+        type_roots: TypeRoots::Auto, // auto-detected from `tsconfig.json`
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve("sleep", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/sleep/dist/index.d.ts"
+        )))
+    );
+
+    // Make sure the re-export is resolvable too:
+    assert_eq!(
+        resolve(
+            "./src/index",
+            Utf8Path::new(&format!("{base_dir}/node_modules/sleep/dist")),
+            &fs,
+            &options
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/sleep/dist/src/index.d.ts"
+        )))
+    );
+}
