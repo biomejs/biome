@@ -29,21 +29,11 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// // root instance: shared state across all new Vue() calls
-    /// new Vue({
+    /// // component-local data via function
+    /// export default {
     ///   /* ✗ BAD */
-    ///   data: {
-    ///     foo: null
-    ///   }
-    /// });
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// // global registration via Vue.component
-    /// Vue.component('my-comp', {
-    ///   /* ✗ BAD */
-    ///   data: { count: 0 }
-    /// });
+    ///   data: { foo: null },
+    /// };
     /// ```
     ///
     /// ```js,expect_diagnostic
