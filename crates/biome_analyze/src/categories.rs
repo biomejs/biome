@@ -327,6 +327,14 @@ impl RuleCategories {
     pub fn is_syntax(&self) -> bool {
         self.0.contains(Categories::Syntax)
     }
+
+    pub fn is_lint(&self) -> bool {
+        self.0.contains(Categories::Lint)
+    }
+
+    pub fn is_assist(&self) -> bool {
+        self.0.contains(Categories::Assist)
+    }
 }
 
 impl From<RuleCategory> for RuleCategories {

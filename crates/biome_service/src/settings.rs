@@ -858,13 +858,7 @@ impl VcsIgnoredPatterns {
         };
 
         let nested_ignored = nested.iter().any(|gitignore| {
-            let ignore_directory = if gitignore.path().is_file() {
-                // SAFETY: if it's a file, it always has a parent
-                gitignore.path().parent().unwrap()
-            } else {
-                gitignore.path()
-            };
-            if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
+            if let Ok(stripped_path) = path.strip_prefix(gitignore.path()) {
                 gitignore.matched(stripped_path, is_dir).is_ignore()
             } else {
                 false
