@@ -88,6 +88,15 @@ impl Rule for UseSemanticElements {
             return None;
         }
 
+        // For the following roles, the associated elements are impractical:
+        // - combobox: <select> is not possible to implement many valid comboboxes (see https://www.w3.org/WAI/ARIA/apg/patterns/combobox/)
+        // - option: <option> in browsers have divergent/unexpected behavior, with Safari hiding elements by default.
+        // - listbox: <datalist> isn’t always correct for all listbox uses
+        // See https://www.w3.org/WAI/ARIA/apg/patterns/combobox/. In most examples, roles are explicit
+        if role_value == "combobox" || role_value == "listbox" || role_value == "option" {
+            return None;
+        }
+
         let role = AriaRole::from_roles(role_value)?;
         if role.base_html_elements().is_empty() && role.related_html_elements().is_empty() {
             None

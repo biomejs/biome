@@ -2,8 +2,6 @@
 <>
     <div role="checkbox" ></div>
     <div role="radio" ></div>
-    <div role="option" ></div>
-    <div role="combobox" ></div>
     <div role="heading" ></div>
     <div role="separator" ></div>
     <div role="button" ></div>
@@ -21,7 +19,6 @@
     <div role="group" ></div>
     <div role="link" ></div>
     <div role="list" ></div>
-    <div role="listbox" ></div>
     <div role="listitem" ></div>
     <div role="navigation" ></div>
     <div role="row" ></div>
