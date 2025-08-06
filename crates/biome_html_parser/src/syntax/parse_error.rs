@@ -5,14 +5,42 @@ use biome_parser::Parser;
 use biome_parser::diagnostic::{ParseDiagnostic, expect_one_of, expected_node};
 use biome_parser::prelude::ToDiagnostic;
 
+/// Creates a diagnostic indicating that an attribute node was expected at the specified range.
+///
+/// # Examples
+///
+/// ```
+/// let diag = expected_attribute(&parser, text_range);
+/// assert_eq!(diag.message(), "Expected attribute");
+/// ```
 pub(crate) fn expected_attribute(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("attribute", range, p).into_diagnostic(p)
 }
 
+/// Creates a diagnostic error indicating that text expressions are not supported at the specified range.
+///
+/// The diagnostic includes a hint suggesting to remove the text expression or enable parsing via the `"html.parser.textExpression"` option.
+///
+/// # Examples
+///
+/// ```
+/// let diagnostic = disabled_interpolation(&parser, text_range);
+/// assert_eq!(diagnostic.message(), "Text expressions aren't supported.");
+/// ```
 pub(crate) fn disabled_interpolation(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Text expressions aren't supported.", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.textExpression"</Emphasis>" option."))
 }
 
+/// Creates a diagnostic for a text expression missing its closing delimiter.
+///
+/// The diagnostic highlights the location of the incomplete expression and provides a detail pointing to where the opening expression was found.
+///
+/// # Examples
+///
+/// ```
+/// let diagnostic = expected_text_expression(parser, curr_range, opening_range);
+/// assert_eq!(diagnostic.message(), "Found a text expression that doesn't have the closing expression:");
+/// ```
 pub(crate) fn expected_text_expression(
     p: &HtmlParser,
     curr_range: TextRange,
@@ -28,6 +56,14 @@ pub(crate) fn expected_text_expression(
     )
 }
 
+/// Creates a diagnostic indicating that an element or text node was expected at the specified range.
+///
+/// # Examples
+///
+/// ```
+/// let diagnostic = expected_child(&parser, text_range);
+/// assert!(diagnostic.message().contains("Expected element or text"));
+/// ```
 pub(crate) fn expected_child(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["element", "text"], range).into_diagnostic(p)
 }

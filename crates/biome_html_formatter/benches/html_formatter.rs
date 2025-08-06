@@ -22,6 +22,10 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[cfg(all(target_env = "musl", target_os = "linux", target_arch = "aarch64"))]
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
+/// Benchmarks the HTML formatter using test cases from the "libs-html.txt" suite.
+///
+/// Loads HTML test cases, parses each into an AST, and measures the throughput of formatting operations using Criterion.
+/// Each benchmark is identified by the test case filename and reports throughput in bytes processed.
 fn bench_formatter(criterion: &mut Criterion) {
     let mut all_suites = HashMap::new();
     all_suites.insert("html", include_str!("libs-html.txt"));

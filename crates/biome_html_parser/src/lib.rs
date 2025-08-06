@@ -14,7 +14,29 @@ use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{AstNode, NodeCache};
 
-/// Parses the provided string as HTML program using the provided node cache.
+/// Parses an HTML source string using a mutable node cache and custom parsing options.
+///
+/// This function allows reuse of syntax nodes across parses by utilizing the provided node cache, which can improve performance in incremental parsing scenarios. The parsing behavior can be customized via the `HtmlParseOptions`.
+///
+/// # Parameters
+///
+/// - `source`: The HTML source code to parse.
+///
+/// # Returns
+///
+/// An `HtmlParse` containing the parsed syntax tree and any diagnostics produced during parsing.
+///
+/// # Examples
+///
+/// ```
+/// use biome_html_parser::{parse_html_with_cache, HtmlParseOptions, NodeCache};
+///
+/// let html = "<div>Hello</div>";
+/// let mut cache = NodeCache::default();
+/// let options = HtmlParseOptions::default();
+/// let result = parse_html_with_cache(html, &mut cache, options);
+/// assert!(result.diagnostics().is_empty());
+/// ```
 pub fn parse_html_with_cache(
     source: &str,
     cache: &mut NodeCache,
@@ -33,7 +55,20 @@ pub fn parse_html_with_cache(
     HtmlParse::new(green, diagnostics)
 }
 
+/// Parses an HTML source string with the specified options.
 ///
+/// This function creates a new node cache internally and parses the provided HTML source using the given parsing options. Returns an `HtmlParse` containing the parsed syntax tree and any diagnostics.
+///
+/// # Examples
+///
+/// ```
+/// use biome_html_parser::{parse_html, HtmlParseOptions};
+///
+/// let html = "<div>Hello</div>";
+/// let options = HtmlParseOptions::default();
+/// let result = parse_html(html, options);
+/// assert!(result.diagnostics().is_empty());
+/// ```
 pub fn parse_html(source: &str, options: HtmlParseOptions) -> HtmlParse {
     let mut cache = NodeCache::default();
     parse_html_with_cache(source, &mut cache, options)

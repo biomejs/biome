@@ -31,6 +31,20 @@ impl FormatRuleWithOptions<HtmlAttributeList> for FormatHtmlAttributeList {
 
 impl FormatRule<HtmlAttributeList> for FormatHtmlAttributeList {
     type Context = HtmlFormatContext;
+    /// Formats an HTML attribute list according to the specified formatting options.
+    ///
+    /// Selects appropriate separators and formatting for each attribute based on the attribute count and layout preferences. Handles canonical HTML elements, tag names, and supports multiple attribute variants, including double text expressions and bogus attributes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Given an HtmlAttributeList node and a configured formatter:
+    /// let list = HtmlAttributeList::from(vec![/* attributes */]);
+    /// let mut formatter = HtmlFormatter::default();
+    /// let rule = FormatHtmlAttributeList::default();
+    /// rule.fmt(&list, &mut formatter).unwrap();
+    /// // The formatted output is written to the formatter.
+    /// ```
     fn fmt(&self, node: &HtmlAttributeList, f: &mut HtmlFormatter) -> FormatResult<()> {
         let attribute_count = node.len();
         let attribute_seperator = if f.options().attribute_position()

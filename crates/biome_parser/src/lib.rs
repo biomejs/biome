@@ -258,7 +258,21 @@ pub trait Parser: Sized {
         self.do_bump(kind)
     }
 
-    /// Consume the current token if token set matches.
+    /// Consumes the current token if it matches any kind in the provided token set.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the current token kind is not in the given set.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut parser = ...; // initialize parser
+    /// let kinds = TokenSet::new([Kind::Identifier, Kind::Number]);
+    /// if kinds.contains(parser.cur()) {
+    ///     parser.bump_ts(kinds);
+    /// }
+    /// ```
     fn bump_ts(&mut self, kinds: TokenSet<Self::Kind>) {
         assert!(
             kinds.contains(self.cur()),
@@ -271,7 +285,10 @@ pub trait Parser: Sized {
         self.bump_any()
     }
 
-    /// Consume the token but cast it as a different kind using the specified `context`.
+    /// Consumes the current token, remapping its kind using the provided context.
+    ///
+    /// The token is treated as the specified kind and context, regardless of its original kind.
+    /// This is useful for cases where the token's syntactic role needs to be adjusted during parsing.
     fn bump_remap_with_context(
         &mut self,
         kind: Self::Kind,
@@ -282,6 +299,15 @@ pub trait Parser: Sized {
         self.do_bump_with_context(kind, context);
     }
 
+    /// Consumes the current token, remapping its kind using the specified context.
+    ///
+    /// This method asserts that the current token is not EOF before remapping and consuming it with the provided context.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// parser.bump_remap_any_with_context(context);
+    /// ```
     fn bump_remap_any_with_context(&mut self, context: <Self::Source as BumpWithContext>::Context)
     where
         Self::Source: BumpWithContext,
@@ -291,7 +317,13 @@ pub trait Parser: Sized {
         self.do_bump_with_context(kind, context);
     }
 
-    /// Consume any token but cast it as a different kind
+    /// Consumes the current token and records it as the specified kind.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// parser.bump_remap(MySyntaxKind::Identifier);
+    /// ```
     fn bump_remap(&mut self, kind: Self::Kind) {
         self.do_bump(kind);
     }

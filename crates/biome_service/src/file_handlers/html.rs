@@ -44,6 +44,9 @@ pub struct HtmlParserSettings {
 }
 
 impl From<HtmlParserConfiguration> for HtmlParserSettings {
+    /// Creates `HtmlParserSettings` from a given `HtmlParserConfiguration`.
+    ///
+    /// Copies the `interpolation` setting from the configuration.
     fn from(configuration: HtmlParserConfiguration) -> Self {
         Self {
             interpolation: configuration.interpolation,
@@ -255,6 +258,19 @@ fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
     true
 }
 
+/// Parses HTML text into a syntax tree using configurable options.
+///
+/// The parsing behavior can be influenced by settings such as interpolation mode and file source type. Returns a `ParseResult` containing the parsed HTML and associated language information.
+///
+/// # Examples
+///
+/// ```
+/// let file_source = DocumentFileSource::from_path("index.html");
+/// let mut cache = NodeCache::default();
+/// let settings = Settings::default();
+/// let result = parse(&BiomePath::new("index.html"), file_source, "<div>Hello</div>", &settings, &mut cache);
+/// assert!(result.any_parse.is_some());
+/// ```
 fn parse(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,

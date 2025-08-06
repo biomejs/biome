@@ -297,6 +297,18 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlDirective {
         biome_html_syntax::HtmlDirective,
         crate::html::auxiliary::directive::FormatHtmlDirective,
     >;
+    /// Converts the HTML directive node into an owned formatter with the default formatting rule.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::HtmlDirective;
+    /// use biome_formatter::IntoFormat;
+    ///
+    /// let directive: HtmlDirective = /* obtain or parse node */;
+    /// let formatted = directive.into_format();
+    /// // `formatted` can now be used with the formatter infrastructure.
+    /// ```
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -308,6 +320,22 @@ impl FormatRule<biome_html_syntax::HtmlDoubleTextExpression>
     for crate::html::auxiliary::double_text_expression::FormatHtmlDoubleTextExpression
 {
     type Context = HtmlFormatContext;
+    /// Formats a `HtmlDoubleTextExpression` node using the associated formatting rule.
+    ///
+    /// Delegates formatting to the `FormatNodeRule` implementation for `HtmlDoubleTextExpression`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use biome_html_syntax::HtmlDoubleTextExpression;
+    /// # use biome_formatter::FormatResult;
+    /// # use crate::html::auxiliary::double_text_expression::FormatHtmlDoubleTextExpression;
+    /// # use crate::HtmlFormatter;
+    /// let node: HtmlDoubleTextExpression = /* obtain node */;
+    /// let formatter = &mut HtmlFormatter::default();
+    /// let rule = FormatHtmlDoubleTextExpression;
+    /// rule.fmt(&node, formatter)?;
+    /// ```
     #[inline(always)]
     fn fmt(
         &self,
@@ -323,6 +351,17 @@ impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlDoubleTextExpression
         biome_html_syntax::HtmlDoubleTextExpression,
         crate::html::auxiliary::double_text_expression::FormatHtmlDoubleTextExpression,
     >;
+    /// Returns a formatter reference for this `HtmlDoubleTextExpression` node using the default formatting rule.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::HtmlDoubleTextExpression;
+    /// use biome_formatter::AsFormat;
+    ///
+    /// let node: HtmlDoubleTextExpression = /* obtain node */;
+    /// let formatted = node.format();
+    /// ```
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -336,6 +375,22 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlDoubleTextExpressi
         biome_html_syntax::HtmlDoubleTextExpression,
         crate::html::auxiliary::double_text_expression::FormatHtmlDoubleTextExpression,
     >;
+    /// Converts the `HtmlDoubleTextExpression` node into an owned formatter for use with the HTML formatting context.
+    ///
+    /// # Returns
+    ///
+    /// An owned formatter that formats this double text expression node according to HTML formatting rules.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::HtmlDoubleTextExpression;
+    /// use biome_html_formatter::IntoFormat;
+    ///
+    /// let node: HtmlDoubleTextExpression = /* obtain node */;
+    /// let formatter = node.into_format();
+    /// // Use `formatter` with the formatting context
+    /// ```
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -483,6 +538,17 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlSelfClosingElement
         biome_html_syntax::HtmlSelfClosingElement,
         crate::html::auxiliary::self_closing_element::FormatHtmlSelfClosingElement,
     >;
+    /// Converts the HTML self-closing element node into an owned formatter with the default formatting rule.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::HtmlSelfClosingElement;
+    /// use biome_formatter::IntoFormat;
+    ///
+    /// let node: HtmlSelfClosingElement = /* obtain node */;
+    /// let formatted = node.into_format();
+    /// ```
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -494,7 +560,20 @@ impl FormatRule<biome_html_syntax::HtmlSingleTextExpression>
     for crate::html::auxiliary::single_text_expression::FormatHtmlSingleTextExpression
 {
     type Context = HtmlFormatContext;
-    #[inline(always)]
+    /// Formats a `HtmlSingleTextExpression` node using the associated formatting rule.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use biome_html_syntax::HtmlSingleTextExpression;
+    /// # use biome_formatter::{FormatRule, FormatResult};
+    /// # use crate::html::auxiliary::single_text_expression::FormatHtmlSingleTextExpression;
+    /// # use crate::HtmlFormatter;
+    /// let node = HtmlSingleTextExpression::parse("{foo}").unwrap();
+    /// let mut formatter = HtmlFormatter::default();
+    /// let rule = FormatHtmlSingleTextExpression;
+    /// rule.fmt(&node, &mut formatter).unwrap();
+    /// ```
     fn fmt(
         &self,
         node: &biome_html_syntax::HtmlSingleTextExpression,
@@ -509,6 +588,18 @@ impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlSingleTextExpression
         biome_html_syntax::HtmlSingleTextExpression,
         crate::html::auxiliary::single_text_expression::FormatHtmlSingleTextExpression,
     >;
+    /// Returns a formatter for this HTML single text expression node.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::HtmlSingleTextExpression;
+    /// use biome_html_formatter::AsFormat;
+    ///
+    /// let node: HtmlSingleTextExpression = /* obtain node */;
+    /// let formatted = node.format();
+    /// // Use `formatted` with the formatter infrastructure.
+    /// ```
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -522,6 +613,17 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlSingleTextExpressi
         biome_html_syntax::HtmlSingleTextExpression,
         crate::html::auxiliary::single_text_expression::FormatHtmlSingleTextExpression,
     >;
+    /// Converts the `HtmlSingleTextExpression` node into an owned formatter for use with the HTML formatting context.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::HtmlSingleTextExpression;
+    /// use biome_formatter::IntoFormat;
+    ///
+    /// let node: HtmlSingleTextExpression = /* obtain node */;
+    /// let formatter = node.into_format();
+    /// ```
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -633,6 +735,19 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlTextExpression {
         biome_html_syntax::HtmlTextExpression,
         crate::html::auxiliary::text_expression::FormatHtmlTextExpression,
     >;
+    /// Converts the node into an owned formatter for HTML text expressions.
+    ///
+    /// Returns a `FormatOwnedWithRule` that wraps the node and applies the default HTML text expression formatting rule.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::HtmlTextExpression;
+    /// use biome_formatter::IntoFormat;
+    ///
+    /// let node: HtmlTextExpression = /* obtain node */;
+    /// let formatted = node.into_format();
+    /// ```
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -823,6 +938,9 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlBogusElement {
         biome_html_syntax::HtmlBogusElement,
         crate::html::bogus::bogus_element::FormatHtmlBogusElement,
     >;
+    /// Converts the node into an owned formatter for a bogus HTML element.
+    ///
+    /// Returns a `FormatOwnedWithRule` that wraps the node and applies the default formatting rule for bogus HTML elements.
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -834,6 +952,22 @@ impl FormatRule<biome_html_syntax::HtmlBogusTextExpression>
     for crate::html::bogus::bogus_text_expression::FormatHtmlBogusTextExpression
 {
     type Context = HtmlFormatContext;
+    /// Formats a bogus HTML text expression node within the given formatter context.
+    ///
+    /// This is used for handling syntactically invalid or unrecognized text expressions in HTML during formatting.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::HtmlBogusTextExpression;
+    /// # use biome_formatter::FormatResult;
+    /// # use crate::HtmlFormatter;
+    /// # let bogus_node: HtmlBogusTextExpression = /* ... */ unimplemented!();
+    /// # let mut formatter = HtmlFormatter::default();
+    /// # let rule = crate::html::bogus::bogus_text_expression::FormatHtmlBogusTextExpression;
+    /// rule.fmt(&bogus_node, &mut formatter)?;
+    /// # Ok::<(), biome_formatter::FormatError>(())
+    /// ```
     #[inline(always)]
     fn fmt(
         &self,
@@ -849,6 +983,20 @@ impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlBogusTextExpression 
         biome_html_syntax::HtmlBogusTextExpression,
         crate::html::bogus::bogus_text_expression::FormatHtmlBogusTextExpression,
     >;
+    /// Returns a formatter reference for this bogus HTML text expression node.
+    ///
+    /// The returned formatter applies the default formatting rule for bogus HTML text expressions within the HTML formatting context.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::HtmlBogusTextExpression;
+    /// use biome_formatter::AsFormat;
+    ///
+    /// let node: HtmlBogusTextExpression = /* obtain node */;
+    /// let formatted = node.format();
+    /// // Use `formatted` with a formatter to produce formatted output.
+    /// ```
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -861,6 +1009,17 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlBogusTextExpressio
         biome_html_syntax::HtmlBogusTextExpression,
         crate::html::bogus::bogus_text_expression::FormatHtmlBogusTextExpression,
     >;
+    /// Converts the `HtmlBogusTextExpression` node into an owned formatter with the default formatting rule.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::HtmlBogusTextExpression;
+    /// use biome_formatter::IntoFormat;
+    ///
+    /// let node: HtmlBogusTextExpression = /* obtain node */;
+    /// let formatted = node.into_format();
+    /// ```
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -911,6 +1070,17 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlAttribute {
         biome_html_syntax::AnyHtmlAttribute,
         crate::html::any::attribute::FormatAnyHtmlAttribute,
     >;
+    Converts the attribute node into an owned formatter with the default formatting rule for any HTML attribute.
+    
+    # Examples
+    
+    ```
+    use biome_html_syntax::AnyHtmlAttribute;
+    use biome_formatter::IntoFormat;
+    
+    let attribute: AnyHtmlAttribute = /* obtain attribute node */;
+    let formatted = attribute.into_format();
+    ```
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,
@@ -924,6 +1094,17 @@ impl AsFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlAttributeInitiali
         biome_html_syntax::AnyHtmlAttributeInitializer,
         crate::html::any::attribute_initializer::FormatAnyHtmlAttributeInitializer,
     >;
+    /// Returns a formatter for this HTML attribute initializer node.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::AnyHtmlAttributeInitializer;
+    /// use biome_html_formatter::AsFormat;
+    ///
+    /// let node: AnyHtmlAttributeInitializer = /* obtain node */;
+    /// let formatted = node.format();
+    /// ```
     fn format(&self) -> Self::Format<'_> {
         FormatRefWithRule::new(
             self,
@@ -936,6 +1117,17 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::AnyHtmlAttributeInitia
         biome_html_syntax::AnyHtmlAttributeInitializer,
         crate::html::any::attribute_initializer::FormatAnyHtmlAttributeInitializer,
     >;
+    /// Converts this attribute initializer node into an owned formatter for use with the HTML formatting context.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use biome_html_syntax::AnyHtmlAttributeInitializer;
+    /// use biome_formatter::IntoFormat;
+    ///
+    /// let node: AnyHtmlAttributeInitializer = /* obtain node */;
+    /// let formatted = node.into_format();
+    /// ```
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule::new(
             self,

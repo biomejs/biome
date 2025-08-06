@@ -15,10 +15,24 @@ impl HtmlFileSource {
         matches!(self.variant, HtmlVariant::Astro)
     }
 
+    /// Returns a reference to the underlying HTML variant for this file source.
     pub fn variant(&self) -> &HtmlVariant {
         &self.variant
     }
 
+    /// Returns the text expression capability if the file source is standard HTML.
+    ///
+    /// Returns `Some(&HtmlTextExpressions)` if the variant is `Standard`, otherwise returns `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let html = HtmlFileSource::html_with_text_expressions();
+    /// assert_eq!(html.text_expressions(), Some(&HtmlTextExpressions::Double));
+    ///
+    /// let astro = HtmlFileSource::astro();
+    /// assert_eq!(astro.text_expressions(), None);
+    /// ```
     pub fn text_expressions(&self) -> Option<&HtmlTextExpressions> {
         if let HtmlVariant::Standard(text_expressions) = &self.variant {
             Some(text_expressions)
@@ -52,30 +66,77 @@ pub enum HtmlVariant {
 }
 
 impl Default for HtmlVariant {
+    /// Returns the default HTML variant with no text expression support.
+    ///
+    /// The default is `Standard(HtmlTextExpressions::None)`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let variant = HtmlVariant::default();
+    /// assert!(matches!(variant, HtmlVariant::Standard(HtmlTextExpressions::None)));
+    /// ```
     fn default() -> Self {
         Self::Standard(HtmlTextExpressions::None)
     }
 }
 
 impl HtmlFileSource {
+    /// Creates a `HtmlFileSource` representing a standard HTML file with no text expression support.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let source = HtmlFileSource::html();
+    /// assert!(source.is_html());
+    /// ```
     pub fn html() -> Self {
         Self {
             variant: HtmlVariant::default(),
         }
     }
 
-    /// Returns `true` if the current file is `.html` and doesn't support
-    /// any text expression capability
+    /// Checks if the file source is a standard HTML file without text expression support.
+    ///
+    /// Returns `true` if the variant is `Standard` with `HtmlTextExpressions::None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let html = HtmlFileSource::html();
+    /// assert!(html.is_html());
+    ///
+    /// let html_with_expr = HtmlFileSource::html_with_text_expressions();
+    /// assert!(!html_with_expr.is_html());
+    /// ```
     pub fn is_html(&self) -> bool {
         self.variant == HtmlVariant::default()
     }
 
+    /// Creates an HTML file source with support for double text expressions.
+    ///
+    /// Returns a `HtmlFileSource` representing a standard HTML variant that enables double text expression capability.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let source = HtmlFileSource::html_with_text_expressions();
+    /// assert_eq!(source.text_expressions(), Some(&HtmlTextExpressions::Double));
+    /// ```
     pub fn html_with_text_expressions() -> Self {
         Self {
             variant: HtmlVariant::Standard(HtmlTextExpressions::Double),
         }
     }
 
+    /// Creates an `HtmlFileSource` representing an Astro file.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let source = HtmlFileSource::astro();
+    /// assert!(source.is_astro());
+    /// ```
     pub fn astro() -> Self {
         Self {
             variant: HtmlVariant::Astro,

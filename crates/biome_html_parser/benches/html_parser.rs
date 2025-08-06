@@ -23,6 +23,20 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[cfg(all(target_env = "musl", target_os = "linux", target_arch = "aarch64"))]
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
+/// Benchmarks HTML parsing performance using Criterion.
+///
+/// This function loads a set of HTML test cases, then benchmarks parsing each case both with and without node caching.
+/// It collects and prints diagnostics for each parse, and reports throughput in bytes for each benchmark case.
+///
+/// # Examples
+///
+/// ```
+/// use criterion::{Criterion, criterion_group, criterion_main};
+/// // In a real benchmark, Criterion would be initialized by the test harness.
+/// // Here is a placeholder for demonstration:
+/// // let mut c = Criterion::default().configure_from_args();
+/// // bench_parser(&mut c);
+/// ```
 fn bench_parser(criterion: &mut Criterion) {
     let mut all_suites = HashMap::new();
     all_suites.insert("html", include_str!("libs-html.txt"));

@@ -594,6 +594,16 @@ impl From<GritConfiguration> for LanguageSettings<GritLanguage> {
 }
 
 impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
+    /// Converts an `HtmlConfiguration` into `LanguageSettings<HtmlLanguage>`, applying formatter and parser settings if present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let config = HtmlConfiguration { formatter: Some(formatter_config), parser: Some(parser_config), ..Default::default() };
+    /// let settings = LanguageSettings::<HtmlLanguage>::from(config);
+    /// assert!(settings.formatter.is_some());
+    /// assert!(settings.parser.is_some());
+    /// ```
     fn from(html: HtmlConfiguration) -> Self {
         let mut language_setting: Self = Self::default();
         if let Some(formatter) = html.formatter {

@@ -26,6 +26,9 @@ pub(crate) enum HtmlSyntaxFeatures {
 impl SyntaxFeature for HtmlSyntaxFeatures {
     type Parser<'source> = HtmlParser<'source>;
 
+    /// Determines if the syntax feature is enabled for the given parser based on its options.
+    ///
+    /// Returns `true` if the feature is supported according to the parser's configuration; otherwise, returns `false`.
     fn is_supported(&self, p: &HtmlParser) -> bool {
         match self {
             Self::Astro => p.options().frontmatter,
@@ -51,6 +54,17 @@ static VOID_ELEMENTS: &[&str] = &[
 /// For these elements, the content is treated as raw text and no parsing is done inside them. This is so that the contents of these tags can be parsed by a different parser.
 pub(crate) static EMBEDDED_LANGUAGE_ELEMENTS: &[&str] = &["script", "style", "pre"];
 
+/// Parses the root of an HTML document, including optional Astro frontmatter, doctype, and the main element list.
+///
+/// If the document starts with a Unicode BOM, it is consumed. If frontmatter (`---`) is present and the Astro feature is enabled, it is parsed; otherwise, an error is emitted. The function then parses an optional doctype and the main list of HTML elements, completing the root node as `HTML_ROOT`.
+///
+/// # Examples
+///
+/// ```
+/// let mut parser = HtmlParser::new("<!doctype html><div>Hello</div>");
+/// parse_root(&mut parser);
+/// // The parser tree now has an HTML_ROOT node with a doctype and a div element.
+/// ```
 pub(crate) fn parse_root(p: &mut HtmlParser) {
     let m = p.start();
 
@@ -171,6 +185,10 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     }
 }
 
+/// Parses an HTML closing tag (e.g., `</div>`).
+///
+/// Emits an error if the tag is a void element or if attributes are present within the closing tag.
+/// Returns `Present` if a closing tag is successfully parsed, otherwise returns `Absent`.
 fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<]) || !p.nth_at(1, T![/]) {
         return Absent;
@@ -203,6 +221,22 @@ impl ParseNodeList for ElementList {
     type Parser<'source> = HtmlParser<'source>;
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
+    /// Parses a single HTML content node within an element list.
+    ///
+    /// Handles CDATA sections, nested elements, double and single text expressions (if enabled), and literal content. Remaps unmatched closing expression tokens and literals to `HTML_CONTENT`.
+    ///
+    /// # Returns
+    /// * `Present` if a valid content node is parsed.
+    /// * `Absent` if no valid content node is found.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut parser = HtmlParser::new("<div>{{ expr }}</div>");
+    /// let mut element_list = ElementList;
+    /// let node = element_list.parse_element(&mut parser);
+    /// assert!(node.is_present());
+    /// ```
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         match p.cur() {
             T!["<![CDATA["] => parse_cdata_section(p),
@@ -262,6 +296,18 @@ impl ParseNodeList for AttributeList {
     type Parser<'source> = HtmlParser<'source>;
     const LIST_KIND: Self::Kind = HTML_ATTRIBUTE_LIST;
 
+    /// Parses a single HTML attribute within an attribute list.
+    ///
+    /// Returns the parsed attribute node if present; otherwise, returns `Absent`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut parser = HtmlParser::new(r#"class="foo""#);
+    /// let mut list = AttributeList;
+    /// let attr = list.parse_element(&mut parser);
+    /// assert!(attr.is_present());
+    /// ```
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         parse_attribute(p)
     }
@@ -283,6 +329,17 @@ impl ParseNodeList for AttributeList {
     }
 }
 
+/// Parses an HTML attribute, supporting both standard attributes and double text expression attributes (`{{ ... }}`).
+///
+/// If the attribute starts with `{{`, parses it as a double text expression attribute if the feature is enabled; otherwise, emits an error. For standard attributes, parses the attribute name and, if present, its initializer.
+///
+/// # Examples
+///
+/// ```
+/// let mut parser = HtmlParser::new(r#"foo="bar""#);
+/// let attr = parse_attribute(&mut parser);
+/// assert!(attr.is_present());
+/// ```
 fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
     if !is_at_attribute_start(p) {
         return Absent;
@@ -310,10 +367,32 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
     }
 }
 
+/// Returns `true` if the parser is positioned at the start of an HTML attribute.
+///
+/// Recognizes attribute starts as a literal, a double text expression (`{{`), or a single text expression (`{`).
+///
+/// # Examples
+///
+/// ```
+/// assert!(is_at_attribute_start(&mut parser)); // when at a literal, `{{`, or `{`
+/// ```
 fn is_at_attribute_start(p: &mut HtmlParser) -> bool {
     p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!['{'])
 }
 
+/// Parses a literal token or a double text expression as the specified HTML syntax kind.
+///
+/// If the current token is a double text expression (`{{ ... }}`) and the feature is enabled, parses it as a text expression. Otherwise, remaps the token as a literal with the appropriate lexing context based on the kind.
+///
+/// Returns `Present` if a literal or double text expression is parsed, or `Absent` if not at a literal start.
+///
+/// # Examples
+///
+/// ```
+/// let mut parser = HtmlParser::new("foo");
+/// let result = parse_literal(&mut parser, HTML_LITERAL);
+/// assert!(result.is_present());
+/// ```
 fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
     if !is_at_start_literal(p) {
         return Absent;
@@ -368,6 +447,12 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_STRING))
 }
 
+/// Parses an attribute initializer following an equals sign in an HTML tag.
+///
+/// Supports parsing string literals, single text expressions (`{}`) if enabled, and double text expressions (`{{}}`) if enabled. Emits diagnostics and attempts recovery if expressions are not supported or malformed.
+///
+/// # Returns
+/// `Present` if an attribute initializer is successfully parsed, otherwise `Absent`.
 fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![=]) {
         return Absent;
@@ -425,10 +510,16 @@ fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_CDATA_SECTION))
 }
 
-/// Parse a text expression, notably:
+/// Parses a double text expression delimited by `{{` and `}}`.
 ///
-/// ```vue
-/// {{ expression }}
+/// This function recognizes and parses double-brace text expressions, such as `{{ expression }}`, within HTML content. It handles error recovery for missing or malformed closing delimiters and marks invalid expressions as bogus nodes when necessary.
+///
+/// # Examples
+///
+/// ```
+/// let mut parser = HtmlParser::new("{{ foo + bar }}");
+/// let syntax = parse_double_text_expression(&mut parser, HtmlLexContext::default());
+/// assert!(syntax.is_present());
 /// ```
 fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> ParsedSyntax {
     if !is_at_opening_double_expression(p) {
@@ -463,11 +554,30 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
     }
 }
 
+/// Returns `true` if the current token is the start of a double text expression (`{{`).
+///
+/// # Examples
+///
+/// ```
+/// let mut parser = HtmlParser::new("{{ expression }}");
+/// assert!(is_at_opening_double_expression(&mut parser));
+/// ```
 pub(crate) fn is_at_opening_double_expression(p: &mut HtmlParser) -> bool {
     p.at(T!["{{"])
 }
 
 // Parsers a single tag expression. `context` is applied after lexing the last token `}`
+/// Parses a single text expression delimited by `{` and `}` if the feature is enabled.
+///
+/// Returns a completed `HTML_SINGLE_TEXT_EXPRESSION` node on success, or a `HTML_BOGUS_TEXT_EXPRESSION` node if the closing delimiter is missing or malformed. If the feature is not supported or the current token is not `{`, returns `Absent`.
+///
+/// # Examples
+///
+/// ```
+/// // Assuming the parser is configured to support single text expressions:
+/// let syntax = parse_single_text_expression(&mut parser, HtmlLexContext::default());
+/// assert!(syntax.is_present());
+/// ```
 pub(crate) fn parse_single_text_expression(
     p: &mut HtmlParser,
     context: HtmlLexContext,
@@ -514,12 +624,28 @@ struct TextExpression {
 }
 
 impl TextExpression {
+    /// Creates a `TextExpression` representing a single-brace text expression (`{ }`).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let expr = TextExpression::new_single();
+    /// assert_eq!(expr.kind, TextExpressionKind::Single);
+    /// ```
     pub fn new_single() -> Self {
         Self {
             kind: TextExpressionKind::Single,
         }
     }
 
+    /// Creates a new `TextExpression` representing a double-brace (`{{ }}`) text expression.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let expr = TextExpression::new_double();
+    /// assert_eq!(expr.kind, TextExpressionKind::Double);
+    /// ```
     pub fn new_double() -> Self {
         Self {
             kind: TextExpressionKind::Double,
@@ -528,6 +654,17 @@ impl TextExpression {
 }
 
 impl TextExpression {
+    /// Parses a single token inside a text expression, remapping it as a literal within the expression context.
+    ///
+    /// Returns `Absent` if at the end of file or at the start of a new HTML element.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut expr = TextExpression::new_single();
+    /// let syntax = expr.parse_element(&mut parser);
+    /// assert!(syntax.is_present() || syntax.is_absent());
+    /// ```
     fn parse_element(&mut self, p: &mut HtmlParser) -> ParsedSyntax {
         if p.at(EOF) || p.at(T![<]) {
             return Absent;

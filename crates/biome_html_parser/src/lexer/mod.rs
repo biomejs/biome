@@ -50,7 +50,17 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume a token in the [HtmlLexContext::InsideTag] context.
+    /// Lexes the next token when inside an HTML tag.
+    ///
+    /// Handles whitespace, tag delimiters (`<`, `>`, `/`, `=`, `!`), braces (including double text expressions), string literals, tag names, attribute names, and Unicode BOM at the start of the file. Returns an error token for unexpected characters.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lexer = HtmlLexer::from_str("<div class=\"foo\">");
+    /// lexer.next_token(HtmlLexContext::InsideTag);
+    /// // Lexes the tag name, attribute name, or delimiter as appropriate.
+    /// ```
     fn consume_token_inside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
@@ -94,7 +104,15 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume a token in the [HtmlLexContext::Regular] context.
+    /// Consumes the next token in the regular HTML context.
+    ///
+    /// Handles whitespace, tag delimiters, frontmatter edges, single and double brace text expressions, and the start of tags. If the current byte does not match any special token, consumes a block of HTML text. Reports a diagnostic if an unescaped `<` is encountered that does not begin a valid tag.
+    ///
+    /// # Parameters
+    /// - `current`: The current byte to analyze for tokenization.
+    ///
+    /// # Returns
+    /// The kind of token that was consumed.
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
@@ -138,7 +156,17 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume a token in the [HtmlLexContext::AttributeValue] context.
+    /// Lexes the next token when inside an HTML attribute value.
+    ///
+    /// Handles whitespace, tag delimiters, braces, quoted string literals, and unquoted attribute values according to HTML syntax rules.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lexer = HtmlLexer::from_str(r#"attr="value""#);
+    /// let kind = lexer.consume_token_attribute_value(b'"');
+    /// assert_eq!(kind, HtmlSyntaxKind::HTML_STRING_LITERAL);
+    /// ```
     fn consume_token_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
@@ -166,7 +194,24 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    /// Consume an embedded language in its entirety. Stops immediately before the closing tag.
+    /// Consumes the content of an embedded language block until the closing tag or, in Astro fenced code blocks, until a frontmatter edge is encountered.
+    ///
+    /// Returns `HTML_LITERAL` if any content was consumed; otherwise, begins consuming the closing tag to ensure progress.
+    ///
+    /// # Parameters
+    /// - `lang`: The embedded language whose end tag determines where to stop.
+    /// - `context`: The current lexing context, which may alter stopping conditions (e.g., Astro fenced code blocks).
+    ///
+    /// # Returns
+    /// The kind of token representing the embedded language content or the start of the closing tag if no content was present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Given a lexer positioned at the start of an embedded <script> block:
+    /// let kind = lexer.consume_token_embedded_language(b'<', HtmlEmbeddedLanguage::Script, HtmlLexContext::Regular);
+    /// assert_eq!(kind, HTML_LITERAL);
+    /// ```
     fn consume_token_embedded_language(
         &mut self,
         _current: u8,
@@ -201,6 +246,18 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consumes tokens inside a double-brace text expression (`{{ ... }}`).
+    ///
+    /// Advances through the content of a double text expression until the closing `}}`, a tag delimiter `<`, or a slash `/` is encountered. Returns the appropriate token kind for the closing braces or the literal content.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lexer = HtmlLexer::from_str("{{ foo + bar }}");
+    /// lexer.next_token(HtmlLexContext::TextExpression(TextExpressionKind::Double)); // Consumes '{{'
+    /// lexer.next_token(HtmlLexContext::TextExpression(TextExpressionKind::Double)); // Consumes 'foo + bar'
+    /// lexer.next_token(HtmlLexContext::TextExpression(TextExpressionKind::Double)); // Consumes '}}'
+    /// ```
     fn consume_double_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'}' if self.is_at_closing_double_text_expression() => {
@@ -222,6 +279,19 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consumes the contents of a single-brace text expression (`{ ... }`) until a closing brace or special character is found.
+    ///
+    /// Advances through the text expression, stopping at a single closing brace (`}`) that is not part of a double-brace sequence, a `<`, or a `/`. Returns the appropriate token kind for the consumed content.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Given input: "{foo < /}"
+    /// let mut lexer = HtmlLexer::from_str("{foo < /}");
+    /// lexer.next_token(HtmlLexContext::TextExpression(TextExpressionKind::Single)); // Consumes '{'
+    /// let kind = lexer.next_token(HtmlLexContext::TextExpression(TextExpressionKind::Single));
+    /// assert_eq!(kind, HTML_LITERAL); // Consumes "foo "
+    /// ```
     fn consume_single_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'}' if !self.is_at_closing_double_text_expression() => self.consume_byte(T!['}']),
@@ -241,6 +311,17 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consumes an HTML comment starting with `<!--` and ending with `-->`.
+    ///
+    /// Advances through the comment content until the closing sequence is found or the end of input is reached. Returns the `COMMENT` token kind.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lexer = HtmlLexer::from_str("<!-- comment -->");
+    /// let kind = lexer.consume_comment();
+    /// assert_eq!(kind, HtmlSyntaxKind::COMMENT);
+    /// ```
     fn consume_comment(&mut self) -> HtmlSyntaxKind {
         // eat <!--
         self.advance(4);
@@ -479,6 +560,19 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consumes a `<` character, handling the start of comments and CDATA sections.
+    ///
+    /// If the current position is at the start of an HTML comment (`<!--`), consumes the entire comment.
+    /// If at the start of a CDATA section (`<![CDATA[`), consumes the CDATA start token.
+    /// Otherwise, consumes a single `<` token.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lexer = HtmlLexer::from_str("<!-- comment -->");
+    /// let kind = lexer.consume_l_angle();
+    /// assert_eq!(kind, HtmlSyntaxKind::HTML_COMMENT);
+    /// ```
     fn consume_l_angle(&mut self) -> HtmlSyntaxKind {
         self.assert_byte(b'<');
 
@@ -491,12 +585,35 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consumes the opening double-brace text expression token `{{`.
+    ///
+    /// Advances the lexer past the `{{` sequence and returns the corresponding token kind.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lexer = HtmlLexer::from_str("{{ value }}");
+    /// assert_eq!(lexer.consume_l_double_text_expression(), T!["{{"]);
+    /// ```
     fn consume_l_double_text_expression(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.is_at_opening_double_text_expression());
         self.advance(2);
         T!["{{"]
     }
 
+    /// Consumes the closing double-brace text expression delimiter `}}`.
+    ///
+    /// Advances the lexer past the `}}` sequence and returns the corresponding token kind.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lexer = HtmlLexer::from_str("{{ value }}");
+    /// lexer.advance(0); // Position at opening braces
+    /// lexer.consume_l_double_text_expression(); // Consumes `{{`
+    /// // ... consume inner content ...
+    /// lexer.consume_r_double_text_expression(); // Consumes `}}`
+    /// ```
     fn consume_r_double_text_expression(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.is_at_closing_double_text_expression());
         self.advance(2);
@@ -540,16 +657,35 @@ impl<'src> HtmlLexer<'src> {
             && self.byte_at(2) == Some(b'>')
     }
 
+    /// Returns `true` if the current position is at a frontmatter edge (`---`).
+    ///
+    /// This checks whether the next three bytes in the source are all hyphens, indicating the start or end of a frontmatter block.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let lexer = HtmlLexer::from_str("---\ncontent");
+    /// assert!(lexer.is_at_frontmatter_edge());
+    /// ```
     fn is_at_frontmatter_edge(&self) -> bool {
         self.current_byte() == Some(b'-')
             && self.byte_at(1) == Some(b'-')
             && self.byte_at(2) == Some(b'-')
     }
 
+    /// Returns `true` if the current position is at the start of a double-brace text expression (`{{`).
     fn is_at_opening_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'{') && self.byte_at(1) == Some(b'{')
     }
 
+    /// Returns `true` if the current position is at the start of a closing double-brace text expression (`}}`).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let lexer = HtmlLexer::from_str("foo }} bar");
+    /// assert!(lexer.is_at_closing_double_text_expression());
+    /// ```
     fn is_at_closing_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
     }
@@ -616,23 +752,17 @@ impl<'src> HtmlLexer<'src> {
         Ok(())
     }
 
-    /// Consume a single block of HTML text outside of tags.
+    /// Consumes a contiguous block of HTML text outside of tags, stopping at special characters or multiple newlines.
     ///
-    /// We consider a "block" of text to be a sequence of words, with whitespace
-    /// separating them. A block ends when there is 2 newlines, or when a special
-    /// character (eg. `<`) is found.
+    /// A block consists of non-whitespace text, ending when a `<` is encountered, when two or more consecutive newlines appear, or when an unescaped brace or double-brace expression is found. Leading and trailing whitespace are excluded from the block, allowing the lexer to treat them as trivia. Escaped braces and whitespace are handled according to HTML and text expression rules.
     ///
-    /// Spaces between words are treated the same as newlines between words in HTML,
-    /// and we don't end a block when we encounter a newline. However, we do not
-    /// include leading or trailing whitespace in the block, letting the lexer
-    /// consume that whitespace as trivia.
+    /// # Examples
     ///
-    /// This makes it easier for users to suppress formatting for specific blocks
-    /// of text instead of needing to suppress the entire parent element, which may
-    /// not even be present if the text is at the root level.
-    ///
-    /// - See: <https://html.spec.whatwg.org/#space-separated-tokens>
-    /// - See: <https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace>
+    /// ```
+    /// let mut lexer = HtmlLexer::from_str("Hello   world\n\n<p>next");
+    /// let kind = lexer.consume_html_text(b'H');
+    /// assert_eq!(kind, HTML_LITERAL);
+    /// ```
     fn consume_html_text(&mut self, current: u8) -> HtmlSyntaxKind {
         let mut whitespace_started = None;
         let mut seen_newlines = 0;
@@ -746,6 +876,12 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         self.current_start
     }
 
+    /// Advances the lexer and returns the next token kind based on the current lexing context.
+    ///
+    /// Selects the appropriate token consumption method according to the provided `HtmlLexContext`, handling regular HTML, tags, attribute values, DOCTYPE, embedded languages, text expressions (single or double brace), CDATA sections, and Astro fenced code blocks. Updates lexer state and token flags accordingly.
+    ///
+    /// # Returns
+    /// The kind of the next token in the input stream.
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
         self.current_start = TextSize::from(self.position as u32);
         self.current_flags = TokenFlags::empty();

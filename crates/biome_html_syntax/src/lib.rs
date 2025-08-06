@@ -52,6 +52,10 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
         )
     }
 
+    /// Returns the corresponding bogus kind for the current syntax kind.
+    ///
+    /// Maps attribute, element, frontmatter, and text expression kinds to their respective bogus variants.
+    /// Returns `HTML_BOGUS_ELEMENT` for closing elements, and `HTML_BOGUS` for all other kinds.
     fn to_bogus(&self) -> Self {
         match self {
             kind if AnyHtmlAttribute::can_cast(*kind) => HTML_BOGUS_ATTRIBUTE,

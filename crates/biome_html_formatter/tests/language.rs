@@ -25,10 +25,29 @@ impl TestFormatLanguage for HtmlTestFormatLanguage {
     type Context = HtmlFormatContext;
     type FormatLanguage = HtmlFormatLanguage;
 
+    /// Parses HTML text into a generic parse representation using options derived from the file source.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let language = HtmlTestFormatLanguage::new(HtmlFileSource::default());
+    /// let parsed = language.parse("<div>Hello</div>");
+    /// assert!(parsed.syntax().is_some());
+    /// ```
     fn parse(&self, text: &str) -> AnyParse {
         parse_html(text, HtmlParseOptions::from(&self.source_type)).into()
     }
 
+    /// Creates an `HtmlFormatLanguage` instance with formatting options resolved from the provided settings and file source.
+    ///
+    /// The formatting options are determined by combining global, override, and HTML-specific formatter settings, along with the given document file source.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let language = HtmlTestFormatLanguage::new(source_type);
+    /// let format_language = language.to_format_language(&settings, &file_source);
+    /// ```
     fn to_format_language(
         &self,
         settings: &Settings,
