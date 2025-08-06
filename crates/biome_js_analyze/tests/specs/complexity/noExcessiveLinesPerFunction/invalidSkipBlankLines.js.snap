@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSkipBlankLines.js
+---
+# Input
+```js
+function name() {
+	var x = 5; 
+	
+
+	var x = 2;
+	var y = 3;
+}
+
+```
+
+# Diagnostics
+```
+invalidSkipBlankLines.options:6:9 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `noExcessiveLinesPerFunction`.
+  
+    4 │     "rules": {
+    5 │       "nursery": {
+  > 6 │         "noExcessiveLinesPerFunction": {
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │           "level": "error",
+    8 │           "options": {
+  
+  i Known keys:
+  
+  - recommended
+  - noFloatingPromises
+  - noImportCycles
+  - noMisusedPromises
+  - noNonNullAssertedOptionalChain
+  - noQuickfixBiome
+  - noQwikUseVisibleTask
+  - noSecrets
+  - noShadow
+  - noUnnecessaryConditions
+  - noUnresolvedImports
+  - noUselessEscapeInString
+  - noVueReservedKeys
+  - noVueReservedProps
+  - useAnchorHref
+  - useConsistentTypeDefinitions
+  - useExhaustiveSwitchCases
+  - useExplicitType
+  - useImageSize
+  - useNamedOperation
+  - useQwikClasslist
+  - useReactFunctionComponents
+  - useSortedClasses
+  
+
+```

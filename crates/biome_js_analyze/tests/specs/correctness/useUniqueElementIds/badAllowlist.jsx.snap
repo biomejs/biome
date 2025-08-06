@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: badAllowlist.jsx
+---
+# Input
+```jsx
+function WithJsxNamespaced() {
+	return <Library.FormattedMessage id="abc"/>
+}
+
+```
+
+# Diagnostics
+```
+badAllowlist.options:6:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `useUniqueElementIds`.
+  
+    4 │         "rules": {
+    5 │             "nursery": {
+  > 6 │                 "useUniqueElementIds": {
+      │                 ^^^^^^^^^^^^^^^^^^^^^
+    7 │                     "level": "error",
+    8 │                     "options": {
+  
+  i Known keys:
+  
+  - recommended
+  - noFloatingPromises
+  - noImportCycles
+  - noMisusedPromises
+  - noNonNullAssertedOptionalChain
+  - noQuickfixBiome
+  - noQwikUseVisibleTask
+  - noSecrets
+  - noShadow
+  - noUnnecessaryConditions
+  - noUnresolvedImports
+  - noUselessEscapeInString
+  - noVueReservedKeys
+  - noVueReservedProps
+  - useAnchorHref
+  - useConsistentTypeDefinitions
+  - useExhaustiveSwitchCases
+  - useExplicitType
+  - useImageSize
+  - useNamedOperation
+  - useQwikClasslist
+  - useReactFunctionComponents
+  - useSortedClasses
+  
+
+```
+
+```
+badAllowlist.jsx:2:9 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    1 │ function WithJsxNamespaced() {
+  > 2 │ 	return <Library.FormattedMessage id="abc"/>
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```

@@ -1,0 +1,276 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_checkAllPropertiesTrue.ts
+---
+# Input
+```ts
+class Example1 {
+	#prop0: number = 42;
+	private prop1: number = 42;
+	protected prop2: string;
+	public prop3: string;
+}
+
+class Example2 {
+	constructor(
+		private prop1: number,
+		public prop2: string,
+		protected prop3: string,
+	) {
+	}
+}
+
+class Example3 {
+	#prop0: number = 42;
+	private prop1: number = 42;
+	protected prop2: number;
+	public prop3: number;
+
+	constructor(prop0: number, prop1: number, prop2: number, prop3: number, private prop4: number, public prop5: number, protected prop6: number) {
+		this.#prop0 = prop0;
+		this.prop1 = prop1;
+		this.prop2 = prop2;
+		this.prop3 = prop3;
+	}
+}
+
+// with some getters/ reads do not affect readonly
+class Example4 {
+	#prop0: number = 42;
+	private prop1: number = 42;
+	protected prop2: number;
+	public prop3: number;
+
+	constructor(prop0: number, prop1: number, prop2: number, prop3: number) {
+		this.#prop0 = prop0;
+		this.prop1 = prop1;
+		this.prop2 = prop2;
+		this.prop3 = prop3;
+	}
+
+	getProp0(): number {
+		return this.#prop0;
+	}
+
+	getProp1(): number {
+		return this.prop1;
+	}
+
+	getProp2(): number {
+		return this.prop2;
+	}
+
+	getProp3(): number {
+		return this.prop3;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid_checkAllPropertiesTrue.options:6:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `useReadonlyClassProperties`.
+  
+    4 │ 		"rules": {
+    5 │ 			"nursery": {
+  > 6 │ 				"useReadonlyClassProperties": {
+      │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 					"level": "error",
+    8 │ 					"options": {
+  
+  i Known keys:
+  
+  - recommended
+  - noFloatingPromises
+  - noImportCycles
+  - noMisusedPromises
+  - noNonNullAssertedOptionalChain
+  - noQuickfixBiome
+  - noQwikUseVisibleTask
+  - noSecrets
+  - noShadow
+  - noUnnecessaryConditions
+  - noUnresolvedImports
+  - noUselessEscapeInString
+  - noVueReservedKeys
+  - noVueReservedProps
+  - useAnchorHref
+  - useConsistentTypeDefinitions
+  - useExhaustiveSwitchCases
+  - useExplicitType
+  - useImageSize
+  - useNamedOperation
+  - useQwikClasslist
+  - useReactFunctionComponents
+  - useSortedClasses
+  
+
+```
+
+```
+invalid_checkAllPropertiesTrue.ts:2:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━
+
+  i Member '#prop0' is never reassigned.
+  
+    1 │ class Example1 {
+  > 2 │ 	#prop0: number = 42;
+      │ 	^^^^^^
+    3 │ 	private prop1: number = 42;
+    4 │ 	protected prop2: string;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    2 │ → readonly·#prop0:·number·=·42;
+      │   +++++++++                    
+
+```
+
+```
+invalid_checkAllPropertiesTrue.ts:3:10 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━
+
+  i Member 'prop1' is never reassigned.
+  
+    1 │ class Example1 {
+    2 │ 	#prop0: number = 42;
+  > 3 │ 	private prop1: number = 42;
+      │ 	        ^^^^^
+    4 │ 	protected prop2: string;
+    5 │ 	public prop3: string;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    3 │ → private·readonly·prop1:·number·=·42;
+      │           +++++++++                   
+
+```
+
+```
+invalid_checkAllPropertiesTrue.ts:10:11 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━
+
+  i Member 'prop1' is never reassigned.
+  
+     8 │ class Example2 {
+     9 │ 	constructor(
+  > 10 │ 		private prop1: number,
+       │ 		        ^^^^^
+    11 │ 		public prop2: string,
+    12 │ 		protected prop3: string,
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    10 │ → → private·readonly·prop1:·number,
+       │             +++++++++              
+
+```
+
+```
+invalid_checkAllPropertiesTrue.ts:18:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━
+
+  i Member '#prop0' is never reassigned.
+  
+    17 │ class Example3 {
+  > 18 │ 	#prop0: number = 42;
+       │ 	^^^^^^
+    19 │ 	private prop1: number = 42;
+    20 │ 	protected prop2: number;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    18 │ → readonly·#prop0:·number·=·42;
+       │   +++++++++                    
+
+```
+
+```
+invalid_checkAllPropertiesTrue.ts:19:10 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━
+
+  i Member 'prop1' is never reassigned.
+  
+    17 │ class Example3 {
+    18 │ 	#prop0: number = 42;
+  > 19 │ 	private prop1: number = 42;
+       │ 	        ^^^^^
+    20 │ 	protected prop2: number;
+    21 │ 	public prop3: number;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    19 │ → private·readonly·prop1:·number·=·42;
+       │           +++++++++                   
+
+```
+
+```
+invalid_checkAllPropertiesTrue.ts:23:82 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━
+
+  i Member 'prop4' is never reassigned.
+  
+    21 │ 	public prop3: number;
+    22 │ 
+  > 23 │ 	constructor(prop0: number, prop1: number, prop2: number, prop3: number, private prop4: number, public prop5: number, protected prop6: number) {
+       │ 	                                                                                ^^^^^
+    24 │ 		this.#prop0 = prop0;
+    25 │ 		this.prop1 = prop1;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    23 │ → constructor(prop0:·number,·prop1:·number,·prop2:·number,·prop3:·number,·private·readonly·prop4:·number,·public·prop5:·number,·protected·prop6:·number)·{
+       │                                                                                   +++++++++                                                               
+
+```
+
+```
+invalid_checkAllPropertiesTrue.ts:33:2 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━
+
+  i Member '#prop0' is never reassigned.
+  
+    31 │ // with some getters/ reads do not affect readonly
+    32 │ class Example4 {
+  > 33 │ 	#prop0: number = 42;
+       │ 	^^^^^^
+    34 │ 	private prop1: number = 42;
+    35 │ 	protected prop2: number;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    33 │ → readonly·#prop0:·number·=·42;
+       │   +++++++++                    
+
+```
+
+```
+invalid_checkAllPropertiesTrue.ts:34:10 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━
+
+  i Member 'prop1' is never reassigned.
+  
+    32 │ class Example4 {
+    33 │ 	#prop0: number = 42;
+  > 34 │ 	private prop1: number = 42;
+       │ 	        ^^^^^
+    35 │ 	protected prop2: number;
+    36 │ 	public prop3: number;
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    34 │ → private·readonly·prop1:·number·=·42;
+       │           +++++++++                   
+
+```

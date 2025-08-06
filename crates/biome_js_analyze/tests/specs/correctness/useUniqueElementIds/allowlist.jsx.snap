@@ -1,0 +1,213 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: allowlist.jsx
+---
+# Input
+```jsx
+// allowed
+function WithJsx() {
+	return <FormattedMessage id="abc"></FormattedMessage>
+}
+
+function WithJsxSelfClosing() {
+	return <FormattedMessage id="abc"/>
+}
+
+function WithJsxNamespaced() {
+	return <Library.FormattedMessage id="abc"/>
+}
+
+function WithCreateElement() {
+	return React.createElement(FormattedMessage, {id: "abc"})
+}
+
+function WithCreateElement2() {
+	return React.createElement(Library.FormattedMessage, {id: "abc"})
+}
+
+// denied
+function WithJsxOther() {
+	return <OtherFormattedMessage id="abc"></OtherFormattedMessage>
+}
+
+function WithCreateElementOther() {
+	return React.createElement(OtherFormattedMessage, {id: "abc"})
+}
+
+function WithCreateElementWronglyQuoted() {
+	return React.createElement("FormattedMessage", {id: "abc"})
+}
+
+```
+
+# Diagnostics
+```
+allowlist.options:6:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `useUniqueElementIds`.
+  
+    4 │         "rules": {
+    5 │             "nursery": {
+  > 6 │                 "useUniqueElementIds": {
+      │                 ^^^^^^^^^^^^^^^^^^^^^
+    7 │                     "level": "error",
+    8 │                     "options": {
+  
+  i Known keys:
+  
+  - recommended
+  - noFloatingPromises
+  - noImportCycles
+  - noMisusedPromises
+  - noNonNullAssertedOptionalChain
+  - noQuickfixBiome
+  - noQwikUseVisibleTask
+  - noSecrets
+  - noShadow
+  - noUnnecessaryConditions
+  - noUnresolvedImports
+  - noUselessEscapeInString
+  - noVueReservedKeys
+  - noVueReservedProps
+  - useAnchorHref
+  - useConsistentTypeDefinitions
+  - useExhaustiveSwitchCases
+  - useExplicitType
+  - useImageSize
+  - useNamedOperation
+  - useQwikClasslist
+  - useReactFunctionComponents
+  - useSortedClasses
+  
+
+```
+
+```
+allowlist.jsx:3:9 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    1 │ // allowed
+    2 │ function WithJsx() {
+  > 3 │ 	return <FormattedMessage id="abc"></FormattedMessage>
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+allowlist.jsx:7:9 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    6 │ function WithJsxSelfClosing() {
+  > 7 │ 	return <FormattedMessage id="abc"/>
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+allowlist.jsx:11:9 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    10 │ function WithJsxNamespaced() {
+  > 11 │ 	return <Library.FormattedMessage id="abc"/>
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+allowlist.jsx:15:9 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    14 │ function WithCreateElement() {
+  > 15 │ 	return React.createElement(FormattedMessage, {id: "abc"})
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+allowlist.jsx:19:9 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    18 │ function WithCreateElement2() {
+  > 19 │ 	return React.createElement(Library.FormattedMessage, {id: "abc"})
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+allowlist.jsx:24:9 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    22 │ // denied
+    23 │ function WithJsxOther() {
+  > 24 │ 	return <OtherFormattedMessage id="abc"></OtherFormattedMessage>
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+allowlist.jsx:28:9 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    27 │ function WithCreateElementOther() {
+  > 28 │ 	return React.createElement(OtherFormattedMessage, {id: "abc"})
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ }
+    30 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+allowlist.jsx:32:9 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    31 │ function WithCreateElementWronglyQuoted() {
+  > 32 │ 	return React.createElement("FormattedMessage", {id: "abc"})
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```

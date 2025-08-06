@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidShorthand.js
+---
+# Input
+```js
+const invalidShorthand = {
+    // Basic property explicit violations
+    prop,
+    shortProp,
+
+    // Method explicit violations
+    method() { return "method"; },
+    async async() { return "async"; },
+    *generator() { yield "gen"; },
+    async *asyncGenerator() { yield "async gen"; },
+
+    // Computed methods
+    [computed]() { return "computed"; },
+    async [computed]() { return "async computed"; },
+    *[computed]() { yield "computed gen"; },
+    ["computed-string"]() { return "computed string"; },
+    ["comp" + "uted" + "-con" + "cat"]() { return "computed concat"; },
+    [computed()]() { return "computed dynamic"; },
+
+    // String literal methods
+    'quotedMethod'() { return "quoted"; },
+    "doubleQuoted"() { return "double quoted"; },
+    async 'asyncQuoted'() { return "async quoted"; },
+};
+
+```
+
+# Diagnostics
+```
+invalidShorthand.options:7:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `useConsistentObjectDefinition`.
+  
+    5 │ 		"rules": {
+    6 │ 			"nursery": {
+  > 7 │ 				"useConsistentObjectDefinition": {
+      │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 					"level": "error",
+    9 │ 					"options": {
+  
+  i Known keys:
+  
+  - recommended
+  - noFloatingPromises
+  - noImportCycles
+  - noMisusedPromises
+  - noNonNullAssertedOptionalChain
+  - noQuickfixBiome
+  - noQwikUseVisibleTask
+  - noSecrets
+  - noShadow
+  - noUnnecessaryConditions
+  - noUnresolvedImports
+  - noUselessEscapeInString
+  - noVueReservedKeys
+  - noVueReservedProps
+  - useAnchorHref
+  - useConsistentTypeDefinitions
+  - useExhaustiveSwitchCases
+  - useExplicitType
+  - useImageSize
+  - useNamedOperation
+  - useQwikClasslist
+  - useReactFunctionComponents
+  - useSortedClasses
+  
+
+```

@@ -6,7 +6,7 @@ use biome_diagnostics::Severity;
 use biome_graphql_factory::make;
 use biome_graphql_syntax::{GraphqlOperationDefinition, GraphqlOperationType};
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::use_named_operation::UseNamedOperationOptions;
+use biome_rule_options::use_named_graphql_operations::UseNamedGraphqlOperationsOptions;
 use biome_string_case::Case;
 
 use crate::GraphqlRuleAction;
@@ -47,7 +47,7 @@ impl Rule for UseNamedOperation {
     type Query = Ast<GraphqlOperationDefinition>;
     type State = GraphqlOperationType;
     type Signals = Option<Self::State>;
-    type Options = UseNamedOperationOptions;
+    type Options = UseNamedGraphqlOperationsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
