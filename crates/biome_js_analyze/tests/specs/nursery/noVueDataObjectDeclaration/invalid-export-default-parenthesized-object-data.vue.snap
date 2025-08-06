@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-export-default-parenthesized-object-data.vue
+---
+# Input
+```ts
+// export default with parenthesized object `data`
+export default {
+	data: /*a*/ (/*b*/{
+		foo: 'bar'
+	})
+};
+
+```
+
+# Diagnostics
+```
+invalid-export-default-parenthesized-object-data.vue:3:2 lint/nursery/noVueDataObjectDeclaration  FIXABLE  ━━━━━━━━━━
+
+  i Found an object declaration for `data` in this component.
+  
+    1 │ // export default with parenthesized object `data`
+    2 │ export default {
+  > 3 │ 	data: /*a*/ (/*b*/{
+      │ 	^^^^^^^^^^^^^^^^^^^
+  > 4 │ 		foo: 'bar'
+  > 5 │ 	})
+      │ 	^^
+    6 │ };
+    7 │ 
+  
+  i Using an object declaration for `data` is deprecated, and can result in different component instances sharing the same data.
+  
+  i Safe fix: Refactor the data object into a function returning the data object
+  
+    1 1 │   // export default with parenthesized object `data`
+    2 2 │   export default {
+    3   │ - → data:·/*a*/·(/*b*/{
+      3 │ + → data:·/*a*/·(/*b*/function()·{
+      4 │ + return·{
+    4 5 │   		foo: 'bar'
+    5   │ - → })
+      6 │ + → }
+      7 │ + })
+    6 8 │   };
+    7 9 │   
+  
+
+```
