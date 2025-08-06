@@ -1,4 +1,5 @@
 <script>
+/* should not generate diagnostics */
 // const app = createApp + app.component with function `data` (dot access)
 import { createApp } from 'vue';
 

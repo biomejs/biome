@@ -4,6 +4,7 @@ expression: valid-export-default-data-in-methods.vue
 ---
 # Input
 ```ts
+/* should not generate diagnostics */
 // export default with data property on an object defined in methods
 export default {
 	methods: {
