@@ -12,7 +12,7 @@ enum Status {
 
 # Diagnostics
 ```
-invalid.graphql:2:2 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:2:2 lint/style/useGraphqlNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Enum values should be in all caps.
   

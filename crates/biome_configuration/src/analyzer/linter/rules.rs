@@ -368,6 +368,7 @@ pub enum RuleName {
     UseGetterReturn,
     UseGoogleFontDisplay,
     UseGoogleFontPreconnect,
+    UseGraphqlNamingConvention,
     UseGroupedAccessorPairs,
     UseGuardForIn,
     UseHeadingContent,
@@ -723,6 +724,7 @@ impl RuleName {
             Self::UseGetterReturn => "useGetterReturn",
             Self::UseGoogleFontDisplay => "useGoogleFontDisplay",
             Self::UseGoogleFontPreconnect => "useGoogleFontPreconnect",
+            Self::UseGraphqlNamingConvention => "useGraphqlNamingConvention",
             Self::UseGroupedAccessorPairs => "useGroupedAccessorPairs",
             Self::UseGuardForIn => "useGuardForIn",
             Self::UseHeadingContent => "useHeadingContent",
@@ -1072,6 +1074,7 @@ impl RuleName {
             Self::UseGetterReturn => RuleGroup::Suspicious,
             Self::UseGoogleFontDisplay => RuleGroup::Suspicious,
             Self::UseGoogleFontPreconnect => RuleGroup::Performance,
+            Self::UseGraphqlNamingConvention => RuleGroup::Style,
             Self::UseGroupedAccessorPairs => RuleGroup::Style,
             Self::UseGuardForIn => RuleGroup::Suspicious,
             Self::UseHeadingContent => RuleGroup::A11y,
@@ -1432,6 +1435,7 @@ impl std::str::FromStr for RuleName {
             "useGetterReturn" => Ok(Self::UseGetterReturn),
             "useGoogleFontDisplay" => Ok(Self::UseGoogleFontDisplay),
             "useGoogleFontPreconnect" => Ok(Self::UseGoogleFontPreconnect),
+            "useGraphqlNamingConvention" => Ok(Self::UseGraphqlNamingConvention),
             "useGroupedAccessorPairs" => Ok(Self::UseGroupedAccessorPairs),
             "useGuardForIn" => Ok(Self::UseGuardForIn),
             "useHeadingContent" => Ok(Self::UseHeadingContent),
@@ -5442,7 +5446,7 @@ impl From<GroupPlainConfiguration> for Security {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
-pub struct Style { # [doc = r" It enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow use of CommonJs module system in favor of ESM style imports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_common_js : Option < RuleConfiguration < biome_rule_options :: no_common_js :: NoCommonJsOptions >> , # [doc = "Disallow default exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_default_export : Option < RuleConfiguration < biome_rule_options :: no_default_export :: NoDefaultExportOptions >> , # [doc = "Disallow a lower specificity selector from coming after a higher specificity selector."] # [serde (skip_serializing_if = "Option::is_none")] pub no_descending_specificity : Option < RuleConfiguration < biome_rule_options :: no_descending_specificity :: NoDescendingSpecificityOptions >> , # [doc = "Disallow using a callback in asynchronous tests and hooks."] # [serde (skip_serializing_if = "Option::is_none")] pub no_done_callback : Option < RuleConfiguration < biome_rule_options :: no_done_callback :: NoDoneCallbackOptions >> , # [doc = "Disallow TypeScript enum."] # [serde (skip_serializing_if = "Option::is_none")] pub no_enum : Option < RuleConfiguration < biome_rule_options :: no_enum :: NoEnumOptions >> , # [doc = "Disallow exporting an imported variable."] # [serde (skip_serializing_if = "Option::is_none")] pub no_exported_imports : Option < RuleConfiguration < biome_rule_options :: no_exported_imports :: NoExportedImportsOptions >> , # [doc = "Prevent usage of \\<head> element in a Next.js project."] # [serde (skip_serializing_if = "Option::is_none")] pub no_head_element : Option < RuleConfiguration < biome_rule_options :: no_head_element :: NoHeadElementOptions >> , # [doc = "Disallow implicit true values on JSX boolean attributes"] # [serde (skip_serializing_if = "Option::is_none")] pub no_implicit_boolean : Option < RuleFixConfiguration < biome_rule_options :: no_implicit_boolean :: NoImplicitBooleanOptions >> , # [doc = "Disallow type annotations for variables, parameters, and class properties initialized with a literal expression."] # [serde (skip_serializing_if = "Option::is_none")] pub no_inferrable_types : Option < RuleFixConfiguration < biome_rule_options :: no_inferrable_types :: NoInferrableTypesOptions >> , # [doc = "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants."] # [serde (skip_serializing_if = "Option::is_none")] pub no_magic_numbers : Option < RuleConfiguration < biome_rule_options :: no_magic_numbers :: NoMagicNumbersOptions >> , # [doc = "Disallow the use of TypeScript's namespaces."] # [serde (skip_serializing_if = "Option::is_none")] pub no_namespace : Option < RuleConfiguration < biome_rule_options :: no_namespace :: NoNamespaceOptions >> , # [doc = "Disallow negation in the condition of an if statement if it has an else clause."] # [serde (skip_serializing_if = "Option::is_none")] pub no_negation_else : Option < RuleFixConfiguration < biome_rule_options :: no_negation_else :: NoNegationElseOptions >> , # [doc = "Disallow nested ternary expressions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_nested_ternary : Option < RuleConfiguration < biome_rule_options :: no_nested_ternary :: NoNestedTernaryOptions >> , # [doc = "Disallow non-null assertions using the ! postfix operator."] # [serde (skip_serializing_if = "Option::is_none")] pub no_non_null_assertion : Option < RuleFixConfiguration < biome_rule_options :: no_non_null_assertion :: NoNonNullAssertionOptions >> , # [doc = "Disallow reassigning function parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub no_parameter_assign : Option < RuleConfiguration < biome_rule_options :: no_parameter_assign :: NoParameterAssignOptions >> , # [doc = "Disallow the use of parameter properties in class constructors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_parameter_properties : Option < RuleConfiguration < biome_rule_options :: no_parameter_properties :: NoParameterPropertiesOptions >> , # [doc = "Disallow the use of process.env."] # [serde (skip_serializing_if = "Option::is_none")] pub no_process_env : Option < RuleConfiguration < biome_rule_options :: no_process_env :: NoProcessEnvOptions >> , # [doc = "This rule allows you to specify global variable names that you don’t want to use in your application."] # [serde (skip_serializing_if = "Option::is_none")] pub no_restricted_globals : Option < RuleConfiguration < biome_rule_options :: no_restricted_globals :: NoRestrictedGlobalsOptions >> , # [doc = "Disallow specified modules when loaded by import or require."] # [serde (skip_serializing_if = "Option::is_none")] pub no_restricted_imports : Option < RuleConfiguration < biome_rule_options :: no_restricted_imports :: NoRestrictedImportsOptions >> , # [doc = "Disallow user defined types."] # [serde (skip_serializing_if = "Option::is_none")] pub no_restricted_types : Option < RuleFixConfiguration < biome_rule_options :: no_restricted_types :: NoRestrictedTypesOptions >> , # [doc = "Disallow the use of constants which its value is the upper-case version of its name."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shouty_constants : Option < RuleFixConfiguration < biome_rule_options :: no_shouty_constants :: NoShoutyConstantsOptions >> , # [doc = "Enforce the use of String.slice() over String.substr() and String.substring()."] # [serde (skip_serializing_if = "Option::is_none")] pub no_substr : Option < RuleFixConfiguration < biome_rule_options :: no_substr :: NoSubstrOptions >> , # [doc = "Disallow template literals if interpolation and special-character handling are not needed"] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_template_literal : Option < RuleFixConfiguration < biome_rule_options :: no_unused_template_literal :: NoUnusedTemplateLiteralOptions >> , # [doc = "Disallow else block when the if block breaks early."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_else : Option < RuleFixConfiguration < biome_rule_options :: no_useless_else :: NoUselessElseOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Disallow use of @value rule in css modules."] # [serde (skip_serializing_if = "Option::is_none")] pub no_value_at_rule : Option < RuleConfiguration < biome_rule_options :: no_value_at_rule :: NoValueAtRuleOptions >> , # [doc = "Disallow the use of yoda expressions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_yoda_expression : Option < RuleFixConfiguration < biome_rule_options :: no_yoda_expression :: NoYodaExpressionOptions >> , # [doc = "Disallow Array constructors."] # [serde (skip_serializing_if = "Option::is_none")] pub use_array_literals : Option < RuleFixConfiguration < biome_rule_options :: use_array_literals :: UseArrayLiteralsOptions >> , # [doc = "Enforce the use of as const over literal type and type annotation."] # [serde (skip_serializing_if = "Option::is_none")] pub use_as_const_assertion : Option < RuleFixConfiguration < biome_rule_options :: use_as_const_assertion :: UseAsConstAssertionOptions >> , # [doc = "Use at() instead of integer index access."] # [serde (skip_serializing_if = "Option::is_none")] pub use_at_index : Option < RuleFixConfiguration < biome_rule_options :: use_at_index :: UseAtIndexOptions >> , # [doc = "Requires following curly brace conventions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_block_statements : Option < RuleFixConfiguration < biome_rule_options :: use_block_statements :: UseBlockStatementsOptions >> , # [doc = "Enforce using else if instead of nested if in else clauses."] # [serde (skip_serializing_if = "Option::is_none")] pub use_collapsed_else_if : Option < RuleFixConfiguration < biome_rule_options :: use_collapsed_else_if :: UseCollapsedElseIfOptions >> , # [doc = "Enforce using single if instead of nested if clauses."] # [serde (skip_serializing_if = "Option::is_none")] pub use_collapsed_if : Option < RuleFixConfiguration < biome_rule_options :: use_collapsed_if :: UseCollapsedIfOptions >> , # [doc = "Enforce declaring components only within modules that export React Components exclusively."] # [serde (skip_serializing_if = "Option::is_none")] pub use_component_export_only_modules : Option < RuleConfiguration < biome_rule_options :: use_component_export_only_modules :: UseComponentExportOnlyModulesOptions >> , # [doc = "Require consistently using either T\\[] or Array\\<T>"] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_array_type : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_array_type :: UseConsistentArrayTypeOptions >> , # [doc = "Enforce the use of new for all builtins, except String, Number and Boolean."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_builtin_instantiation : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiationOptions >> , # [doc = "This rule enforces consistent use of curly braces inside JSX attributes and JSX children."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_curly_braces : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_curly_braces :: UseConsistentCurlyBracesOptions >> , # [doc = "Require consistent accessibility modifiers on class properties and methods."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_member_accessibility : Option < RuleConfiguration < biome_rule_options :: use_consistent_member_accessibility :: UseConsistentMemberAccessibilityOptions >> , # [doc = "Require the consistent declaration of object literals. Defaults to explicit definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_object_definitions : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_object_definitions :: UseConsistentObjectDefinitionsOptions >> , # [doc = "Require const declarations for variables that are only assigned once."] # [serde (skip_serializing_if = "Option::is_none")] pub use_const : Option < RuleFixConfiguration < biome_rule_options :: use_const :: UseConstOptions >> , # [doc = "Enforce default function parameters and optional function parameters to be last."] # [serde (skip_serializing_if = "Option::is_none")] pub use_default_parameter_last : Option < RuleFixConfiguration < biome_rule_options :: use_default_parameter_last :: UseDefaultParameterLastOptions >> , # [doc = "Require the default clause in switch statements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_default_switch_clause : Option < RuleConfiguration < biome_rule_options :: use_default_switch_clause :: UseDefaultSwitchClauseOptions >> , # [doc = "Require specifying the reason argument when using @deprecated directive"] # [serde (skip_serializing_if = "Option::is_none")] pub use_deprecated_reason : Option < RuleConfiguration < biome_rule_options :: use_deprecated_reason :: UseDeprecatedReasonOptions >> , # [doc = "Require that each enum member value be explicitly initialized."] # [serde (skip_serializing_if = "Option::is_none")] pub use_enum_initializers : Option < RuleFixConfiguration < biome_rule_options :: use_enum_initializers :: UseEnumInitializersOptions >> , # [doc = "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_length_check : Option < RuleFixConfiguration < biome_rule_options :: use_explicit_length_check :: UseExplicitLengthCheckOptions >> , # [doc = "Disallow the use of Math.pow in favor of the ** operator."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exponentiation_operator : Option < RuleFixConfiguration < biome_rule_options :: use_exponentiation_operator :: UseExponentiationOperatorOptions >> , # [doc = "Promotes the use of export type for types."] # [serde (skip_serializing_if = "Option::is_none")] pub use_export_type : Option < RuleFixConfiguration < biome_rule_options :: use_export_type :: UseExportTypeOptions >> , # [doc = "Require that all exports are declared after all non-export statements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exports_last : Option < RuleConfiguration < biome_rule_options :: use_exports_last :: UseExportsLastOptions >> , # [doc = "Enforce naming conventions for JavaScript and TypeScript filenames."] # [serde (skip_serializing_if = "Option::is_none")] pub use_filenaming_convention : Option < RuleConfiguration < biome_rule_options :: use_filenaming_convention :: UseFilenamingConventionOptions >> , # [doc = "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array."] # [serde (skip_serializing_if = "Option::is_none")] pub use_for_of : Option < RuleConfiguration < biome_rule_options :: use_for_of :: UseForOfOptions >> , # [doc = "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>."] # [serde (skip_serializing_if = "Option::is_none")] pub use_fragment_syntax : Option < RuleFixConfiguration < biome_rule_options :: use_fragment_syntax :: UseFragmentSyntaxOptions >> , # [doc = "Enforce that getters and setters for the same property are adjacent in class and object definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_grouped_accessor_pairs : Option < RuleConfiguration < biome_rule_options :: use_grouped_accessor_pairs :: UseGroupedAccessorPairsOptions >> , # [doc = "Promotes the use of import type for types."] # [serde (skip_serializing_if = "Option::is_none")] pub use_import_type : Option < RuleFixConfiguration < biome_rule_options :: use_import_type :: UseImportTypeOptions >> , # [doc = "Require all enum members to be literal values."] # [serde (skip_serializing_if = "Option::is_none")] pub use_literal_enum_members : Option < RuleConfiguration < biome_rule_options :: use_literal_enum_members :: UseLiteralEnumMembersOptions >> , # [doc = "Validates that all enum values are capitalized."] # [serde (skip_serializing_if = "Option::is_none")] pub use_naming_convention : Option < RuleConfiguration < biome_rule_options :: use_naming_convention :: UseNamingConventionOptions >> , # [doc = "Promotes the usage of node:assert/strict over node:assert."] # [serde (skip_serializing_if = "Option::is_none")] pub use_node_assert_strict : Option < RuleFixConfiguration < biome_rule_options :: use_node_assert_strict :: UseNodeAssertStrictOptions >> , # [doc = "Enforces using the node: protocol for Node.js builtin modules."] # [serde (skip_serializing_if = "Option::is_none")] pub use_nodejs_import_protocol : Option < RuleFixConfiguration < biome_rule_options :: use_nodejs_import_protocol :: UseNodejsImportProtocolOptions >> , # [doc = "Use the Number properties instead of global ones."] # [serde (skip_serializing_if = "Option::is_none")] pub use_number_namespace : Option < RuleFixConfiguration < biome_rule_options :: use_number_namespace :: UseNumberNamespaceOptions >> , # [doc = "Enforce the use of numeric separators in numeric literals."] # [serde (skip_serializing_if = "Option::is_none")] pub use_numeric_separators : Option < RuleFixConfiguration < biome_rule_options :: use_numeric_separators :: UseNumericSeparatorsOptions >> , # [doc = "Prefer object spread over Object.assign() when constructing new objects."] # [serde (skip_serializing_if = "Option::is_none")] pub use_object_spread : Option < RuleFixConfiguration < biome_rule_options :: use_object_spread :: UseObjectSpreadOptions >> , # [doc = "Enforce marking members as readonly if they are never modified outside the constructor."] # [serde (skip_serializing_if = "Option::is_none")] pub use_readonly_class_properties : Option < RuleFixConfiguration < biome_rule_options :: use_readonly_class_properties :: UseReadonlyClassPropertiesOptions >> , # [doc = "Prevent extra closing tags for components without children."] # [serde (skip_serializing_if = "Option::is_none")] pub use_self_closing_elements : Option < RuleFixConfiguration < biome_rule_options :: use_self_closing_elements :: UseSelfClosingElementsOptions >> , # [doc = "Require assignment operator shorthand where possible."] # [serde (skip_serializing_if = "Option::is_none")] pub use_shorthand_assign : Option < RuleFixConfiguration < biome_rule_options :: use_shorthand_assign :: UseShorthandAssignOptions >> , # [doc = "Enforce using function types instead of object type with call signatures."] # [serde (skip_serializing_if = "Option::is_none")] pub use_shorthand_function_type : Option < RuleFixConfiguration < biome_rule_options :: use_shorthand_function_type :: UseShorthandFunctionTypeOptions >> , # [doc = "Disallow multiple variable declarations in the same variable statement"] # [serde (skip_serializing_if = "Option::is_none")] pub use_single_var_declarator : Option < RuleFixConfiguration < biome_rule_options :: use_single_var_declarator :: UseSingleVarDeclaratorOptions >> , # [doc = "Require a description parameter for the Symbol()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_symbol_description : Option < RuleConfiguration < biome_rule_options :: use_symbol_description :: UseSymbolDescriptionOptions >> , # [doc = "Prefer template literals over string concatenation."] # [serde (skip_serializing_if = "Option::is_none")] pub use_template : Option < RuleFixConfiguration < biome_rule_options :: use_template :: UseTemplateOptions >> , # [doc = "Require new when throwing an error."] # [serde (skip_serializing_if = "Option::is_none")] pub use_throw_new_error : Option < RuleFixConfiguration < biome_rule_options :: use_throw_new_error :: UseThrowNewErrorOptions >> , # [doc = "Disallow throwing non-Error values."] # [serde (skip_serializing_if = "Option::is_none")] pub use_throw_only_error : Option < RuleConfiguration < biome_rule_options :: use_throw_only_error :: UseThrowOnlyErrorOptions >> , # [doc = "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_trim_start_end : Option < RuleFixConfiguration < biome_rule_options :: use_trim_start_end :: UseTrimStartEndOptions >> , # [doc = "Disallow overload signatures that can be unified into a single signature."] # [serde (skip_serializing_if = "Option::is_none")] pub use_unified_type_signatures : Option < RuleFixConfiguration < biome_rule_options :: use_unified_type_signatures :: UseUnifiedTypeSignaturesOptions >> }
+pub struct Style { # [doc = r" It enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Disallow use of CommonJs module system in favor of ESM style imports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_common_js : Option < RuleConfiguration < biome_rule_options :: no_common_js :: NoCommonJsOptions >> , # [doc = "Disallow default exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_default_export : Option < RuleConfiguration < biome_rule_options :: no_default_export :: NoDefaultExportOptions >> , # [doc = "Disallow a lower specificity selector from coming after a higher specificity selector."] # [serde (skip_serializing_if = "Option::is_none")] pub no_descending_specificity : Option < RuleConfiguration < biome_rule_options :: no_descending_specificity :: NoDescendingSpecificityOptions >> , # [doc = "Disallow using a callback in asynchronous tests and hooks."] # [serde (skip_serializing_if = "Option::is_none")] pub no_done_callback : Option < RuleConfiguration < biome_rule_options :: no_done_callback :: NoDoneCallbackOptions >> , # [doc = "Disallow TypeScript enum."] # [serde (skip_serializing_if = "Option::is_none")] pub no_enum : Option < RuleConfiguration < biome_rule_options :: no_enum :: NoEnumOptions >> , # [doc = "Disallow exporting an imported variable."] # [serde (skip_serializing_if = "Option::is_none")] pub no_exported_imports : Option < RuleConfiguration < biome_rule_options :: no_exported_imports :: NoExportedImportsOptions >> , # [doc = "Prevent usage of \\<head> element in a Next.js project."] # [serde (skip_serializing_if = "Option::is_none")] pub no_head_element : Option < RuleConfiguration < biome_rule_options :: no_head_element :: NoHeadElementOptions >> , # [doc = "Disallow implicit true values on JSX boolean attributes"] # [serde (skip_serializing_if = "Option::is_none")] pub no_implicit_boolean : Option < RuleFixConfiguration < biome_rule_options :: no_implicit_boolean :: NoImplicitBooleanOptions >> , # [doc = "Disallow type annotations for variables, parameters, and class properties initialized with a literal expression."] # [serde (skip_serializing_if = "Option::is_none")] pub no_inferrable_types : Option < RuleFixConfiguration < biome_rule_options :: no_inferrable_types :: NoInferrableTypesOptions >> , # [doc = "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants."] # [serde (skip_serializing_if = "Option::is_none")] pub no_magic_numbers : Option < RuleConfiguration < biome_rule_options :: no_magic_numbers :: NoMagicNumbersOptions >> , # [doc = "Disallow the use of TypeScript's namespaces."] # [serde (skip_serializing_if = "Option::is_none")] pub no_namespace : Option < RuleConfiguration < biome_rule_options :: no_namespace :: NoNamespaceOptions >> , # [doc = "Disallow negation in the condition of an if statement if it has an else clause."] # [serde (skip_serializing_if = "Option::is_none")] pub no_negation_else : Option < RuleFixConfiguration < biome_rule_options :: no_negation_else :: NoNegationElseOptions >> , # [doc = "Disallow nested ternary expressions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_nested_ternary : Option < RuleConfiguration < biome_rule_options :: no_nested_ternary :: NoNestedTernaryOptions >> , # [doc = "Disallow non-null assertions using the ! postfix operator."] # [serde (skip_serializing_if = "Option::is_none")] pub no_non_null_assertion : Option < RuleFixConfiguration < biome_rule_options :: no_non_null_assertion :: NoNonNullAssertionOptions >> , # [doc = "Disallow reassigning function parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub no_parameter_assign : Option < RuleConfiguration < biome_rule_options :: no_parameter_assign :: NoParameterAssignOptions >> , # [doc = "Disallow the use of parameter properties in class constructors."] # [serde (skip_serializing_if = "Option::is_none")] pub no_parameter_properties : Option < RuleConfiguration < biome_rule_options :: no_parameter_properties :: NoParameterPropertiesOptions >> , # [doc = "Disallow the use of process.env."] # [serde (skip_serializing_if = "Option::is_none")] pub no_process_env : Option < RuleConfiguration < biome_rule_options :: no_process_env :: NoProcessEnvOptions >> , # [doc = "This rule allows you to specify global variable names that you don’t want to use in your application."] # [serde (skip_serializing_if = "Option::is_none")] pub no_restricted_globals : Option < RuleConfiguration < biome_rule_options :: no_restricted_globals :: NoRestrictedGlobalsOptions >> , # [doc = "Disallow specified modules when loaded by import or require."] # [serde (skip_serializing_if = "Option::is_none")] pub no_restricted_imports : Option < RuleConfiguration < biome_rule_options :: no_restricted_imports :: NoRestrictedImportsOptions >> , # [doc = "Disallow user defined types."] # [serde (skip_serializing_if = "Option::is_none")] pub no_restricted_types : Option < RuleFixConfiguration < biome_rule_options :: no_restricted_types :: NoRestrictedTypesOptions >> , # [doc = "Disallow the use of constants which its value is the upper-case version of its name."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shouty_constants : Option < RuleFixConfiguration < biome_rule_options :: no_shouty_constants :: NoShoutyConstantsOptions >> , # [doc = "Enforce the use of String.slice() over String.substr() and String.substring()."] # [serde (skip_serializing_if = "Option::is_none")] pub no_substr : Option < RuleFixConfiguration < biome_rule_options :: no_substr :: NoSubstrOptions >> , # [doc = "Disallow template literals if interpolation and special-character handling are not needed"] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_template_literal : Option < RuleFixConfiguration < biome_rule_options :: no_unused_template_literal :: NoUnusedTemplateLiteralOptions >> , # [doc = "Disallow else block when the if block breaks early."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_else : Option < RuleFixConfiguration < biome_rule_options :: no_useless_else :: NoUselessElseOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Disallow use of @value rule in css modules."] # [serde (skip_serializing_if = "Option::is_none")] pub no_value_at_rule : Option < RuleConfiguration < biome_rule_options :: no_value_at_rule :: NoValueAtRuleOptions >> , # [doc = "Disallow the use of yoda expressions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_yoda_expression : Option < RuleFixConfiguration < biome_rule_options :: no_yoda_expression :: NoYodaExpressionOptions >> , # [doc = "Disallow Array constructors."] # [serde (skip_serializing_if = "Option::is_none")] pub use_array_literals : Option < RuleFixConfiguration < biome_rule_options :: use_array_literals :: UseArrayLiteralsOptions >> , # [doc = "Enforce the use of as const over literal type and type annotation."] # [serde (skip_serializing_if = "Option::is_none")] pub use_as_const_assertion : Option < RuleFixConfiguration < biome_rule_options :: use_as_const_assertion :: UseAsConstAssertionOptions >> , # [doc = "Use at() instead of integer index access."] # [serde (skip_serializing_if = "Option::is_none")] pub use_at_index : Option < RuleFixConfiguration < biome_rule_options :: use_at_index :: UseAtIndexOptions >> , # [doc = "Requires following curly brace conventions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_block_statements : Option < RuleFixConfiguration < biome_rule_options :: use_block_statements :: UseBlockStatementsOptions >> , # [doc = "Enforce using else if instead of nested if in else clauses."] # [serde (skip_serializing_if = "Option::is_none")] pub use_collapsed_else_if : Option < RuleFixConfiguration < biome_rule_options :: use_collapsed_else_if :: UseCollapsedElseIfOptions >> , # [doc = "Enforce using single if instead of nested if clauses."] # [serde (skip_serializing_if = "Option::is_none")] pub use_collapsed_if : Option < RuleFixConfiguration < biome_rule_options :: use_collapsed_if :: UseCollapsedIfOptions >> , # [doc = "Enforce declaring components only within modules that export React Components exclusively."] # [serde (skip_serializing_if = "Option::is_none")] pub use_component_export_only_modules : Option < RuleConfiguration < biome_rule_options :: use_component_export_only_modules :: UseComponentExportOnlyModulesOptions >> , # [doc = "Require consistently using either T\\[] or Array\\<T>"] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_array_type : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_array_type :: UseConsistentArrayTypeOptions >> , # [doc = "Enforce the use of new for all builtins, except String, Number and Boolean."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_builtin_instantiation : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiationOptions >> , # [doc = "This rule enforces consistent use of curly braces inside JSX attributes and JSX children."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_curly_braces : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_curly_braces :: UseConsistentCurlyBracesOptions >> , # [doc = "Require consistent accessibility modifiers on class properties and methods."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_member_accessibility : Option < RuleConfiguration < biome_rule_options :: use_consistent_member_accessibility :: UseConsistentMemberAccessibilityOptions >> , # [doc = "Require the consistent declaration of object literals. Defaults to explicit definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_object_definitions : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_object_definitions :: UseConsistentObjectDefinitionsOptions >> , # [doc = "Require const declarations for variables that are only assigned once."] # [serde (skip_serializing_if = "Option::is_none")] pub use_const : Option < RuleFixConfiguration < biome_rule_options :: use_const :: UseConstOptions >> , # [doc = "Enforce default function parameters and optional function parameters to be last."] # [serde (skip_serializing_if = "Option::is_none")] pub use_default_parameter_last : Option < RuleFixConfiguration < biome_rule_options :: use_default_parameter_last :: UseDefaultParameterLastOptions >> , # [doc = "Require the default clause in switch statements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_default_switch_clause : Option < RuleConfiguration < biome_rule_options :: use_default_switch_clause :: UseDefaultSwitchClauseOptions >> , # [doc = "Require specifying the reason argument when using @deprecated directive"] # [serde (skip_serializing_if = "Option::is_none")] pub use_deprecated_reason : Option < RuleConfiguration < biome_rule_options :: use_deprecated_reason :: UseDeprecatedReasonOptions >> , # [doc = "Require that each enum member value be explicitly initialized."] # [serde (skip_serializing_if = "Option::is_none")] pub use_enum_initializers : Option < RuleFixConfiguration < biome_rule_options :: use_enum_initializers :: UseEnumInitializersOptions >> , # [doc = "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_length_check : Option < RuleFixConfiguration < biome_rule_options :: use_explicit_length_check :: UseExplicitLengthCheckOptions >> , # [doc = "Disallow the use of Math.pow in favor of the ** operator."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exponentiation_operator : Option < RuleFixConfiguration < biome_rule_options :: use_exponentiation_operator :: UseExponentiationOperatorOptions >> , # [doc = "Promotes the use of export type for types."] # [serde (skip_serializing_if = "Option::is_none")] pub use_export_type : Option < RuleFixConfiguration < biome_rule_options :: use_export_type :: UseExportTypeOptions >> , # [doc = "Require that all exports are declared after all non-export statements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exports_last : Option < RuleConfiguration < biome_rule_options :: use_exports_last :: UseExportsLastOptions >> , # [doc = "Enforce naming conventions for JavaScript and TypeScript filenames."] # [serde (skip_serializing_if = "Option::is_none")] pub use_filenaming_convention : Option < RuleConfiguration < biome_rule_options :: use_filenaming_convention :: UseFilenamingConventionOptions >> , # [doc = "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array."] # [serde (skip_serializing_if = "Option::is_none")] pub use_for_of : Option < RuleConfiguration < biome_rule_options :: use_for_of :: UseForOfOptions >> , # [doc = "This rule enforces the use of \\<>...\\</> over \\<Fragment>...\\</Fragment>."] # [serde (skip_serializing_if = "Option::is_none")] pub use_fragment_syntax : Option < RuleFixConfiguration < biome_rule_options :: use_fragment_syntax :: UseFragmentSyntaxOptions >> , # [doc = "Validates that all enum values are capitalized."] # [serde (skip_serializing_if = "Option::is_none")] pub use_graphql_naming_convention : Option < RuleConfiguration < biome_rule_options :: use_graphql_naming_convention :: UseGraphqlNamingConventionOptions >> , # [doc = "Enforce that getters and setters for the same property are adjacent in class and object definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_grouped_accessor_pairs : Option < RuleConfiguration < biome_rule_options :: use_grouped_accessor_pairs :: UseGroupedAccessorPairsOptions >> , # [doc = "Promotes the use of import type for types."] # [serde (skip_serializing_if = "Option::is_none")] pub use_import_type : Option < RuleFixConfiguration < biome_rule_options :: use_import_type :: UseImportTypeOptions >> , # [doc = "Require all enum members to be literal values."] # [serde (skip_serializing_if = "Option::is_none")] pub use_literal_enum_members : Option < RuleConfiguration < biome_rule_options :: use_literal_enum_members :: UseLiteralEnumMembersOptions >> , # [doc = "Enforce naming conventions for everything across a codebase."] # [serde (skip_serializing_if = "Option::is_none")] pub use_naming_convention : Option < RuleFixConfiguration < biome_rule_options :: use_naming_convention :: UseNamingConventionOptions >> , # [doc = "Promotes the usage of node:assert/strict over node:assert."] # [serde (skip_serializing_if = "Option::is_none")] pub use_node_assert_strict : Option < RuleFixConfiguration < biome_rule_options :: use_node_assert_strict :: UseNodeAssertStrictOptions >> , # [doc = "Enforces using the node: protocol for Node.js builtin modules."] # [serde (skip_serializing_if = "Option::is_none")] pub use_nodejs_import_protocol : Option < RuleFixConfiguration < biome_rule_options :: use_nodejs_import_protocol :: UseNodejsImportProtocolOptions >> , # [doc = "Use the Number properties instead of global ones."] # [serde (skip_serializing_if = "Option::is_none")] pub use_number_namespace : Option < RuleFixConfiguration < biome_rule_options :: use_number_namespace :: UseNumberNamespaceOptions >> , # [doc = "Enforce the use of numeric separators in numeric literals."] # [serde (skip_serializing_if = "Option::is_none")] pub use_numeric_separators : Option < RuleFixConfiguration < biome_rule_options :: use_numeric_separators :: UseNumericSeparatorsOptions >> , # [doc = "Prefer object spread over Object.assign() when constructing new objects."] # [serde (skip_serializing_if = "Option::is_none")] pub use_object_spread : Option < RuleFixConfiguration < biome_rule_options :: use_object_spread :: UseObjectSpreadOptions >> , # [doc = "Enforce marking members as readonly if they are never modified outside the constructor."] # [serde (skip_serializing_if = "Option::is_none")] pub use_readonly_class_properties : Option < RuleFixConfiguration < biome_rule_options :: use_readonly_class_properties :: UseReadonlyClassPropertiesOptions >> , # [doc = "Prevent extra closing tags for components without children."] # [serde (skip_serializing_if = "Option::is_none")] pub use_self_closing_elements : Option < RuleFixConfiguration < biome_rule_options :: use_self_closing_elements :: UseSelfClosingElementsOptions >> , # [doc = "Require assignment operator shorthand where possible."] # [serde (skip_serializing_if = "Option::is_none")] pub use_shorthand_assign : Option < RuleFixConfiguration < biome_rule_options :: use_shorthand_assign :: UseShorthandAssignOptions >> , # [doc = "Enforce using function types instead of object type with call signatures."] # [serde (skip_serializing_if = "Option::is_none")] pub use_shorthand_function_type : Option < RuleFixConfiguration < biome_rule_options :: use_shorthand_function_type :: UseShorthandFunctionTypeOptions >> , # [doc = "Disallow multiple variable declarations in the same variable statement"] # [serde (skip_serializing_if = "Option::is_none")] pub use_single_var_declarator : Option < RuleFixConfiguration < biome_rule_options :: use_single_var_declarator :: UseSingleVarDeclaratorOptions >> , # [doc = "Require a description parameter for the Symbol()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_symbol_description : Option < RuleConfiguration < biome_rule_options :: use_symbol_description :: UseSymbolDescriptionOptions >> , # [doc = "Prefer template literals over string concatenation."] # [serde (skip_serializing_if = "Option::is_none")] pub use_template : Option < RuleFixConfiguration < biome_rule_options :: use_template :: UseTemplateOptions >> , # [doc = "Require new when throwing an error."] # [serde (skip_serializing_if = "Option::is_none")] pub use_throw_new_error : Option < RuleFixConfiguration < biome_rule_options :: use_throw_new_error :: UseThrowNewErrorOptions >> , # [doc = "Disallow throwing non-Error values."] # [serde (skip_serializing_if = "Option::is_none")] pub use_throw_only_error : Option < RuleConfiguration < biome_rule_options :: use_throw_only_error :: UseThrowOnlyErrorOptions >> , # [doc = "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight()."] # [serde (skip_serializing_if = "Option::is_none")] pub use_trim_start_end : Option < RuleFixConfiguration < biome_rule_options :: use_trim_start_end :: UseTrimStartEndOptions >> , # [doc = "Disallow overload signatures that can be unified into a single signature."] # [serde (skip_serializing_if = "Option::is_none")] pub use_unified_type_signatures : Option < RuleFixConfiguration < biome_rule_options :: use_unified_type_signatures :: UseUnifiedTypeSignaturesOptions >> }
 impl Style {
     const GROUP_NAME: &'static str = "style";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -5497,6 +5501,7 @@ impl Style {
         "useFilenamingConvention",
         "useForOf",
         "useFragmentSyntax",
+        "useGraphqlNamingConvention",
         "useGroupedAccessorPairs",
         "useImportType",
         "useLiteralEnumMembers",
@@ -5526,11 +5531,11 @@ impl Style {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[63]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[67]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -5604,6 +5609,7 @@ impl Style {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[68]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[69]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[70]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[71]),
     ];
 }
 impl RuleGroupExt for Style {
@@ -5870,104 +5876,109 @@ impl RuleGroupExt for Style {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
             }
         }
-        if let Some(rule) = self.use_grouped_accessor_pairs.as_ref() {
+        if let Some(rule) = self.use_graphql_naming_convention.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]));
             }
         }
-        if let Some(rule) = self.use_import_type.as_ref() {
+        if let Some(rule) = self.use_grouped_accessor_pairs.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]));
             }
         }
-        if let Some(rule) = self.use_literal_enum_members.as_ref() {
+        if let Some(rule) = self.use_import_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_literal_enum_members.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]));
             }
         }
-        if let Some(rule) = self.use_node_assert_strict.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]));
             }
         }
-        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]));
             }
         }
-        if let Some(rule) = self.use_number_namespace.as_ref() {
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]));
             }
         }
-        if let Some(rule) = self.use_numeric_separators.as_ref() {
+        if let Some(rule) = self.use_number_namespace.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
             }
         }
-        if let Some(rule) = self.use_object_spread.as_ref() {
+        if let Some(rule) = self.use_numeric_separators.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]));
             }
         }
-        if let Some(rule) = self.use_readonly_class_properties.as_ref() {
+        if let Some(rule) = self.use_object_spread.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]));
             }
         }
-        if let Some(rule) = self.use_self_closing_elements.as_ref() {
+        if let Some(rule) = self.use_readonly_class_properties.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]));
             }
         }
-        if let Some(rule) = self.use_shorthand_assign.as_ref() {
+        if let Some(rule) = self.use_self_closing_elements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[62]));
             }
         }
-        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+        if let Some(rule) = self.use_shorthand_assign.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[63]));
             }
         }
-        if let Some(rule) = self.use_single_var_declarator.as_ref() {
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_single_var_declarator.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[65]));
             }
         }
-        if let Some(rule) = self.use_template.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]));
             }
         }
-        if let Some(rule) = self.use_throw_new_error.as_ref() {
+        if let Some(rule) = self.use_template.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[67]));
             }
         }
-        if let Some(rule) = self.use_throw_only_error.as_ref() {
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[68]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[69]));
             }
         }
-        if let Some(rule) = self.use_unified_type_signatures.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[70]));
+            }
+        }
+        if let Some(rule) = self.use_unified_type_signatures.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[71]));
             }
         }
         index_set
@@ -6229,104 +6240,109 @@ impl RuleGroupExt for Style {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
             }
         }
-        if let Some(rule) = self.use_grouped_accessor_pairs.as_ref() {
+        if let Some(rule) = self.use_graphql_naming_convention.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]));
             }
         }
-        if let Some(rule) = self.use_import_type.as_ref() {
+        if let Some(rule) = self.use_grouped_accessor_pairs.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]));
             }
         }
-        if let Some(rule) = self.use_literal_enum_members.as_ref() {
+        if let Some(rule) = self.use_import_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_literal_enum_members.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]));
             }
         }
-        if let Some(rule) = self.use_node_assert_strict.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]));
             }
         }
-        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
+        if let Some(rule) = self.use_node_assert_strict.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]));
             }
         }
-        if let Some(rule) = self.use_number_namespace.as_ref() {
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]));
             }
         }
-        if let Some(rule) = self.use_numeric_separators.as_ref() {
+        if let Some(rule) = self.use_number_namespace.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
             }
         }
-        if let Some(rule) = self.use_object_spread.as_ref() {
+        if let Some(rule) = self.use_numeric_separators.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]));
             }
         }
-        if let Some(rule) = self.use_readonly_class_properties.as_ref() {
+        if let Some(rule) = self.use_object_spread.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]));
             }
         }
-        if let Some(rule) = self.use_self_closing_elements.as_ref() {
+        if let Some(rule) = self.use_readonly_class_properties.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]));
             }
         }
-        if let Some(rule) = self.use_shorthand_assign.as_ref() {
+        if let Some(rule) = self.use_self_closing_elements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[62]));
             }
         }
-        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+        if let Some(rule) = self.use_shorthand_assign.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[63]));
             }
         }
-        if let Some(rule) = self.use_single_var_declarator.as_ref() {
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]));
             }
         }
-        if let Some(rule) = self.use_symbol_description.as_ref() {
+        if let Some(rule) = self.use_single_var_declarator.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[65]));
             }
         }
-        if let Some(rule) = self.use_template.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]));
             }
         }
-        if let Some(rule) = self.use_throw_new_error.as_ref() {
+        if let Some(rule) = self.use_template.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[67]));
             }
         }
-        if let Some(rule) = self.use_throw_only_error.as_ref() {
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[68]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[69]));
             }
         }
-        if let Some(rule) = self.use_unified_type_signatures.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[70]));
+            }
+        }
+        if let Some(rule) = self.use_unified_type_signatures.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[71]));
             }
         }
         index_set
@@ -6563,6 +6579,10 @@ impl RuleGroupExt for Style {
                 .use_fragment_syntax
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "useGraphqlNamingConvention" => self
+                .use_graphql_naming_convention
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "useGroupedAccessorPairs" => self
                 .use_grouped_accessor_pairs
                 .as_ref()
@@ -6702,6 +6722,7 @@ impl From<GroupPlainConfiguration> for Style {
             use_filenaming_convention: Some(value.into()),
             use_for_of: Some(value.into()),
             use_fragment_syntax: Some(value.into()),
+            use_graphql_naming_convention: Some(value.into()),
             use_grouped_accessor_pairs: Some(value.into()),
             use_import_type: Some(value.into()),
             use_literal_enum_members: Some(value.into()),

@@ -4,5 +4,5 @@
 
 use biome_analyze::declare_lint_group;
 pub mod use_deprecated_reason;
-pub mod use_naming_convention;
-declare_lint_group! { pub Style { name : "style" , rules : [self :: use_deprecated_reason :: UseDeprecatedReason , self :: use_naming_convention :: UseNamingConvention ,] } }
+pub mod use_graphql_naming_convention;
+declare_lint_group! { pub Style { name : "style" , rules : [self :: use_deprecated_reason :: UseDeprecatedReason , self :: use_graphql_naming_convention :: UseGraphqlNamingConvention ,] } }

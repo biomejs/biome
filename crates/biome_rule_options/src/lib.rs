@@ -284,6 +284,7 @@ pub mod use_generic_font_names;
 pub mod use_getter_return;
 pub mod use_google_font_display;
 pub mod use_google_font_preconnect;
+pub mod use_graphql_naming_convention;
 pub mod use_grouped_accessor_pairs;
 pub mod use_guard_for_in;
 pub mod use_heading_content;

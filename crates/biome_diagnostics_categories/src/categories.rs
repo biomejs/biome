@@ -315,6 +315,7 @@ define_categories! {
     "lint/style/useFilenamingConvention": "https://biomejs.dev/linter/rules/use-filenaming-convention",
     "lint/style/useForOf": "https://biomejs.dev/linter/rules/use-for-of",
     "lint/style/useFragmentSyntax": "https://biomejs.dev/linter/rules/use-fragment-syntax",
+    "lint/style/useGraphqlNamingConvention": "https://biomejs.dev/linter/rules/use-graphql-naming-convention",
     "lint/style/useGroupedAccessorPairs": "https://biomejs.dev/linter/rules/use-grouped-accessor-pairs",
     "lint/style/useImportType": "https://biomejs.dev/linter/rules/use-import-type",
     "lint/style/useLiteralEnumMembers": "https://biomejs.dev/linter/rules/use-literal-enum-members",

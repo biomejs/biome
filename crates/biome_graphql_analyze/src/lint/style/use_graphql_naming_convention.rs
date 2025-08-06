@@ -3,7 +3,7 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lin
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlEnumValueDefinition;
 use biome_rowan::AstNode;
-use biome_rule_options::use_naming_convention::UseNamingConventionOptions;
+use biome_rule_options::use_graphql_naming_convention::UseGraphqlNamingConventionOptions;
 
 declare_lint_rule! {
     /// Validates that all enum values are capitalized.
@@ -28,20 +28,20 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub UseNamingConvention {
+    pub UseGraphqlNamingConvention {
         version: "2.0.0",
-        name: "useNamingConvention",
+        name: "useGraphqlNamingConvention",
         language: "graphql",
         recommended: false,
         sources: &[RuleSource::EslintGraphqlSchemaLinter("enum-values-all-caps").inspired()],
     }
 }
 
-impl Rule for UseNamingConvention {
+impl Rule for UseGraphqlNamingConvention {
     type Query = Ast<GraphqlEnumValueDefinition>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UseNamingConventionOptions;
+    type Options = UseGraphqlNamingConventionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
