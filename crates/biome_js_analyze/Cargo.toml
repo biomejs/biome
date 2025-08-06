@@ -55,6 +55,7 @@ biome_test_utils    = { path = "../biome_test_utils" }
 criterion           = { package = "codspeed-criterion-compat", version = "=3.0.3" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
+biome_service       = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dev-dependencies]
 mimalloc = { workspace = true }
