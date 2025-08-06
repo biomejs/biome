@@ -1,16 +1,18 @@
+use biome_analyze::RuleSource;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{
-    AnyJsExpression, AnyJsObjectMember, AnyJsStatement, JsCallExpression,
-    JsExportDefaultExpressionClause, JsObjectExpression, T,
-};
-use biome_rowan::{AstNode, AstSeparatedList, TextRange, TriviaPieceKind};
-use biome_rowan::{BatchMutationExt, declare_node_union};
+use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsFileSource, JsObjectExpression, T};
+use biome_rowan::{AstNode, TextRange, TriviaPieceKind};
+use biome_rowan::{BatchMutationExt, SyntaxNodeCast};
+use biome_rule_options::no_vue_data_object_declaration::NoVueDataObjectDeclarationOptions;
 
 use crate::JsRuleAction;
+use crate::frameworks::vue::vue_component::{
+    AnyVueDataDeclarationsGroup, VueComponent, VueComponentDeclarations, VueComponentQuery,
+};
 
 declare_lint_rule! {
     /// Enforce that Vue component `data` options are declared as functions.
@@ -106,206 +108,117 @@ declare_lint_rule! {
         recommended: true,
         fix_kind: FixKind::Safe,
         domains: &[RuleDomain::Vue],
+        sources: &[
+            RuleSource::EslintVueJs("no-deprecated-data-object-declaration").inspired(),
+            RuleSource::EslintVueJs("no-shared-component-data").inspired(),
+        ],
     }
 }
 
-// Anything that can hold a Vue Options object:
-// `export default { … }`
-// `createApp(...)`, `defineComponent(...)`, `.component(...)`
-declare_node_union! {
-  pub AnyVueOptionsLike = JsExportDefaultExpressionClause | JsCallExpression
-}
+pub struct State {
+    /// The range around the entire data declaration.
+    data_decl_range: TextRange,
 
-fn get_options_object_expression(call: &JsCallExpression) -> Option<JsObjectExpression> {
-    let callee = call.callee().ok()?;
-    let options_argument = match callee {
-        // createApp(...), defineComponent(...)
-        AnyJsExpression::JsIdentifierExpression(_) => {
-            let fn_name = call
-                .callee()
-                .ok()?
-                .get_callee_member_name()?
-                .token_text_trimmed();
-
-            if fn_name == "createApp" || fn_name == "defineComponent" {
-                call.arguments()
-                    .ok()?
-                    .args()
-                    .elements()
-                    .next()?
-                    .into_node()
-                    .ok()
-            } else {
-                None
-            }
-        }
-        // dot access: `app.component(...)`
-        AnyJsExpression::JsStaticMemberExpression(_) => {
-            let fn_name = call
-                .callee()
-                .ok()?
-                .get_callee_member_name()?
-                .token_text_trimmed();
-            if fn_name == "component" {
-                call.arguments()
-                    .ok()?
-                    .args()
-                    .elements()
-                    .next()?
-                    .into_node()
-                    .ok()
-            } else {
-                None
-            }
-        }
-        _ => return None,
-    };
-
-    JsObjectExpression::cast(options_argument?.syntax().clone())
-}
-
-pub struct RuleState {
-    diagnostic_range: TextRange,
+    /// The object expression representing the value of the data declaration.
+    object_expression: JsObjectExpression,
 }
 
 impl Rule for NoVueDataObjectDeclaration {
-    type Query = Ast<AnyVueOptionsLike>;
-    type State = RuleState;
+    type Query = VueComponentQuery;
+    type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoVueDataObjectDeclarationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
+        dbg!("rule is running");
 
-        let vue_options_object_expression = match node {
-            AnyVueOptionsLike::JsCallExpression(call) => get_options_object_expression(call),
-            AnyVueOptionsLike::JsExportDefaultExpressionClause(export) => {
-                if let Ok(AnyJsExpression::JsObjectExpression(object_expression)) =
-                    export.expression()
-                {
-                    Some(object_expression)
-                } else {
-                    None
-                }
-            }
+        let Some(component) = VueComponent::from_potential_component(
+            ctx.query(),
+            ctx.model(),
+            ctx.source_type::<JsFileSource>(),
+        ) else {
+            return None;
         };
 
-        if let Some(options) = vue_options_object_expression {
-            let options_object = JsObjectExpression::cast(options.syntax().clone())?;
+        dbg!("found a component");
 
-            for member in options_object.members() {
-                let member = member.ok()?;
+        let Some(data_decl) = component.data_declarations_group() else {
+            return None;
+        };
 
-                if let AnyJsObjectMember::JsPropertyObjectMember(property_object_member) = member {
-                    return property_object_member
-                        .name()
-                        .ok()
-                        .and_then(|n| n.name())
-                        .filter(|ident| ident.text().trim() == "data")
-                        .and_then(|_| property_object_member.value().ok())
-                        .and_then(|value| match value {
-                            AnyJsExpression::JsIdentifierExpression(_)
-                            | AnyJsExpression::JsArrowFunctionExpression(_)
-                            | AnyJsExpression::JsFunctionExpression(_) => None,
-                            _ => Some(RuleState {
-                                diagnostic_range: property_object_member.range(),
-                            }),
-                        });
-                }
-            }
+        dbg!("found a data declaration");
+
+        let data_decl_range = data_decl.range();
+        match data_decl {
+            AnyVueDataDeclarationsGroup::JsPropertyObjectMember(object_member) => object_member
+                .value()
+                .ok()
+                .and_then(|value| value.omit_parentheses().as_js_object_expression().cloned())
+                .map(|object_expression| State {
+                    data_decl_range,
+                    object_expression,
+                }),
+            AnyVueDataDeclarationsGroup::JsMethodObjectMember(_) => None,
         }
-
-        None
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.diagnostic_range,
+                state.data_decl_range,
                 markup! {
-                    "Object declaration on 'data' property is deprecated. Using function declaration instead."
+                    "Found an object declaration for "<Emphasis>"`data`"</Emphasis>" in this component."
                 },
             )
             .note(markup! {
-                "When using the data property on a component, the value must be a function that returns an object."
+                "Using an object declaration for "<Emphasis>"`data`"</Emphasis>" is deprecated, and can result in different component instances sharing the same data."
             }),
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
-        let node = ctx.query();
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let data_expr = state
+            .object_expression
+            .syntax()
+            .clone()
+            .cast::<AnyJsExpression>()?;
 
-        let vue_options_object_expression = match node {
-            AnyVueOptionsLike::JsCallExpression(call) => get_options_object_expression(call),
-            AnyVueOptionsLike::JsExportDefaultExpressionClause(export) => {
-                export.expression().ok()?.as_js_object_expression().cloned()
-            }
-        };
+        let data_function = make::js_function_expression(
+            make::token(T![function]),
+            make::js_parameters(
+                make::token(T!['(']),
+                make::js_parameter_list(None, None),
+                make::token(T![')']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            ),
+            make::js_function_body(
+                make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Newline, "\n")]),
+                make::js_directive_list(None),
+                make::js_statement_list([AnyJsStatement::JsReturnStatement(
+                    make::js_return_statement(
+                        make::token(T![return])
+                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    )
+                    .with_argument(data_expr.clone())
+                    .build(),
+                )]),
+                make::token(T!['}']).with_leading_trivia([(TriviaPieceKind::Newline, "\n")]),
+            ),
+        )
+        .build();
 
-        let options_object =
-            JsObjectExpression::cast(vue_options_object_expression?.syntax().clone())?;
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node(
+            data_expr,
+            AnyJsExpression::JsFunctionExpression(data_function),
+        );
 
-        for member in options_object.members() {
-            let action = member.ok()?.as_js_property_object_member().and_then(|property_object_member| {
-                    property_object_member
-                        .name()
-                        .ok()
-                        .and_then(|object_member_name| object_member_name.name())
-                        .filter(|object_member_name| object_member_name.text().trim() == "data")
-                        .and_then(|_| property_object_member.value().ok())
-                        .and_then(|value| match value {
-                            AnyJsExpression::JsIdentifierExpression(_)
-                            | AnyJsExpression::JsArrowFunctionExpression(_)
-                            | AnyJsExpression::JsFunctionExpression(_) => None,
-                            _ => {
-                                let data_function = make::js_function_expression(
-                                    make::token(T![function]),
-                                    make::js_parameters(
-                                        make::token(T!['(']),
-                                        make::js_parameter_list(None, None),
-                                        make::token(T![')']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                                    ),
-                                    make::js_function_body(
-                                        make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Newline, "\n")]),
-                                        make::js_directive_list(None),
-                                        make::js_statement_list([
-                                            AnyJsStatement::JsReturnStatement(
-                                                make::js_return_statement(make::token(
-                                                    T![return],
-                                                )
-                                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]))
-                                                .with_argument(value.clone())
-                                                .build(),
-                                            ),
-                                            ]),
-                                            make::token(T!['}']).with_leading_trivia([(TriviaPieceKind::Newline, "\n")]),
-                                        ),
-                                    )
-                                    .build();
-
-                                let mut mutation = ctx.root().begin();
-                                mutation.replace_node(
-                                    value,
-                                    AnyJsExpression::JsFunctionExpression(
-                                        data_function,
-                                    ),
-                                );
-
-                                Some(JsRuleAction::new(
-                                    ctx.metadata().action_category(ctx.category(), ctx.group()),
-                                    ctx.metadata().applicability(),
-                                    markup! { "Convert the data object to a function returning the data object" }.to_owned(),
-                                    mutation,
-                                ))
-                        }})
-                });
-
-            if action.is_some() {
-                return action;
-            }
-        }
-
-        None
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Refactor the data object into a function returning the data object" }
+                .to_owned(),
+            mutation,
+        ))
     }
 }

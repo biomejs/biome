@@ -23,8 +23,6 @@ use enumflags2::{BitFlags, bitflags};
 /// It can match any potential Vue component.
 pub type VueComponentQuery = Semantic<AnyPotentialVueComponent>;
 
-// pub type VueComponentQuery = Semantic<AnyPotentialVueComponent>;
-//
 declare_node_union! {
     pub AnyPotentialVueComponent = JsExportDefaultExpressionClause
         | JsCallExpression
