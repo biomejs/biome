@@ -430,6 +430,8 @@ pub enum RuleDomain {
     Vue,
     /// For rules that require querying multiple files inside a project
     Project,
+    /// Tailwind CSS rules
+    Tailwind,
 }
 
 impl Display for RuleDomain {
@@ -443,6 +445,7 @@ impl Display for RuleDomain {
             Self::Qwik => fmt.write_str("qwik"),
             Self::Vue => fmt.write_str("vue"),
             Self::Project => fmt.write_str("project"),
+            Self::Tailwind => fmt.write_str("tailwind"),
         }
     }
 }
@@ -481,6 +484,7 @@ impl RuleDomain {
             ],
             Self::Vue => &[&("vue", ">=3.0.0")],
             Self::Project => &[],
+            Self::Tailwind => &[&("tailwindcss", ">=3.0.0")],
         }
     }
 
@@ -505,6 +509,7 @@ impl RuleDomain {
             Self::Qwik => &[],
             Self::Vue => &[],
             Self::Project => &[],
+            Self::Tailwind => &[],
         }
     }
 }

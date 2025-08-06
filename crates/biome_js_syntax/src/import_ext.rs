@@ -189,13 +189,15 @@ impl AnyJsNamedImportSpecifier {
     /// ```
     pub fn imported_name(&self) -> Option<JsSyntaxToken> {
         match self {
-            specifier @ (Self::JsNamedImportSpecifier(_)
-            | Self::JsShorthandNamedImportSpecifier(_)) => specifier
-                .local_name()?
-                .as_js_identifier_binding()?
-                .name_token()
-                .ok(),
             Self::JsBogusNamedImportSpecifier(_) => None,
+            Self::JsNamedImportSpecifier(specifier) => {
+                specifier.name().and_then(|name| name.value()).ok()
+            }
+            Self::JsShorthandNamedImportSpecifier(specifier) => {
+                let imported_name = specifier.local_name().ok()?;
+                let imported_name = imported_name.as_js_identifier_binding()?;
+                imported_name.name_token().ok()
+            }
         }
     }
 

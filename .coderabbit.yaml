@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-GB"
+early_access: false
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: false
+  commit_status: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  estimate_code_review_effort: false
+  sequence_diagrams: false
+  changed_files_summary: false
+  auto_review:
+    enabled: true
+    drafts: false
+tone_instructions: "Please keep it short and to the point. Be patient, especially with new contributors. Feel free to be witty with maintainers."
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns: ["**/CONTRIBUTING.md"]
+chat:
+  auto_reply: false

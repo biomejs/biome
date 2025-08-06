@@ -903,7 +903,8 @@ export type RuleDomain =
 	| "next"
 	| "qwik"
 	| "vue"
-	| "project";
+	| "project"
+	| "tailwind";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
@@ -1608,6 +1609,10 @@ export interface Nursery {
 	 */
 	noNestedComponentDefinitions?: RuleConfiguration_for_NoNestedComponentDefinitionsOptions;
 	/**
+	 * Disallow non-null assertions after optional chaining expressions.
+	 */
+	noNonNullAssertedOptionalChain?: RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions;
+	/**
 	 * Disallow use event handlers on non-interactive elements.
 	 */
 	noNoninteractiveElementInteractions?: RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions;
@@ -1651,6 +1656,10 @@ export interface Nursery {
 	 * Disallow unknown at-rules.
 	 */
 	noUnknownAtRule?: RuleConfiguration_for_NoUnknownAtRuleOptions;
+	/**
+	 * Disallow unnecessary type-based conditions that can be statically determined as redundant.
+	 */
+	noUnnecessaryConditions?: RuleConfiguration_for_NoUnnecessaryConditionsOptions;
 	/**
 	 * Warn when importing non-existing exports.
 	 */
@@ -1699,6 +1708,10 @@ export interface Nursery {
 	 * Use static Response methods instead of new Response() constructor when possible.
 	 */
 	useConsistentResponse?: RuleFixConfiguration_for_UseConsistentResponseOptions;
+	/**
+	 * Enforce type definitions to consistently use either interface or type.
+	 */
+	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
 	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
@@ -2911,6 +2924,9 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNestedComponentDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNestedComponentDefinitionsOptions;
+export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions;
 export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNoninteractiveElementInteractionsOptions;
@@ -2944,6 +2960,9 @@ export type RuleConfiguration_for_NoUnassignedVariablesOptions =
 export type RuleConfiguration_for_NoUnknownAtRuleOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnknownAtRuleOptions;
+export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnnecessaryConditionsOptions;
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
@@ -2977,6 +2996,9 @@ export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 export type RuleFixConfiguration_for_UseConsistentResponseOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentResponseOptions;
+export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -5199,6 +5221,16 @@ export interface RuleWithOptions_for_NoNestedComponentDefinitionsOptions {
 	 */
 	options: NoNestedComponentDefinitionsOptions;
 }
+export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoNonNullAssertedOptionalChainOptions;
+}
 export interface RuleWithOptions_for_NoNoninteractiveElementInteractionsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5320,6 +5352,16 @@ export interface RuleWithOptions_for_NoUnknownAtRuleOptions {
 	 * Rule's options
 	 */
 	options: NoUnknownAtRuleOptions;
+}
+export interface RuleWithOptions_for_NoUnnecessaryConditionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnnecessaryConditionsOptions;
 }
 export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	/**
@@ -5446,6 +5488,20 @@ export interface RuleWithFixOptions_for_UseConsistentResponseOptions {
 	 * Rule's options
 	 */
 	options: UseConsistentResponseOptions;
+}
+export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentTypeDefinitionsOptions;
 }
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
@@ -7793,6 +7849,7 @@ export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
+export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
 export interface NoQuickfixBiomeOptions {
@@ -7819,6 +7876,7 @@ export interface NoShadowOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
 export interface NoUnknownAtRuleOptions {}
+export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
@@ -7835,6 +7893,9 @@ export interface UseConsistentObjectDefinitionOptions {
 	syntax?: ObjectPropertySyntax;
 }
 export interface UseConsistentResponseOptions {}
+export interface UseConsistentTypeDefinitionsOptions {
+	style?: ConsistentTypeDefinition;
+}
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
 export interface UseExportsLastOptions {}
@@ -8160,6 +8221,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type CustomRestrictedElements = Record<string, string>;
 export type ObjectPropertySyntax = "explicit" | "shorthand";
+export type ConsistentTypeDefinition = "interface" | "type";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -8491,9 +8553,11 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNestedComponentDefinitions"
+	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noQuickfixBiome"
+	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
@@ -8510,39 +8574,40 @@ export type Category =
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
-	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
-	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAdjacentGetterSetter"
+	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentResponse"
+	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"
-	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useGoogleFontPreconnect"
+	| "lint/nursery/useImageSize"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
-	| "lint/nursery/useImageSize"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
 	| "lint/nursery/useObjectSpread"
 	| "lint/nursery/useParseIntRadix"
+	| "lint/nursery/useQwikClasslist"
+	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useReadonlyClassProperties"
 	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"
@@ -8846,10 +8911,6 @@ export interface BacktraceSymbol {
 }
 export interface OpenProjectParams {
 	/**
-	 * Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
-	 */
-	onlyRules?: RuleCode[];
-	/**
 	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
 	 */
 	openUninitialized: boolean;
@@ -8857,42 +8918,13 @@ export interface OpenProjectParams {
 	 * The path to open
 	 */
 	path: BiomePath;
-	/**
-	 * Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
-	 */
-	skipRules?: RuleCode[];
 }
-export type RuleCode = string;
 export interface OpenProjectResult {
 	/**
 	 * A unique identifier for this project
 	 */
 	projectKey: ProjectKey;
-	/**
-	 * How to scan this project
-	 */
-	scanKind: ScanKind;
 }
-export type ScanKind =
-	| "noScanner"
-	| "knownFiles"
-	| {
-			targetedKnownFiles: {
-				/**
-				 * Determines whether the file scanner should descend into subdirectories of the target paths.
-				 */
-				descendFromTargets: boolean;
-				/**
-	* The paths to target by the scanner.
-
-If a target path indicates a folder, all files within are scanned as well.
-
-Target paths must be absolute. 
-	 */
-				targetPaths: BiomePath[];
-			};
-	  }
-	| "project";
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
@@ -9050,6 +9082,7 @@ export interface PullDiagnosticsParams {
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
+export type RuleCode = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];

@@ -192,17 +192,12 @@ fn resolve_module_with_package_json(
 
     // Initialise `type_roots` from the `tsconfig.json` if we have one.
     let initialise_type_roots = options.resolve_types && options.type_roots.is_auto();
-    let type_roots: Option<Vec<&str>> = match initialise_type_roots {
-        true => tsconfig
-            .as_ref()
-            .ok()
-            .and_then(|tsconfig| tsconfig.compiler_options.type_roots.as_ref())
-            .map(|type_roots| type_roots.iter().map(String::as_str).collect()),
-        false => None,
-    };
     let options = match initialise_type_roots {
         true => &options.with_type_roots_and_without_manifests(TypeRoots::from_optional_slice(
-            type_roots.as_deref(),
+            tsconfig
+                .as_ref()
+                .ok()
+                .and_then(|tsconfig| tsconfig.compiler_options.type_roots.as_deref()),
         )),
         false => options,
     };
@@ -460,35 +455,32 @@ fn resolve_dependency(
 ) -> Result<Utf8PathBuf, ResolveError> {
     let (package_name, subpath) = parse_package_specifier(specifier)?;
 
-    if let TypeRoots::Explicit(type_roots) = options.type_roots {
-        for type_root in type_roots {
-            let package_path = base_dir.join(type_root).join(package_name);
-            match resolve_package_path(&package_path, subpath, fs, options) {
-                Ok(path) => return Ok(path),
-                Err(ResolveError::NotFound) => { /* continue */ }
-                Err(error) => return Err(error),
-            }
+    for type_root in options.type_roots.explicit_roots() {
+        let package_path = base_dir.join(type_root).join(package_name);
+        match resolve_package_path(&package_path, subpath, fs, options) {
+            Ok(path) => return Ok(path),
+            Err(ResolveError::NotFound) => { /* continue */ }
+            Err(error) => return Err(error),
+        }
 
-            // FIXME: This is an incomplete approximation of how resolving
-            //        inside custom `typeRoots` should work. Besides packages,
-            //        type roots may contain individual `d.ts` files. Such files
-            //        don't even need to match the name of the package, because
-            //        they can do things such as
-            //        `declare module "whatever_package_name"`. But to get these
-            //        things to work reliably, we need to track **global** type
-            //        definitions first, so for now we'll assume a correlation
-            //        between package name and module name.
-            for extension in options.extensions {
-                if let Some(extension) = definition_extension_for_js_extension(extension) {
-                    let path = package_path.with_extension(extension);
-                    match fs.path_info(&path) {
-                        Ok(PathInfo::File) => return Ok(normalize_path(&path)),
-                        Ok(PathInfo::Symlink {
-                            canonicalized_target,
-                        }) => return Ok(canonicalized_target),
-                        _ => { /* continue */ }
-                    };
-                }
+        // FIXME: This is an incomplete approximation of how resolving inside
+        //        custom `typeRoots` should work. Besides packages, type roots
+        //        may contain individual `d.ts` files. Such files don't even
+        //        need to match the name of the package, because they can do
+        //        things such as `declare module "whatever_package_name"`. But
+        //        to get these things to work reliably, we need to track
+        //        **global** type definitions first, so for now we'll assume a
+        //        correlation between package name and module name.
+        for extension in options.extensions {
+            if let Some(extension) = definition_extension_for_js_extension(extension) {
+                let path = package_path.with_extension(extension);
+                match fs.path_info(&path) {
+                    Ok(PathInfo::File) => return Ok(normalize_path(&path)),
+                    Ok(PathInfo::Symlink {
+                        canonicalized_target,
+                    }) => return Ok(canonicalized_target),
+                    _ => { /* continue */ }
+                };
             }
         }
     }
@@ -935,6 +927,12 @@ pub enum TypeRoots<'a> {
     /// Relative paths are resolved from the package path.
     Explicit(&'a [&'a str]),
 
+    /// Explicit list of directories to search.
+    ///
+    /// Same as [`TypeRoots::Explicit`] except it references a slice of owned
+    /// strings.
+    ExplicitOwned(&'a [String]),
+
     /// The default value to use if no `compilerOptions.typeRoots` field can be
     /// found in the `tsconfig.json`.
     ///
@@ -944,15 +942,46 @@ pub enum TypeRoots<'a> {
 }
 
 impl<'a> TypeRoots<'a> {
-    const fn from_optional_slice(type_roots: Option<&'a [&'a str]>) -> Self {
+    const fn from_optional_slice(type_roots: Option<&'a [String]>) -> Self {
         match type_roots {
-            Some(type_roots) => Self::Explicit(type_roots),
+            Some(type_roots) => Self::ExplicitOwned(type_roots),
             None => Self::TypesInNodeModules,
+        }
+    }
+
+    fn explicit_roots(&self) -> impl Iterator<Item = &str> {
+        ExplicitTypeRootIterator {
+            type_roots: self,
+            index: 0,
         }
     }
 
     const fn is_auto(self) -> bool {
         matches!(self, Self::Auto)
+    }
+}
+
+struct ExplicitTypeRootIterator<'a> {
+    type_roots: &'a TypeRoots<'a>,
+    index: usize,
+}
+
+impl<'a> Iterator for ExplicitTypeRootIterator<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.type_roots {
+            TypeRoots::Auto => None,
+            TypeRoots::Explicit(items) => items.get(self.index).map(|root| {
+                self.index += 1;
+                *root
+            }),
+            TypeRoots::ExplicitOwned(items) => items.get(self.index).map(|root| {
+                self.index += 1;
+                root.as_str()
+            }),
+            TypeRoots::TypesInNodeModules => None,
+        }
     }
 }
 

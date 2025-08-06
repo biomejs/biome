@@ -26,19 +26,13 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"async function doStuff(db) {
-    const txStatements: Array<(tx: any) => Promise<number>> = [(tx) => tx.insert().run()];
-
-    db.transaction((tx: any) => {
-        for (const stmt of txStatements) {
-            stmt(tx)
-        }
-    });
-}"#;
+    const SOURCE: &str = r#"import { sleep as alias } from "./sleep.ts";
+alias(100);"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
     let mut fs = TemporaryFs::new("quick_test");
+    fs.create_file("sleep.ts", "export const sleep = async (ms = 1000): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));");
     fs.create_file(FILENAME, SOURCE);
 
     let file_path = Utf8PathBuf::from(format!("{}/{FILENAME}", fs.cli_path()));

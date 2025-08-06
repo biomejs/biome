@@ -726,6 +726,20 @@
 				}
 			]
 		},
+		"ConsistentTypeDefinition": {
+			"oneOf": [
+				{
+					"description": "Prefer using `interface` for object type definitions",
+					"type": "string",
+					"enum": ["interface"]
+				},
+				{
+					"description": "Prefer using `type` for object type definitions",
+					"type": "string",
+					"enum": ["type"]
+				}
+			]
+		},
 		"Convention": {
 			"type": "object",
 			"properties": {
@@ -3625,6 +3639,18 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNonNullAssertedOptionalChainConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithNoNonNullAssertedOptionalChainOptions"
+				}
+			]
+		},
+		"NoNonNullAssertedOptionalChainOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNonNullAssertionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4292,6 +4318,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnnecessaryConditionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnnecessaryConditionsOptions" }
+			]
+		},
+		"NoUnnecessaryConditionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnreachableConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4823,6 +4859,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noNonNullAssertedOptionalChain": {
+					"description": "Disallow non-null assertions after optional chaining expressions.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noNoninteractiveElementInteractions": {
 					"description": "Disallow use event handlers on non-interactive elements.",
 					"anyOf": [
@@ -4899,6 +4944,13 @@
 					"description": "Disallow unknown at-rules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnknownAtRuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnnecessaryConditions": {
+					"description": "Disallow unnecessary type-based conditions that can be statically determined as redundant.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnnecessaryConditionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4982,6 +5034,15 @@
 					"description": "Use static Response methods instead of new Response() constructor when possible.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseConsistentResponseConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentTypeDefinitions": {
+					"description": "Enforce type definitions to consistently use either interface or type.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -5579,6 +5640,11 @@
 					"description": "For rules that require querying multiple files inside a project",
 					"type": "string",
 					"enum": ["project"]
+				},
+				{
+					"description": "Tailwind CSS rules",
+					"type": "string",
+					"enum": ["tailwind"]
 				}
 			]
 		},
@@ -7701,6 +7767,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoNonNullAssertedOptionalChainOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoNonNullAssertedOptionalChainOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoNonNullAssertionOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -8712,6 +8795,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnmatchableAnbSelectorOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUnnecessaryConditionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnnecessaryConditionsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -9913,6 +10011,27 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseConsistentResponseOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseConsistentTypeDefinitionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseConsistentTypeDefinitionsOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -13068,6 +13187,22 @@
 		},
 		"UseConsistentResponseOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConsistentTypeDefinitionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseConsistentTypeDefinitionsOptions" }
+			]
+		},
+		"UseConsistentTypeDefinitionsOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"default": "interface",
+					"allOf": [{ "$ref": "#/definitions/ConsistentTypeDefinition" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseConstConfiguration": {
