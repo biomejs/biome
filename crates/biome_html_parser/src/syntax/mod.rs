@@ -191,7 +191,7 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
         p.error(closing_tag_should_not_have_attributes(p, p.cur_range()));
         p.bump_remap_with_context(HTML_BOGUS, HtmlLexContext::InsideTag);
     }
-    p.bump(T![>]);
+    p.expect(T![>]);
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
 
