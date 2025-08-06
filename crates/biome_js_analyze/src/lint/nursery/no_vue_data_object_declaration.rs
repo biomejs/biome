@@ -130,23 +130,13 @@ impl Rule for NoVueDataObjectDeclaration {
     type Options = NoVueDataObjectDeclarationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        dbg!("rule is running");
-
-        let Some(component) = VueComponent::from_potential_component(
+        let component = VueComponent::from_potential_component(
             ctx.query(),
             ctx.model(),
             ctx.source_type::<JsFileSource>(),
-        ) else {
-            return None;
-        };
+        )?;
 
-        dbg!("found a component");
-
-        let Some(data_decl) = component.data_declarations_group() else {
-            return None;
-        };
-
-        dbg!("found a data declaration");
+        let data_decl = component.data_declarations_group()?;
 
         let data_decl_range = data_decl.range();
         match data_decl {
