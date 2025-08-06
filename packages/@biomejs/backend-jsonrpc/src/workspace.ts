@@ -1676,7 +1676,7 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
 	/**
-	 * Enforce component's data property to be a function
+	 * Enforce that Vue component data options are declared as functions.
 	 */
 	noVueDataObjectDeclaration?: RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions;
 	/**
