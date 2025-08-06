@@ -33,7 +33,7 @@ pub fn parse_html_with_cache(
     HtmlParse::new(green, diagnostics)
 }
 
-///
+/// Parses an HTML code with the provided options
 pub fn parse_html(source: &str, options: HtmlParseOptions) -> HtmlParse {
     let mut cache = NodeCache::default();
     parse_html_with_cache(source, &mut cache, options)

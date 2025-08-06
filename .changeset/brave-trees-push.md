@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added a new **experimental option** that allows to parse `.html` files that contain interpolation syntax.
+Added a new **experimental option** that allows parsing of `.html` files that contain interpolation syntax.
 
 ```json5
 // biome.json
