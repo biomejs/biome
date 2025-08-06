@@ -164,7 +164,6 @@ define_categories! {
     "lint/nursery/colorNoInvalidHex": "https://biomejs.dev/linter/rules/color-no-invalid-hex",
     "lint/nursery/noNextAsyncClientComponent": "https://biomejs.dev/linter/rules/no-next-async-client-component",
     "lint/nursery/noAwaitInLoop": "https://biomejs.dev/linter/rules/no-await-in-loop",
-    "lint/nursery/noBitwiseOperators": "https://biomejs.dev/linter/rules/no-bitwise-operators",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noConsole": "https://biomejs.dev/linter/rules/no-console",
     "lint/nursery/noConstantBinaryExpression": "https://biomejs.dev/linter/rules/no-constant-binary-expression",

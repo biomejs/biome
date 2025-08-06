@@ -12,83 +12,42 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.options:7:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:1:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found an unknown key `noBitwiseOperators`.
+  i Use TextField instead
   
-    5 │ 		"rules": {
-    6 │ 			"nursery": {
-  > 7 │ 				"noBitwiseOperators": "error",
-      │ 				^^^^^^^^^^^^^^^^^^^^
-    8 │ 				"noRestrictedElements": {
-    9 │ 					"level": "error",
-  
-  i Known keys:
-  
-  - recommended
-  - noFloatingPromises
-  - noImportCycles
-  - noMisusedPromises
-  - noNonNullAssertedOptionalChain
-  - noQuickfixBiome
-  - noQwikUseVisibleTask
-  - noSecrets
-  - noShadow
-  - noUnnecessaryConditions
-  - noUnresolvedImports
-  - noUselessEscapeInString
-  - noVueReservedKeys
-  - noVueReservedProps
-  - useAnchorHref
-  - useConsistentTypeDefinitions
-  - useExhaustiveSwitchCases
-  - useExplicitType
-  - useImageSize
-  - useNamedOperation
-  - useQwikClasslist
-  - useReactFunctionComponents
-  - useSortedClasses
+  > 1 │ (<input />);
+      │  ^^^^^^^^^
+    2 │ (<button />);
+    3 │ (<MyNS.MyComponent />);
   
 
 ```
 
 ```
-invalid.options:8:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found an unknown key `noRestrictedElements`.
+  i Use Button instead
   
-     6 │ 			"nursery": {
-     7 │ 				"noBitwiseOperators": "error",
-   > 8 │ 				"noRestrictedElements": {
-       │ 				^^^^^^^^^^^^^^^^^^^^^^
-     9 │ 					"level": "error",
-    10 │ 					"options": {
+    1 │ (<input />);
+  > 2 │ (<button />);
+      │  ^^^^^^^^^^
+    3 │ (<MyNS.MyComponent />);
+    4 │ 
   
-  i Known keys:
+
+```
+
+```
+invalid.jsx:3:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This component is deprecated
   
-  - recommended
-  - noFloatingPromises
-  - noImportCycles
-  - noMisusedPromises
-  - noNonNullAssertedOptionalChain
-  - noQuickfixBiome
-  - noQwikUseVisibleTask
-  - noSecrets
-  - noShadow
-  - noUnnecessaryConditions
-  - noUnresolvedImports
-  - noUselessEscapeInString
-  - noVueReservedKeys
-  - noVueReservedProps
-  - useAnchorHref
-  - useConsistentTypeDefinitions
-  - useExhaustiveSwitchCases
-  - useExplicitType
-  - useImageSize
-  - useNamedOperation
-  - useQwikClasslist
-  - useReactFunctionComponents
-  - useSortedClasses
+    1 │ (<input />);
+    2 │ (<button />);
+  > 3 │ (<MyNS.MyComponent />);
+      │  ^^^^^^^^^^^^^^^^^^^^
+    4 │ 
   
 
 ```

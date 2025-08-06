@@ -74,6 +74,7 @@ Linter:
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
     complexity/noFlatMapIdentity
+    complexity/noImportantStyles
     complexity/noStaticOnlyClass
     complexity/noThisInStatic
     complexity/noUselessCatch
@@ -94,6 +95,7 @@ Linter:
     complexity/useArrowFunction
     complexity/useDateNow
     complexity/useFlatMap
+    complexity/useIndexOf
     complexity/useLiteralKeys
     complexity/useNumericLiterals
     complexity/useOptionalChain

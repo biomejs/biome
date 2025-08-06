@@ -73,42 +73,218 @@ class foo {
 
 # Diagnostics
 ```
-invalid.options:6:9 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:13 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found an unknown key `noExcessiveLinesPerFunction`.
+  i This function has too many lines (3). Maximum allowed is 2.
   
-    4 │     "rules": {
-    5 │       "nursery": {
-  > 6 │         "noExcessiveLinesPerFunction": {
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │           "level": "error",
-    8 │           "options": {
+  > 1 │ const foo = () => {
+      │             ^^^^^^^
+  > 2 │ 	const x = 2;
+  > 3 │ 	const y = 1;
+  > 4 │ 	return x + y;
+  > 5 │ };
+      │ ^
+    6 │ 
+    7 │ function bar() {
   
-  i Known keys:
+  i Consider refactoring this function to split it into smaller functions.
   
-  - recommended
-  - noFloatingPromises
-  - noImportCycles
-  - noMisusedPromises
-  - noNonNullAssertedOptionalChain
-  - noQuickfixBiome
-  - noQwikUseVisibleTask
-  - noSecrets
-  - noShadow
-  - noUnnecessaryConditions
-  - noUnresolvedImports
-  - noUselessEscapeInString
-  - noVueReservedKeys
-  - noVueReservedProps
-  - useAnchorHref
-  - useConsistentTypeDefinitions
-  - useExhaustiveSwitchCases
-  - useExplicitType
-  - useImageSize
-  - useNamedOperation
-  - useQwikClasslist
-  - useReactFunctionComponents
-  - useSortedClasses
+
+```
+
+```
+invalid.js:7:1 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (3). Maximum allowed is 2.
+  
+     5 │ };
+     6 │ 
+   > 7 │ function bar() {
+       │ ^^^^^^^^^^^^^^^^
+   > 8 │ 	const x = 2;
+   > 9 │ 	const y = 1;
+  > 10 │ 	return x + y;
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ function name() {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:13:1 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (3). Maximum allowed is 2.
+  
+    11 │ }
+    12 │ 
+  > 13 │ function name() {
+       │ ^^^^^^^^^^^^^^^^^
+  > 14 │ 	var x = 5;
+  > 15 │ 
+  > 16 │ 	var x = 2;
+  > 17 │ }
+       │ ^
+    18 │ 
+    19 │ function foo(
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:19:1 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (3). Maximum allowed is 2.
+  
+    17 │ }
+    18 │ 
+  > 19 │ function foo(
+       │ ^^^^^^^^^^^^^
+  > 20 │ 	aaa = 1,
+        ...
+  > 26 │ 	return aaa + bbb + ccc + x + y;
+  > 27 │ }
+       │ ^
+    28 │ 
+    29 │ function parent() {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:29:1 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (5). Maximum allowed is 2.
+  
+    27 │ }
+    28 │ 
+  > 29 │ function parent() {
+       │ ^^^^^^^^^^^^^^^^^^^
+  > 30 │ 	var x = 0;
+        ...
+  > 35 │ 	}
+  > 36 │ };
+       │ ^
+    37 │ 
+    38 │ class foo {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:31:2 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (3). Maximum allowed is 2.
+  
+    29 │ function parent() {
+    30 │ 	var x = 0;
+  > 31 │ 	function nested() {
+       │ 	^^^^^^^^^^^^^^^^^^^
+  > 32 │ 		var y = 0;
+  > 33 │ 		x = 2;
+  > 34 │ 		var z = x + y;
+  > 35 │ 	}
+       │ 	^
+    36 │ };
+    37 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:39:2 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (3). Maximum allowed is 2.
+  
+    38 │ class foo {
+  > 39 │ 	method() {
+       │ 	^^^^^^^^^^
+  > 40 │ 		let y = 10;
+  > 41 │ 		let x = 20;
+  > 42 │ 		return y + x;
+  > 43 │ 	}
+       │ 	^
+    44 │ 	constructor() {
+    45 │ 		let y = 10;
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:44:2 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (3). Maximum allowed is 2.
+  
+    42 │ 		return y + x;
+    43 │ 	}
+  > 44 │ 	constructor() {
+       │ 	^^^^^^^^^^^^^^^
+  > 45 │ 		let y = 10;
+  > 46 │ 		let x = 20;
+  > 47 │ 		return y + x;
+  > 48 │ 	}
+       │ 	^
+    49 │ }
+    50 │ 
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:51:2 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (5). Maximum allowed is 2.
+  
+    49 │ }
+    50 │ 
+  > 51 │ (function () {
+       │  ^^^^^^^^^^^^^
+  > 52 │ 	let x = 0;
+        ...
+  > 56 │ 	return bar;
+  > 57 │ })();
+       │ ^
+    58 │ 
+    59 │ (() => {
+  
+  i Consider refactoring this function to split it into smaller functions.
+  
+
+```
+
+```
+invalid.js:59:2 lint/complexity/noExcessiveLinesPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has too many lines (5). Maximum allowed is 2.
+  
+    57 │ })();
+    58 │ 
+  > 59 │ (() => {
+       │  ^^^^^^^
+  > 60 │ 	let x = 0;
+  > 61 │ 	let y = 0;
+  > 62 │ 	let z = x + y;
+  > 63 │ 	let foo = {};
+  > 64 │ 	return bar;
+  > 65 │ })();
+       │ ^
+  
+  i Consider refactoring this function to split it into smaller functions.
   
 
 ```

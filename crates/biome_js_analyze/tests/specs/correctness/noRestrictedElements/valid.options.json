@@ -3,7 +3,7 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"nursery": {
+			"correctness": {
 				"noRestrictedElements": {
 					"level": "error",
 					"options": {

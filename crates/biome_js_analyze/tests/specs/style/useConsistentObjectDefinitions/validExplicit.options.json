@@ -3,8 +3,8 @@
     "linter": {
         "enabled": true,
         "rules": {
-            "nursery": {
-                "useConsistentObjectDefinition": {
+            "style": {
+                "useConsistentObjectDefinitions": {
                     "level": "error",
                     "options": {
                         "syntax": "explicit"

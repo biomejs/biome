@@ -30,7 +30,6 @@ badAllowlist.options:6:17 deserialize ━━━━━━━━━━━━━━
   - noImportCycles
   - noMisusedPromises
   - noNonNullAssertedOptionalChain
-  - noQuickfixBiome
   - noQwikUseVisibleTask
   - noSecrets
   - noShadow

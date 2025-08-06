@@ -115,7 +115,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         fix_kind: FixKind::Safe,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         sources: &[RuleSource::Eslint("object-shorthand").inspired()],
     }
 }
