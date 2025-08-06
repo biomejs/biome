@@ -606,7 +606,7 @@ fn migrate_eslint_rule(
                             biome_config::RuleWithFixOptions {
                                 level: severity.into(),
                                 fix: None,
-                                options: conf.option_or_default().into(),
+                                options: options.into(),
                             },
                         ));
                 }
