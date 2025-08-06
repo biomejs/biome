@@ -341,26 +341,27 @@ impl Scanner {
 
         let collector = DiagnosticsCollector::new(verbose);
 
+        // The traversal context is scoped to ensure all the channels it
+        // contains are properly closed once scanning finishes.
+        #[cfg_attr(target_family = "wasm", allow(unused_mut))]
+        let mut ctx = ScanContext {
+            workspace,
+            project_key,
+            interner,
+            diagnostics_sender,
+            evaluated_paths: Default::default(),
+            scan_kind,
+            trigger,
+            watch,
+            dependencies: Default::default(),
+        };
+
         #[cfg(not(target_family = "wasm"))]
         let (duration, diagnostics, configuration_files) = thread::scope(|scope| {
             let handler = thread::Builder::new()
                 .name("biome::scanner".to_string())
                 .spawn_scoped(scope, || collector.run(diagnostics_receiver))
                 .expect("failed to spawn scanner thread");
-
-            // The traversal context is scoped to ensure all the channels it
-            // contains are properly closed once scanning finishes.
-            let mut ctx = ScanContext {
-                workspace,
-                project_key,
-                interner,
-                diagnostics_sender,
-                evaluated_paths: Default::default(),
-                scan_kind,
-                trigger,
-                watch,
-                dependencies: Default::default(),
-            };
 
             let ScanFolderResult {
                 mut duration,
@@ -401,18 +402,7 @@ impl Scanner {
                 duration,
                 configuration_files,
                 ..
-            } = scan_folder(
-                folder,
-                ScanContext {
-                    workspace: self,
-                    project_key,
-                    interner,
-                    diagnostics_sender,
-                    evaluated_paths: Default::default(),
-                    scan_kind: scan_kind.clone(),
-                    watch,
-                },
-            );
+            } = self.scan_folder(folder, &ctx);
 
             let diagnostics = collector.run(diagnostics_receiver);
             (duration, diagnostics, configuration_files)
