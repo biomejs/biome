@@ -163,6 +163,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noNoninteractiveElementInteractions": {
+					"description": "Disallow use event handlers on non-interactive elements.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoNoninteractiveElementInteractionsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noNoninteractiveElementToInteractiveRole": {
 					"description": "Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.",
 					"anyOf": [
@@ -466,6 +475,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveLinesPerFunction": {
+					"description": "Restrict the number of lines of code in a function.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoExcessiveLinesPerFunctionConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveNestedTestSuites": {
 					"description": "This rule enforces a maximum depth to nested describe() in test files.",
 					"anyOf": [
@@ -493,6 +511,20 @@
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoForEachConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImplicitCoercions": {
+					"description": "Disallow shorthand type conversions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoImplicitCoercionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImportantStyles": {
+					"description": "Disallow the use of the !important style.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoImportantStylesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -658,6 +690,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useIndexOf": {
+					"description": "Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseIndexOfConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useLiteralKeys": {
 					"description": "Enforce the usage of a literal access to properties over computed property access.",
 					"anyOf": [
@@ -813,6 +852,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalDirnameFilename": {
+					"description": "Disallow the use of __dirname and __filename in the global scope.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoGlobalDirnameFilenameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noGlobalObjectCalls": {
 					"description": "Disallow calling global object properties as functions",
 					"anyOf": [
@@ -884,6 +930,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noNestedComponentDefinitions": {
+					"description": "Disallows defining React components inside other components.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoNestedComponentDefinitionsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noNodejsModules": {
 					"description": "Forbid the use of Node.js builtin modules.",
 					"anyOf": [
@@ -912,10 +967,31 @@
 						{ "type": "null" }
 					]
 				},
+				"noProcessGlobal": {
+					"description": "Disallow the use of process global.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoProcessGlobalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactPropAssignments": {
+					"description": "Disallow assigning to React component props.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoReactPropAssignmentsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRenderReturnValue": {
 					"description": "Prevent the usage of the return value of React.render.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoRenderReturnValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRestrictedElements": {
+					"description": "Disallow the use of configured elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoRestrictedElementsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -930,6 +1006,13 @@
 					"description": "Disallow returning a value from a setter",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoSetterReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSolidDestructuredProps": {
+					"description": "Disallow destructuring props inside JSX components in Solid projects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoSolidDestructuredPropsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1128,10 +1211,45 @@
 						{ "type": "null" }
 					]
 				},
+				"useJsonImportAttributes": {
+					"description": "Enforces the use of with { type: \"json\" } for JSON module imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseJsonImportAttributesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useJsxKeyInIterable": {
 					"description": "Disallow missing key props in iterators/collection literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseJsxKeyInIterableConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamedGraphqlOperations": {
+					"description": "Enforce specifying the name of GraphQL operations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNamedGraphqlOperationsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useParseIntRadix": {
+					"description": "Enforce the consistent use of the radix argument when using parseInt().",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSingleJsDocAsterisk": {
+					"description": "Enforce JSDoc comment lines to start with a single asterisk, except for the first one.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseSingleJsDocAsteriskConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUniqueElementIds": {
+					"description": "Prevent the usage of static string literal id attribute on elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseUniqueElementIdsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2466,13 +2584,16 @@
 			]
 		},
 		"NoAutofocusOptions": { "type": "object", "additionalProperties": false },
-		"NoAwaitInLoopConfiguration": {
+		"NoAwaitInLoopsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoAwaitInLoopOptions" }
+				{ "$ref": "#/definitions/RuleWithNoAwaitInLoopsOptions" }
 			]
 		},
-		"NoAwaitInLoopOptions": { "type": "object", "additionalProperties": false },
+		"NoAwaitInLoopsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoBannedTypesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2642,13 +2763,13 @@
 			]
 		},
 		"NoConstEnumOptions": { "type": "object", "additionalProperties": false },
-		"NoConstantBinaryExpressionConfiguration": {
+		"NoConstantBinaryExpressionsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoConstantBinaryExpressionOptions" }
+				{ "$ref": "#/definitions/RuleWithNoConstantBinaryExpressionsOptions" }
 			]
 		},
-		"NoConstantBinaryExpressionOptions": {
+		"NoConstantBinaryExpressionsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -2745,16 +2866,6 @@
 			]
 		},
 		"NoDescendingSpecificityOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoDestructuredPropsConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoDestructuredPropsOptions" }
-			]
-		},
-		"NoDestructuredPropsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3312,13 +3423,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoImplicitCoercionConfiguration": {
+		"NoImplicitCoercionsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoImplicitCoercionOptions" }
+				{ "$ref": "#/definitions/RuleWithNoImplicitCoercionsOptions" }
 			]
 		},
-		"NoImplicitCoercionOptions": {
+		"NoImplicitCoercionsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -3340,13 +3451,6 @@
 		},
 		"NoImportCyclesOptions": {
 			"type": "object",
-			"properties": {
-				"ignoreTypes": {
-					"description": "Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.",
-					"default": true,
-					"type": "boolean"
-				}
-			},
 			"additionalProperties": false
 		},
 		"NoImportantInKeyframeConfiguration": {
@@ -3629,16 +3733,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoNextAsyncClientComponentConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoNextAsyncClientComponentOptions" }
-			]
-		},
-		"NoNextAsyncClientComponentOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoNodejsModulesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3848,13 +3942,13 @@
 			]
 		},
 		"NoReExportAllOptions": { "type": "object", "additionalProperties": false },
-		"NoReactPropAssignConfiguration": {
+		"NoReactPropAssignmentsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoReactPropAssignOptions" }
+				{ "$ref": "#/definitions/RuleWithNoReactPropAssignmentsOptions" }
 			]
 		},
-		"NoReactPropAssignOptions": {
+		"NoReactPropAssignmentsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -4073,6 +4167,16 @@
 			]
 		},
 		"NoSkippedTestsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoSolidDestructuredPropsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoSolidDestructuredPropsOptions" }
+			]
+		},
+		"NoSolidDestructuredPropsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -4489,16 +4593,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoUselessBackrefInRegexConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoUselessBackrefInRegexOptions" }
-			]
-		},
-		"NoUselessBackrefInRegexOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoUselessCatchConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4596,6 +4690,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessRegexBackrefsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUselessRegexBackrefsOptions" }
+			]
+		},
+		"NoUselessRegexBackrefsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessRenameConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4613,6 +4717,16 @@
 			]
 		},
 		"NoUselessStringConcatOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUselessStringEscapesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUselessStringEscapesOptions" }
+			]
+		},
+		"NoUselessStringEscapesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -4729,16 +4843,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoVueDataObjectDeclarationConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoVueDataObjectDeclarationOptions" }
-			]
-		},
-		"NoVueDataObjectDeclarationOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoVueReservedKeysConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4784,61 +4888,10 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"noAwaitInLoop": {
-					"description": "Disallow await inside loops.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoAwaitInLoopConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noBitwiseOperators": {
-					"description": "Disallow bitwise operators.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoBitwiseOperatorsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noConstantBinaryExpression": {
-					"description": "Disallow expressions where the operation doesn't affect the value",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoConstantBinaryExpressionConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDestructuredProps": {
-					"description": "Disallow destructuring props inside JSX components in Solid projects.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoDestructuredPropsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noExcessiveLinesPerFunction": {
-					"description": "Restrict the number of lines of code in a function.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/NoExcessiveLinesPerFunctionConfiguration"
-						},
-						{ "type": "null" }
-					]
-				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoFloatingPromisesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noGlobalDirnameFilename": {
-					"description": "Disallow the use of __dirname and __filename in the global scope.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoGlobalDirnameFilenameConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noImplicitCoercion": {
-					"description": "Disallow shorthand type conversions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoImplicitCoercionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4849,40 +4902,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noImportantStyles": {
-					"description": "Disallow the use of the !important style.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoImportantStylesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noMagicNumbers": {
-					"description": "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoMagicNumbersConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noMisusedPromises": {
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoMisusedPromisesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noNestedComponentDefinitions": {
-					"description": "Disallows defining React components inside other components.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/NoNestedComponentDefinitionsConfiguration"
-						},
-						{ "type": "null" }
-					]
-				},
-				"noNextAsyncClientComponent": {
-					"description": "Prevent client components from being async functions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoNextAsyncClientComponentConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4892,22 +4915,6 @@
 						{
 							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
 						},
-						{ "type": "null" }
-					]
-				},
-				"noNoninteractiveElementInteractions": {
-					"description": "Disallow use event handlers on non-interactive elements.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/NoNoninteractiveElementInteractionsConfiguration"
-						},
-						{ "type": "null" }
-					]
-				},
-				"noProcessGlobal": {
-					"description": "Disallow the use of process global.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoProcessGlobalConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4925,20 +4932,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noReactPropAssign": {
-					"description": "Disallow assigning to React component props.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoReactPropAssignConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noRestrictedElements": {
-					"description": "Disallow the use of configured elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoRestrictedElementsConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noSecrets": {
 					"description": "Disallow usage of sensitive data such as API keys and tokens.",
 					"anyOf": [
@@ -4950,27 +4943,6 @@
 					"description": "Disallow variable declarations from shadowing variables declared in the outer scope.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoShadowConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noTsIgnore": {
-					"description": "Prevents the use of the TypeScript directive @ts-ignore.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoTsIgnoreConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnassignedVariables": {
-					"description": "Disallow let or var variables that are read but never assigned.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoUnassignedVariablesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnknownAtRule": {
-					"description": "Disallow unknown at-rules.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoUnknownAtRuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4988,38 +4960,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnwantedPolyfillio": {
-					"description": "Prevent duplicate polyfills from Polyfill.io.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoUnwantedPolyfillioConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessBackrefInRegex": {
-					"description": "Disallow useless backreferences in regular expression literals that always match an empty string.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoUselessBackrefInRegexConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUselessEscapeInString": {
 					"description": "Disallow unnecessary escapes in string literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUselessEscapeInStringConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessUndefined": {
-					"description": "Disallow the use of useless undefined.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoUselessUndefinedConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noVueDataObjectDeclaration": {
-					"description": "Enforce that Vue component data options are declared as functions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoVueDataObjectDeclarationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5041,33 +4985,10 @@
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
-				"useAdjacentGetterSetter": {
-					"description": "Enforce that getters and setters for the same property are adjacent in class and object definitions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseAdjacentGetterSetterConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useAnchorHref": {
 					"description": "Enforces href attribute for \\<a> elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useConsistentObjectDefinition": {
-					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/UseConsistentObjectDefinitionConfiguration"
-						},
-						{ "type": "null" }
-					]
-				},
-				"useConsistentResponse": {
-					"description": "Use static Response methods instead of new Response() constructor when possible.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseConsistentResponseConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5094,27 +5015,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useExportsLast": {
-					"description": "Require that all exports are declared after all non-export statements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseExportsLastConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useForComponent": {
-					"description": "Enforce using Solid's \\<For /> component for mapping an array to JSX elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseForComponentConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useGoogleFontPreconnect": {
-					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseGoogleFontPreconnectConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useImageSize": {
 					"description": "Enforces that \\<img> elements have both width and height attributes.",
 					"anyOf": [
@@ -5122,66 +5022,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useIndexOf": {
-					"description": "Prefer Array#{indexOf,lastIndexOf}() over Array#{findIndex,findLastIndex}() when looking for the index of an item.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseIndexOfConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useIterableCallbackReturn": {
-					"description": "Enforce consistent return values in iterable callbacks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseIterableCallbackReturnConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useJsonImportAttribute": {
-					"description": "Enforces the use of with { type: \"json\" } for JSON module imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseJsonImportAttributeConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useMaxParams": {
-					"description": "Enforce a maximum number of parameters in function definitions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseMaxParamsConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useNamedOperation": {
 					"description": "Enforce specifying the name of GraphQL operations.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseNamedOperationConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNamingConvention": {
-					"description": "Validates that all enum values are capitalized.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseNamingConventionConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNumericSeparators": {
-					"description": "Enforce the use of numeric separators in numeric literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseNumericSeparatorsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useObjectSpread": {
-					"description": "Prefer object spread over Object.assign() when constructing new objects.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseObjectSpreadConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useParseIntRadix": {
-					"description": "Enforce the consistent use of the radix argument when using parseInt().",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5199,45 +5043,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useReadonlyClassProperties": {
-					"description": "Enforce marking members as readonly if they are never modified outside the constructor.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseReadonlyClassPropertiesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useSingleJsDocAsterisk": {
-					"description": "Enforce JSDoc comment lines to start with a single asterisk, except for the first one.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseSingleJsDocAsteriskConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseSortedClassesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useSymbolDescription": {
-					"description": "Require a description parameter for the Symbol().",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseSymbolDescriptionConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useUnifiedTypeSignature": {
-					"description": "Disallow overload signatures that can be unified into a single signature.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseUnifiedTypeSignatureConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useUniqueElementIds": {
-					"description": "Prevent the usage of static string literal id attribute on elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseUniqueElementIdsConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -5470,6 +5279,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAwaitInLoops": {
+					"description": "Disallow await inside loops.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoAwaitInLoopsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBarrelFile": {
 					"description": "Disallow the use of barrel file.",
 					"anyOf": [
@@ -5514,9 +5330,30 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnwantedPolyfillio": {
+					"description": "Prevent duplicate polyfills from Polyfill.io.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnwantedPolyfillioConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useGoogleFontPreconnect": {
+					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseGoogleFontPreconnectConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSolidForComponent": {
+					"description": "Enforce using Solid's \\<For /> component for mapping an array to JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseSolidForComponentConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"useTopLevelRegex": {
 					"description": "Require regex literals to be declared at the top level.",
@@ -5946,7 +5783,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoAwaitInLoopOptions": {
+		"RuleWithNoAwaitInLoopsOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -5956,7 +5793,7 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoAwaitInLoopOptions" }]
+					"allOf": [{ "$ref": "#/definitions/NoAwaitInLoopsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -6233,7 +6070,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoConstantBinaryExpressionOptions": {
+		"RuleWithNoConstantBinaryExpressionsOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -6244,7 +6081,7 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [
-						{ "$ref": "#/definitions/NoConstantBinaryExpressionOptions" }
+						{ "$ref": "#/definitions/NoConstantBinaryExpressionsOptions" }
 					]
 				}
 			},
@@ -6418,21 +6255,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoDescendingSpecificityOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNoDestructuredPropsOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoDestructuredPropsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -7300,7 +7122,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoImplicitCoercionOptions": {
+		"RuleWithNoImplicitCoercionsOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -7314,7 +7136,7 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoImplicitCoercionOptions" }]
+					"allOf": [{ "$ref": "#/definitions/NoImplicitCoercionsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -7793,23 +7615,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoNextAsyncClientComponentOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoNextAsyncClientComponentOptions" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithNoNodejsModulesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -8141,7 +7946,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoReactPropAssignOptions": {
+		"RuleWithNoReactPropAssignmentsOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -8151,7 +7956,7 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoReactPropAssignOptions" }]
+					"allOf": [{ "$ref": "#/definitions/NoReactPropAssignmentsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -8463,6 +8268,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoSkippedTestsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoSolidDestructuredPropsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoSolidDestructuredPropsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -9116,21 +8936,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoUselessBackrefInRegexOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessBackrefInRegexOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithNoUselessCatchOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9323,6 +9128,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoUselessRegexBackrefsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUselessRegexBackrefsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoUselessRenameOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9357,6 +9177,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUselessStringConcatOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUselessStringEscapesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUselessStringEscapesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -9577,27 +9416,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoVueDataObjectDeclarationOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"fix": {
-					"description": "The kind of the code actions emitted by the rule",
-					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
-				},
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/NoVueDataObjectDeclarationOptions" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithNoVueReservedKeysOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9658,21 +9476,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoYodaExpressionOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseAdjacentGetterSetterOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseAdjacentGetterSetterOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -10037,6 +9840,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseConsistentIterableCallbackReturnValuesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{
+							"$ref": "#/definitions/UseConsistentIterableCallbackReturnValuesOptions"
+						}
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseConsistentMemberAccessibilityOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10054,7 +9876,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseConsistentObjectDefinitionOptions": {
+		"RuleWithUseConsistentObjectDefinitionsOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -10069,27 +9891,8 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [
-						{ "$ref": "#/definitions/UseConsistentObjectDefinitionOptions" }
+						{ "$ref": "#/definitions/UseConsistentObjectDefinitionsOptions" }
 					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseConsistentResponseOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"fix": {
-					"description": "The kind of the code actions emitted by the rule",
-					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
-				},
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseConsistentResponseOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -10431,21 +10234,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseForComponentOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseForComponentOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithUseForOfOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10540,6 +10328,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseGoogleFontPreconnectOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseGroupedAccessorPairsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseGroupedAccessorPairsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -10729,24 +10532,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseIterableCallbackReturnOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseIterableCallbackReturnOptions" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseJsonImportAttributeOptions": {
+		"RuleWithUseJsonImportAttributesOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -10760,7 +10546,7 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseJsonImportAttributeOptions" }]
+					"allOf": [{ "$ref": "#/definitions/UseJsonImportAttributesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -10844,21 +10630,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseMaxParamsOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseMaxParamsOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithUseMediaCaptionOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10870,6 +10641,27 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseMediaCaptionOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseNamedGraphqlOperationsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseNamedGraphqlOperationsOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11322,6 +11114,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseSolidForComponentOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseSolidForComponentOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseSortedClassesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -11337,6 +11144,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseSortedClassesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseStaticResponseMethodsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseStaticResponseMethodsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -11462,7 +11288,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseUnifiedTypeSignatureOptions": {
+		"RuleWithUseUnifiedTypeSignaturesOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -11476,7 +11302,7 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseUnifiedTypeSignatureOptions" }]
+					"allOf": [{ "$ref": "#/definitions/UseUnifiedTypeSignaturesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -11990,6 +11816,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMagicNumbers": {
+					"description": "Reports usage of \"magic numbers\" — numbers used directly instead of being assigned to named constants.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoMagicNumbersConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNamespace": {
 					"description": "Disallow the use of TypeScript's namespaces.",
 					"anyOf": [
@@ -12085,6 +11918,13 @@
 					"description": "Disallow else block when the if block breaks early.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUselessElseConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessUndefined": {
+					"description": "Disallow the use of useless undefined.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessUndefinedConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12189,6 +12029,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentObjectDefinitions": {
+					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentObjectDefinitionsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useConst": {
 					"description": "Require const declarations for variables that are only assigned once.",
 					"anyOf": [
@@ -12245,6 +12094,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExportsLast": {
+					"description": "Require that all exports are declared after all non-export statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseExportsLastConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useFilenamingConvention": {
 					"description": "Enforce naming conventions for JavaScript and TypeScript filenames.",
 					"anyOf": [
@@ -12266,6 +12122,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGroupedAccessorPairs": {
+					"description": "Enforce that getters and setters for the same property are adjacent in class and object definitions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseGroupedAccessorPairsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useImportType": {
 					"description": "Promotes the use of import type for types.",
 					"anyOf": [
@@ -12281,7 +12144,7 @@
 					]
 				},
 				"useNamingConvention": {
-					"description": "Enforce naming conventions for everything across a codebase.",
+					"description": "Validates that all enum values are capitalized.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseNamingConventionConfiguration" },
 						{ "type": "null" }
@@ -12305,6 +12168,27 @@
 					"description": "Use the Number properties instead of global ones.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseNumberNamespaceConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNumericSeparators": {
+					"description": "Enforce the use of numeric separators in numeric literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseNumericSeparatorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useObjectSpread": {
+					"description": "Prefer object spread over Object.assign() when constructing new objects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseObjectSpreadConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReadonlyClassProperties": {
+					"description": "Enforce marking members as readonly if they are never modified outside the constructor.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseReadonlyClassPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12336,6 +12220,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSymbolDescription": {
+					"description": "Require a description parameter for the Symbol().",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseSymbolDescriptionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTemplate": {
 					"description": "Prefer template literals over string concatenation.",
 					"anyOf": [
@@ -12361,6 +12252,13 @@
 					"description": "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseTrimStartEndConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUnifiedTypeSignatures": {
+					"description": "Disallow overload signatures that can be unified into a single signature.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseUnifiedTypeSignaturesConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -12428,6 +12326,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noBitwiseOperators": {
+					"description": "Disallow bitwise operators.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoBitwiseOperatorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noCatchAssign": {
 					"description": "Disallow reassigning exceptions in catch clauses.",
 					"anyOf": [
@@ -12481,6 +12386,15 @@
 					"description": "Disallow TypeScript const enum",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoConstEnumConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noConstantBinaryExpressions": {
+					"description": "Disallow expressions where the operation doesn't affect the value",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoConstantBinaryExpressionsConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -12870,6 +12784,27 @@
 						{ "type": "null" }
 					]
 				},
+				"noTsIgnore": {
+					"description": "Prevents the use of the TypeScript directive @ts-ignore.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoTsIgnoreConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnassignedVariables": {
+					"description": "Disallow let or var variables that are read but never assigned.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnassignedVariablesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownAtRule": {
+					"description": "Disallow unknown at-rules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnknownAtRuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnsafeDeclarationMerging": {
 					"description": "Disallow unsafe declaration merging between interfaces and classes.",
 					"anyOf": [
@@ -12881,6 +12816,20 @@
 					"description": "Disallow using unsafe negation.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnsafeNegationConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessRegexBackrefs": {
+					"description": "Disallow useless backreferences in regular expression literals that always match an empty string.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessRegexBackrefsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessStringEscapes": {
+					"description": "Disallow unnecessary escapes in string literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessStringEscapesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12915,6 +12864,15 @@
 					"description": "Ensure async functions utilize await.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseAwaitConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentIterableCallbackReturnValues": {
+					"description": "Enforce consistent return values in iterable callbacks.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentIterableCallbackReturnValuesConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -12976,6 +12934,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useStaticResponseMethods": {
+					"description": "Use static Response methods instead of new Response() constructor when possible.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseStaticResponseMethodsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useStrictMode": {
 					"description": "Enforce the use of the directive \"use strict\" in script files.",
 					"anyOf": [
@@ -13019,16 +12984,6 @@
 					"enum": ["all"]
 				}
 			]
-		},
-		"UseAdjacentGetterSetterConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseAdjacentGetterSetterOptions" }
-			]
-		},
-		"UseAdjacentGetterSetterOptions": {
-			"type": "object",
-			"additionalProperties": false
 		},
 		"UseAdjacentOverloadSignaturesConfiguration": {
 			"anyOf": [
@@ -13237,6 +13192,18 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseConsistentIterableCallbackReturnValuesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithUseConsistentIterableCallbackReturnValuesOptions"
+				}
+			]
+		},
+		"UseConsistentIterableCallbackReturnValuesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseConsistentMemberAccessibilityConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13256,13 +13223,15 @@
 			},
 			"additionalProperties": false
 		},
-		"UseConsistentObjectDefinitionConfiguration": {
+		"UseConsistentObjectDefinitionsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseConsistentObjectDefinitionOptions" }
+				{
+					"$ref": "#/definitions/RuleWithUseConsistentObjectDefinitionsOptions"
+				}
 			]
 		},
-		"UseConsistentObjectDefinitionOptions": {
+		"UseConsistentObjectDefinitionsOptions": {
 			"type": "object",
 			"properties": {
 				"syntax": {
@@ -13271,16 +13240,6 @@
 					"allOf": [{ "$ref": "#/definitions/ObjectPropertySyntax" }]
 				}
 			},
-			"additionalProperties": false
-		},
-		"UseConsistentResponseConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseConsistentResponseOptions" }
-			]
-		},
-		"UseConsistentResponseOptions": {
-			"type": "object",
 			"additionalProperties": false
 		},
 		"UseConsistentTypeDefinitionsConfiguration": {
@@ -13503,16 +13462,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseForComponentConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseForComponentOptions" }
-			]
-		},
-		"UseForComponentOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"UseForOfConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13567,6 +13516,16 @@
 			]
 		},
 		"UseGoogleFontPreconnectOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseGroupedAccessorPairsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseGroupedAccessorPairsOptions" }
+			]
+		},
+		"UseGroupedAccessorPairsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -13676,23 +13635,13 @@
 			]
 		},
 		"UseIsNanOptions": { "type": "object", "additionalProperties": false },
-		"UseIterableCallbackReturnConfiguration": {
+		"UseJsonImportAttributesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseIterableCallbackReturnOptions" }
+				{ "$ref": "#/definitions/RuleWithUseJsonImportAttributesOptions" }
 			]
 		},
-		"UseIterableCallbackReturnOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"UseJsonImportAttributeConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseJsonImportAttributeOptions" }
-			]
-		},
-		"UseJsonImportAttributeOptions": {
+		"UseJsonImportAttributesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -13753,25 +13702,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseMaxParamsConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseMaxParamsOptions" }
-			]
-		},
-		"UseMaxParamsOptions": {
-			"type": "object",
-			"properties": {
-				"max": {
-					"description": "Maximum number of parameters allowed (default: 4)",
-					"default": 4,
-					"type": "integer",
-					"format": "uint8",
-					"minimum": 0.0
-				}
-			},
-			"additionalProperties": false
-		},
 		"UseMediaCaptionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13779,6 +13709,16 @@
 			]
 		},
 		"UseMediaCaptionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseNamedGraphqlOperationsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseNamedGraphqlOperationsOptions" }
+			]
+		},
+		"UseNamedGraphqlOperationsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -14049,6 +13989,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseSolidForComponentConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseSolidForComponentOptions" }
+			]
+		},
+		"UseSolidForComponentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseSortedAttributesOptions": {
 			"type": "object",
 			"additionalProperties": false
@@ -14077,6 +14027,16 @@
 		},
 		"UseSortedKeysOptions": { "type": "object", "additionalProperties": false },
 		"UseSortedPropertiesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseStaticResponseMethodsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseStaticResponseMethodsOptions" }
+			]
+		},
+		"UseStaticResponseMethodsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -14144,13 +14104,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseUnifiedTypeSignatureConfiguration": {
+		"UseUnifiedTypeSignaturesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseUnifiedTypeSignatureOptions" }
+				{ "$ref": "#/definitions/RuleWithUseUnifiedTypeSignaturesOptions" }
 			]
 		},
-		"UseUnifiedTypeSignatureOptions": {
+		"UseUnifiedTypeSignaturesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
