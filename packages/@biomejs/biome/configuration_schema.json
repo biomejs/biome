@@ -10332,6 +10332,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseGraphqlNamingConventionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseGraphqlNamingConventionOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseGroupedAccessorPairsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10708,6 +10725,10 @@
 			"type": "object",
 			"required": ["level"],
 			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
 					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
@@ -12122,6 +12143,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGraphqlNamingConvention": {
+					"description": "Validates that all enum values are capitalized.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseGraphqlNamingConventionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGroupedAccessorPairs": {
 					"description": "Enforce that getters and setters for the same property are adjacent in class and object definitions.",
 					"anyOf": [
@@ -12144,7 +12172,7 @@
 					]
 				},
 				"useNamingConvention": {
-					"description": "Validates that all enum values are capitalized.",
+					"description": "Enforce naming conventions for everything across a codebase.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseNamingConventionConfiguration" },
 						{ "type": "null" }
@@ -13516,6 +13544,16 @@
 			]
 		},
 		"UseGoogleFontPreconnectOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseGraphqlNamingConventionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseGraphqlNamingConventionOptions" }
+			]
+		},
+		"UseGraphqlNamingConventionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

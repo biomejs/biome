@@ -2003,6 +2003,10 @@ export interface Style {
 	 */
 	useFragmentSyntax?: RuleFixConfiguration_for_UseFragmentSyntaxOptions;
 	/**
+	 * Validates that all enum values are capitalized.
+	 */
+	useGraphqlNamingConvention?: RuleConfiguration_for_UseGraphqlNamingConventionOptions;
+	/**
 	 * Enforce that getters and setters for the same property are adjacent in class and object definitions.
 	 */
 	useGroupedAccessorPairs?: RuleConfiguration_for_UseGroupedAccessorPairsOptions;
@@ -2015,9 +2019,9 @@ export interface Style {
 	 */
 	useLiteralEnumMembers?: RuleConfiguration_for_UseLiteralEnumMembersOptions;
 	/**
-	 * Validates that all enum values are capitalized.
+	 * Enforce naming conventions for everything across a codebase.
 	 */
-	useNamingConvention?: RuleConfiguration_for_UseNamingConventionOptions;
+	useNamingConvention?: RuleFixConfiguration_for_UseNamingConventionOptions;
 	/**
 	 * Promotes the usage of node:assert/strict over node:assert.
 	 */
@@ -3199,6 +3203,9 @@ export type RuleConfiguration_for_UseForOfOptions =
 export type RuleFixConfiguration_for_UseFragmentSyntaxOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseFragmentSyntaxOptions;
+export type RuleConfiguration_for_UseGraphqlNamingConventionOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseGraphqlNamingConventionOptions;
 export type RuleConfiguration_for_UseGroupedAccessorPairsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseGroupedAccessorPairsOptions;
@@ -3208,9 +3215,9 @@ export type RuleFixConfiguration_for_UseImportTypeOptions =
 export type RuleConfiguration_for_UseLiteralEnumMembersOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseLiteralEnumMembersOptions;
-export type RuleConfiguration_for_UseNamingConventionOptions =
+export type RuleFixConfiguration_for_UseNamingConventionOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseNamingConventionOptions;
+	| RuleWithFixOptions_for_UseNamingConventionOptions;
 export type RuleFixConfiguration_for_UseNodeAssertStrictOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNodeAssertStrictOptions;
@@ -6315,6 +6322,16 @@ export interface RuleWithFixOptions_for_UseFragmentSyntaxOptions {
 	 */
 	options: UseFragmentSyntaxOptions;
 }
+export interface RuleWithOptions_for_UseGraphqlNamingConventionOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseGraphqlNamingConventionOptions;
+}
 export interface RuleWithOptions_for_UseGroupedAccessorPairsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -6349,7 +6366,11 @@ export interface RuleWithOptions_for_UseLiteralEnumMembersOptions {
 	 */
 	options: UseLiteralEnumMembersOptions;
 }
-export interface RuleWithOptions_for_UseNamingConventionOptions {
+export interface RuleWithFixOptions_for_UseNamingConventionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -8047,6 +8068,7 @@ export interface UseFilenamingConventionOptions {
 }
 export interface UseForOfOptions {}
 export interface UseFragmentSyntaxOptions {}
+export interface UseGraphqlNamingConventionOptions {}
 export interface UseGroupedAccessorPairsOptions {}
 export interface UseImportTypeOptions {
 	/**
@@ -8715,6 +8737,7 @@ export type Category =
 	| "lint/style/useFilenamingConvention"
 	| "lint/style/useForOf"
 	| "lint/style/useFragmentSyntax"
+	| "lint/style/useGraphqlNamingConvention"
 	| "lint/style/useGroupedAccessorPairs"
 	| "lint/style/useImportType"
 	| "lint/style/useLiteralEnumMembers"
