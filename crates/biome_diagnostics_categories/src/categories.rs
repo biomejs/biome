@@ -206,6 +206,7 @@ define_categories! {
     "lint/nursery/useConsistentTypeDefinitions": "https://biomejs.dev/linter/rules/use-consistent-type-definitions",
     "lint/nursery/useExhaustiveSwitchCases": "https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
     "lint/nursery/useExplicitFunctionReturnType": "https://biomejs.dev/linter/rules/use-explicit-type",
+    "lint/nursery/useExplicitTestAssertions": "https://biomejs.dev/linter/rules/use-explicit-test-assertions",
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-type",
     "lint/nursery/useExportsLast": "https://biomejs.dev/linter/rules/use-exports-last",
     "lint/nursery/useForComponent": "https://biomejs.dev/linter/rules/use-for-component",

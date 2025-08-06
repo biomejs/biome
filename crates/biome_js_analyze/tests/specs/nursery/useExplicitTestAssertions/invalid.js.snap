@@ -1,0 +1,144 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+it('should fail', () => {});
+
+it('should fail', myTest);
+function myTest() {}
+
+test('should fail', () => {});
+
+test.skip('should fail', () => {});
+
+it('should fail', () => {
+	somePromise.then(() => {});
+});
+
+test('should fail', () => {
+	foo(true).toBe(true);
+});
+
+it('should also fail', () => expectSaga(mySaga).returns());
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+  > 1 │ it('should fail', () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ it('should fail', myTest);
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+    4 │ function myTest() {}
+    5 │ 
+  > 6 │ test('should fail', () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ test.skip('should fail', () => {});
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+     6 │ test('should fail', () => {});
+     7 │ 
+   > 8 │ test.skip('should fail', () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ it('should fail', () => {
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+     8 │ test.skip('should fail', () => {});
+     9 │ 
+  > 10 │ it('should fail', () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 11 │ 	somePromise.then(() => {});
+  > 12 │ });
+       │ ^^
+    13 │ 
+    14 │ test('should fail', () => {
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+    12 │ });
+    13 │ 
+  > 14 │ test('should fail', () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 15 │ 	foo(true).toBe(true);
+  > 16 │ });
+       │ ^^
+    17 │ 
+    18 │ it('should also fail', () => expectSaga(mySaga).returns());
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+    16 │ });
+    17 │ 
+  > 18 │ it('should also fail', () => expectSaga(mySaga).returns());
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
