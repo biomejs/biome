@@ -1,11 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 146
 expression: invalid-computed.vue
 ---
 # Input
 ```ts
-<script>
 export default {
     computed: {
         $el() {},
@@ -18,22 +16,38 @@ export default {
         }
     }
 };
-</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-computed.vue:4:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-computed.vue:3:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Key $el is reserved in Vue.
   
-    2 │ export default {
-    3 │     computed: {
-  > 4 │         $el() {},
+    1 │ export default {
+    2 │     computed: {
+  > 3 │         $el() {},
       │         ^^^
-    5 │         $data: () => {},
-    6 │         $props: () => ({}),
+    4 │         $data: () => {},
+    5 │         $props: () => ({}),
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```
+
+```
+invalid-computed.vue:4:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $data is reserved in Vue.
+  
+    2 │     computed: {
+    3 │         $el() {},
+  > 4 │         $data: () => {},
+      │         ^^^^^
+    5 │         $props: () => ({}),
+    6 │         $options: function() {},
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   
@@ -43,14 +57,14 @@ invalid-computed.vue:4:9 lint/nursery/noVueReservedKeys ━━━━━━━━
 ```
 invalid-computed.vue:5:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Key $data is reserved in Vue.
+  × Key $props is reserved in Vue.
   
-    3 │     computed: {
-    4 │         $el() {},
-  > 5 │         $data: () => {},
-      │         ^^^^^
-    6 │         $props: () => ({}),
-    7 │         $options: function() {},
+    3 │         $el() {},
+    4 │         $data: () => {},
+  > 5 │         $props: () => ({}),
+      │         ^^^^^^
+    6 │         $options: function() {},
+    7 │         $children: {
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   
@@ -60,14 +74,14 @@ invalid-computed.vue:5:9 lint/nursery/noVueReservedKeys ━━━━━━━━
 ```
 invalid-computed.vue:6:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Key $props is reserved in Vue.
+  × Key $options is reserved in Vue.
   
-    4 │         $el() {},
-    5 │         $data: () => {},
-  > 6 │         $props: () => ({}),
-      │         ^^^^^^
-    7 │         $options: function() {},
-    8 │         $children: {
+    4 │         $data: () => {},
+    5 │         $props: () => ({}),
+  > 6 │         $options: function() {},
+      │         ^^^^^^^^
+    7 │         $children: {
+    8 │             get() {},
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   
@@ -77,31 +91,14 @@ invalid-computed.vue:6:9 lint/nursery/noVueReservedKeys ━━━━━━━━
 ```
 invalid-computed.vue:7:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Key $options is reserved in Vue.
-  
-    5 │         $data: () => {},
-    6 │         $props: () => ({}),
-  > 7 │         $options: function() {},
-      │         ^^^^^^^^
-    8 │         $children: {
-    9 │             get() {},
-  
-  i Rename the key to avoid conflicts with Vue reserved keys.
-  
-
-```
-
-```
-invalid-computed.vue:8:9 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   × Key $children is reserved in Vue.
   
-     6 │         $props: () => ({}),
-     7 │         $options: function() {},
-   > 8 │         $children: {
-       │         ^^^^^^^^^
-     9 │             get() {},
-    10 │             set(value) {}
+    5 │         $props: () => ({}),
+    6 │         $options: function() {},
+  > 7 │         $children: {
+      │         ^^^^^^^^^
+    8 │             get() {},
+    9 │             set(value) {}
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   

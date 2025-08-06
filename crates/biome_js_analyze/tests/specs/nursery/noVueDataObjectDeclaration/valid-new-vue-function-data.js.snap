@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-new-vue-function-data.vue
+---
+# Input
+```ts
+<script>
+// new Vue with function `data`
+new Vue({
+	data: function () {
+		return {
+			foo: 'bar'
+		};
+	}
+});
+</script>
+
+```
