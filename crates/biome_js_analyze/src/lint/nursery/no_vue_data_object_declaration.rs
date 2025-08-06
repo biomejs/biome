@@ -28,7 +28,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// // component-local data via function
     /// export default {
     ///   /* ✗ BAD */
@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// };
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// // Composition API helper also deprecated
     /// defineComponent({
     ///   /* ✗ BAD */
@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// // Vue 3 entrypoint via createApp
     /// createApp({
     ///   /* ✗ BAD */
