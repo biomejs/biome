@@ -1632,10 +1632,6 @@ export interface Nursery {
 	 */
 	noNonNullAssertedOptionalChain?: RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions;
 	/**
-	 * Disallow the use if quickfix.biome inside editor settings file.
-	 */
-	noQuickfixBiome?: RuleFixConfiguration_for_NoQuickfixBiomeOptions;
-	/**
 	 * Disallow useVisibleTask$() functions in Qwik components.
 	 */
 	noQwikUseVisibleTask?: RuleConfiguration_for_NoQwikUseVisibleTaskOptions;
@@ -2324,6 +2320,10 @@ export interface Suspicious {
 	 */
 	noPrototypeBuiltins?: RuleFixConfiguration_for_NoPrototypeBuiltinsOptions;
 	/**
+	 * Disallow the use if quickfix.biome inside editor settings file.
+	 */
+	noQuickfixBiome?: RuleFixConfiguration_for_NoQuickfixBiomeOptions;
+	/**
 	 * Prevents React-specific JSX properties from being used.
 	 */
 	noReactSpecificProps?: RuleFixConfiguration_for_NoReactSpecificPropsOptions;
@@ -2948,9 +2948,6 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions;
-export type RuleFixConfiguration_for_NoQuickfixBiomeOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoQuickfixBiomeOptions;
 export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
@@ -3440,6 +3437,9 @@ export type RuleFixConfiguration_for_NoOctalEscapeOptions =
 export type RuleFixConfiguration_for_NoPrototypeBuiltinsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoPrototypeBuiltinsOptions;
+export type RuleFixConfiguration_for_NoQuickfixBiomeOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoQuickfixBiomeOptions;
 export type RuleFixConfiguration_for_NoReactSpecificPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoReactSpecificPropsOptions;
@@ -5323,20 +5323,6 @@ export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
 	 * Rule's options
 	 */
 	options: NoNonNullAssertedOptionalChainOptions;
-}
-export interface RuleWithFixOptions_for_NoQuickfixBiomeOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoQuickfixBiomeOptions;
 }
 export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
 	/**
@@ -7244,6 +7230,20 @@ export interface RuleWithFixOptions_for_NoPrototypeBuiltinsOptions {
 	 */
 	options: NoPrototypeBuiltinsOptions;
 }
+export interface RuleWithFixOptions_for_NoQuickfixBiomeOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoQuickfixBiomeOptions;
+}
 export interface RuleWithFixOptions_for_NoReactSpecificPropsOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -7898,12 +7898,6 @@ export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
-export interface NoQuickfixBiomeOptions {
-	/**
-	 * A list of additional JSON files that should be checked.
-	 */
-	additionalPaths?: string[];
-}
 export interface NoQwikUseVisibleTaskOptions {}
 export interface NoSecretsOptions {
 	/**
@@ -8197,6 +8191,12 @@ export interface NoMisplacedAssertionOptions {}
 export interface NoMisrefactoredShorthandAssignOptions {}
 export interface NoOctalEscapeOptions {}
 export interface NoPrototypeBuiltinsOptions {}
+export interface NoQuickfixBiomeOptions {
+	/**
+	 * A list of additional JSON files that should be checked.
+	 */
+	additionalPaths?: string[];
+}
 export interface NoReactSpecificPropsOptions {}
 export interface NoRedeclareOptions {}
 export interface NoRedundantUseStrictOptions {}
@@ -8481,8 +8481,8 @@ export type Category =
 	| "lint/complexity/noCommaOperator"
 	| "lint/complexity/noEmptyTypeParameters"
 	| "lint/complexity/noExcessiveCognitiveComplexity"
-	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExcessiveLinesPerFunction"
+	| "lint/complexity/noExcessiveNestedTestSuites"
 	| "lint/complexity/noExtraBooleanCast"
 	| "lint/complexity/noFlatMapIdentity"
 	| "lint/complexity/noForEach"
@@ -8588,50 +8588,28 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noAwaitInLoop"
-	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantBinaryExpression"
 	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
-	| "lint/nursery/noExcessiveLinesPerFunction"
 	| "lint/nursery/noFloatingPromises"
-	| "lint/nursery/noGlobalDirnameFilename"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noImportantInKeyframe"
-	| "lint/nursery/noImportantStyles"
-	| "lint/nursery/noInvalidDirectionInLinearGradient"
-	| "lint/nursery/noInvalidGridAreas"
-	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noMagicNumbers"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
-	| "lint/nursery/noNestedComponentDefinitions"
 	| "lint/nursery/noNonNullAssertedOptionalChain"
-	| "lint/nursery/noNoninteractiveElementInteractions"
-	| "lint/nursery/noProcessGlobal"
-	| "lint/nursery/noQuickfixBiome"
 	| "lint/nursery/noQwikUseVisibleTask"
-	| "lint/nursery/noReactPropAssign"
-	| "lint/nursery/noReactSpecificProps"
-	| "lint/nursery/noRestrictedElements"
 	| "lint/nursery/noSecrets"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noTsIgnore"
 	| "lint/nursery/noUnassignedVariables"
-	| "lint/nursery/noUndeclaredDependencies"
-	| "lint/nursery/noUnknownFunction"
-	| "lint/nursery/noUnknownMediaFeatureName"
-	| "lint/nursery/noUnknownProperty"
-	| "lint/nursery/noUnknownSelectorPseudoElement"
-	| "lint/nursery/noUnknownUnit"
-	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
-	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
@@ -8649,27 +8627,15 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"
-	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useImageSize"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
-	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
-	| "lint/nursery/useNamingConvention"
-	| "lint/nursery/useNumericSeparators"
-	| "lint/nursery/useObjectSpread"
-	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useReadonlyClassProperties"
-	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"
-	| "lint/nursery/useSortedProperties"
-	| "lint/nursery/useSymbolDescription"
-	| "lint/nursery/useUnifiedTypeSignature"
-	| "lint/nursery/useUniqueElementIds"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
@@ -8691,11 +8657,11 @@ export type Category =
 	| "lint/style/noDescendingSpecificity"
 	| "lint/style/noDoneCallback"
 	| "lint/style/noEnum"
-	| "lint/style/noMagicNumbers"
 	| "lint/style/noExportedImports"
 	| "lint/style/noHeadElement"
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
+	| "lint/style/noMagicNumbers"
 	| "lint/style/noNamespace"
 	| "lint/style/noNegationElse"
 	| "lint/style/noNestedTernary"
@@ -8724,6 +8690,7 @@ export type Category =
 	| "lint/style/useConsistentBuiltinInstantiation"
 	| "lint/style/useConsistentCurlyBraces"
 	| "lint/style/useConsistentMemberAccessibility"
+	| "lint/style/useConsistentObjectDefinitions"
 	| "lint/style/useConst"
 	| "lint/style/useDefaultParameterLast"
 	| "lint/style/useDefaultSwitchClause"
@@ -8731,7 +8698,6 @@ export type Category =
 	| "lint/style/useEnumInitializers"
 	| "lint/style/useExplicitLengthCheck"
 	| "lint/style/useExponentiationOperator"
-	| "lint/style/useConsistentObjectDefinitions"
 	| "lint/style/useExportType"
 	| "lint/style/useExportsLast"
 	| "lint/style/useFilenamingConvention"
@@ -8743,23 +8709,23 @@ export type Category =
 	| "lint/style/useLiteralEnumMembers"
 	| "lint/style/useNamingConvention"
 	| "lint/style/useNodeAssertStrict"
+	| "lint/style/useNodejsImportProtocol"
+	| "lint/style/useNumberNamespace"
 	| "lint/style/useNumericSeparators"
 	| "lint/style/useObjectSpread"
 	| "lint/style/useReadonlyClassProperties"
-	| "lint/style/useSymbolDescription"
-	| "lint/style/useUnifiedTypeSignatures"
-	| "lint/style/useNodejsImportProtocol"
-	| "lint/style/useNumberNamespace"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandArrayType"
 	| "lint/style/useShorthandAssign"
 	| "lint/style/useShorthandFunctionType"
 	| "lint/style/useSingleCaseStatement"
 	| "lint/style/useSingleVarDeclarator"
+	| "lint/style/useSymbolDescription"
 	| "lint/style/useTemplate"
 	| "lint/style/useThrowNewError"
 	| "lint/style/useThrowOnlyError"
 	| "lint/style/useTrimStartEnd"
+	| "lint/style/useUnifiedTypeSignatures"
 	| "lint/suspicious/noAlert"
 	| "lint/suspicious/noApproximativeNumericConstant"
 	| "lint/suspicious/noArrayIndexKey"
@@ -8770,11 +8736,11 @@ export type Category =
 	| "lint/suspicious/noClassAssign"
 	| "lint/suspicious/noCommentText"
 	| "lint/suspicious/noCompareNegZero"
-	| "lint/suspicious/noConstantBinaryExpressions"
 	| "lint/suspicious/noConfusingLabels"
 	| "lint/suspicious/noConfusingVoidType"
 	| "lint/suspicious/noConsole"
 	| "lint/suspicious/noConstEnum"
+	| "lint/suspicious/noConstantBinaryExpressions"
 	| "lint/suspicious/noControlCharactersInRegex"
 	| "lint/suspicious/noDebugger"
 	| "lint/suspicious/noDocumentCookie"
@@ -8818,24 +8784,25 @@ export type Category =
 	| "lint/suspicious/noMisrefactoredShorthandAssign"
 	| "lint/suspicious/noOctalEscape"
 	| "lint/suspicious/noPrototypeBuiltins"
+	| "lint/suspicious/noQuickfixBiome"
 	| "lint/suspicious/noReactSpecificProps"
 	| "lint/suspicious/noRedeclare"
 	| "lint/suspicious/noRedundantUseStrict"
 	| "lint/suspicious/noSelfCompare"
 	| "lint/suspicious/noShadowRestrictedNames"
-	| "lint/suspicious/noTsIgnore"
-	| "lint/suspicious/noUnassignedVariables"
-	| "lint/suspicious/noUselessRegexBackrefs"
-	| "lint/suspicious/noUselessStringEscapes"
 	| "lint/suspicious/noShorthandPropertyOverrides"
 	| "lint/suspicious/noSkippedTests"
 	| "lint/suspicious/noSparseArray"
 	| "lint/suspicious/noSuspiciousSemicolonInJsx"
 	| "lint/suspicious/noTemplateCurlyInString"
 	| "lint/suspicious/noThenProperty"
+	| "lint/suspicious/noTsIgnore"
+	| "lint/suspicious/noUnassignedVariables"
 	| "lint/suspicious/noUnknownAtRule"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
+	| "lint/suspicious/noUselessRegexBackrefs"
+	| "lint/suspicious/noUselessStringEscapes"
 	| "lint/suspicious/noVar"
 	| "lint/suspicious/noWith"
 	| "lint/suspicious/useAdjacentOverloadSignatures"

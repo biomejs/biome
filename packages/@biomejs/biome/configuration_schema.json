@@ -4918,13 +4918,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noQuickfixBiome": {
-					"description": "Disallow the use if quickfix.biome inside editor settings file.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoQuickfixBiomeConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noQwikUseVisibleTask": {
 					"description": "Disallow useVisibleTask$() functions in Qwik components.",
 					"anyOf": [
@@ -12730,6 +12723,13 @@
 					"description": "Disallow direct use of Object.prototype builtins.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoPrototypeBuiltinsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noQuickfixBiome": {
+					"description": "Disallow the use if quickfix.biome inside editor settings file.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQuickfixBiomeConfiguration" },
 						{ "type": "null" }
 					]
 				},
