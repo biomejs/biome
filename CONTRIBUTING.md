@@ -454,13 +454,17 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 ### Regular releases
 
-When releasing a new **minor** or **major** version of a Biome, follow these steps:
+Before starting release:
 
-1. [ ] Before starting the release, make sure that all issues/PRs for the milestone are done: https://github.com/biomejs/biome/milestones
+1. [ ] Make sure that all issues/PRs for the milestone are done: https://github.com/biomejs/biome/milestones
+
+1. [ ] Replace all `version: "next"` to the new version number in the metadata of the rules.
+
+When releasing a new **minor** or **major** version of a Biome, follow these steps:
 
 1. [ ] Create a PR from `next` to `main`. Make sure that code conflicts are fixed and the new features have relative docs PR.
 
-1. [ ] Merge `next` to `main`.
+1. [ ] Merge `next` to `main`. **Using merge commit is recommended here**, do not use squash merge as it removes the commit history.
 
 1. [ ] **Update to the same `version` in all crates** if you publish crates, if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
@@ -469,12 +473,6 @@ When releasing a new **minor** or **major** version of a Biome, follow these ste
    This field must be updated to the new version.
 
 1. [ ] Merge the `ci: release` PR, and the release workflow will run. Once these workflows finish compiling the final artefact, **they need to be approved manually** by a member of the **Core Contributors**.
-
-1. [ ] Update the generated documentation in the `next` branch of the [website](https://github.com/biomejs/website):
-   `BIOME_VERSION=<version> pnpm run codegen:all`.
-   This will also copy the configuration schema in the right place.
-
-1. [ ] Merge the website's `next` branch into `main` with a PR. Once merged, the documentation will automatically deploy.
 
 1. [ ] After releasing a major version number, you may want to update the `update-preview-version.mjs` script to make sure that future previews indicate a version number with a higher patch version than is currently indicated in the `package.json` manifests.
 
