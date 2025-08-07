@@ -379,7 +379,7 @@ jobs:
           repository: ${{ env.BIOME_WEBSITE_REPO }}
           event-type: ${{ env.BIOME_RELEASE_CLI_EVENT }}
           client-payload: |
-            { "sha": "${{ env.GITHUB_SHA }}", "tag": "@biomejs/biome@${{ needs.build-binaries.outputs.version }}", "version": "${{ needs.build-binaries.outputs.version }}" }
+            { "sha": "${{ github.sha }}", "tag": "@biomejs/biome@${{ needs.build-binaries.outputs.version }}", "version": "${{ needs.build-binaries.outputs.version }}" }
 
   publish-js-api:
     name: Publish JS API
