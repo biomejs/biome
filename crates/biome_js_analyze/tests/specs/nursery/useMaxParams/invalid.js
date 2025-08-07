@@ -35,3 +35,7 @@ const obj = {
         return a + b + c + d + e + f + g + h;
     }
 };
+
+function withThisParam(this, a, b, c, d, e, f, g) {
+    return a + b + c + d + e + f + g;
+}

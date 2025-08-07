@@ -42,3 +42,7 @@ const obj = {
         return a + b + c;
     }
 };
+
+function withThisParamValid(this, a, b, c) {
+    return a + b + c;
+}

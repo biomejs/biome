@@ -42,6 +42,10 @@ const obj = {
     }
 };
 
+function withThisParam(this, a, b, c, d, e, f, g) {
+    return a + b + c + d + e + f + g;
+}
+
 ```
 
 # Diagnostics
@@ -228,6 +232,27 @@ invalid.js:34:5 lint/nursery/useMaxParams ━━━━━━━━━━━━�
        │     ^
     37 │ };
     38 │ 
+  
+  i Functions with many parameters are hard to read and maintain.
+  
+  i Consider using an options object, splitting into smaller functions, or grouping related parameters.
+  
+
+```
+
+```
+invalid.js:39:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Function has 8 parameters, but only 4 are allowed.
+  
+    37 │ };
+    38 │ 
+  > 39 │ function withThisParam(this, a, b, c, d, e, f, g) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 40 │     return a + b + c + d + e + f + g;
+  > 41 │ }
+       │ ^
+    42 │ 
   
   i Functions with many parameters are hard to read and maintain.
   

@@ -4,9 +4,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, JsArrowFunctionExpression, JsConstructorClassMember,
+    AnyJsArrowFunctionParameters, AnyTsType, JsArrowFunctionExpression, JsConstructorClassMember,
     JsConstructorParameters, JsFunctionDeclaration, JsFunctionExpression, JsMethodClassMember,
-    JsMethodObjectMember, JsParameters,
+    JsMethodObjectMember, JsParameters, TsDeclareFunctionDeclaration, TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::use_max_params::UseMaxParamsOptions;
@@ -81,7 +81,7 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub AnyFunctionLike = JsFunctionDeclaration | JsFunctionExpression | JsArrowFunctionExpression | JsMethodClassMember | JsMethodObjectMember | JsConstructorClassMember
+    pub AnyFunctionLike = JsFunctionDeclaration | JsFunctionExpression | JsArrowFunctionExpression | JsMethodClassMember | JsMethodObjectMember | JsConstructorClassMember | TsDeclareFunctionDeclaration | TsTypeAliasDeclaration
 }
 
 #[derive(Debug, Clone)]
@@ -128,6 +128,22 @@ impl Rule for UseMaxParams {
                 .parameters()
                 .ok()
                 .map(FunctionParameters::JsConstructorParameters),
+            AnyFunctionLike::TsDeclareFunctionDeclaration(decl) => {
+                decl.parameters().ok().map(FunctionParameters::JsParameters)
+            }
+            AnyFunctionLike::TsTypeAliasDeclaration(decl) => {
+                if let Ok(ty) = decl.ty() {
+                    match ty {
+                        AnyTsType::TsFunctionType(func_type) => func_type
+                            .parameters()
+                            .ok()
+                            .map(FunctionParameters::JsParameters),
+                        _ => None, // Not a function type, no parameters to count
+                    }
+                } else {
+                    None
+                }
+            }
         };
 
         let parameters = parameters?;
