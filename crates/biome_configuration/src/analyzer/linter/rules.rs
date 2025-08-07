@@ -315,6 +315,7 @@ pub enum RuleName {
     NoVoid,
     NoVoidElementsWithChildren,
     NoVoidTypeReturn,
+    NoVueDataObjectDeclaration,
     NoVueReservedKeys,
     NoVueReservedProps,
     NoWith,
@@ -667,6 +668,7 @@ impl RuleName {
             Self::NoVoid => "noVoid",
             Self::NoVoidElementsWithChildren => "noVoidElementsWithChildren",
             Self::NoVoidTypeReturn => "noVoidTypeReturn",
+            Self::NoVueDataObjectDeclaration => "noVueDataObjectDeclaration",
             Self::NoVueReservedKeys => "noVueReservedKeys",
             Self::NoVueReservedProps => "noVueReservedProps",
             Self::NoWith => "noWith",
@@ -1015,6 +1017,7 @@ impl RuleName {
             Self::NoVoid => RuleGroup::Complexity,
             Self::NoVoidElementsWithChildren => RuleGroup::Correctness,
             Self::NoVoidTypeReturn => RuleGroup::Correctness,
+            Self::NoVueDataObjectDeclaration => RuleGroup::Nursery,
             Self::NoVueReservedKeys => RuleGroup::Nursery,
             Self::NoVueReservedProps => RuleGroup::Nursery,
             Self::NoWith => RuleGroup::Suspicious,
@@ -1372,6 +1375,7 @@ impl std::str::FromStr for RuleName {
             "noVoid" => Ok(Self::NoVoid),
             "noVoidElementsWithChildren" => Ok(Self::NoVoidElementsWithChildren),
             "noVoidTypeReturn" => Ok(Self::NoVoidTypeReturn),
+            "noVueDataObjectDeclaration" => Ok(Self::NoVueDataObjectDeclaration),
             "noVueReservedKeys" => Ok(Self::NoVueReservedKeys),
             "noVueReservedProps" => Ok(Self::NoVueReservedProps),
             "noWith" => Ok(Self::NoWith),
@@ -4574,7 +4578,7 @@ impl From<GroupPlainConfiguration> for Correctness {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
-pub struct Nursery { # [doc = r" It enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallow Promises to be used in places where they are almost certainly a mistake."] # [serde (skip_serializing_if = "Option::is_none")] pub no_misused_promises : Option < RuleFixConfiguration < biome_rule_options :: no_misused_promises :: NoMisusedPromisesOptions >> , # [doc = "Disallow non-null assertions after optional chaining expressions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_non_null_asserted_optional_chain : Option < RuleConfiguration < biome_rule_options :: no_non_null_asserted_optional_chain :: NoNonNullAssertedOptionalChainOptions >> , # [doc = "Disallow useVisibleTask$() functions in Qwik components."] # [serde (skip_serializing_if = "Option::is_none")] pub no_qwik_use_visible_task : Option < RuleConfiguration < biome_rule_options :: no_qwik_use_visible_task :: NoQwikUseVisibleTaskOptions >> , # [doc = "Disallow usage of sensitive data such as API keys and tokens."] # [serde (skip_serializing_if = "Option::is_none")] pub no_secrets : Option < RuleConfiguration < biome_rule_options :: no_secrets :: NoSecretsOptions >> , # [doc = "Disallow variable declarations from shadowing variables declared in the outer scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shadow : Option < RuleConfiguration < biome_rule_options :: no_shadow :: NoShadowOptions >> , # [doc = "Disallow unnecessary type-based conditions that can be statically determined as redundant."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unnecessary_conditions : Option < RuleConfiguration < biome_rule_options :: no_unnecessary_conditions :: NoUnnecessaryConditionsOptions >> , # [doc = "Warn when importing non-existing exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unresolved_imports : Option < RuleConfiguration < biome_rule_options :: no_unresolved_imports :: NoUnresolvedImportsOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Disallow reserved keys in Vue component data and computed properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_keys :: NoVueReservedKeysOptions >> , # [doc = "Disallow reserved names to be used as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_props : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_props :: NoVueReservedPropsOptions >> , # [doc = "Enforces href attribute for \\<a> elements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_anchor_href : Option < RuleConfiguration < biome_rule_options :: use_anchor_href :: UseAnchorHrefOptions >> , # [doc = "Enforce type definitions to consistently use either interface or type."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_type_definitions : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_type_definitions :: UseConsistentTypeDefinitionsOptions >> , # [doc = "Require switch-case statements to be exhaustive."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_switch_cases : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCasesOptions >> , # [doc = "Enforce types in functions, methods, variables, and parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Enforces that \\<img> elements have both width and height attributes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_image_size : Option < RuleConfiguration < biome_rule_options :: use_image_size :: UseImageSizeOptions >> , # [doc = "Prefer using the class prop as a classlist over the classnames helper."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_classlist : Option < RuleConfiguration < biome_rule_options :: use_qwik_classlist :: UseQwikClasslistOptions >> , # [doc = "Enforce that components are defined as functions and never as classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_react_function_components : Option < RuleConfiguration < biome_rule_options :: use_react_function_components :: UseReactFunctionComponentsOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> }
+pub struct Nursery { # [doc = r" It enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallow Promises to be used in places where they are almost certainly a mistake."] # [serde (skip_serializing_if = "Option::is_none")] pub no_misused_promises : Option < RuleFixConfiguration < biome_rule_options :: no_misused_promises :: NoMisusedPromisesOptions >> , # [doc = "Disallow non-null assertions after optional chaining expressions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_non_null_asserted_optional_chain : Option < RuleConfiguration < biome_rule_options :: no_non_null_asserted_optional_chain :: NoNonNullAssertedOptionalChainOptions >> , # [doc = "Disallow useVisibleTask$() functions in Qwik components."] # [serde (skip_serializing_if = "Option::is_none")] pub no_qwik_use_visible_task : Option < RuleConfiguration < biome_rule_options :: no_qwik_use_visible_task :: NoQwikUseVisibleTaskOptions >> , # [doc = "Disallow usage of sensitive data such as API keys and tokens."] # [serde (skip_serializing_if = "Option::is_none")] pub no_secrets : Option < RuleConfiguration < biome_rule_options :: no_secrets :: NoSecretsOptions >> , # [doc = "Disallow variable declarations from shadowing variables declared in the outer scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shadow : Option < RuleConfiguration < biome_rule_options :: no_shadow :: NoShadowOptions >> , # [doc = "Disallow unnecessary type-based conditions that can be statically determined as redundant."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unnecessary_conditions : Option < RuleConfiguration < biome_rule_options :: no_unnecessary_conditions :: NoUnnecessaryConditionsOptions >> , # [doc = "Warn when importing non-existing exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unresolved_imports : Option < RuleConfiguration < biome_rule_options :: no_unresolved_imports :: NoUnresolvedImportsOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Enforce that Vue component data options are declared as functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_data_object_declaration : Option < RuleFixConfiguration < biome_rule_options :: no_vue_data_object_declaration :: NoVueDataObjectDeclarationOptions >> , # [doc = "Disallow reserved keys in Vue component data and computed properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_keys :: NoVueReservedKeysOptions >> , # [doc = "Disallow reserved names to be used as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_props : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_props :: NoVueReservedPropsOptions >> , # [doc = "Enforces href attribute for \\<a> elements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_anchor_href : Option < RuleConfiguration < biome_rule_options :: use_anchor_href :: UseAnchorHrefOptions >> , # [doc = "Enforce type definitions to consistently use either interface or type."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_type_definitions : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_type_definitions :: UseConsistentTypeDefinitionsOptions >> , # [doc = "Require switch-case statements to be exhaustive."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_switch_cases : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCasesOptions >> , # [doc = "Enforce types in functions, methods, variables, and parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Enforces that \\<img> elements have both width and height attributes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_image_size : Option < RuleConfiguration < biome_rule_options :: use_image_size :: UseImageSizeOptions >> , # [doc = "Prefer using the class prop as a classlist over the classnames helper."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_classlist : Option < RuleConfiguration < biome_rule_options :: use_qwik_classlist :: UseQwikClasslistOptions >> , # [doc = "Enforce that components are defined as functions and never as classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_react_function_components : Option < RuleConfiguration < biome_rule_options :: use_react_function_components :: UseReactFunctionComponentsOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -4588,6 +4592,7 @@ impl Nursery {
         "noUnnecessaryConditions",
         "noUnresolvedImports",
         "noUselessUndefined",
+        "noVueDataObjectDeclaration",
         "noVueReservedKeys",
         "noVueReservedProps",
         "useAnchorHref",
@@ -4622,6 +4627,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -4683,54 +4689,59 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_vue_reserved_keys.as_ref() {
+        if let Some(rule) = self.no_vue_data_object_declaration.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_vue_reserved_props.as_ref() {
+        if let Some(rule) = self.no_vue_reserved_keys.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_anchor_href.as_ref() {
+        if let Some(rule) = self.no_vue_reserved_props.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.use_consistent_type_definitions.as_ref() {
+        if let Some(rule) = self.use_anchor_href.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
+        if let Some(rule) = self.use_consistent_type_definitions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.use_explicit_type.as_ref() {
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_image_size.as_ref() {
+        if let Some(rule) = self.use_explicit_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_qwik_classlist.as_ref() {
+        if let Some(rule) = self.use_image_size.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.use_react_function_components.as_ref() {
+        if let Some(rule) = self.use_qwik_classlist.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_react_function_components.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
         index_set
@@ -4787,54 +4798,59 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_vue_reserved_keys.as_ref() {
+        if let Some(rule) = self.no_vue_data_object_declaration.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_vue_reserved_props.as_ref() {
+        if let Some(rule) = self.no_vue_reserved_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_anchor_href.as_ref() {
+        if let Some(rule) = self.no_vue_reserved_props.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.use_consistent_type_definitions.as_ref() {
+        if let Some(rule) = self.use_anchor_href.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
+        if let Some(rule) = self.use_consistent_type_definitions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.use_explicit_type.as_ref() {
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_image_size.as_ref() {
+        if let Some(rule) = self.use_explicit_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_qwik_classlist.as_ref() {
+        if let Some(rule) = self.use_image_size.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
             }
         }
-        if let Some(rule) = self.use_react_function_components.as_ref() {
+        if let Some(rule) = self.use_qwik_classlist.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_react_function_components.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
         index_set
@@ -4907,6 +4923,10 @@ impl RuleGroupExt for Nursery {
                 .no_useless_undefined
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "noVueDataObjectDeclaration" => self
+                .no_vue_data_object_declaration
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noVueReservedKeys" => self
                 .no_vue_reserved_keys
                 .as_ref()
@@ -4965,6 +4985,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             no_unnecessary_conditions: Some(value.into()),
             no_unresolved_imports: Some(value.into()),
             no_useless_undefined: Some(value.into()),
+            no_vue_data_object_declaration: Some(value.into()),
             no_vue_reserved_keys: Some(value.into()),
             no_vue_reserved_props: Some(value.into()),
             use_anchor_href: Some(value.into()),

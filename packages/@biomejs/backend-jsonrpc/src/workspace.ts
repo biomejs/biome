@@ -1563,6 +1563,10 @@ export interface Correctness {
 	 */
 	useExhaustiveDependencies?: RuleFixConfiguration_for_UseExhaustiveDependenciesOptions;
 	/**
+	 * Enforce specifying the name of GraphQL operations.
+	 */
+	useGraphqlNamedOperations?: RuleFixConfiguration_for_UseGraphqlNamedOperationsOptions;
+	/**
 	 * Enforce that all React hooks are being called from the Top Level component functions.
 	 */
 	useHookAtTopLevel?: RuleConfiguration_for_UseHookAtTopLevelOptions;
@@ -1582,10 +1586,6 @@ export interface Correctness {
 	 * Disallow missing key props in iterators/collection literals.
 	 */
 	useJsxKeyInIterable?: RuleConfiguration_for_UseJsxKeyInIterableOptions;
-	/**
-	 * Enforce specifying the name of GraphQL operations.
-	 */
-	useNamedGraphqlOperations?: RuleFixConfiguration_for_UseNamedGraphqlOperationsOptions;
 	/**
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
@@ -1652,9 +1652,13 @@ export interface Nursery {
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
 	/**
-	 * Disallow unnecessary escapes in string literals.
+	 * Disallow the use of useless undefined.
 	 */
-	noUselessEscapeInString?: RuleFixConfiguration_for_NoUselessEscapeInStringOptions;
+	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
+	/**
+	 * Enforce that Vue component data options are declared as functions.
+	 */
+	noVueDataObjectDeclaration?: RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions;
 	/**
 	 * Disallow reserved keys in Vue component data and computed properties.
 	 */
@@ -1687,10 +1691,6 @@ export interface Nursery {
 	 * Enforces that \<img> elements have both width and height attributes.
 	 */
 	useImageSize?: RuleConfiguration_for_UseImageSizeOptions;
-	/**
-	 * Enforce specifying the name of GraphQL operations.
-	 */
-	useNamedOperation?: RuleFixConfiguration_for_UseNamedOperationOptions;
 	/**
 	 * Prefer using the class prop as a classlist over the classnames helper.
 	 */
@@ -1886,10 +1886,6 @@ export interface Style {
 	 * Disallow else block when the if block breaks early.
 	 */
 	noUselessElse?: RuleFixConfiguration_for_NoUselessElseOptions;
-	/**
-	 * Disallow the use of useless undefined.
-	 */
-	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
 	/**
 	 * Disallow use of @value rule in css modules.
 	 */
@@ -2378,7 +2374,7 @@ export interface Suspicious {
 	/**
 	 * Disallow unknown at-rules.
 	 */
-	noUnknownAtRule?: RuleConfiguration_for_NoUnknownAtRuleOptions;
+	noUnknownAtRules?: RuleConfiguration_for_NoUnknownAtRulesOptions;
 	/**
 	 * Disallow unsafe declaration merging between interfaces and classes.
 	 */
@@ -2388,13 +2384,13 @@ export interface Suspicious {
 	 */
 	noUnsafeNegation?: RuleFixConfiguration_for_NoUnsafeNegationOptions;
 	/**
+	 * Disallow unnecessary escapes in string literals.
+	 */
+	noUselessEscapeInString?: RuleFixConfiguration_for_NoUselessEscapeInStringOptions;
+	/**
 	 * Disallow useless backreferences in regular expression literals that always match an empty string.
 	 */
 	noUselessRegexBackrefs?: RuleConfiguration_for_NoUselessRegexBackrefsOptions;
-	/**
-	 * Disallow unnecessary escapes in string literals.
-	 */
-	noUselessStringEscapes?: RuleFixConfiguration_for_NoUselessStringEscapesOptions;
 	/**
 	 * Disallow the use of var
 	 */
@@ -2415,10 +2411,6 @@ export interface Suspicious {
 	 * Ensure async functions utilize await.
 	 */
 	useAwait?: RuleConfiguration_for_UseAwaitOptions;
-	/**
-	 * Enforce consistent return values in iterable callbacks.
-	 */
-	useConsistentIterableCallbackReturnValues?: RuleConfiguration_for_UseConsistentIterableCallbackReturnValuesOptions;
 	/**
 	 * Enforce default clauses in switch statements to be last
 	 */
@@ -2443,6 +2435,10 @@ export interface Suspicious {
 	 * Use Array.isArray() instead of instanceof Array.
 	 */
 	useIsArray?: RuleFixConfiguration_for_UseIsArrayOptions;
+	/**
+	 * Enforce consistent return values in iterable callbacks.
+	 */
+	useIterableCallbackReturn?: RuleConfiguration_for_UseIterableCallbackReturnOptions;
 	/**
 	 * Require using the namespace keyword over the module keyword to declare TypeScript namespaces.
 	 */
@@ -2900,6 +2896,9 @@ export type RuleConfiguration_for_NoVoidTypeReturnOptions =
 export type RuleFixConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveDependenciesOptions;
+export type RuleFixConfiguration_for_UseGraphqlNamedOperationsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseGraphqlNamedOperationsOptions;
 export type RuleConfiguration_for_UseHookAtTopLevelOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseHookAtTopLevelOptions;
@@ -2915,9 +2914,6 @@ export type RuleFixConfiguration_for_UseJsonImportAttributesOptions =
 export type RuleConfiguration_for_UseJsxKeyInIterableOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseJsxKeyInIterableOptions;
-export type RuleFixConfiguration_for_UseNamedGraphqlOperationsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNamedGraphqlOperationsOptions;
 export type RuleFixConfiguration_for_UseParseIntRadixOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseParseIntRadixOptions;
@@ -2963,9 +2959,12 @@ export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
-export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
+export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessEscapeInStringOptions;
+	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
+export type RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions;
 export type RuleConfiguration_for_NoVueReservedKeysOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedKeysOptions;
@@ -2987,9 +2986,6 @@ export type RuleConfiguration_for_UseExplicitTypeOptions =
 export type RuleConfiguration_for_UseImageSizeOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseImageSizeOptions;
-export type RuleFixConfiguration_for_UseNamedOperationOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseNamedOperationOptions;
 export type RuleConfiguration_for_UseQwikClasslistOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseQwikClasslistOptions;
@@ -3119,9 +3115,6 @@ export type RuleFixConfiguration_for_NoUnusedTemplateLiteralOptions =
 export type RuleFixConfiguration_for_NoUselessElseOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessElseOptions;
-export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
 export type RuleConfiguration_for_NoValueAtRuleOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoValueAtRuleOptions;
@@ -3479,21 +3472,21 @@ export type RuleFixConfiguration_for_NoTsIgnoreOptions =
 export type RuleConfiguration_for_NoUnassignedVariablesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnassignedVariablesOptions;
-export type RuleConfiguration_for_NoUnknownAtRuleOptions =
+export type RuleConfiguration_for_NoUnknownAtRulesOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUnknownAtRuleOptions;
+	| RuleWithOptions_for_NoUnknownAtRulesOptions;
 export type RuleConfiguration_for_NoUnsafeDeclarationMergingOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnsafeDeclarationMergingOptions;
 export type RuleFixConfiguration_for_NoUnsafeNegationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUnsafeNegationOptions;
+export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoUselessEscapeInStringOptions;
 export type RuleConfiguration_for_NoUselessRegexBackrefsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUselessRegexBackrefsOptions;
-export type RuleFixConfiguration_for_NoUselessStringEscapesOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoUselessStringEscapesOptions;
 export type RuleFixConfiguration_for_NoVarOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoVarOptions;
@@ -3506,9 +3499,6 @@ export type RuleConfiguration_for_UseAdjacentOverloadSignaturesOptions =
 export type RuleConfiguration_for_UseAwaitOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAwaitOptions;
-export type RuleConfiguration_for_UseConsistentIterableCallbackReturnValuesOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseConsistentIterableCallbackReturnValuesOptions;
 export type RuleConfiguration_for_UseDefaultSwitchClauseLastOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseDefaultSwitchClauseLastOptions;
@@ -3527,6 +3517,9 @@ export type RuleConfiguration_for_UseGuardForInOptions =
 export type RuleFixConfiguration_for_UseIsArrayOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseIsArrayOptions;
+export type RuleConfiguration_for_UseIterableCallbackReturnOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseIterableCallbackReturnOptions;
 export type RuleFixConfiguration_for_UseNamespaceKeywordOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNamespaceKeywordOptions;
@@ -5128,6 +5121,20 @@ export interface RuleWithFixOptions_for_UseExhaustiveDependenciesOptions {
 	 */
 	options: UseExhaustiveDependenciesOptions;
 }
+export interface RuleWithFixOptions_for_UseGraphqlNamedOperationsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseGraphqlNamedOperationsOptions;
+}
 export interface RuleWithOptions_for_UseHookAtTopLevelOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5189,20 +5196,6 @@ export interface RuleWithOptions_for_UseJsxKeyInIterableOptions {
 	 * Rule's options
 	 */
 	options: UseJsxKeyInIterableOptions;
-}
-export interface RuleWithFixOptions_for_UseNamedGraphqlOperationsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNamedGraphqlOperationsOptions;
 }
 export interface RuleWithFixOptions_for_UseParseIntRadixOptions {
 	/**
@@ -5374,7 +5367,7 @@ export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	 */
 	options: NoUnresolvedImportsOptions;
 }
-export interface RuleWithFixOptions_for_NoUselessEscapeInStringOptions {
+export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -5386,7 +5379,21 @@ export interface RuleWithFixOptions_for_NoUselessEscapeInStringOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessEscapeInStringOptions;
+	options: NoUselessUndefinedOptions;
+}
+export interface RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueDataObjectDeclarationOptions;
 }
 export interface RuleWithOptions_for_NoVueReservedKeysOptions {
 	/**
@@ -5465,20 +5472,6 @@ export interface RuleWithOptions_for_UseImageSizeOptions {
 	 * Rule's options
 	 */
 	options: UseImageSizeOptions;
-}
-export interface RuleWithFixOptions_for_UseNamedOperationOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseNamedOperationOptions;
 }
 export interface RuleWithOptions_for_UseQwikClasslistOptions {
 	/**
@@ -5961,20 +5954,6 @@ export interface RuleWithFixOptions_for_NoUselessElseOptions {
 	 * Rule's options
 	 */
 	options: NoUselessElseOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessUndefinedOptions;
 }
 export interface RuleWithOptions_for_NoValueAtRuleOptions {
 	/**
@@ -7394,7 +7373,7 @@ export interface RuleWithOptions_for_NoUnassignedVariablesOptions {
 	 */
 	options: NoUnassignedVariablesOptions;
 }
-export interface RuleWithOptions_for_NoUnknownAtRuleOptions {
+export interface RuleWithOptions_for_NoUnknownAtRulesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -7402,7 +7381,7 @@ export interface RuleWithOptions_for_NoUnknownAtRuleOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUnknownAtRuleOptions;
+	options: NoUnknownAtRulesOptions;
 }
 export interface RuleWithOptions_for_NoUnsafeDeclarationMergingOptions {
 	/**
@@ -7428,17 +7407,7 @@ export interface RuleWithFixOptions_for_NoUnsafeNegationOptions {
 	 */
 	options: NoUnsafeNegationOptions;
 }
-export interface RuleWithOptions_for_NoUselessRegexBackrefsOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoUselessRegexBackrefsOptions;
-}
-export interface RuleWithFixOptions_for_NoUselessStringEscapesOptions {
+export interface RuleWithFixOptions_for_NoUselessEscapeInStringOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -7450,7 +7419,17 @@ export interface RuleWithFixOptions_for_NoUselessStringEscapesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoUselessStringEscapesOptions;
+	options: NoUselessEscapeInStringOptions;
+}
+export interface RuleWithOptions_for_NoUselessRegexBackrefsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUselessRegexBackrefsOptions;
 }
 export interface RuleWithFixOptions_for_NoVarOptions {
 	/**
@@ -7495,16 +7474,6 @@ export interface RuleWithOptions_for_UseAwaitOptions {
 	 * Rule's options
 	 */
 	options: UseAwaitOptions;
-}
-export interface RuleWithOptions_for_UseConsistentIterableCallbackReturnValuesOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseConsistentIterableCallbackReturnValuesOptions;
 }
 export interface RuleWithOptions_for_UseDefaultSwitchClauseLastOptions {
 	/**
@@ -7569,6 +7538,16 @@ export interface RuleWithFixOptions_for_UseIsArrayOptions {
 	 * Rule's options
 	 */
 	options: UseIsArrayOptions;
+}
+export interface RuleWithOptions_for_UseIterableCallbackReturnOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseIterableCallbackReturnOptions;
 }
 export interface RuleWithFixOptions_for_UseNamespaceKeywordOptions {
 	/**
@@ -7867,6 +7846,7 @@ export interface UseExhaustiveDependenciesOptions {
 	 */
 	reportUnnecessaryDependencies?: boolean;
 }
+export interface UseGraphqlNamedOperationsOptions {}
 export interface UseHookAtTopLevelOptions {}
 export interface UseImportExtensionsOptions {
 	/**
@@ -7882,7 +7862,6 @@ export interface UseJsxKeyInIterableOptions {
 	 */
 	checkShorthandFragments?: boolean;
 }
-export interface UseNamedGraphqlOperationsOptions {}
 export interface UseParseIntRadixOptions {}
 export interface UseSingleJsDocAsteriskOptions {}
 export interface UseUniqueElementIdsOptions {
@@ -7908,7 +7887,8 @@ export interface NoSecretsOptions {
 export interface NoShadowOptions {}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
-export interface NoUselessEscapeInStringOptions {}
+export interface NoUselessUndefinedOptions {}
+export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export type UseAnchorHrefOptions = null;
@@ -7918,7 +7898,6 @@ export interface UseConsistentTypeDefinitionsOptions {
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
 export type UseImageSizeOptions = null;
-export interface UseNamedOperationOptions {}
 export interface UseQwikClasslistOptions {}
 export interface UseReactFunctionComponentsOptions {}
 export interface UseSortedClassesOptions {
@@ -7997,7 +7976,6 @@ export interface NoShoutyConstantsOptions {}
 export interface NoSubstrOptions {}
 export interface NoUnusedTemplateLiteralOptions {}
 export interface NoUselessElseOptions {}
-export interface NoUselessUndefinedOptions {}
 export interface NoValueAtRuleOptions {}
 export interface NoYodaExpressionOptions {}
 export interface UseArrayLiteralsOptions {}
@@ -8210,22 +8188,22 @@ export interface NoTemplateCurlyInStringOptions {}
 export interface NoThenPropertyOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
-export interface NoUnknownAtRuleOptions {}
+export interface NoUnknownAtRulesOptions {}
 export interface NoUnsafeDeclarationMergingOptions {}
 export interface NoUnsafeNegationOptions {}
+export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessRegexBackrefsOptions {}
-export interface NoUselessStringEscapesOptions {}
 export interface NoVarOptions {}
 export interface NoWithOptions {}
 export interface UseAdjacentOverloadSignaturesOptions {}
 export interface UseAwaitOptions {}
-export interface UseConsistentIterableCallbackReturnValuesOptions {}
 export interface UseDefaultSwitchClauseLastOptions {}
 export interface UseErrorMessageOptions {}
 export interface UseGetterReturnOptions {}
 export interface UseGoogleFontDisplayOptions {}
 export interface UseGuardForInOptions {}
 export interface UseIsArrayOptions {}
+export interface UseIterableCallbackReturnOptions {}
 export interface UseNamespaceKeywordOptions {}
 export interface UseNumberToFixedDigitsArgumentOptions {}
 export interface UseStaticResponseMethodsOptions {}
@@ -8579,7 +8557,7 @@ export type Category =
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useJsonImportAttributes"
 	| "lint/correctness/useJsxKeyInIterable"
-	| "lint/correctness/useNamedGraphqlOperations"
+	| "lint/correctness/useGraphqlNamedOperations"
 	| "lint/correctness/useParseIntRadix"
 	| "lint/correctness/useSingleJsDocAsterisk"
 	| "lint/correctness/useUniqueElementIds"
@@ -8589,33 +8567,25 @@ export type Category =
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noAwaitInLoop"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantBinaryExpression"
 	| "lint/nursery/noDestructuredProps"
-	| "lint/nursery/noDoneCallback"
-	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
-	| "lint/nursery/noImportantInKeyframe"
-	| "lint/nursery/noMagicNumbers"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noSecrets"
 	| "lint/nursery/noShadow"
-	| "lint/nursery/noShorthandPropertyOverrides"
-	| "lint/nursery/noTsIgnore"
-	| "lint/nursery/noUnassignedVariables"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
-	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
+	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -8625,16 +8595,12 @@ export type Category =
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
-	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"
 	| "lint/nursery/useImageSize"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useIterableCallbackReturn"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/useReactFunctionComponents"
-	| "lint/nursery/useReadonlyClassProperties"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
@@ -8676,7 +8642,6 @@ export type Category =
 	| "lint/style/noSubstr"
 	| "lint/style/noUnusedTemplateLiteral"
 	| "lint/style/noUselessElse"
-	| "lint/style/noUselessUndefined"
 	| "lint/style/noValueAtRule"
 	| "lint/style/noYodaExpression"
 	| "lint/style/useArrayLiterals"
@@ -8798,16 +8763,16 @@ export type Category =
 	| "lint/suspicious/noThenProperty"
 	| "lint/suspicious/noTsIgnore"
 	| "lint/suspicious/noUnassignedVariables"
-	| "lint/suspicious/noUnknownAtRule"
+	| "lint/suspicious/noUnknownAtRules"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/noUselessRegexBackrefs"
-	| "lint/suspicious/noUselessStringEscapes"
+	| "lint/suspicious/noUselessEscapeInString"
 	| "lint/suspicious/noVar"
 	| "lint/suspicious/noWith"
 	| "lint/suspicious/useAdjacentOverloadSignatures"
 	| "lint/suspicious/useAwait"
-	| "lint/suspicious/useConsistentIterableCallbackReturnValues"
+	| "lint/suspicious/useIterableCallbackReturn"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
 	| "lint/suspicious/useErrorMessage"
 	| "lint/suspicious/useGetterReturn"

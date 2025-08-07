@@ -1190,6 +1190,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGraphqlNamedOperations": {
+					"description": "Enforce specifying the name of GraphQL operations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseGraphqlNamedOperationsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useHookAtTopLevel": {
 					"description": "Enforce that all React hooks are being called from the Top Level component functions.",
 					"anyOf": [
@@ -1222,13 +1229,6 @@
 					"description": "Disallow missing key props in iterators/collection literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseJsxKeyInIterableConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNamedGraphqlOperations": {
-					"description": "Enforce specifying the name of GraphQL operations.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseNamedGraphqlOperationsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4345,13 +4345,13 @@
 			},
 			"additionalProperties": false
 		},
-		"NoUnknownAtRuleConfiguration": {
+		"NoUnknownAtRulesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoUnknownAtRuleOptions" }
+				{ "$ref": "#/definitions/RuleWithNoUnknownAtRulesOptions" }
 			]
 		},
-		"NoUnknownAtRuleOptions": {
+		"NoUnknownAtRulesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -4720,16 +4720,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoUselessStringEscapesConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoUselessStringEscapesOptions" }
-			]
-		},
-		"NoUselessStringEscapesOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoUselessStringRawConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4843,6 +4833,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDataObjectDeclarationConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueDataObjectDeclarationOptions" }
+			]
+		},
+		"NoVueDataObjectDeclarationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4953,10 +4953,17 @@
 						{ "type": "null" }
 					]
 				},
-				"noUselessEscapeInString": {
-					"description": "Disallow unnecessary escapes in string literals.",
+				"noUselessUndefined": {
+					"description": "Disallow the use of useless undefined.",
 					"anyOf": [
-						{ "$ref": "#/definitions/NoUselessEscapeInStringConfiguration" },
+						{ "$ref": "#/definitions/NoUselessUndefinedConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDataObjectDeclaration": {
+					"description": "Enforce that Vue component data options are declared as functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueDataObjectDeclarationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5012,13 +5019,6 @@
 					"description": "Enforces that \\<img> elements have both width and height attributes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNamedOperation": {
-					"description": "Enforce specifying the name of GraphQL operations.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseNamedOperationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8533,7 +8533,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoUnknownAtRuleOptions": {
+		"RuleWithNoUnknownAtRulesOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -8543,7 +8543,7 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUnknownAtRuleOptions" }]
+					"allOf": [{ "$ref": "#/definitions/NoUnknownAtRulesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -9174,25 +9174,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoUselessStringEscapesOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"fix": {
-					"description": "The kind of the code actions emitted by the rule",
-					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
-				},
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoUselessStringEscapesOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithNoUselessStringRawOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9405,6 +9386,27 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoVoidTypeReturnOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoVueDataObjectDeclarationOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoVueDataObjectDeclarationOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -9829,25 +9831,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseConsistentCurlyBracesOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseConsistentIterableCallbackReturnValuesOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [
-						{
-							"$ref": "#/definitions/UseConsistentIterableCallbackReturnValuesOptions"
-						}
-					]
 				}
 			},
 			"additionalProperties": false
@@ -10325,6 +10308,27 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseGraphqlNamedOperationsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseGraphqlNamedOperationsOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseGraphqlNamingConventionOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10542,6 +10546,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseIterableCallbackReturnOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseIterableCallbackReturnOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseJsonImportAttributesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10651,46 +10672,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseMediaCaptionOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseNamedGraphqlOperationsOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"fix": {
-					"description": "The kind of the code actions emitted by the rule",
-					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
-				},
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [
-						{ "$ref": "#/definitions/UseNamedGraphqlOperationsOptions" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseNamedOperationOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"fix": {
-					"description": "The kind of the code actions emitted by the rule",
-					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
-				},
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseNamedOperationOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -11935,13 +11916,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noUselessUndefined": {
-					"description": "Disallow the use of useless undefined.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoUselessUndefinedConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noValueAtRule": {
 					"description": "Disallow use of @value rule in css modules.",
 					"anyOf": [
@@ -12826,10 +12800,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnknownAtRule": {
+				"noUnknownAtRules": {
 					"description": "Disallow unknown at-rules.",
 					"anyOf": [
-						{ "$ref": "#/definitions/NoUnknownAtRuleConfiguration" },
+						{ "$ref": "#/definitions/NoUnknownAtRulesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12847,17 +12821,17 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessEscapeInString": {
+					"description": "Disallow unnecessary escapes in string literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessEscapeInStringConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessRegexBackrefs": {
 					"description": "Disallow useless backreferences in regular expression literals that always match an empty string.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUselessRegexBackrefsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessStringEscapes": {
-					"description": "Disallow unnecessary escapes in string literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoUselessStringEscapesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12892,15 +12866,6 @@
 					"description": "Ensure async functions utilize await.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseAwaitConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useConsistentIterableCallbackReturnValues": {
-					"description": "Enforce consistent return values in iterable callbacks.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/UseConsistentIterableCallbackReturnValuesConfiguration"
-						},
 						{ "type": "null" }
 					]
 				},
@@ -12943,6 +12908,13 @@
 					"description": "Use Array.isArray() instead of instanceof Array.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseIsArrayConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useIterableCallbackReturn": {
+					"description": "Enforce consistent return values in iterable callbacks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseIterableCallbackReturnConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13217,18 +13189,6 @@
 			]
 		},
 		"UseConsistentCurlyBracesOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"UseConsistentIterableCallbackReturnValuesConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{
-					"$ref": "#/definitions/RuleWithUseConsistentIterableCallbackReturnValuesOptions"
-				}
-			]
-		},
-		"UseConsistentIterableCallbackReturnValuesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -13547,6 +13507,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseGraphqlNamedOperationsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseGraphqlNamedOperationsOptions" }
+			]
+		},
+		"UseGraphqlNamedOperationsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseGraphqlNamingConventionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13673,6 +13643,16 @@
 			]
 		},
 		"UseIsNanOptions": { "type": "object", "additionalProperties": false },
+		"UseIterableCallbackReturnConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseIterableCallbackReturnOptions" }
+			]
+		},
+		"UseIterableCallbackReturnOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseJsonImportAttributesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13747,26 +13727,6 @@
 			]
 		},
 		"UseMediaCaptionOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"UseNamedGraphqlOperationsConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseNamedGraphqlOperationsOptions" }
-			]
-		},
-		"UseNamedGraphqlOperationsOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"UseNamedOperationConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseNamedOperationOptions" }
-			]
-		},
-		"UseNamedOperationOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
