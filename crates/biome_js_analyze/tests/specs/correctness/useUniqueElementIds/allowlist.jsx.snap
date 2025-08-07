@@ -66,6 +66,7 @@ allowlist.options:6:17 deserialize ━━━━━━━━━━━━━━━
   - noUnnecessaryConditions
   - noUnresolvedImports
   - noUselessEscapeInString
+  - noUselessUndefined
   - noVueReservedKeys
   - noVueReservedProps
   - useAnchorHref
@@ -73,7 +74,6 @@ allowlist.options:6:17 deserialize ━━━━━━━━━━━━━━━
   - useExhaustiveSwitchCases
   - useExplicitType
   - useImageSize
-  - useNamedOperation
   - useQwikClasslist
   - useReactFunctionComponents
   - useSortedClasses

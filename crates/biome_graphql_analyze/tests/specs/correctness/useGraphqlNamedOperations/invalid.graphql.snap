@@ -12,7 +12,7 @@ subscription {}
 
 # Diagnostics
 ```
-invalid.graphql:1:1 lint/correctness/useNamedGraphqlOperations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:1:1 lint/correctness/useGraphqlNamedOperations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Anonymous GraphQL operations are forbidden. Make sure to name your query.
   
@@ -31,7 +31,7 @@ invalid.graphql:1:1 lint/correctness/useNamedGraphqlOperations  FIXABLE  ━━�
 ```
 
 ```
-invalid.graphql:2:1 lint/correctness/useNamedGraphqlOperations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:2:1 lint/correctness/useGraphqlNamedOperations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Anonymous GraphQL operations are forbidden. Make sure to name your mutation.
   
@@ -51,7 +51,7 @@ invalid.graphql:2:1 lint/correctness/useNamedGraphqlOperations  FIXABLE  ━━�
 ```
 
 ```
-invalid.graphql:3:1 lint/correctness/useNamedGraphqlOperations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:3:1 lint/correctness/useGraphqlNamedOperations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Anonymous GraphQL operations are forbidden. Make sure to name your subscription.
   

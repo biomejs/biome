@@ -12,6 +12,7 @@ pub mod no_secrets;
 pub mod no_shadow;
 pub mod no_unnecessary_conditions;
 pub mod no_unresolved_imports;
+pub mod no_useless_undefined;
 pub mod no_vue_reserved_keys;
 pub mod no_vue_reserved_props;
 pub mod use_anchor_href;
@@ -22,4 +23,4 @@ pub mod use_image_size;
 pub mod use_qwik_classlist;
 pub mod use_react_function_components;
 pub mod use_sorted_classes;
-declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_floating_promises :: NoFloatingPromises , self :: no_import_cycles :: NoImportCycles , self :: no_misused_promises :: NoMisusedPromises , self :: no_non_null_asserted_optional_chain :: NoNonNullAssertedOptionalChain , self :: no_qwik_use_visible_task :: NoQwikUseVisibleTask , self :: no_secrets :: NoSecrets , self :: no_shadow :: NoShadow , self :: no_unnecessary_conditions :: NoUnnecessaryConditions , self :: no_unresolved_imports :: NoUnresolvedImports , self :: no_vue_reserved_keys :: NoVueReservedKeys , self :: no_vue_reserved_props :: NoVueReservedProps , self :: use_anchor_href :: UseAnchorHref , self :: use_consistent_type_definitions :: UseConsistentTypeDefinitions , self :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCases , self :: use_explicit_type :: UseExplicitType , self :: use_image_size :: UseImageSize , self :: use_qwik_classlist :: UseQwikClasslist , self :: use_react_function_components :: UseReactFunctionComponents , self :: use_sorted_classes :: UseSortedClasses ,] } }
+declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_floating_promises :: NoFloatingPromises , self :: no_import_cycles :: NoImportCycles , self :: no_misused_promises :: NoMisusedPromises , self :: no_non_null_asserted_optional_chain :: NoNonNullAssertedOptionalChain , self :: no_qwik_use_visible_task :: NoQwikUseVisibleTask , self :: no_secrets :: NoSecrets , self :: no_shadow :: NoShadow , self :: no_unnecessary_conditions :: NoUnnecessaryConditions , self :: no_unresolved_imports :: NoUnresolvedImports , self :: no_useless_undefined :: NoUselessUndefined , self :: no_vue_reserved_keys :: NoVueReservedKeys , self :: no_vue_reserved_props :: NoVueReservedProps , self :: use_anchor_href :: UseAnchorHref , self :: use_consistent_type_definitions :: UseConsistentTypeDefinitions , self :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCases , self :: use_explicit_type :: UseExplicitType , self :: use_image_size :: UseImageSize , self :: use_qwik_classlist :: UseQwikClasslist , self :: use_react_function_components :: UseReactFunctionComponents , self :: use_sorted_classes :: UseSortedClasses ,] } }

@@ -11,7 +11,7 @@ use biome_js_syntax::{
     JsCallExpression, JsFunctionExpression, JsReturnStatement, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, NodeOrToken, TextRange};
-use biome_rule_options::use_consistent_iterable_callback_return_values::UseConsistentIterableCallbackReturnValuesOptions;
+use biome_rule_options::use_iterable_callback_return::UseIterableCallbackReturnOptions;
 use roaring::RoaringBitmap;
 use rustc_hash::FxHashMap;
 use std::io;
@@ -76,9 +76,9 @@ declare_lint_rule! {
     ///     // No return value, which is correct
     /// });
     /// ```
-    pub UseConsistentIterableCallbackReturnValues {
+    pub UseIterableCallbackReturn {
         version: "2.0.0",
-        name: "useConsistentIterableCallbackReturnValues",
+        name: "useIterableCallbackReturn",
         language: "js",
         sources: &[RuleSource::Eslint("array-callback-return").same()],
         severity: Severity::Error,
@@ -86,11 +86,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for UseConsistentIterableCallbackReturnValues {
+impl Rule for UseIterableCallbackReturn {
     type Query = ControlFlowGraph;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = UseConsistentIterableCallbackReturnValuesOptions;
+    type Options = UseIterableCallbackReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();

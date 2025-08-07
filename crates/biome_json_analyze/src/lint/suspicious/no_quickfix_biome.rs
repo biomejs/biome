@@ -118,7 +118,7 @@ impl Rule for NoQuickfixBiome {
                 },
             )
             .note(markup! {
-                    "The code action "<Emphasis>"quickfix.biome"</Emphasis>" applies the code fix of rules and actions without being aware of each other. This might cause the emission of malformed code, especially if the code fixes are applied to the same code."
+                    "The code action "<Emphasis>"quickfix.biome"</Emphasis>" applies the code fix of rules and actions without being aware of each other. This might cause the emission of malformed code, especially if the code fixes are applied to the same lines of code."
             }),
         )
     }

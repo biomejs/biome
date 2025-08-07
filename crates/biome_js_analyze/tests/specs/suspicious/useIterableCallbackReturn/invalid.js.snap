@@ -210,7 +210,7 @@ Array.from([], function() {
 
 # Diagnostics
 ```
-invalid.js:1:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
@@ -232,7 +232,7 @@ invalid.js:1:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━�
 ```
 
 ```
-invalid.js:4:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
@@ -258,7 +258,7 @@ invalid.js:4:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━�
 ```
 
 ```
-invalid.js:7:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
@@ -284,7 +284,7 @@ invalid.js:7:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━�
 ```
 
 ```
-invalid.js:12:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
@@ -310,7 +310,7 @@ invalid.js:12:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:18:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
@@ -336,7 +336,7 @@ invalid.js:18:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:24:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to forEach() iterable method should not return a value.
   
@@ -362,7 +362,7 @@ invalid.js:24:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:30:7 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:7 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to Array.from() method should always return a value.
   
@@ -379,7 +379,7 @@ invalid.js:30:7 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:31:7 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:7 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to Array.from() method should always return a value.
   
@@ -396,7 +396,7 @@ invalid.js:31:7 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:32:7 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:7 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to Array.from() method should always return a value.
   
@@ -413,7 +413,7 @@ invalid.js:32:7 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:35:7 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:7 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to Array.from() method should always return a value.
   
@@ -430,7 +430,7 @@ invalid.js:35:7 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:38:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:38:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
@@ -447,7 +447,7 @@ invalid.js:38:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:41:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
@@ -464,7 +464,7 @@ invalid.js:41:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:44:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:44:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
@@ -481,7 +481,7 @@ invalid.js:44:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:45:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:45:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
@@ -498,7 +498,7 @@ invalid.js:45:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:46:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:46:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
@@ -515,7 +515,7 @@ invalid.js:46:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:53:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:53:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
@@ -532,7 +532,7 @@ invalid.js:53:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:62:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:62:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
@@ -549,7 +549,7 @@ invalid.js:62:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:85:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:85:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to filter() iterable method should always return a value.
   
@@ -566,7 +566,7 @@ invalid.js:85:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:88:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:88:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to filter() iterable method should always return a value.
   
@@ -583,7 +583,7 @@ invalid.js:88:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:91:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:91:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to filter() iterable method should always return a value.
   
@@ -600,7 +600,7 @@ invalid.js:91:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:92:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:92:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to filter() iterable method should always return a value.
   
@@ -617,7 +617,7 @@ invalid.js:92:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:93:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:93:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to find() iterable method should always return a value.
   
@@ -634,7 +634,7 @@ invalid.js:93:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:96:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:96:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to find() iterable method should always return a value.
   
@@ -651,7 +651,7 @@ invalid.js:96:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:99:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:99:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to find() iterable method should always return a value.
   
@@ -668,7 +668,7 @@ invalid.js:99:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━
 ```
 
 ```
-invalid.js:100:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:100:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to find() iterable method should always return a value.
   
@@ -685,7 +685,7 @@ invalid.js:100:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:101:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:101:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findIndex() iterable method should always return a value.
   
@@ -702,7 +702,7 @@ invalid.js:101:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:104:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:104:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findIndex() iterable method should always return a value.
   
@@ -719,7 +719,7 @@ invalid.js:104:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:107:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:107:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findIndex() iterable method should always return a value.
   
@@ -736,7 +736,7 @@ invalid.js:107:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:108:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:108:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findIndex() iterable method should always return a value.
   
@@ -753,7 +753,7 @@ invalid.js:108:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:109:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:109:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findLast() iterable method should always return a value.
   
@@ -770,7 +770,7 @@ invalid.js:109:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:112:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:112:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findLast() iterable method should always return a value.
   
@@ -787,7 +787,7 @@ invalid.js:112:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:115:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:115:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findLast() iterable method should always return a value.
   
@@ -804,7 +804,7 @@ invalid.js:115:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:116:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:116:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findLast() iterable method should always return a value.
   
@@ -821,7 +821,7 @@ invalid.js:116:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:117:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:117:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findLastIndex() iterable method should always return a value.
   
@@ -838,7 +838,7 @@ invalid.js:117:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:120:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:120:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findLastIndex() iterable method should always return a value.
   
@@ -855,7 +855,7 @@ invalid.js:120:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:123:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:123:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findLastIndex() iterable method should always return a value.
   
@@ -872,7 +872,7 @@ invalid.js:123:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:124:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:124:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findLastIndex() iterable method should always return a value.
   
@@ -889,7 +889,7 @@ invalid.js:124:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:125:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:125:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to some() iterable method should always return a value.
   
@@ -906,7 +906,7 @@ invalid.js:125:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:128:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:128:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to some() iterable method should always return a value.
   
@@ -923,7 +923,7 @@ invalid.js:128:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:131:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:131:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to some() iterable method should always return a value.
   
@@ -940,7 +940,7 @@ invalid.js:131:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:132:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:132:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to some() iterable method should always return a value.
   
@@ -957,7 +957,7 @@ invalid.js:132:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:133:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:133:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to flatMap() iterable method should always return a value.
   
@@ -974,7 +974,7 @@ invalid.js:133:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:136:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:136:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to flatMap() iterable method should always return a value.
   
@@ -991,7 +991,7 @@ invalid.js:136:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:139:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:139:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to flatMap() iterable method should always return a value.
   
@@ -1008,7 +1008,7 @@ invalid.js:139:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:140:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:140:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to flatMap() iterable method should always return a value.
   
@@ -1025,7 +1025,7 @@ invalid.js:140:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:141:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:141:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to map() iterable method should always return a value.
   
@@ -1042,7 +1042,7 @@ invalid.js:141:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:144:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:144:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to map() iterable method should always return a value.
   
@@ -1059,7 +1059,7 @@ invalid.js:144:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:147:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:147:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to map() iterable method should always return a value.
   
@@ -1076,7 +1076,7 @@ invalid.js:147:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:148:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:148:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to map() iterable method should always return a value.
   
@@ -1093,7 +1093,7 @@ invalid.js:148:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:149:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:149:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to reduce() iterable method should always return a value.
   
@@ -1110,7 +1110,7 @@ invalid.js:149:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:152:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:152:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to reduce() iterable method should always return a value.
   
@@ -1127,7 +1127,7 @@ invalid.js:152:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:155:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:155:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to reduce() iterable method should always return a value.
   
@@ -1144,7 +1144,7 @@ invalid.js:155:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:156:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:156:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to reduce() iterable method should always return a value.
   
@@ -1161,7 +1161,7 @@ invalid.js:156:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:157:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:157:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to reduceRight() iterable method should always return a value.
   
@@ -1178,7 +1178,7 @@ invalid.js:157:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:160:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:160:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to reduceRight() iterable method should always return a value.
   
@@ -1195,7 +1195,7 @@ invalid.js:160:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:163:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:163:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to reduceRight() iterable method should always return a value.
   
@@ -1212,7 +1212,7 @@ invalid.js:163:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:164:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:164:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to reduceRight() iterable method should always return a value.
   
@@ -1229,7 +1229,7 @@ invalid.js:164:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:165:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:165:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to sort() iterable method should always return a value.
   
@@ -1246,7 +1246,7 @@ invalid.js:165:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:168:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:168:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to sort() iterable method should always return a value.
   
@@ -1263,7 +1263,7 @@ invalid.js:168:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:171:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:171:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to sort() iterable method should always return a value.
   
@@ -1280,7 +1280,7 @@ invalid.js:171:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:172:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:172:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to sort() iterable method should always return a value.
   
@@ -1297,7 +1297,7 @@ invalid.js:172:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:173:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:173:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to toSorted() iterable method should always return a value.
   
@@ -1314,7 +1314,7 @@ invalid.js:173:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:176:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:176:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to toSorted() iterable method should always return a value.
   
@@ -1331,7 +1331,7 @@ invalid.js:176:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:179:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:179:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to toSorted() iterable method should always return a value.
   
@@ -1368,7 +1368,7 @@ invalid.js:179:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:188:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:188:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to toSorted() iterable method should always return a value.
   
@@ -1385,7 +1385,7 @@ invalid.js:188:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━�
 ```
 
 ```
-invalid.js:195:4 lint/suspicious/useConsistentIterableCallbackReturnValues ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:195:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to toSorted() iterable method should always return a value.
   

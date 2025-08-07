@@ -16,7 +16,7 @@ expression: settings.json
 
 # Diagnostics
 ```
-settings.json:3:5 lint/nursery/noQuickfixBiome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+settings.json:3:5 lint/suspicious/noQuickfixBiome  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The use of quickfix.biome is deprecated.
   
@@ -27,7 +27,7 @@ settings.json:3:5 lint/nursery/noQuickfixBiome  FIXABLE  ━━━━━━━�
     4 │     "source.organizeImports.biome": true,
     5 │     "source.fixAll.biome": true
   
-  i The code action quickfix.biome applies the code fix of rules and actions without being aware of each other. This might cause the emission of malformed code, especially if the code fixes are applied to the same code.
+  i The code action quickfix.biome applies the code fix of rules and actions without being aware of each other. This might cause the emission of malformed code, especially if the code fixes are applied to the same lines of code.
   
   i Safe fix: Remove the code action.
   

@@ -6,7 +6,7 @@ use biome_js_syntax::{
     JsSyntaxToken, JsTemplateExpression,
 };
 use biome_rowan::{BatchMutationExt, TextRange, declare_node_union};
-use biome_rule_options::no_useless_string_escapes::NoUselessStringEscapesOptions;
+use biome_rule_options::no_useless_escape_in_string::NoUselessEscapeInStringOptions;
 
 use crate::JsRuleAction;
 
@@ -52,9 +52,9 @@ declare_lint_rule! {
     /// <div attr="str\a"/>;
     /// ```
     ///
-    pub NoUselessStringEscapes {
+    pub NoUselessEscapeInString {
         version: "2.0.0",
-        name: "noUselessStringEscapes",
+        name: "noUselessEscapeInString",
         language: "js",
         recommended: true,
         severity: Severity::Warning,
@@ -62,11 +62,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for NoUselessStringEscapes {
+impl Rule for NoUselessEscapeInString {
     type Query = Ast<AnyJsString>;
     type State = (JsSyntaxToken, usize);
     type Signals = Option<Self::State>;
-    type Options = NoUselessStringEscapesOptions;
+    type Options = NoUselessEscapeInStringOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

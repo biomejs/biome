@@ -20,7 +20,7 @@ var s = {
 
 # Diagnostics
 ```
-invalid.js:2:7 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:7 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
@@ -40,7 +40,7 @@ invalid.js:2:7 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:2:24 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
@@ -60,7 +60,7 @@ invalid.js:2:24 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.js:3:7 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:7 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
@@ -81,7 +81,7 @@ invalid.js:3:7 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:3:13 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:13 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
@@ -102,7 +102,7 @@ invalid.js:3:13 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.js:4:10 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:10 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
@@ -128,7 +128,7 @@ invalid.js:4:10 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.js:4:30 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:30 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
@@ -149,7 +149,7 @@ invalid.js:4:30 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.js:6:13 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:13 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
@@ -170,7 +170,7 @@ invalid.js:6:13 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.js:8:26 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:26 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
@@ -191,7 +191,7 @@ invalid.js:8:26 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.js:9:29 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:29 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
@@ -212,7 +212,7 @@ invalid.js:9:29 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.js:10:31 lint/suspicious/noUselessStringEscapes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:31 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   

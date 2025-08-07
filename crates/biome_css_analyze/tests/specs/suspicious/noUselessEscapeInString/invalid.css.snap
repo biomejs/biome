@@ -14,7 +14,7 @@ expression: invalid.css
 
 # Diagnostics
 ```
-invalid.css:2:35 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:35 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
@@ -34,7 +34,7 @@ invalid.css:2:35 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.css:5:24 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   

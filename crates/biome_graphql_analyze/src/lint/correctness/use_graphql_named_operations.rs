@@ -6,7 +6,7 @@ use biome_diagnostics::Severity;
 use biome_graphql_factory::make;
 use biome_graphql_syntax::{GraphqlOperationDefinition, GraphqlOperationType};
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::use_named_graphql_operations::UseNamedGraphqlOperationsOptions;
+use biome_rule_options::use_graphql_named_operations::UseGraphqlNamedOperationsOptions;
 use biome_string_case::Case;
 
 use crate::GraphqlRuleAction;
@@ -32,9 +32,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub UseNamedOperation {
+    pub UseGraphqlNamedOperations {
         version: "2.0.0",
-        name: "useNamedOperation",
+        name: "useGraphqlNamedOperations",
         language: "graphql",
         sources: &[RuleSource::EslintGraphql("no-anonymous-operations").same()],
         recommended: true,
@@ -43,11 +43,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for UseNamedOperation {
+impl Rule for UseGraphqlNamedOperations {
     type Query = Ast<GraphqlOperationDefinition>;
     type State = GraphqlOperationType;
     type Signals = Option<Self::State>;
-    type Options = UseNamedGraphqlOperationsOptions;
+    type Options = UseGraphqlNamedOperationsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
@@ -71,7 +71,7 @@ impl Rule for UseNamedOperation {
                     "Anonymous GraphQL operations are forbidden. Make sure to name your " {operation_type.to_trimmed_string()}"."
                 },
             )
-            .note(markup! {
+                .note(markup! {
                 "Most GraphQL client libraries use the operation name for caching purposes."
             }),
         )

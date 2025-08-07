@@ -3,7 +3,7 @@ use biome_console::markup;
 use biome_css_syntax::{CssString, CssSyntaxToken};
 use biome_diagnostics::Severity;
 use biome_rowan::{BatchMutationExt, TextRange};
-use biome_rule_options::no_useless_string_escapes::NoUselessStringEscapesOptions;
+use biome_rule_options::no_useless_escape_in_string::NoUselessEscapeInStringOptions;
 
 use crate::CssRuleAction;
 
@@ -57,7 +57,7 @@ impl Rule for NoUselessEscapeInString {
     type Query = Ast<CssString>;
     type State = (CssSyntaxToken, usize);
     type Signals = Option<Self::State>;
-    type Options = NoUselessStringEscapesOptions;
+    type Options = NoUselessEscapeInStringOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

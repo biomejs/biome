@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{CssUnknownBlockAtRule, CssUnknownValueAtRule};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
-use biome_rule_options::no_unknown_at_rule::NoUnknownAtRuleOptions;
+use biome_rule_options::no_unknown_at_rules::NoUnknownAtRulesOptions;
 
 declare_lint_rule! {
     /// Disallow unknown at-rules.
@@ -39,9 +39,9 @@ declare_lint_rule! {
     ///   }
     /// }
     /// ```
-    pub NoUnknownAtRule {
+    pub NoUnknownAtRules {
         version: "2.0.0",
-        name: "noUnknownAtRule",
+        name: "noUnknownAtRules",
         language: "css",
         recommended: true,
         severity: Severity::Error,
@@ -58,11 +58,11 @@ pub struct NoUnknownAtRuleState {
     name: String,
 }
 
-impl Rule for NoUnknownAtRule {
+impl Rule for NoUnknownAtRules {
     type Query = Ast<AnyUnknownAtRule>;
     type State = NoUnknownAtRuleState;
     type Signals = Option<Self::State>;
-    type Options = NoUnknownAtRuleOptions;
+    type Options = NoUnknownAtRulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
