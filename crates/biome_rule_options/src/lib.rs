@@ -52,6 +52,7 @@ pub mod no_duplicate_at_import_rules;
 pub mod no_duplicate_case;
 pub mod no_duplicate_class_members;
 pub mod no_duplicate_custom_properties;
+pub mod no_duplicate_dependencies;
 pub mod no_duplicate_else_if;
 pub mod no_duplicate_fields;
 pub mod no_duplicate_font_names;

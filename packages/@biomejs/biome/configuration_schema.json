@@ -2854,6 +2854,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateDependenciesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoDuplicateDependenciesOptions" }
+			]
+		},
+		"NoDuplicateDependenciesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateElseIfConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4795,6 +4805,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateDependencies": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDuplicateDependenciesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveLinesPerFunction": {
 					"description": "Restrict the number of lines of code in a function.",
 					"anyOf": [
@@ -6547,6 +6564,21 @@
 					"allOf": [
 						{ "$ref": "#/definitions/NoDuplicateCustomPropertiesOptions" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoDuplicateDependenciesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoDuplicateDependenciesOptions" }]
 				}
 			},
 			"additionalProperties": false

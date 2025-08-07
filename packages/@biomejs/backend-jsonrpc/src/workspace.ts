@@ -1568,6 +1568,10 @@ export interface Nursery {
 	 */
 	noDestructuredProps?: RuleConfiguration_for_NoDestructuredPropsOptions;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
+	/**
 	 * Restrict the number of lines of code in a function.
 	 */
 	noExcessiveLinesPerFunction?: RuleConfiguration_for_NoExcessiveLinesPerFunctionOptions;
@@ -2896,6 +2900,9 @@ export type RuleConfiguration_for_NoConstantBinaryExpressionOptions =
 export type RuleConfiguration_for_NoDestructuredPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDestructuredPropsOptions;
+export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
 export type RuleConfiguration_for_NoExcessiveLinesPerFunctionOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoExcessiveLinesPerFunctionOptions;
@@ -5112,6 +5119,16 @@ export interface RuleWithOptions_for_NoDestructuredPropsOptions {
 	 * Rule's options
 	 */
 	options: NoDestructuredPropsOptions;
+}
+export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDuplicateDependenciesOptions;
 }
 export interface RuleWithOptions_for_NoExcessiveLinesPerFunctionOptions {
 	/**
@@ -7843,6 +7860,7 @@ export interface NoBitwiseOperatorsOptions {
 }
 export interface NoConstantBinaryExpressionOptions {}
 export interface NoDestructuredPropsOptions {}
+export interface NoDuplicateDependenciesOptions {}
 export interface NoExcessiveLinesPerFunctionOptions {
 	/**
 	 * The maximum number of lines allowed in a function body.
@@ -8556,6 +8574,7 @@ export type Category =
 	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
+	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noExcessiveLinesPerFunction"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noGlobalDirnameFilename"
