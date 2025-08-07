@@ -7329,7 +7329,7 @@ impl CssVariantAtRule {
     pub fn name(&self) -> SyntaxResult<CssIdentifier> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -7345,7 +7345,7 @@ impl Serialize for CssVariantAtRule {
 pub struct CssVariantAtRuleFields {
     pub variant_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssIdentifier>,
-    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+    pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssViewTransitionAtRule {

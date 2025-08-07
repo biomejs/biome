@@ -1,42 +1,14 @@
-/* @variant directive */
 @variant dark {
-  background: black;
-  color: white;
+	background: black;
+	color: white;
 }
 
-@variant mobile {
-  @media (max-width: 768px) {
-    display: block;
-    width: 100%;
-  }
-}
+.my-element {
+	background: white;
 
-/* @variant with simple declarations */
-@variant hover {
-  opacity: 0.8;
-  transform: scale(1.05);
-}
-
-/* @variant with nested at-rules */
-@variant tablet {
-  @media (min-width: 768px) and (max-width: 1024px) {
-    padding: 1rem;
-  }
-}
-
-/* @variant with multiple media queries */
-@variant print {
-  @media print {
-    color: black;
-    background: white;
-  }
-}
-
-/* Empty @variant */
-@variant empty-variant {
-}
-
-/* @variant with kebab-case name */
-@variant high-contrast {
-  filter: contrast(150%);
+	@variant dark {
+		@variant hover {
+			background: black;
+		}
+	}
 }

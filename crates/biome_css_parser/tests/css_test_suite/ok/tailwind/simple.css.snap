@@ -162,9 +162,9 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@209..214 "dark" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@214..215 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -426,9 +426,9 @@ CssRoot {
         0: VARIANT_KW@201..209 "variant" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@209..214
           0: IDENT@209..214 "dark" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@214..254
+        2: CSS_DECLARATION_OR_RULE_BLOCK@214..254
           0: L_CURLY@214..215 "{" [] []
-          1: CSS_DECLARATION_LIST@215..252
+          1: CSS_DECLARATION_OR_RULE_LIST@215..252
             0: CSS_DECLARATION_WITH_SEMICOLON@215..236
               0: CSS_DECLARATION@215..235
                 0: CSS_GENERIC_PROPERTY@215..235

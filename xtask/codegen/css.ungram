@@ -1928,7 +1928,7 @@ CssUtilityAtRule =
 CssVariantAtRule =
     'variant'
     name: CssIdentifier
-    block: AnyCssDeclarationBlock
+    block: AnyCssDeclarationOrRuleBlock
 
 // Tailwind 4.0 @custom-variant directive
 // @custom-variant theme-midnight (&:where([data-theme="midnight"] *));

@@ -2575,7 +2575,7 @@ pub fn css_value_at_rule_named_import_specifier(
 pub fn css_variant_at_rule(
     variant_token: SyntaxToken,
     name: CssIdentifier,
-    block: AnyCssDeclarationBlock,
+    block: AnyCssDeclarationOrRuleBlock,
 ) -> CssVariantAtRule {
     CssVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_VARIANT_AT_RULE,

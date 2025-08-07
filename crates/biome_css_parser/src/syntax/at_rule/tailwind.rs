@@ -1,5 +1,5 @@
 use crate::parser::CssParser;
-use crate::syntax::block::parse_declaration_block;
+use crate::syntax::block::{parse_declaration_block, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{expected_identifier, expected_string};
 use crate::syntax::{is_at_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -59,7 +59,7 @@ pub(crate) fn parse_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     parse_regular_identifier(p).ok();
 
-    parse_declaration_block(p);
+    parse_declaration_or_rule_list_block(p);
 
     Present(m.complete(p, CSS_VARIANT_AT_RULE))
 }
