@@ -94,7 +94,7 @@ declare_lint_rule! {
     pub NoVueDataObjectDeclaration {
         version: "next",
         name: "noVueDataObjectDeclaration",
-        language: "vue",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
         domains: &[RuleDomain::Vue],
