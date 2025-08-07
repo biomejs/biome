@@ -1,9 +1,9 @@
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
-    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportLike,
-    AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsIdentifierBinding, AnyTsModuleName,
-    JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
-    JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
+    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
+    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsIdentifierBinding,
+    AnyTsModuleName, JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList,
+    JsIdentifierBinding, JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::Utf8Path;
 
 use crate::{
-    JsImport, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
+    JsImport, JsImportPhase, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
     js_module_info::collector::JsCollectedExport, module_graph::ModuleGraphFsProxy,
 };
 
@@ -65,11 +65,39 @@ impl<'a> JsModuleVisitor<'a> {
         let resolved_path = self.resolved_path_from_specifier(specifier.text());
 
         match node {
-            AnyJsImportLike::JsModuleSource(_) => {
-                collector.register_static_import_path(specifier, resolved_path);
+            AnyJsImportLike::JsModuleSource(source) => {
+                // TODO: support defer or source imports
+                let phase = if let Some(clause) = source.parent::<AnyJsImportClause>() {
+                    match clause {
+                        AnyJsImportClause::JsImportDefaultClause(clause)
+                            if clause.type_token().is_some() =>
+                        {
+                            JsImportPhase::Type
+                        }
+                        AnyJsImportClause::JsImportNamedClause(clause)
+                            if clause.type_token().is_some() =>
+                        {
+                            JsImportPhase::Type
+                        }
+                        AnyJsImportClause::JsImportNamespaceClause(clause)
+                            if clause.type_token().is_some() =>
+                        {
+                            JsImportPhase::Type
+                        }
+                        _ => JsImportPhase::Default,
+                    }
+                } else {
+                    JsImportPhase::Default
+                };
+
+                collector.register_static_import_path(specifier, resolved_path, phase);
             }
             AnyJsImportLike::JsCallExpression(_) | AnyJsImportLike::JsImportCallExpression(_) => {
-                collector.register_dynamic_import_path(specifier, resolved_path);
+                collector.register_dynamic_import_path(
+                    specifier,
+                    resolved_path,
+                    JsImportPhase::Default, // TODO: support defer or source imports
+                );
             }
         }
     }
