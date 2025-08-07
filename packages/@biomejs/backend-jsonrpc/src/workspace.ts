@@ -7850,7 +7850,12 @@ export interface NoExcessiveLinesPerFunctionOptions {
 export interface NoFloatingPromisesOptions {}
 export interface NoGlobalDirnameFilenameOptions {}
 export interface NoImplicitCoercionOptions {}
-export interface NoImportCyclesOptions {}
+export interface NoImportCyclesOptions {
+	/**
+	 * Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
+	 */
+	ignoreTypes?: boolean;
+}
 export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
 export interface NoMisusedPromisesOptions {}

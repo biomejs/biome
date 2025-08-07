@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
-use biome_module_graph::{JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
+use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
 use biome_resolver::ResolveError;
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
 use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
@@ -99,7 +99,8 @@ impl Rule for NoUnresolvedImports {
         };
 
         let node = ctx.query();
-        let Some(resolved_path) = module_info.get_import_path_by_js_node(node) else {
+        let Some(JsImportPath { resolved_path, .. }) = module_info.get_import_path_by_js_node(node)
+        else {
             return Vec::new();
         };
 

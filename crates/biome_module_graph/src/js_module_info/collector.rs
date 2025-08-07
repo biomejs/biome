@@ -19,16 +19,16 @@ use indexmap::IndexMap;
 use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
+use super::{
+    Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoInner,
+    JsOwnExport, JsReexport, ResolvedPath, binding::JsBindingData, scope::JsScopeData,
+};
 use crate::js_module_info::{
     binding::{JsBindingReference, JsBindingReferenceKind, JsDeclarationKind},
     scope::TsBindingReference,
     scope_id_for_range,
 };
-
-use super::{
-    Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoInner,
-    JsOwnExport, JsReexport, ResolvedPath, binding::JsBindingData, scope::JsScopeData,
-};
+use crate::{JsImportPath, JsImportPhase};
 
 /// Responsible for collecting all the information from which to build the
 /// [`JsModuleInfo`].
@@ -74,11 +74,11 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Map with all static import paths, from the source specifier to the
     /// resolved path.
-    static_import_paths: IndexMap<Text, ResolvedPath>,
+    static_import_paths: IndexMap<Text, JsImportPath>,
 
     /// Map with all dynamic import paths, from the import source to the
     /// resolved path.
-    dynamic_import_paths: IndexMap<Text, ResolvedPath>,
+    dynamic_import_paths: IndexMap<Text, JsImportPath>,
 
     /// All collected exports.
     ///
@@ -194,7 +194,8 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let resolved_path = self.static_import_paths.get(source.text())?;
+                let JsImportPath { resolved_path, .. } =
+                    self.static_import_paths.get(source.text())?;
 
                 let default_specifier = node.default_specifier().ok()?;
                 let local_name = default_specifier.local_name().ok()?;
@@ -249,7 +250,8 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let resolved_path = self.static_import_paths.get(source.text())?;
+                let JsImportPath { resolved_path, .. } =
+                    self.static_import_paths.get(source.text())?;
 
                 let local_name = node.default_specifier().ok()?.local_name().ok()?;
                 let local_name = local_name.as_js_identifier_binding()?;
@@ -267,7 +269,8 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let resolved_path = self.static_import_paths.get(source.text())?;
+                let JsImportPath { resolved_path, .. } =
+                    self.static_import_paths.get(source.text())?;
 
                 for specifier in node.named_specifiers().ok()?.specifiers() {
                     let specifier = specifier.ok()?;
@@ -292,7 +295,8 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let resolved_path = self.static_import_paths.get(source.text())?;
+                let JsImportPath { resolved_path, .. } =
+                    self.static_import_paths.get(source.text())?;
 
                 let specifier = node.namespace_specifier().ok()?;
                 let local_name = specifier.local_name().ok()?;
@@ -335,18 +339,30 @@ impl JsModuleInfoCollector {
         &mut self,
         specifier: TokenText,
         resolved_path: ResolvedPath,
+        phase: JsImportPhase,
     ) {
-        self.static_import_paths
-            .insert(specifier.into(), resolved_path);
+        self.static_import_paths.insert(
+            specifier.into(),
+            JsImportPath {
+                resolved_path,
+                phase,
+            },
+        );
     }
 
     pub fn register_dynamic_import_path(
         &mut self,
         specifier: TokenText,
         resolved_path: ResolvedPath,
+        phase: JsImportPhase,
     ) {
-        self.dynamic_import_paths
-            .insert(specifier.into(), resolved_path);
+        self.dynamic_import_paths.insert(
+            specifier.into(),
+            JsImportPath {
+                resolved_path,
+                phase,
+            },
+        );
     }
 
     fn push_event(&mut self, event: SemanticEvent) {
