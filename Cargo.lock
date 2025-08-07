@@ -832,6 +832,7 @@ dependencies = [
  "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
+ "biome_service",
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",

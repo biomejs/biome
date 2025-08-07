@@ -1,30 +1,26 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 146
 expression: invalid-define-props-object.vue
 ---
 # Input
 ```ts
-<script setup>
 defineProps({
     $el: String
 });
-</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-define-props-object.vue:3:5 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-define-props-object.vue:2:5 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Key $el is reserved in Vue.
   
-    1 │ <script setup>
-    2 │ defineProps({
-  > 3 │     $el: String
+    1 │ defineProps({
+  > 2 │     $el: String
       │     ^^^
-    4 │ });
-    5 │ </script>
+    3 │ });
+    4 │ 
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   

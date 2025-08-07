@@ -53,6 +53,7 @@ JsModule {
             import_token: IMPORT_KW@49..57 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportDefaultClause {
                 type_token: missing (optional),
+                phase_token: missing (optional),
                 default_specifier: JsDefaultImportSpecifier {
                     local_name: JsIdentifierBinding {
                         name_token: IDENT@57..63 "defer" [] [Whitespace(" ")],
@@ -121,6 +122,7 @@ JsModule {
             import_token: IMPORT_KW@151..159 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportDefaultClause {
                 type_token: missing (optional),
+                phase_token: missing (optional),
                 default_specifier: JsDefaultImportSpecifier {
                     local_name: JsIdentifierBinding {
                         name_token: IDENT@159..165 "defer" [] [Whitespace(" ")],
@@ -207,12 +209,13 @@ JsModule {
       0: IMPORT_KW@49..57 "import" [Newline("\n")] [Whitespace(" ")]
       1: JS_IMPORT_DEFAULT_CLAUSE@57..63
         0: (empty)
-        1: JS_DEFAULT_IMPORT_SPECIFIER@57..63
+        1: (empty)
+        2: JS_DEFAULT_IMPORT_SPECIFIER@57..63
           0: JS_IDENTIFIER_BINDING@57..63
             0: IDENT@57..63 "defer" [] [Whitespace(" ")]
-        2: (empty)
         3: (empty)
         4: (empty)
+        5: (empty)
       2: (empty)
     2: JS_EXPRESSION_STATEMENT@63..77
       0: JS_IDENTIFIER_EXPRESSION@63..77
@@ -250,12 +253,13 @@ JsModule {
       0: IMPORT_KW@151..159 "import" [Newline("\n")] [Whitespace(" ")]
       1: JS_IMPORT_DEFAULT_CLAUSE@159..165
         0: (empty)
-        1: JS_DEFAULT_IMPORT_SPECIFIER@159..165
+        1: (empty)
+        2: JS_DEFAULT_IMPORT_SPECIFIER@159..165
           0: JS_IDENTIFIER_BINDING@159..165
             0: IDENT@159..165 "defer" [] [Whitespace(" ")]
-        2: (empty)
         3: (empty)
         4: (empty)
+        5: (empty)
       2: (empty)
     7: JS_EXPRESSION_STATEMENT@165..175
       0: JS_BINARY_EXPRESSION@165..175
