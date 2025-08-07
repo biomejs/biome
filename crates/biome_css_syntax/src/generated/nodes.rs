@@ -6430,6 +6430,56 @@ pub struct CssTailwindSpacingFunctionFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssTailwindValueFunction {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssTailwindValueFunction {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssTailwindValueFunctionFields {
+        CssTailwindValueFunctionFields {
+            __value_token: self.__value_token(),
+            l_paren_token: self.l_paren_token(),
+            value: self.value(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn __value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> Option<AnyCssExpression> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssTailwindValueFunction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssTailwindValueFunctionFields {
+    pub __value_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub value: Option<AnyCssExpression>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssThemeAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -8183,6 +8233,7 @@ pub enum AnyCssFunction {
     CssFunction(CssFunction),
     CssTailwindAlphaFunction(CssTailwindAlphaFunction),
     CssTailwindSpacingFunction(CssTailwindSpacingFunction),
+    CssTailwindValueFunction(CssTailwindValueFunction),
     CssUrlFunction(CssUrlFunction),
 }
 impl AnyCssFunction {
@@ -8201,6 +8252,12 @@ impl AnyCssFunction {
     pub fn as_css_tailwind_spacing_function(&self) -> Option<&CssTailwindSpacingFunction> {
         match &self {
             Self::CssTailwindSpacingFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_tailwind_value_function(&self) -> Option<&CssTailwindValueFunction> {
+        match &self {
+            Self::CssTailwindValueFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -17337,6 +17394,65 @@ impl From<CssTailwindSpacingFunction> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssTailwindValueFunction {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_TAILWIND_VALUE_FUNCTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_TAILWIND_VALUE_FUNCTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssTailwindValueFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssTailwindValueFunction")
+                .field(
+                    "__value_token",
+                    &support::DebugSyntaxResult(self.__value_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("value", &support::DebugOptionalElement(self.value()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssTailwindValueFunction").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssTailwindValueFunction> for SyntaxNode {
+    fn from(n: CssTailwindValueFunction) -> Self {
+        n.syntax
+    }
+}
+impl From<CssTailwindValueFunction> for SyntaxElement {
+    fn from(n: CssTailwindValueFunction) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssThemeAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -20775,6 +20891,11 @@ impl From<CssTailwindSpacingFunction> for AnyCssFunction {
         Self::CssTailwindSpacingFunction(node)
     }
 }
+impl From<CssTailwindValueFunction> for AnyCssFunction {
+    fn from(node: CssTailwindValueFunction) -> Self {
+        Self::CssTailwindValueFunction(node)
+    }
+}
 impl From<CssUrlFunction> for AnyCssFunction {
     fn from(node: CssUrlFunction) -> Self {
         Self::CssUrlFunction(node)
@@ -20785,6 +20906,7 @@ impl AstNode for AnyCssFunction {
     const KIND_SET: SyntaxKindSet<Language> = CssFunction::KIND_SET
         .union(CssTailwindAlphaFunction::KIND_SET)
         .union(CssTailwindSpacingFunction::KIND_SET)
+        .union(CssTailwindValueFunction::KIND_SET)
         .union(CssUrlFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
@@ -20792,6 +20914,7 @@ impl AstNode for AnyCssFunction {
             CSS_FUNCTION
                 | CSS_TAILWIND_ALPHA_FUNCTION
                 | CSS_TAILWIND_SPACING_FUNCTION
+                | CSS_TAILWIND_VALUE_FUNCTION
                 | CSS_URL_FUNCTION
         )
     }
@@ -20804,6 +20927,9 @@ impl AstNode for AnyCssFunction {
             CSS_TAILWIND_SPACING_FUNCTION => {
                 Self::CssTailwindSpacingFunction(CssTailwindSpacingFunction { syntax })
             }
+            CSS_TAILWIND_VALUE_FUNCTION => {
+                Self::CssTailwindValueFunction(CssTailwindValueFunction { syntax })
+            }
             CSS_URL_FUNCTION => Self::CssUrlFunction(CssUrlFunction { syntax }),
             _ => return None,
         };
@@ -20814,6 +20940,7 @@ impl AstNode for AnyCssFunction {
             Self::CssFunction(it) => &it.syntax,
             Self::CssTailwindAlphaFunction(it) => &it.syntax,
             Self::CssTailwindSpacingFunction(it) => &it.syntax,
+            Self::CssTailwindValueFunction(it) => &it.syntax,
             Self::CssUrlFunction(it) => &it.syntax,
         }
     }
@@ -20822,6 +20949,7 @@ impl AstNode for AnyCssFunction {
             Self::CssFunction(it) => it.syntax,
             Self::CssTailwindAlphaFunction(it) => it.syntax,
             Self::CssTailwindSpacingFunction(it) => it.syntax,
+            Self::CssTailwindValueFunction(it) => it.syntax,
             Self::CssUrlFunction(it) => it.syntax,
         }
     }
@@ -20832,6 +20960,7 @@ impl std::fmt::Debug for AnyCssFunction {
             Self::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssTailwindAlphaFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssTailwindSpacingFunction(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssTailwindValueFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -20842,6 +20971,7 @@ impl From<AnyCssFunction> for SyntaxNode {
             AnyCssFunction::CssFunction(it) => it.into(),
             AnyCssFunction::CssTailwindAlphaFunction(it) => it.into(),
             AnyCssFunction::CssTailwindSpacingFunction(it) => it.into(),
+            AnyCssFunction::CssTailwindValueFunction(it) => it.into(),
             AnyCssFunction::CssUrlFunction(it) => it.into(),
         }
     }
@@ -25963,6 +26093,11 @@ impl std::fmt::Display for CssTailwindAlphaFunction {
     }
 }
 impl std::fmt::Display for CssTailwindSpacingFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssTailwindValueFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

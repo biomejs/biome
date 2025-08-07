@@ -658,6 +658,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssTailwindSpacingFunction::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_TAILWIND_VALUE_FUNCTION => {
+                    let $pattern = unsafe { $crate::CssTailwindValueFunction::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_THEME_AT_RULE => {
                     let $pattern = unsafe { $crate::CssThemeAtRule::new_unchecked(node) };
                     $body

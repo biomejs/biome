@@ -11,6 +11,7 @@ impl FormatRule<AnyCssFunction> for FormatAnyCssFunction {
             AnyCssFunction::CssFunction(node) => node.format().fmt(f),
             AnyCssFunction::CssTailwindAlphaFunction(node) => node.format().fmt(f),
             AnyCssFunction::CssTailwindSpacingFunction(node) => node.format().fmt(f),
+            AnyCssFunction::CssTailwindValueFunction(node) => node.format().fmt(f),
             AnyCssFunction::CssUrlFunction(node) => node.format().fmt(f),
         }
     }

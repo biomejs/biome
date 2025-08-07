@@ -5139,6 +5139,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssTailwindSpacingFuncti
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: tailwind_spacing_function :: FormatCssTailwindSpacingFunction :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::CssTailwindValueFunction>
+    for crate::css::auxiliary::tailwind_value_function::FormatCssTailwindValueFunction
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssTailwindValueFunction,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssTailwindValueFunction>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssTailwindValueFunction {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssTailwindValueFunction,
+        crate::css::auxiliary::tailwind_value_function::FormatCssTailwindValueFunction,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::tailwind_value_function::FormatCssTailwindValueFunction::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssTailwindValueFunction {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssTailwindValueFunction,
+        crate::css::auxiliary::tailwind_value_function::FormatCssTailwindValueFunction,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::tailwind_value_function::FormatCssTailwindValueFunction::default(
+            ),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssThemeAtRule>
     for crate::css::statements::theme_at_rule::FormatCssThemeAtRule
 {

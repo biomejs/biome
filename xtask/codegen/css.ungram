@@ -1866,7 +1866,7 @@ CssMetavariable = value: 'grit_metavariable'
 
 // Tailwind CSS 4.0 --alpha() function
 // color: rgb(255 0 0 / --alpha(0.5));
-//                     ^^^^^^^^^^^^^^
+//                      ^^^^^^^^^^^^
 CssTailwindAlphaFunction =
 	'--alpha'
 	'('
@@ -1891,6 +1891,24 @@ CssTailwindValueFunction =
 	'('
 	value: AnyCssExpression?
 	')'
+
+// AnyCssTailwindCustomUtilityName =
+//   CssIdentifier
+//   | CssTailwindUtilityIdentifierWithParam
+
+// // @utility tab-* {
+// //          ^^^^^
+// CssTailwindUtilityIdentifierWithParam =
+// 	identifier: CssIdentifier
+// 	'-'
+// 	'*' // this denotes the parameter
+//
+// // --value(--tab-size-*)
+// //         ^^^^^^^^^^^^
+// CssTailwindDashedIdentifierWithParam =
+// 	identifier: CssDashedIdentifier
+// 	'-'
+// 	'*'
 
 // Tailwind 4.0 @theme directive
 // @theme { --color-primary: #3b82f6; }

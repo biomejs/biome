@@ -267,7 +267,7 @@ pub(crate) fn is_at_tailwind_function(p: &mut CssParser) -> bool {
         return false;
     }
 
-    p.at(T![__alpha]) || p.at(T![__spacing])
+    p.at(T![__alpha]) || p.at(T![__spacing]) || p.at(T![__value])
 }
 
 /// Parses Tailwind CSS 4.0 functions
@@ -280,6 +280,8 @@ pub(crate) fn parse_tailwind_function(p: &mut CssParser) -> ParsedSyntax {
         parse_alpha_function(p)
     } else if p.at(T![__spacing]) {
         parse_spacing_function(p)
+    } else if p.at(T![__value]) {
+        parse_value_function(p)
     } else {
         Absent
     }
@@ -313,4 +315,19 @@ fn parse_spacing_function(p: &mut CssParser) -> ParsedSyntax {
 
     p.expect(T![')']);
     Present(m.complete(p, CSS_TAILWIND_SPACING_FUNCTION))
+}
+
+fn parse_value_function(p: &mut CssParser) -> ParsedSyntax {
+    // --value(4) or --value(var(--value-base))
+    let m = p.start();
+    p.bump(T![__value]);
+    p.expect(T!['(']);
+
+    // Parse optional expression parameter
+    if !p.at(T![')']) {
+        parse_any_expression(p).ok();
+    }
+
+    p.expect(T![')']);
+    Present(m.complete(p, CSS_TAILWIND_VALUE_FUNCTION))
 }

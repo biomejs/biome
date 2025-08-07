@@ -78,6 +78,7 @@ pub(crate) mod supports_not_condition;
 pub(crate) mod supports_or_condition;
 pub(crate) mod tailwind_alpha_function;
 pub(crate) mod tailwind_spacing_function;
+pub(crate) mod tailwind_value_function;
 pub(crate) mod unicode_codepoint;
 pub(crate) mod unicode_range;
 pub(crate) mod unicode_range_interval;

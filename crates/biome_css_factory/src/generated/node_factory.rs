@@ -2261,6 +2261,42 @@ impl CssTailwindSpacingFunctionBuilder {
         ))
     }
 }
+pub fn css_tailwind_value_function(
+    __value_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+) -> CssTailwindValueFunctionBuilder {
+    CssTailwindValueFunctionBuilder {
+        __value_token,
+        l_paren_token,
+        r_paren_token,
+        value: None,
+    }
+}
+pub struct CssTailwindValueFunctionBuilder {
+    __value_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    value: Option<AnyCssExpression>,
+}
+impl CssTailwindValueFunctionBuilder {
+    pub fn with_value(mut self, value: AnyCssExpression) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> CssTailwindValueFunction {
+        CssTailwindValueFunction::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_TAILWIND_VALUE_FUNCTION,
+            [
+                Some(SyntaxElement::Token(self.__value_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
 pub fn css_theme_at_rule(
     theme_token: SyntaxToken,
     block: AnyCssDeclarationBlock,

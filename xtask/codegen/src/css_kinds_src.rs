@@ -117,6 +117,19 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "ridge",
         "inset",
         "outset",
+        // Tailwind CSS 4.0 keywords
+        "theme",
+        "utility",
+        "variant",
+        "custom-variant",
+        "apply",
+        "source",
+        "reference",
+        "config",
+        "plugin",
+        "--alpha",
+        "--spacing",
+        "--value",
         // HERE: Add new regular keywords _above_ here. Be sure to also add them
         // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords
@@ -244,19 +257,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "composes",
         "position-try",
         "view-transition",
-        // Tailwind CSS 4.0 keywords
-        "theme",
-        "utility",
-        "variant",
-        "custom-variant",
-        "apply",
-        "source",
-        "reference",
-        "config",
-        "plugin",
-        "--alpha",
-        "--spacing",
-        "--value",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"

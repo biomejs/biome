@@ -1,0 +1,3 @@
+@utility tab-* {
+	tab-size: --value(--tab-size-*);
+}

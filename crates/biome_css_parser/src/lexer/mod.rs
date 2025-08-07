@@ -935,6 +935,7 @@ impl<'src> CssLexer<'src> {
             b"plugin" => PLUGIN_KW,
             b"--alpha" => _ALPHA_KW,
             b"--spacing" => _SPACING_KW,
+            b"--value" => _VALUE_KW,
             _ => IDENT,
         }
     }
@@ -1051,6 +1052,10 @@ impl<'src> CssLexer<'src> {
                         return None;
                     }
                 }
+            }
+            MUL if self.options.is_tailwind_directives_enabled() => {
+                self.advance(1);
+                current as char
             }
             _ => return None,
         };
