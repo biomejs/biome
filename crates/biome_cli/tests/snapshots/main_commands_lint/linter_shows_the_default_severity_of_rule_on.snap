@@ -74,7 +74,6 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noSubstr
   - noUnusedTemplateLiteral
   - noUselessElse
-  - noUselessUndefined
   - noValueAtRule
   - noYodaExpression
   - useArrayLiterals

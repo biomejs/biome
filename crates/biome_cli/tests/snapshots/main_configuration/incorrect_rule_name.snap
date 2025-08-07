@@ -101,12 +101,12 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noVoidElementsWithChildren
   - noVoidTypeReturn
   - useExhaustiveDependencies
+  - useGraphqlNamedOperations
   - useHookAtTopLevel
   - useImportExtensions
   - useIsNan
   - useJsonImportAttributes
   - useJsxKeyInIterable
-  - useNamedGraphqlOperations
   - useParseIntRadix
   - useSingleJsDocAsterisk
   - useUniqueElementIds
@@ -156,7 +156,6 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noSubstr
   - noUnusedTemplateLiteral
   - noUselessElse
-  - noUselessUndefined
   - noValueAtRule
   - noYodaExpression
   - useArrayLiterals
