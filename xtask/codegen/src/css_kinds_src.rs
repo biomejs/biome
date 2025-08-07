@@ -256,6 +256,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "plugin",
         "--alpha",
         "--spacing",
+        "--value",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -511,6 +512,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_PLUGIN_AT_RULE",
         "CSS_TAILWIND_ALPHA_FUNCTION",
         "CSS_TAILWIND_SPACING_FUNCTION",
+        "CSS_TAILWIND_VALUE_FUNCTION",
         "CSS_UNKNOWN_BLOCK_AT_RULE",
         "CSS_UNKNOWN_VALUE_AT_RULE",
         "CSS_UNKNOWN_AT_RULE_COMPONENT_LIST",

@@ -1731,6 +1731,7 @@ AnyCssFunction =
 	| CssUrlFunction
 	| CssTailwindAlphaFunction
 	| CssTailwindSpacingFunction
+	| CssTailwindValueFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -1767,24 +1768,6 @@ AnyCssUrlModifier =
 AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
-
-// Tailwind CSS 4.0 --alpha() function
-// color: rgb(255 0 0 / --alpha(0.5));
-//                     ^^^^^^^^^^^^^^
-CssTailwindAlphaFunction =
-	'--alpha'
-	'('
-	value: AnyCssExpression?
-	')'
-
-// Tailwind CSS 4.0 --spacing() function
-// margin: --spacing(4);
-//         ^^^^^^^^^^^^
-CssTailwindSpacingFunction =
-	'--spacing'
-	'('
-	value: AnyCssExpression?
-	')'
 
 CssParameterList = CssParameter (',' CssParameter)* ','?
 
@@ -1880,6 +1863,34 @@ CssMetavariable = value: 'grit_metavariable'
 
 
 // Tailwind
+
+// Tailwind CSS 4.0 --alpha() function
+// color: rgb(255 0 0 / --alpha(0.5));
+//                     ^^^^^^^^^^^^^^
+CssTailwindAlphaFunction =
+	'--alpha'
+	'('
+	value: AnyCssExpression?
+	')'
+
+// Tailwind CSS 4.0 --spacing() function
+// margin: --spacing(4);
+//         ^^^^^^^^^^^^
+CssTailwindSpacingFunction =
+	'--spacing'
+	'('
+	value: AnyCssExpression?
+	')'
+
+// @utility tab-* {
+//   tab-size: --value(--tab-size-*);
+//             ^^^^^^^^^^^^^^^^^^^^^
+// }
+CssTailwindValueFunction =
+	'--value'
+	'('
+	value: AnyCssExpression?
+	')'
 
 // Tailwind 4.0 @theme directive
 // @theme { --color-primary: #3b82f6; }
