@@ -14,9 +14,9 @@ use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
 use biome_module_graph::{
-    ImportSymbol, JsImport, JsReexport, ModuleGraph, ModuleResolver, ResolvedPath,
+    ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase, JsReexport, ModuleGraph,
+    ModuleResolver, ResolvedPath,
 };
-use biome_module_graph::{JsExport, JsImportPath, JsImportPhase};
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
