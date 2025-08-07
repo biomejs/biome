@@ -4806,7 +4806,7 @@
 					]
 				},
 				"noDuplicateDependencies": {
-					"description": "Succinct description of the rule.",
+					"description": "Checks a dependency isn't specified more than once (i.e. in dependencies and devDependencies)",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDuplicateDependenciesConfiguration" },
 						{ "type": "null" }

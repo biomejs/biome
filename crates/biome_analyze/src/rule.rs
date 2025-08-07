@@ -207,7 +207,9 @@ impl std::fmt::Display for RuleSource {
             Self::EslintVitest(_) => write!(f, "@vitest/eslint-plugin"),
             Self::EslintVueJs(_) => write!(f, "eslint-plugin-vue"),
             Self::EslintPackageJson(_) => write!(f, "eslint-plugin-package-json"),
-            Self::EslintPackageJsonDependencies(_) => write!(f, "eslint-plugin-package-json-dependencies"),
+            Self::EslintPackageJsonDependencies(_) => {
+                write!(f, "eslint-plugin-package-json-dependencies")
+            }
         }
     }
 }
@@ -326,7 +328,9 @@ impl RuleSource {
             Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
             Self::EslintVueJs(rule_name) => format!("vue/{rule_name}"),
             Self::EslintPackageJson(rule_name) => format!("package-json/{rule_name}"),
-            Self::EslintPackageJsonDependencies(rule_name) => format!("package-json-dependencies/{rule_name}"),
+            Self::EslintPackageJsonDependencies(rule_name) => {
+                format!("package-json-dependencies/{rule_name}")
+            }
         }
     }
 

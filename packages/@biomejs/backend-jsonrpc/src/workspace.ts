@@ -1568,7 +1568,7 @@ export interface Nursery {
 	 */
 	noDestructuredProps?: RuleConfiguration_for_NoDestructuredPropsOptions;
 	/**
-	 * Succinct description of the rule.
+	 * Checks a dependency isn't specified more than once (i.e. in dependencies and devDependencies)
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
 	/**
