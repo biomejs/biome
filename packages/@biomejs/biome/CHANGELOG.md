@@ -1,5 +1,210 @@
 # @biomejs/biome
 
+## 2.1.4
+
+### Patch Changes
+
+- [#7121](https://github.com/biomejs/biome/pull/7121) [`b9642ab`](https://github.com/biomejs/biome/commit/b9642abc6d05135180f4243df30524cf40ba12df) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#7111](https://github.com/biomejs/biome/issues/7111): Imported symbols using aliases are now correctly recognised.
+
+- [#7103](https://github.com/biomejs/biome/pull/7103) [`80515ec`](https://github.com/biomejs/biome/commit/80515ecad8cc272feeae4c17762d3b150acd88e7) Thanks [@omasakun](https://github.com/omasakun)! - Fixed [#6933](https://github.com/biomejs/biome/issues/6933) and [#6994](https://github.com/biomejs/biome/issues/6994).
+
+  When the values of private member assignment expressions, increment expressions, etc. are used, those private members are no longer marked as unused.
+
+- [#6887](https://github.com/biomejs/biome/pull/6887) [`0cc38f5`](https://github.com/biomejs/biome/commit/0cc38f59cd9ddf0fdcd12d6f8cb3642743cc4406) Thanks [@ptkagori](https://github.com/ptkagori)! - Added the [`noQwikUseVisibleTask`](https://biomejs.dev/linter/rules/no-qwik-use-visible-task) rule to Qwik.
+
+  This rule is intended for use in Qwik applications to warn about the use of `useVisibleTask$()` functions which require careful consideration before use.
+
+  **Invalid:**
+
+  ```js
+  useVisibleTask$(() => {
+    console.log("Component is visible");
+  });
+  ```
+
+  **Valid:**
+
+  ```js
+  useTask$(() => {
+    console.log("Task executed");
+  });
+  ```
+
+- [#7084](https://github.com/biomejs/biome/pull/7084) [`50ca155`](https://github.com/biomejs/biome/commit/50ca1553f08348ab1e92dc7cf04013c85ff743a4) Thanks [@ematipico](https://github.com/ematipico)! - Added the new nursery rule `noUnnecessararyConditions`, which detects whenever some conditions don't
+  change during the life cycle of the program, and truthy or false, hence deemed redundant.
+
+  For example, the following snippets will trigger the rule:
+
+  ```js
+  // Always truthy literal conditions
+  if (true) {
+    console.log("always runs");
+  }
+  ```
+
+  ```ts
+  // Unnecessary condition on constrained string type
+  function foo(arg: "bar" | "baz") {
+    if (arg) {
+      // This check is unnecessary
+    }
+  }
+  ```
+
+- [#6887](https://github.com/biomejs/biome/pull/6887) [`0cc38f5`](https://github.com/biomejs/biome/commit/0cc38f59cd9ddf0fdcd12d6f8cb3642743cc4406) Thanks [@ptkagori](https://github.com/ptkagori)! - Added the [`useImageSize`](https://biomejs.dev/linter/rules/use-image-size) rule to Biome.
+
+  The `useImageSize` rule enforces the use of width and height attributes on `<img>` elements for performance reasons. This rule is intended to prevent layout shifts and improve Core Web Vitals by ensuring images have explicit dimensions.
+
+  **Invalid:**
+
+  ```jsx
+  <img src="/image.png" />
+  <img src="https://example.com/image.png" />
+  <img src="/image.png" width="200" />
+  <img src="/image.png" height="200" />
+  ```
+
+  **Valid:**
+
+  ```jsx
+  <img width="200" height="600" src="/static/images/portrait-01.webp" />
+  <img width="100" height="100" src="https://example.com/image.png" />
+  ```
+
+- [#6887](https://github.com/biomejs/biome/pull/6887) [`0cc38f5`](https://github.com/biomejs/biome/commit/0cc38f59cd9ddf0fdcd12d6f8cb3642743cc4406) Thanks [@ptkagori](https://github.com/ptkagori)! - Added the [`useAnchorHref`](https://biomejs.dev/linter/rules/use-anchor-href) rule to Biome.
+
+  The `useAnchorHref` rule enforces the presence of an `href` attribute on `<a>` elements in JSX. This rule is intended to ensure that anchor elements are always valid and accessible.
+
+  **Invalid:**
+
+  ```jsx
+  <a>Link</a>
+  ```
+
+  ```jsx
+  <a target="_blank">External</a>
+  ```
+
+  **Valid:**
+
+  ```jsx
+  <a href="/home">Home</a>
+  ```
+
+  ```jsx
+  <a href="https://example.com" target="_blank">
+    External
+  </a>
+  ```
+
+- [#7100](https://github.com/biomejs/biome/pull/7100) [`29fcb05`](https://github.com/biomejs/biome/commit/29fcb0540ed817d92a3f663132b658541706765b) Thanks [@Jayllyz](https://github.com/Jayllyz)! - Added the rule [`noNonNullAssertedOptionalChain`](https://biomejs.dev/linter/rules/no-non-null-asserted-optional-chain).
+
+  This rule prevents the use of non-null assertions (`!`) immediately after optional chaining expressions (`?.`). Optional chaining is designed to safely handle nullable values by returning `undefined` when the chain encounters `null` or `undefined`. Using a non-null assertion defeats this purpose and can lead to runtime errors.
+
+  ```ts
+  // Invalid - non-null assertion after optional chaining
+  obj?.prop!;
+  obj?.method()!;
+  obj?.[key]!;
+  obj?.prop!;
+
+  // Valid - proper optional chaining usage
+  obj?.prop;
+  obj?.method();
+  obj?.prop ?? defaultValue;
+  obj!.prop?.method();
+  ```
+
+- [#7129](https://github.com/biomejs/biome/pull/7129) [`9f4538a`](https://github.com/biomejs/biome/commit/9f4538ab8bad8a974b8e408641b1fd4770d26c79) Thanks [@drwpow](https://github.com/drwpow)! - Removed option, combobox, listbox roles from [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) suggestions
+
+- [#7106](https://github.com/biomejs/biome/pull/7106) [`236deaa`](https://github.com/biomejs/biome/commit/236deaadca077051f6e2ef01cfdbbc55cc1c3d78) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#6985](https://github.com/biomejs/biome/issues/6985): Inference of return types no longer mistakenly picks up return types of nested functions.
+
+- [#7102](https://github.com/biomejs/biome/pull/7102) [`d3118c6`](https://github.com/biomejs/biome/commit/d3118c6ac3bba0ca29251fa7fc5ba36a9e4456b0) Thanks [@omasakun](https://github.com/omasakun)! - Fixed [#7101](https://github.com/biomejs/biome/issues/7101): [`noUnusedPrivateClassMembers`](https://biomejs.dev/linter/rules/no-unused-private-class-members/) now handles members declared as part of constructor arguments:
+  1. If a class member defined in a constructor argument is only used within the constructor, it removes the `private` modifier and makes it a plain method argument.
+  1. If it is not used at all, it will prefix it with an underscore, similar to `noUnusedFunctionParameter`.
+
+- [#7104](https://github.com/biomejs/biome/pull/7104) [`5395297`](https://github.com/biomejs/biome/commit/53952972cd5786cfdcc3deda0c226d6488ef1aee) Thanks [@harxki](https://github.com/harxki)! - Reverting to prevent regressions around ref handling
+
+- [#7143](https://github.com/biomejs/biome/pull/7143) [`1a6933a`](https://github.com/biomejs/biome/commit/1a6933aaf2c5b57d70a60d607b5cab68d532eeb4) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6799](https://github.com/biomejs/biome/issues/6799): The [`noImportCycles`](https://biomejs.dev/linter/rules/no-import-cycles/) rule now ignores type-only imports if the new `ignoreTypes` option is enabled (enabled by default).
+
+  > [!WARNING]
+  > **Breaking Change**: The `noImportCycles` rule no longer detects import cycles that include one or more type-only imports by default.
+  > To keep the old behaviour, you can turn off the `ignoreTypes` option explicitly:
+  >
+  > ```json
+  > {
+  >   "linter": {
+  >     "rules": {
+  >       "nursery": {
+  >         "noImportCycles": {
+  >           "options": {
+  >             "ignoreTypes": false
+  >           }
+  >         }
+  >       }
+  >     }
+  >   }
+  > }
+  > ```
+
+- [#7099](https://github.com/biomejs/biome/pull/7099) [`6cc84cb`](https://github.com/biomejs/biome/commit/6cc84cb547480f83119d2cba5542e2d2afc65b4d) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#7062](https://github.com/biomejs/biome/issues/7062): Biome now correctly considers extended configs when determining the mode for the scanner.
+
+- [#6887](https://github.com/biomejs/biome/pull/6887) [`0cc38f5`](https://github.com/biomejs/biome/commit/0cc38f59cd9ddf0fdcd12d6f8cb3642743cc4406) Thanks [@ptkagori](https://github.com/ptkagori)! - Added the [`useQwikClasslist`](https://biomejs.dev/linter/rules/use-qwik-classlist) rule to Biome.
+
+  This rule is intended for use in Qwik applications to encourage the use of the built-in `class` prop (which accepts a string, object, or array) instead of the `classnames` utility library.
+
+  **Invalid:**
+
+  ```jsx
+  <div class={classnames({ active: true, disabled: false })} />
+  ```
+
+  **Valid:**
+
+  ```jsx
+  <div classlist={{ active: true, disabled: false }} />
+  ```
+
+- [#7019](https://github.com/biomejs/biome/pull/7019) [`57c15e6`](https://github.com/biomejs/biome/commit/57c15e6df5b6257ffb9f69d7614c3455a1f5c870) Thanks [@fireairforce](https://github.com/fireairforce)! - Added support in the JS parser for `import source`(a [stage3 proposal](https://github.com/tc39/proposal-source-phase-imports)). The syntax looks like:
+
+  ```ts
+  import source foo from "<specifier>";
+  ```
+
+- [#7053](https://github.com/biomejs/biome/pull/7053) [`655049e`](https://github.com/biomejs/biome/commit/655049e9e38f536b33fff6d7b160299f0b446908) Thanks [@jakeleventhal](https://github.com/jakeleventhal)! - Added the [`useConsistentTypeDefinitions`](https://biomejs.dev/rules/use-consistent-type-definitions) rule.
+
+  This rule enforces consistent usage of either `interface` or `type` for object type definitions in TypeScript.
+
+  The rule accepts an option to specify the preferred style:
+  - `interface` (default): Prefer using `interface` for object type definitions
+  - `type`: Prefer using `type` for object type definitions
+
+  Examples:
+
+  ```ts
+  // With default option (interface)
+  // ❌ Invalid
+  type Point = { x: number; y: number };
+
+  // ✅ Valid
+  interface Point {
+    x: number;
+    y: number;
+  }
+
+  // With option { style: "type" }
+  // ❌ Invalid
+  interface Point {
+    x: number;
+    y: number;
+  }
+
+  // ✅ Valid
+  type Point = { x: number; y: number };
+  ```
+
+  The rule will automatically fix simple cases where conversion is straightforward.
+
 ## 2.1.3
 
 ### Patch Changes
