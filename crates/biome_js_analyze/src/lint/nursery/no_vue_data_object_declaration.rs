@@ -92,9 +92,9 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueDataObjectDeclaration {
-        version: "next",
+        version: "v2.1.4",
         name: "noVueDataObjectDeclaration",
-        language: "vue",
+        language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
         domains: &[RuleDomain::Vue],
