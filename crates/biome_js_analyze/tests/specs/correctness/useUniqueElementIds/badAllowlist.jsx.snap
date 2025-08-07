@@ -12,41 +12,19 @@ function WithJsxNamespaced() {
 
 # Diagnostics
 ```
-badAllowlist.options:6:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+badAllowlist.options:8:32 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found an unknown key `useUniqueElementIds`.
+  × 'excludedComponents' does not accept values with dots.
   
-    4 │         "rules": {
-    5 │             "nursery": {
-  > 6 │                 "useUniqueElementIds": {
-      │                 ^^^^^^^^^^^^^^^^^^^^^
-    7 │                     "level": "error",
-    8 │                     "options": {
-  
-  i Known keys:
-  
-  - recommended
-  - noFloatingPromises
-  - noImportCycles
-  - noMisusedPromises
-  - noNonNullAssertedOptionalChain
-  - noQwikUseVisibleTask
-  - noSecrets
-  - noShadow
-  - noUnnecessaryConditions
-  - noUnresolvedImports
-  - noUselessEscapeInString
-  - noUselessUndefined
-  - noVueReservedKeys
-  - noVueReservedProps
-  - useAnchorHref
-  - useConsistentTypeDefinitions
-  - useExhaustiveSwitchCases
-  - useExplicitType
-  - useImageSize
-  - useQwikClasslist
-  - useReactFunctionComponents
-  - useSortedClasses
+     6 │                 "useUniqueElementIds": {
+     7 │                     "level": "error",
+   > 8 │                     "options": {
+       │                                ^
+   > 9 │                         "excludedComponents": ["Library.FormattedMessage"]
+  > 10 │                     }
+       │                     ^
+    11 │                 }
+    12 │             }
   
 
 ```
