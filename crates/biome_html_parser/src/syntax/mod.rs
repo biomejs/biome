@@ -30,10 +30,10 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
         match self {
             Self::Astro => p.options().frontmatter,
             Self::DoubleTextExpressions => {
-                p.options().text_expression == Some(crate::parser::TextExpressionKind::Double)
+                p.options().text_expression == Some(TextExpressionKind::Double)
             }
             Self::SingleTextExpressions => {
-                p.options().text_expression == Some(crate::parser::TextExpressionKind::Single)
+                p.options().text_expression == Some(TextExpressionKind::Single)
             }
         }
     }
@@ -205,7 +205,6 @@ impl ParseNodeList for ElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        dbg!(p.cur(), p.cur_text());
         match p.cur() {
             T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
