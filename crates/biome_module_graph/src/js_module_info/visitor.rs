@@ -444,6 +444,7 @@ impl<'a> JsModuleVisitor<'a> {
             condition_names: &["types", "import", "default"],
             default_files: &["index"],
             extensions: SUPPORTED_EXTENSIONS,
+            extension_alias: &[("js", &["ts", "js"]), ("mjs", &["mts", "mjs"])],
             resolve_node_builtins: true,
             resolve_types: true,
             ..Default::default()
