@@ -131,7 +131,7 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
                 HtmlTextExpressions::Double => {
                     options = options.with_double_text_expression();
                 }
-                variant => unreachable!("unknown text expressions: {variant:?}"),
+                HtmlTextExpressions::None => {}
             },
             HtmlVariant::Astro => {
                 options = options.with_single_text_expression().with_frontmatter();
