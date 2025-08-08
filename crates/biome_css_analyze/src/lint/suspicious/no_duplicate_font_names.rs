@@ -1,15 +1,14 @@
+use crate::fonts::{CssFontValue, find_font_family, is_font_family_keyword};
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericProperty};
+use biome_css_syntax::CssGenericProperty;
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::AstNode;
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
 use biome_string_case::StrLikeExtension;
 use std::collections::HashSet;
-
-use crate::utils::{find_font_family, is_font_family_keyword};
 
 declare_lint_rule! {
     /// Disallow duplicate names within font families.
@@ -39,10 +38,9 @@ declare_lint_rule! {
     ///
     /// ```css
     /// a { font-family: "Lucida Grande", "Arial", sans-serif; }
-    /// ```
-    ///
-    /// ```css
     /// b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif; }
+    /// c { font-family: SF Mono, Liberation Mono, sans-serif; }
+    /// d { font: 1em SF Mono, Liberation Mono, sans-serif; }
     /// ```
     pub NoDuplicateFontNames {
         version: "1.8.0",
@@ -54,14 +52,9 @@ declare_lint_rule! {
     }
 }
 
-pub struct RuleState {
-    value: Box<str>,
-    span: TextRange,
-}
-
 impl Rule for NoDuplicateFontNames {
     type Query = Ast<CssGenericProperty>;
-    type State = RuleState;
+    type State = (CssFontValue, CssFontValue);
     type Signals = Option<Self::State>;
     type Options = NoDuplicateFontNamesOptions;
 
@@ -77,87 +70,65 @@ impl Rule for NoDuplicateFontNames {
             return None;
         }
 
-        let mut unquoted_family_names: HashSet<String> = HashSet::new();
-        let mut family_names: HashSet<String> = HashSet::new();
+        let mut family_names: HashSet<CssFontValue> = HashSet::new();
         let value_list = node.value();
-        let font_families = if is_font {
-            find_font_family(value_list)
-        } else {
-            value_list
-                .into_iter()
-                .filter_map(|v| match v {
-                    AnyCssGenericComponentValue::AnyCssValue(value) => Some(value),
-                    _ => None,
-                })
-                .collect()
-        };
+        // let font_families = if is_font {
+        //     find_font_family(value_list)
+        // } else {
+        //     value_list
+        //         .into_iter()
+        //         .filter_map(|v| match v {
+        //             AnyCssGenericComponentValue::AnyCssValue(value) => match value {
+        //                 AnyCssValue::CssIdentifier(node) => {
+        //                     Some(CssFontValue::SingleValue(node.into()))
+        //                 }
+        //                 AnyCssValue::CssString(node) => {
+        //                     Some(CssFontValue::SingleValue(node.into()))
+        //                 }
+        //                 _ => None,
+        //             },
+        //             _ => None,
+        //         })
+        //         .collect()
+        // };
+        let font_families = find_font_family(value_list);
 
         for css_value in font_families {
-            match css_value {
-                // A generic family name like `sans-serif` or unquoted font name.
-                AnyCssValue::CssIdentifier(val) => {
-                    let font_name = val.to_trimmed_text();
+            let value = css_value.to_string()?;
 
-                    // check the case: "Arial", Arial
-                    // we ignore the case of the font name is a keyword(context: https://github.com/stylelint/stylelint/issues/1284)
-                    // e.g "sans-serif", sans-serif
-                    if family_names.contains(font_name.text())
-                        && !is_font_family_keyword(&font_name)
-                    {
-                        return Some(RuleState {
-                            value: font_name.into(),
-                            span: val.range(),
-                        });
-                    }
+            // check the case: "Arial", Arial
+            // we ignore the case of the font name is a keyword(context: https://github.com/stylelint/stylelint/issues/1284)
+            // e.g "sans-serif", sans-serif
+            if css_value.is_identifier() && is_font_family_keyword(&value) && is_font {
+                continue;
+            }
 
-                    // check the case: sans-self, sans-self
-                    if unquoted_family_names.contains(font_name.text()) {
-                        return Some(RuleState {
-                            value: font_name.into(),
-                            span: val.range(),
-                        });
-                    }
-                    unquoted_family_names.insert(font_name.text().into());
-                }
-                // A font family name. e.g "Lucida Grande", "Arial".
-                AnyCssValue::CssString(val) => {
-                    // FIXME: avoid String allocation
-                    let normalized_font_name: String = val
-                        .to_trimmed_text()
-                        .chars()
-                        .filter(|&c| c != '\'' && c != '\"' && !c.is_whitespace())
-                        .collect();
-
-                    if family_names.contains(&normalized_font_name)
-                        || unquoted_family_names
-                            .iter()
-                            .any(|name| *name == normalized_font_name.as_str())
-                    {
-                        return Some(RuleState {
-                            value: normalized_font_name.into(),
-                            span: val.range(),
-                        });
-                    }
-                    family_names.insert(normalized_font_name);
-                }
-                _ => {}
+            if let Some(duplicate) = family_names.get(&css_value) {
+                return Some((css_value.clone(), duplicate.clone()));
+            } else {
+                family_names.insert(css_value.clone());
             }
         }
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let span = state.span;
+    fn diagnostic(
+        _: &RuleContext<Self>,
+        (this, duplicate): &Self::State,
+    ) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                span,
+                this.range(),
                 markup! {
-                    "Duplicate font names are redundant and unnecessary: "<Emphasis>{ state.value }</Emphasis>
+                    "Duplicate font names are redundant and unnecessary: "<Emphasis>{ this.to_string()? }</Emphasis>
                 },
             )
+            .detail(duplicate.range(), markup! {
+                "This is where the duplicate font name is found:"
+            })
             .note(markup! {
-                "Remove duplicate font names within the property"
+                "Remove duplicate font names within the property."
             }),
         )
     }
