@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoNonNullAssertedOptionalChain {
-        version: "v2.1.4",
+        version: "2.1.4",
         name: "noNonNullAssertedOptionalChain",
         language: "js",
         sources: &[RuleSource::EslintTypeScript("no-non-null-asserted-optional-chain").same()],
