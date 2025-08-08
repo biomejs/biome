@@ -5055,6 +5055,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useBiomeIgnoreFolder": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseBiomeIgnoreFolderConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentObjectDefinition": {
 					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
 					"anyOf": [
@@ -9889,6 +9896,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseBiomeIgnoreFolderOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseBiomeIgnoreFolderOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseBlockStatementsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13140,6 +13162,16 @@
 			]
 		},
 		"UseAwaitOptions": { "type": "object", "additionalProperties": false },
+		"UseBiomeIgnoreFolderConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseBiomeIgnoreFolderOptions" }
+			]
+		},
+		"UseBiomeIgnoreFolderOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseBlockStatementsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

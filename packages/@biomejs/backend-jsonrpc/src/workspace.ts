@@ -1704,6 +1704,10 @@ export interface Nursery {
 	 */
 	useAnchorHref?: RuleConfiguration_for_UseAnchorHrefOptions;
 	/**
+	 * Succinct description of the rule.
+	 */
+	useBiomeIgnoreFolder?: RuleConfiguration_for_UseBiomeIgnoreFolderOptions;
+	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
 	useConsistentObjectDefinition?: RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions;
@@ -3003,6 +3007,9 @@ export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
 export type RuleConfiguration_for_UseAnchorHrefOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAnchorHrefOptions;
+export type RuleConfiguration_for_UseBiomeIgnoreFolderOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseBiomeIgnoreFolderOptions;
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
@@ -5501,6 +5508,16 @@ export interface RuleWithOptions_for_UseAnchorHrefOptions {
 	 */
 	options: UseAnchorHrefOptions;
 }
+export interface RuleWithOptions_for_UseBiomeIgnoreFolderOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseBiomeIgnoreFolderOptions;
+}
 export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -7943,6 +7960,7 @@ export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
 export type UseAnchorHrefOptions = null;
+export interface UseBiomeIgnoreFolderOptions {}
 export interface UseConsistentObjectDefinitionOptions {
 	/**
 	 * The preferred syntax to enforce.
@@ -8594,7 +8612,6 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noAwaitInLoop"
 	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
@@ -8617,6 +8634,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNestedComponentDefinitions"
+	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
@@ -8645,11 +8663,12 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
-	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useAnchorHref"
+	| "lint/nursery/useBiomeIgnoreFolder"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentResponse"
