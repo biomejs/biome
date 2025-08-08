@@ -302,6 +302,7 @@ pub mod use_key_with_click_events;
 pub mod use_key_with_mouse_events;
 pub mod use_literal_enum_members;
 pub mod use_literal_keys;
+pub mod use_max_params;
 pub mod use_media_caption;
 pub mod use_named_operation;
 pub mod use_namespace_keyword;

@@ -5126,6 +5126,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useMaxParams": {
+					"description": "Enforce a maximum number of parameters in function definitions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseMaxParamsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNamedOperation": {
 					"description": "Enforce specifying the name of GraphQL operations.",
 					"anyOf": [
@@ -10803,6 +10810,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseMaxParamsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseMaxParamsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseMediaCaptionOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13695,6 +13717,25 @@
 		},
 		"UseLiteralKeysOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseMaxParamsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseMaxParamsOptions" }
+			]
+		},
+		"UseMaxParamsOptions": {
+			"type": "object",
+			"properties": {
+				"max": {
+					"description": "Maximum number of parameters allowed (default: 4)",
+					"default": 4,
+					"type": "integer",
+					"format": "uint8",
+					"minimum": 0.0
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseMediaCaptionConfiguration": {

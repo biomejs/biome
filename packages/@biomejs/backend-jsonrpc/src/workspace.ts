@@ -1748,6 +1748,10 @@ export interface Nursery {
 	 */
 	useJsonImportAttribute?: RuleFixConfiguration_for_UseJsonImportAttributeOptions;
 	/**
+	 * Enforce a maximum number of parameters in function definitions.
+	 */
+	useMaxParams?: RuleConfiguration_for_UseMaxParamsOptions;
+	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
 	useNamedOperation?: RuleFixConfiguration_for_UseNamedOperationOptions;
@@ -3028,6 +3032,9 @@ export type RuleConfiguration_for_UseIterableCallbackReturnOptions =
 export type RuleFixConfiguration_for_UseJsonImportAttributeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseJsonImportAttributeOptions;
+export type RuleConfiguration_for_UseMaxParamsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseMaxParamsOptions;
 export type RuleFixConfiguration_for_UseNamedOperationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNamedOperationOptions;
@@ -5625,6 +5632,16 @@ export interface RuleWithFixOptions_for_UseJsonImportAttributeOptions {
 	 */
 	options: UseJsonImportAttributeOptions;
 }
+export interface RuleWithOptions_for_UseMaxParamsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseMaxParamsOptions;
+}
 export interface RuleWithFixOptions_for_UseNamedOperationOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -7927,6 +7944,12 @@ export type UseImageSizeOptions = null;
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
+export interface UseMaxParamsOptions {
+	/**
+	 * Maximum number of parameters allowed (default: 4)
+	 */
+	max?: number;
+}
 export interface UseNamedOperationOptions {}
 /**
  * Rule's options.
@@ -8624,6 +8647,7 @@ export type Category =
 	| "lint/nursery/useIterableCallbackReturn"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
