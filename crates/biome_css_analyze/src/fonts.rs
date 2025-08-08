@@ -231,8 +231,7 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<CssFontValue
             AnyCssGenericComponentValue::CssGenericDelimiter(_) => {
                 if !identifiers_collector.is_empty() {
                     font_families.push(CssFontValue::MultipleValue(
-                        identifiers_collector
-                            .clone()
+                        std::mem::take(&mut identifiers_collector)
                             .into_iter()
                             .map(AnyCssFontValue::from)
                             .collect(),
@@ -268,8 +267,7 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<CssFontValue
 
                             // This is a multiple value
                             font_families.push(CssFontValue::MultipleValue(
-                                identifiers_collector
-                                    .clone()
+                                std::mem::take(&mut identifiers_collector)
                                     .into_iter()
                                     .map(AnyCssFontValue::from)
                                     .collect::<Vec<_>>(),
