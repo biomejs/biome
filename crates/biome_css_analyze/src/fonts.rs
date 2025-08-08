@@ -48,11 +48,19 @@ impl Hash for CssFontValue {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         match self {
             Self::SingleValue(node) => {
-                node.inner_string_text().unwrap().trim().hash(state);
+                if let Some(text) = node.inner_string_text() {
+                    text.text().trim().hash(state);
+                } else {
+                    state.write_u8(0);
+                }
             }
             Self::MultipleValue(nodes) => {
                 for node in nodes {
-                    node.inner_string_text().unwrap().trim().hash(state);
+                    if let Some(text) = node.inner_string_text() {
+                        text.text().trim().hash(state);
+                    } else {
+                        state.write_u8(0);
+                    }
                 }
             }
         }
@@ -76,7 +84,15 @@ impl PartialEq for CssFontValue {
                     && this_values
                         .iter()
                         .zip(other_values.iter())
-                        .all(|(this, other)| this == other)
+                        .all(|(this, other)| {
+                            if let (Some(this), Some(other)) =
+                                (this.inner_string_text(), other.inner_string_text())
+                            {
+                                this.text().trim() == other.text().trim()
+                            } else {
+                                false
+                            }
+                        })
             }
             _ => false,
         }

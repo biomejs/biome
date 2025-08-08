@@ -167,9 +167,15 @@ fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValue
 }
 
 fn has_generic_font_family_property(nodes: &[CssFontValue]) -> bool {
-    nodes.iter().any(|n| {
-        n.to_string()
-            .is_some_and(|s| is_font_family_keyword(s.as_ref()))
+    nodes.iter().any(|value| {
+        match value {
+            // Multiple values won't match font families keywords
+            CssFontValue::MultipleValue(_) => false,
+            CssFontValue::SingleValue(value) => {
+                let text = value.to_trimmed_text();
+                is_font_family_keyword(text.text())
+            }
+        }
     })
 }
 
