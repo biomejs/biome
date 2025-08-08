@@ -11,8 +11,7 @@ The following rules have been promoted from nursery to stable groups:
 ##### CSS
 
 - Promoted [`noImportantStyles`](https://biomejs.dev/linter/rules/no-important-styles) to the `complexity` group.
-- Promoted [`noUnknownAtRule`](https://biomejs.dev/linter/rules/no-unknown-at-rule) to the `suspicious` group.
-
+- Promoted [`noUnknownAtRules`](https://biomejs.dev/linter/rules/no-unknown-at-rules) to the `suspicious` group.
 ##### GraphQL
 
 - Promoted [`useNamedGraphqlOperations`](https://biomejs.dev/linter/rules/use-named-graphql-operations) to the `correctness` group.
