@@ -16,6 +16,8 @@ expression: snapshot
 
 	}} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
 
+<div>Too small: {{ x < 5 }} {{ y / 16}}</div>
+
 ```
 
 
@@ -70,19 +72,56 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@192..193 ">" [] [],
             },
         },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@193..196 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@196..199 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@199..200 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@200..211 "Too small:" [] [Whitespace(" ")],
+                },
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@211..213 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@213..220 " x < 5 " [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@220..223 "}}" [] [Whitespace(" ")],
+                },
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@223..225 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@225..232 " y / 16" [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@232..234 "}}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@234..235 "<" [] [],
+                slash_token: SLASH@235..236 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@236..239 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@239..240 ">" [] [],
+            },
+        },
     ],
-    eof_token: EOF@193..194 "" [Newline("\n")] [],
+    eof_token: EOF@240..241 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..194
+0: HTML_ROOT@0..241
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..193
+  3: HTML_ELEMENT_LIST@0..240
     0: HTML_ELEMENT@0..193
       0: HTML_OPENING_ELEMENT@0..5
         0: L_ANGLE@0..1 "<" [] []
@@ -113,6 +152,32 @@ HtmlRoot {
         2: HTML_TAG_NAME@189..192
           0: HTML_LITERAL@189..192 "div" [] []
         3: R_ANGLE@192..193 ">" [] []
-  4: EOF@193..194 "" [Newline("\n")] []
+    1: HTML_ELEMENT@193..240
+      0: HTML_OPENING_ELEMENT@193..200
+        0: L_ANGLE@193..196 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@196..199
+          0: HTML_LITERAL@196..199 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@199..199
+        3: R_ANGLE@199..200 ">" [] []
+      1: HTML_ELEMENT_LIST@200..234
+        0: HTML_CONTENT@200..211
+          0: HTML_LITERAL@200..211 "Too small:" [] [Whitespace(" ")]
+        1: HTML_DOUBLE_TEXT_EXPRESSION@211..223
+          0: L_DOUBLE_CURLY@211..213 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@213..220
+            0: HTML_LITERAL@213..220 " x < 5 " [] []
+          2: R_DOUBLE_CURLY@220..223 "}}" [] [Whitespace(" ")]
+        2: HTML_DOUBLE_TEXT_EXPRESSION@223..234
+          0: L_DOUBLE_CURLY@223..225 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@225..232
+            0: HTML_LITERAL@225..232 " y / 16" [] []
+          2: R_DOUBLE_CURLY@232..234 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@234..240
+        0: L_ANGLE@234..235 "<" [] []
+        1: SLASH@235..236 "/" [] []
+        2: HTML_TAG_NAME@236..239
+          0: HTML_LITERAL@236..239 "div" [] []
+        3: R_ANGLE@239..240 ">" [] []
+  4: EOF@240..241 "" [Newline("\n")] []
 
 ```

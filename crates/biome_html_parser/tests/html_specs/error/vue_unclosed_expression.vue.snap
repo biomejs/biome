@@ -33,14 +33,12 @@ HtmlRoot {
                 HtmlBogusTextExpression {
                     items: [
                         L_DOUBLE_CURLY@10..14 "{{" [Newline("\n"), Whitespace("\t")] [],
-                        HtmlTextExpression {
-                            html_literal_token: HTML_LITERAL@14..18 "xyz\n" [] [],
-                        },
+                        HTML_LITERAL@14..17 "xyz" [] [],
                     ],
                 },
             ],
             closing_element: HtmlClosingElement {
-                l_angle_token: L_ANGLE@18..19 "<" [] [],
+                l_angle_token: L_ANGLE@17..19 "<" [Newline("\n")] [],
                 slash_token: SLASH@19..20 "/" [] [],
                 name: HtmlTagName {
                     value_token: HTML_LITERAL@20..28 "template" [] [],
@@ -68,13 +66,12 @@ HtmlRoot {
           0: HTML_LITERAL@1..9 "template" [] []
         2: HTML_ATTRIBUTE_LIST@9..9
         3: R_ANGLE@9..10 ">" [] []
-      1: HTML_ELEMENT_LIST@10..18
-        0: HTML_BOGUS_TEXT_EXPRESSION@10..18
+      1: HTML_ELEMENT_LIST@10..17
+        0: HTML_BOGUS_TEXT_EXPRESSION@10..17
           0: L_DOUBLE_CURLY@10..14 "{{" [Newline("\n"), Whitespace("\t")] []
-          1: HTML_TEXT_EXPRESSION@14..18
-            0: HTML_LITERAL@14..18 "xyz\n" [] []
-      2: HTML_CLOSING_ELEMENT@18..29
-        0: L_ANGLE@18..19 "<" [] []
+          1: HTML_LITERAL@14..17 "xyz" [] []
+      2: HTML_CLOSING_ELEMENT@17..29
+        0: L_ANGLE@17..19 "<" [Newline("\n")] []
         1: SLASH@19..20 "/" [] []
         2: HTML_TAG_NAME@20..28
           0: HTML_LITERAL@20..28 "template" [] []
@@ -86,14 +83,14 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-vue_unclosed_expression.vue:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+vue_unclosed_expression.vue:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Found a text expression that doesn't have the closing expression:
   
     1 │ <template>
-    2 │ 	{{xyz
-  > 3 │ </template>
-      │ ^
+  > 2 │ 	{{xyz
+      │ 	^^^^^
+    3 │ </template>
     4 │ 
   
   i This is where the opening expression was found:

@@ -4,7 +4,9 @@ use biome_html_syntax::{HtmlSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
 use biome_parser::prelude::BumpWithContext;
-use biome_parser::token_source::{TokenSource, TokenSourceWithBufferedLexer, Trivia};
+use biome_parser::token_source::{
+    TokenSource, TokenSourceCheckpoint, TokenSourceWithBufferedLexer, Trivia,
+};
 use biome_rowan::TriviaPieceKind;
 
 pub(crate) struct HtmlTokenSource<'source> {
@@ -79,6 +81,8 @@ impl LexContext for HtmlLexContext {
     }
 }
 
+pub(crate) type HtmlTokenSourceCheckpoint = TokenSourceCheckpoint<HtmlSyntaxKind>;
+
 impl<'source> HtmlTokenSource<'source> {
     /// Creates a new token source for the given string
     pub fn from_str(source: &'source str) -> Self {
@@ -122,6 +126,21 @@ impl<'source> HtmlTokenSource<'source> {
                 }
             }
         }
+    }
+
+    /// Creates a checkpoint to which it can later return using [Self::rewind].
+    pub fn checkpoint(&self) -> HtmlTokenSourceCheckpoint {
+        HtmlTokenSourceCheckpoint {
+            trivia_len: self.trivia_list.len() as u32,
+            lexer_checkpoint: self.lexer.checkpoint(),
+        }
+    }
+
+    /// Restores the token source to a previous state
+    pub fn rewind(&mut self, checkpoint: HtmlTokenSourceCheckpoint) {
+        assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
+        self.trivia_list.truncate(checkpoint.trivia_len as usize);
+        self.lexer.rewind(checkpoint.lexer_checkpoint);
     }
 }
 

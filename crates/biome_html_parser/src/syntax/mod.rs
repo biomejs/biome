@@ -40,7 +40,8 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
 }
 
 const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<], T![/]);
-const RECOVER_TEXT_EXPRESSION_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![<], T!['}'], T!["}}"]);
+const RECOVER_TEXT_EXPRESSION_LIST: TokenSet<HtmlSyntaxKind> =
+    token_set!(T![<], T![>], T!['}'], T!["}}"]);
 
 /// These elements are effectively always self-closing. They should not have a closing tag (if they do, it should be a parsing error). They might not contain a `/` like in `<img />`.
 static VOID_ELEMENTS: &[&str] = &[
@@ -204,6 +205,7 @@ impl ParseNodeList for ElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        dbg!(p.cur(), p.cur_text());
         match p.cur() {
             T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
@@ -434,6 +436,7 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
     if !is_at_opening_double_expression(p) {
         return Absent;
     }
+    let checkpoint = p.checkpoint();
     let m = p.start();
     let opening_range = p.cur_range();
     p.bump_with_context(
@@ -451,15 +454,20 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
         p.error(diagnostic);
         Present(m.complete(p, HTML_BOGUS_TEXT_EXPRESSION))
     } else {
+        m.abandon(p);
+        p.rewind(checkpoint);
+
         let recovery =
             ParseRecoveryTokenSet::new(HTML_BOGUS_TEXT_EXPRESSION, RECOVER_TEXT_EXPRESSION_LIST);
         if let Ok(m) = recovery.enable_recovery_on_line_break().recover(p) {
             let diagnostic = expected_text_expression(p, m.range(p), opening_range);
             p.error(diagnostic);
+            return Present(m);
+        } else {
+            Absent
         }
 
-        p.expect(T![<]);
-        Present(m.complete(p, HTML_DOUBLE_TEXT_EXPRESSION))
+        // p.expect(T![<]);
     }
 }
 
@@ -479,6 +487,7 @@ pub(crate) fn parse_single_text_expression(
     if !p.at(T!['{']) {
         return Absent;
     }
+    let checkpoint = p.checkpoint();
     let m = p.start();
     let opening_range = p.cur_range();
 
@@ -497,15 +506,17 @@ pub(crate) fn parse_single_text_expression(
         p.error(diagnostic);
         Present(m.complete(p, HTML_BOGUS_TEXT_EXPRESSION))
     } else {
+        m.abandon(p);
+        p.rewind(checkpoint);
         let recovery =
             ParseRecoveryTokenSet::new(HTML_BOGUS_TEXT_EXPRESSION, RECOVER_TEXT_EXPRESSION_LIST);
         if let Ok(m) = recovery.enable_recovery_on_line_break().recover(p) {
             let diagnostic = expected_text_expression(p, m.range(p), opening_range);
             p.error(diagnostic);
+            Present(m)
+        } else {
+            Absent
         }
-
-        p.expect(T![<]);
-        Present(m.complete(p, HTML_SINGLE_TEXT_EXPRESSION))
     }
 }
 

@@ -211,7 +211,6 @@ impl<'src> HtmlLexer<'src> {
                 while let Some(current) = self.current_byte() {
                     match current {
                         b'}' if self.is_at_closing_double_text_expression() => break,
-                        b'<' | b'/' => break,
                         _ => {
                             self.advance(1);
                         }
@@ -230,7 +229,6 @@ impl<'src> HtmlLexer<'src> {
                 while let Some(current) = self.current_byte() {
                     match current {
                         b'}' if !self.is_at_closing_double_text_expression() => break,
-                        b'<' | b'/' => break,
                         _ => {
                             self.advance(1);
                         }

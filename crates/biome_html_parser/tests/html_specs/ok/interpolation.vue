@@ -8,3 +8,5 @@
 
 
 	}} reprehenderit voluptates minus {{console.log(  short_interpolation )}} nemo.</div>
+
+<div>Too small: {{ x < 5 }} {{ y / 16}}</div>

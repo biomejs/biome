@@ -1,4 +1,4 @@
-use crate::token_source::HtmlTokenSource;
+use crate::token_source::{HtmlTokenSource, HtmlTokenSourceCheckpoint};
 use biome_html_factory::HtmlSyntaxFactory;
 use biome_html_syntax::{
     HtmlFileSource, HtmlLanguage, HtmlSyntaxKind, HtmlTextExpressions, HtmlVariant,
@@ -7,7 +7,7 @@ use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
 use biome_parser::tree_sink::LosslessTreeSink;
-use biome_parser::{Parser, ParserContext};
+use biome_parser::{Parser, ParserContext, ParserContextCheckpoint};
 
 pub(crate) type HtmlLosslessTreeSink<'source> =
     LosslessTreeSink<'source, HtmlLanguage, HtmlSyntaxFactory>;
@@ -45,6 +45,34 @@ impl<'source> HtmlParser<'source> {
 
         (events, diagnostics, trivia)
     }
+
+    pub(crate) fn checkpoint(&mut self) -> HtmlParserCheckpiont {
+        HtmlParserCheckpiont {
+            context: self.context.checkpoint(),
+            source: self.source.checkpoint(),
+            // `state` is not checkpointed because it (currently) only contains
+            // scoped properties that aren't only dependent on checkpoints and
+            // should be reset manually when the scope of their use is exited.
+        }
+    }
+
+    pub fn rewind(&mut self, checkpoint: HtmlParserCheckpiont) {
+        let HtmlParserCheckpiont { context, source } = checkpoint;
+
+        self.context.rewind(context);
+        self.source.rewind(source);
+        // `state` is not checkpointed because it (currently) only contains
+        // scoped properties that aren't only dependent on checkpoints and
+        // should be reset manually when the scope of their use is exited.
+    }
+}
+
+pub struct HtmlParserCheckpiont {
+    pub(super) context: ParserContextCheckpoint,
+    pub(super) source: HtmlTokenSourceCheckpoint,
+    // `state` is not checkpointed because it (currently) only contains
+    // scoped properties that aren't only dependent on checkpoints and
+    // should be reset manually when the scope of their use is exited.
 }
 
 impl<'src> Parser for HtmlParser<'src> {
