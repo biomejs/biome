@@ -4,3 +4,5 @@ a { font: 1em "Lucida Grande", 'Arial', sans-serif; }
 a { font: 1em "Lucida Grande", 'Arial', "sans-serif", sans-serif; }
 a { font-family: Times, serif; }
 b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif; }
+/* Issue case: Should not report "SF Mono" and "Liberation Mono" as duplicates */
+code { font-family: "SF Mono", "Liberation Mono", monospace; }

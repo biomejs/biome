@@ -4,3 +4,5 @@ a { fOnT-fAmIlY: "Lucida Grande", '  Lucida Grande ', sans-serif; }
 a { font-family: 'Times', Times }
 a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
 b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-serif; }
+/* Test case for the specific issue: unquoted font names with spaces */
+code { font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace; }
