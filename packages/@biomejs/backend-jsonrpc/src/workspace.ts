@@ -1628,6 +1628,10 @@ export interface Nursery {
 	 */
 	noMisusedPromises?: RuleFixConfiguration_for_NoMisusedPromisesOptions;
 	/**
+	 * Prevent client components from being async functions.
+	 */
+	noNextAsyncClientComponent?: RuleConfiguration_for_NoNextAsyncClientComponentOptions;
+	/**
 	 * Disallow non-null assertions after optional chaining expressions.
 	 */
 	noNonNullAssertedOptionalChain?: RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions;
@@ -1691,6 +1695,10 @@ export interface Nursery {
 	 * Enforces that \<img> elements have both width and height attributes.
 	 */
 	useImageSize?: RuleConfiguration_for_UseImageSizeOptions;
+	/**
+	 * Enforce a maximum number of parameters in function definitions.
+	 */
+	useMaxParams?: RuleConfiguration_for_UseMaxParamsOptions;
 	/**
 	 * Prefer using the class prop as a classlist over the classnames helper.
 	 */
@@ -2941,6 +2949,9 @@ export type RuleConfiguration_for_NoImportCyclesOptions =
 export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoMisusedPromisesOptions;
+export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoNextAsyncClientComponentOptions;
 export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions;
@@ -2986,6 +2997,9 @@ export type RuleConfiguration_for_UseExplicitTypeOptions =
 export type RuleConfiguration_for_UseImageSizeOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseImageSizeOptions;
+export type RuleConfiguration_for_UseMaxParamsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseMaxParamsOptions;
 export type RuleConfiguration_for_UseQwikClasslistOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseQwikClasslistOptions;
@@ -5307,6 +5321,16 @@ export interface RuleWithFixOptions_for_NoMisusedPromisesOptions {
 	 */
 	options: NoMisusedPromisesOptions;
 }
+export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoNextAsyncClientComponentOptions;
+}
 export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5472,6 +5496,16 @@ export interface RuleWithOptions_for_UseImageSizeOptions {
 	 * Rule's options
 	 */
 	options: UseImageSizeOptions;
+}
+export interface RuleWithOptions_for_UseMaxParamsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseMaxParamsOptions;
 }
 export interface RuleWithOptions_for_UseQwikClasslistOptions {
 	/**
@@ -7874,8 +7908,14 @@ export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
 export interface NoFloatingPromisesOptions {}
-export interface NoImportCyclesOptions {}
+export interface NoImportCyclesOptions {
+	/**
+	 * Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
+	 */
+	ignoreTypes?: boolean;
+}
 export interface NoMisusedPromisesOptions {}
+export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoQwikUseVisibleTaskOptions {}
 export interface NoSecretsOptions {
@@ -7898,6 +7938,12 @@ export interface UseConsistentTypeDefinitionsOptions {
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
 export type UseImageSizeOptions = null;
+export interface UseMaxParamsOptions {
+	/**
+	 * Maximum number of parameters allowed (default: 4)
+	 */
+	max?: number;
+}
 export interface UseQwikClasslistOptions {}
 export interface UseReactFunctionComponentsOptions {}
 export interface UseSortedClassesOptions {
@@ -8565,6 +8611,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
@@ -8593,6 +8640,7 @@ export type Category =
 	| "lint/nursery/useImageSize"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useSortedClasses"
