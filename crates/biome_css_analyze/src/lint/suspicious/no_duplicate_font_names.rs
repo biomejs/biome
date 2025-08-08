@@ -78,6 +78,8 @@ impl Rule for NoDuplicateFontNames {
         }
 
         let mut family_names: HashSet<String> = HashSet::new();
+        let mut quoted_family_names: HashSet<String> = HashSet::new();
+        let mut unquoted_family_names: HashSet<String> = HashSet::new();
         let value_list = node.value();
         
         // Parse font families, handling both quoted strings and unquoted multi-word identifiers
@@ -94,19 +96,38 @@ impl Rule for NoDuplicateFontNames {
                 .filter(|&c| c != '\'' && c != '\"' && !c.is_whitespace())
                 .collect();
 
+            // Determine if this was originally quoted
+            let is_quoted = font_name.starts_with('"') || font_name.starts_with('\'');
+
             if family_names.contains(&normalized_font_name) {
                 // Allow mixed quoted/unquoted duplicates for font family keywords (e.g., "sans-serif" and sans-serif)
-                // but still flag identical duplicates (e.g., sans-serif, sans-serif)
-                if is_font_family_keyword(&normalized_font_name) && font_name != normalized_font_name {
-                    // This is a quoted vs unquoted case - allow it
-                    continue;
+                // as mentioned in https://github.com/stylelint/stylelint/issues/1284
+                if is_font_family_keyword(&normalized_font_name) {
+                    let has_quoted = quoted_family_names.contains(&normalized_font_name);
+                    let has_unquoted = unquoted_family_names.contains(&normalized_font_name);
+                    
+                    // If we have both quoted and unquoted, and this is a keyword, allow it
+                    if (is_quoted && has_unquoted) || (!is_quoted && has_quoted) {
+                        if is_quoted {
+                            quoted_family_names.insert(normalized_font_name.clone());
+                        } else {
+                            unquoted_family_names.insert(normalized_font_name.clone());
+                        }
+                        continue;
+                    }
                 }
                 return Some(RuleState {
                     value: normalized_font_name.into(),
                     span,
                 });
             }
-            family_names.insert(normalized_font_name);
+            
+            family_names.insert(normalized_font_name.clone());
+            if is_quoted {
+                quoted_family_names.insert(normalized_font_name);
+            } else {
+                unquoted_family_names.insert(normalized_font_name);
+            }
         }
         None
     }
@@ -165,7 +186,7 @@ fn parse_font_families_from_font_family_property(
                         current_family_span_end = Some(val.range());
                     }
                     AnyCssValue::CssString(val) => {
-                        // Quoted string - complete font family name
+                        // Quoted string - complete font family name, preserve original with quotes
                         let font_name = val.to_trimmed_text();
                         font_families.push((font_name.text().to_string(), val.range()));
                     }
@@ -192,49 +213,21 @@ fn parse_font_families_from_font_shorthand(
     css_values: Vec<AnyCssValue>,
 ) -> Vec<(String, TextRange)> {
     let mut font_families = Vec::new();
-    let mut current_family_parts = Vec::new();
-    let mut current_family_span_start: Option<TextRange> = None;
-    let mut current_family_span_end: Option<TextRange> = None;
 
     for css_value in css_values {
         match css_value {
             AnyCssValue::CssIdentifier(val) => {
-                // Unquoted identifier - part of a multi-word font name
-                let part = val.to_trimmed_text();
-                current_family_parts.push(part.text().to_string());
-                if current_family_span_start.is_none() {
-                    current_family_span_start = Some(val.range());
-                }
-                current_family_span_end = Some(val.range());
+                // For font shorthand, each identifier is a separate font family
+                let font_name = val.to_trimmed_text();
+                font_families.push((font_name.text().to_string(), val.range()));
             }
             AnyCssValue::CssString(val) => {
-                // If we have accumulated parts, finish the current family first
-                if !current_family_parts.is_empty() {
-                    let font_name = current_family_parts.join(" ");
-                    let span = current_family_span_start
-                        .unwrap()
-                        .cover(current_family_span_end.unwrap());
-                    font_families.push((font_name, span));
-                    current_family_parts.clear();
-                    current_family_span_start = None;
-                    current_family_span_end = None;
-                }
-                
-                // Quoted string - complete font family name
+                // Quoted string - preserve original with quotes
                 let font_name = val.to_trimmed_text();
                 font_families.push((font_name.text().to_string(), val.range()));
             }
             _ => {}
         }
-    }
-
-    // Handle the last font family if there are remaining parts
-    if !current_family_parts.is_empty() {
-        let font_name = current_family_parts.join(" ");
-        let span = current_family_span_start
-            .unwrap()
-            .cover(current_family_span_end.unwrap());
-        font_families.push((font_name, span));
     }
 
     font_families
