@@ -66,7 +66,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentTypeDefinitions {
-        version: "v2.1.4",
+        version: "2.1.4",
         name: "useConsistentTypeDefinitions",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("consistent-type-definitions").same()],

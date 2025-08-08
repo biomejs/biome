@@ -32,7 +32,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoQwikUseVisibleTask {
-        version: "v2.1.4",
+        version: "2.1.4",
         name: "noQwikUseVisibleTask",
         language: "jsx",
         sources: &[RuleSource::EslintQwik("no-use-visible-task").same()],

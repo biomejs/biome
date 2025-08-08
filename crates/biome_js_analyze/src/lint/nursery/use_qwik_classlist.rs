@@ -26,7 +26,7 @@ declare_lint_rule! {
     /// <div class={{ active: true, disabled: false }} />
     /// ```
  pub UseQwikClasslist {
-        version: "v2.1.4",
+        version: "2.1.4",
         name: "useQwikClasslist",
         language: "jsx",
         sources: &[RuleSource::EslintQwik("prefer-classlist").same()],

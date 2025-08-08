@@ -92,7 +92,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueDataObjectDeclaration {
-        version: "v2.1.4",
+        version: "2.1.4",
         name: "noVueDataObjectDeclaration",
         language: "js",
         recommended: true,
