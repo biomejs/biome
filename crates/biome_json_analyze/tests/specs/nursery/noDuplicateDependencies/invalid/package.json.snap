@@ -1,0 +1,42 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "dependencies": {
+    "foo": "",
+    "bar": ""
+  },
+  "devDependencies": {
+    "foo": ""
+  }
+}
+
+```
+
+# Diagnostics
+```
+package.json:3:5 lint/nursery/noDuplicateDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The dependency foo is also listed later.
+  
+    1 │ {
+    2 │   "dependencies": {
+  > 3 │     "foo": "",
+      │     ^^^^^
+    4 │     "bar": ""
+    5 │   },
+  
+  i This dependency has already been listed before
+  
+    5 │   },
+    6 │   "devDependencies": {
+  > 7 │     "foo": ""
+      │     ^^^^^
+    8 │   }
+    9 │ }
+  
+
+```
