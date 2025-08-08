@@ -1,4 +1,4 @@
-use crate::token_source::{HtmlTokenSource, HtmlTokenSourceCheckpoint};
+use crate::token_source::{HtmlTokenSource, HtmlTokenSourceCheckpoint, TextExpressionKind};
 use biome_html_factory::HtmlSyntaxFactory;
 use biome_html_syntax::{
     HtmlFileSource, HtmlLanguage, HtmlSyntaxKind, HtmlTextExpressions, HtmlVariant,
@@ -46,8 +46,8 @@ impl<'source> HtmlParser<'source> {
         (events, diagnostics, trivia)
     }
 
-    pub(crate) fn checkpoint(&mut self) -> HtmlParserCheckpiont {
-        HtmlParserCheckpiont {
+    pub(crate) fn checkpoint(&mut self) -> HtmlParserCheckpoint {
+        HtmlParserCheckpoint {
             context: self.context.checkpoint(),
             source: self.source.checkpoint(),
             // `state` is not checkpointed because it (currently) only contains
@@ -56,8 +56,8 @@ impl<'source> HtmlParser<'source> {
         }
     }
 
-    pub fn rewind(&mut self, checkpoint: HtmlParserCheckpiont) {
-        let HtmlParserCheckpiont { context, source } = checkpoint;
+    pub fn rewind(&mut self, checkpoint: HtmlParserCheckpoint) {
+        let HtmlParserCheckpoint { context, source } = checkpoint;
 
         self.context.rewind(context);
         self.source.rewind(source);
@@ -67,7 +67,7 @@ impl<'source> HtmlParser<'source> {
     }
 }
 
-pub struct HtmlParserCheckpiont {
+pub struct HtmlParserCheckpoint {
     pub(super) context: ParserContextCheckpoint,
     pub(super) source: HtmlTokenSourceCheckpoint,
     // `state` is not checkpointed because it (currently) only contains
@@ -102,12 +102,6 @@ pub struct HtmlParseOptions {
     pub(crate) text_expression: Option<TextExpressionKind>,
 }
 
-#[derive(PartialEq, Eq, Debug)]
-pub enum TextExpressionKind {
-    Single,
-    Double,
-}
-
 impl HtmlParseOptions {
     pub fn with_single_text_expression(mut self) -> Self {
         self.text_expression = Some(TextExpressionKind::Single);
@@ -131,13 +125,13 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
 
         match file_source.variant() {
             HtmlVariant::Standard(text_expressions) => match text_expressions {
-                HtmlTextExpressions::None => {}
                 HtmlTextExpressions::Single => {
                     options = options.with_single_text_expression();
                 }
                 HtmlTextExpressions::Double => {
                     options = options.with_double_text_expression();
                 }
+                _ => unreachable!("unknown text expressions: {:?}"),
             },
             HtmlVariant::Astro => {
                 options = options.with_single_text_expression().with_frontmatter();

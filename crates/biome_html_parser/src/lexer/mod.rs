@@ -531,24 +531,26 @@ impl<'src> HtmlLexer<'src> {
             && self.byte_at(7) == Some(b'A')
             && self.byte_at(8) == Some(b'[')
     }
-
-    fn at_end_cdata(&mut self) -> bool {
+    #[inline(always)]
+    const fn at_end_cdata(&mut self) -> bool {
         self.current_byte() == Some(b']')
             && self.byte_at(1) == Some(b']')
             && self.byte_at(2) == Some(b'>')
     }
-
-    fn is_at_frontmatter_edge(&self) -> bool {
+    #[inline(always)]
+    const fn is_at_frontmatter_edge(&self) -> bool {
         self.current_byte() == Some(b'-')
             && self.byte_at(1) == Some(b'-')
             && self.byte_at(2) == Some(b'-')
     }
 
-    fn is_at_opening_double_text_expression(&self) -> bool {
+    #[inline(always)]
+    const fn is_at_opening_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'{') && self.byte_at(1) == Some(b'{')
     }
 
-    fn is_at_closing_double_text_expression(&self) -> bool {
+    #[inline(always)]
+    const fn is_at_closing_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
     }
 

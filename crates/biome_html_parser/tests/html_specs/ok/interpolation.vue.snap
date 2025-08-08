@@ -18,6 +18,8 @@ expression: snapshot
 
 <div>Too small: {{ x < 5 }} {{ y / 16}}</div>
 
+<div>{{ call(fn({ inner })) }}</div>
+
 ```
 
 
@@ -109,19 +111,46 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@239..240 ">" [] [],
             },
         },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@240..243 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@243..246 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@246..247 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@247..249 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@249..270 " call(fn({ inner })) " [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@270..272 "}}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@272..273 "<" [] [],
+                slash_token: SLASH@273..274 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@274..277 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@277..278 ">" [] [],
+            },
+        },
     ],
-    eof_token: EOF@240..241 "" [Newline("\n")] [],
+    eof_token: EOF@278..279 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..241
+0: HTML_ROOT@0..279
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..240
+  3: HTML_ELEMENT_LIST@0..278
     0: HTML_ELEMENT@0..193
       0: HTML_OPENING_ELEMENT@0..5
         0: L_ANGLE@0..1 "<" [] []
@@ -178,6 +207,25 @@ HtmlRoot {
         2: HTML_TAG_NAME@236..239
           0: HTML_LITERAL@236..239 "div" [] []
         3: R_ANGLE@239..240 ">" [] []
-  4: EOF@240..241 "" [Newline("\n")] []
+    2: HTML_ELEMENT@240..278
+      0: HTML_OPENING_ELEMENT@240..247
+        0: L_ANGLE@240..243 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@243..246
+          0: HTML_LITERAL@243..246 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@246..246
+        3: R_ANGLE@246..247 ">" [] []
+      1: HTML_ELEMENT_LIST@247..272
+        0: HTML_DOUBLE_TEXT_EXPRESSION@247..272
+          0: L_DOUBLE_CURLY@247..249 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@249..270
+            0: HTML_LITERAL@249..270 " call(fn({ inner })) " [] []
+          2: R_DOUBLE_CURLY@270..272 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@272..278
+        0: L_ANGLE@272..273 "<" [] []
+        1: SLASH@273..274 "/" [] []
+        2: HTML_TAG_NAME@274..277
+          0: HTML_LITERAL@274..277 "div" [] []
+        3: R_ANGLE@277..278 ">" [] []
+  4: EOF@278..279 "" [Newline("\n")] []
 
 ```
