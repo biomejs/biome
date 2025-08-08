@@ -22,7 +22,7 @@ unicode-segmentation = "1.12.0"
 unicode-width        = { workspace = true }
 
 [dev-dependencies]
-trybuild = "=1.0.106"
+trybuild = "=1.0.110"
 
 
 [features]
