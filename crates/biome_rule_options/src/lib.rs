@@ -125,6 +125,7 @@ pub mod no_namespace_import;
 pub mod no_negation_else;
 pub mod no_nested_component_definitions;
 pub mod no_nested_ternary;
+pub mod no_next_async_client_component;
 pub mod no_nodejs_modules;
 pub mod no_non_null_asserted_optional_chain;
 pub mod no_non_null_assertion;
