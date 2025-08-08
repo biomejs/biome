@@ -171,7 +171,7 @@
   import source foo from "<specifier>";
   ```
 
-- [#7053](https://github.com/biomejs/biome/pull/7053) [`655049e`](https://github.com/biomejs/biome/commit/655049e9e38f536b33fff6d7b160299f0b446908) Thanks [@jakeleventhal](https://github.com/jakeleventhal)! - Added the [`useConsistentTypeDefinitions`](https://biomejs.dev/rules/use-consistent-type-definitions) rule.
+- [#7053](https://github.com/biomejs/biome/pull/7053) [`655049e`](https://github.com/biomejs/biome/commit/655049e9e38f536b33fff6d7b160299f0b446908) Thanks [@jakeleventhal](https://github.com/jakeleventhal)! - Added the [`useConsistentTypeDefinitions`](https://biomejs.dev/linter/rules/use-consistent-type-definitions) rule.
 
   This rule enforces consistent usage of either `interface` or `type` for object type definitions in TypeScript.
 
