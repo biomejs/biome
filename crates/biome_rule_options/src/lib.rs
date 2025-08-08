@@ -248,6 +248,7 @@ pub mod use_arrow_function;
 pub mod use_as_const_assertion;
 pub mod use_at_index;
 pub mod use_await;
+pub mod use_block_scoped_var;
 pub mod use_block_statements;
 pub mod use_button_type;
 pub mod use_collapsed_else_if;
