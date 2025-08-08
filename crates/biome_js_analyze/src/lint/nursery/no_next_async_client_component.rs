@@ -6,7 +6,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::AnyJsRoot;
+use biome_js_syntax::{AnyJsExpression, AnyJsRoot};
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_next_async_client_component::NoNextAsyncClientComponentOptions;
 
@@ -93,6 +93,50 @@ impl Rule for NoNextAsyncClientComponent {
             }
             AnyPotentialReactComponentDeclaration::JsFunctionExportDefaultDeclaration(func) => {
                 func.async_token().is_some()
+            }
+            AnyPotentialReactComponentDeclaration::JsVariableDeclarator(declarator) => declarator
+                .initializer()
+                .and_then(|init| init.expression().ok())
+                .and_then(|expr| match expr {
+                    AnyJsExpression::JsArrowFunctionExpression(arrow) => arrow.async_token(),
+                    AnyJsExpression::JsFunctionExpression(func) => func.async_token(),
+                    _ => None,
+                })
+                .is_some(),
+            AnyPotentialReactComponentDeclaration::JsAssignmentExpression(assignment) => assignment
+                .right()
+                .ok()
+                .and_then(|expr| match expr {
+                    AnyJsExpression::JsArrowFunctionExpression(arrow) => arrow.async_token(),
+                    AnyJsExpression::JsFunctionExpression(func) => func.async_token(),
+                    _ => None,
+                })
+                .is_some(),
+            AnyPotentialReactComponentDeclaration::JsExportDefaultExpressionClause(export) => {
+                export
+                    .expression()
+                    .ok()
+                    .and_then(|expr| match expr {
+                        AnyJsExpression::JsArrowFunctionExpression(arrow) => arrow.async_token(),
+                        AnyJsExpression::JsFunctionExpression(func) => func.async_token(),
+                        _ => None,
+                    })
+                    .is_some()
+            }
+            AnyPotentialReactComponentDeclaration::JsMethodObjectMember(method) => {
+                method.async_token().is_some()
+            }
+            AnyPotentialReactComponentDeclaration::JsPropertyObjectMember(prop) => prop
+                .value()
+                .ok()
+                .and_then(|expr| match expr {
+                    AnyJsExpression::JsArrowFunctionExpression(arrow) => arrow.async_token(),
+                    AnyJsExpression::JsFunctionExpression(func) => func.async_token(),
+                    _ => None,
+                })
+                .is_some(),
+            AnyPotentialReactComponentDeclaration::JsMethodClassMember(method) => {
+                method.async_token().is_some()
             }
             _ => false,
         };

@@ -10,6 +10,52 @@ export default async function MyComponent() {
   return <div>Hello</div>;
 }
 
+async function MyComponent2() {
+  return <div>Hello</div>;
+}
+
+const MyComponent3 = async () => {
+  return <div>Hello</div>;
+};
+
+const MyComponent4 = async function() {
+  return <div>Hello</div>;
+};
+
+let MyComponent5;
+MyComponent5 = async () => {
+  return <div>Hello</div>;
+};
+
+let MyComponent6;
+MyComponent6 = async function() {
+  return <div>Hello</div>;
+};
+
+const components = {
+  async MyComponent() {
+    return <div>Hello</div>;
+  }
+};
+
+const components2 = {
+  MyComponent: async () => {
+    return <div>Hello</div>;
+  }
+};
+
+const components3 = {
+  MyComponent: async function() {
+    return <div>Hello</div>;
+  }
+};
+
+class ComponentClass {
+  async MyComponent() {
+    return <div>Hello</div>;
+  }
+}
+
 ```
 
 # Diagnostics
@@ -26,6 +72,199 @@ invalid.jsx:3:16 lint/nursery/noNextAsyncClientComponent ━━━━━━━�
   > 5 │ }
       │ ^
     6 │ 
+    7 │ async function MyComponent2() {
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```
+
+```
+invalid.jsx:7:1 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The component MyComponent2 is an async client component, which is not allowed.
+  
+     5 │ }
+     6 │ 
+   > 7 │ async function MyComponent2() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │   return <div>Hello</div>;
+   > 9 │ }
+       │ ^
+    10 │ 
+    11 │ const MyComponent3 = async () => {
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```
+
+```
+invalid.jsx:11:7 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The component MyComponent3 is an async client component, which is not allowed.
+  
+     9 │ }
+    10 │ 
+  > 11 │ const MyComponent3 = async () => {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │   return <div>Hello</div>;
+  > 13 │ };
+       │ ^
+    14 │ 
+    15 │ const MyComponent4 = async function() {
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```
+
+```
+invalid.jsx:15:7 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The component MyComponent4 is an async client component, which is not allowed.
+  
+    13 │ };
+    14 │ 
+  > 15 │ const MyComponent4 = async function() {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 16 │   return <div>Hello</div>;
+  > 17 │ };
+       │ ^
+    18 │ 
+    19 │ let MyComponent5;
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```
+
+```
+invalid.jsx:20:1 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The component MyComponent5 is an async client component, which is not allowed.
+  
+    19 │ let MyComponent5;
+  > 20 │ MyComponent5 = async () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 21 │   return <div>Hello</div>;
+  > 22 │ };
+       │ ^
+    23 │ 
+    24 │ let MyComponent6;
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```
+
+```
+invalid.jsx:25:1 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The component MyComponent6 is an async client component, which is not allowed.
+  
+    24 │ let MyComponent6;
+  > 25 │ MyComponent6 = async function() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 26 │   return <div>Hello</div>;
+  > 27 │ };
+       │ ^
+    28 │ 
+    29 │ const components = {
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```
+
+```
+invalid.jsx:30:3 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The component MyComponent is an async client component, which is not allowed.
+  
+    29 │ const components = {
+  > 30 │   async MyComponent() {
+       │   ^^^^^^^^^^^^^^^^^^^^^
+  > 31 │     return <div>Hello</div>;
+  > 32 │   }
+       │   ^
+    33 │ };
+    34 │ 
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```
+
+```
+invalid.jsx:36:3 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The component MyComponent is an async client component, which is not allowed.
+  
+    35 │ const components2 = {
+  > 36 │   MyComponent: async () => {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 37 │     return <div>Hello</div>;
+  > 38 │   }
+       │   ^
+    39 │ };
+    40 │ 
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```
+
+```
+invalid.jsx:42:3 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The component MyComponent is an async client component, which is not allowed.
+  
+    41 │ const components3 = {
+  > 42 │   MyComponent: async function() {
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 43 │     return <div>Hello</div>;
+  > 44 │   }
+       │   ^
+    45 │ };
+    46 │ 
+  
+  i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
+  
+  i Consider using useEffect for async operations inside the component, or remove the "use client" directive if this should be a server component.
+  
+
+```
+
+```
+invalid.jsx:48:3 lint/nursery/noNextAsyncClientComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The component MyComponent is an async client component, which is not allowed.
+  
+    47 │ class ComponentClass {
+  > 48 │   async MyComponent() {
+       │   ^^^^^^^^^^^^^^^^^^^^^
+  > 49 │     return <div>Hello</div>;
+  > 50 │   }
+       │   ^
+    51 │ }
+    52 │ 
   
   i Client components with "use client" directive should not be async functions as this can cause hydration mismatches and break React's rendering lifecycle.
   
