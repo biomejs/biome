@@ -8,7 +8,7 @@ use biome_json_factory::make::{
 };
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonStringValue, T};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
-use biome_rule_options::no_biome_first_expection::NoBiomeFirstExpectionOptions;
+use biome_rule_options::no_biome_first_exception::NoBiomeFirstExceptionOptions;
 
 declare_lint_rule! {
     /// Prevents the use of the `!` pattern in the first position of `files.includes` in the configuration file.
