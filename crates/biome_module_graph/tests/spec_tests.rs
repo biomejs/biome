@@ -17,7 +17,6 @@ use biome_module_graph::{
     ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase, JsReexport, ModuleGraph,
     ModuleResolver, ResolvedPath,
 };
-use biome_module_graph::{JsExport, JsImportPath, JsImportPhase};
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::Text;
