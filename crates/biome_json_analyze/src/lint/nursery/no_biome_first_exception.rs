@@ -54,7 +54,7 @@ impl Rule for NoBiomeFirstException {
     type Query = Ast<JsonMember>;
     type State = JsonStringValue;
     type Signals = Option<Self::State>;
-    type Options = NoBiomeFirstExpectionOptions;
+    type Options = NoBiomeFirstExceptionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

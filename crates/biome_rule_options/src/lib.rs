@@ -17,7 +17,7 @@ pub mod no_autofocus;
 pub mod no_await_in_loop;
 pub mod no_banned_types;
 pub mod no_barrel_file;
-pub mod no_biome_first_expection;
+pub mod no_biome_first_exception;
 pub mod no_bitwise_operators;
 pub mod no_blank_target;
 pub mod no_catch_assign;
