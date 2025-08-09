@@ -1,0 +1,57 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```text
+border-spacing-y-[2px]
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..16 "border-spacing-y" [] [],
+                minus_token: DASH@16..17 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@17..18 "[" [] [],
+                    value_token: TW_VALUE@18..21 "2px" [] [],
+                    r_brack_token: R_BRACKET@21..23 "]" [] [Newline("\n")],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@23..23 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..23
+  0: (empty)
+  1: TW_CANDIDATE_LIST@0..23
+    0: TW_FULL_CANDIDATE@0..23
+      0: TW_VARIANT_LIST@0..0
+      1: TW_FUNCTIONAL_CANDIDATE@0..23
+        0: TW_BASE@0..16 "border-spacing-y" [] []
+        1: DASH@16..17 "-" [] []
+        2: TW_ARBITRARY_VALUE@17..23
+          0: L_BRACKET@17..18 "[" [] []
+          1: TW_VALUE@18..21 "2px" [] []
+          2: R_BRACKET@21..23 "]" [] [Newline("\n")]
+        3: (empty)
+      2: (empty)
+  2: EOF@23..23 "" [] []
+
+```
