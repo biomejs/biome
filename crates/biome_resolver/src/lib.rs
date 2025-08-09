@@ -73,17 +73,17 @@ fn resolve_absolute_path_with_extension_alias(
     };
 
     // Skip if no extension alias is configured.
-    let Some((_, aliases)) = options
+    let Some(&(_, aliases)) = options
         .extension_alias
         .iter()
-        .find(|(ext, _)| ext == &extension)
+        .find(|(ext, _)| *ext == extension)
     else {
         return resolve_absolute_path(path, fs, options);
     };
 
     // Try to resolve the path for each extension alias.
     let mut last_error: Option<ResolveError> = None;
-    for alias in *aliases {
+    for alias in aliases {
         match resolve_absolute_path(path.with_extension(alias), fs, options) {
             Ok(path) => return Ok(path),
             Err(error) => last_error = Some(error),
@@ -760,8 +760,9 @@ pub struct ResolveOptions<'a> {
     /// Extensions should be provided without a leading dot.
     pub extensions: &'a [&'a str],
 
-    /// List of extension aliases to search for in relative paths.
+    /// List of extension aliases to search for in absolute or relative paths.
     /// Typically used to resolve `.ts` files by `.js` extension.
+    /// Same behavior as the `extensionAlias` option in [enhanced-resolve](https://github.com/webpack/enhanced-resolve?tab=readme-ov-file#resolver-options).
     ///
     /// Extensions should be provided without a leading dot.
     pub extension_alias: &'a [(&'a str, &'a [&'a str])],
