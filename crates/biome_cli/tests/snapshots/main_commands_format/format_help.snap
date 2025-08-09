@@ -72,6 +72,9 @@ Formatting options specific to the JavaScript files
                               formatted on a single line if it fits in the line. When formatting
                               `package.json`, Biome will use `always` unless configured otherwise.
                               Defaults to "auto".
+        --javascript-formatter-operator-linebreak=<before|after>  When breaking binary expressions
+                              into multiple lines, whether to break them before or after the binary
+                              operator. Defaults to "after".
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client

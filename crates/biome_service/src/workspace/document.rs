@@ -123,15 +123,6 @@ pub(crate) struct Document {
     /// - `AnyParse`: the result of the parsed file
     pub(crate) syntax: Option<Result<AnyParse, FileTooLarge>>,
 
-    /// If `true`, this indicates the document has been opened by the scanner,
-    /// and should be unloaded only when the project is unregistered.
-    ///
-    /// Note the file can still *also* be opened explicitly by a client such as
-    /// the LSP Proxy. In that case `version` will be `Some` and
-    /// `opened_by_scanner` will be `true`, and the document will only be
-    /// unloaded when both are unset.
-    pub(super) opened_by_scanner: bool,
-
     /// Embedded JavaScript content found in HTML documents (script tags).
     /// Each entry contains the parsed JavaScript with offset-aware positioning
     /// relative to the parent HTML document.

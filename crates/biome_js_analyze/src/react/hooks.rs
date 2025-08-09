@@ -265,6 +265,10 @@ pub fn is_binding_react_stable(
         .parent::<JsArrayBindingPatternElement>()
         .map(|parent| parent.syntax().index() / 2)
         .and_then(|index| index.try_into().ok());
+    let key = binding
+        .name_token()
+        .ok()
+        .map(|token| token.text_trimmed().to_string());
     let Some(callee) = declarator
         .initializer()
         .and_then(|initializer| initializer.expression().ok())
@@ -287,10 +291,11 @@ pub fn is_binding_react_stable(
             return false;
         }
 
-        match (&config.result, index) {
-            (StableHookResult::Identity, index) => index.is_none(),
-            (StableHookResult::Indices(indices), Some(index)) => indices.contains(&index),
-            (_, _) => false,
+        match (&config.result, index, &key) {
+            (StableHookResult::Identity, None, _) => true,
+            (StableHookResult::Indices(indices), Some(i), _) => indices.contains(&i),
+            (StableHookResult::Keys(keys), _, Some(k)) => keys.contains(k),
+            _ => false,
         }
     })
 }

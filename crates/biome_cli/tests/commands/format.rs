@@ -3507,3 +3507,29 @@ fn format_skip_parse_errors_continues_with_valid_files() {
         result,
     ));
 }
+
+#[test]
+fn should_not_format_file_with_syntax_errors() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let invalid = Utf8Path::new("invalid.js");
+    fs.insert(invalid.into(), "while ) {}".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", invalid.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, invalid, "while ) {}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_format_file_with_syntax_errors",
+        fs,
+        console,
+        result,
+    ));
+}

@@ -10,7 +10,7 @@ use crate::execute::Execution;
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, Error, Severity};
 use biome_fs::BiomePath;
-use camino::Utf8PathBuf;
+use camino::Utf8Path;
 use serde::Serialize;
 use std::collections::BTreeSet;
 use std::io;
@@ -62,7 +62,7 @@ pub trait ReporterVisitor {
     fn report_handled_paths(
         &mut self,
         _evaluated_paths: BTreeSet<BiomePath>,
-        _working_directory: Option<Utf8PathBuf>,
+        _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()> {
         Ok(())
     }
@@ -73,6 +73,7 @@ pub trait ReporterVisitor {
         _execution: &Execution,
         _payload: DiagnosticsPayload,
         _verbose: bool,
+        _working_directory: Option<&Utf8Path>,
     ) -> io::Result<()>;
 }
 

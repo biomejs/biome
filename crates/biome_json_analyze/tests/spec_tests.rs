@@ -22,6 +22,11 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
 
+    // We should skip running test for .options.json as input_file
+    if file_name.ends_with(".options.json") || file_name.ends_with(".options.jsonc") {
+        return;
+    }
+
     let parser_options = match input_file.extension() {
         Some("json") => JsonParserOptions::default(),
         Some("jsonc") => JsonParserOptions::default()

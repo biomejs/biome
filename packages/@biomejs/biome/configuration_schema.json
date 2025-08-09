@@ -1397,38 +1397,6 @@
 			"minProperties": 1,
 			"additionalProperties": { "type": "string" }
 		},
-		"CustomRestrictedImport": {
-			"anyOf": [
-				{
-					"description": "The message to display when this module is imported.",
-					"type": "string"
-				},
-				{
-					"description": "Additional options to configure the message and allowed/disallowed import names.",
-					"allOf": [{ "$ref": "#/definitions/CustomRestrictedImportOptions" }]
-				}
-			]
-		},
-		"CustomRestrictedImportOptions": {
-			"type": "object",
-			"properties": {
-				"allowImportNames": {
-					"description": "Names of the exported members that allowed to be not be used.",
-					"type": "array",
-					"items": { "type": "string" }
-				},
-				"importNames": {
-					"description": "Names of the exported members that should not be used.",
-					"type": "array",
-					"items": { "type": "string" }
-				},
-				"message": {
-					"description": "The message to display when this module is imported.",
-					"type": "string"
-				}
-			},
-			"additionalProperties": false
-		},
 		"CustomRestrictedType": {
 			"anyOf": [
 				{ "type": "string" },
@@ -2111,6 +2079,13 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"operatorLinebreak": {
+					"description": "When breaking binary expressions into multiple lines, whether to break them before or after the binary operator. Defaults to \"after\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/OperatorLinebreak" },
+						{ "type": "null" }
+					]
 				},
 				"quoteProperties": {
 					"description": "When properties in objects are quoted. Defaults to asNeeded.",
@@ -4071,9 +4046,12 @@
 				"paths": {
 					"description": "A list of import paths that should trigger the rule.",
 					"type": "object",
-					"additionalProperties": {
-						"$ref": "#/definitions/CustomRestrictedImport"
-					}
+					"additionalProperties": { "$ref": "#/definitions/Paths" }
+				},
+				"patterns": {
+					"description": "gitignore-style patterns that should trigger the rule.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Patterns" }
 				}
 			},
 			"additionalProperties": false
@@ -5087,12 +5065,17 @@
 				{ "description": "`{foo}`", "type": "string", "enum": ["shorthand"] }
 			]
 		},
+		"OperatorLinebreak": { "type": "string", "enum": ["after", "before"] },
 		"OrganizeImportsOptions": {
 			"type": "object",
 			"properties": {
 				"groups": {
 					"default": [],
 					"allOf": [{ "$ref": "#/definitions/ImportGroups" }]
+				},
+				"identifierOrder": {
+					"default": "natural",
+					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
 				}
 			},
 			"additionalProperties": false
@@ -5292,6 +5275,65 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/OverridePattern" }
 		},
+		"PathOptions": {
+			"type": "object",
+			"properties": {
+				"allowImportNames": {
+					"description": "Names of the exported members that allowed to be not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"importNames": {
+					"description": "Names of the exported members that should not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
+		"Paths": {
+			"anyOf": [
+				{
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				},
+				{
+					"description": "Additional options to configure the message and allowed/disallowed import names.",
+					"allOf": [{ "$ref": "#/definitions/PathOptions" }]
+				}
+			]
+		},
+		"PatternOptions": {
+			"type": "object",
+			"properties": {
+				"group": {
+					"description": "An array of gitignore-style patterns.",
+					"anyOf": [
+						{ "$ref": "#/definitions/SourcesMatcher" },
+						{ "type": "null" }
+					]
+				},
+				"importNamePattern": {
+					"description": "A regex pattern for import names to forbid within the matched modules.",
+					"anyOf": [{ "$ref": "#/definitions/Regex" }, { "type": "null" }]
+				},
+				"invertImportNamePattern": {
+					"description": "If true, the matched patterns in the importNamePattern will be allowed. Defaults to `false`.",
+					"default": false,
+					"type": "boolean"
+				},
+				"message": {
+					"description": "A custom message for diagnostics related to this pattern.",
+					"type": ["string", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"Patterns": { "anyOf": [{ "$ref": "#/definitions/PatternOptions" }] },
 		"Performance": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -11729,6 +11771,7 @@
 				{ "$ref": "#/definitions/Suspicious" }
 			]
 		},
+		"SortOrder": { "type": "string", "enum": ["natural", "lexicographic"] },
 		"Source": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -11803,6 +11846,12 @@
 						"maximum": 255.0,
 						"minimum": 0.0
 					},
+					"minItems": 1
+				},
+				{
+					"description": "Used to indicate the hook returns an object and some of its properties have stable identities.",
+					"type": "array",
+					"items": { "type": "string" },
 					"minItems": 1
 				}
 			]
@@ -14081,6 +14130,12 @@
 		},
 		"UseSortedAttributesOptions": {
 			"type": "object",
+			"properties": {
+				"sortOrder": {
+					"default": "natural",
+					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseSortedClassesConfiguration": {
@@ -14105,7 +14160,16 @@
 			},
 			"additionalProperties": false
 		},
-		"UseSortedKeysOptions": { "type": "object", "additionalProperties": false },
+		"UseSortedKeysOptions": {
+			"type": "object",
+			"properties": {
+				"sortOrder": {
+					"default": "natural",
+					"allOf": [{ "$ref": "#/definitions/SortOrder" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseSortedPropertiesOptions": {
 			"type": "object",
 			"additionalProperties": false
