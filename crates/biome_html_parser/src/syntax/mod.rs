@@ -555,7 +555,7 @@ impl TextExpression {
                 }
             }
             TextExpressionKind::Double => {
-                if p.at(T!["}}"]) {
+                if p.at(T!['}']) {
                     p.bump_remap_with_context(
                         HTML_LITERAL,
                         HtmlLexContext::TextExpression(self.kind),
