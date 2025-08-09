@@ -13,6 +13,7 @@ mod handle_astro_files;
 mod handle_css_files;
 mod handle_svelte_files;
 mod handle_vue_files;
+mod html;
 mod included_files;
 mod linter_domains;
 mod linter_groups_plain;

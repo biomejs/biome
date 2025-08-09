@@ -8,12 +8,12 @@ mod syntax_node;
 
 pub use self::generated::*;
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
-pub use file_source::{HtmlFileSource, HtmlVariant};
+pub use file_source::{HtmlFileSource, HtmlTextExpressions, HtmlVariant};
 pub use syntax_node::*;
 
 use crate::HtmlSyntaxKind::{
     ASTRO_BOGUS_FRONTMATTER, HTML_BOGUS, HTML_BOGUS_ATTRIBUTE, HTML_BOGUS_ELEMENT,
-    HTML_CLOSING_ELEMENT,
+    HTML_BOGUS_TEXT_EXPRESSION, HTML_CLOSING_ELEMENT,
 };
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
 
@@ -57,6 +57,7 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
             kind if AnyHtmlAttribute::can_cast(*kind) => HTML_BOGUS_ATTRIBUTE,
             kind if AnyHtmlElement::can_cast(*kind) => HTML_BOGUS_ELEMENT,
             kind if AnyAstroFrontmatterElement::can_cast(*kind) => ASTRO_BOGUS_FRONTMATTER,
+            kind if AnyHtmlTextExpression::can_cast(*kind) => HTML_BOGUS_TEXT_EXPRESSION,
             HTML_CLOSING_ELEMENT => HTML_BOGUS_ELEMENT,
 
             _ => HTML_BOGUS,

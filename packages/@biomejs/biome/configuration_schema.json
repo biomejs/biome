@@ -1806,7 +1806,14 @@
 		},
 		"HtmlParserConfiguration": {
 			"description": "Options that changes how the HTML parser behaves",
-			"type": "null"
+			"type": "object",
+			"properties": {
+				"interpolation": {
+					"description": "Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
 		},
 		"ImportGroup": {
 			"anyOf": [
