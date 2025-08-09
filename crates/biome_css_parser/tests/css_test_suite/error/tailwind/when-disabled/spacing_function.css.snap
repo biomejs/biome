@@ -1,0 +1,127 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+.test-spacing-basic {
+	margin: --spacing(4);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..20 "test-spacing-basic" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@20..21 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@21..29 "margin" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@29..31 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    _SPACING_KW@31..40 "--spacing" [] [],
+                                                    L_PAREN@40..41 "(" [] [],
+                                                    CSS_NUMBER_LITERAL@41..42 "4" [] [],
+                                                    R_PAREN@42..43 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@43..44 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@44..46 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@46..47 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..47
+  0: (empty)
+  1: CSS_RULE_LIST@0..46
+    0: CSS_QUALIFIED_RULE@0..46
+      0: CSS_SELECTOR_LIST@0..20
+        0: CSS_COMPOUND_SELECTOR@0..20
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..20
+            0: CSS_CLASS_SELECTOR@0..20
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..20
+                0: IDENT@1..20 "test-spacing-basic" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@20..46
+        0: L_CURLY@20..21 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@21..44
+          0: CSS_DECLARATION_WITH_SEMICOLON@21..44
+            0: CSS_DECLARATION@21..43
+              0: CSS_BOGUS_PROPERTY@21..43
+                0: CSS_IDENTIFIER@21..29
+                  0: IDENT@21..29 "margin" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@29..31 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@31..43
+                  0: CSS_BOGUS_PROPERTY_VALUE@31..43
+                    0: _SPACING_KW@31..40 "--spacing" [] []
+                    1: L_PAREN@40..41 "(" [] []
+                    2: CSS_NUMBER_LITERAL@41..42 "4" [] []
+                    3: R_PAREN@42..43 ")" [] []
+              1: (empty)
+            1: SEMICOLON@43..44 ";" [] []
+        2: R_CURLY@44..46 "}" [Newline("\n")] []
+  2: EOF@46..47 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+spacing_function.css:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+    1 │ .test-spacing-basic {
+  > 2 │ 	margin: --spacing(4);
+      │ 	        ^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Enable `tailwind_directives` in the css parser options.
+  
+```

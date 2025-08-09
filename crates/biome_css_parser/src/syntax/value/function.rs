@@ -271,16 +271,17 @@ pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> Pa
 
 /// Checks if the current position is at a Tailwind function
 pub(crate) fn is_at_tailwind_function(p: &mut CssParser) -> bool {
-    if !p.options().is_tailwind_directives_enabled() {
-        return false;
-    }
-
     p.at(T![__alpha]) || p.at(T![__spacing]) || p.at(T![__value])
 }
 
 /// Parses Tailwind CSS 4.0 functions
 pub(crate) fn parse_tailwind_function(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_tailwind_function(p) {
+        return Absent;
+    }
+
+    if !p.options().is_tailwind_directives_enabled() {
+        p.error(tailwind_disabled(p, p.cur_range()));
         return Absent;
     }
 
