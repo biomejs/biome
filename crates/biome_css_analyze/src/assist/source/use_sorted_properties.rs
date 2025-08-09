@@ -268,6 +268,9 @@ impl RecessOrderMember {
                                 NodeKindOrder::CustomProperty
                             }
                             AnyCssDeclarationName::CssIdentifier(_) => NodeKindOrder::Declaration,
+                            AnyCssDeclarationName::CssTailwindValueThemeReference(_) => {
+                                NodeKindOrder::Declaration
+                            }
                         }
                     }
                 }

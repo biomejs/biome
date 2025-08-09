@@ -49,7 +49,7 @@ CssRoot {
                                 colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindAlphaFunction {
-                                        __alpha_token: _ALPHA_KW@28..35 "--alpha" [] [],
+                                        alpha_token: _ALPHA_KW@28..35 "--alpha" [] [],
                                         l_paren_token: L_PAREN@35..36 "(" [] [],
                                         value: CssBinaryExpression {
                                             left: CssListOfComponentValuesExpression {
@@ -129,7 +129,7 @@ CssRoot {
                                 colon_token: COLON@80..82 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindAlphaFunction {
-                                        __alpha_token: _ALPHA_KW@82..89 "--alpha" [] [],
+                                        alpha_token: _ALPHA_KW@82..89 "--alpha" [] [],
                                         l_paren_token: L_PAREN@89..90 "(" [] [],
                                         value: CssBinaryExpression {
                                             left: CssListOfComponentValuesExpression {

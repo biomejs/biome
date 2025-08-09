@@ -202,42 +202,59 @@ CssRoot {
                                     selector: FROM_KW@142..149 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssBogusBlock {
-                                items: [
-                                    L_CURLY@149..150 "{" [] [],
-                                    CssBogus {
-                                        items: [
-                                            CssDeclarationWithSemicolon {
-                                                declaration: CssDeclaration {
-                                                    property: CssGenericProperty {
-                                                        name: CssIdentifier {
-                                                            value_token: IDENT@150..157 "color" [Newline("\n"), Whitespace("\t")] [],
-                                                        },
-                                                        colon_token: COLON@157..159 ":" [] [Whitespace(" ")],
-                                                        value: CssGenericComponentValueList [
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@149..150 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@150..157 "color" [Newline("\n"), Whitespace("\t")] [],
+                                                },
+                                                colon_token: COLON@157..159 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@159..162 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@162..163 ";" [] [],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssBogusProperty {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@163..169 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                                    },
+                                                    CssBogus {
+                                                        items: [
+                                                            CssBogusPropertyValue {
+                                                                items: [
+                                                                    L_CURLY@169..170 "{" [] [],
+                                                                ],
+                                                            },
                                                             CssIdentifier {
-                                                                value_token: IDENT@159..162 "red" [] [],
+                                                                value_token: IDENT@170..178 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                            },
+                                                            CssBogusPropertyValue {
+                                                                items: [
+                                                                    COLON@178..180 ":" [] [Whitespace(" ")],
+                                                                    IDENT@180..184 "blue" [] [],
+                                                                ],
                                                             },
                                                         ],
                                                     },
-                                                    important: missing (optional),
-                                                },
-                                                semicolon_token: SEMICOLON@162..163 ";" [] [],
-                                            },
-                                            CssBogus {
-                                                items: [
-                                                    TO_KW@163..169 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
-                                                    L_CURLY@169..170 "{" [] [],
-                                                    IDENT@170..178 "color" [Newline("\n"), Whitespace("\t\t")] [],
-                                                    COLON@178..180 ":" [] [Whitespace(" ")],
-                                                    IDENT@180..184 "blue" [] [],
-                                                    SEMICOLON@184..185 ";" [] [],
                                                 ],
                                             },
-                                        ],
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@184..185 ";" [] [],
                                     },
-                                    R_CURLY@185..188 "}" [Newline("\n"), Whitespace("\t")] [],
                                 ],
+                                r_curly_token: R_CURLY@185..188 "}" [Newline("\n"), Whitespace("\t")] [],
                             },
                         },
                     ],
@@ -261,34 +278,45 @@ CssRoot {
                                     selector: FROM_KW@210..216 "from" [Newline("\n"), Whitespace("\t")] [],
                                 },
                                 COMMA@216..218 "," [] [Whitespace(" ")],
-                                CssBogusSelector {
-                                    items: [
-                                        IDENT@218..237 "someivalidselector" [] [Whitespace(" ")],
-                                    ],
-                                },
+                                missing element,
                             ],
-                            block: CssDeclarationBlock {
-                                l_curly_token: L_CURLY@237..238 "{" [] [],
-                                declarations: CssDeclarationList [
-                                    CssDeclarationWithSemicolon {
-                                        declaration: CssDeclaration {
-                                            property: CssGenericProperty {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@238..246 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                            block: CssBogusBlock {
+                                items: [
+                                    CssDeclarationList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssBogusProperty {
+                                                    items: [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@218..237 "someivalidselector" [] [Whitespace(" ")],
+                                                        },
+                                                        CssBogus {
+                                                            items: [
+                                                                CssBogusPropertyValue {
+                                                                    items: [
+                                                                        L_CURLY@237..238 "{" [] [],
+                                                                    ],
+                                                                },
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@238..246 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                                },
+                                                                CssBogusPropertyValue {
+                                                                    items: [
+                                                                        COLON@246..248 ":" [] [Whitespace(" ")],
+                                                                        IDENT@248..251 "red" [] [],
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
                                                 },
-                                                colon_token: COLON@246..248 ":" [] [Whitespace(" ")],
-                                                value: CssGenericComponentValueList [
-                                                    CssIdentifier {
-                                                        value_token: IDENT@248..251 "red" [] [],
-                                                    },
-                                                ],
+                                                important: missing (optional),
                                             },
-                                            important: missing (optional),
+                                            semicolon_token: SEMICOLON@251..252 ";" [] [],
                                         },
-                                        semicolon_token: SEMICOLON@251..252 ";" [] [],
-                                    },
+                                    ],
+                                    R_CURLY@252..255 "}" [Newline("\n"), Whitespace("\t")] [],
                                 ],
-                                r_curly_token: R_CURLY@252..255 "}" [Newline("\n"), Whitespace("\t")] [],
                             },
                         },
                         CssKeyframesItem {
@@ -488,9 +516,9 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@142..149
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@142..149
                   0: FROM_KW@142..149 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-              1: CSS_BOGUS_BLOCK@149..188
+              1: CSS_DECLARATION_BLOCK@149..188
                 0: L_CURLY@149..150 "{" [] []
-                1: CSS_BOGUS@150..185
+                1: CSS_DECLARATION_LIST@150..185
                   0: CSS_DECLARATION_WITH_SEMICOLON@150..163
                     0: CSS_DECLARATION@150..162
                       0: CSS_GENERIC_PROPERTY@150..162
@@ -502,13 +530,21 @@ CssRoot {
                             0: IDENT@159..162 "red" [] []
                       1: (empty)
                     1: SEMICOLON@162..163 ";" [] []
-                  1: CSS_BOGUS@163..185
-                    0: TO_KW@163..169 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
-                    1: L_CURLY@169..170 "{" [] []
-                    2: IDENT@170..178 "color" [Newline("\n"), Whitespace("\t\t")] []
-                    3: COLON@178..180 ":" [] [Whitespace(" ")]
-                    4: IDENT@180..184 "blue" [] []
-                    5: SEMICOLON@184..185 ";" [] []
+                  1: CSS_DECLARATION_WITH_SEMICOLON@163..185
+                    0: CSS_DECLARATION@163..184
+                      0: CSS_BOGUS_PROPERTY@163..184
+                        0: CSS_IDENTIFIER@163..169
+                          0: IDENT@163..169 "to" [Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                        1: CSS_BOGUS@169..184
+                          0: CSS_BOGUS_PROPERTY_VALUE@169..170
+                            0: L_CURLY@169..170 "{" [] []
+                          1: CSS_IDENTIFIER@170..178
+                            0: IDENT@170..178 "color" [Newline("\n"), Whitespace("\t\t")] []
+                          2: CSS_BOGUS_PROPERTY_VALUE@178..184
+                            0: COLON@178..180 ":" [] [Whitespace(" ")]
+                            1: IDENT@180..184 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@184..185 ";" [] []
                 2: R_CURLY@185..188 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@188..190 "}" [Newline("\n")] []
     3: CSS_AT_RULE@190..334
@@ -521,27 +557,29 @@ CssRoot {
           0: L_CURLY@209..210 "{" [] []
           1: CSS_KEYFRAMES_ITEM_LIST@210..332
             0: CSS_KEYFRAMES_ITEM@210..255
-              0: CSS_KEYFRAMES_SELECTOR_LIST@210..237
+              0: CSS_KEYFRAMES_SELECTOR_LIST@210..218
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@210..216
                   0: FROM_KW@210..216 "from" [Newline("\n"), Whitespace("\t")] []
                 1: COMMA@216..218 "," [] [Whitespace(" ")]
-                2: CSS_BOGUS_SELECTOR@218..237
-                  0: IDENT@218..237 "someivalidselector" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_BLOCK@237..255
-                0: L_CURLY@237..238 "{" [] []
-                1: CSS_DECLARATION_LIST@238..252
-                  0: CSS_DECLARATION_WITH_SEMICOLON@238..252
-                    0: CSS_DECLARATION@238..251
-                      0: CSS_GENERIC_PROPERTY@238..251
-                        0: CSS_IDENTIFIER@238..246
-                          0: IDENT@238..246 "color" [Newline("\n"), Whitespace("\t\t")] []
-                        1: COLON@246..248 ":" [] [Whitespace(" ")]
-                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@248..251
-                          0: CSS_IDENTIFIER@248..251
-                            0: IDENT@248..251 "red" [] []
+                2: (empty)
+              1: CSS_BOGUS_BLOCK@218..255
+                0: CSS_DECLARATION_LIST@218..252
+                  0: CSS_DECLARATION_WITH_SEMICOLON@218..252
+                    0: CSS_DECLARATION@218..251
+                      0: CSS_BOGUS_PROPERTY@218..251
+                        0: CSS_IDENTIFIER@218..237
+                          0: IDENT@218..237 "someivalidselector" [] [Whitespace(" ")]
+                        1: CSS_BOGUS@237..251
+                          0: CSS_BOGUS_PROPERTY_VALUE@237..238
+                            0: L_CURLY@237..238 "{" [] []
+                          1: CSS_IDENTIFIER@238..246
+                            0: IDENT@238..246 "color" [Newline("\n"), Whitespace("\t\t")] []
+                          2: CSS_BOGUS_PROPERTY_VALUE@246..251
+                            0: COLON@246..248 ":" [] [Whitespace(" ")]
+                            1: IDENT@248..251 "red" [] []
                       1: (empty)
                     1: SEMICOLON@251..252 ";" [] []
-                2: R_CURLY@252..255 "}" [Newline("\n"), Whitespace("\t")] []
+                1: R_CURLY@252..255 "}" [Newline("\n"), Whitespace("\t")] []
             1: CSS_KEYFRAMES_ITEM@255..305
               0: CSS_KEYFRAMES_SELECTOR_LIST@255..287
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@255..261
@@ -629,30 +667,38 @@ at_rule_keyframes_1.css:12:2 parse ━━━━━━━━━━━━━━━
   
   i Remove }
   
-at_rule_keyframes_1.css:22:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+at_rule_keyframes_1.css:22:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a declaration item but instead found 'to {
-    		color: blue;'.
+  × expected `:` but instead found `{`
   
     20 │ 	color: red;
     21 │ 
   > 22 │ 	to {
-       │ 	^^^^
+       │ 	   ^
+    23 │ 		color: blue;
+    24 │ 	}
+  
+  i Remove {
+  
+at_rule_keyframes_1.css:23:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    22 │ 	to {
   > 23 │ 		color: blue;
-       │ 		^^^^^^^^^^^^
+       │ 		     ^^^^^^
     24 │ 	}
     25 │ }
   
-  i Expected a declaration item here.
+  i Expected one of:
   
-    20 │ 	color: red;
-    21 │ 
-  > 22 │ 	to {
-       │ 	^^^^
-  > 23 │ 		color: blue;
-       │ 		^^^^^^^^^^^^
-    24 │ 	}
-    25 │ }
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
   
 at_rule_keyframes_1.css:28:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -669,6 +715,39 @@ at_rule_keyframes_1.css:28:8 parse ━━━━━━━━━━━━━━━
   - from
   - to
   - a percentage
+  
+at_rule_keyframes_1.css:28:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `{`
+  
+    27 │ @keyframes name3 {
+  > 28 │ 	from, someivalidselector {
+       │ 	                         ^
+    29 │ 		color: red;
+    30 │ 	}
+  
+  i Remove {
+  
+at_rule_keyframes_1.css:29:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    27 │ @keyframes name3 {
+    28 │ 	from, someivalidselector {
+  > 29 │ 		color: red;
+       │ 		     ^^^^^
+    30 │ 	}
+    31 │ 	from, someivalidselector, 50% {
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
   
 at_rule_keyframes_1.css:31:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

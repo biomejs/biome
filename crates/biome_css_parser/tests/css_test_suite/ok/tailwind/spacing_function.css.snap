@@ -116,7 +116,7 @@ CssRoot {
                                 colon_token: COLON@57..59 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@59..68 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@59..68 "--spacing" [] [],
                                         l_paren_token: L_PAREN@68..69 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -142,7 +142,7 @@ CssRoot {
                                 colon_token: COLON@82..84 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@84..93 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@84..93 "--spacing" [] [],
                                         l_paren_token: L_PAREN@93..94 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -154,7 +154,7 @@ CssRoot {
                                         r_paren_token: R_PAREN@95..97 ")" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@97..106 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@97..106 "--spacing" [] [],
                                         l_paren_token: L_PAREN@106..107 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -202,7 +202,7 @@ CssRoot {
                                 colon_token: COLON@150..152 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@152..161 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@152..161 "--spacing" [] [],
                                         l_paren_token: L_PAREN@161..162 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -243,7 +243,7 @@ CssRoot {
                                 colon_token: COLON@187..189 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@189..198 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@189..198 "--spacing" [] [],
                                         l_paren_token: L_PAREN@198..199 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -316,7 +316,7 @@ CssRoot {
                                                     left: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssTailwindSpacingFunction {
-                                                                __spacing_token: _SPACING_KW@263..272 "--spacing" [] [],
+                                                                spacing_token: _SPACING_KW@263..272 "--spacing" [] [],
                                                                 l_paren_token: L_PAREN@272..273 "(" [] [],
                                                                 value: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
@@ -368,7 +368,7 @@ CssRoot {
                                                     left: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssTailwindSpacingFunction {
-                                                                __spacing_token: _SPACING_KW@298..307 "--spacing" [] [],
+                                                                spacing_token: _SPACING_KW@298..307 "--spacing" [] [],
                                                                 l_paren_token: L_PAREN@307..308 "(" [] [],
                                                                 value: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
@@ -428,7 +428,7 @@ CssRoot {
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssTailwindSpacingFunction {
-                                                                __spacing_token: _SPACING_KW@340..349 "--spacing" [] [],
+                                                                spacing_token: _SPACING_KW@340..349 "--spacing" [] [],
                                                                 l_paren_token: L_PAREN@349..350 "(" [] [],
                                                                 value: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
@@ -483,7 +483,7 @@ CssRoot {
                                 colon_token: COLON@398..400 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@400..409 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@400..409 "--spacing" [] [],
                                         l_paren_token: L_PAREN@409..410 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -495,7 +495,7 @@ CssRoot {
                                         r_paren_token: R_PAREN@411..413 ")" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@413..422 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@413..422 "--spacing" [] [],
                                         l_paren_token: L_PAREN@422..423 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -507,7 +507,7 @@ CssRoot {
                                         r_paren_token: R_PAREN@424..426 ")" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@426..435 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@426..435 "--spacing" [] [],
                                         l_paren_token: L_PAREN@435..436 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -519,7 +519,7 @@ CssRoot {
                                         r_paren_token: R_PAREN@437..439 ")" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@439..448 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@439..448 "--spacing" [] [],
                                         l_paren_token: L_PAREN@448..449 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -545,7 +545,7 @@ CssRoot {
                                 colon_token: COLON@462..464 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@464..473 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@464..473 "--spacing" [] [],
                                         l_paren_token: L_PAREN@473..474 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -557,7 +557,7 @@ CssRoot {
                                         r_paren_token: R_PAREN@475..477 ")" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@477..486 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@477..486 "--spacing" [] [],
                                         l_paren_token: L_PAREN@486..487 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -614,7 +614,7 @@ CssRoot {
                                                 any_css_expression: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssTailwindSpacingFunction {
-                                                            __spacing_token: _SPACING_KW@557..566 "--spacing" [] [],
+                                                            spacing_token: _SPACING_KW@557..566 "--spacing" [] [],
                                                             l_paren_token: L_PAREN@566..567 "(" [] [],
                                                             value: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
@@ -646,7 +646,7 @@ CssRoot {
                                 colon_token: COLON@584..586 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@586..595 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@586..595 "--spacing" [] [],
                                         l_paren_token: L_PAREN@595..596 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -658,7 +658,7 @@ CssRoot {
                                         r_paren_token: R_PAREN@597..599 ")" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@599..608 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@599..608 "--spacing" [] [],
                                         l_paren_token: L_PAREN@608..609 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -670,7 +670,7 @@ CssRoot {
                                         r_paren_token: R_PAREN@610..612 ")" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@612..621 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@612..621 "--spacing" [] [],
                                         l_paren_token: L_PAREN@621..622 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -766,7 +766,7 @@ CssRoot {
                                 colon_token: COLON@679..681 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@681..690 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@681..690 "--spacing" [] [],
                                         l_paren_token: L_PAREN@690..691 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -778,7 +778,7 @@ CssRoot {
                                         r_paren_token: R_PAREN@692..694 ")" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@694..703 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@694..703 "--spacing" [] [],
                                         l_paren_token: L_PAREN@703..704 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -804,7 +804,7 @@ CssRoot {
                                 colon_token: COLON@731..733 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@733..742 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@733..742 "--spacing" [] [],
                                         l_paren_token: L_PAREN@742..743 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -820,7 +820,7 @@ CssRoot {
                                         unit_token: IDENT@748..751 "fr" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@751..760 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@751..760 "--spacing" [] [],
                                         l_paren_token: L_PAREN@760..761 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -868,7 +868,7 @@ CssRoot {
                                 colon_token: COLON@808..810 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@810..819 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@810..819 "--spacing" [] [],
                                         l_paren_token: L_PAREN@819..820 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -894,7 +894,7 @@ CssRoot {
                                 colon_token: COLON@835..837 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@837..846 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@837..846 "--spacing" [] [],
                                         l_paren_token: L_PAREN@846..847 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -906,7 +906,7 @@ CssRoot {
                                         r_paren_token: R_PAREN@850..852 ")" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@852..861 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@852..861 "--spacing" [] [],
                                         l_paren_token: L_PAREN@861..862 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -954,7 +954,7 @@ CssRoot {
                                 colon_token: COLON@907..909 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@909..918 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@909..918 "--spacing" [] [],
                                         l_paren_token: L_PAREN@918..919 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -980,7 +980,7 @@ CssRoot {
                                 colon_token: COLON@932..934 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@934..943 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@934..943 "--spacing" [] [],
                                         l_paren_token: L_PAREN@943..944 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1006,7 +1006,7 @@ CssRoot {
                                 colon_token: COLON@961..963 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@963..972 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@963..972 "--spacing" [] [],
                                         l_paren_token: L_PAREN@972..973 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1054,7 +1054,7 @@ CssRoot {
                                 colon_token: COLON@1022..1024 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1024..1033 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1024..1033 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1033..1034 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1080,7 +1080,7 @@ CssRoot {
                                 colon_token: COLON@1044..1046 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1046..1055 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1046..1055 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1055..1056 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1128,7 +1128,7 @@ CssRoot {
                                 colon_token: COLON@1101..1103 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1103..1112 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1103..1112 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1112..1113 "(" [] [],
                                         value: missing (optional),
                                         r_paren_token: R_PAREN@1113..1114 ")" [] [],
@@ -1170,7 +1170,7 @@ CssRoot {
                                 colon_token: COLON@1161..1163 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1163..1172 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1163..1172 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1172..1173 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1221,7 +1221,7 @@ CssRoot {
                                 colon_token: COLON@1209..1211 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1211..1220 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1211..1220 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1220..1221 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1304,7 +1304,7 @@ CssRoot {
                                 colon_token: COLON@1291..1293 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1293..1302 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1293..1302 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1302..1303 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1316,7 +1316,7 @@ CssRoot {
                                         r_paren_token: R_PAREN@1304..1306 ")" [] [Whitespace(" ")],
                                     },
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1306..1315 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1306..1315 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1315..1316 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1342,7 +1342,7 @@ CssRoot {
                                 colon_token: COLON@1344..1346 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1346..1355 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1346..1355 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1355..1356 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1390,7 +1390,7 @@ CssRoot {
                                 colon_token: COLON@1404..1406 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1406..1415 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1406..1415 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1415..1416 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1416,7 +1416,7 @@ CssRoot {
                                 colon_token: COLON@1429..1431 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1431..1440 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1431..1440 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1440..1441 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1464,7 +1464,7 @@ CssRoot {
                                 colon_token: COLON@1488..1490 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1490..1499 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1490..1499 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1499..1500 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1490,7 +1490,7 @@ CssRoot {
                                 colon_token: COLON@1509..1511 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1511..1520 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1511..1520 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1520..1521 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1516,7 +1516,7 @@ CssRoot {
                                 colon_token: COLON@1532..1534 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1534..1543 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1534..1543 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1543..1544 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1542,7 +1542,7 @@ CssRoot {
                                 colon_token: COLON@1556..1558 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1558..1567 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1558..1567 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1567..1568 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
@@ -1568,7 +1568,7 @@ CssRoot {
                                 colon_token: COLON@1578..1580 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@1580..1589 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@1580..1589 "--spacing" [] [],
                                         l_paren_token: L_PAREN@1589..1590 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [

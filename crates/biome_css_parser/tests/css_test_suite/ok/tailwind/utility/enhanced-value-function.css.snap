@@ -71,7 +71,7 @@ CssRoot {
                                     colon_token: COLON@89..91 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssTailwindValueFunction {
-                                            __value_token: _VALUE_KW@91..98 "--value" [] [],
+                                            value_token: _VALUE_KW@91..98 "--value" [] [],
                                             l_paren_token: L_PAREN@98..99 "(" [] [],
                                             value: CssTailwindValueList [
                                                 CssTailwindValueArbitraryType {
@@ -118,7 +118,7 @@ CssRoot {
                                     colon_token: COLON@142..144 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssTailwindValueFunction {
-                                            __value_token: _VALUE_KW@144..151 "--value" [] [],
+                                            value_token: _VALUE_KW@144..151 "--value" [] [],
                                             l_paren_token: L_PAREN@151..152 "(" [] [],
                                             value: CssTailwindValueList [
                                                 CssTailwindValueArbitraryType {
@@ -165,7 +165,7 @@ CssRoot {
                                     colon_token: COLON@191..193 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssTailwindValueFunction {
-                                            __value_token: _VALUE_KW@193..200 "--value" [] [],
+                                            value_token: _VALUE_KW@193..200 "--value" [] [],
                                             l_paren_token: L_PAREN@200..201 "(" [] [],
                                             value: CssTailwindValueList [
                                                 CssTailwindValueArbitraryType {
@@ -212,7 +212,7 @@ CssRoot {
                                     colon_token: COLON@303..305 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssTailwindValueFunction {
-                                            __value_token: _VALUE_KW@305..312 "--value" [] [],
+                                            value_token: _VALUE_KW@305..312 "--value" [] [],
                                             l_paren_token: L_PAREN@312..313 "(" [] [],
                                             value: CssTailwindValueList [
                                                 CssTailwindValueThemeReference {
@@ -259,7 +259,7 @@ CssRoot {
                                     colon_token: COLON@355..357 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssTailwindValueFunction {
-                                            __value_token: _VALUE_KW@357..364 "--value" [] [],
+                                            value_token: _VALUE_KW@357..364 "--value" [] [],
                                             l_paren_token: L_PAREN@364..365 "(" [] [],
                                             value: CssTailwindValueList [
                                                 CssTailwindValueThemeReference {
@@ -306,7 +306,7 @@ CssRoot {
                                     colon_token: COLON@458..460 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssTailwindValueFunction {
-                                            __value_token: _VALUE_KW@460..467 "--value" [] [],
+                                            value_token: _VALUE_KW@460..467 "--value" [] [],
                                             l_paren_token: L_PAREN@467..468 "(" [] [],
                                             value: CssTailwindValueList [
                                                 CssIdentifier {
@@ -349,7 +349,7 @@ CssRoot {
                                     colon_token: COLON@581..583 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssTailwindValueFunction {
-                                            __value_token: _VALUE_KW@583..590 "--value" [] [],
+                                            value_token: _VALUE_KW@583..590 "--value" [] [],
                                             l_paren_token: L_PAREN@590..591 "(" [] [],
                                             value: CssTailwindValueList [
                                                 CssIdentifier {
@@ -389,7 +389,7 @@ CssRoot {
                                     colon_token: COLON@634..636 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssTailwindValueFunction {
-                                            __value_token: _VALUE_KW@636..643 "--value" [] [],
+                                            value_token: _VALUE_KW@636..643 "--value" [] [],
                                             l_paren_token: L_PAREN@643..644 "(" [] [],
                                             value: CssTailwindValueList [
                                                 CssTailwindValueArbitraryType {
@@ -425,7 +425,7 @@ CssRoot {
                                     colon_token: COLON@678..680 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssTailwindValueFunction {
-                                            __value_token: _VALUE_KW@680..687 "--value" [] [],
+                                            value_token: _VALUE_KW@680..687 "--value" [] [],
                                             l_paren_token: L_PAREN@687..688 "(" [] [],
                                             value: CssTailwindValueList [
                                                 CssTailwindValueArbitraryType {

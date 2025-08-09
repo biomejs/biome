@@ -605,7 +605,7 @@ CssGenericDelimiter =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier
+AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | CssTailwindValueThemeReference
 
 CssDeclarationImportant =
 	'!'

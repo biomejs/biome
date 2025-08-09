@@ -470,7 +470,7 @@ pub(crate) fn parse_custom_identifier_with_keywords(
 
 #[inline]
 pub(crate) fn is_at_dashed_identifier(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && p.cur_text().starts_with("--")
+    is_at_identifier(p) && p.cur_text().starts_with("--") || p.at(T![__spacing])
 }
 
 /// Dashed identifiers are any identifiers that start with two dashes (`--`).
@@ -483,7 +483,14 @@ pub(crate) fn parse_dashed_identifier(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(T![ident]);
+    // HACK: tailwind has some functions that start with two dashes (`--`)
+    // The more correct way to handle this would be to make it so that the lexer
+    // only emits the `--spacing` token where it is actually applicable.
+    if p.at(T![__spacing]) {
+        p.bump_remap(T![ident]);
+    } else {
+        p.bump(T![ident]);
+    }
     Present(m.complete(p, CSS_DASHED_IDENTIFIER))
 }
 

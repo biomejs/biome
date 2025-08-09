@@ -6425,13 +6425,13 @@ impl CssTailwindAlphaFunction {
     }
     pub fn as_fields(&self) -> CssTailwindAlphaFunctionFields {
         CssTailwindAlphaFunctionFields {
-            __alpha_token: self.__alpha_token(),
+            alpha_token: self.alpha_token(),
             l_paren_token: self.l_paren_token(),
             value: self.value(),
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn __alpha_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn alpha_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -6454,7 +6454,7 @@ impl Serialize for CssTailwindAlphaFunction {
 }
 #[derive(Serialize)]
 pub struct CssTailwindAlphaFunctionFields {
-    pub __alpha_token: SyntaxResult<SyntaxToken>,
+    pub alpha_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub value: Option<AnyCssExpression>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -6475,13 +6475,13 @@ impl CssTailwindSpacingFunction {
     }
     pub fn as_fields(&self) -> CssTailwindSpacingFunctionFields {
         CssTailwindSpacingFunctionFields {
-            __spacing_token: self.__spacing_token(),
+            spacing_token: self.spacing_token(),
             l_paren_token: self.l_paren_token(),
             value: self.value(),
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn __spacing_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn spacing_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -6504,7 +6504,7 @@ impl Serialize for CssTailwindSpacingFunction {
 }
 #[derive(Serialize)]
 pub struct CssTailwindSpacingFunctionFields {
-    pub __spacing_token: SyntaxResult<SyntaxToken>,
+    pub spacing_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub value: Option<AnyCssExpression>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -6570,13 +6570,13 @@ impl CssTailwindValueFunction {
     }
     pub fn as_fields(&self) -> CssTailwindValueFunctionFields {
         CssTailwindValueFunctionFields {
-            __value_token: self.__value_token(),
+            value_token: self.value_token(),
             l_paren_token: self.l_paren_token(),
             value: self.value(),
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn __value_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -6599,7 +6599,7 @@ impl Serialize for CssTailwindValueFunction {
 }
 #[derive(Serialize)]
 pub struct CssTailwindValueFunctionFields {
-    pub __value_token: SyntaxResult<SyntaxToken>,
+    pub value_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub value: CssTailwindValueList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -8135,6 +8135,7 @@ impl AnyCssDeclarationBlock {
 pub enum AnyCssDeclarationName {
     CssDashedIdentifier(CssDashedIdentifier),
     CssIdentifier(CssIdentifier),
+    CssTailwindValueThemeReference(CssTailwindValueThemeReference),
 }
 impl AnyCssDeclarationName {
     pub fn as_css_dashed_identifier(&self) -> Option<&CssDashedIdentifier> {
@@ -8146,6 +8147,12 @@ impl AnyCssDeclarationName {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_tailwind_value_theme_reference(&self) -> Option<&CssTailwindValueThemeReference> {
+        match &self {
+            Self::CssTailwindValueThemeReference(item) => Some(item),
             _ => None,
         }
     }
@@ -17629,8 +17636,8 @@ impl std::fmt::Debug for CssTailwindAlphaFunction {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssTailwindAlphaFunction")
                 .field(
-                    "__alpha_token",
-                    &support::DebugSyntaxResult(self.__alpha_token()),
+                    "alpha_token",
+                    &support::DebugSyntaxResult(self.alpha_token()),
                 )
                 .field(
                     "l_paren_token",
@@ -17688,8 +17695,8 @@ impl std::fmt::Debug for CssTailwindSpacingFunction {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssTailwindSpacingFunction")
                 .field(
-                    "__spacing_token",
-                    &support::DebugSyntaxResult(self.__spacing_token()),
+                    "spacing_token",
+                    &support::DebugSyntaxResult(self.spacing_token()),
                 )
                 .field(
                     "l_paren_token",
@@ -17802,8 +17809,8 @@ impl std::fmt::Debug for CssTailwindValueFunction {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssTailwindValueFunction")
                 .field(
-                    "__value_token",
-                    &support::DebugSyntaxResult(self.__value_token()),
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
                 )
                 .field(
                     "l_paren_token",
@@ -20517,17 +20524,29 @@ impl From<CssIdentifier> for AnyCssDeclarationName {
         Self::CssIdentifier(node)
     }
 }
+impl From<CssTailwindValueThemeReference> for AnyCssDeclarationName {
+    fn from(node: CssTailwindValueThemeReference) -> Self {
+        Self::CssTailwindValueThemeReference(node)
+    }
+}
 impl AstNode for AnyCssDeclarationName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssDashedIdentifier::KIND_SET.union(CssIdentifier::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssDashedIdentifier::KIND_SET
+        .union(CssIdentifier::KIND_SET)
+        .union(CssTailwindValueThemeReference::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_DASHED_IDENTIFIER | CSS_IDENTIFIER)
+        matches!(
+            kind,
+            CSS_DASHED_IDENTIFIER | CSS_IDENTIFIER | CSS_TAILWIND_VALUE_THEME_REFERENCE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_DASHED_IDENTIFIER => Self::CssDashedIdentifier(CssDashedIdentifier { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            CSS_TAILWIND_VALUE_THEME_REFERENCE => {
+                Self::CssTailwindValueThemeReference(CssTailwindValueThemeReference { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -20536,12 +20555,14 @@ impl AstNode for AnyCssDeclarationName {
         match self {
             Self::CssDashedIdentifier(it) => &it.syntax,
             Self::CssIdentifier(it) => &it.syntax,
+            Self::CssTailwindValueThemeReference(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssDashedIdentifier(it) => it.syntax,
             Self::CssIdentifier(it) => it.syntax,
+            Self::CssTailwindValueThemeReference(it) => it.syntax,
         }
     }
 }
@@ -20550,6 +20571,7 @@ impl std::fmt::Debug for AnyCssDeclarationName {
         match self {
             Self::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssTailwindValueThemeReference(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -20558,6 +20580,7 @@ impl From<AnyCssDeclarationName> for SyntaxNode {
         match n {
             AnyCssDeclarationName::CssDashedIdentifier(it) => it.into(),
             AnyCssDeclarationName::CssIdentifier(it) => it.into(),
+            AnyCssDeclarationName::CssTailwindValueThemeReference(it) => it.into(),
         }
     }
 }

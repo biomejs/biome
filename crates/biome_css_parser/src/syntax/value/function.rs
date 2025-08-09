@@ -401,7 +401,7 @@ fn parse_tailwind_value_arbitrary_type(p: &mut CssParser) -> ParsedSyntax {
 }
 
 /// Parses theme references: --value(--tab-size-*)
-fn parse_tailwind_value_theme_reference(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_tailwind_value_theme_reference(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_dashed_identifier(p) {
         return Absent;
     }

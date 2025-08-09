@@ -282,7 +282,7 @@ CssRoot {
                                                     right: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssTailwindAlphaFunction {
-                                                                __alpha_token: _ALPHA_KW@340..347 "--alpha" [] [],
+                                                                alpha_token: _ALPHA_KW@340..347 "--alpha" [] [],
                                                                 l_paren_token: L_PAREN@347..348 "(" [] [],
                                                                 value: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
@@ -315,7 +315,7 @@ CssRoot {
                                 colon_token: COLON@363..365 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssTailwindSpacingFunction {
-                                        __spacing_token: _SPACING_KW@365..374 "--spacing" [] [],
+                                        spacing_token: _SPACING_KW@365..374 "--spacing" [] [],
                                         l_paren_token: L_PAREN@374..375 "(" [] [],
                                         value: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [

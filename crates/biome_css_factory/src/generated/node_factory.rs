@@ -2210,19 +2210,19 @@ pub fn css_supports_or_condition(
     ))
 }
 pub fn css_tailwind_alpha_function(
-    __alpha_token: SyntaxToken,
+    alpha_token: SyntaxToken,
     l_paren_token: SyntaxToken,
     r_paren_token: SyntaxToken,
 ) -> CssTailwindAlphaFunctionBuilder {
     CssTailwindAlphaFunctionBuilder {
-        __alpha_token,
+        alpha_token,
         l_paren_token,
         r_paren_token,
         value: None,
     }
 }
 pub struct CssTailwindAlphaFunctionBuilder {
-    __alpha_token: SyntaxToken,
+    alpha_token: SyntaxToken,
     l_paren_token: SyntaxToken,
     r_paren_token: SyntaxToken,
     value: Option<AnyCssExpression>,
@@ -2236,7 +2236,7 @@ impl CssTailwindAlphaFunctionBuilder {
         CssTailwindAlphaFunction::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_TAILWIND_ALPHA_FUNCTION,
             [
-                Some(SyntaxElement::Token(self.__alpha_token)),
+                Some(SyntaxElement::Token(self.alpha_token)),
                 Some(SyntaxElement::Token(self.l_paren_token)),
                 self.value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
@@ -2246,19 +2246,19 @@ impl CssTailwindAlphaFunctionBuilder {
     }
 }
 pub fn css_tailwind_spacing_function(
-    __spacing_token: SyntaxToken,
+    spacing_token: SyntaxToken,
     l_paren_token: SyntaxToken,
     r_paren_token: SyntaxToken,
 ) -> CssTailwindSpacingFunctionBuilder {
     CssTailwindSpacingFunctionBuilder {
-        __spacing_token,
+        spacing_token,
         l_paren_token,
         r_paren_token,
         value: None,
     }
 }
 pub struct CssTailwindSpacingFunctionBuilder {
-    __spacing_token: SyntaxToken,
+    spacing_token: SyntaxToken,
     l_paren_token: SyntaxToken,
     r_paren_token: SyntaxToken,
     value: Option<AnyCssExpression>,
@@ -2272,7 +2272,7 @@ impl CssTailwindSpacingFunctionBuilder {
         CssTailwindSpacingFunction::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_TAILWIND_SPACING_FUNCTION,
             [
-                Some(SyntaxElement::Token(self.__spacing_token)),
+                Some(SyntaxElement::Token(self.spacing_token)),
                 Some(SyntaxElement::Token(self.l_paren_token)),
                 self.value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
@@ -2296,7 +2296,7 @@ pub fn css_tailwind_value_arbitrary_type(
     ))
 }
 pub fn css_tailwind_value_function(
-    __value_token: SyntaxToken,
+    value_token: SyntaxToken,
     l_paren_token: SyntaxToken,
     value: CssTailwindValueList,
     r_paren_token: SyntaxToken,
@@ -2304,7 +2304,7 @@ pub fn css_tailwind_value_function(
     CssTailwindValueFunction::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_TAILWIND_VALUE_FUNCTION,
         [
-            Some(SyntaxElement::Token(__value_token)),
+            Some(SyntaxElement::Token(value_token)),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),

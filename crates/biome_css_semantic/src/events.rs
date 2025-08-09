@@ -125,6 +125,12 @@ impl SemanticEventExtractor {
                                 AnyCssDeclarationName::CssIdentifier(name) => {
                                     CssProperty::from(name)
                                 }
+                                AnyCssDeclarationName::CssTailwindValueThemeReference(name) => {
+                                    let Ok(ident) = name.reference() else {
+                                        return;
+                                    };
+                                    CssProperty::from(ident)
+                                }
                             };
 
                             self.stash.push_back(SemanticEvent::PropertyDeclaration {

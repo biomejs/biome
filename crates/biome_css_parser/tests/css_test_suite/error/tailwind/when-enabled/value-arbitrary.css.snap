@@ -41,7 +41,7 @@ CssRoot {
                                     colon_token: COLON@23..25 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssTailwindValueFunction {
-                                            __value_token: _VALUE_KW@25..32 "--value" [] [],
+                                            value_token: _VALUE_KW@25..32 "--value" [] [],
                                             l_paren_token: L_PAREN@32..33 "(" [] [],
                                             value: CssTailwindValueList [
                                                 CssTailwindValueArbitraryType {
