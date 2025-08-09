@@ -6,6 +6,7 @@ use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, 
 use biome_rowan::{SyntaxKind, TextLen};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
+use biome_tailwind_syntax::metadata::BASENAMES_WITH_DASHES;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextSize};
 
 pub(crate) struct TailwindLexer<'src> {
@@ -103,6 +104,17 @@ impl<'src> TailwindLexer<'src> {
 
     fn consume_base(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
+
+        // Find the longest matching base name
+        let source_from_position = &self.source[self.position..];
+        let base_name = BASENAMES_WITH_DASHES
+            .iter()
+            .rfind(|&name| source_from_position.starts_with(name));
+
+        if let Some(base_name) = base_name {
+            self.advance(base_name.len());
+            return TW_BASE;
+        }
 
         while let Some(byte) = self.current_byte() {
             let char = self.current_char_unchecked();
