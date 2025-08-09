@@ -225,6 +225,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssFunction::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_FUNCTIONAL_UTILITY_NAME => {
+                    let $pattern = unsafe { $crate::CssFunctionalUtilityName::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_GENERIC_DELIMITER => {
                     let $pattern = unsafe { $crate::CssGenericDelimiter::new_unchecked(node) };
                     $body
@@ -606,6 +610,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssScopeRangeStart::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_SIMPLE_UTILITY_NAME => {
+                    let $pattern = unsafe { $crate::CssSimpleUtilityName::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_SOURCE_AT_RULE => {
                     let $pattern = unsafe { $crate::CssSourceAtRule::new_unchecked(node) };
                     $body
@@ -658,8 +666,18 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssTailwindSpacingFunction::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_TAILWIND_VALUE_ARBITRARY_TYPE => {
+                    let $pattern =
+                        unsafe { $crate::CssTailwindValueArbitraryType::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_TAILWIND_VALUE_FUNCTION => {
                     let $pattern = unsafe { $crate::CssTailwindValueFunction::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_TAILWIND_VALUE_THEME_REFERENCE => {
+                    let $pattern =
+                        unsafe { $crate::CssTailwindValueThemeReference::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_THEME_AT_RULE => {
@@ -851,6 +869,11 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssBogusSupportsCondition::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_TAILWIND_UTILITY_VALUE => {
+                    let $pattern =
+                        unsafe { $crate::CssBogusTailwindUtilityValue::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_UNICODE_RANGE_VALUE => {
                     let $pattern =
                         unsafe { $crate::CssBogusUnicodeRangeValue::new_unchecked(node) };
@@ -990,6 +1013,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_SUB_SELECTOR_LIST => {
                     let $pattern = unsafe { $crate::CssSubSelectorList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_TAILWIND_VALUE_LIST => {
+                    let $pattern = unsafe { $crate::CssTailwindValueList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_URL_MODIFIER_LIST => {

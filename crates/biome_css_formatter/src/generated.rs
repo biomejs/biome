@@ -1731,6 +1731,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFunction {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssFunctionalUtilityName>
+    for crate::css::auxiliary::functional_utility_name::FormatCssFunctionalUtilityName
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssFunctionalUtilityName,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssFunctionalUtilityName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssFunctionalUtilityName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssFunctionalUtilityName,
+        crate::css::auxiliary::functional_utility_name::FormatCssFunctionalUtilityName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::functional_utility_name::FormatCssFunctionalUtilityName::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFunctionalUtilityName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssFunctionalUtilityName,
+        crate::css::auxiliary::functional_utility_name::FormatCssFunctionalUtilityName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::functional_utility_name::FormatCssFunctionalUtilityName::default(
+            ),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssGenericDelimiter>
     for crate::css::auxiliary::generic_delimiter::FormatCssGenericDelimiter
 {
@@ -4717,6 +4757,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssScopeRangeStart {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssSimpleUtilityName>
+    for crate::css::auxiliary::simple_utility_name::FormatCssSimpleUtilityName
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssSimpleUtilityName,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssSimpleUtilityName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssSimpleUtilityName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssSimpleUtilityName,
+        crate::css::auxiliary::simple_utility_name::FormatCssSimpleUtilityName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::simple_utility_name::FormatCssSimpleUtilityName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSimpleUtilityName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssSimpleUtilityName,
+        crate::css::auxiliary::simple_utility_name::FormatCssSimpleUtilityName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::simple_utility_name::FormatCssSimpleUtilityName::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssSourceAtRule>
     for crate::css::statements::source_at_rule::FormatCssSourceAtRule
 {
@@ -5139,6 +5217,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssTailwindSpacingFuncti
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: tailwind_spacing_function :: FormatCssTailwindSpacingFunction :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::CssTailwindValueArbitraryType>
+    for crate::css::auxiliary::tailwind_value_arbitrary_type::FormatCssTailwindValueArbitraryType
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssTailwindValueArbitraryType,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssTailwindValueArbitraryType>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssTailwindValueArbitraryType {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssTailwindValueArbitraryType,
+        crate::css::auxiliary::tailwind_value_arbitrary_type::FormatCssTailwindValueArbitraryType,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: tailwind_value_arbitrary_type :: FormatCssTailwindValueArbitraryType :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssTailwindValueArbitraryType {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssTailwindValueArbitraryType,
+        crate::css::auxiliary::tailwind_value_arbitrary_type::FormatCssTailwindValueArbitraryType,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: tailwind_value_arbitrary_type :: FormatCssTailwindValueArbitraryType :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssTailwindValueFunction>
     for crate::css::auxiliary::tailwind_value_function::FormatCssTailwindValueFunction
 {
@@ -5177,6 +5287,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssTailwindValueFunction
             crate::css::auxiliary::tailwind_value_function::FormatCssTailwindValueFunction::default(
             ),
         )
+    }
+}
+impl FormatRule<biome_css_syntax::CssTailwindValueThemeReference>
+    for crate::css::auxiliary::tailwind_value_theme_reference::FormatCssTailwindValueThemeReference
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssTailwindValueThemeReference,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssTailwindValueThemeReference>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssTailwindValueThemeReference {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssTailwindValueThemeReference,
+        crate::css::auxiliary::tailwind_value_theme_reference::FormatCssTailwindValueThemeReference,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: tailwind_value_theme_reference :: FormatCssTailwindValueThemeReference :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssTailwindValueThemeReference {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssTailwindValueThemeReference,
+        crate::css::auxiliary::tailwind_value_theme_reference::FormatCssTailwindValueThemeReference,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: tailwind_value_theme_reference :: FormatCssTailwindValueThemeReference :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::CssThemeAtRule>
@@ -6639,6 +6781,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSubSelectorList {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssTailwindValueList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssTailwindValueList,
+        crate::css::lists::tailwind_value_list::FormatCssTailwindValueList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::lists::tailwind_value_list::FormatCssTailwindValueList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssTailwindValueList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssTailwindValueList,
+        crate::css::lists::tailwind_value_list::FormatCssTailwindValueList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::lists::tailwind_value_list::FormatCssTailwindValueList::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssUrlModifierList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -7534,6 +7701,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusSupportsConditio
             self,
             crate::css::bogus::bogus_supports_condition::FormatCssBogusSupportsCondition::default(),
         )
+    }
+}
+impl FormatRule<biome_css_syntax::CssBogusTailwindUtilityValue>
+    for crate::css::bogus::bogus_tailwind_utility_value::FormatCssBogusTailwindUtilityValue
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusTailwindUtilityValue,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusTailwindUtilityValue>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusTailwindUtilityValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusTailwindUtilityValue,
+        crate::css::bogus::bogus_tailwind_utility_value::FormatCssBogusTailwindUtilityValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: bogus :: bogus_tailwind_utility_value :: FormatCssBogusTailwindUtilityValue :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusTailwindUtilityValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusTailwindUtilityValue,
+        crate::css::bogus::bogus_tailwind_utility_value::FormatCssBogusTailwindUtilityValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: bogus :: bogus_tailwind_utility_value :: FormatCssBogusTailwindUtilityValue :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::CssBogusUnicodeRangeValue>
@@ -9361,6 +9560,25 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssSupportsOrCombinab
         FormatOwnedWithRule :: new (self , crate :: css :: any :: supports_or_combinable_condition :: FormatAnyCssSupportsOrCombinableCondition :: default ())
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssTailwindValueExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssTailwindValueExpression,
+        crate::css::any::tailwind_value_expression::FormatAnyCssTailwindValueExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: tailwind_value_expression :: FormatAnyCssTailwindValueExpression :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssTailwindValueExpression {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssTailwindValueExpression,
+        crate::css::any::tailwind_value_expression::FormatAnyCssTailwindValueExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: tailwind_value_expression :: FormatAnyCssTailwindValueExpression :: default ())
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssUnicodeValue {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -9433,6 +9651,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssUrlValue {
         FormatOwnedWithRule::new(
             self,
             crate::css::any::url_value::FormatAnyCssUrlValue::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssUtilityName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssUtilityName,
+        crate::css::any::utility_name::FormatAnyCssUtilityName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::utility_name::FormatAnyCssUtilityName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssUtilityName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssUtilityName,
+        crate::css::any::utility_name::FormatAnyCssUtilityName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::utility_name::FormatAnyCssUtilityName::default(),
         )
     }
 }

@@ -23,6 +23,7 @@ pub(crate) fn parse_theme_at_rule(p: &mut CssParser) -> ParsedSyntax {
 }
 
 // @utility tab-4 { tab-size: 4; }
+// @utility tab-* { tab-size: --value([integer]); }
 pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !p.options().is_tailwind_directives_enabled() || !p.at(T![utility]) {
         return Absent;
@@ -31,16 +32,36 @@ pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![utility]);
 
+    // Parse utility name - can be simple or functional
     if !is_at_identifier(p) {
         p.error(expected_identifier(p, p.cur_range()));
         return Present(m.complete(p, CSS_BOGUS_AT_RULE));
     }
 
-    parse_regular_identifier(p).ok();
+    parse_utility_name(p).ok();
 
     parse_declaration_block(p);
 
     Present(m.complete(p, CSS_UTILITY_AT_RULE))
+}
+
+fn parse_utility_name(p: &mut CssParser) -> ParsedSyntax {
+    let m = p.start();
+
+    // Check if this is a functional utility (ends with -*)
+    if p.at(T![ident]) && p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
+        // Functional utility: tab-*
+        parse_regular_identifier(p).ok();
+        p.expect(T![-]);
+        p.expect(T![*]);
+
+        Present(m.complete(p, CSS_FUNCTIONAL_UTILITY_NAME))
+    } else {
+        // Simple utility: center-flex
+        parse_regular_identifier(p).ok();
+
+        Present(m.complete(p, CSS_SIMPLE_UTILITY_NAME))
+    }
 }
 
 // @variant dark { background: black; }

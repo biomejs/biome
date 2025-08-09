@@ -786,6 +786,20 @@ pub fn css_function(
         ],
     ))
 }
+pub fn css_functional_utility_name(
+    identifier: CssIdentifier,
+    minus_token: SyntaxToken,
+    star_token: SyntaxToken,
+) -> CssFunctionalUtilityName {
+    CssFunctionalUtilityName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FUNCTIONAL_UTILITY_NAME,
+        [
+            Some(SyntaxElement::Node(identifier.into_syntax())),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Token(star_token)),
+        ],
+    ))
+}
 pub fn css_generic_delimiter(value_token: SyntaxToken) -> CssGenericDelimiter {
     CssGenericDelimiter::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_GENERIC_DELIMITER,
@@ -2059,6 +2073,12 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
         [Some(SyntaxElement::Node(start.into_syntax()))],
     ))
 }
+pub fn css_simple_utility_name(css_identifier: CssIdentifier) -> CssSimpleUtilityName {
+    CssSimpleUtilityName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SIMPLE_UTILITY_NAME,
+        [Some(SyntaxElement::Node(css_identifier.into_syntax()))],
+    ))
+}
 pub fn css_source_at_rule(
     source_token: SyntaxToken,
     path: CssString,
@@ -2261,41 +2281,43 @@ impl CssTailwindSpacingFunctionBuilder {
         ))
     }
 }
+pub fn css_tailwind_value_arbitrary_type(
+    l_brack_token: SyntaxToken,
+    ty: CssIdentifier,
+    r_brack_token: SyntaxToken,
+) -> CssTailwindValueArbitraryType {
+    CssTailwindValueArbitraryType::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_TAILWIND_VALUE_ARBITRARY_TYPE,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(ty.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
 pub fn css_tailwind_value_function(
     __value_token: SyntaxToken,
     l_paren_token: SyntaxToken,
+    value: CssTailwindValueList,
     r_paren_token: SyntaxToken,
-) -> CssTailwindValueFunctionBuilder {
-    CssTailwindValueFunctionBuilder {
-        __value_token,
-        l_paren_token,
-        r_paren_token,
-        value: None,
-    }
+) -> CssTailwindValueFunction {
+    CssTailwindValueFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_TAILWIND_VALUE_FUNCTION,
+        [
+            Some(SyntaxElement::Token(__value_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
 }
-pub struct CssTailwindValueFunctionBuilder {
-    __value_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-    value: Option<AnyCssExpression>,
-}
-impl CssTailwindValueFunctionBuilder {
-    pub fn with_value(mut self, value: AnyCssExpression) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> CssTailwindValueFunction {
-        CssTailwindValueFunction::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_TAILWIND_VALUE_FUNCTION,
-            [
-                Some(SyntaxElement::Token(self.__value_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                self.value
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-            ],
-        ))
-    }
+pub fn css_tailwind_value_theme_reference(
+    reference: CssDashedIdentifier,
+) -> CssTailwindValueThemeReference {
+    CssTailwindValueThemeReference::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_TAILWIND_VALUE_THEME_REFERENCE,
+        [Some(SyntaxElement::Node(reference.into_syntax()))],
+    ))
 }
 pub fn css_theme_at_rule(
     theme_token: SyntaxToken,
@@ -2490,7 +2512,7 @@ pub fn css_url_value_raw(value_token: SyntaxToken) -> CssUrlValueRaw {
 }
 pub fn css_utility_at_rule(
     utility_token: SyntaxToken,
-    name: CssIdentifier,
+    name: AnyCssUtilityName,
     block: AnyCssDeclarationBlock,
 ) -> CssUtilityAtRule {
     CssUtilityAtRule::unwrap_cast(SyntaxNode::new_detached(
@@ -3056,6 +3078,27 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn css_tailwind_value_list<I, S>(items: I, separators: S) -> CssTailwindValueList
+where
+    I: IntoIterator<Item = AnyCssTailwindValueExpression>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssTailwindValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_TAILWIND_VALUE_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn css_url_modifier_list<I>(items: I) -> CssUrlModifierList
 where
     I: IntoIterator<Item = AnyCssUrlModifier>,
@@ -3337,6 +3380,16 @@ where
 {
     CssBogusSupportsCondition::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SUPPORTS_CONDITION,
+        slots,
+    ))
+}
+pub fn css_bogus_tailwind_utility_value<I>(slots: I) -> CssBogusTailwindUtilityValue
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusTailwindUtilityValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_TAILWIND_UTILITY_VALUE,
         slots,
     ))
 }

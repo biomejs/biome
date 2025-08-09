@@ -1,14 +1,15 @@
 use super::parse_error::expected_expression;
 use super::url::{is_at_url_function, parse_url_function};
 use crate::parser::CssParser;
-use crate::syntax::parse_error::expected_declaration_item;
+use crate::syntax::parse_error::{expected_declaration_item, expected_tailwind_utility_value};
 use crate::syntax::{
-    CssComponentValueList, is_at_any_value, is_nth_at_identifier, parse_regular_identifier,
+    CssComponentValueList, is_at_any_value, is_at_dashed_identifier, is_nth_at_identifier,
+    parse_dashed_identifier, parse_regular_identifier, parse_string,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, TokenSet, token_set};
@@ -319,15 +320,87 @@ fn parse_spacing_function(p: &mut CssParser) -> ParsedSyntax {
 
 fn parse_value_function(p: &mut CssParser) -> ParsedSyntax {
     // --value(4) or --value(var(--value-base))
-    let m = p.start();
-    p.bump(T![__value]);
-    p.expect(T!['(']);
-
-    // Parse optional expression parameter
-    if !p.at(T![')']) {
-        parse_any_expression(p).ok();
+    // --value("inherit", "initial", "unset")
+    // --value([integer])
+    // --value(--tab-size-*)
+    // --value(integer, [integer], --tab-size-*)
+    if !p.at(T![__value]) {
+        return Absent;
     }
 
+    let m = p.start();
+
+    p.bump(T![__value]);
+    p.expect(T!['(']);
+    TailwindValueList.parse_list(p);
     p.expect(T![')']);
+
     Present(m.complete(p, CSS_TAILWIND_VALUE_FUNCTION))
+}
+
+const TAILWIND_VALUE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T![')']];
+
+struct TailwindValueList;
+
+impl ParseSeparatedList for TailwindValueList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_TAILWIND_VALUE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_string(p)
+            .or_else(|| parse_tailwind_value_arbitrary_type(p))
+            .or_else(|| parse_tailwind_value_theme_reference(p))
+            .or_else(|| parse_regular_identifier(p))
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![')']) || p.at(EOF)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(
+                CSS_BOGUS_TAILWIND_UTILITY_VALUE,
+                TAILWIND_VALUE_RECOVERY_SET,
+            ),
+            expected_tailwind_utility_value,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
+}
+
+/// Parses arbitrary type values: --value([integer])
+fn parse_tailwind_value_arbitrary_type(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T!['[']) {
+        return Absent;
+    }
+    let m = p.start();
+
+    p.expect(T!['[']);
+    parse_regular_identifier(p).ok();
+    p.expect(T![']']);
+
+    Present(m.complete(p, CSS_TAILWIND_VALUE_ARBITRARY_TYPE))
+}
+
+/// Parses theme references: --value(--tab-size-*)
+fn parse_tailwind_value_theme_reference(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_dashed_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    parse_dashed_identifier(p).ok();
+
+    Present(m.complete(p, CSS_TAILWIND_VALUE_THEME_REFERENCE))
 }

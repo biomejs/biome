@@ -93,8 +93,10 @@ CssRoot {
             at_token: AT@110..113 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssUtilityAtRule {
                 utility_token: UTILITY_KW@113..121 "utility" [] [Whitespace(" ")],
-                name: CssIdentifier {
-                    value_token: IDENT@121..128 "center" [] [Whitespace(" ")],
+                name: CssSimpleUtilityName {
+                    css_identifier: CssIdentifier {
+                        value_token: IDENT@121..128 "center" [] [Whitespace(" ")],
+                    },
                 },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@128..129 "{" [] [],
@@ -381,8 +383,9 @@ CssRoot {
       0: AT@110..113 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_UTILITY_AT_RULE@113..198
         0: UTILITY_KW@113..121 "utility" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@121..128
-          0: IDENT@121..128 "center" [] [Whitespace(" ")]
+        1: CSS_SIMPLE_UTILITY_NAME@121..128
+          0: CSS_IDENTIFIER@121..128
+            0: IDENT@121..128 "center" [] [Whitespace(" ")]
         2: CSS_DECLARATION_BLOCK@128..198
           0: L_CURLY@128..129 "{" [] []
           1: CSS_DECLARATION_LIST@129..196

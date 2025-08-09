@@ -29,6 +29,7 @@ pub(crate) mod relative_selector_list;
 pub(crate) mod rule_list;
 pub(crate) mod selector_list;
 pub(crate) mod sub_selector_list;
+pub(crate) mod tailwind_value_list;
 pub(crate) mod url_modifier_list;
 pub(crate) mod value_at_rule_import_specifier_list;
 pub(crate) mod value_at_rule_property_list;

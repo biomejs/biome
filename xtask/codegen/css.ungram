@@ -61,6 +61,7 @@ CssBogusCustomIdentifier = SyntaxElement*
 CssBogusKeyframesName = SyntaxElement*
 CssBogusUnicodeRangeValue = SyntaxElement*
 CssBogusSupportsCondition = SyntaxElement*
+CssBogusTailwindUtilityValue = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -1889,38 +1890,55 @@ CssTailwindSpacingFunction =
 CssTailwindValueFunction =
 	'--value'
 	'('
-	value: AnyCssExpression?
+	value: CssTailwindValueList
 	')'
 
-// AnyCssTailwindCustomUtilityName =
-//   CssIdentifier
-//   | CssTailwindUtilityIdentifierWithParam
+// --value("inherit", "initial", "unset")
+CssTailwindValueList = (AnyCssTailwindValueExpression (',' AnyCssTailwindValueExpression)*)
 
-// // @utility tab-* {
-// //          ^^^^^
-// CssTailwindUtilityIdentifierWithParam =
-// 	identifier: CssIdentifier
-// 	'-'
-// 	'*' // this denotes the parameter
-//
-// // --value(--tab-size-*)
-// //         ^^^^^^^^^^^^
-// CssTailwindDashedIdentifierWithParam =
-// 	identifier: CssDashedIdentifier
-// 	'-'
-// 	'*'
+// Enhanced value expressions for Tailwind's --value() function
+AnyCssTailwindValueExpression =
+	CssString
+	| CssTailwindValueArbitraryType
+	| CssTailwindValueThemeReference
+	| CssIdentifier
+
+// --value([integer])
+CssTailwindValueArbitraryType =
+	'['
+	type: CssIdentifier
+	']'
+
+// --value(--tab-size-*)
+CssTailwindValueThemeReference =
+	reference: CssDashedIdentifier
+
+// Enhanced @utility directive to support functional utilities
+// @utility tab-* { tab-size: --value([integer]); }
+// @utility tab-* { tab-size: --value("inherit", "initial", "unset"); }
+CssUtilityAtRule =
+    'utility'
+    name: AnyCssUtilityName
+    block: AnyCssDeclarationBlock
+
+// Support both simple utility names and functional utility names
+AnyCssUtilityName =
+	CssSimpleUtilityName
+	| CssFunctionalUtilityName
+
+// Simple utility name: @utility center-flex { ... }
+CssSimpleUtilityName = CssIdentifier
+
+// Functional utility name: @utility tab-* { ... }
+CssFunctionalUtilityName =
+	identifier: CssIdentifier
+	'-'
+	'*'
 
 // Tailwind 4.0 @theme directive
 // @theme { --color-primary: #3b82f6; }
 CssThemeAtRule =
     'theme'
-    block: AnyCssDeclarationBlock
-
-// Tailwind 4.0 @utility directive
-// @utility tab-4 { tab-size: 4; }
-CssUtilityAtRule =
-    'utility'
-    name: CssIdentifier
     block: AnyCssDeclarationBlock
 
 // Tailwind 4.0 @variant directive

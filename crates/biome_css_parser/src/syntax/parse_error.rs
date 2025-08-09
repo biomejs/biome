@@ -230,3 +230,7 @@ pub(crate) fn expected_component_value(p: &CssParser, range: TextRange) -> Parse
 pub(crate) fn expected_declaration(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("<declaration>", range, p)
 }
+
+pub(crate) fn expected_tailwind_utility_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("tailwind utility value", range, p)
+}
