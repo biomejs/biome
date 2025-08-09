@@ -465,8 +465,6 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
         } else {
             Absent
         }
-
-        // p.expect(T![<]);
     }
 }
 

@@ -60,14 +60,14 @@ impl<'src> HtmlLexer<'src> {
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
             b'{' => {
-                if self.is_at_opening_double_text_expression() {
+                if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
                 }
             }
             b'}' => {
-                if self.is_at_closing_double_text_expression() {
+                if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
                     self.consume_byte(T!['}'])
@@ -100,16 +100,16 @@ impl<'src> HtmlLexer<'src> {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'!' if self.current() == T![<] => self.consume_byte(T![!]),
             b'/' if self.current() == T![<] => self.consume_byte(T![/]),
-            b'-' if self.is_at_frontmatter_edge() => self.consume_frontmatter_edge(),
+            b'-' if self.at_frontmatter_edge() => self.consume_frontmatter_edge(),
             b'{' => {
-                if self.is_at_opening_double_text_expression() {
+                if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
                 }
             }
             b'}' => {
-                if self.is_at_closing_double_text_expression() {
+                if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
                     self.consume_byte(T!['}'])
@@ -187,7 +187,7 @@ impl<'src> HtmlLexer<'src> {
             }
             self.advance_byte_or_char(byte);
 
-            if context == HtmlLexContext::AstroFencedCodeBlock && self.is_at_frontmatter_edge() {
+            if context == HtmlLexContext::AstroFencedCodeBlock && self.at_frontmatter_edge() {
                 return HTML_LITERAL;
             }
         }
@@ -203,14 +203,14 @@ impl<'src> HtmlLexer<'src> {
 
     fn consume_double_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
-            b'}' if self.is_at_closing_double_text_expression() => {
+            b'}' if self.at_closing_double_text_expression() => {
                 self.consume_r_double_text_expression()
             }
             b'<' => self.consume_byte(T![<]),
             _ => {
                 while let Some(current) = self.current_byte() {
                     match current {
-                        b'}' if self.is_at_closing_double_text_expression() => break,
+                        b'}' if self.at_closing_double_text_expression() => break,
                         _ => {
                             self.advance(1);
                         }
@@ -223,12 +223,12 @@ impl<'src> HtmlLexer<'src> {
 
     fn consume_single_text_expression(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
-            b'}' if !self.is_at_closing_double_text_expression() => self.consume_byte(T!['}']),
+            b'}' if !self.at_closing_double_text_expression() => self.consume_byte(T!['}']),
             b'<' => self.consume_byte(T![<]),
             _ => {
                 while let Some(current) = self.current_byte() {
                     match current {
-                        b'}' if !self.is_at_closing_double_text_expression() => break,
+                        b'}' if !self.at_closing_double_text_expression() => break,
                         _ => {
                             self.advance(1);
                         }
@@ -283,7 +283,7 @@ impl<'src> HtmlLexer<'src> {
             b'<' if self.at_start_cdata() => self.consume_cdata_start(),
             b'<' => self.consume_byte(T![<]),
             b'-' => {
-                debug_assert!(self.is_at_frontmatter_edge());
+                debug_assert!(self.at_frontmatter_edge());
                 self.advance(3);
                 T![---]
             }
@@ -490,37 +490,40 @@ impl<'src> HtmlLexer<'src> {
     }
 
     fn consume_l_double_text_expression(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.is_at_opening_double_text_expression());
+        debug_assert!(self.at_opening_double_text_expression());
         self.advance(2);
         T!["{{"]
     }
 
     fn consume_r_double_text_expression(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.is_at_closing_double_text_expression());
+        debug_assert!(self.at_closing_double_text_expression());
         self.advance(2);
         T!["}}"]
     }
 
     fn consume_frontmatter_edge(&mut self) -> HtmlSyntaxKind {
-        debug_assert!(self.is_at_frontmatter_edge());
+        debug_assert!(self.at_frontmatter_edge());
         self.advance(3);
         T![---]
     }
 
-    fn at_start_comment(&mut self) -> bool {
+    #[inline(always)]
+    fn at_start_comment(&self) -> bool {
         self.current_byte() == Some(b'<')
             && self.byte_at(1) == Some(b'!')
             && self.byte_at(2) == Some(b'-')
             && self.byte_at(3) == Some(b'-')
     }
 
-    fn at_end_comment(&mut self) -> bool {
+    #[inline(always)]
+    fn at_end_comment(&self) -> bool {
         self.current_byte() == Some(b'-')
             && self.byte_at(1) == Some(b'-')
             && self.byte_at(2) == Some(b'>')
     }
 
-    fn at_start_cdata(&mut self) -> bool {
+    #[inline(always)]
+    fn at_start_cdata(&self) -> bool {
         self.current_byte() == Some(b'<')
             && self.byte_at(1) == Some(b'!')
             && self.byte_at(2) == Some(b'[')
@@ -532,25 +535,25 @@ impl<'src> HtmlLexer<'src> {
             && self.byte_at(8) == Some(b'[')
     }
     #[inline(always)]
-    fn at_end_cdata(&mut self) -> bool {
+    fn at_end_cdata(&self) -> bool {
         self.current_byte() == Some(b']')
             && self.byte_at(1) == Some(b']')
             && self.byte_at(2) == Some(b'>')
     }
     #[inline(always)]
-    fn is_at_frontmatter_edge(&self) -> bool {
+    fn at_frontmatter_edge(&self) -> bool {
         self.current_byte() == Some(b'-')
             && self.byte_at(1) == Some(b'-')
             && self.byte_at(2) == Some(b'-')
     }
 
     #[inline(always)]
-    fn is_at_opening_double_text_expression(&self) -> bool {
+    fn at_opening_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'{') && self.byte_at(1) == Some(b'{')
     }
 
     #[inline(always)]
-    fn is_at_closing_double_text_expression(&self) -> bool {
+    fn at_closing_double_text_expression(&self) -> bool {
         self.current_byte() == Some(b'}') && self.byte_at(1) == Some(b'}')
     }
 
@@ -642,14 +645,14 @@ impl<'src> HtmlLexer<'src> {
 
         match current {
             b'{' => {
-                if self.is_at_opening_double_text_expression() {
+                if self.at_opening_double_text_expression() {
                     self.consume_l_double_text_expression()
                 } else {
                     self.consume_byte(T!['{'])
                 }
             }
             b'}' => {
-                if self.is_at_closing_double_text_expression() {
+                if self.at_closing_double_text_expression() {
                     self.consume_r_double_text_expression()
                 } else {
                     self.consume_byte(T!['}'])
