@@ -8,7 +8,8 @@ mod syntax_node;
 
 pub use self::generated::*;
 pub use biome_rowan::{
-    SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
+    SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TokenText, TriviaPieceKind,
+    WalkEvent,
 };
 pub use file_source::CssFileSource;
 pub use syntax_node::*;
@@ -180,4 +181,34 @@ impl TryFrom<CssSyntaxKind> for TriviaPieceKind {
             Err(())
         }
     }
+}
+
+/// Similar to [CssSyntaxToken::text_trimmed()], but removes the quotes of string literals.
+///
+/// ## Examples
+///
+/// ```
+/// use biome_css_syntax::{CssSyntaxKind, CssSyntaxToken, inner_string_text};
+///
+/// let a = CssSyntaxToken::new_detached(CssSyntaxKind::CSS_STRING_LITERAL, "'inner_string_text'", [], []);
+/// let b = CssSyntaxToken::new_detached(CssSyntaxKind::CSS_STRING_LITERAL, "\"inner_string_text\"", [], []);
+/// assert_eq!(inner_string_text(&a), inner_string_text(&b));
+///
+/// let a = CssSyntaxToken::new_detached(CssSyntaxKind::IDENT, "ident", [], []);
+/// let b = CssSyntaxToken::new_detached(CssSyntaxKind::IDENT, "ident", [], []);
+/// assert_eq!(inner_string_text(&a), inner_string_text(&b));
+///
+/// let a = CssSyntaxToken::new_detached(CssSyntaxKind::IDENT, "one", [], []);
+/// let b = CssSyntaxToken::new_detached(CssSyntaxKind::IDENT, "two", [], []);
+/// assert!(inner_string_text(&a) != inner_string_text(&b));
+/// ```
+pub fn inner_string_text(token: &CssSyntaxToken) -> TokenText {
+    let mut text = token.token_text_trimmed();
+    if matches!(token.kind(), CssSyntaxKind::CSS_STRING_LITERAL) {
+        // remove string delimiters
+        // SAFETY: string literal token have a delimiters at the start and the end of the string
+        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
+        text = text.slice(range);
+    }
+    text
 }
