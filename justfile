@@ -32,12 +32,17 @@ gen-bindings:
 
 # Generates code generated files for the linter
 gen-analyzer:
-  cargo run -p xtask_codegen -- analyzer
+  just gen-rules
   just gen-configuration
   just gen-migrate
   just gen-bindings
   just lint-rules
   just format
+
+# Generate and updates the files needed inside the *_analyze crates
+gen-rules:
+    cargo run -p xtask_codegen -- analyzer
+
 
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration
@@ -95,12 +100,9 @@ new-graphql-lintrule rulename:
   just gen-analyzer
 
 # Promotes a rule from the nursery group to a new group
-move-rule group rulename:
-	cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
-	just gen-analyzer
-	just documentation
-	cargo test -- {{snakecase(rulename)}}
-	cargo insta accept
+move-rule rulename group:
+  cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
+  cargo run -p xtask_codegen -- analyzer
 
 # Format Rust files and TOML files
 format:

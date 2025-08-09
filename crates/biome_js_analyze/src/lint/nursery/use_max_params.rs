@@ -71,7 +71,7 @@ declare_lint_rule! {
     /// The maximum number of parameters allowed (default: 4).
     ///
     pub UseMaxParams {
-        version: "next",
+        version: "2.2.0",
         name: "useMaxParams",
         language: "js",
         sources: &[RuleSource::Eslint("max-params").same(), RuleSource::Clippy("too_many_arguments").same()],

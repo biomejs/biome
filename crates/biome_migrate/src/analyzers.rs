@@ -29,7 +29,7 @@ impl RuleGroup for MigrationGroup {
     const NAME: &'static str = "migrations";
 
     fn record_rules<V: RegistryVisitor<Self::Language> + ?Sized>(registry: &mut V) {
-        // Order here is important, rules should be added from the most old, to the most recent
+        // Order here is important; rules should be added from the most old, to the most recent
         // v1.5.0
         registry.record_rule::<Schema>();
         // v2.0.0

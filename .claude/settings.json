@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo insta:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(just:*)",
+      "Bash(cargo test:*)",
+      "Bash(cargo check:*)",
+      "Bash(cargo run:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:typescript-eslint.io)",
+      "WebFetch(domain:eslint.org)"
+    ],
+    "deny": [
+      "Bash(cargo biome-cli-dev:*)",
+      "Bash(cargo biome-cli:*)"
+    ]
+  }
+}
