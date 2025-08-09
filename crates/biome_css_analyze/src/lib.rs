@@ -1,6 +1,7 @@
 #![deny(clippy::use_self)]
 
 mod assist;
+mod fonts;
 mod keywords;
 mod lint;
 mod order;
