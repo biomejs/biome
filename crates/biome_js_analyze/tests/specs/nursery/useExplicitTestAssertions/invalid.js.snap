@@ -38,7 +38,7 @@ invalid.js:1:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━�
   
   i This could cause false positives where the test always passes but isn’t testing anything.
   
-  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  i Add an expect() or assert() assertion to this test.
   
 
 ```
@@ -57,7 +57,7 @@ invalid.js:6:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━�
   
   i This could cause false positives where the test always passes but isn’t testing anything.
   
-  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  i Add an expect() or assert() assertion to this test.
   
 
 ```
@@ -76,7 +76,7 @@ invalid.js:8:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━�
   
   i This could cause false positives where the test always passes but isn’t testing anything.
   
-  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  i Add an expect() or assert() assertion to this test.
   
 
 ```
@@ -98,7 +98,7 @@ invalid.js:10:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━�
   
   i This could cause false positives where the test always passes but isn’t testing anything.
   
-  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  i Add an expect() or assert() assertion to this test.
   
 
 ```
@@ -120,7 +120,7 @@ invalid.js:14:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━�
   
   i This could cause false positives where the test always passes but isn’t testing anything.
   
-  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  i Add an expect() or assert() assertion to this test.
   
 
 ```
@@ -138,7 +138,7 @@ invalid.js:18:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━�
   
   i This could cause false positives where the test always passes but isn’t testing anything.
   
-  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  i Add an expect() or assert() assertion to this test.
   
 
 ```
