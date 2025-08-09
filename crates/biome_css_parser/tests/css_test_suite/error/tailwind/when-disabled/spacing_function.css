@@ -1,0 +1,3 @@
+.test-spacing-basic {
+	margin: --spacing(4);
+}

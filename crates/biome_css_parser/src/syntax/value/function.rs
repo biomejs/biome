@@ -1,7 +1,9 @@
 use super::parse_error::expected_expression;
 use super::url::{is_at_url_function, parse_url_function};
 use crate::parser::CssParser;
-use crate::syntax::parse_error::{expected_declaration_item, expected_tailwind_utility_value};
+use crate::syntax::parse_error::{
+    expected_declaration_item, expected_tailwind_utility_value, tailwind_disabled,
+};
 use crate::syntax::{
     CssComponentValueList, is_at_any_value, is_at_dashed_identifier, is_nth_at_identifier,
     parse_dashed_identifier, parse_regular_identifier, parse_string,
@@ -37,7 +39,12 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
     if is_at_url_function(p) {
         parse_url_function(p)
     } else if is_at_tailwind_function(p) {
-        parse_tailwind_function(p)
+        if p.options().is_tailwind_directives_enabled() {
+            parse_tailwind_function(p)
+        } else {
+            p.error(tailwind_disabled(p, p.cur_range()));
+            return Absent;
+        }
     } else {
         parse_function(p)
     }

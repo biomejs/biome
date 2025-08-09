@@ -1,0 +1,144 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@reference "./app.css";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssBogusRule {
+            items: [
+                AT@0..1 "@" [] [],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@1..10 "reference" [] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                    combinator: CSS_SPACE_LITERAL@10..11 " " [] [],
+                    right: missing (required),
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
+                        CSS_STRING_LITERAL@11..22 "\"./app.css\"" [] [],
+                    ],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [
+                    CssDeclarationOrRuleList [
+                        CssEmptyDeclaration {
+                            semicolon_token: SEMICOLON@22..23 ";" [] [],
+                        },
+                    ],
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@23..24 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..24
+  0: (empty)
+  1: CSS_RULE_LIST@0..23
+    0: CSS_BOGUS_RULE@0..1
+      0: AT@0..1 "@" [] []
+    1: CSS_QUALIFIED_RULE@1..23
+      0: CSS_SELECTOR_LIST@1..22
+        0: CSS_COMPLEX_SELECTOR@1..11
+          0: CSS_COMPOUND_SELECTOR@1..10
+            0: CSS_NESTED_SELECTOR_LIST@1..1
+            1: CSS_TYPE_SELECTOR@1..10
+              0: (empty)
+              1: CSS_IDENTIFIER@1..10
+                0: IDENT@1..10 "reference" [] []
+            2: CSS_SUB_SELECTOR_LIST@10..10
+          1: CSS_SPACE_LITERAL@10..11 " " [] []
+          2: (empty)
+        1: (empty)
+        2: CSS_BOGUS_SELECTOR@11..22
+          0: CSS_STRING_LITERAL@11..22 "\"./app.css\"" [] []
+      1: CSS_BOGUS_BLOCK@22..23
+        0: CSS_DECLARATION_OR_RULE_LIST@22..23
+          0: CSS_EMPTY_DECLARATION@22..23
+            0: SEMICOLON@22..23 ";" [] []
+  2: EOF@23..24 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+reference.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+  > 1 │ @reference "./app.css";
+      │  ^^^^^^^^^
+    2 │ 
+  
+  i Enable `tailwind_directives` in the css parser options.
+  
+reference.css:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '"./app.css"'.
+  
+  > 1 │ @reference "./app.css";
+      │            ^^^^^^^^^^^
+    2 │ 
+  
+  i Expected a compound selector here.
+  
+  > 1 │ @reference "./app.css";
+      │            ^^^^^^^^^^^
+    2 │ 
+  
+reference.css:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+  > 1 │ @reference "./app.css";
+      │                       ^
+    2 │ 
+  
+  i Remove ;
+  
+reference.css:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ @reference "./app.css";
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ @reference "./app.css";
+  > 2 │ 
+      │ 
+  
+```

@@ -1,0 +1,152 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@utility foo-* {
+	width: --value(length
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssUtilityAtRule {
+                utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
+                name: CssFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@9..12 "foo" [] [],
+                    },
+                    minus_token: MINUS@12..13 "-" [] [],
+                    star_token: STAR@13..15 "*" [] [Whitespace(" ")],
+                },
+                block: CssBogusBlock {
+                    items: [
+                        L_CURLY@15..16 "{" [] [],
+                        CssDeclarationList [
+                            CssDeclarationWithSemicolon {
+                                declaration: CssDeclaration {
+                                    property: CssBogusProperty {
+                                        items: [
+                                            CssIdentifier {
+                                                value_token: IDENT@16..23 "width" [Newline("\n"), Whitespace("\t")] [],
+                                            },
+                                            COLON@23..25 ":" [] [Whitespace(" ")],
+                                            CssBogus {
+                                                items: [
+                                                    CssBogusSupportsCondition {
+                                                        items: [
+                                                            _VALUE_KW@25..32 "--value" [] [],
+                                                            L_PAREN@32..33 "(" [] [],
+                                                            CssBogus {
+                                                                items: [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@33..39 "length" [] [],
+                                                                    },
+                                                                    CssBogusTailwindUtilityValue {
+                                                                        items: [
+                                                                            R_CURLY@39..41 "}" [Newline("\n")] [],
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                    important: missing (optional),
+                                },
+                                semicolon_token: missing (optional),
+                            },
+                        ],
+                    ],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..42
+  0: (empty)
+  1: CSS_RULE_LIST@0..41
+    0: CSS_AT_RULE@0..41
+      0: AT@0..1 "@" [] []
+      1: CSS_UTILITY_AT_RULE@1..41
+        0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
+        1: CSS_FUNCTIONAL_UTILITY_NAME@9..15
+          0: CSS_IDENTIFIER@9..12
+            0: IDENT@9..12 "foo" [] []
+          1: MINUS@12..13 "-" [] []
+          2: STAR@13..15 "*" [] [Whitespace(" ")]
+        2: CSS_BOGUS_BLOCK@15..41
+          0: L_CURLY@15..16 "{" [] []
+          1: CSS_DECLARATION_LIST@16..41
+            0: CSS_DECLARATION_WITH_SEMICOLON@16..41
+              0: CSS_DECLARATION@16..41
+                0: CSS_BOGUS_PROPERTY@16..41
+                  0: CSS_IDENTIFIER@16..23
+                    0: IDENT@16..23 "width" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@23..25 ":" [] [Whitespace(" ")]
+                  2: CSS_BOGUS@25..41
+                    0: CSS_BOGUS_SUPPORTS_CONDITION@25..41
+                      0: _VALUE_KW@25..32 "--value" [] []
+                      1: L_PAREN@32..33 "(" [] []
+                      2: CSS_BOGUS@33..41
+                        0: CSS_IDENTIFIER@33..39
+                          0: IDENT@33..39 "length" [] []
+                        1: CSS_BOGUS_TAILWIND_UTILITY_VALUE@39..41
+                          0: R_CURLY@39..41 "}" [Newline("\n")] []
+                1: (empty)
+              1: (empty)
+  2: EOF@41..42 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+value-incomplete.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `}`
+  
+    1 │ @utility foo-* {
+    2 │ 	width: --value(length
+  > 3 │ }
+      │ ^
+    4 │ 
+  
+  i Remove }
+  
+value-incomplete.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead the file ends
+  
+    2 │ 	width: --value(length
+    3 │ }
+  > 4 │ 
+      │ 
+  
+  i the file ends here
+  
+    2 │ 	width: --value(length
+    3 │ }
+  > 4 │ 
+      │ 
+  
+```

@@ -1,0 +1,108 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@utility empty-util {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssBogusRule {
+            items: [
+                AT@0..1 "@" [] [],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@1..8 "utility" [] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                    combinator: CSS_SPACE_LITERAL@8..9 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@9..20 "empty-util" [] [Whitespace(" ")],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@20..21 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@21..22 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@22..23 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..23
+  0: (empty)
+  1: CSS_RULE_LIST@0..22
+    0: CSS_BOGUS_RULE@0..1
+      0: AT@0..1 "@" [] []
+    1: CSS_QUALIFIED_RULE@1..22
+      0: CSS_SELECTOR_LIST@1..20
+        0: CSS_COMPLEX_SELECTOR@1..20
+          0: CSS_COMPOUND_SELECTOR@1..8
+            0: CSS_NESTED_SELECTOR_LIST@1..1
+            1: CSS_TYPE_SELECTOR@1..8
+              0: (empty)
+              1: CSS_IDENTIFIER@1..8
+                0: IDENT@1..8 "utility" [] []
+            2: CSS_SUB_SELECTOR_LIST@8..8
+          1: CSS_SPACE_LITERAL@8..9 " " [] []
+          2: CSS_COMPOUND_SELECTOR@9..20
+            0: CSS_NESTED_SELECTOR_LIST@9..9
+            1: CSS_TYPE_SELECTOR@9..20
+              0: (empty)
+              1: CSS_IDENTIFIER@9..20
+                0: IDENT@9..20 "empty-util" [] [Whitespace(" ")]
+            2: CSS_SUB_SELECTOR_LIST@20..20
+      1: CSS_DECLARATION_OR_RULE_BLOCK@20..22
+        0: L_CURLY@20..21 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@21..21
+        2: R_CURLY@21..22 "}" [] []
+  2: EOF@22..23 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+utility.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+  > 1 │ @utility empty-util {}
+      │  ^^^^^^^
+    2 │ 
+  
+  i Enable `tailwind_directives` in the css parser options.
+  
+```

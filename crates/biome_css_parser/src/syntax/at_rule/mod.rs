@@ -91,22 +91,6 @@ pub(crate) fn parse_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
-    // Try Tailwind directives first when enabled
-    if p.options().is_tailwind_directives_enabled() {
-        match p.cur() {
-            T![theme] => return parse_theme_at_rule(p),
-            T![utility] => return parse_utility_at_rule(p),
-            T![variant] => return parse_variant_at_rule(p),
-            T![custom_variant] => return parse_custom_variant_at_rule(p),
-            T![apply] => return parse_apply_at_rule(p),
-            T![source] => return parse_source_at_rule(p),
-            T![reference] => return parse_reference_at_rule(p),
-            T![config] => return parse_config_at_rule(p),
-            T![plugin] => return parse_plugin_at_rule(p),
-            _ => {}
-        }
-    }
-
     match p.cur() {
         T![charset] => parse_charset_at_rule(p),
         T![color_profile] => parse_color_profile_at_rule(p),
@@ -129,6 +113,16 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         T![value] => parse_value_at_rule(p),
         T![position_try] => parse_position_try_at_rule(p),
         T![view_transition] => parse_view_transition_at_rule(p),
+        // Tailwind at rules
+        T![theme] => parse_theme_at_rule(p),
+        T![utility] => parse_utility_at_rule(p),
+        T![variant] => parse_variant_at_rule(p),
+        T![custom_variant] => parse_custom_variant_at_rule(p),
+        T![apply] => parse_apply_at_rule(p),
+        T![source] => parse_source_at_rule(p),
+        T![reference] => parse_reference_at_rule(p),
+        T![config] => parse_config_at_rule(p),
+        T![plugin] => parse_plugin_at_rule(p),
         _ if is_at_unknown_at_rule(p) => parse_unknown_at_rule(p),
         _ => Absent,
     }
