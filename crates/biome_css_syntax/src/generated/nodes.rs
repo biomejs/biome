@@ -6621,10 +6621,18 @@ impl CssTailwindValueThemeReference {
     pub fn as_fields(&self) -> CssTailwindValueThemeReferenceFields {
         CssTailwindValueThemeReferenceFields {
             reference: self.reference(),
+            minus_token: self.minus_token(),
+            star_token: self.star_token(),
         }
     }
     pub fn reference(&self) -> SyntaxResult<CssDashedIdentifier> {
         support::required_node(&self.syntax, 0usize)
+    }
+    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
     }
 }
 impl Serialize for CssTailwindValueThemeReference {
@@ -6638,6 +6646,8 @@ impl Serialize for CssTailwindValueThemeReference {
 #[derive(Serialize)]
 pub struct CssTailwindValueThemeReferenceFields {
     pub reference: SyntaxResult<CssDashedIdentifier>,
+    pub minus_token: SyntaxResult<SyntaxToken>,
+    pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssThemeAtRule {
@@ -17851,6 +17861,11 @@ impl std::fmt::Debug for CssTailwindValueThemeReference {
             DEPTH.set(current_depth + 1);
             f.debug_struct("CssTailwindValueThemeReference")
                 .field("reference", &support::DebugSyntaxResult(self.reference()))
+                .field(
+                    "minus_token",
+                    &support::DebugSyntaxResult(self.minus_token()),
+                )
+                .field("star_token", &support::DebugSyntaxResult(self.star_token()))
                 .finish()
         } else {
             f.debug_struct("CssTailwindValueThemeReference").finish()

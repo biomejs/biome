@@ -1912,6 +1912,8 @@ CssTailwindValueArbitraryType =
 // --value(--tab-size-*)
 CssTailwindValueThemeReference =
 	reference: CssDashedIdentifier
+	'-'
+	'*'
 
 // Enhanced @utility directive to support functional utilities
 // @utility tab-* { tab-size: --value([integer]); }

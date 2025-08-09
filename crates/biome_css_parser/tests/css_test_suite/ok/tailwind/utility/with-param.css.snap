@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 179
 expression: snapshot
 ---
 ## Input
@@ -23,10 +22,12 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssUtilityAtRule {
                 utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
-                name: CssSimpleUtilityName {
-                    css_identifier: CssIdentifier {
-                        value_token: IDENT@9..15 "tab-*" [] [Whitespace(" ")],
+                name: CssFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@9..12 "tab" [] [],
                     },
+                    minus_token: MINUS@12..13 "-" [] [],
+                    star_token: STAR@13..15 "*" [] [Whitespace(" ")],
                 },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@15..16 "{" [] [],
@@ -45,8 +46,10 @@ CssRoot {
                                             value: CssTailwindValueList [
                                                 CssTailwindValueThemeReference {
                                                     reference: CssDashedIdentifier {
-                                                        value_token: IDENT@36..48 "--tab-size-*" [] [],
+                                                        value_token: IDENT@36..46 "--tab-size" [] [],
                                                     },
+                                                    minus_token: MINUS@46..47 "-" [] [],
+                                                    star_token: STAR@47..48 "*" [] [],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@48..49 ")" [] [],
@@ -77,9 +80,11 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_UTILITY_AT_RULE@1..52
         0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
-        1: CSS_SIMPLE_UTILITY_NAME@9..15
-          0: CSS_IDENTIFIER@9..15
-            0: IDENT@9..15 "tab-*" [] [Whitespace(" ")]
+        1: CSS_FUNCTIONAL_UTILITY_NAME@9..15
+          0: CSS_IDENTIFIER@9..12
+            0: IDENT@9..12 "tab" [] []
+          1: MINUS@12..13 "-" [] []
+          2: STAR@13..15 "*" [] [Whitespace(" ")]
         2: CSS_DECLARATION_BLOCK@15..52
           0: L_CURLY@15..16 "{" [] []
           1: CSS_DECLARATION_LIST@16..50
@@ -95,8 +100,10 @@ CssRoot {
                       1: L_PAREN@35..36 "(" [] []
                       2: CSS_TAILWIND_VALUE_LIST@36..48
                         0: CSS_TAILWIND_VALUE_THEME_REFERENCE@36..48
-                          0: CSS_DASHED_IDENTIFIER@36..48
-                            0: IDENT@36..48 "--tab-size-*" [] []
+                          0: CSS_DASHED_IDENTIFIER@36..46
+                            0: IDENT@36..46 "--tab-size" [] []
+                          1: MINUS@46..47 "-" [] []
+                          2: STAR@47..48 "*" [] []
                       3: R_PAREN@48..49 ")" [] []
                 1: (empty)
               1: SEMICOLON@49..50 ";" [] []

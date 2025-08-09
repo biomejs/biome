@@ -22,10 +22,12 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssUtilityAtRule {
                 utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
-                name: CssSimpleUtilityName {
-                    css_identifier: CssIdentifier {
-                        value_token: IDENT@9..15 "tab-*" [] [Whitespace(" ")],
+                name: CssFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@9..12 "tab" [] [],
                     },
+                    minus_token: MINUS@12..13 "-" [] [],
+                    star_token: STAR@13..15 "*" [] [Whitespace(" ")],
                 },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@15..16 "{" [] [],
@@ -82,9 +84,11 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_UTILITY_AT_RULE@1..69
         0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
-        1: CSS_SIMPLE_UTILITY_NAME@9..15
-          0: CSS_IDENTIFIER@9..15
-            0: IDENT@9..15 "tab-*" [] [Whitespace(" ")]
+        1: CSS_FUNCTIONAL_UTILITY_NAME@9..15
+          0: CSS_IDENTIFIER@9..12
+            0: IDENT@9..12 "tab" [] []
+          1: MINUS@12..13 "-" [] []
+          2: STAR@13..15 "*" [] [Whitespace(" ")]
         2: CSS_DECLARATION_BLOCK@15..69
           0: L_CURLY@15..16 "{" [] []
           1: CSS_DECLARATION_LIST@16..67

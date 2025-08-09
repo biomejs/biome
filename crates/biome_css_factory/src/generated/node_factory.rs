@@ -2313,10 +2313,16 @@ pub fn css_tailwind_value_function(
 }
 pub fn css_tailwind_value_theme_reference(
     reference: CssDashedIdentifier,
+    minus_token: SyntaxToken,
+    star_token: SyntaxToken,
 ) -> CssTailwindValueThemeReference {
     CssTailwindValueThemeReference::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_TAILWIND_VALUE_THEME_REFERENCE,
-        [Some(SyntaxElement::Node(reference.into_syntax()))],
+        [
+            Some(SyntaxElement::Node(reference.into_syntax())),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Token(star_token)),
+        ],
     ))
 }
 pub fn css_theme_at_rule(

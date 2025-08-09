@@ -1004,6 +1004,13 @@ impl<'src> CssLexer<'src> {
     /// Returns the consumed character wrapped in `Some` if it is part of an identifier,
     /// and `None` if it is not.
     fn consume_ident_part(&mut self, current: u8) -> Option<char> {
+        if self.options.is_tailwind_directives_enabled()
+            && current == b'-'
+            && self.peek_byte() == Some(b'*')
+        {
+            return None;
+        }
+
         let chr = match lookup_byte(current) {
             IDT | MIN | DIG | ZER => {
                 self.advance(1);
@@ -1052,10 +1059,6 @@ impl<'src> CssLexer<'src> {
                         return None;
                     }
                 }
-            }
-            MUL if self.options.is_tailwind_directives_enabled() => {
-                self.advance(1);
-                current as char
             }
             _ => return None,
         };

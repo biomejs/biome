@@ -400,7 +400,16 @@ fn parse_tailwind_value_theme_reference(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    parse_dashed_identifier(p).ok();
+    if p.at(T![__spacing]) || p.at(T![__alpha]) {
+        let ident = p.start();
+        p.bump_remap(T![ident]);
+        ident.complete(p, CSS_DASHED_IDENTIFIER);
+    } else {
+        parse_dashed_identifier(p).ok();
+    }
+
+    p.expect(T![-]);
+    p.expect(T![*]);
 
     Present(m.complete(p, CSS_TAILWIND_VALUE_THEME_REFERENCE))
 }
