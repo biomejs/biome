@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-new-vue-method-shorthand-data.vue
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// new Vue with method shorthand `data`
+new Vue({
+	...data,
+	data() {
+		return {
+			foo: 'bar'
+		};
+	}
+});
+
+```

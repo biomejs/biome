@@ -68,7 +68,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnnecessaryConditions {
-        version: "next",
+        version: "2.1.4",
         name: "noUnnecessaryConditions",
         language: "js",
         sources: &[RuleSource::EslintTypeScript("no-unnecessary-condition").same()],

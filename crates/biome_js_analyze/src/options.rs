@@ -311,6 +311,7 @@ pub type NoVoid = <lint::complexity::no_void::NoVoid as biome_analyze::Rule>::Op
 pub type NoVoidElementsWithChildren = < lint :: correctness :: no_void_elements_with_children :: NoVoidElementsWithChildren as biome_analyze :: Rule > :: Options ;
 pub type NoVoidTypeReturn =
     <lint::correctness::no_void_type_return::NoVoidTypeReturn as biome_analyze::Rule>::Options;
+pub type NoVueDataObjectDeclaration = < lint :: nursery :: no_vue_data_object_declaration :: NoVueDataObjectDeclaration as biome_analyze :: Rule > :: Options ;
 pub type NoWith = <lint::suspicious::no_with::NoWith as biome_analyze::Rule>::Options;
 pub type NoYodaExpression =
     <lint::style::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;

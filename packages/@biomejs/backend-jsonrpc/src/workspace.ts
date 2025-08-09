@@ -1604,6 +1604,10 @@ export interface Nursery {
 	 */
 	noNestedComponentDefinitions?: RuleConfiguration_for_NoNestedComponentDefinitionsOptions;
 	/**
+	 * Prevent client components from being async functions.
+	 */
+	noNextAsyncClientComponent?: RuleConfiguration_for_NoNextAsyncClientComponentOptions;
+	/**
 	 * Disallow non-null assertions after optional chaining expressions.
 	 */
 	noNonNullAssertedOptionalChain?: RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions;
@@ -1676,6 +1680,10 @@ export interface Nursery {
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
 	/**
+	 * Enforce that Vue component data options are declared as functions.
+	 */
+	noVueDataObjectDeclaration?: RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions;
+	/**
 	 * Disallow reserved keys in Vue component data and computed properties.
 	 */
 	noVueReservedKeys?: RuleConfiguration_for_NoVueReservedKeysOptions;
@@ -1747,6 +1755,10 @@ export interface Nursery {
 	 * Enforces the use of with { type: "json" } for JSON module imports.
 	 */
 	useJsonImportAttribute?: RuleFixConfiguration_for_UseJsonImportAttributeOptions;
+	/**
+	 * Enforce a maximum number of parameters in function definitions.
+	 */
+	useMaxParams?: RuleConfiguration_for_UseMaxParamsOptions;
 	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
@@ -2923,6 +2935,9 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNestedComponentDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNestedComponentDefinitionsOptions;
+export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoNextAsyncClientComponentOptions;
 export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions;
@@ -2977,6 +2992,9 @@ export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
+export type RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions;
 export type RuleConfiguration_for_NoVueReservedKeysOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedKeysOptions;
@@ -3028,6 +3046,9 @@ export type RuleConfiguration_for_UseIterableCallbackReturnOptions =
 export type RuleFixConfiguration_for_UseJsonImportAttributeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseJsonImportAttributeOptions;
+export type RuleConfiguration_for_UseMaxParamsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseMaxParamsOptions;
 export type RuleFixConfiguration_for_UseNamedOperationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNamedOperationOptions;
@@ -5223,6 +5244,16 @@ export interface RuleWithOptions_for_NoNestedComponentDefinitionsOptions {
 	 */
 	options: NoNestedComponentDefinitionsOptions;
 }
+export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoNextAsyncClientComponentOptions;
+}
 export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5423,6 +5454,20 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	 */
 	options: NoUselessUndefinedOptions;
 }
+export interface RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueDataObjectDeclarationOptions;
+}
 export interface RuleWithOptions_for_NoVueReservedKeysOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5620,6 +5665,16 @@ export interface RuleWithFixOptions_for_UseJsonImportAttributeOptions {
 	 * Rule's options
 	 */
 	options: UseJsonImportAttributeOptions;
+}
+export interface RuleWithOptions_for_UseMaxParamsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseMaxParamsOptions;
 }
 export interface RuleWithFixOptions_for_UseNamedOperationOptions {
 	/**
@@ -7856,11 +7911,17 @@ export interface NoExcessiveLinesPerFunctionOptions {
 export interface NoFloatingPromisesOptions {}
 export interface NoGlobalDirnameFilenameOptions {}
 export interface NoImplicitCoercionOptions {}
-export interface NoImportCyclesOptions {}
+export interface NoImportCyclesOptions {
+	/**
+	 * Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
+	 */
+	ignoreTypes?: boolean;
+}
 export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
+export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
@@ -7894,6 +7955,7 @@ export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
+export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
@@ -7918,6 +7980,12 @@ export type UseImageSizeOptions = null;
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
+export interface UseMaxParamsOptions {
+	/**
+	 * Maximum number of parameters allowed (default: 4)
+	 */
+	max?: number;
+}
 export interface UseNamedOperationOptions {}
 /**
  * Rule's options.
@@ -8544,6 +8612,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noAwaitInLoop"
 	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
@@ -8596,6 +8665,7 @@ export type Category =
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
+	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -8615,6 +8685,7 @@ export type Category =
 	| "lint/nursery/useIterableCallbackReturn"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"

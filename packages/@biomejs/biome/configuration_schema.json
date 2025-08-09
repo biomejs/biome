@@ -3340,6 +3340,13 @@
 		},
 		"NoImportCyclesOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreTypes": {
+					"description": "Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.",
+					"default": true,
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoImportantInKeyframeConfiguration": {
@@ -3619,6 +3626,16 @@
 			]
 		},
 		"NoNestedTernaryOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoNextAsyncClientComponentConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoNextAsyncClientComponentOptions" }
+			]
+		},
+		"NoNextAsyncClientComponentOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -4712,6 +4729,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDataObjectDeclarationConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueDataObjectDeclarationOptions" }
+			]
+		},
+		"NoVueDataObjectDeclarationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4852,6 +4879,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNextAsyncClientComponent": {
+					"description": "Prevent client components from being async functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoNextAsyncClientComponentConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNonNullAssertedOptionalChain": {
 					"description": "Disallow non-null assertions after optional chaining expressions.",
 					"anyOf": [
@@ -4982,6 +5016,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueDataObjectDeclaration": {
+					"description": "Enforce that Vue component data options are declared as functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueDataObjectDeclarationConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueReservedKeys": {
 					"description": "Disallow reserved keys in Vue component data and computed properties.",
 					"anyOf": [
@@ -5106,6 +5147,13 @@
 					"description": "Enforces the use of with { type: \"json\" } for JSON module imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseJsonImportAttributeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useMaxParams": {
+					"description": "Enforce a maximum number of parameters in function definitions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseMaxParamsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7752,6 +7800,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoNextAsyncClientComponentOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoNextAsyncClientComponentOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoNodejsModulesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9519,6 +9584,27 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoVueDataObjectDeclarationOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoVueDataObjectDeclarationOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoVueReservedKeysOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10778,6 +10864,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseLiteralKeysOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseMaxParamsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseMaxParamsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -13684,6 +13785,25 @@
 		},
 		"UseLiteralKeysOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseMaxParamsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseMaxParamsOptions" }
+			]
+		},
+		"UseMaxParamsOptions": {
+			"type": "object",
+			"properties": {
+				"max": {
+					"description": "Maximum number of parameters allowed (default: 4)",
+					"default": 4,
+					"type": "integer",
+					"format": "uint8",
+					"minimum": 0.0
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseMediaCaptionConfiguration": {

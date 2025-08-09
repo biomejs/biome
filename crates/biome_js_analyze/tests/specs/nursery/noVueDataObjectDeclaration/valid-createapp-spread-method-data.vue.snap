@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-createapp-spread-method-data.vue
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// createApp with spread + method `data`
+import { createApp } from 'vue';
+
+createApp({
+	...data,
+	data() {
+		return {
+			foo: 'bar'
+		};
+	}
+}).mount('#app');
+
+```

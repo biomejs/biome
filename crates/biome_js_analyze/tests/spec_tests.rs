@@ -10,6 +10,7 @@ use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, JsLanguage, Module
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::{AstNode, FileSourceError};
+use biome_service::file_handlers::VueFileHandler;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
@@ -124,11 +125,16 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         } else {
             source_type
         };
+        let input_code = if source_type.as_embedding_kind().is_vue() {
+            VueFileHandler::input(&input_code)
+        } else {
+            input_code.as_str()
+        };
 
         // if source_type.
         analyze_and_snap(
             &mut snapshot,
-            &input_code,
+            input_code,
             source_type,
             filter,
             file_name,

@@ -1,11 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 146
 expression: invalid-data-function.vue
 ---
 # Input
 ```ts
-<script>
 export default {
     data: function() {
         return {
@@ -14,22 +12,21 @@ export default {
         }
     }
 };
-</script>
 
 ```
 
 # Diagnostics
 ```
-invalid-data-function.vue:5:13 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-data-function.vue:4:13 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Key $el is reserved in Vue.
   
-    3 │     data: function() {
-    4 │         return {
-  > 5 │             $el: '',
+    2 │     data: function() {
+    3 │         return {
+  > 4 │             $el: '',
       │             ^^^
-    6 │             _foo: String,
-    7 │         }
+    5 │             _foo: String,
+    6 │         }
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   
@@ -37,16 +34,16 @@ invalid-data-function.vue:5:13 lint/nursery/noVueReservedKeys ━━━━━━
 ```
 
 ```
-invalid-data-function.vue:6:13 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-data-function.vue:5:13 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Keys starting with an underscore are reserved in Vue.
   
-    4 │         return {
-    5 │             $el: '',
-  > 6 │             _foo: String,
+    3 │         return {
+    4 │             $el: '',
+  > 5 │             _foo: String,
       │             ^^^^
-    7 │         }
-    8 │     }
+    6 │         }
+    7 │     }
   
   i Rename the key to avoid conflicts with Vue reserved keys.
   

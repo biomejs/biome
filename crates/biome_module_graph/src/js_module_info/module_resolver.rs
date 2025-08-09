@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, RawSyntaxKind, Text, TextRange, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
-    JsExport, JsOwnExport, ModuleGraph,
+    JsExport, JsImportPath, JsOwnExport, ModuleGraph,
     js_module_info::{JsModuleInfoInner, scope::TsBindingReference},
 };
 
@@ -184,7 +184,7 @@ impl ModuleResolver {
         let mut i = 0;
         while i < self.modules.len() {
             let module = self.modules[i].clone();
-            for resolved_path in module.static_import_paths.values() {
+            for JsImportPath { resolved_path, .. } in module.static_import_paths.values() {
                 self.register_module(resolved_path.clone());
             }
 

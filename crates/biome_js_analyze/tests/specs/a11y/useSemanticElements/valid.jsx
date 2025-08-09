@@ -26,3 +26,9 @@ export const Component2 = () => (
     <div role="alert"></div>
     <div role="alertdialog"></div>
 </>;
+
+<>
+    <div role="combobox"></div>
+    <div role="listbox"></div>
+    <div role="option"></div>
+</>
