@@ -1,5 +1,58 @@
 # @biomejs/biome
 
+## 2.1.5
+
+### Patch Changes
+
+- [#7124](https://github.com/biomejs/biome/pull/7124) [`3f436b8`](https://github.com/biomejs/biome/commit/3f436b84bb62320c16c1ca1ac5b419e4d9abefb3) Thanks [@Jayllyz](https://github.com/Jayllyz)! - Added the rule [`useMaxParams`](https://biomejs.dev/linter/rules/use-max-params).
+
+  This rule enforces a maximum number of parameters for functions to improve code readability and maintainability. Functions with many parameters are difficult to read, understand, and maintain because they require memorizing parameter order and types.
+
+  ```js
+  // Invalid - too many parameters (default max: 4)
+  function processData(
+    name,
+    age,
+    email,
+    phone,
+    address,
+    city,
+    country,
+    zipCode,
+  ) {
+    // ...
+  }
+
+  // Valid - within parameter limit
+  function processData(userData) {
+    const { name, age, email, phone, address, city, country, zipCode } =
+      userData;
+    // ...
+  }
+
+  function calculateSum(a, b, c) {
+    return a + b + c;
+  }
+  ```
+
+- [#7081](https://github.com/biomejs/biome/pull/7081) [`a081bbe`](https://github.com/biomejs/biome/commit/a081bbef37a4b329ace1cb0eb88c36f6c6162af1) Thanks [@Jayllyz](https://github.com/Jayllyz)! - Added the rule [`noNextAsyncClientComponent`](https://biomejs.dev/linter/rules/no-next-async-client-component).
+
+  This rule prevents the use of async functions for client components in Next.js applications. Client components marked with "use client" directive should not be async as this can cause hydration mismatches, break component rendering lifecycle, and lead to unexpected behavior with React's concurrent features.
+
+  ```jsx
+  "use client";
+
+  // Invalid - async client component
+  export default async function MyComponent() {
+    return <div>Hello</div>;
+  }
+
+  // Valid - synchronous client component
+  export default function MyComponent() {
+    return <div>Hello</div>;
+  }
+  ```
+
 ## 2.1.4
 
 ### Patch Changes
