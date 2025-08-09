@@ -1,0 +1,143 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+.test-alpha-basic {
+	color: --alpha(rgb(255 0 0) / 50%);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..18 "test-alpha-basic" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@18..19 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@19..26 "color" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    COLON@26..28 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    _ALPHA_KW@28..35 "--alpha" [] [],
+                                                    L_PAREN@35..36 "(" [] [],
+                                                    IDENT@36..39 "rgb" [] [],
+                                                    L_PAREN@39..40 "(" [] [],
+                                                    CSS_NUMBER_LITERAL@40..44 "255" [] [Whitespace(" ")],
+                                                    CSS_NUMBER_LITERAL@44..46 "0" [] [Whitespace(" ")],
+                                                    CSS_NUMBER_LITERAL@46..47 "0" [] [],
+                                                    R_PAREN@47..49 ")" [] [Whitespace(" ")],
+                                                    SLASH@49..51 "/" [] [Whitespace(" ")],
+                                                    CSS_PERCENTAGE_VALUE@51..53 "50" [] [],
+                                                    PERCENT@53..54 "%" [] [],
+                                                    R_PAREN@54..55 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@55..56 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@56..58 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@58..59 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..59
+  0: (empty)
+  1: CSS_RULE_LIST@0..58
+    0: CSS_QUALIFIED_RULE@0..58
+      0: CSS_SELECTOR_LIST@0..18
+        0: CSS_COMPOUND_SELECTOR@0..18
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..18
+            0: CSS_CLASS_SELECTOR@0..18
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..18
+                0: IDENT@1..18 "test-alpha-basic" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@18..58
+        0: L_CURLY@18..19 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@19..56
+          0: CSS_DECLARATION_WITH_SEMICOLON@19..56
+            0: CSS_DECLARATION@19..55
+              0: CSS_BOGUS_PROPERTY@19..55
+                0: CSS_IDENTIFIER@19..26
+                  0: IDENT@19..26 "color" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@26..28 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@28..55
+                  0: CSS_BOGUS_PROPERTY_VALUE@28..55
+                    0: _ALPHA_KW@28..35 "--alpha" [] []
+                    1: L_PAREN@35..36 "(" [] []
+                    2: IDENT@36..39 "rgb" [] []
+                    3: L_PAREN@39..40 "(" [] []
+                    4: CSS_NUMBER_LITERAL@40..44 "255" [] [Whitespace(" ")]
+                    5: CSS_NUMBER_LITERAL@44..46 "0" [] [Whitespace(" ")]
+                    6: CSS_NUMBER_LITERAL@46..47 "0" [] []
+                    7: R_PAREN@47..49 ")" [] [Whitespace(" ")]
+                    8: SLASH@49..51 "/" [] [Whitespace(" ")]
+                    9: CSS_PERCENTAGE_VALUE@51..53 "50" [] []
+                    10: PERCENT@53..54 "%" [] []
+                    11: R_PAREN@54..55 ")" [] []
+              1: (empty)
+            1: SEMICOLON@55..56 ";" [] []
+        2: R_CURLY@56..58 "}" [Newline("\n")] []
+  2: EOF@58..59 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+alpha_function.css:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+    1 │ .test-alpha-basic {
+  > 2 │ 	color: --alpha(rgb(255 0 0) / 50%);
+      │ 	       ^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i Enable `tailwind_directives` in the css parser options.
+  
+```
