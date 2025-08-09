@@ -72,25 +72,6 @@ impl Rule for NoDuplicateFontNames {
 
         let mut family_names: HashSet<CssFontValue> = HashSet::new();
         let value_list = node.value();
-        // let font_families = if is_font {
-        //     find_font_family(value_list)
-        // } else {
-        //     value_list
-        //         .into_iter()
-        //         .filter_map(|v| match v {
-        //             AnyCssGenericComponentValue::AnyCssValue(value) => match value {
-        //                 AnyCssValue::CssIdentifier(node) => {
-        //                     Some(CssFontValue::SingleValue(node.into()))
-        //                 }
-        //                 AnyCssValue::CssString(node) => {
-        //                     Some(CssFontValue::SingleValue(node.into()))
-        //                 }
-        //                 _ => None,
-        //             },
-        //             _ => None,
-        //         })
-        //         .collect()
-        // };
         let font_families = find_font_family(value_list);
 
         for css_value in font_families {
