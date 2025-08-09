@@ -14,9 +14,8 @@ The following rules have been promoted from nursery to stable groups:
 - Promoted [`noUnknownAtRules`](https://biomejs.dev/linter/rules/no-unknown-at-rules) to the `suspicious` group.
 ##### GraphQL
 
-- Promoted [`useNamedGraphqlOperations`](https://biomejs.dev/linter/rules/use-named-graphql-operations) to the `correctness` group.
-- Promoted [`useNamingConvention`](https://biomejs.dev/linter/rules/use-naming-convention) to the `style` group.
-
+- Promoted [`useGraphqlNamedOperations`](https://biomejs.dev/linter/rules/use-graphql-named-operations) to the `correctness` group.
+- Promoted [`useGraphqlNamingConvention`](https://biomejs.dev/linter/rules/use-graphql-naming-convention) to the `style` group.
 ##### JavaScript/TypeScript
 
 - Promoted [`noExcessiveLinesPerFunction`](https://biomejs.dev/linter/rules/no-excessive-lines-per-function) to the `complexity` group.
