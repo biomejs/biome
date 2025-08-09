@@ -46,3 +46,14 @@ pub fn matches_path(optional_node: Option<&JsonMemberName>, path: &[&str]) -> bo
 
     matches_path(optional_parent_node.as_ref(), &path[..path.len() - 1])
 }
+
+/// Finds the first ancestor [JsonMember], and returns [true] if it's name matches the given input
+pub(crate) fn matches_parent_object(node: &JsonMember, name: &str) -> bool {
+    node.syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(JsonMember::cast)
+        .and_then(|member| member.name().ok())
+        .and_then(|member| member.inner_string_text().ok())
+        .is_some_and(|text| text.text() == name)
+}

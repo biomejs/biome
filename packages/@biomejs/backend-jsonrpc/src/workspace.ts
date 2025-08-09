@@ -1556,6 +1556,10 @@ export interface Nursery {
 	 */
 	noAwaitInLoop?: RuleConfiguration_for_NoAwaitInLoopOptions;
 	/**
+	 * Prevents the use of the ! pattern in the first position of files.includes in the configuration file.
+	 */
+	noBiomeFirstException?: RuleFixConfiguration_for_NoBiomeFirstExceptionOptions;
+	/**
 	 * Disallow bitwise operators.
 	 */
 	noBitwiseOperators?: RuleConfiguration_for_NoBitwiseOperatorsOptions;
@@ -1703,6 +1707,10 @@ export interface Nursery {
 	 * Enforces href attribute for \<a> elements.
 	 */
 	useAnchorHref?: RuleConfiguration_for_UseAnchorHrefOptions;
+	/**
+	 * Promotes the correct usage for ignoring folders in the configuration file.
+	 */
+	useBiomeIgnoreFolder?: RuleFixConfiguration_for_UseBiomeIgnoreFolderOptions;
 	/**
 	 * Require the consistent declaration of object literals. Defaults to explicit definitions.
 	 */
@@ -2895,6 +2903,9 @@ export type RuleConfiguration_for_UseYieldOptions =
 export type RuleConfiguration_for_NoAwaitInLoopOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAwaitInLoopOptions;
+export type RuleFixConfiguration_for_NoBiomeFirstExceptionOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoBiomeFirstExceptionOptions;
 export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
@@ -3003,6 +3014,9 @@ export type RuleConfiguration_for_UseAdjacentGetterSetterOptions =
 export type RuleConfiguration_for_UseAnchorHrefOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAnchorHrefOptions;
+export type RuleFixConfiguration_for_UseBiomeIgnoreFolderOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseBiomeIgnoreFolderOptions;
 export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions;
@@ -5097,6 +5111,20 @@ export interface RuleWithOptions_for_NoAwaitInLoopOptions {
 	 */
 	options: NoAwaitInLoopOptions;
 }
+export interface RuleWithFixOptions_for_NoBiomeFirstExceptionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoBiomeFirstExceptionOptions;
+}
 export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5500,6 +5528,20 @@ export interface RuleWithOptions_for_UseAnchorHrefOptions {
 	 * Rule's options
 	 */
 	options: UseAnchorHrefOptions;
+}
+export interface RuleWithFixOptions_for_UseBiomeIgnoreFolderOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseBiomeIgnoreFolderOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentObjectDefinitionOptions {
 	/**
@@ -7869,6 +7911,7 @@ export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
 export interface NoAwaitInLoopOptions {}
+export interface NoBiomeFirstExceptionOptions {}
 export interface NoBitwiseOperatorsOptions {
 	/**
 	 * Allows a list of bitwise operators to be used as exceptions.
@@ -7943,6 +7986,7 @@ export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
 export type UseAnchorHrefOptions = null;
+export interface UseBiomeIgnoreFolderOptions {}
 export interface UseConsistentObjectDefinitionOptions {
 	/**
 	 * The preferred syntax to enforce.
@@ -8594,8 +8638,8 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noAwaitInLoop"
+	| "lint/nursery/noBiomeFirstException"
 	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noConsole"
@@ -8617,6 +8661,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNestedComponentDefinitions"
+	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
@@ -8645,11 +8690,12 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
-	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/useAdjacentGetterSetter"
 	| "lint/nursery/useAnchorHref"
+	| "lint/nursery/useBiomeIgnoreFolder"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentResponse"

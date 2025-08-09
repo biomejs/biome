@@ -2487,6 +2487,16 @@
 			]
 		},
 		"NoBarrelFileOptions": { "type": "object", "additionalProperties": false },
+		"NoBiomeFirstExceptionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoBiomeFirstExceptionOptions" }
+			]
+		},
+		"NoBiomeFirstExceptionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoBitwiseOperatorsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4791,6 +4801,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noBiomeFirstException": {
+					"description": "Prevents the use of the ! pattern in the first position of files.includes in the configuration file.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoBiomeFirstExceptionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noBitwiseOperators": {
 					"description": "Disallow bitwise operators.",
 					"anyOf": [
@@ -5052,6 +5069,13 @@
 					"description": "Enforces href attribute for \\<a> elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useBiomeIgnoreFolder": {
+					"description": "Promotes the correct usage for ignoring folders in the configuration file.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseBiomeIgnoreFolderConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5991,6 +6015,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoBarrelFileOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoBiomeFirstExceptionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoBiomeFirstExceptionOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -9889,6 +9932,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseBiomeIgnoreFolderOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseBiomeIgnoreFolderOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseBlockStatementsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13140,6 +13202,16 @@
 			]
 		},
 		"UseAwaitOptions": { "type": "object", "additionalProperties": false },
+		"UseBiomeIgnoreFolderConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseBiomeIgnoreFolderOptions" }
+			]
+		},
+		"UseBiomeIgnoreFolderOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseBlockStatementsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

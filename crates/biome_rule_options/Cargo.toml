@@ -15,7 +15,7 @@ biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
-biome_glob               = { workspace = true, features = ["biome_deserialize"] }
+biome_glob               = { workspace = true, features = ["biome_deserialize", "serde"] }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true, features = ["biome_rowan"] }
