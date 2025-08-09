@@ -223,7 +223,7 @@ impl Arguments {
 
             // Find where the static prefix appears in the file path; include the last static component (e.g. "ok")
             let mut start_idx: Option<usize> = None;
-            if !static_components.is_empty() {
+            if !static_components.is_empty() && static_components.len() < parent_components.len() {
                 'outer: for i in 0..=parent_components
                     .len()
                     .saturating_sub(static_components.len())
