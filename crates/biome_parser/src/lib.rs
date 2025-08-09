@@ -271,7 +271,7 @@ pub trait Parser: Sized {
         self.bump_any()
     }
 
-    /// Consume any token but cast it as a different kind using the specified `context`.
+    /// Consume the token but cast it as a different kind using the specified `context`.
     fn bump_remap_with_context(
         &mut self,
         kind: Self::Kind,
@@ -279,6 +279,15 @@ pub trait Parser: Sized {
     ) where
         Self::Source: BumpWithContext,
     {
+        self.do_bump_with_context(kind, context);
+    }
+
+    fn bump_remap_any_with_context(&mut self, context: <Self::Source as BumpWithContext>::Context)
+    where
+        Self::Source: BumpWithContext,
+    {
+        let kind = self.cur();
+        assert_ne!(kind, Self::Kind::EOF);
         self.do_bump_with_context(kind, context);
     }
 

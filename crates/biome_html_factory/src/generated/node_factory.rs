@@ -65,7 +65,7 @@ impl HtmlAttributeBuilder {
 }
 pub fn html_attribute_initializer_clause(
     eq_token: SyntaxToken,
-    value: HtmlString,
+    value: AnyHtmlAttributeInitializer,
 ) -> HtmlAttributeInitializerClause {
     HtmlAttributeInitializerClause::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_ATTRIBUTE_INITIALIZER_CLAUSE,
@@ -178,6 +178,20 @@ impl HtmlDirectiveBuilder {
             ],
         ))
     }
+}
+pub fn html_double_text_expression(
+    l_double_curly_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_double_curly_token: SyntaxToken,
+) -> HtmlDoubleTextExpression {
+    HtmlDoubleTextExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_DOUBLE_TEXT_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_double_curly_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_double_curly_token)),
+        ],
+    ))
 }
 pub fn html_element(
     opening_element: HtmlOpeningElement,
@@ -292,6 +306,20 @@ impl HtmlSelfClosingElementBuilder {
         ))
     }
 }
+pub fn html_single_text_expression(
+    l_curly_token: SyntaxToken,
+    expression: HtmlTextExpression,
+    r_curly_token: SyntaxToken,
+) -> HtmlSingleTextExpression {
+    HtmlSingleTextExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn html_string(value_token: SyntaxToken) -> HtmlString {
     HtmlString::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_STRING,
@@ -304,32 +332,10 @@ pub fn html_tag_name(value_token: SyntaxToken) -> HtmlTagName {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn html_text_expression(
-    l_double_curly_token: SyntaxToken,
-    expression_token: SyntaxToken,
-    r_double_curly_token: SyntaxToken,
-) -> HtmlTextExpression {
+pub fn html_text_expression(html_literal_token: SyntaxToken) -> HtmlTextExpression {
     HtmlTextExpression::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_TEXT_EXPRESSION,
-        [
-            Some(SyntaxElement::Token(l_double_curly_token)),
-            Some(SyntaxElement::Token(expression_token)),
-            Some(SyntaxElement::Token(r_double_curly_token)),
-        ],
-    ))
-}
-pub fn svelte_text_expression(
-    l_curly_token: SyntaxToken,
-    expression_token: SyntaxToken,
-    r_curly_token: SyntaxToken,
-) -> SvelteTextExpression {
-    SvelteTextExpression::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::SVELTE_TEXT_EXPRESSION,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Token(expression_token)),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
+        [Some(SyntaxElement::Token(html_literal_token))],
     ))
 }
 pub fn html_attribute_list<I>(items: I) -> HtmlAttributeList
@@ -390,6 +396,16 @@ where
 {
     HtmlBogusElement::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_BOGUS_ELEMENT,
+        slots,
+    ))
+}
+pub fn html_bogus_text_expression<I>(slots: I) -> HtmlBogusTextExpression
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    HtmlBogusTextExpression::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_BOGUS_TEXT_EXPRESSION,
         slots,
     ))
 }

@@ -49,6 +49,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_DOUBLE_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlDoubleTextExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ELEMENT => {
                     let $pattern = unsafe { $crate::HtmlElement::new_unchecked(node) };
                     $body
@@ -65,6 +69,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlSelfClosingElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlSingleTextExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_STRING => {
                     let $pattern = unsafe { $crate::HtmlString::new_unchecked(node) };
                     $body
@@ -75,10 +83,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_TEXT_EXPRESSION => {
                     let $pattern = unsafe { $crate::HtmlTextExpression::new_unchecked(node) };
-                    $body
-                }
-                $crate::HtmlSyntaxKind::SVELTE_TEXT_EXPRESSION => {
-                    let $pattern = unsafe { $crate::SvelteTextExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::ASTRO_BOGUS_FRONTMATTER => {
@@ -95,6 +99,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_BOGUS_ELEMENT => {
                     let $pattern = unsafe { $crate::HtmlBogusElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_BOGUS_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlBogusTextExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_LIST => {

@@ -1,7 +1,7 @@
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, termcolor};
-use biome_html_parser::parse_html;
+use biome_html_parser::{HtmlParseOptions, parse_html};
 use biome_html_syntax::{HtmlFileSource, HtmlVariant};
 use biome_rowan::SyntaxKind;
 use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
@@ -32,15 +32,15 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
     let file_source = HtmlFileSource::try_from(test_case_path).unwrap_or_default();
-
-    let parsed = parse_html(&content, file_source);
+    let parser_options = HtmlParseOptions::from(&file_source);
+    let parsed = parse_html(&content, parser_options);
     validate_eof_token(parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();
     let code_block = match file_source.variant() {
-        HtmlVariant::Standard => "html",
+        HtmlVariant::Standard(_) => "html",
         HtmlVariant::Astro => "astro",
         HtmlVariant::Vue => "vue",
         HtmlVariant::Svelte => "svelte",
@@ -145,7 +145,7 @@ pub fn quick_test() {
     let code = r#"<template>{{foo}}</template>
     "#;
 
-    let root = parse_html(code, HtmlFileSource::astro());
+    let root = parse_html(code, (&HtmlFileSource::astro()).into());
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());
     if has_bogus_nodes_or_empty_slots(&syntax) {

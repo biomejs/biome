@@ -12,7 +12,10 @@ use crate::{
     workspace::GetSyntaxTreeResult,
 };
 use biome_analyze::AnalyzerOptions;
-use biome_configuration::html::{HtmlFormatterConfiguration, HtmlFormatterEnabled};
+use biome_configuration::html::{
+    HtmlFormatterConfiguration, HtmlFormatterEnabled, HtmlParseInterpolation,
+    HtmlParserConfiguration,
+};
 use biome_css_parser::{CssParserOptions, parse_css_with_offset_and_cache};
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{
@@ -25,7 +28,7 @@ use biome_html_formatter::{
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
     format_node,
 };
-use biome_html_parser::parse_html_with_cache;
+use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
 use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_js_parser::{JsParserOptions, parse_js_with_offset_and_cache};
 use biome_js_syntax::JsFileSource;
@@ -33,6 +36,20 @@ use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, NodeCache};
 use camino::Utf8Path;
 use tracing::debug_span;
+
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct HtmlParserSettings {
+    pub interpolation: Option<HtmlParseInterpolation>,
+}
+
+impl From<HtmlParserConfiguration> for HtmlParserSettings {
+    fn from(configuration: HtmlParserConfiguration) -> Self {
+        Self {
+            interpolation: configuration.interpolation,
+        }
+    }
+}
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -70,7 +87,7 @@ impl ServiceLanguage for HtmlLanguage {
     type FormatterSettings = HtmlFormatterSettings;
     type LinterSettings = ();
     type FormatOptions = HtmlFormatOptions;
-    type ParserSettings = ();
+    type ParserSettings = HtmlParserSettings;
     type EnvironmentSettings = ();
     type AssistSettings = ();
 
@@ -242,11 +259,23 @@ fn parse(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _settings: &Settings,
+    settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let html_file_source = file_source.to_html_file_source().unwrap_or_default();
-    let parse = parse_html_with_cache(text, html_file_source, cache);
+    let mut options = HtmlParseOptions::from(&html_file_source);
+    if settings
+        .languages
+        .html
+        .parser
+        .interpolation
+        .unwrap_or_default()
+        .into()
+        && html_file_source.is_html()
+    {
+        options = options.with_double_text_expression();
+    }
+    let parse = parse_html_with_cache(text, cache, options);
 
     ParseResult {
         any_parse: parse.into(),

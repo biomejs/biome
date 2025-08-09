@@ -1,0 +1,141 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```astro
+---
+const foo = "lorem ipsum";
+---
+<html>
+	<span id={foo}></span>
+</html>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content_token: HTML_LITERAL@3..31 "const foo = \"lorem ipsum\";\n" [Newline("\n")] [],
+        r_fence_token: FENCE@31..34 "---" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@34..36 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@36..40 "html" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@40..41 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@41..44 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@44..49 "span" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@49..51 "id" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@51..52 "=" [] [],
+                                    value: HtmlSingleTextExpression {
+                                        l_curly_token: L_CURLY@52..53 "{" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@53..56 "foo" [] [],
+                                        },
+                                        r_curly_token: R_CURLY@56..57 "}" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@57..58 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@58..59 "<" [] [],
+                        slash_token: SLASH@59..60 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_LITERAL@60..64 "span" [] [],
+                        },
+                        r_angle_token: R_ANGLE@64..65 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@65..67 "<" [Newline("\n")] [],
+                slash_token: SLASH@67..68 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@68..72 "html" [] [],
+                },
+                r_angle_token: R_ANGLE@72..73 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@73..74 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..74
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..34
+    0: FENCE@0..3 "---" [] []
+    1: HTML_LITERAL@3..31 "const foo = \"lorem ipsum\";\n" [Newline("\n")] []
+    2: FENCE@31..34 "---" [] []
+  2: (empty)
+  3: HTML_ELEMENT_LIST@34..73
+    0: HTML_ELEMENT@34..73
+      0: HTML_OPENING_ELEMENT@34..41
+        0: L_ANGLE@34..36 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@36..40
+          0: HTML_LITERAL@36..40 "html" [] []
+        2: HTML_ATTRIBUTE_LIST@40..40
+        3: R_ANGLE@40..41 ">" [] []
+      1: HTML_ELEMENT_LIST@41..65
+        0: HTML_ELEMENT@41..65
+          0: HTML_OPENING_ELEMENT@41..58
+            0: L_ANGLE@41..44 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@44..49
+              0: HTML_LITERAL@44..49 "span" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@49..57
+              0: HTML_ATTRIBUTE@49..57
+                0: HTML_ATTRIBUTE_NAME@49..51
+                  0: HTML_LITERAL@49..51 "id" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@51..57
+                  0: EQ@51..52 "=" [] []
+                  1: HTML_SINGLE_TEXT_EXPRESSION@52..57
+                    0: L_CURLY@52..53 "{" [] []
+                    1: HTML_TEXT_EXPRESSION@53..56
+                      0: HTML_LITERAL@53..56 "foo" [] []
+                    2: R_CURLY@56..57 "}" [] []
+            3: R_ANGLE@57..58 ">" [] []
+          1: HTML_ELEMENT_LIST@58..58
+          2: HTML_CLOSING_ELEMENT@58..65
+            0: L_ANGLE@58..59 "<" [] []
+            1: SLASH@59..60 "/" [] []
+            2: HTML_TAG_NAME@60..64
+              0: HTML_LITERAL@60..64 "span" [] []
+            3: R_ANGLE@64..65 ">" [] []
+      2: HTML_CLOSING_ELEMENT@65..73
+        0: L_ANGLE@65..67 "<" [Newline("\n")] []
+        1: SLASH@67..68 "/" [] []
+        2: HTML_TAG_NAME@68..72
+          0: HTML_LITERAL@68..72 "html" [] []
+        3: R_ANGLE@72..73 ">" [] []
+  4: EOF@73..74 "" [Newline("\n")] []
+
+```

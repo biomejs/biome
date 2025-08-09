@@ -1,5 +1,5 @@
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
-use biome_html_parser::{parse_html, parse_html_with_cache};
+use biome_html_parser::{HtmlParseOptions, parse_html, parse_html_with_cache};
 use biome_html_syntax::HtmlFileSource;
 use biome_rowan::NodeCache;
 use biome_test_utils::BenchCase;
@@ -43,7 +43,8 @@ fn bench_parser(criterion: &mut Criterion) {
                     &code,
                     |b, _| {
                         b.iter(|| {
-                            let result = black_box(parse_html(code, file_source));
+                            let result =
+                                black_box(parse_html(code, HtmlParseOptions::from(&file_source)));
                             diagnostics.extend(result.into_diagnostics());
                         })
                     },
@@ -61,11 +62,19 @@ fn bench_parser(criterion: &mut Criterion) {
                         b.iter_batched(
                             || {
                                 let mut cache = NodeCache::default();
-                                parse_html_with_cache(code, file_source, &mut cache);
+                                parse_html_with_cache(
+                                    code,
+                                    &mut cache,
+                                    HtmlParseOptions::from(&file_source),
+                                );
                                 cache
                             },
                             |mut cache| {
-                                parse_html_with_cache(code, file_source, &mut cache);
+                                parse_html_with_cache(
+                                    code,
+                                    &mut cache,
+                                    HtmlParseOptions::from(&file_source),
+                                );
                             },
                             BatchSize::SmallInput,
                         )
