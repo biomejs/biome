@@ -68,14 +68,14 @@
     "@biomejs/wasm-bundler": "workspace:*",
     "@biomejs/wasm-nodejs": "workspace:*",
     "@biomejs/wasm-web": "workspace:*",
-    "typescript": "5.8.3",
-    "vite": "7.0.5",
+    "typescript": "5.9.2",
+    "vite": "7.0.6",
     "vitest": "3.2.4"
   },
   "peerDependencies": {
-    "@biomejs/wasm-bundler": "^2.1.3",
-    "@biomejs/wasm-nodejs": "^2.1.3",
-    "@biomejs/wasm-web": "^2.1.3"
+    "@biomejs/wasm-bundler": "^2.1.4",
+    "@biomejs/wasm-nodejs": "^2.1.4",
+    "@biomejs/wasm-web": "^2.1.4"
   },
   "peerDependenciesMeta": {
     "@biomejs/wasm-bundler": {

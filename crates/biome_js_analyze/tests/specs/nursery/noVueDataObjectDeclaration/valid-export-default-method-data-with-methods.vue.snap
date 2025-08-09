@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-export-default-method-data-with-methods.vue
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// export default method and methods/computed mix
+export default {
+	data() { },
+	methods: {},
+};
+
+```

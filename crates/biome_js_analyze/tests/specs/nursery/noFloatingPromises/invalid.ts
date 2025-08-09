@@ -1,4 +1,5 @@
 import { returnPromiseResult } from "./returnPromiseResult.ts";
+import { returnPromiseResult as returnAliasedPromiseResult } from "./returnPromiseResult.ts";
 
 async function returnsPromise(): Promise<string> {
 	return "value";
@@ -335,6 +336,7 @@ async function testDestructuringAndCallingReturnsPromiseFromRest({
 import("some-module").then(() => {});
 
 returnPromiseResult();
+returnAliasedPromiseResult();
 
 function returnMaybePromise(): Promise<void> | undefined {
 	if (!false) {

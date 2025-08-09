@@ -11,6 +11,7 @@ use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeD
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
+use camino::Utf8Path;
 use indexmap::IndexMap;
 use rust_lapper::Lapper;
 use rustc_hash::FxHashMap;
@@ -38,7 +39,7 @@ impl Deref for JsModuleInfo {
 impl JsModuleInfo {
     /// Returns an iterator over all the static and dynamic imports in this
     /// module.
-    pub fn all_import_paths(&self) -> impl Iterator<Item = ResolvedPath> + use<> {
+    pub fn all_import_paths(&self) -> impl Iterator<Item = JsImportPath> + use<> {
         ImportPathIterator {
             module_info: self.clone(),
             index: 0,
@@ -101,11 +102,11 @@ pub struct JsModuleInfoInner {
 
     /// Map of all the paths from static imports in the module.
     ///
-    /// Maps from the source specifier name to a [JsResolvedPath] with the
+    /// Maps from the source specifier name to a [JsImportPath] with the
     /// absolute path it resolves to. The resolved path may be looked up as key
     /// in the [ModuleGraph::data] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
-    pub static_import_paths: IndexMap<Text, ResolvedPath>,
+    pub static_import_paths: IndexMap<Text, JsImportPath>,
 
     /// Map of all dynamic import paths found in the module for which the import
     /// specifier could be statically determined.
@@ -114,14 +115,14 @@ pub struct JsModuleInfoInner {
     /// (for instance, because a template string with variables is used) will be
     /// omitted from this map.
     ///
-    /// Maps from the source specifier name to a [JsResolvedPath] with the
+    /// Maps from the source specifier name to a [JsImportPath] with the
     /// absolute path it resolves to. The resolved path may be looked up as key
     /// in the [ModuleGraph::data] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
     ///
     /// Paths found in `require()` expressions in CommonJS sources are also
     /// included with the dynamic import paths.
-    pub dynamic_import_paths: IndexMap<Text, ResolvedPath>,
+    pub dynamic_import_paths: IndexMap<Text, JsImportPath>,
 
     /// Map of exports from the module.
     ///
@@ -177,6 +178,31 @@ impl Deref for Imports {
     }
 }
 
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+pub enum JsImportPhase {
+    #[default]
+    Default,
+    /// https://tc39.es/proposal-defer-import-eval/
+    Defer,
+    /// https://tc39.es/proposal-source-phase-imports/
+    Source,
+    /// Technically this is not an import phase defined in ECMAScript, but type-only imports in
+    /// TypeScript cannot be imported in other phases.
+    Type,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct JsImportPath {
+    pub resolved_path: ResolvedPath,
+    pub phase: JsImportPhase,
+}
+
+impl JsImportPath {
+    pub fn as_path(&self) -> Option<&Utf8Path> {
+        self.resolved_path.as_path()
+    }
+}
+
 static_assertions::assert_impl_all!(JsModuleInfo: Send, Sync);
 
 impl JsModuleInfoInner {
@@ -208,7 +234,7 @@ impl JsModuleInfoInner {
     }
 
     /// Returns the information about a given import by its syntax node.
-    pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&ResolvedPath> {
+    pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&JsImportPath> {
         let specifier_text = node.inner_string_text()?;
         let specifier = specifier_text.text();
         if node.is_static_import() {
@@ -313,7 +339,7 @@ struct ImportPathIterator {
 }
 
 impl Iterator for ImportPathIterator {
-    type Item = ResolvedPath;
+    type Item = JsImportPath;
 
     fn next(&mut self) -> Option<Self::Item> {
         let num_static_imports = self.module_info.static_import_paths.len();

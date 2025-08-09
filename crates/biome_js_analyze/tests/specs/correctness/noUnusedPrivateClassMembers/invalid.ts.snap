@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 146
 expression: invalid.ts
 ---
 # Input
@@ -113,10 +114,15 @@ invalid.ts:10:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     11 │ 
     12 │ 	}
   
-  i Unsafe fix: Remove unused declaration.
+  i Unsafe fix: Remove private modifier
   
-    10 │ → constructor(private·nusedProperty·=·3){
-       │               -------------------------  
+     8  8 │   
+     9  9 │   class TSUnusedPrivateConstructor {
+    10    │ - → constructor(private·nusedProperty·=·3){
+       10 │ + → constructor(_nusedProperty·=·3){
+    11 11 │   
+    12 12 │   	}
+  
 
 ```
 

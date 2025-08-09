@@ -221,6 +221,7 @@ impl Projects {
                 if project_data
                     .root_settings
                     .is_path_ignored_for_feature(path, feature)
+                    || settings.is_path_ignored_for_feature(path, feature)
                 {
                     file_features.set_ignored(feature);
                 }

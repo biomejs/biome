@@ -99,7 +99,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueReservedKeys {
-        version: "next",
+        version: "2.1.3",
         name: "noVueReservedKeys",
         language: "js",
         recommended: true,

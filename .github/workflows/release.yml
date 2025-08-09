@@ -22,7 +22,7 @@ jobs:
     name: Release
     outputs:
       hasChangesets: ${{ steps.changesets-action.outputs.hasChangesets }}
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm-small
     steps:
       - name: Checkout Repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -53,7 +53,7 @@ jobs:
 
   # Retrieve version of `@biomejs/biome` and `@biomejs/js-api`
   version:
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm-small
     needs: changesets
     if: needs.changesets.outputs.hasChangesets == 'false'
     outputs:
@@ -91,16 +91,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: depot-windows-2022-4
+          - os: depot-windows-2022-16
             target: x86_64-pc-windows-msvc
             code-target: win32-x64
-          - os: depot-windows-2022-4
+          - os: depot-windows-2022-16
             target: aarch64-pc-windows-msvc
             code-target: win32-arm64
-          - os: depot-ubuntu-24.04
+          - os: depot-ubuntu-24.04-16
             target: x86_64-unknown-linux-musl
             code-target: linux-x64-musl
-          - os: depot-ubuntu-24.04-arm
+          - os: depot-ubuntu-24.04-arm-16
             target: aarch64-unknown-linux-musl
             code-target: linux-arm64-musl
           - os: depot-macos-14
@@ -127,7 +127,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@c99cc51b309eee71a866715cfa08c922f11cf898 # v2.56.19
+        uses: taiki-e/install-action@6064345e6658255e90e9500fdf9a06ab77e6909c # v2.57.6
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -147,12 +147,12 @@ jobs:
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
-        if: matrix.os == 'depot-windows-2022-4'
+        if: matrix.os == 'depot-windows-2022-16'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
       - name: Copy CLI binary
-        if: matrix.os != 'depot-windows-2022-4'
+        if: matrix.os != 'depot-windows-2022-16'
         run: |
           mkdir dist
           cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
@@ -298,7 +298,7 @@ jobs:
 
   publish-cli:
     name: Publish CLI
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04 # Must be a GitHub hosted runner for provenance
     needs:
       - build-binaries
       - build-binaries-gnu
@@ -379,11 +379,11 @@ jobs:
           repository: ${{ env.BIOME_WEBSITE_REPO }}
           event-type: ${{ env.BIOME_RELEASE_CLI_EVENT }}
           client-payload: |
-            { "sha": "${{ env.GITHUB_SHA }}", "tag": "@biomejs/biome@${{ needs.build-binaries.outputs.version }}", "version": "${{ needs.build-binaries.outputs.version }}" }
+            { "sha": "${{ github.sha }}", "tag": "@biomejs/biome@${{ needs.build-binaries.outputs.version }}", "version": "${{ needs.build-binaries.outputs.version }}" }
 
   publish-js-api:
     name: Publish JS API
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04 # Must be a GitHub hosted runner for provenance
     needs: build-js-api
     if: needs.build-js-api.outputs.version
     environment: npm-publish

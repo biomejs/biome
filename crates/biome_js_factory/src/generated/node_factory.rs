@@ -2108,6 +2108,7 @@ pub fn js_import_default_clause(
         from_token,
         source,
         type_token: None,
+        phase_token: None,
         assertion: None,
     }
 }
@@ -2116,11 +2117,16 @@ pub struct JsImportDefaultClauseBuilder {
     from_token: SyntaxToken,
     source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
+    phase_token: Option<SyntaxToken>,
     assertion: Option<JsImportAssertion>,
 }
 impl JsImportDefaultClauseBuilder {
     pub fn with_type_token(mut self, type_token: SyntaxToken) -> Self {
         self.type_token = Some(type_token);
+        self
+    }
+    pub fn with_phase_token(mut self, phase_token: SyntaxToken) -> Self {
+        self.phase_token = Some(phase_token);
         self
     }
     pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
@@ -2132,6 +2138,7 @@ impl JsImportDefaultClauseBuilder {
             JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE,
             [
                 self.type_token.map(|token| SyntaxElement::Token(token)),
+                self.phase_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.default_specifier.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),

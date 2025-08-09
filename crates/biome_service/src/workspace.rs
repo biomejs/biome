@@ -1207,13 +1207,6 @@ pub struct OpenProjectParams {
     /// Whether the folder should be opened as a project, even if no
     /// `biome.json` can be found.
     pub open_uninitialized: bool,
-
-    /// Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub only_rules: Option<Vec<RuleSelector>>,
-    /// Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub skip_rules: Option<Vec<RuleSelector>>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1222,9 +1215,6 @@ pub struct OpenProjectParams {
 pub struct OpenProjectResult {
     /// A unique identifier for this project
     pub project_key: ProjectKey,
-
-    /// How to scan this project
-    pub scan_kind: ScanKind,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

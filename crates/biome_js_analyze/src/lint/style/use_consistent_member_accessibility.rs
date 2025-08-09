@@ -309,11 +309,11 @@ declare_lint_rule! {
     /// This option determines the required accessibility modifiers on class properties and methods.
     /// It can be set to one of the following values:
     ///
-    /// - `noPublic` - forbid the use of public (a safe fix will remove it).
-    /// - `explicit` - requires an accessibility modifier for every member that allows that (a safe fix will add public).
+    /// - `noPublic` - forbid the use of the `public` modifier.
+    /// - `explicit` - requires an accessibility modifier for every member where it is permitted.
     /// - `none` - forbid all accessibility modifiers (public, protected, private).
     ///
-    /// **Default:** `noPublic`
+    /// **Default: `noPublic`**
     ///
     pub UseConsistentMemberAccessibility {
         version: "1.9.0",

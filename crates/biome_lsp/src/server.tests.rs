@@ -604,15 +604,13 @@ async fn document_lifecycle() -> Result<()> {
 
     // `open_project()` will return an existing key if called with a path
     // for an existing project.
-    let OpenProjectResult { project_key, .. } = server
+    let OpenProjectResult { project_key } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
             },
         )
         .await?
@@ -666,15 +664,13 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 
         // `open_project()` will return an existing key if called with a path
         // for an existing project.
-        let OpenProjectResult { project_key, .. } = server
+        let OpenProjectResult { project_key } = server
             .request(
                 "biome/open_project",
                 "open_project",
                 OpenProjectParams {
                     path: BiomePath::new(""),
                     open_uninitialized: true,
-                    only_rules: None,
-                    skip_rules: None,
                 },
             )
             .await?
@@ -712,15 +708,13 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 
         // `open_project()` will return an existing key if called with a path
         // for an existing project.
-        let OpenProjectResult { project_key, .. } = server
+        let OpenProjectResult { project_key } = server
             .request(
                 "biome/open_project",
                 "open_project",
                 OpenProjectParams {
                     path: BiomePath::new(""),
                     open_uninitialized: true,
-                    only_rules: None,
-                    skip_rules: None,
                 },
             )
             .await?
@@ -1015,6 +1009,28 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
                         range: Range {
                             start: Position {
                                 line: 0,
+                                character: 16,
+                            },
+                            end: Position {
+                                line: 0,
+                                character: 20,
+                            },
+                        },
+                        severity: Some(lsp::DiagnosticSeverity::ERROR),
+                        code: Some(lsp::NumberOrString::String(String::from(
+                            "syntax/correctness/noDuplicatePrivateClassMembers",
+                        ))),
+                        code_description: None,
+                        source: Some(String::from("biome")),
+                        message: String::from("Duplicate private class member \"#foo\"",),
+                        related_information: None,
+                        tags: None,
+                        data: None,
+                    },
+                    lsp::Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 0,
                                 character: 10,
                             },
                             end: Position {
@@ -1065,28 +1081,6 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
                         message: String::from(
                             "This private class member is defined but never used.",
                         ),
-                        related_information: None,
-                        tags: None,
-                        data: None,
-                    },
-                    lsp::Diagnostic {
-                        range: Range {
-                            start: Position {
-                                line: 0,
-                                character: 16,
-                            },
-                            end: Position {
-                                line: 0,
-                                character: 20,
-                            },
-                        },
-                        severity: Some(lsp::DiagnosticSeverity::ERROR),
-                        code: Some(lsp::NumberOrString::String(String::from(
-                            "syntax/correctness/noDuplicatePrivateClassMembers",
-                        ))),
-                        code_description: None,
-                        source: Some(String::from("biome")),
-                        message: String::from("Duplicate private class member \"#foo\"",),
                         related_information: None,
                         tags: None,
                         data: None,
@@ -2561,15 +2555,13 @@ isSpreadAssignment;
 
     // `open_project()` will return an existing key if called with a path
     // for an existing project.
-    let OpenProjectResult { project_key, .. } = server
+    let OpenProjectResult { project_key } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
-                skip_rules: None,
-                only_rules: None,
             },
         )
         .await?
@@ -3383,15 +3375,13 @@ export function bar() {
 
     server.initialize().await?;
 
-    let OpenProjectResult { project_key, .. } = server
+    let OpenProjectResult { project_key } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: fs.working_directory.clone().into(),
                 open_uninitialized: true,
-                skip_rules: None,
-                only_rules: None,
             },
         )
         .await?
@@ -3581,15 +3571,13 @@ export function bar() {
 
     server.initialize().await?;
 
-    let OpenProjectResult { project_key, .. } = server
+    let OpenProjectResult { project_key } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: fs.working_directory.clone().into(),
                 open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
             },
         )
         .await?
@@ -3739,15 +3727,13 @@ async fn should_open_and_update_nested_files() -> Result<()> {
     server.initialize().await?;
 
     // ARRANGE: Open project.
-    let OpenProjectResult { project_key, .. } = server
+    let OpenProjectResult { project_key } = server
         .request(
             "biome/open_project",
             "open_project",
             OpenProjectParams {
                 path: fs.working_directory.clone().into(),
                 open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
             },
         )
         .await?

@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
 use biome_jsdoc_comment::JsdocComment;
-use biome_module_graph::{JsModuleInfo, ModuleGraph, ResolvedPath};
+use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
 use biome_rule_options::no_private_imports::{NoPrivateImportsOptions, Visibility};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -180,7 +180,7 @@ impl Rule for NoPrivateImports {
             .then(|| node.inner_string_text())
             .flatten()
             .and_then(|specifier| module_info.static_import_paths.get(specifier.text()))
-            .and_then(ResolvedPath::as_path)
+            .and_then(JsImportPath::as_path)
             .filter(|path| !BiomePath::new(path).is_dependency())
         else {
             return Vec::new();

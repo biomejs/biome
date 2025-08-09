@@ -898,7 +898,8 @@ export type RuleDomain =
 	| "next"
 	| "qwik"
 	| "vue"
-	| "project";
+	| "project"
+	| "tailwind";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
@@ -1603,6 +1604,14 @@ export interface Nursery {
 	 */
 	noNestedComponentDefinitions?: RuleConfiguration_for_NoNestedComponentDefinitionsOptions;
 	/**
+	 * Prevent client components from being async functions.
+	 */
+	noNextAsyncClientComponent?: RuleConfiguration_for_NoNextAsyncClientComponentOptions;
+	/**
+	 * Disallow non-null assertions after optional chaining expressions.
+	 */
+	noNonNullAssertedOptionalChain?: RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions;
+	/**
 	 * Disallow use event handlers on non-interactive elements.
 	 */
 	noNoninteractiveElementInteractions?: RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions;
@@ -1647,6 +1656,10 @@ export interface Nursery {
 	 */
 	noUnknownAtRule?: RuleConfiguration_for_NoUnknownAtRuleOptions;
 	/**
+	 * Disallow unnecessary type-based conditions that can be statically determined as redundant.
+	 */
+	noUnnecessaryConditions?: RuleConfiguration_for_NoUnnecessaryConditionsOptions;
+	/**
 	 * Warn when importing non-existing exports.
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
@@ -1666,6 +1679,10 @@ export interface Nursery {
 	 * Disallow the use of useless undefined.
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
+	/**
+	 * Enforce that Vue component data options are declared as functions.
+	 */
+	noVueDataObjectDeclaration?: RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions;
 	/**
 	 * Disallow reserved keys in Vue component data and computed properties.
 	 */
@@ -1694,6 +1711,10 @@ export interface Nursery {
 	 * Use static Response methods instead of new Response() constructor when possible.
 	 */
 	useConsistentResponse?: RuleFixConfiguration_for_UseConsistentResponseOptions;
+	/**
+	 * Enforce type definitions to consistently use either interface or type.
+	 */
+	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
 	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
@@ -1730,6 +1751,10 @@ export interface Nursery {
 	 * Enforces the use of with { type: "json" } for JSON module imports.
 	 */
 	useJsonImportAttribute?: RuleFixConfiguration_for_UseJsonImportAttributeOptions;
+	/**
+	 * Enforce a maximum number of parameters in function definitions.
+	 */
+	useMaxParams?: RuleConfiguration_for_UseMaxParamsOptions;
 	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
@@ -2906,6 +2931,12 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNestedComponentDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNestedComponentDefinitionsOptions;
+export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoNextAsyncClientComponentOptions;
+export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions;
 export type RuleConfiguration_for_NoNoninteractiveElementInteractionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNoninteractiveElementInteractionsOptions;
@@ -2939,6 +2970,9 @@ export type RuleConfiguration_for_NoUnassignedVariablesOptions =
 export type RuleConfiguration_for_NoUnknownAtRuleOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnknownAtRuleOptions;
+export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnnecessaryConditionsOptions;
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
@@ -2954,6 +2988,9 @@ export type RuleFixConfiguration_for_NoUselessEscapeInStringOptions =
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
+export type RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions;
 export type RuleConfiguration_for_NoVueReservedKeysOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedKeysOptions;
@@ -2972,6 +3009,9 @@ export type RuleFixConfiguration_for_UseConsistentObjectDefinitionOptions =
 export type RuleFixConfiguration_for_UseConsistentResponseOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentResponseOptions;
+export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -2999,6 +3039,9 @@ export type RuleConfiguration_for_UseIterableCallbackReturnOptions =
 export type RuleFixConfiguration_for_UseJsonImportAttributeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseJsonImportAttributeOptions;
+export type RuleConfiguration_for_UseMaxParamsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseMaxParamsOptions;
 export type RuleFixConfiguration_for_UseNamedOperationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNamedOperationOptions;
@@ -5194,6 +5237,26 @@ export interface RuleWithOptions_for_NoNestedComponentDefinitionsOptions {
 	 */
 	options: NoNestedComponentDefinitionsOptions;
 }
+export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoNextAsyncClientComponentOptions;
+}
+export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoNonNullAssertedOptionalChainOptions;
+}
 export interface RuleWithOptions_for_NoNoninteractiveElementInteractionsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5316,6 +5379,16 @@ export interface RuleWithOptions_for_NoUnknownAtRuleOptions {
 	 */
 	options: NoUnknownAtRuleOptions;
 }
+export interface RuleWithOptions_for_NoUnnecessaryConditionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnnecessaryConditionsOptions;
+}
 export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5373,6 +5446,20 @@ export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	 * Rule's options
 	 */
 	options: NoUselessUndefinedOptions;
+}
+export interface RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueDataObjectDeclarationOptions;
 }
 export interface RuleWithOptions_for_NoVueReservedKeysOptions {
 	/**
@@ -5441,6 +5528,20 @@ export interface RuleWithFixOptions_for_UseConsistentResponseOptions {
 	 * Rule's options
 	 */
 	options: UseConsistentResponseOptions;
+}
+export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentTypeDefinitionsOptions;
 }
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
@@ -5547,6 +5648,16 @@ export interface RuleWithFixOptions_for_UseJsonImportAttributeOptions {
 	 * Rule's options
 	 */
 	options: UseJsonImportAttributeOptions;
+}
+export interface RuleWithOptions_for_UseMaxParamsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseMaxParamsOptions;
 }
 export interface RuleWithFixOptions_for_UseNamedOperationOptions {
 	/**
@@ -7783,11 +7894,18 @@ export interface NoExcessiveLinesPerFunctionOptions {
 export interface NoFloatingPromisesOptions {}
 export interface NoGlobalDirnameFilenameOptions {}
 export interface NoImplicitCoercionOptions {}
-export interface NoImportCyclesOptions {}
+export interface NoImportCyclesOptions {
+	/**
+	 * Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
+	 */
+	ignoreTypes?: boolean;
+}
 export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
+export interface NoNextAsyncClientComponentOptions {}
+export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
 export interface NoQuickfixBiomeOptions {
@@ -7814,11 +7932,13 @@ export interface NoShadowOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
 export interface NoUnknownAtRuleOptions {}
+export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
 export interface NoUnwantedPolyfillioOptions {}
 export interface NoUselessBackrefInRegexOptions {}
 export interface NoUselessEscapeInStringOptions {}
 export interface NoUselessUndefinedOptions {}
+export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export interface UseAdjacentGetterSetterOptions {}
@@ -7830,6 +7950,9 @@ export interface UseConsistentObjectDefinitionOptions {
 	syntax?: ObjectPropertySyntax;
 }
 export interface UseConsistentResponseOptions {}
+export interface UseConsistentTypeDefinitionsOptions {
+	style?: ConsistentTypeDefinition;
+}
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
 export interface UseExportsLastOptions {}
@@ -7839,6 +7962,12 @@ export type UseImageSizeOptions = null;
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
+export interface UseMaxParamsOptions {
+	/**
+	 * Maximum number of parameters allowed (default: 4)
+	 */
+	max?: number;
+}
 export interface UseNamedOperationOptions {}
 /**
  * Rule's options.
@@ -8155,6 +8284,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type CustomRestrictedElements = Record<string, string>;
 export type ObjectPropertySyntax = "explicit" | "shorthand";
+export type ConsistentTypeDefinition = "interface" | "type";
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -8464,6 +8594,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noAwaitInLoop"
 	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
@@ -8486,9 +8617,11 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNestedComponentDefinitions"
+	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noQuickfixBiome"
+	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noReactPropAssign"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedElements"
@@ -8505,39 +8638,42 @@ export type Category =
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
-	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessUndefined"
-	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
+	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/useAdjacentGetterSetter"
+	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentResponse"
+	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useForComponent"
-	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useGoogleFontPreconnect"
+	| "lint/nursery/useImageSize"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIndexOf"
 	| "lint/nursery/useIterableCallbackReturn"
-	| "lint/nursery/useImageSize"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useAnchorHref"
+	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
 	| "lint/nursery/useObjectSpread"
 	| "lint/nursery/useParseIntRadix"
+	| "lint/nursery/useQwikClasslist"
+	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useReadonlyClassProperties"
 	| "lint/nursery/useSingleJsDocAsterisk"
 	| "lint/nursery/useSortedClasses"
@@ -8841,10 +8977,6 @@ export interface BacktraceSymbol {
 }
 export interface OpenProjectParams {
 	/**
-	 * Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
-	 */
-	onlyRules?: RuleCode[];
-	/**
 	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
 	 */
 	openUninitialized: boolean;
@@ -8852,42 +8984,13 @@ export interface OpenProjectParams {
 	 * The path to open
 	 */
 	path: BiomePath;
-	/**
-	 * Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
-	 */
-	skipRules?: RuleCode[];
 }
-export type RuleCode = string;
 export interface OpenProjectResult {
 	/**
 	 * A unique identifier for this project
 	 */
 	projectKey: ProjectKey;
-	/**
-	 * How to scan this project
-	 */
-	scanKind: ScanKind;
 }
-export type ScanKind =
-	| "noScanner"
-	| "knownFiles"
-	| {
-			targetedKnownFiles: {
-				/**
-				 * Determines whether the file scanner should descend into subdirectories of the target paths.
-				 */
-				descendFromTargets: boolean;
-				/**
-	* The paths to target by the scanner.
-
-If a target path indicates a folder, all files within are scanned as well.
-
-Target paths must be absolute. 
-	 */
-				targetPaths: BiomePath[];
-			};
-	  }
-	| "project";
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
@@ -9040,6 +9143,7 @@ export interface PullDiagnosticsParams {
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
+export type RuleCode = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
