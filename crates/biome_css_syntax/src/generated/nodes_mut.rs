@@ -2618,7 +2618,7 @@ impl CssSupportsOrCondition {
     }
 }
 impl CssTailwindAlphaFunction {
-    pub fn with___alpha_token(self, element: SyntaxToken) -> Self {
+    pub fn with_alpha_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
@@ -2644,7 +2644,7 @@ impl CssTailwindAlphaFunction {
     }
 }
 impl CssTailwindSpacingFunction {
-    pub fn with___spacing_token(self, element: SyntaxToken) -> Self {
+    pub fn with_spacing_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
@@ -2690,7 +2690,7 @@ impl CssTailwindValueArbitraryType {
     }
 }
 impl CssTailwindValueFunction {
-    pub fn with___value_token(self, element: SyntaxToken) -> Self {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
