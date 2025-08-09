@@ -2,8 +2,10 @@ use crate::parser::CssParser;
 use crate::syntax::block::{parse_declaration_block, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{expected_identifier, expected_string, tailwind_disabled};
 use crate::syntax::{is_at_identifier, parse_regular_identifier, parse_string};
-use biome_css_syntax::CssSyntaxKind::*;
+use biome_css_syntax::CssSyntaxKind::{self, *};
 use biome_css_syntax::T;
+use biome_parser::parse_lists::ParseNodeList;
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -162,17 +164,39 @@ pub(crate) fn parse_apply_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T![apply]);
-
-    // Parse class list
-    let class_list = p.start();
-    while is_at_identifier(p) && !p.at(T![;]) && !p.at(EOF) {
-        parse_regular_identifier(p).ok();
-    }
-    class_list.complete(p, CSS_APPLY_CLASS_LIST);
-
+    ApplyClassList.parse_list(p);
     p.expect(T![;]);
 
     Present(m.complete(p, CSS_APPLY_AT_RULE))
+}
+
+struct ApplyClassList;
+
+impl ParseNodeList for ApplyClassList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_APPLY_CLASS_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_regular_identifier(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![;]) || p.at(EOF)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> biome_parser::parse_recovery::RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_CUSTOM_IDENTIFIER, token_set![T![;], EOF])
+                .enable_recovery_on_line_break(),
+            expected_identifier,
+        )
+    }
 }
 
 // @config "../../tailwind.config.js";
