@@ -1609,6 +1609,10 @@ export interface Nursery {
 	 */
 	noNestedComponentDefinitions?: RuleConfiguration_for_NoNestedComponentDefinitionsOptions;
 	/**
+	 * Prevent client components from being async functions.
+	 */
+	noNextAsyncClientComponent?: RuleConfiguration_for_NoNextAsyncClientComponentOptions;
+	/**
 	 * Disallow non-null assertions after optional chaining expressions.
 	 */
 	noNonNullAssertedOptionalChain?: RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions;
@@ -1752,6 +1756,10 @@ export interface Nursery {
 	 * Enforces the use of with { type: "json" } for JSON module imports.
 	 */
 	useJsonImportAttribute?: RuleFixConfiguration_for_UseJsonImportAttributeOptions;
+	/**
+	 * Enforce a maximum number of parameters in function definitions.
+	 */
+	useMaxParams?: RuleConfiguration_for_UseMaxParamsOptions;
 	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
@@ -2928,6 +2936,9 @@ export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 export type RuleConfiguration_for_NoNestedComponentDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNestedComponentDefinitionsOptions;
+export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoNextAsyncClientComponentOptions;
 export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions;
@@ -3033,6 +3044,9 @@ export type RuleConfiguration_for_UseIterableCallbackReturnOptions =
 export type RuleFixConfiguration_for_UseJsonImportAttributeOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseJsonImportAttributeOptions;
+export type RuleConfiguration_for_UseMaxParamsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseMaxParamsOptions;
 export type RuleFixConfiguration_for_UseNamedOperationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseNamedOperationOptions;
@@ -5233,6 +5247,16 @@ export interface RuleWithOptions_for_NoNestedComponentDefinitionsOptions {
 	 */
 	options: NoNestedComponentDefinitionsOptions;
 }
+export interface RuleWithOptions_for_NoNextAsyncClientComponentOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoNextAsyncClientComponentOptions;
+}
 export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5634,6 +5658,16 @@ export interface RuleWithFixOptions_for_UseJsonImportAttributeOptions {
 	 * Rule's options
 	 */
 	options: UseJsonImportAttributeOptions;
+}
+export interface RuleWithOptions_for_UseMaxParamsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseMaxParamsOptions;
 }
 export interface RuleWithFixOptions_for_UseNamedOperationOptions {
 	/**
@@ -7881,6 +7915,7 @@ export interface NoImportantStylesOptions {}
 export interface NoMagicNumbersOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNestedComponentDefinitionsOptions {}
+export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoNoninteractiveElementInteractionsOptions {}
 export interface NoProcessGlobalOptions {}
@@ -7938,6 +7973,12 @@ export type UseImageSizeOptions = null;
 export interface UseIndexOfOptions {}
 export interface UseIterableCallbackReturnOptions {}
 export interface UseJsonImportAttributeOptions {}
+export interface UseMaxParamsOptions {
+	/**
+	 * Maximum number of parameters allowed (default: 4)
+	 */
+	max?: number;
+}
 export interface UseNamedOperationOptions {}
 /**
  * Rule's options.
@@ -8587,6 +8628,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noAwaitInLoop"
 	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
@@ -8658,6 +8700,7 @@ export type Category =
 	| "lint/nursery/useIterableCallbackReturn"
 	| "lint/nursery/useJsonImportAttribute"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useNumericSeparators"
