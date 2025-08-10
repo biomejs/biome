@@ -82,15 +82,15 @@ fn resolve_absolute_path_with_extension_alias(
     };
 
     // Try to resolve the path for each extension alias.
-    let mut last_error: Option<ResolveError> = None;
     for alias in aliases {
         match resolve_absolute_path(path.with_extension(alias), fs, options) {
             Ok(path) => return Ok(path),
-            Err(error) => last_error = Some(error),
+            Err(ResolveError::NotFound) => continue,
+            Err(error) => return Err(error),
         }
     }
 
-    Err(last_error.unwrap_or(ResolveError::NotFound))
+    Err(ResolveError::NotFound)
 }
 
 /// Resolves the given absolute `path`.
