@@ -2797,17 +2797,16 @@ fn parse_decorator(p: &mut JsParser) -> ParsedSyntax {
     if let Some(mut complete_marker) =
         parse_lhs_expr(p, ExpressionContext::default().and_in_decorator(true))
             .or_add_diagnostic(p, expected_expression)
-    {
-        if !matches!(
+        && !matches!(
             complete_marker.kind(p),
             JS_PARENTHESIZED_EXPRESSION
                 | JS_CALL_EXPRESSION
                 | JS_STATIC_MEMBER_EXPRESSION
                 | JS_IDENTIFIER_EXPRESSION
-        ) {
-            p.error(invalid_decorator_error(p, complete_marker.range(p)));
-            complete_marker.change_to_bogus(p);
-        }
+        )
+    {
+        p.error(invalid_decorator_error(p, complete_marker.range(p)));
+        complete_marker.change_to_bogus(p);
     }
 
     Present(m.complete(p, JS_DECORATOR))

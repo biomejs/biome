@@ -58,10 +58,10 @@ impl Rule for NoAwaitInLoop {
         let loop_node = ctx.query();
 
         // skip "for await ... of"
-        if let AnyLoopNode::JsForOfStatement(for_of) = loop_node {
-            if for_of.await_token().is_some() {
-                return None;
-            }
+        if let AnyLoopNode::JsForOfStatement(for_of) = loop_node
+            && for_of.await_token().is_some()
+        {
+            return None;
         }
 
         let mut preorder = loop_node.syntax().preorder();
@@ -74,20 +74,19 @@ impl Rule for NoAwaitInLoop {
 
                     // skip valid case: for await
                     // e.g. `while (baz) { for await (x of xs)}`
-                    if let Some(for_of) = JsForOfStatement::cast(node.clone()) {
-                        if for_of.await_token().is_some() {
-                            return Some(node);
-                        }
+                    if let Some(for_of) = JsForOfStatement::cast(node.clone())
+                        && for_of.await_token().is_some()
+                    {
+                        return Some(node);
                     }
 
                     // skip valid case: binding in `for`
                     // e.g. `async function foo() { for (var i = await bar; i < n; i++) {  } }`
-                    if JsVariableDeclaration::can_cast(node.kind()) {
-                        if let Some(parent) = node.parent() {
-                            if JsForStatement::can_cast(parent.kind()) {
-                                preorder.skip_subtree();
-                            }
-                        }
+                    if JsVariableDeclaration::can_cast(node.kind())
+                        && let Some(parent) = node.parent()
+                        && JsForStatement::can_cast(parent.kind())
+                    {
+                        preorder.skip_subtree();
                     }
 
                     // skip valid case: bidning in `for in`
@@ -100,12 +99,11 @@ impl Rule for NoAwaitInLoop {
                         // skip valid cases: expression in `for in` and `for of`
                         // - `async function foo() { for (var bar in await baz) { } }`
                         // - `async function foo() { for (var bar of await baz) { } }`
-                        if let Some(parent) = node.parent() {
-                            if JsForOfStatement::can_cast(parent.kind())
-                                || JsForInStatement::can_cast(parent.kind())
-                            {
-                                continue;
-                            }
+                        if let Some(parent) = node.parent()
+                            && (JsForOfStatement::can_cast(parent.kind())
+                                || JsForInStatement::can_cast(parent.kind()))
+                        {
+                            continue;
                         }
                         return Some(node);
                     }

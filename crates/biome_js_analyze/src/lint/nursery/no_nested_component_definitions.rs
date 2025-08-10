@@ -107,18 +107,17 @@ impl Rule for NoNestedComponentDefinitions {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if let Some(component) = ReactComponentInfo::from_declaration(node.syntax()) {
-            if let Some(parent_component) = node
+        if let Some(component) = ReactComponentInfo::from_declaration(node.syntax())
+            && let Some(parent_component) = node
                 .syntax()
                 .ancestors()
                 .skip_while(|ancestor| ancestor.eq(node.syntax()))
                 .find_map(|syntax| ReactComponentInfo::from_declaration(&syntax))
-            {
-                return Some(RuleState {
-                    component_range: component.declaration_highlight_range(),
-                    parent_component_range: parent_component.declaration_highlight_range(),
-                });
-            }
+        {
+            return Some(RuleState {
+                component_range: component.declaration_highlight_range(),
+                parent_component_range: parent_component.declaration_highlight_range(),
+            });
         };
         None
     }

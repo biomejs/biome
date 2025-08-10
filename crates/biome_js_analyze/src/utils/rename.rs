@@ -261,26 +261,24 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
             };
 
             let new_name = make::ident(new_name);
-            if let Some(reference_parent) = reference_syntax.parent() {
-                if reference_parent.kind() == JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER {
-                    // Handle renaming of shorthand properties.
-                    // For example renaming `color` into `colorNew` in
-                    // `let color = ...; const c = { color }` must result in
-                    // `let colorNew = ...; const c = { color: colorNew }`
-                    let trailing_trivia = prev_ref_token.trailing_trivia().pieces();
-                    let new_property = make::js_property_object_member(
-                        make::js_literal_member_name(prev_ref_token.with_trailing_trivia([]))
-                            .into(),
-                        make::token(T![:])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        make::js_identifier_expression(make::js_reference_identifier(
-                            new_name.append_trivia_pieces(trailing_trivia),
-                        ))
-                        .into(),
-                    );
-                    node_changes.push((reference_parent, new_property.into_syntax()));
-                    continue;
-                }
+            if let Some(reference_parent) = reference_syntax.parent()
+                && reference_parent.kind() == JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER
+            {
+                // Handle renaming of shorthand properties.
+                // For example renaming `color` into `colorNew` in
+                // `let color = ...; const c = { color }` must result in
+                // `let colorNew = ...; const c = { color: colorNew }`
+                let trailing_trivia = prev_ref_token.trailing_trivia().pieces();
+                let new_property = make::js_property_object_member(
+                    make::js_literal_member_name(prev_ref_token.with_trailing_trivia([])).into(),
+                    make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::js_identifier_expression(make::js_reference_identifier(
+                        new_name.append_trivia_pieces(trailing_trivia),
+                    ))
+                    .into(),
+                );
+                node_changes.push((reference_parent, new_property.into_syntax()));
+                continue;
             }
             token_changes.push((prev_ref_token, new_name));
         }

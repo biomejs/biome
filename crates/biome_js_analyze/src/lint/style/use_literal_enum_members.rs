@@ -100,18 +100,18 @@ impl Rule for UseLiteralEnumMembers {
                 continue;
             };
             // no initializer => sequentially assigned literal integer
-            if let Some(initializer) = enum_member.initializer() {
-                if let Ok(initializer) = initializer.expression() {
-                    let range = initializer.range();
-                    if !is_constant_enum_expression(initializer, enum_name, &enum_member_names) {
-                        result.push(range);
-                    }
+            if let Some(initializer) = enum_member.initializer()
+                && let Ok(initializer) = initializer.expression()
+            {
+                let range = initializer.range();
+                if !is_constant_enum_expression(initializer, enum_name, &enum_member_names) {
+                    result.push(range);
                 }
             };
-            if let Ok(name) = enum_member.name() {
-                if let Some(name) = name.name() {
-                    enum_member_names.insert(name.to_string());
-                }
+            if let Ok(name) = enum_member.name()
+                && let Some(name) = name.name()
+            {
+                enum_member_names.insert(name.to_string());
             }
         }
         result.into_boxed_slice()

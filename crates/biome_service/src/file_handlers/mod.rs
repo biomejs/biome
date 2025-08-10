@@ -1131,13 +1131,13 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         L: biome_rowan::Language,
     {
-        if let Some(rule_filter) = rule_filter {
-            if rule_filter.match_rule::<R>() {
-                // first we want to register rules via "magic default"
-                self.record_rule_from_manifest::<R, L>(rule_filter);
-                // then we want to register rules
-                self.record_rule_from_domains::<R, L>(rule_filter);
-            }
+        if let Some(rule_filter) = rule_filter
+            && rule_filter.match_rule::<R>()
+        {
+            // first we want to register rules via "magic default"
+            self.record_rule_from_manifest::<R, L>(rule_filter);
+            // then we want to register rules
+            self.record_rule_from_domains::<R, L>(rule_filter);
         };
 
         // Do not report unused suppression comment diagnostics if:

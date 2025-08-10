@@ -263,10 +263,10 @@ impl Rule for UseOptionalChain {
 /// Normalize optional chain like.
 /// E.g. `foo != null` is normalized to `foo`
 fn normalized_optional_chain_like(expression: AnyJsExpression) -> SyntaxResult<AnyJsExpression> {
-    if let AnyJsExpression::JsBinaryExpression(expression) = &expression {
-        if expression.is_optional_chain_like()? {
-            return expression.left();
-        }
+    if let AnyJsExpression::JsBinaryExpression(expression) = &expression
+        && expression.is_optional_chain_like()?
+    {
+        return expression.left();
     }
     Ok(expression)
 }
@@ -418,27 +418,24 @@ impl LogicalAndChain {
         // The head of the sub-chain is `foo.bar`.
         // The parent of the head is logical expression `foo && foo.bar`
         // The grand-parent of the head is logical expression `foo && foo.bar && foo.bar.baz`
-        if let Some(parent) = self.head.parent::<JsLogicalExpression>() {
-            if let Some(grand_parent) = parent.parent::<JsLogicalExpression>() {
-                let grand_parent_operator = grand_parent.operator()?;
-                if !matches!(grand_parent_operator, JsLogicalOperator::LogicalAnd) {
-                    return Ok(false);
-                }
-                let grand_parent_logical_left = grand_parent.left()?;
-                // Here we check that we came from the left side of the logical expression.
-                // Because only the left-hand parts can be sub-chains.
-                if grand_parent_logical_left.as_js_logical_expression() == Some(&parent) {
-                    let grand_parent_right_chain = Self::from_expression(
-                        normalized_optional_chain_like(grand_parent.right()?)?,
-                    )?;
-                    let result = grand_parent_right_chain.cmp_chain(self)?;
-                    return match result {
-                        LogicalAndChainOrdering::SubChain | LogicalAndChainOrdering::Equal => {
-                            Ok(true)
-                        }
-                        LogicalAndChainOrdering::Different => Ok(false),
-                    };
-                }
+        if let Some(parent) = self.head.parent::<JsLogicalExpression>()
+            && let Some(grand_parent) = parent.parent::<JsLogicalExpression>()
+        {
+            let grand_parent_operator = grand_parent.operator()?;
+            if !matches!(grand_parent_operator, JsLogicalOperator::LogicalAnd) {
+                return Ok(false);
+            }
+            let grand_parent_logical_left = grand_parent.left()?;
+            // Here we check that we came from the left side of the logical expression.
+            // Because only the left-hand parts can be sub-chains.
+            if grand_parent_logical_left.as_js_logical_expression() == Some(&parent) {
+                let grand_parent_right_chain =
+                    Self::from_expression(normalized_optional_chain_like(grand_parent.right()?)?)?;
+                let result = grand_parent_right_chain.cmp_chain(self)?;
+                return match result {
+                    LogicalAndChainOrdering::SubChain | LogicalAndChainOrdering::Equal => Ok(true),
+                    LogicalAndChainOrdering::Different => Ok(false),
+                };
             }
         }
         Ok(false)

@@ -663,10 +663,10 @@ impl AnyJsAssignmentLike {
 
         let right = self.right()?;
 
-        if let RightAssignmentLike::JsInitializerClause(initializer) = &right {
-            if f.context().comments().is_suppressed(initializer.syntax()) {
-                return Ok(AssignmentLikeLayout::SuppressedInitializer);
-            }
+        if let RightAssignmentLike::JsInitializerClause(initializer) = &right
+            && f.context().comments().is_suppressed(initializer.syntax())
+        {
+            return Ok(AssignmentLikeLayout::SuppressedInitializer);
         }
         let right_expression = right.as_expression();
 
@@ -674,10 +674,10 @@ impl AnyJsAssignmentLike {
             return Ok(layout);
         }
 
-        if let Some(AnyJsExpression::JsCallExpression(call_expression)) = &right_expression {
-            if call_expression.callee()?.syntax().text_with_trivia() == "require" {
-                return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
-            }
+        if let Some(AnyJsExpression::JsCallExpression(call_expression)) = &right_expression
+            && call_expression.callee()?.syntax().text_with_trivia() == "require"
+        {
+            return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
         }
 
         if self.should_break_left_hand_side()? {

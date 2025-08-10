@@ -214,10 +214,12 @@ impl Case {
                 word_separator = true;
                 continue;
             }
-            if let Some(next) = next {
-                if i != 0 && current.is_uppercase() && next.is_lowercase() {
-                    word_separator = true;
-                }
+            if let Some(next) = next
+                && i != 0
+                && current.is_uppercase()
+                && next.is_lowercase()
+            {
+                word_separator = true;
             }
             if word_separator {
                 match self {
@@ -256,10 +258,11 @@ impl Case {
                 Self::Number | Self::Unknown => (),
             }
             word_separator = false;
-            if let Some(next) = next {
-                if current.is_lowercase() && next.is_uppercase() {
-                    word_separator = true;
-                }
+            if let Some(next) = next
+                && current.is_lowercase()
+                && next.is_uppercase()
+            {
+                word_separator = true;
             }
         }
         output

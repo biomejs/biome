@@ -266,17 +266,17 @@ impl Rule for RuleMover {
             }
             let last_has_separator = new_elements.last().is_some_and(|(_, sep)| sep.is_some());
             let mut indent = Vec::new();
-            if let Some((last_node, _)) = new_elements.last() {
-                if let Some(first_token) = last_node.syntax().first_token() {
-                    indent.extend(first_token.indentation_trivia_pieces());
-                }
+            if let Some((last_node, _)) = new_elements.last()
+                && let Some(first_token) = last_node.syntax().first_token()
+            {
+                indent.extend(first_token.indentation_trivia_pieces());
             }
             // Add the new group and rule
             let mut indent = Vec::new();
-            if let Some(Ok(last_group_node)) = old_rules_list.last() {
-                if let Some(first_token) = last_group_node.syntax().first_token() {
-                    indent.extend(first_token.indentation_trivia_pieces());
-                }
+            if let Some(Ok(last_group_node)) = old_rules_list.last()
+                && let Some(first_token) = last_group_node.syntax().first_token()
+            {
+                indent.extend(first_token.indentation_trivia_pieces());
             }
             let new_group_node = make::json_member(
                 make::json_member_name(

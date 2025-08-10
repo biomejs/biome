@@ -405,10 +405,10 @@ where
 
                     // If we have two modifications to the same slot,
                     // last write wins
-                    if let Some(&(prev_new_node_slot, ..)) = modifications.last() {
-                        if prev_new_node_slot == next_new_node_slot {
-                            modifications.pop();
-                        }
+                    if let Some(&(prev_new_node_slot, ..)) = modifications.last()
+                        && prev_new_node_slot == next_new_node_slot
+                    {
+                        modifications.pop();
                     }
 
                     // Add to the modifications

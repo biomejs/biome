@@ -879,10 +879,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             |signal| {
                 let current_diagnostic = signal.diagnostic();
 
-                if let Some(diagnostic) = current_diagnostic.as_ref() {
-                    if is_diagnostic_error(diagnostic, rules.as_deref()) {
-                        errors += 1;
-                    }
+                if let Some(diagnostic) = current_diagnostic.as_ref()
+                    && is_diagnostic_error(diagnostic, rules.as_deref())
+                {
+                    errors += 1;
                 }
 
                 for action in signal.actions() {

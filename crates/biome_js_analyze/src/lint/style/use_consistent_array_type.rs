@@ -343,24 +343,23 @@ fn transform_array_element_type(param: AnyTsType, array_kind: TsArrayKind) -> Op
             );
 
             // Modify `ReadonlyArray<ReadonlyArray<T>>` to `readonly (readonly T[])[]`
-            if let AnyTsType::TsTypeOperatorType(op) = &element_type {
-                if let Ok(op) = op.operator_token() {
-                    if op.text_trimmed() == "readonly" {
-                        return AnyTsType::TsTypeOperatorType(make::ts_type_operator_type(
-                            readonly_token,
-                            // wrap ArrayType
-                            AnyTsType::TsArrayType(make::ts_array_type(
-                                AnyTsType::TsParenthesizedType(make::ts_parenthesized_type(
-                                    make::token(T!['(']),
-                                    element_type,
-                                    make::token(T![')']),
-                                )),
-                                make::token(T!['[']),
-                                make::token(T![']']),
-                            )),
-                        ));
-                    }
-                }
+            if let AnyTsType::TsTypeOperatorType(op) = &element_type
+                && let Ok(op) = op.operator_token()
+                && op.text_trimmed() == "readonly"
+            {
+                return AnyTsType::TsTypeOperatorType(make::ts_type_operator_type(
+                    readonly_token,
+                    // wrap ArrayType
+                    AnyTsType::TsArrayType(make::ts_array_type(
+                        AnyTsType::TsParenthesizedType(make::ts_parenthesized_type(
+                            make::token(T!['(']),
+                            element_type,
+                            make::token(T![')']),
+                        )),
+                        make::token(T!['[']),
+                        make::token(T![']']),
+                    )),
+                ));
             }
 
             AnyTsType::TsTypeOperatorType(make::ts_type_operator_type(

@@ -71,10 +71,10 @@ impl SemanticModelBuilder {
                     specificity: Specificity::default(),
                 };
 
-                if let Some(&parent_id) = self.current_rule_stack.last() {
-                    if let Some(parent_rule) = self.rules_by_id.get_mut(&parent_id) {
-                        parent_rule.child_ids.push(new_rule_id);
-                    }
+                if let Some(&parent_id) = self.current_rule_stack.last()
+                    && let Some(parent_rule) = self.rules_by_id.get_mut(&parent_id)
+                {
+                    parent_rule.child_ids.push(new_rule_id);
                 }
 
                 self.rules_by_id.insert(new_rule_id, new_rule);

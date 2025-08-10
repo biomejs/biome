@@ -85,30 +85,30 @@ impl LSPServer {
 
         entries.extend(workspace_entries);
 
-        if let Ok(sessions) = self.sessions.lock() {
-            if sessions.len() > 1 {
-                entries.push(RageEntry::markup(
+        if let Ok(sessions) = self.sessions.lock()
+            && sessions.len() > 1
+        {
+            entries.push(RageEntry::markup(
                     markup!("\n"<Underline><Emphasis>"Other Active Server Workspaces:"</Emphasis></Underline>"\n"),
                 ));
 
-                for (key, session) in sessions.iter() {
-                    if &self.session.key == key {
-                        // Already printed above
-                        continue;
-                    }
+            for (key, session) in sessions.iter() {
+                if &self.session.key == key {
+                    // Already printed above
+                    continue;
+                }
 
-                    let RageResult {
-                        entries: workspace_entries,
-                    } = session.failsafe_rage(params);
+                let RageResult {
+                    entries: workspace_entries,
+                } = session.failsafe_rage(params);
 
-                    entries.extend(workspace_entries);
+                entries.extend(workspace_entries);
 
-                    if let Some(information) = session.client_information() {
-                        entries.push(RageEntry::pair("Client Name", &information.name));
+                if let Some(information) = session.client_information() {
+                    entries.push(RageEntry::pair("Client Name", &information.name));
 
-                        if let Some(version) = &information.version {
-                            entries.push(RageEntry::pair("Client Version", version))
-                        }
+                    if let Some(version) = &information.version {
+                        entries.push(RageEntry::pair("Client Version", version))
                     }
                 }
             }
@@ -353,18 +353,17 @@ impl LanguageServer for LSPServer {
             let base_path = self.session.base_path();
             if let Some(base_path) = base_path {
                 let possible_biome_json = file_path.strip_prefix(&base_path);
-                if let Ok(watched_file) = possible_biome_json {
-                    if ConfigName::file_names().contains(&&*watched_file.display().to_string())
-                        || watched_file.ends_with(".editorconfig")
-                    {
-                        self.session.load_extension_settings().await;
-                        self.session.load_workspace_settings().await;
-                        self.setup_capabilities().await;
-                        self.session.update_all_diagnostics().await;
-                        // for now we are only interested to the configuration file,
-                        // so it's OK to exit the loop
-                        break;
-                    }
+                if let Ok(watched_file) = possible_biome_json
+                    && (ConfigName::file_names().contains(&&*watched_file.display().to_string())
+                        || watched_file.ends_with(".editorconfig"))
+                {
+                    self.session.load_extension_settings().await;
+                    self.session.load_workspace_settings().await;
+                    self.setup_capabilities().await;
+                    self.session.update_all_diagnostics().await;
+                    // for now we are only interested to the configuration file,
+                    // so it's OK to exit the loop
+                    break;
                 }
             }
         }

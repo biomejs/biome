@@ -216,10 +216,9 @@ impl SimpleArgument {
         if let Self::Expression(AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsRegexLiteralExpression(regex),
         )) = self
+            && let Ok((pattern, _)) = regex.decompose()
         {
-            if let Ok((pattern, _)) = regex.decompose() {
-                return pattern.text().width() <= 5;
-            }
+            return pattern.text().width() <= 5;
         }
 
         false

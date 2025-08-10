@@ -199,25 +199,22 @@ fn check_class_methods(js_class_decl: &JsClassDeclaration) -> Option<RuleState> 
         .name_token()
         .ok()?;
     for member in js_class_decl.members() {
-        if let AnyJsClassMember::TsMethodSignatureClassMember(method) = member {
-            if let Some(ClassMemberName::Public(name)) = method.name().ok()?.name() {
-                if name.text() == "new" {
-                    let return_type = method.return_type_annotation()?.ty().ok()?;
-                    match return_type.as_any_ts_type()? {
-                        AnyTsType::TsReferenceType(ref_type) => {
-                            let return_type_ident = extract_return_type_ident(ref_type)?;
-                            if class_ident.text_trimmed() == return_type_ident.text_trimmed() {
-                                return Some(RuleState::ClassMisleadingNew(method.range()));
-                            }
-                        }
-                        AnyTsType::TsThisType(this_type)
-                            if this_type.this_token().ok().is_some() =>
-                        {
-                            return Some(RuleState::ClassMisleadingNew(method.range()));
-                        }
-                        _ => {}
+        if let AnyJsClassMember::TsMethodSignatureClassMember(method) = member
+            && let Some(ClassMemberName::Public(name)) = method.name().ok()?.name()
+            && name.text() == "new"
+        {
+            let return_type = method.return_type_annotation()?.ty().ok()?;
+            match return_type.as_any_ts_type()? {
+                AnyTsType::TsReferenceType(ref_type) => {
+                    let return_type_ident = extract_return_type_ident(ref_type)?;
+                    if class_ident.text_trimmed() == return_type_ident.text_trimmed() {
+                        return Some(RuleState::ClassMisleadingNew(method.range()));
                     }
                 }
+                AnyTsType::TsThisType(this_type) if this_type.this_token().ok().is_some() => {
+                    return Some(RuleState::ClassMisleadingNew(method.range()));
+                }
+                _ => {}
             }
         }
     }

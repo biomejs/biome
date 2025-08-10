@@ -60,25 +60,22 @@ impl NodeCompilationContext<'_> {
         } = self;
 
         if let Some(i) = vars.get(&name) {
-            if let Some(FileLocation { range, .. }) = location {
-                if let VariableSource::Compiled { locations, .. } =
+            if let Some(FileLocation { range, .. }) = location
+                && let VariableSource::Compiled { locations, .. } =
                     &mut vars_array[*scope_index][*i]
-                {
-                    locations.insert(range);
-                }
+            {
+                locations.insert(range);
             }
             return Variable::new(*scope_index, *i);
         }
 
         if let Some(i) = global_vars.get(&name) {
-            if let Some(FileLocation { path, range }) = location {
-                if path.is_none() {
-                    if let VariableSource::Compiled { locations, .. } =
-                        &mut vars_array[GLOBAL_VARS_SCOPE_INDEX as usize][*i]
-                    {
-                        locations.insert(range);
-                    }
-                }
+            if let Some(FileLocation { path, range }) = location
+                && path.is_none()
+                && let VariableSource::Compiled { locations, .. } =
+                    &mut vars_array[GLOBAL_VARS_SCOPE_INDEX as usize][*i]
+            {
+                locations.insert(range);
             }
             return Variable::new(GLOBAL_VARS_SCOPE_INDEX.into(), *i);
         }

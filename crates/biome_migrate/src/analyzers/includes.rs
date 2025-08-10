@@ -236,11 +236,11 @@ fn validate_globs(member: &JsonMember) -> Box<[(TextRange, biome_glob::GlobError
         let Err(glob_error) = biome_glob::Glob::from_str(&glob) else {
             continue;
         };
-        if let biome_glob::GlobError::Regular { kind, .. } = &glob_error {
-            if matches!(kind, biome_glob::GlobErrorKind::UnsupportedCharacterClass) {
-                // Ignore errors for characters classes because we escape them in `to_biome_glob`.
-                continue;
-            }
+        if let biome_glob::GlobError::Regular { kind, .. } = &glob_error
+            && matches!(kind, biome_glob::GlobErrorKind::UnsupportedCharacterClass)
+        {
+            // Ignore errors for characters classes because we escape them in `to_biome_glob`.
+            continue;
         }
         let range = glob_value.range();
         let range = glob_error.index().map_or(range, |index| {

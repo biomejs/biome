@@ -334,10 +334,10 @@ impl IsNameEqual for AnyJsObjectMemberName {
         match self {
             Self::JsMetavariable(_) => return false,
             _ => {
-                if let Some(name) = self.as_static_name() {
-                    if let Some(another_name) = another_name.as_static_name() {
-                        return name.text().eq(another_name.text());
-                    }
+                if let Some(name) = self.as_static_name()
+                    && let Some(another_name) = another_name.as_static_name()
+                {
+                    return name.text().eq(another_name.text());
                 }
             }
         }
@@ -355,10 +355,10 @@ impl IsNameEqual for AnyJsClassMemberName {
             }
             Self::JsMetavariable(_) => return false,
             _ => {
-                if let Some(name) = self.as_static_name() {
-                    if let Some(another_name) = another_name.as_static_name() {
-                        return name.text().eq(another_name.text());
-                    }
+                if let Some(name) = self.as_static_name()
+                    && let Some(another_name) = another_name.as_static_name()
+                {
+                    return name.text().eq(another_name.text());
                 }
             }
         }

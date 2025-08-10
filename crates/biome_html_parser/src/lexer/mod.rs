@@ -73,11 +73,11 @@ impl<'src> HtmlLexer<'src> {
                 self.consume_identifier(current, false)
             }
             _ => {
-                if self.position == 0 {
-                    if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
-                        self.unicode_bom_length = bom_size;
-                        return bom;
-                    }
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
                 }
                 self.consume_unexpected_character()
             }

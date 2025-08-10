@@ -85,18 +85,16 @@ impl Rule for UseJsonImportAttribute {
             let mut found_type_json = false;
             let assertions = assertion_clause.assertions();
             for entry in assertions.into_iter().flatten() {
-                if let AnyJsImportAssertionEntry::JsImportAssertionEntry(entry) = entry {
-                    if let Ok(key) = entry.key() {
-                        if key.text_trimmed() == "type" {
-                            if let Ok(value) = entry.value_token() {
-                                if value.text_trimmed() == "json" {
-                                    found_type_json = true;
-                                    break;
-                                } else {
-                                    return None; // A manual type other than "json" is present.
-                                }
-                            }
-                        }
+                if let AnyJsImportAssertionEntry::JsImportAssertionEntry(entry) = entry
+                    && let Ok(key) = entry.key()
+                    && key.text_trimmed() == "type"
+                    && let Ok(value) = entry.value_token()
+                {
+                    if value.text_trimmed() == "json" {
+                        found_type_json = true;
+                        break;
+                    } else {
+                        return None; // A manual type other than "json" is present.
                     }
                 }
             }

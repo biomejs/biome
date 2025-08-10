@@ -65,10 +65,10 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
         let node = match event {
             WalkEvent::Enter(node) => node,
             WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree {
-                    if skip_subtree == node {
-                        self.skip_subtree = None;
-                    }
+                if let Some(skip_subtree) = &self.skip_subtree
+                    && skip_subtree == node
+                {
+                    self.skip_subtree = None;
                 }
 
                 return;
@@ -79,11 +79,11 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
             return;
         }
 
-        if let Some(range) = ctx.range {
-            if node.text_range_with_trivia().ordering(range).is_ne() {
-                self.skip_subtree = Some(node.clone());
-                return;
-            }
+        if let Some(range) = ctx.range
+            && node.text_range_with_trivia().ordering(range).is_ne()
+        {
+            self.skip_subtree = Some(node.clone());
+            return;
         }
 
         ctx.match_query(node.clone());

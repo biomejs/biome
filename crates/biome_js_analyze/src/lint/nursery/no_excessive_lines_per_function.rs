@@ -141,10 +141,11 @@ impl Rule for NoExcessiveLinesPerFunction {
         let binding = ctx.query();
         let options = ctx.options();
 
-        if let AnyFunctionLike::AnyJsFunction(func) = binding {
-            if is_iife(func) && options.skip_iifes {
-                return None;
-            }
+        if let AnyFunctionLike::AnyJsFunction(func) = binding
+            && is_iife(func)
+            && options.skip_iifes
+        {
+            return None;
         };
 
         let Ok(func_body) = binding.body() else {
