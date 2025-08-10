@@ -1,0 +1,357 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Invalid: variable declared in if block but used outside
+function doIf() {
+	if (true) {
+		var build = true;
+	}
+
+	console.log(build);
+}
+
+// Invalid: variable declared in if/else blocks
+function doIfElse() {
+	if (true) {
+		var build = true;
+	} else {
+		var build = false;
+	}
+}
+
+// Invalid: variable declared in try block but used in catch
+function doTryCatch() {
+	try {
+		var build = 1;
+	} catch (e) {
+		var f = build;
+	}
+}
+
+// Invalid: variable declared in for loop but used outside
+function doFor() {
+	for (var x = 1; x < 10; x++) {
+		var y = f(x);
+	}
+	console.log(y);
+}
+
+// Invalid: variable declared in while loop but used outside
+function doWhile() {
+	while (true) {
+		var z = 1;
+		break;
+	}
+	console.log(z);
+}
+
+// Invalid: variable declared in do-while loop but used outside
+function doDoWhile() {
+	do {
+		var a = 1;
+	} while (false);
+	console.log(a);
+}
+
+// Invalid: variable declared in switch case but used outside
+function doSwitch() {
+	switch (x) {
+		case 1:
+			var caseVar = "test";
+			break;
+	}
+	console.log(caseVar);
+}
+
+// Invalid: variable declared in with statement but used outside
+function doWith() {
+	with (obj) {
+		var withVar = "test";
+	}
+	console.log(withVar);
+}
+
+// Invalid: nested blocks
+function doNested() {
+	if (true) {
+		if (true) {
+			var nested = "value";
+		}
+		console.log(nested); // used outside inner block
+	}
+}
+
+// Invalid: variable in try block used in finally
+function doTryFinally() {
+	try {
+		var tryVar = 1;
+	} finally {
+		console.log(tryVar);
+	}
+}
+
+// Invalid: for-in loop variable used outside
+function doForIn() {
+	for (var key in obj) {
+		var loopVar = obj[key];
+	}
+	console.log(loopVar);
+}
+
+// Invalid: for-of loop variable used outside
+function doForOf() {
+	for (var item of items) {
+		var itemVar = item.value;
+	}
+	console.log(itemVar);
+}
+
+// Invalid: class static block
+class C {
+	static {
+		if (something) {
+			var build = true;
+		}
+		build = false;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:7:14 lint/correctness/useBlockScopedVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable build used outside of its declaration scope.
+  
+    5 │ 	}
+    6 │ 
+  > 7 │ 	console.log(build);
+      │ 	            ^^^^^
+    8 │ }
+    9 │ 
+  
+  i Variable declared here:
+  
+    2 │ function doIf() {
+    3 │ 	if (true) {
+  > 4 │ 		var build = true;
+      │ 		    ^^^^^
+    5 │ 	}
+    6 │ 
+  
+  i Variables declared with 'var' should be used within the block they are defined to emulate block scope.
+  
+
+```
+
+```
+invalid.js:24:11 lint/correctness/useBlockScopedVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable build used outside of its declaration scope.
+  
+    22 │ 		var build = 1;
+    23 │ 	} catch (e) {
+  > 24 │ 		var f = build;
+       │ 		        ^^^^^
+    25 │ 	}
+    26 │ }
+  
+  i Variable declared here:
+  
+    20 │ function doTryCatch() {
+    21 │ 	try {
+  > 22 │ 		var build = 1;
+       │ 		    ^^^^^
+    23 │ 	} catch (e) {
+    24 │ 		var f = build;
+  
+  i Variables declared with 'var' should be used within the block they are defined to emulate block scope.
+  
+
+```
+
+```
+invalid.js:33:14 lint/correctness/useBlockScopedVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable y used outside of its declaration scope.
+  
+    31 │ 		var y = f(x);
+    32 │ 	}
+  > 33 │ 	console.log(y);
+       │ 	            ^
+    34 │ }
+    35 │ 
+  
+  i Variable declared here:
+  
+    29 │ function doFor() {
+    30 │ 	for (var x = 1; x < 10; x++) {
+  > 31 │ 		var y = f(x);
+       │ 		    ^
+    32 │ 	}
+    33 │ 	console.log(y);
+  
+  i Variables declared with 'var' should be used within the block they are defined to emulate block scope.
+  
+
+```
+
+```
+invalid.js:42:14 lint/correctness/useBlockScopedVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable z used outside of its declaration scope.
+  
+    40 │ 		break;
+    41 │ 	}
+  > 42 │ 	console.log(z);
+       │ 	            ^
+    43 │ }
+    44 │ 
+  
+  i Variable declared here:
+  
+    37 │ function doWhile() {
+    38 │ 	while (true) {
+  > 39 │ 		var z = 1;
+       │ 		    ^
+    40 │ 		break;
+    41 │ 	}
+  
+  i Variables declared with 'var' should be used within the block they are defined to emulate block scope.
+  
+
+```
+
+```
+invalid.js:50:14 lint/correctness/useBlockScopedVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable a used outside of its declaration scope.
+  
+    48 │ 		var a = 1;
+    49 │ 	} while (false);
+  > 50 │ 	console.log(a);
+       │ 	            ^
+    51 │ }
+    52 │ 
+  
+  i Variable declared here:
+  
+    46 │ function doDoWhile() {
+    47 │ 	do {
+  > 48 │ 		var a = 1;
+       │ 		    ^
+    49 │ 	} while (false);
+    50 │ 	console.log(a);
+  
+  i Variables declared with 'var' should be used within the block they are defined to emulate block scope.
+  
+
+```
+
+```
+invalid.js:77:15 lint/correctness/useBlockScopedVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable nested used outside of its declaration scope.
+  
+    75 │ 			var nested = "value";
+    76 │ 		}
+  > 77 │ 		console.log(nested); // used outside inner block
+       │ 		            ^^^^^^
+    78 │ 	}
+    79 │ }
+  
+  i Variable declared here:
+  
+    73 │ 	if (true) {
+    74 │ 		if (true) {
+  > 75 │ 			var nested = "value";
+       │ 			    ^^^^^^
+    76 │ 		}
+    77 │ 		console.log(nested); // used outside inner block
+  
+  i Variables declared with 'var' should be used within the block they are defined to emulate block scope.
+  
+
+```
+
+```
+invalid.js:95:14 lint/correctness/useBlockScopedVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable loopVar used outside of its declaration scope.
+  
+    93 │ 		var loopVar = obj[key];
+    94 │ 	}
+  > 95 │ 	console.log(loopVar);
+       │ 	            ^^^^^^^
+    96 │ }
+    97 │ 
+  
+  i Variable declared here:
+  
+    91 │ function doForIn() {
+    92 │ 	for (var key in obj) {
+  > 93 │ 		var loopVar = obj[key];
+       │ 		    ^^^^^^^
+    94 │ 	}
+    95 │ 	console.log(loopVar);
+  
+  i Variables declared with 'var' should be used within the block they are defined to emulate block scope.
+  
+
+```
+
+```
+invalid.js:103:14 lint/correctness/useBlockScopedVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable itemVar used outside of its declaration scope.
+  
+    101 │ 		var itemVar = item.value;
+    102 │ 	}
+  > 103 │ 	console.log(itemVar);
+        │ 	            ^^^^^^^
+    104 │ }
+    105 │ 
+  
+  i Variable declared here:
+  
+     99 │ function doForOf() {
+    100 │ 	for (var item of items) {
+  > 101 │ 		var itemVar = item.value;
+        │ 		    ^^^^^^^
+    102 │ 	}
+    103 │ 	console.log(itemVar);
+  
+  i Variables declared with 'var' should be used within the block they are defined to emulate block scope.
+  
+
+```
+
+```
+invalid.js:112:3 lint/correctness/useBlockScopedVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable build used outside of its declaration scope.
+  
+    110 │ 			var build = true;
+    111 │ 		}
+  > 112 │ 		build = false;
+        │ 		^^^^^
+    113 │ 	}
+    114 │ }
+  
+  i Variable declared here:
+  
+    108 │ 	static {
+    109 │ 		if (something) {
+  > 110 │ 			var build = true;
+        │ 			    ^^^^^
+    111 │ 		}
+    112 │ 		build = false;
+  
+  i Variables declared with 'var' should be used within the block they are defined to emulate block scope.
+  
+
+```
