@@ -408,7 +408,13 @@ fn parse_tailwind_value_arbitrary_type(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.expect(T!['[']);
-    parse_regular_identifier(p).ok();
+    if p.at(T![*]) {
+        let m = p.start();
+        p.bump_remap(T![ident]);
+        m.complete(p, CSS_IDENTIFIER);
+    } else {
+        parse_regular_identifier(p).ok();
+    }
     p.expect(T![']']);
 
     Present(m.complete(p, TW_VALUE_ARBITRARY_TYPE))
