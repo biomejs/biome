@@ -1,5 +1,5 @@
 use biome_package::{NodeJsPackage, Package, PackageJson, TsConfigJson};
-use biome_parser::AnyParse;
+use biome_rowan::SendNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
@@ -124,7 +124,7 @@ impl ProjectLayout {
     /// parsing the manifest on demand.
     ///
     /// See also [Self::insert_node_manifest()].
-    pub fn insert_serialized_node_manifest(&self, path: Utf8PathBuf, manifest: AnyParse) {
+    pub fn insert_serialized_node_manifest(&self, path: Utf8PathBuf, manifest: &SendNode) {
         self.0.pin().update_or_insert_with(
             path,
             |data| {
@@ -137,7 +137,7 @@ impl ProjectLayout {
                         .map(|package| package.tsconfig.clone())
                         .unwrap_or_default(),
                 };
-                node_js_package.insert_serialized_manifest(&manifest.tree());
+                node_js_package.insert_serialized_manifest(&manifest.to_language_root());
 
                 PackageData {
                     node_package: Some(node_js_package),
@@ -145,7 +145,7 @@ impl ProjectLayout {
             },
             || {
                 let mut node_js_package = NodeJsPackage::default();
-                node_js_package.insert_serialized_manifest(&manifest.tree());
+                node_js_package.insert_serialized_manifest(&manifest.to_language_root());
 
                 PackageData {
                     node_package: Some(node_js_package),
@@ -156,7 +156,7 @@ impl ProjectLayout {
 
     /// Inserts a `tsconfig.json` manifest for the package at the given `path`,
     /// parsing the manifest on demand.
-    pub fn insert_serialized_tsconfig(&self, path: Utf8PathBuf, manifest: AnyParse) {
+    pub fn insert_serialized_tsconfig(&self, path: Utf8PathBuf, manifest: &SendNode) {
         self.0.pin().update_or_insert_with(
             path,
             |data| {
@@ -169,7 +169,7 @@ impl ProjectLayout {
                     diagnostics: Default::default(),
                     tsconfig: Default::default(),
                 };
-                node_js_package.insert_serialized_tsconfig(&manifest.tree());
+                node_js_package.insert_serialized_tsconfig(&manifest.to_language_root());
 
                 PackageData {
                     node_package: Some(node_js_package),
@@ -177,13 +177,33 @@ impl ProjectLayout {
             },
             || {
                 let mut node_js_package = NodeJsPackage::default();
-                node_js_package.insert_serialized_tsconfig(&manifest.tree());
+                node_js_package.insert_serialized_tsconfig(&manifest.to_language_root());
 
                 PackageData {
                     node_package: Some(node_js_package),
                 }
             },
         );
+    }
+
+    /// Returns whether the manifest with the given `path` is indexed in the
+    /// project layout.
+    ///
+    /// Only returns `true` for `package.json` and `tsconfig.json` manifests.
+    pub fn is_indexed(&self, path: &Utf8Path) -> bool {
+        path.parent()
+            .and_then(|package_path| {
+                self.0
+                    .pin()
+                    .get(package_path)
+                    .and_then(|data| data.node_package.as_ref())
+                    .map(|package| match path.file_name() {
+                        Some("package.json") => package.manifest.is_some(),
+                        Some("tsconfig.json") => package.tsconfig.is_some(),
+                        _ => false,
+                    })
+            })
+            .unwrap_or_default()
     }
 
     /// Removes a `tsconfig.json` manifest from the package with the given
@@ -200,5 +220,15 @@ impl ProjectLayout {
     /// Removes a package and its metadata from the project layout.
     pub fn remove_package(&self, path: &Utf8Path) {
         self.0.pin().remove(path);
+    }
+
+    /// Unloads all paths from the graph within the given `path`.
+    pub fn unload_folder(&self, path: &Utf8Path) {
+        let packages = self.0.pin();
+        for package_path in packages.keys() {
+            if package_path.starts_with(path) {
+                packages.remove(package_path);
+            }
+        }
     }
 }

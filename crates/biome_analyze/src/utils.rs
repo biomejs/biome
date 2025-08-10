@@ -2,6 +2,7 @@ use biome_rowan::{
     AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxError, SyntaxNode, SyntaxToken,
     chain_trivia_pieces, trim_trailing_trivia_pieces,
 };
+use std::cmp::Ordering;
 
 /// Returns `true` if `list` is sorted by `get_key`.
 /// The function returns an error if we encounter a buggy node or separator.
@@ -9,16 +10,13 @@ use biome_rowan::{
 /// The list is divided into chunks of nodes with keys.
 /// Thus, a node without key acts as a chuck delimiter.
 /// Chunks are sorted separately.
-pub fn is_separated_list_sorted_by<
-    'a,
-    L: Language + 'a,
-    N: AstNode<Language = L> + 'a,
-    Key: Ord,
->(
+pub fn is_separated_list_sorted_by<'a, L: Language + 'a, N: AstNode<Language = L> + 'a, Key>(
     list: &impl AstSeparatedList<Language = L, Node = N>,
     get_key: impl Fn(&N) -> Option<Key>,
+    comparator: impl Fn(&Key, &Key) -> Ordering,
 ) -> Result<bool, SyntaxError> {
     let mut is_sorted = true;
+
     if list.len() > 1 {
         let mut previous_key: Option<Key> = None;
         for AstSeparatedElement {
@@ -29,7 +27,8 @@ pub fn is_separated_list_sorted_by<
             // We have to check if the separator is not buggy.
             let _separator = trailing_separator?;
             previous_key = if let Some(key) = get_key(&node?) {
-                if previous_key.is_some_and(|previous_key| previous_key > key) {
+                if previous_key.is_some_and(|previous_key| comparator(&previous_key, &key).is_gt())
+                {
                     // We don't return early because we want to return the error if we met one.
                     is_sorted = false;
                 }
@@ -51,10 +50,11 @@ pub fn is_separated_list_sorted_by<
 /// Chunks are sorted separately.
 ///
 /// This sort is stable (i.e., does not reorder equal elements).
-pub fn sorted_separated_list_by<'a, L: Language + 'a, List, Node, Key: Ord>(
+pub fn sorted_separated_list_by<'a, L: Language + 'a, List, Node, Key>(
     list: &List,
     get_key: impl Fn(&Node) -> Option<Key>,
     make_separator: fn() -> SyntaxToken<L>,
+    comparator: impl Fn(&Key, &Key) -> Ordering,
 ) -> Result<List, SyntaxError>
 where
     List: AstSeparatedList<Language = L, Node = Node> + AstNode<Language = L> + 'a,
@@ -74,7 +74,12 @@ where
     // Iterate over chunks of node with a key
     for slice in elements.split_mut(|(key, _, _)| key.is_none()) {
         let last_has_separator = slice.last().is_some_and(|(_, _, sep)| sep.is_some());
-        slice.sort_by(|(key1, _, _), (key2, _, _)| key1.cmp(key2));
+        slice.sort_by(|(key1, _, _), (key2, _, _)| match (key1, key2) {
+            (Some(k1), Some(k2)) => comparator(k1, k2),
+            (Some(_), None) => Ordering::Greater,
+            (None, Some(_)) => Ordering::Less,
+            (None, None) => Ordering::Equal,
+        });
         fix_separators(
             slice.iter_mut().map(|(_, node, sep)| (node, sep)),
             last_has_separator,
