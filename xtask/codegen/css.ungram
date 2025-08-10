@@ -1866,8 +1866,8 @@ CssMetavariable = value: 'grit_metavariable'
 // Tailwind
 
 // Tailwind CSS 4.0 --alpha() function
-// color: rgb(255 0 0 / --alpha(0.5));
-//                      ^^^^^^^^^^^^
+// color: --alpha(rgb(255 0 0) / 50%);
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssTailwindAlphaFunction =
 	'--alpha'
 	'('
@@ -1941,6 +1941,7 @@ CssFunctionalUtilityName =
 // @theme { --color-primary: #3b82f6; }
 CssThemeAtRule =
     'theme'
+    name: CssIdentifier?
     block: AnyCssDeclarationBlock
 
 // Tailwind 4.0 @variant directive

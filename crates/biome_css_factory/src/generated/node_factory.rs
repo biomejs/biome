@@ -2328,14 +2328,34 @@ pub fn css_tailwind_value_theme_reference(
 pub fn css_theme_at_rule(
     theme_token: SyntaxToken,
     block: AnyCssDeclarationBlock,
-) -> CssThemeAtRule {
-    CssThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_THEME_AT_RULE,
-        [
-            Some(SyntaxElement::Token(theme_token)),
-            Some(SyntaxElement::Node(block.into_syntax())),
-        ],
-    ))
+) -> CssThemeAtRuleBuilder {
+    CssThemeAtRuleBuilder {
+        theme_token,
+        block,
+        name: None,
+    }
+}
+pub struct CssThemeAtRuleBuilder {
+    theme_token: SyntaxToken,
+    block: AnyCssDeclarationBlock,
+    name: Option<CssIdentifier>,
+}
+impl CssThemeAtRuleBuilder {
+    pub fn with_name(mut self, name: CssIdentifier) -> Self {
+        self.name = Some(name);
+        self
+    }
+    pub fn build(self) -> CssThemeAtRule {
+        CssThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_THEME_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.theme_token)),
+                self.name
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn css_type_selector(ident: CssIdentifier) -> CssTypeSelectorBuilder {
     CssTypeSelectorBuilder {

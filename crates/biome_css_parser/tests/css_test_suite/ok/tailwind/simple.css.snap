@@ -45,6 +45,7 @@ CssRoot {
             at_token: AT@0..49 "@" [Comments("/* Simple Tailwind CS ..."), Newline("\n"), Newline("\n")] [],
             rule: CssThemeAtRule {
                 theme_token: THEME_KW@49..55 "theme" [] [Whitespace(" ")],
+                name: missing (optional),
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@55..56 "{" [] [],
                     declarations: CssDeclarationList [
@@ -351,7 +352,8 @@ CssRoot {
       0: AT@0..49 "@" [Comments("/* Simple Tailwind CS ..."), Newline("\n"), Newline("\n")] []
       1: CSS_THEME_AT_RULE@49..110
         0: THEME_KW@49..55 "theme" [] [Whitespace(" ")]
-        1: CSS_DECLARATION_BLOCK@55..110
+        1: (empty)
+        2: CSS_DECLARATION_BLOCK@55..110
           0: L_CURLY@55..56 "{" [] []
           1: CSS_DECLARATION_LIST@56..108
             0: CSS_DECLARATION_WITH_SEMICOLON@56..84

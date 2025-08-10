@@ -22,8 +22,11 @@ pub(crate) fn parse_theme_at_rule(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(T![theme]);
 
+    p.bump(T![theme]);
+    if p.at(T![ident]) {
+        parse_regular_identifier(p).ok();
+    }
     parse_declaration_block(p);
 
     Present(m.complete(p, CSS_THEME_AT_RULE))

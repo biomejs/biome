@@ -6666,14 +6666,18 @@ impl CssThemeAtRule {
     pub fn as_fields(&self) -> CssThemeAtRuleFields {
         CssThemeAtRuleFields {
             theme_token: self.theme_token(),
+            name: self.name(),
             block: self.block(),
         }
     }
     pub fn theme_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
+    pub fn name(&self) -> Option<CssIdentifier> {
+        support::node(&self.syntax, 1usize)
+    }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
 }
 impl Serialize for CssThemeAtRule {
@@ -6687,6 +6691,7 @@ impl Serialize for CssThemeAtRule {
 #[derive(Serialize)]
 pub struct CssThemeAtRuleFields {
     pub theme_token: SyntaxResult<SyntaxToken>,
+    pub name: Option<CssIdentifier>,
     pub block: SyntaxResult<AnyCssDeclarationBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -17923,6 +17928,7 @@ impl std::fmt::Debug for CssThemeAtRule {
                     "theme_token",
                     &support::DebugSyntaxResult(self.theme_token()),
                 )
+                .field("name", &support::DebugOptionalElement(self.name()))
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
