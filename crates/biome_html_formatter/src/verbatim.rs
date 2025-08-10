@@ -9,11 +9,11 @@ use biome_formatter::prelude::{
 };
 
 use biome_formatter::{
-    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatRefWithRule,
-    FormatResult, FormatWithRule, LINE_TERMINATORS, normalize_newlines,
+    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatRefWithRule,
+    FormatResult, LINE_TERMINATORS, normalize_newlines,
 };
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode};
-use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
+use biome_rowan::{Direction, SyntaxElement, TextRange};
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
 /// a node "as is" is useful if a node contains syntax errors. Formatting a node with syntax errors
@@ -192,35 +192,6 @@ pub fn format_suppressed_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'
         node,
         kind: VerbatimKind::Suppressed,
         format_comments: true,
-    }
-}
-
-/// Formats a node or falls back to verbatim printing if formating this node fails.
-#[derive(Copy, Clone)]
-pub struct FormatNodeOrVerbatim<F> {
-    inner: F,
-}
-
-impl<F, Item> Format<HtmlFormatContext> for FormatNodeOrVerbatim<F>
-where
-    F: FormatWithRule<HtmlFormatContext, Item = Item>,
-    Item: AstNode<Language = HtmlLanguage>,
-{
-    fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
-        let snapshot = Formatter::state_snapshot(f);
-
-        match self.inner.fmt(f) {
-            Ok(result) => Ok(result),
-
-            Err(FormatError::SyntaxError) => {
-                f.restore_state_snapshot(snapshot);
-
-                // Lists that yield errors are formatted as they were suppressed nodes.
-                // Doing so, the formatter formats the nodes/tokens as is.
-                format_suppressed_node(self.inner.item().syntax()).fmt(f)
-            }
-            Err(err) => Err(err),
-        }
     }
 }
 
