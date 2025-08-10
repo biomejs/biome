@@ -271,7 +271,7 @@ pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> Pa
 
 /// Checks if the current position is at a Tailwind function
 pub(crate) fn is_at_tailwind_function(p: &mut CssParser) -> bool {
-    p.at(T![__alpha]) || p.at(T![__spacing]) || p.at(T![__value])
+    p.at(T![__alpha]) || p.at(T![__spacing]) || p.at(T![__value]) || p.at(T![__modifier])
 }
 
 /// Parses Tailwind CSS 4.0 functions
@@ -291,6 +291,8 @@ pub(crate) fn parse_tailwind_function(p: &mut CssParser) -> ParsedSyntax {
         parse_spacing_function(p)
     } else if p.at(T![__value]) {
         parse_value_function(p)
+    } else if p.at(T![__modifier]) {
+        parse_modifier_function(p)
     } else {
         Absent
     }
@@ -344,6 +346,21 @@ fn parse_value_function(p: &mut CssParser) -> ParsedSyntax {
     p.expect(T![')']);
 
     Present(m.complete(p, TW_VALUE_FUNCTION))
+}
+
+fn parse_modifier_function(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T![__modifier]) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(T![__modifier]);
+    p.expect(T!['(']);
+    TailwindValueList.parse_list(p);
+    p.expect(T![')']);
+
+    Present(m.complete(p, TW_MODIFIER_FUNCTION))
 }
 
 const TAILWIND_VALUE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T![')']];

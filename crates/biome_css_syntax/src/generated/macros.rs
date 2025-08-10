@@ -731,6 +731,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TwFunctionalUtilityName::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::TW_MODIFIER_FUNCTION => {
+                    let $pattern = unsafe { $crate::TwModifierFunction::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::TW_PLUGIN_AT_RULE => {
                     let $pattern = unsafe { $crate::TwPluginAtRule::new_unchecked(node) };
                     $body

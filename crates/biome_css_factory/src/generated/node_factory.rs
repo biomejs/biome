@@ -2472,6 +2472,22 @@ pub fn tw_functional_utility_name(
         ],
     ))
 }
+pub fn tw_modifier_function(
+    modifier_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    value: TwValueList,
+    r_paren_token: SyntaxToken,
+) -> TwModifierFunction {
+    TwModifierFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_MODIFIER_FUNCTION,
+        [
+            Some(SyntaxElement::Token(modifier_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn tw_plugin_at_rule(
     plugin_token: SyntaxToken,
     name: CssString,

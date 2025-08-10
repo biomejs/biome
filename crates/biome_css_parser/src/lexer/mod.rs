@@ -941,6 +941,7 @@ impl<'src> CssLexer<'src> {
             b"--alpha" => _ALPHA_KW,
             b"--spacing" => _SPACING_KW,
             b"--value" => _VALUE_KW,
+            b"--modifier" => _MODIFIER_KW,
             _ => IDENT,
         }
     }

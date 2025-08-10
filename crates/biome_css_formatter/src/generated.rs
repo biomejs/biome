@@ -5699,6 +5699,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::TwFunctionalUtilityName 
         FormatOwnedWithRule :: new (self , crate :: tailwind :: auxiliary :: functional_utility_name :: FormatTwFunctionalUtilityName :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::TwModifierFunction>
+    for crate::tailwind::auxiliary::modifier_function::FormatTwModifierFunction
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::TwModifierFunction,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::TwModifierFunction>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::TwModifierFunction {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::TwModifierFunction,
+        crate::tailwind::auxiliary::modifier_function::FormatTwModifierFunction,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::tailwind::auxiliary::modifier_function::FormatTwModifierFunction::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::TwModifierFunction {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::TwModifierFunction,
+        crate::tailwind::auxiliary::modifier_function::FormatTwModifierFunction,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::tailwind::auxiliary::modifier_function::FormatTwModifierFunction::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::TwPluginAtRule>
     for crate::tailwind::statements::plugin_at_rule::FormatTwPluginAtRule
 {

@@ -7113,6 +7113,56 @@ pub struct TwFunctionalUtilityNameFields {
     pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwModifierFunction {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwModifierFunction {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwModifierFunctionFields {
+        TwModifierFunctionFields {
+            modifier_token: self.modifier_token(),
+            l_paren_token: self.l_paren_token(),
+            value: self.value(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn modifier_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> TwValueList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for TwModifierFunction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwModifierFunctionFields {
+    pub modifier_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub value: TwValueList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwPluginAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -8460,6 +8510,7 @@ pub enum AnyCssFunction {
     CssFunction(CssFunction),
     CssUrlFunction(CssUrlFunction),
     TwAlphaFunction(TwAlphaFunction),
+    TwModifierFunction(TwModifierFunction),
     TwSpacingFunction(TwSpacingFunction),
     TwValueFunction(TwValueFunction),
 }
@@ -8479,6 +8530,12 @@ impl AnyCssFunction {
     pub fn as_tw_alpha_function(&self) -> Option<&TwAlphaFunction> {
         match &self {
             Self::TwAlphaFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_tw_modifier_function(&self) -> Option<&TwModifierFunction> {
+        match &self {
+            Self::TwModifierFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -18538,6 +18595,65 @@ impl From<TwFunctionalUtilityName> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for TwModifierFunction {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_MODIFIER_FUNCTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_MODIFIER_FUNCTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwModifierFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwModifierFunction")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("value", &self.value())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwModifierFunction").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwModifierFunction> for SyntaxNode {
+    fn from(n: TwModifierFunction) -> Self {
+        n.syntax
+    }
+}
+impl From<TwModifierFunction> for SyntaxElement {
+    fn from(n: TwModifierFunction) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for TwPluginAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -21470,6 +21586,11 @@ impl From<TwAlphaFunction> for AnyCssFunction {
         Self::TwAlphaFunction(node)
     }
 }
+impl From<TwModifierFunction> for AnyCssFunction {
+    fn from(node: TwModifierFunction) -> Self {
+        Self::TwModifierFunction(node)
+    }
+}
 impl From<TwSpacingFunction> for AnyCssFunction {
     fn from(node: TwSpacingFunction) -> Self {
         Self::TwSpacingFunction(node)
@@ -21485,6 +21606,7 @@ impl AstNode for AnyCssFunction {
     const KIND_SET: SyntaxKindSet<Language> = CssFunction::KIND_SET
         .union(CssUrlFunction::KIND_SET)
         .union(TwAlphaFunction::KIND_SET)
+        .union(TwModifierFunction::KIND_SET)
         .union(TwSpacingFunction::KIND_SET)
         .union(TwValueFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -21493,6 +21615,7 @@ impl AstNode for AnyCssFunction {
             CSS_FUNCTION
                 | CSS_URL_FUNCTION
                 | TW_ALPHA_FUNCTION
+                | TW_MODIFIER_FUNCTION
                 | TW_SPACING_FUNCTION
                 | TW_VALUE_FUNCTION
         )
@@ -21502,6 +21625,7 @@ impl AstNode for AnyCssFunction {
             CSS_FUNCTION => Self::CssFunction(CssFunction { syntax }),
             CSS_URL_FUNCTION => Self::CssUrlFunction(CssUrlFunction { syntax }),
             TW_ALPHA_FUNCTION => Self::TwAlphaFunction(TwAlphaFunction { syntax }),
+            TW_MODIFIER_FUNCTION => Self::TwModifierFunction(TwModifierFunction { syntax }),
             TW_SPACING_FUNCTION => Self::TwSpacingFunction(TwSpacingFunction { syntax }),
             TW_VALUE_FUNCTION => Self::TwValueFunction(TwValueFunction { syntax }),
             _ => return None,
@@ -21513,6 +21637,7 @@ impl AstNode for AnyCssFunction {
             Self::CssFunction(it) => &it.syntax,
             Self::CssUrlFunction(it) => &it.syntax,
             Self::TwAlphaFunction(it) => &it.syntax,
+            Self::TwModifierFunction(it) => &it.syntax,
             Self::TwSpacingFunction(it) => &it.syntax,
             Self::TwValueFunction(it) => &it.syntax,
         }
@@ -21522,6 +21647,7 @@ impl AstNode for AnyCssFunction {
             Self::CssFunction(it) => it.syntax,
             Self::CssUrlFunction(it) => it.syntax,
             Self::TwAlphaFunction(it) => it.syntax,
+            Self::TwModifierFunction(it) => it.syntax,
             Self::TwSpacingFunction(it) => it.syntax,
             Self::TwValueFunction(it) => it.syntax,
         }
@@ -21533,6 +21659,7 @@ impl std::fmt::Debug for AnyCssFunction {
             Self::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::TwAlphaFunction(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwModifierFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::TwSpacingFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::TwValueFunction(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -21544,6 +21671,7 @@ impl From<AnyCssFunction> for SyntaxNode {
             AnyCssFunction::CssFunction(it) => it.into(),
             AnyCssFunction::CssUrlFunction(it) => it.into(),
             AnyCssFunction::TwAlphaFunction(it) => it.into(),
+            AnyCssFunction::TwModifierFunction(it) => it.into(),
             AnyCssFunction::TwSpacingFunction(it) => it.into(),
             AnyCssFunction::TwValueFunction(it) => it.into(),
         }
@@ -26980,6 +27108,11 @@ impl std::fmt::Display for TwCustomVariantShorthand {
     }
 }
 impl std::fmt::Display for TwFunctionalUtilityName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TwModifierFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

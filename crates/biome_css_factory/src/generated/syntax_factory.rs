@@ -4839,32 +4839,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![__alpha] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![__alpha]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!['('] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyCssExpression::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && AnyCssExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![')'] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -4879,25 +4879,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![apply] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![apply]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if TwApplyClassList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && TwApplyClassList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [;] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [;]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -4912,25 +4912,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![config] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![config]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssString::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssString::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [;] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [;]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -4945,25 +4945,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![custom_variant] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![custom_variant]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyTwCustomVariantSelector::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && AnyTwCustomVariantSelector::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -4978,32 +4978,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!['('] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyCssSelector::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && AnyCssSelector::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![')'] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [;] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [;]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5018,25 +5018,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [-] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [-]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [*] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [*]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5047,29 +5047,69 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(TW_FUNCTIONAL_UTILITY_NAME, children)
             }
+            TW_MODIFIER_FUNCTION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![__modifier]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && TwValueList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        TW_MODIFIER_FUNCTION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(TW_MODIFIER_FUNCTION, children)
+            }
             TW_PLUGIN_AT_RULE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![plugin] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![plugin]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssString::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssString::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [;] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [;]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5084,25 +5124,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![reference] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![reference]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssString::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssString::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [;] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [;]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5117,11 +5157,11 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5136,25 +5176,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![source] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![source]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssString::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssString::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [;] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [;]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5169,32 +5209,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![__spacing] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![__spacing]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!['('] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyCssExpression::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && AnyCssExpression::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![')'] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5209,25 +5249,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![theme] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![theme]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyCssDeclarationOrRuleBlock::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && AnyCssDeclarationOrRuleBlock::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5242,25 +5282,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![utility] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![utility]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyTwUtilityName::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && AnyTwUtilityName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyCssDeclarationBlock::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && AnyCssDeclarationBlock::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5275,25 +5315,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!['['] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!['[']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![']'] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![']']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5308,32 +5348,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![__value] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![__value]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!['('] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if TwValueList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && TwValueList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![')'] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5348,25 +5388,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if CssDashedIdentifier::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssDashedIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [-] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [-]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [*] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [*]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -5381,25 +5421,25 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![variant] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![variant]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && CssIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyCssDeclarationOrRuleBlock::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && AnyCssDeclarationOrRuleBlock::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {

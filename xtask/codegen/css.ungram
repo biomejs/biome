@@ -1734,6 +1734,7 @@ AnyCssFunction =
 	| TwAlphaFunction
 	| TwSpacingFunction
 	| TwValueFunction
+	| TwModifierFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -1890,6 +1891,12 @@ TwSpacingFunction =
 // }
 TwValueFunction =
 	'--value'
+	'('
+	value: TwValueList
+	')'
+
+TwModifierFunction =
+	'--modifier'
 	'('
 	value: TwValueList
 	')'

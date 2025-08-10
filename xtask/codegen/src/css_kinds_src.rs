@@ -130,6 +130,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "--alpha",
         "--spacing",
         "--value",
+        "--modifier",
         // HERE: Add new regular keywords _above_ here. Be sure to also add them
         // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords
@@ -513,6 +514,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "TW_ALPHA_FUNCTION",
         "TW_SPACING_FUNCTION",
         "TW_VALUE_FUNCTION",
+        "TW_MODIFIER_FUNCTION",
         "TW_VALUE_LIST",
         "TW_VALUE_ARBITRARY_TYPE",
         "TW_VALUE_THEME_REFERENCE",
