@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1@sha256:9857836c9ee4268391bb5b09f9f157f3c91bb15821bb77969642813b0d00518d
-FROM rust:1.89.0-trixie@sha256:51af0529d7144945a3093feb9090ccbe0aae6c54dbce428831aadf186c9393df
+FROM rust:1.89.0-bookworm@sha256:c50cd6e20c46b0b36730b5eb27289744e4bb8f32abc90d8c64ca09decf4f55ba
 WORKDIR /usr/src/
 
 # https://github.com/nodesource/distributions
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs
 RUN cargo install hyperfine
 
 COPY Cargo.toml Cargo.lock ./
