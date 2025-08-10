@@ -301,7 +301,7 @@ impl GreenNode {
 
 impl Slot {
     #[inline]
-    pub(crate) fn as_ref(&self) -> Option<GreenElementRef> {
+    pub(crate) fn as_ref(&self) -> Option<GreenElementRef<'_>> {
         match self {
             Self::Node { node, .. } => Some(NodeOrToken::Node(node)),
             Self::Token { token, .. } => Some(NodeOrToken::Token(token)),

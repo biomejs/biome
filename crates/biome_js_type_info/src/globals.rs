@@ -431,7 +431,7 @@ impl TypeResolver for GlobalsResolver {
         self.types.get_by_id(id)
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
         (id.level() == GLOBAL_LEVEL).then(|| (id, self.get_by_id(id.id())).into())
     }
 
@@ -471,7 +471,11 @@ impl TypeResolver for GlobalsResolver {
         }
     }
 
-    fn resolve_expression(&mut self, scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expr: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
         Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
     }
 

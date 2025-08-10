@@ -292,7 +292,7 @@ where
         snapshot_builder.finish(self.test_file.relative_file_name());
     }
 
-    fn test_file(&self) -> &SpecTestFile {
+    fn test_file(&self) -> &SpecTestFile<'_> {
         &self.test_file
     }
 }

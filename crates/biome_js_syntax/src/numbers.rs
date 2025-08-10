@@ -5,7 +5,7 @@ use std::{borrow::Cow, str::FromStr};
 /// Split given string into radix and number string.
 ///
 /// It also removes any underscores.
-pub fn split_into_radix_and_number(num: &str) -> (u8, Cow<str>) {
+pub fn split_into_radix_and_number(num: &str) -> (u8, Cow<'_, str>) {
     let (radix, raw) = parse_js_number_prefix(num).unwrap_or((10, num));
     let raw = if raw.contains('_') {
         Cow::Owned(raw.replace('_', ""))

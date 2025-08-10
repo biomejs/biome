@@ -9,7 +9,7 @@ pub(crate) struct FormatRemoved<'a> {
     token: &'a GraphqlSyntaxToken,
 }
 
-pub(crate) fn format_removed(token: &GraphqlSyntaxToken) -> FormatRemoved {
+pub(crate) fn format_removed(token: &GraphqlSyntaxToken) -> FormatRemoved<'_> {
     FormatRemoved { token }
 }
 

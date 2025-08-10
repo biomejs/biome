@@ -240,7 +240,7 @@ impl<K: std::hash::Hash + Eq, V> CommentsMap<K, V> {
     }
 
     /// Returns an iterator over all leading, dangling, and trailing parts of `key`.
-    pub fn parts(&self, key: &K) -> PartsIterator<V> {
+    pub fn parts(&self, key: &K) -> PartsIterator<'_, V> {
         match self.index.get(key) {
             None => PartsIterator::Slice([].iter()),
             Some(entry) => PartsIterator::from_entry(entry, self),

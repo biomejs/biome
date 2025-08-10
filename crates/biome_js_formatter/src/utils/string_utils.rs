@@ -39,7 +39,7 @@ impl<'token> FormatLiteralStringToken<'token> {
         self.token
     }
 
-    pub fn clean_text(&self, options: &JsFormatOptions) -> CleanedStringLiteralText {
+    pub fn clean_text(&self, options: &JsFormatOptions) -> CleanedStringLiteralText<'_> {
         let token = self.token();
         debug_assert!(
             matches!(token.kind(), JS_STRING_LITERAL | JSX_STRING_LITERAL),
@@ -400,7 +400,7 @@ mod tests {
     }
 
     impl AsToken {
-        fn into_token(self, token: &JsSyntaxToken) -> FormatLiteralStringToken {
+        fn into_token(self, token: &JsSyntaxToken) -> FormatLiteralStringToken<'_> {
             match self {
                 Self::Directive => {
                     FormatLiteralStringToken::new(token, StringLiteralParentKind::Directive)

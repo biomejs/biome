@@ -25,7 +25,7 @@ use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
 ///
 /// These nodes and tokens get tracked as [VerbatimKind::Verbatim], useful to understand
 /// if these nodes still need to have their own implementation.
-pub fn format_html_verbatim_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
+pub fn format_html_verbatim_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
         kind: VerbatimKind::Verbatim {
@@ -37,7 +37,7 @@ pub fn format_html_verbatim_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNod
 
 /// "Formats" a node according to its original formatting in the source text. It's functionally equal to
 /// [`format_html_verbatim_node`], but it doesn't track the node as [VerbatimKind::Verbatim].
-pub fn format_verbatim_skipped(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
+pub fn format_verbatim_skipped(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
         kind: VerbatimKind::Skipped,
@@ -178,7 +178,7 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
 
 /// Formats bogus nodes. The difference between this method  and `format_verbatim` is that this method
 /// doesn't track nodes/tokens as [VerbatimKind::Verbatim]. They are just printed as they are.
-pub fn format_bogus_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
+pub fn format_bogus_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
         kind: VerbatimKind::Bogus,
@@ -187,7 +187,7 @@ pub fn format_bogus_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
 }
 
 /// Format a node having formatter suppression comment applied to it
-pub fn format_suppressed_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
+pub fn format_suppressed_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
         kind: VerbatimKind::Suppressed,
@@ -225,7 +225,7 @@ where
 }
 
 /// Formats the leading comments of `node`
-pub const fn format_html_leading_comments(node: &HtmlSyntaxNode) -> FormatLHtmlLeadingComments {
+pub const fn format_html_leading_comments(node: &HtmlSyntaxNode) -> FormatLHtmlLeadingComments<'_> {
     FormatLHtmlLeadingComments::Node(node)
 }
 
@@ -281,7 +281,9 @@ impl<'a> Format<HtmlFormatContext> for FormatLHtmlLeadingComments<'a> {
 }
 
 /// Formats the leading comments of `node`
-pub const fn format_html_trailing_comments(node: &HtmlSyntaxNode) -> FormatLHtmlTrailingComments {
+pub const fn format_html_trailing_comments(
+    node: &HtmlSyntaxNode,
+) -> FormatLHtmlTrailingComments<'_> {
     FormatLHtmlTrailingComments::Node(node)
 }
 

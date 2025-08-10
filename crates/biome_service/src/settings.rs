@@ -195,7 +195,7 @@ impl Settings {
     }
 
     /// Returns linter rules taking overrides into account.
-    pub fn as_linter_rules(&self, path: &Utf8Path) -> Option<Cow<Rules>> {
+    pub fn as_linter_rules(&self, path: &Utf8Path) -> Option<Cow<'_, Rules>> {
         let mut result = self.linter.rules.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
@@ -216,7 +216,7 @@ impl Settings {
     }
 
     /// Extract the domains applied to the given `path`, by looking that the base `domains`, and the once applied by `overrides`
-    pub fn as_linter_domains(&self, path: &Utf8Path) -> Option<Cow<RuleDomains>> {
+    pub fn as_linter_domains(&self, path: &Utf8Path) -> Option<Cow<'_, RuleDomains>> {
         let mut result = self.linter.domains.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
@@ -238,7 +238,7 @@ impl Settings {
     }
 
     /// Returns assists rules taking overrides into account.
-    pub fn as_assist_actions(&self, path: &Utf8Path) -> Option<Cow<Actions>> {
+    pub fn as_assist_actions(&self, path: &Utf8Path) -> Option<Cow<'_, Actions>> {
         let mut result = self.assist.actions.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
@@ -259,7 +259,7 @@ impl Settings {
     }
 
     /// Returns the plugins that should be enabled for the given `path`, taking overrides into account.
-    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<Plugins> {
+    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<'_, Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         for pattern in &self.override_settings.patterns {
@@ -272,7 +272,7 @@ impl Settings {
     }
 
     /// Return all plugins configured in setting
-    pub fn as_all_plugins(&self) -> Cow<Plugins> {
+    pub fn as_all_plugins(&self) -> Cow<'_, Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         let all_override_plugins = self

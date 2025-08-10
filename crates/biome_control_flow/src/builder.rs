@@ -109,7 +109,7 @@ impl<L: Language> FunctionBuilder<L> {
     }
 
     /// Insert an instruction at the current position of the cursor
-    fn append_instruction(&mut self, kind: InstructionKind) -> InstructionBuilder<L> {
+    fn append_instruction(&mut self, kind: InstructionKind) -> InstructionBuilder<'_, L> {
         let index = self.block_cursor.index as usize;
         let block = &mut self.result.blocks[index];
 
@@ -119,15 +119,15 @@ impl<L: Language> FunctionBuilder<L> {
         InstructionBuilder(&mut block.instructions[index])
     }
 
-    pub fn append_statement(&mut self) -> InstructionBuilder<L> {
+    pub fn append_statement(&mut self) -> InstructionBuilder<'_, L> {
         self.append_instruction(InstructionKind::Statement)
     }
 
-    pub fn append_return(&mut self) -> InstructionBuilder<L> {
+    pub fn append_return(&mut self) -> InstructionBuilder<'_, L> {
         self.append_instruction(InstructionKind::Return)
     }
 
-    pub fn append_jump(&mut self, conditional: bool, block: BlockId) -> InstructionBuilder<L> {
+    pub fn append_jump(&mut self, conditional: bool, block: BlockId) -> InstructionBuilder<'_, L> {
         self.append_instruction(InstructionKind::Jump {
             conditional,
             block,
@@ -135,7 +135,7 @@ impl<L: Language> FunctionBuilder<L> {
         })
     }
 
-    pub fn append_finally_fallthrough(&mut self, block: BlockId) -> InstructionBuilder<L> {
+    pub fn append_finally_fallthrough(&mut self, block: BlockId) -> InstructionBuilder<'_, L> {
         self.append_instruction(InstructionKind::Jump {
             conditional: false,
             block,
