@@ -18,7 +18,7 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssPluginAtRule {
+            rule: TwPluginAtRule {
                 plugin_token: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")],
                 name: CssString {
                     value_token: CSS_STRING_LITERAL@8..33 "\"@tailwindcss/typography\"" [] [],
@@ -39,7 +39,7 @@ CssRoot {
   1: CSS_RULE_LIST@0..34
     0: CSS_AT_RULE@0..34
       0: AT@0..1 "@" [] []
-      1: CSS_PLUGIN_AT_RULE@1..34
+      1: TW_PLUGIN_AT_RULE@1..34
         0: PLUGIN_KW@1..8 "plugin" [] [Whitespace(" ")]
         1: CSS_STRING@8..33
           0: CSS_STRING_LITERAL@8..33 "\"@tailwindcss/typography\"" [] []

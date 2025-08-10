@@ -18,12 +18,12 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssCustomVariantAtRule {
+            rule: TwCustomVariantAtRule {
                 custom_variant_token: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")],
                 name: CssIdentifier {
                     value_token: IDENT@16..21 "dark" [] [Whitespace(" ")],
                 },
-                selector: CssTwCustomVariantShorthand {
+                selector: TwCustomVariantShorthand {
                     l_paren_token: L_PAREN@21..22 "(" [] [],
                     selector: CssCompoundSelector {
                         nesting_selectors: CssNestedSelectorList [
@@ -88,11 +88,11 @@ CssRoot {
   1: CSS_RULE_LIST@0..37
     0: CSS_AT_RULE@0..37
       0: AT@0..1 "@" [] []
-      1: CSS_CUSTOM_VARIANT_AT_RULE@1..37
+      1: TW_CUSTOM_VARIANT_AT_RULE@1..37
         0: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@16..21
           0: IDENT@16..21 "dark" [] [Whitespace(" ")]
-        2: CSS_TW_CUSTOM_VARIANT_SHORTHAND@21..37
+        2: TW_CUSTOM_VARIANT_SHORTHAND@21..37
           0: L_PAREN@21..22 "(" [] []
           1: CSS_COMPOUND_SELECTOR@22..35
             0: CSS_NESTED_SELECTOR_LIST@22..23

@@ -20,7 +20,7 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssThemeAtRule {
+            rule: TwThemeAtRule {
                 theme_token: THEME_KW@1..7 "theme" [] [Whitespace(" ")],
                 name: CssIdentifier {
                     value_token: IDENT@7..11 "foo" [] [Whitespace(" ")],
@@ -64,7 +64,7 @@ CssRoot {
   1: CSS_RULE_LIST@0..28
     0: CSS_AT_RULE@0..28
       0: AT@0..1 "@" [] []
-      1: CSS_THEME_AT_RULE@1..28
+      1: TW_THEME_AT_RULE@1..28
         0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@7..11
           0: IDENT@7..11 "foo" [] [Whitespace(" ")]

@@ -48,7 +48,7 @@ CssRoot {
                                 },
                                 colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
-                                    CssTailwindAlphaFunction {
+                                    TwAlphaFunction {
                                         alpha_token: _ALPHA_KW@28..35 "--alpha" [] [],
                                         l_paren_token: L_PAREN@35..36 "(" [] [],
                                         value: CssBinaryExpression {
@@ -128,7 +128,7 @@ CssRoot {
                                 },
                                 colon_token: COLON@80..82 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
-                                    CssTailwindAlphaFunction {
+                                    TwAlphaFunction {
                                         alpha_token: _ALPHA_KW@82..89 "--alpha" [] [],
                                         l_paren_token: L_PAREN@89..90 "(" [] [],
                                         value: CssBinaryExpression {
@@ -207,7 +207,7 @@ CssRoot {
                   0: IDENT@19..26 "color" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@26..28 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@28..55
-                  0: CSS_TAILWIND_ALPHA_FUNCTION@28..55
+                  0: TW_ALPHA_FUNCTION@28..55
                     0: _ALPHA_KW@28..35 "--alpha" [] []
                     1: L_PAREN@35..36 "(" [] []
                     2: CSS_BINARY_EXPRESSION@36..54
@@ -258,7 +258,7 @@ CssRoot {
                   0: IDENT@73..80 "color" [Newline("\n"), Whitespace("\t")] []
                 1: COLON@80..82 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@82..118
-                  0: CSS_TAILWIND_ALPHA_FUNCTION@82..118
+                  0: TW_ALPHA_FUNCTION@82..118
                     0: _ALPHA_KW@82..89 "--alpha" [] []
                     1: L_PAREN@89..90 "(" [] []
                     2: CSS_BINARY_EXPRESSION@90..117

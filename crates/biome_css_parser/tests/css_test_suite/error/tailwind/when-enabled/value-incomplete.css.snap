@@ -20,9 +20,9 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssUtilityAtRule {
+            rule: TwUtilityAtRule {
                 utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
-                name: CssFunctionalUtilityName {
+                name: TwFunctionalUtilityName {
                     identifier: CssIdentifier {
                         value_token: IDENT@9..12 "foo" [] [],
                     },
@@ -52,7 +52,7 @@ CssRoot {
                                                                     CssIdentifier {
                                                                         value_token: IDENT@33..39 "length" [] [],
                                                                     },
-                                                                    CssBogusTailwindUtilityValue {
+                                                                    CssBogusTwUtilityValue {
                                                                         items: [
                                                                             R_CURLY@39..41 "}" [Newline("\n")] [],
                                                                         ],
@@ -87,9 +87,9 @@ CssRoot {
   1: CSS_RULE_LIST@0..41
     0: CSS_AT_RULE@0..41
       0: AT@0..1 "@" [] []
-      1: CSS_UTILITY_AT_RULE@1..41
+      1: TW_UTILITY_AT_RULE@1..41
         0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
-        1: CSS_FUNCTIONAL_UTILITY_NAME@9..15
+        1: TW_FUNCTIONAL_UTILITY_NAME@9..15
           0: CSS_IDENTIFIER@9..12
             0: IDENT@9..12 "foo" [] []
           1: MINUS@12..13 "-" [] []
@@ -110,7 +110,7 @@ CssRoot {
                       2: CSS_BOGUS@33..41
                         0: CSS_IDENTIFIER@33..39
                           0: IDENT@33..39 "length" [] []
-                        1: CSS_BOGUS_TAILWIND_UTILITY_VALUE@39..41
+                        1: CSS_BOGUS_TW_UTILITY_VALUE@39..41
                           0: R_CURLY@39..41 "}" [Newline("\n")] []
                 1: (empty)
               1: (empty)

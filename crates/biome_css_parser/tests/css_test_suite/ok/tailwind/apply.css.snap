@@ -48,9 +48,9 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..24 "@" [Comments("/* @apply directive */"), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@24..30 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@30..38 "text-lg" [] [Whitespace(" ")],
                     },
@@ -63,9 +63,9 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@48..51 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@51..57 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@57..62 "flex" [] [Whitespace(" ")],
                     },
@@ -87,9 +87,9 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@101..137 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with single ..."), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@137..143 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@143..149 "hidden" [] [],
                     },
@@ -99,9 +99,9 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@150..189 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with spacin ..."), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@189..195 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@195..199 "m-4" [] [Whitespace(" ")],
                     },
@@ -114,9 +114,9 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@203..240 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with color  ..."), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@240..246 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@246..258 "bg-blue-500" [] [Whitespace(" ")],
                     },
@@ -129,9 +129,9 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@269..311 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with typogr ..."), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@311..317 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@317..329 "text-center" [] [Whitespace(" ")],
                     },
@@ -147,9 +147,9 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@359..397 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with layout ..."), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@397..403 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@403..413 "container" [] [Whitespace(" ")],
                     },
@@ -165,9 +165,9 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@431..472 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with transf ..."), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@472..478 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@478..488 "transform" [] [Whitespace(" ")],
                     },
@@ -183,9 +183,9 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@508..550 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with transi ..."), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@550..556 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@556..571 "transition-all" [] [Whitespace(" ")],
                     },
@@ -201,9 +201,9 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@596..634 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with custom ..."), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@634..640 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@640..658 "my-custom-utility" [] [Whitespace(" ")],
                     },
@@ -216,9 +216,9 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@674..713 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with numeri ..."), Newline("\n")] [],
-            rule: CssApplyAtRule {
+            rule: TwApplyAtRule {
                 apply_token: APPLY_KW@713..719 "apply" [] [Whitespace(" ")],
-                classes: CssApplyClassList [
+                classes: TwApplyClassList [
                     CssIdentifier {
                         value_token: IDENT@719..723 "w-1" [] [Whitespace(" ")],
                     },
@@ -245,9 +245,9 @@ CssRoot {
   1: CSS_RULE_LIST@0..733
     0: CSS_AT_RULE@0..48
       0: AT@0..24 "@" [Comments("/* @apply directive */"), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@24..48
+      1: TW_APPLY_AT_RULE@24..48
         0: APPLY_KW@24..30 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@30..47
+        1: TW_APPLY_CLASS_LIST@30..47
           0: CSS_IDENTIFIER@30..38
             0: IDENT@30..38 "text-lg" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@38..47
@@ -255,9 +255,9 @@ CssRoot {
         2: SEMICOLON@47..48 ";" [] []
     1: CSS_AT_RULE@48..101
       0: AT@48..51 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@51..101
+      1: TW_APPLY_AT_RULE@51..101
         0: APPLY_KW@51..57 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@57..100
+        1: TW_APPLY_CLASS_LIST@57..100
           0: CSS_IDENTIFIER@57..62
             0: IDENT@57..62 "flex" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@62..75
@@ -271,17 +271,17 @@ CssRoot {
         2: SEMICOLON@100..101 ";" [] []
     2: CSS_AT_RULE@101..150
       0: AT@101..137 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with single ..."), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@137..150
+      1: TW_APPLY_AT_RULE@137..150
         0: APPLY_KW@137..143 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@143..149
+        1: TW_APPLY_CLASS_LIST@143..149
           0: CSS_IDENTIFIER@143..149
             0: IDENT@143..149 "hidden" [] []
         2: SEMICOLON@149..150 ";" [] []
     3: CSS_AT_RULE@150..203
       0: AT@150..189 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with spacin ..."), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@189..203
+      1: TW_APPLY_AT_RULE@189..203
         0: APPLY_KW@189..195 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@195..202
+        1: TW_APPLY_CLASS_LIST@195..202
           0: CSS_IDENTIFIER@195..199
             0: IDENT@195..199 "m-4" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@199..202
@@ -289,9 +289,9 @@ CssRoot {
         2: SEMICOLON@202..203 ";" [] []
     4: CSS_AT_RULE@203..269
       0: AT@203..240 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with color  ..."), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@240..269
+      1: TW_APPLY_AT_RULE@240..269
         0: APPLY_KW@240..246 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@246..268
+        1: TW_APPLY_CLASS_LIST@246..268
           0: CSS_IDENTIFIER@246..258
             0: IDENT@246..258 "bg-blue-500" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@258..268
@@ -299,9 +299,9 @@ CssRoot {
         2: SEMICOLON@268..269 ";" [] []
     5: CSS_AT_RULE@269..359
       0: AT@269..311 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with typogr ..."), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@311..359
+      1: TW_APPLY_AT_RULE@311..359
         0: APPLY_KW@311..317 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@317..358
+        1: TW_APPLY_CLASS_LIST@317..358
           0: CSS_IDENTIFIER@317..329
             0: IDENT@317..329 "text-center" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@329..345
@@ -311,9 +311,9 @@ CssRoot {
         2: SEMICOLON@358..359 ";" [] []
     6: CSS_AT_RULE@359..431
       0: AT@359..397 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with layout ..."), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@397..431
+      1: TW_APPLY_AT_RULE@397..431
         0: APPLY_KW@397..403 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@403..430
+        1: TW_APPLY_CLASS_LIST@403..430
           0: CSS_IDENTIFIER@403..413
             0: IDENT@403..413 "container" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@413..421
@@ -323,9 +323,9 @@ CssRoot {
         2: SEMICOLON@430..431 ";" [] []
     7: CSS_AT_RULE@431..508
       0: AT@431..472 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with transf ..."), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@472..508
+      1: TW_APPLY_AT_RULE@472..508
         0: APPLY_KW@472..478 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@478..507
+        1: TW_APPLY_CLASS_LIST@478..507
           0: CSS_IDENTIFIER@478..488
             0: IDENT@478..488 "transform" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@488..498
@@ -335,9 +335,9 @@ CssRoot {
         2: SEMICOLON@507..508 ";" [] []
     8: CSS_AT_RULE@508..596
       0: AT@508..550 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with transi ..."), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@550..596
+      1: TW_APPLY_AT_RULE@550..596
         0: APPLY_KW@550..556 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@556..595
+        1: TW_APPLY_CLASS_LIST@556..595
           0: CSS_IDENTIFIER@556..571
             0: IDENT@556..571 "transition-all" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@571..584
@@ -347,9 +347,9 @@ CssRoot {
         2: SEMICOLON@595..596 ";" [] []
     9: CSS_AT_RULE@596..674
       0: AT@596..634 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with custom ..."), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@634..674
+      1: TW_APPLY_AT_RULE@634..674
         0: APPLY_KW@634..640 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@640..673
+        1: TW_APPLY_CLASS_LIST@640..673
           0: CSS_IDENTIFIER@640..658
             0: IDENT@640..658 "my-custom-utility" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@658..673
@@ -357,9 +357,9 @@ CssRoot {
         2: SEMICOLON@673..674 ";" [] []
     10: CSS_AT_RULE@674..733
       0: AT@674..713 "@" [Newline("\n"), Newline("\n"), Comments("/* @apply with numeri ..."), Newline("\n")] []
-      1: CSS_APPLY_AT_RULE@713..733
+      1: TW_APPLY_AT_RULE@713..733
         0: APPLY_KW@713..719 "apply" [] [Whitespace(" ")]
-        1: CSS_APPLY_CLASS_LIST@719..732
+        1: TW_APPLY_CLASS_LIST@719..732
           0: CSS_IDENTIFIER@719..723
             0: IDENT@719..723 "w-1" [] [Whitespace(" ")]
           1: CSS_IDENTIFIER@723..728

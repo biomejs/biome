@@ -33,7 +33,7 @@ pub(crate) fn parse_theme_at_rule(p: &mut CssParser) -> ParsedSyntax {
     }
     parse_declaration_or_rule_list_block(p);
 
-    Present(m.complete(p, CSS_THEME_AT_RULE))
+    Present(m.complete(p, TW_THEME_AT_RULE))
 }
 
 // @utility tab-4 { tab-size: 4; }
@@ -61,7 +61,7 @@ pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     parse_declaration_block(p);
 
-    Present(m.complete(p, CSS_UTILITY_AT_RULE))
+    Present(m.complete(p, TW_UTILITY_AT_RULE))
 }
 
 fn parse_utility_name(p: &mut CssParser) -> ParsedSyntax {
@@ -74,12 +74,12 @@ fn parse_utility_name(p: &mut CssParser) -> ParsedSyntax {
         p.expect(T![-]);
         p.expect(T![*]);
 
-        Present(m.complete(p, CSS_FUNCTIONAL_UTILITY_NAME))
+        Present(m.complete(p, TW_FUNCTIONAL_UTILITY_NAME))
     } else {
         // Simple utility: center-flex
         parse_regular_identifier(p).ok();
 
-        Present(m.complete(p, CSS_SIMPLE_UTILITY_NAME))
+        Present(m.complete(p, TW_SIMPLE_UTILITY_NAME))
     }
 }
 
@@ -106,7 +106,7 @@ pub(crate) fn parse_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     parse_declaration_or_rule_list_block(p);
 
-    Present(m.complete(p, CSS_VARIANT_AT_RULE))
+    Present(m.complete(p, TW_VARIANT_AT_RULE))
 }
 
 // @custom-variant theme-midnight (&:where([data-theme="midnight"] *));
@@ -144,7 +144,7 @@ pub(crate) fn parse_custom_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_rule_block(p);
     }
 
-    Present(m.complete(p, CSS_CUSTOM_VARIANT_AT_RULE))
+    Present(m.complete(p, TW_CUSTOM_VARIANT_AT_RULE))
 }
 
 fn parse_custom_variant_shorthand(p: &mut CssParser) -> ParsedSyntax {
@@ -159,7 +159,7 @@ fn parse_custom_variant_shorthand(p: &mut CssParser) -> ParsedSyntax {
     p.expect(T![')']);
     p.expect(T![;]);
 
-    Present(m.complete(p, CSS_TW_CUSTOM_VARIANT_SHORTHAND))
+    Present(m.complete(p, TW_CUSTOM_VARIANT_SHORTHAND))
 }
 
 // @apply text-lg font-bold;
@@ -178,7 +178,7 @@ pub(crate) fn parse_apply_at_rule(p: &mut CssParser) -> ParsedSyntax {
     ApplyClassList.parse_list(p);
     p.expect(T![;]);
 
-    Present(m.complete(p, CSS_APPLY_AT_RULE))
+    Present(m.complete(p, TW_APPLY_AT_RULE))
 }
 
 struct ApplyClassList;
@@ -186,7 +186,7 @@ struct ApplyClassList;
 impl ParseNodeList for ApplyClassList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_APPLY_CLASS_LIST;
+    const LIST_KIND: Self::Kind = TW_APPLY_CLASS_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         parse_identifier(p, CssLexContext::TailwindUtility)
@@ -226,7 +226,7 @@ pub(crate) fn parse_config_at_rule(p: &mut CssParser) -> ParsedSyntax {
     parse_string(p).or_add_diagnostic(p, expected_string);
     p.expect(T![;]);
 
-    Present(m.complete(p, CSS_CONFIG_AT_RULE))
+    Present(m.complete(p, TW_CONFIG_AT_RULE))
 }
 
 // @plugin "@tailwindcss/typography";
@@ -245,7 +245,7 @@ pub(crate) fn parse_plugin_at_rule(p: &mut CssParser) -> ParsedSyntax {
     parse_string(p).or_add_diagnostic(p, expected_string);
     p.expect(T![;]);
 
-    Present(m.complete(p, CSS_PLUGIN_AT_RULE))
+    Present(m.complete(p, TW_PLUGIN_AT_RULE))
 }
 
 // @source "../node_modules/@my-company/ui-lib";
@@ -264,7 +264,7 @@ pub(crate) fn parse_source_at_rule(p: &mut CssParser) -> ParsedSyntax {
     parse_string(p).or_add_diagnostic(p, expected_string);
     p.expect(T![;]);
 
-    Present(m.complete(p, CSS_SOURCE_AT_RULE))
+    Present(m.complete(p, TW_SOURCE_AT_RULE))
 }
 
 // @reference "../../app.css";
@@ -283,5 +283,5 @@ pub(crate) fn parse_reference_at_rule(p: &mut CssParser) -> ParsedSyntax {
     parse_string(p).or_add_diagnostic(p, expected_string);
     p.expect(T![;]);
 
-    Present(m.complete(p, CSS_REFERENCE_AT_RULE))
+    Present(m.complete(p, TW_REFERENCE_AT_RULE))
 }

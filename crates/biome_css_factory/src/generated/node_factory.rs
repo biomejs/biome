@@ -6,20 +6,6 @@ use biome_css_syntax::{
     *,
 };
 use biome_rowan::AstNode;
-pub fn css_apply_at_rule(
-    apply_token: SyntaxToken,
-    classes: CssApplyClassList,
-    semicolon_token: SyntaxToken,
-) -> CssApplyAtRule {
-    CssApplyAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_APPLY_AT_RULE,
-        [
-            Some(SyntaxElement::Token(apply_token)),
-            Some(SyntaxElement::Node(classes.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
-}
 pub fn css_at_rule(at_token: SyntaxToken, rule: AnyCssAtRule) -> CssAtRule {
     CssAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_AT_RULE,
@@ -302,20 +288,6 @@ impl CssCompoundSelectorBuilder {
         ))
     }
 }
-pub fn css_config_at_rule(
-    config_token: SyntaxToken,
-    path: CssString,
-    semicolon_token: SyntaxToken,
-) -> CssConfigAtRule {
-    CssConfigAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_CONFIG_AT_RULE,
-        [
-            Some(SyntaxElement::Token(config_token)),
-            Some(SyntaxElement::Node(path.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
-}
 pub fn css_container_and_query(
     left: AnyCssContainerQueryInParens,
     and_token: SyntaxToken,
@@ -508,20 +480,6 @@ pub fn css_custom_identifier(value_token: SyntaxToken) -> CssCustomIdentifier {
     CssCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CUSTOM_IDENTIFIER,
         [Some(SyntaxElement::Token(value_token))],
-    ))
-}
-pub fn css_custom_variant_at_rule(
-    custom_variant_token: SyntaxToken,
-    name: CssIdentifier,
-    selector: AnyCssTwCustomVariantSelector,
-) -> CssCustomVariantAtRule {
-    CssCustomVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_CUSTOM_VARIANT_AT_RULE,
-        [
-            Some(SyntaxElement::Token(custom_variant_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(selector.into_syntax())),
-        ],
     ))
 }
 pub fn css_dashed_identifier(value_token: SyntaxToken) -> CssDashedIdentifier {
@@ -781,20 +739,6 @@ pub fn css_function(
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(items.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
-}
-pub fn css_functional_utility_name(
-    identifier: CssIdentifier,
-    minus_token: SyntaxToken,
-    star_token: SyntaxToken,
-) -> CssFunctionalUtilityName {
-    CssFunctionalUtilityName::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_FUNCTIONAL_UTILITY_NAME,
-        [
-            Some(SyntaxElement::Node(identifier.into_syntax())),
-            Some(SyntaxElement::Token(minus_token)),
-            Some(SyntaxElement::Token(star_token)),
         ],
     ))
 }
@@ -1420,20 +1364,6 @@ pub fn css_percentage(value_token: SyntaxToken, percent_token: SyntaxToken) -> C
         ],
     ))
 }
-pub fn css_plugin_at_rule(
-    plugin_token: SyntaxToken,
-    name: CssString,
-    semicolon_token: SyntaxToken,
-) -> CssPluginAtRule {
-    CssPluginAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PLUGIN_AT_RULE,
-        [
-            Some(SyntaxElement::Token(plugin_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
-}
 pub fn css_position_try_at_rule(
     position_try_token: SyntaxToken,
     name: CssDashedIdentifier,
@@ -1902,20 +1832,6 @@ pub fn css_ratio(
         ],
     ))
 }
-pub fn css_reference_at_rule(
-    reference_token: SyntaxToken,
-    path: CssString,
-    semicolon_token: SyntaxToken,
-) -> CssReferenceAtRule {
-    CssReferenceAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_REFERENCE_AT_RULE,
-        [
-            Some(SyntaxElement::Token(reference_token)),
-            Some(SyntaxElement::Node(path.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
-}
 pub fn css_regular_dimension(
     value_token: SyntaxToken,
     unit_token: SyntaxToken,
@@ -2071,26 +1987,6 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
         [Some(SyntaxElement::Node(start.into_syntax()))],
     ))
 }
-pub fn css_simple_utility_name(css_identifier: CssIdentifier) -> CssSimpleUtilityName {
-    CssSimpleUtilityName::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_SIMPLE_UTILITY_NAME,
-        [Some(SyntaxElement::Node(css_identifier.into_syntax()))],
-    ))
-}
-pub fn css_source_at_rule(
-    source_token: SyntaxToken,
-    path: CssString,
-    semicolon_token: SyntaxToken,
-) -> CssSourceAtRule {
-    CssSourceAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_SOURCE_AT_RULE,
-        [
-            Some(SyntaxElement::Token(source_token)),
-            Some(SyntaxElement::Node(path.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
-}
 pub fn css_starting_style_at_rule(
     starting_style_token: SyntaxToken,
     block: AnyCssConditionalBlock,
@@ -2204,170 +2100,6 @@ pub fn css_supports_or_condition(
             Some(SyntaxElement::Node(left.into_syntax())),
             Some(SyntaxElement::Token(or_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
-        ],
-    ))
-}
-pub fn css_tailwind_alpha_function(
-    alpha_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-) -> CssTailwindAlphaFunctionBuilder {
-    CssTailwindAlphaFunctionBuilder {
-        alpha_token,
-        l_paren_token,
-        r_paren_token,
-        value: None,
-    }
-}
-pub struct CssTailwindAlphaFunctionBuilder {
-    alpha_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-    value: Option<AnyCssExpression>,
-}
-impl CssTailwindAlphaFunctionBuilder {
-    pub fn with_value(mut self, value: AnyCssExpression) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> CssTailwindAlphaFunction {
-        CssTailwindAlphaFunction::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_TAILWIND_ALPHA_FUNCTION,
-            [
-                Some(SyntaxElement::Token(self.alpha_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                self.value
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-            ],
-        ))
-    }
-}
-pub fn css_tailwind_spacing_function(
-    spacing_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-) -> CssTailwindSpacingFunctionBuilder {
-    CssTailwindSpacingFunctionBuilder {
-        spacing_token,
-        l_paren_token,
-        r_paren_token,
-        value: None,
-    }
-}
-pub struct CssTailwindSpacingFunctionBuilder {
-    spacing_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-    value: Option<AnyCssExpression>,
-}
-impl CssTailwindSpacingFunctionBuilder {
-    pub fn with_value(mut self, value: AnyCssExpression) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> CssTailwindSpacingFunction {
-        CssTailwindSpacingFunction::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_TAILWIND_SPACING_FUNCTION,
-            [
-                Some(SyntaxElement::Token(self.spacing_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                self.value
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-            ],
-        ))
-    }
-}
-pub fn css_tailwind_value_arbitrary_type(
-    l_brack_token: SyntaxToken,
-    ty: CssIdentifier,
-    r_brack_token: SyntaxToken,
-) -> CssTailwindValueArbitraryType {
-    CssTailwindValueArbitraryType::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_TAILWIND_VALUE_ARBITRARY_TYPE,
-        [
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(ty.into_syntax())),
-            Some(SyntaxElement::Token(r_brack_token)),
-        ],
-    ))
-}
-pub fn css_tailwind_value_function(
-    value_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    value: CssTailwindValueList,
-    r_paren_token: SyntaxToken,
-) -> CssTailwindValueFunction {
-    CssTailwindValueFunction::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_TAILWIND_VALUE_FUNCTION,
-        [
-            Some(SyntaxElement::Token(value_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
-}
-pub fn css_tailwind_value_theme_reference(
-    reference: CssDashedIdentifier,
-    minus_token: SyntaxToken,
-    star_token: SyntaxToken,
-) -> CssTailwindValueThemeReference {
-    CssTailwindValueThemeReference::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_TAILWIND_VALUE_THEME_REFERENCE,
-        [
-            Some(SyntaxElement::Node(reference.into_syntax())),
-            Some(SyntaxElement::Token(minus_token)),
-            Some(SyntaxElement::Token(star_token)),
-        ],
-    ))
-}
-pub fn css_theme_at_rule(
-    theme_token: SyntaxToken,
-    block: AnyCssDeclarationOrRuleBlock,
-) -> CssThemeAtRuleBuilder {
-    CssThemeAtRuleBuilder {
-        theme_token,
-        block,
-        name: None,
-    }
-}
-pub struct CssThemeAtRuleBuilder {
-    theme_token: SyntaxToken,
-    block: AnyCssDeclarationOrRuleBlock,
-    name: Option<CssIdentifier>,
-}
-impl CssThemeAtRuleBuilder {
-    pub fn with_name(mut self, name: CssIdentifier) -> Self {
-        self.name = Some(name);
-        self
-    }
-    pub fn build(self) -> CssThemeAtRule {
-        CssThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_THEME_AT_RULE,
-            [
-                Some(SyntaxElement::Token(self.theme_token)),
-                self.name
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.block.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn css_tw_custom_variant_shorthand(
-    l_paren_token: SyntaxToken,
-    selector: AnyCssSelector,
-    r_paren_token: SyntaxToken,
-    semicolon_token: SyntaxToken,
-) -> CssTwCustomVariantShorthand {
-    CssTwCustomVariantShorthand::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_TW_CUSTOM_VARIANT_SHORTHAND,
-        [
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(selector.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-            Some(SyntaxElement::Token(semicolon_token)),
         ],
     ))
 }
@@ -2550,20 +2282,6 @@ pub fn css_url_value_raw(value_token: SyntaxToken) -> CssUrlValueRaw {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_utility_at_rule(
-    utility_token: SyntaxToken,
-    name: AnyCssUtilityName,
-    block: AnyCssDeclarationBlock,
-) -> CssUtilityAtRule {
-    CssUtilityAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_UTILITY_AT_RULE,
-        [
-            Some(SyntaxElement::Token(utility_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
-        ],
-    ))
-}
 pub fn css_value_at_rule(
     value_token: SyntaxToken,
     clause: AnyCssValueAtRuleClause,
@@ -2634,20 +2352,6 @@ pub fn css_value_at_rule_named_import_specifier(
         ],
     ))
 }
-pub fn css_variant_at_rule(
-    variant_token: SyntaxToken,
-    name: CssIdentifier,
-    block: AnyCssDeclarationOrRuleBlock,
-) -> CssVariantAtRule {
-    CssVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_VARIANT_AT_RULE,
-        [
-            Some(SyntaxElement::Token(variant_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
-        ],
-    ))
-}
 pub fn css_view_transition_at_rule(
     view_transition_token: SyntaxToken,
     block: AnyCssDeclarationBlock,
@@ -2660,16 +2364,300 @@ pub fn css_view_transition_at_rule(
         ],
     ))
 }
-pub fn css_apply_class_list<I>(items: I) -> CssApplyClassList
-where
-    I: IntoIterator<Item = CssIdentifier>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssApplyClassList::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_APPLY_CLASS_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
+pub fn tw_alpha_function(
+    alpha_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+) -> TwAlphaFunctionBuilder {
+    TwAlphaFunctionBuilder {
+        alpha_token,
+        l_paren_token,
+        r_paren_token,
+        value: None,
+    }
+}
+pub struct TwAlphaFunctionBuilder {
+    alpha_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    value: Option<AnyCssExpression>,
+}
+impl TwAlphaFunctionBuilder {
+    pub fn with_value(mut self, value: AnyCssExpression) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> TwAlphaFunction {
+        TwAlphaFunction::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::TW_ALPHA_FUNCTION,
+            [
+                Some(SyntaxElement::Token(self.alpha_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn tw_apply_at_rule(
+    apply_token: SyntaxToken,
+    classes: TwApplyClassList,
+    semicolon_token: SyntaxToken,
+) -> TwApplyAtRule {
+    TwApplyAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_APPLY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(apply_token)),
+            Some(SyntaxElement::Node(classes.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_config_at_rule(
+    config_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwConfigAtRule {
+    TwConfigAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_CONFIG_AT_RULE,
+        [
+            Some(SyntaxElement::Token(config_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_custom_variant_at_rule(
+    custom_variant_token: SyntaxToken,
+    name: CssIdentifier,
+    selector: AnyTwCustomVariantSelector,
+) -> TwCustomVariantAtRule {
+    TwCustomVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_CUSTOM_VARIANT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(custom_variant_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+        ],
+    ))
+}
+pub fn tw_custom_variant_shorthand(
+    l_paren_token: SyntaxToken,
+    selector: AnyCssSelector,
+    r_paren_token: SyntaxToken,
+    semicolon_token: SyntaxToken,
+) -> TwCustomVariantShorthand {
+    TwCustomVariantShorthand::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_CUSTOM_VARIANT_SHORTHAND,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_functional_utility_name(
+    identifier: CssIdentifier,
+    minus_token: SyntaxToken,
+    star_token: SyntaxToken,
+) -> TwFunctionalUtilityName {
+    TwFunctionalUtilityName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_FUNCTIONAL_UTILITY_NAME,
+        [
+            Some(SyntaxElement::Node(identifier.into_syntax())),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Token(star_token)),
+        ],
+    ))
+}
+pub fn tw_plugin_at_rule(
+    plugin_token: SyntaxToken,
+    name: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwPluginAtRule {
+    TwPluginAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_PLUGIN_AT_RULE,
+        [
+            Some(SyntaxElement::Token(plugin_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_reference_at_rule(
+    reference_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwReferenceAtRule {
+    TwReferenceAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_REFERENCE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(reference_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_simple_utility_name(css_identifier: CssIdentifier) -> TwSimpleUtilityName {
+    TwSimpleUtilityName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_SIMPLE_UTILITY_NAME,
+        [Some(SyntaxElement::Node(css_identifier.into_syntax()))],
+    ))
+}
+pub fn tw_source_at_rule(
+    source_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwSourceAtRule {
+    TwSourceAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_SOURCE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(source_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_spacing_function(
+    spacing_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+) -> TwSpacingFunctionBuilder {
+    TwSpacingFunctionBuilder {
+        spacing_token,
+        l_paren_token,
+        r_paren_token,
+        value: None,
+    }
+}
+pub struct TwSpacingFunctionBuilder {
+    spacing_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    value: Option<AnyCssExpression>,
+}
+impl TwSpacingFunctionBuilder {
+    pub fn with_value(mut self, value: AnyCssExpression) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> TwSpacingFunction {
+        TwSpacingFunction::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::TW_SPACING_FUNCTION,
+            [
+                Some(SyntaxElement::Token(self.spacing_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn tw_theme_at_rule(
+    theme_token: SyntaxToken,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> TwThemeAtRuleBuilder {
+    TwThemeAtRuleBuilder {
+        theme_token,
+        block,
+        name: None,
+    }
+}
+pub struct TwThemeAtRuleBuilder {
+    theme_token: SyntaxToken,
+    block: AnyCssDeclarationOrRuleBlock,
+    name: Option<CssIdentifier>,
+}
+impl TwThemeAtRuleBuilder {
+    pub fn with_name(mut self, name: CssIdentifier) -> Self {
+        self.name = Some(name);
+        self
+    }
+    pub fn build(self) -> TwThemeAtRule {
+        TwThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::TW_THEME_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.theme_token)),
+                self.name
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn tw_utility_at_rule(
+    utility_token: SyntaxToken,
+    name: AnyTwUtilityName,
+    block: AnyCssDeclarationBlock,
+) -> TwUtilityAtRule {
+    TwUtilityAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_UTILITY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(utility_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn tw_value_arbitrary_type(
+    l_brack_token: SyntaxToken,
+    ty: CssIdentifier,
+    r_brack_token: SyntaxToken,
+) -> TwValueArbitraryType {
+    TwValueArbitraryType::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_VALUE_ARBITRARY_TYPE,
+        [
+            Some(SyntaxElement::Token(l_brack_token)),
+            Some(SyntaxElement::Node(ty.into_syntax())),
+            Some(SyntaxElement::Token(r_brack_token)),
+        ],
+    ))
+}
+pub fn tw_value_function(
+    value_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    value: TwValueList,
+    r_paren_token: SyntaxToken,
+) -> TwValueFunction {
+    TwValueFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_VALUE_FUNCTION,
+        [
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn tw_value_theme_reference(
+    reference: CssDashedIdentifier,
+    minus_token: SyntaxToken,
+    star_token: SyntaxToken,
+) -> TwValueThemeReference {
+    TwValueThemeReference::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_VALUE_THEME_REFERENCE,
+        [
+            Some(SyntaxElement::Node(reference.into_syntax())),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Token(star_token)),
+        ],
+    ))
+}
+pub fn tw_variant_at_rule(
+    variant_token: SyntaxToken,
+    name: CssIdentifier,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> TwVariantAtRule {
+    TwVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_VARIANT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(variant_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
     ))
 }
 pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList
@@ -3118,27 +3106,6 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
-pub fn css_tailwind_value_list<I, S>(items: I, separators: S) -> CssTailwindValueList
-where
-    I: IntoIterator<Item = AnyCssTailwindValueExpression>,
-    I::IntoIter: ExactSizeIterator,
-    S: IntoIterator<Item = CssSyntaxToken>,
-    S::IntoIter: ExactSizeIterator,
-{
-    let mut items = items.into_iter();
-    let mut separators = separators.into_iter();
-    let length = items.len() + separators.len();
-    CssTailwindValueList::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_TAILWIND_VALUE_LIST,
-        (0..length).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
-    ))
-}
 pub fn css_url_modifier_list<I>(items: I) -> CssUrlModifierList
 where
     I: IntoIterator<Item = AnyCssUrlModifier>,
@@ -3187,6 +3154,39 @@ where
     let length = items.len() + separators.len();
     CssValueAtRulePropertyList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_VALUE_AT_RULE_PROPERTY_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn tw_apply_class_list<I>(items: I) -> TwApplyClassList
+where
+    I: IntoIterator<Item = CssIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    TwApplyClassList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_APPLY_CLASS_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn tw_value_list<I, S>(items: I, separators: S) -> TwValueList
+where
+    I: IntoIterator<Item = AnyTwValueExpression>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    TwValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_VALUE_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())
@@ -3423,13 +3423,13 @@ where
         slots,
     ))
 }
-pub fn css_bogus_tailwind_utility_value<I>(slots: I) -> CssBogusTailwindUtilityValue
+pub fn css_bogus_tw_utility_value<I>(slots: I) -> CssBogusTwUtilityValue
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
     I::IntoIter: ExactSizeIterator,
 {
-    CssBogusTailwindUtilityValue::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_TAILWIND_UTILITY_VALUE,
+    CssBogusTwUtilityValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_TW_UTILITY_VALUE,
         slots,
     ))
 }

@@ -177,7 +177,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@22..25 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssPluginAtRule {
+            rule: TwPluginAtRule {
                 plugin_token: PLUGIN_KW@25..32 "plugin" [] [Whitespace(" ")],
                 name: CssString {
                     value_token: CSS_STRING_LITERAL@32..53 "\"tailwindcss-animate\"" [] [],
@@ -187,12 +187,12 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@54..57 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssCustomVariantAtRule {
+            rule: TwCustomVariantAtRule {
                 custom_variant_token: CUSTOM_VARIANT_KW@57..72 "custom-variant" [] [Whitespace(" ")],
                 name: CssIdentifier {
                     value_token: IDENT@72..77 "dark" [] [Whitespace(" ")],
                 },
-                selector: CssTwCustomVariantShorthand {
+                selector: TwCustomVariantShorthand {
                     l_paren_token: L_PAREN@77..78 "(" [] [],
                     selector: CssCompoundSelector {
                         nesting_selectors: CssNestedSelectorList [
@@ -2870,7 +2870,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@2420..2423 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssThemeAtRule {
+            rule: TwThemeAtRule {
                 theme_token: THEME_KW@2423..2429 "theme" [] [Whitespace(" ")],
                 name: CssIdentifier {
                     value_token: IDENT@2429..2436 "inline" [] [Whitespace(" ")],
@@ -4372,9 +4372,9 @@ CssRoot {
                                     items: CssDeclarationOrRuleList [
                                         CssAtRule {
                                             at_token: AT@4366..4370 "@" [Newline("\n"), Whitespace("\t\t")] [],
-                                            rule: CssApplyAtRule {
+                                            rule: TwApplyAtRule {
                                                 apply_token: APPLY_KW@4370..4376 "apply" [] [Whitespace(" ")],
-                                                classes: CssApplyClassList [
+                                                classes: TwApplyClassList [
                                                     CssIdentifier {
                                                         value_token: IDENT@4376..4390 "border-border" [] [Whitespace(" ")],
                                                     },
@@ -4407,9 +4407,9 @@ CssRoot {
                                     items: CssDeclarationOrRuleList [
                                         CssAtRule {
                                             at_token: AT@4418..4422 "@" [Newline("\n"), Whitespace("\t\t")] [],
-                                            rule: CssApplyAtRule {
+                                            rule: TwApplyAtRule {
                                                 apply_token: APPLY_KW@4422..4428 "apply" [] [Whitespace(" ")],
-                                                classes: CssApplyClassList [
+                                                classes: TwApplyClassList [
                                                     CssIdentifier {
                                                         value_token: IDENT@4428..4442 "bg-background" [] [Whitespace(" ")],
                                                     },
@@ -4453,18 +4453,18 @@ CssRoot {
         5: SEMICOLON@21..22 ";" [] []
     1: CSS_AT_RULE@22..54
       0: AT@22..25 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_PLUGIN_AT_RULE@25..54
+      1: TW_PLUGIN_AT_RULE@25..54
         0: PLUGIN_KW@25..32 "plugin" [] [Whitespace(" ")]
         1: CSS_STRING@32..53
           0: CSS_STRING_LITERAL@32..53 "\"tailwindcss-animate\"" [] []
         2: SEMICOLON@53..54 ";" [] []
     2: CSS_AT_RULE@54..93
       0: AT@54..57 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_CUSTOM_VARIANT_AT_RULE@57..93
+      1: TW_CUSTOM_VARIANT_AT_RULE@57..93
         0: CUSTOM_VARIANT_KW@57..72 "custom-variant" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@72..77
           0: IDENT@72..77 "dark" [] [Whitespace(" ")]
-        2: CSS_TW_CUSTOM_VARIANT_SHORTHAND@77..93
+        2: TW_CUSTOM_VARIANT_SHORTHAND@77..93
           0: L_PAREN@77..78 "(" [] []
           1: CSS_COMPOUND_SELECTOR@78..91
             0: CSS_NESTED_SELECTOR_LIST@78..79
@@ -6205,7 +6205,7 @@ CssRoot {
         2: R_CURLY@2418..2420 "}" [Newline("\n")] []
     5: CSS_AT_RULE@2420..4346
       0: AT@2420..2423 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_THEME_AT_RULE@2423..4346
+      1: TW_THEME_AT_RULE@2423..4346
         0: THEME_KW@2423..2429 "theme" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@2429..2436
           0: IDENT@2429..2436 "inline" [] [Whitespace(" ")]
@@ -7152,9 +7152,9 @@ CssRoot {
                   1: CSS_DECLARATION_OR_RULE_LIST@4366..4406
                     0: CSS_AT_RULE@4366..4406
                       0: AT@4366..4370 "@" [Newline("\n"), Whitespace("\t\t")] []
-                      1: CSS_APPLY_AT_RULE@4370..4406
+                      1: TW_APPLY_AT_RULE@4370..4406
                         0: APPLY_KW@4370..4376 "apply" [] [Whitespace(" ")]
-                        1: CSS_APPLY_CLASS_LIST@4376..4405
+                        1: TW_APPLY_CLASS_LIST@4376..4405
                           0: CSS_IDENTIFIER@4376..4390
                             0: IDENT@4376..4390 "border-border" [] [Whitespace(" ")]
                           1: CSS_IDENTIFIER@4390..4405
@@ -7175,9 +7175,9 @@ CssRoot {
                   1: CSS_DECLARATION_OR_RULE_LIST@4418..4458
                     0: CSS_AT_RULE@4418..4458
                       0: AT@4418..4422 "@" [Newline("\n"), Whitespace("\t\t")] []
-                      1: CSS_APPLY_AT_RULE@4422..4458
+                      1: TW_APPLY_AT_RULE@4422..4458
                         0: APPLY_KW@4422..4428 "apply" [] [Whitespace(" ")]
-                        1: CSS_APPLY_CLASS_LIST@4428..4457
+                        1: TW_APPLY_CLASS_LIST@4428..4457
                           0: CSS_IDENTIFIER@4428..4442
                             0: IDENT@4428..4442 "bg-background" [] [Whitespace(" ")]
                           1: CSS_IDENTIFIER@4442..4457

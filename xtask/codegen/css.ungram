@@ -61,7 +61,7 @@ CssBogusCustomIdentifier = SyntaxElement*
 CssBogusKeyframesName = SyntaxElement*
 CssBogusUnicodeRangeValue = SyntaxElement*
 CssBogusSupportsCondition = SyntaxElement*
-CssBogusTailwindUtilityValue = SyntaxElement*
+CssBogusTwUtilityValue = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -605,7 +605,7 @@ CssGenericDelimiter =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | CssTailwindValueThemeReference
+AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'
@@ -643,15 +643,16 @@ AnyCssAtRule =
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
 	// Tailwind CSS 4.0 at rules
-	| CssThemeAtRule
-	| CssSourceAtRule
-	| CssUtilityAtRule
-	| CssVariantAtRule
-	| CssCustomVariantAtRule
-	| CssApplyAtRule
-	| CssReferenceAtRule
-	| CssConfigAtRule
-	| CssPluginAtRule
+	| TwThemeAtRule
+	| TwSourceAtRule
+	| TwUtilityAtRule
+	| TwVariantAtRule
+	| TwCustomVariantAtRule
+	| TwApplyAtRule
+	| TwReferenceAtRule
+	| TwConfigAtRule
+	| TwPluginAtRule
+	// Unknowns
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
 	| CssBogusAtRule
@@ -1730,9 +1731,9 @@ CssRatio =
 AnyCssFunction =
 	CssFunction
 	| CssUrlFunction
-	| CssTailwindAlphaFunction
-	| CssTailwindSpacingFunction
-	| CssTailwindValueFunction
+	| TwAlphaFunction
+	| TwSpacingFunction
+	| TwValueFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -1868,7 +1869,7 @@ CssMetavariable = value: 'grit_metavariable'
 // Tailwind CSS 4.0 --alpha() function
 // color: --alpha(rgb(255 0 0) / 50%);
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-CssTailwindAlphaFunction =
+TwAlphaFunction =
 	'--alpha'
 	'('
 	value: AnyCssExpression?
@@ -1877,7 +1878,7 @@ CssTailwindAlphaFunction =
 // Tailwind CSS 4.0 --spacing() function
 // margin: --spacing(4);
 //         ^^^^^^^^^^^^
-CssTailwindSpacingFunction =
+TwSpacingFunction =
 	'--spacing'
 	'('
 	value: AnyCssExpression?
@@ -1887,30 +1888,30 @@ CssTailwindSpacingFunction =
 //   tab-size: --value(--tab-size-*);
 //             ^^^^^^^^^^^^^^^^^^^^^
 // }
-CssTailwindValueFunction =
+TwValueFunction =
 	'--value'
 	'('
-	value: CssTailwindValueList
+	value: TwValueList
 	')'
 
 // --value("inherit", "initial", "unset")
-CssTailwindValueList = (AnyCssTailwindValueExpression (',' AnyCssTailwindValueExpression)*)
+TwValueList = (AnyTwValueExpression (',' AnyTwValueExpression)*)
 
 // Enhanced value expressions for Tailwind's --value() function
-AnyCssTailwindValueExpression =
+AnyTwValueExpression =
 	CssString
-	| CssTailwindValueArbitraryType
-	| CssTailwindValueThemeReference
+	| TwValueArbitraryType
+	| TwValueThemeReference
 	| CssIdentifier
 
 // --value([integer])
-CssTailwindValueArbitraryType =
+TwValueArbitraryType =
 	'['
 	type: CssIdentifier
 	']'
 
 // --value(--tab-size-*)
-CssTailwindValueThemeReference =
+TwValueThemeReference =
 	reference: CssDashedIdentifier
 	'-'
 	'*'
@@ -1918,49 +1919,49 @@ CssTailwindValueThemeReference =
 // Enhanced @utility directive to support functional utilities
 // @utility tab-* { tab-size: --value([integer]); }
 // @utility tab-* { tab-size: --value("inherit", "initial", "unset"); }
-CssUtilityAtRule =
+TwUtilityAtRule =
   'utility'
-  name: AnyCssUtilityName
+  name: AnyTwUtilityName
   block: AnyCssDeclarationBlock
 
 // Support both simple utility names and functional utility names
-AnyCssUtilityName =
-	CssSimpleUtilityName
-	| CssFunctionalUtilityName
+AnyTwUtilityName =
+	TwSimpleUtilityName
+	| TwFunctionalUtilityName
 
 // Simple utility name: @utility center-flex { ... }
-CssSimpleUtilityName = CssIdentifier
+TwSimpleUtilityName = CssIdentifier
 
 // Functional utility name: @utility tab-* { ... }
-CssFunctionalUtilityName =
+TwFunctionalUtilityName =
 	identifier: CssIdentifier
 	'-'
 	'*'
 
 // Tailwind 4.0 @theme directive
 // @theme { --color-primary: #3b82f6; }
-CssThemeAtRule =
+TwThemeAtRule =
   'theme'
   name: CssIdentifier?
   block: AnyCssDeclarationOrRuleBlock
 
 // Tailwind 4.0 @variant directive
 // @variant dark { background: black; }
-CssVariantAtRule =
+TwVariantAtRule =
   'variant'
   name: CssIdentifier
   block: AnyCssDeclarationOrRuleBlock
 
 // Tailwind 4.0 @custom-variant directive
 // @custom-variant theme-midnight (&:where([data-theme="midnight"] *));
-CssCustomVariantAtRule =
+TwCustomVariantAtRule =
   'custom-variant'
   name: CssIdentifier
-  selector: AnyCssTwCustomVariantSelector
+  selector: AnyTwCustomVariantSelector
 
-AnyCssTwCustomVariantSelector = AnyCssRuleBlock | CssTwCustomVariantShorthand
+AnyTwCustomVariantSelector = AnyCssRuleBlock | TwCustomVariantShorthand
 
-CssTwCustomVariantShorthand =
+TwCustomVariantShorthand =
   '('
   selector: AnyCssSelector
   ')'
@@ -1968,37 +1969,37 @@ CssTwCustomVariantShorthand =
 
 // Tailwind 4.0 @apply directive (enhanced)
 // @apply text-lg font-bold;
-CssApplyAtRule =
+TwApplyAtRule =
   'apply'
-  classes: CssApplyClassList
+  classes: TwApplyClassList
   ';'
 
-CssApplyClassList = CssIdentifier*
+TwApplyClassList = CssIdentifier*
 
 // Tailwind 4.0 @source directive
 // @source "../node_modules/@my-company/ui-lib";
-CssSourceAtRule =
+TwSourceAtRule =
   'source'
   path: CssString
   ';'
 
 // Tailwind 4.0 @reference directive
 // @reference "../../app.css";
-CssReferenceAtRule =
+TwReferenceAtRule =
   'reference'
   path: CssString
   ';'
 
 // Tailwind 4.0 @config directive (compatibility)
 // @config "../../tailwind.config.js";
-CssConfigAtRule =
+TwConfigAtRule =
   'config'
   path: CssString
   ';'
 
 // Tailwind 4.0 @plugin directive (compatibility)
 // @plugin "@tailwindcss/typography";
-CssPluginAtRule =
+TwPluginAtRule =
   'plugin'
   name: CssString
   ';'

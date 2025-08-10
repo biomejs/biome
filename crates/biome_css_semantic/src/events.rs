@@ -125,7 +125,7 @@ impl SemanticEventExtractor {
                                 AnyCssDeclarationName::CssIdentifier(name) => {
                                     CssProperty::from(name)
                                 }
-                                AnyCssDeclarationName::CssTailwindValueThemeReference(name) => {
+                                AnyCssDeclarationName::TwValueThemeReference(name) => {
                                     let Ok(ident) = name.reference() else {
                                         return;
                                     };

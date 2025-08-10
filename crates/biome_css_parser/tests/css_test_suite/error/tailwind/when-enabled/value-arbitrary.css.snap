@@ -20,9 +20,9 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssUtilityAtRule {
+            rule: TwUtilityAtRule {
                 utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
-                name: CssFunctionalUtilityName {
+                name: TwFunctionalUtilityName {
                     identifier: CssIdentifier {
                         value_token: IDENT@9..12 "foo" [] [],
                     },
@@ -40,11 +40,11 @@ CssRoot {
                                     },
                                     colon_token: COLON@23..25 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
-                                        CssTailwindValueFunction {
+                                        TwValueFunction {
                                             value_token: _VALUE_KW@25..32 "--value" [] [],
                                             l_paren_token: L_PAREN@32..33 "(" [] [],
-                                            value: CssTailwindValueList [
-                                                CssTailwindValueArbitraryType {
+                                            value: TwValueList [
+                                                TwValueArbitraryType {
                                                     l_brack_token: L_BRACK@33..34 "[" [] [],
                                                     ty: CssIdentifier {
                                                         value_token: IDENT@34..40 "length" [] [],
@@ -78,9 +78,9 @@ CssRoot {
   1: CSS_RULE_LIST@0..43
     0: CSS_AT_RULE@0..43
       0: AT@0..1 "@" [] []
-      1: CSS_UTILITY_AT_RULE@1..43
+      1: TW_UTILITY_AT_RULE@1..43
         0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
-        1: CSS_FUNCTIONAL_UTILITY_NAME@9..15
+        1: TW_FUNCTIONAL_UTILITY_NAME@9..15
           0: CSS_IDENTIFIER@9..12
             0: IDENT@9..12 "foo" [] []
           1: MINUS@12..13 "-" [] []
@@ -95,11 +95,11 @@ CssRoot {
                     0: IDENT@16..23 "width" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@23..25 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@25..41
-                    0: CSS_TAILWIND_VALUE_FUNCTION@25..41
+                    0: TW_VALUE_FUNCTION@25..41
                       0: _VALUE_KW@25..32 "--value" [] []
                       1: L_PAREN@32..33 "(" [] []
-                      2: CSS_TAILWIND_VALUE_LIST@33..40
-                        0: CSS_TAILWIND_VALUE_ARBITRARY_TYPE@33..40
+                      2: TW_VALUE_LIST@33..40
+                        0: TW_VALUE_ARBITRARY_TYPE@33..40
                           0: L_BRACK@33..34 "[" [] []
                           1: CSS_IDENTIFIER@34..40
                             0: IDENT@34..40 "length" [] []

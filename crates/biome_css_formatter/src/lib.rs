@@ -7,6 +7,7 @@ mod cst;
 mod generated;
 mod prelude;
 mod separated;
+mod tailwind;
 mod trivia;
 mod utils;
 mod verbatim;

@@ -18,7 +18,7 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssConfigAtRule {
+            rule: TwConfigAtRule {
                 config_token: CONFIG_KW@1..8 "config" [] [Whitespace(" ")],
                 path: CssString {
                     value_token: CSS_STRING_LITERAL@8..30 "\"./tailwind.config.js\"" [] [],
@@ -39,7 +39,7 @@ CssRoot {
   1: CSS_RULE_LIST@0..31
     0: CSS_AT_RULE@0..31
       0: AT@0..1 "@" [] []
-      1: CSS_CONFIG_AT_RULE@1..31
+      1: TW_CONFIG_AT_RULE@1..31
         0: CONFIG_KW@1..8 "config" [] [Whitespace(" ")]
         1: CSS_STRING@8..30
           0: CSS_STRING_LITERAL@8..30 "\"./tailwind.config.js\"" [] []

@@ -20,9 +20,9 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssUtilityAtRule {
+            rule: TwUtilityAtRule {
                 utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
-                name: CssFunctionalUtilityName {
+                name: TwFunctionalUtilityName {
                     identifier: CssIdentifier {
                         value_token: IDENT@9..12 "tab" [] [],
                     },
@@ -40,10 +40,10 @@ CssRoot {
                                     },
                                     colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
-                                        CssTailwindValueFunction {
+                                        TwValueFunction {
                                             value_token: _VALUE_KW@28..35 "--value" [] [],
                                             l_paren_token: L_PAREN@35..36 "(" [] [],
-                                            value: CssTailwindValueList [
+                                            value: TwValueList [
                                                 CssString {
                                                     value_token: CSS_STRING_LITERAL@36..45 "\"inherit\"" [] [],
                                                 },
@@ -82,9 +82,9 @@ CssRoot {
   1: CSS_RULE_LIST@0..69
     0: CSS_AT_RULE@0..69
       0: AT@0..1 "@" [] []
-      1: CSS_UTILITY_AT_RULE@1..69
+      1: TW_UTILITY_AT_RULE@1..69
         0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
-        1: CSS_FUNCTIONAL_UTILITY_NAME@9..15
+        1: TW_FUNCTIONAL_UTILITY_NAME@9..15
           0: CSS_IDENTIFIER@9..12
             0: IDENT@9..12 "tab" [] []
           1: MINUS@12..13 "-" [] []
@@ -99,10 +99,10 @@ CssRoot {
                     0: IDENT@16..26 "tab-size" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@26..28 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@28..66
-                    0: CSS_TAILWIND_VALUE_FUNCTION@28..66
+                    0: TW_VALUE_FUNCTION@28..66
                       0: _VALUE_KW@28..35 "--value" [] []
                       1: L_PAREN@35..36 "(" [] []
-                      2: CSS_TAILWIND_VALUE_LIST@36..65
+                      2: TW_VALUE_LIST@36..65
                         0: CSS_STRING@36..45
                           0: CSS_STRING_LITERAL@36..45 "\"inherit\"" [] []
                         1: COMMA@45..47 "," [] [Whitespace(" ")]

@@ -22,7 +22,7 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssCustomVariantAtRule {
+            rule: TwCustomVariantAtRule {
                 custom_variant_token: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")],
                 name: CssIdentifier {
                     value_token: IDENT@16..31 "theme-midnight" [] [Whitespace(" ")],
@@ -128,7 +128,7 @@ CssRoot {
   1: CSS_RULE_LIST@0..84
     0: CSS_AT_RULE@0..84
       0: AT@0..1 "@" [] []
-      1: CSS_CUSTOM_VARIANT_AT_RULE@1..84
+      1: TW_CUSTOM_VARIANT_AT_RULE@1..84
         0: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@16..31
           0: IDENT@16..31 "theme-midnight" [] [Whitespace(" ")]

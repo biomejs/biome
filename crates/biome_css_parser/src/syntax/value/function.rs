@@ -308,7 +308,7 @@ fn parse_alpha_function(p: &mut CssParser) -> ParsedSyntax {
     }
 
     p.expect(T![')']);
-    Present(m.complete(p, CSS_TAILWIND_ALPHA_FUNCTION))
+    Present(m.complete(p, TW_ALPHA_FUNCTION))
 }
 
 fn parse_spacing_function(p: &mut CssParser) -> ParsedSyntax {
@@ -323,7 +323,7 @@ fn parse_spacing_function(p: &mut CssParser) -> ParsedSyntax {
     }
 
     p.expect(T![')']);
-    Present(m.complete(p, CSS_TAILWIND_SPACING_FUNCTION))
+    Present(m.complete(p, TW_SPACING_FUNCTION))
 }
 
 fn parse_value_function(p: &mut CssParser) -> ParsedSyntax {
@@ -343,7 +343,7 @@ fn parse_value_function(p: &mut CssParser) -> ParsedSyntax {
     TailwindValueList.parse_list(p);
     p.expect(T![')']);
 
-    Present(m.complete(p, CSS_TAILWIND_VALUE_FUNCTION))
+    Present(m.complete(p, TW_VALUE_FUNCTION))
 }
 
 const TAILWIND_VALUE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T![')']];
@@ -353,7 +353,7 @@ struct TailwindValueList;
 impl ParseSeparatedList for TailwindValueList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_TAILWIND_VALUE_LIST;
+    const LIST_KIND: Self::Kind = TW_VALUE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         parse_string(p)
@@ -373,10 +373,7 @@ impl ParseSeparatedList for TailwindValueList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(
-                CSS_BOGUS_TAILWIND_UTILITY_VALUE,
-                TAILWIND_VALUE_RECOVERY_SET,
-            ),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_TW_UTILITY_VALUE, TAILWIND_VALUE_RECOVERY_SET),
             expected_tailwind_utility_value,
         )
     }
@@ -397,7 +394,7 @@ fn parse_tailwind_value_arbitrary_type(p: &mut CssParser) -> ParsedSyntax {
     parse_regular_identifier(p).ok();
     p.expect(T![']']);
 
-    Present(m.complete(p, CSS_TAILWIND_VALUE_ARBITRARY_TYPE))
+    Present(m.complete(p, TW_VALUE_ARBITRARY_TYPE))
 }
 
 /// Parses theme references: --value(--tab-size-*)
@@ -419,5 +416,5 @@ pub(crate) fn parse_tailwind_value_theme_reference(p: &mut CssParser) -> ParsedS
     p.expect(T![-]);
     p.expect(T![*]);
 
-    Present(m.complete(p, CSS_TAILWIND_VALUE_THEME_REFERENCE))
+    Present(m.complete(p, TW_VALUE_THEME_REFERENCE))
 }

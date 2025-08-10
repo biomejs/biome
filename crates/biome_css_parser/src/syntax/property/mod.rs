@@ -178,7 +178,7 @@ fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
                 let m = ident.precede(p);
                 p.expect(T![-]);
                 p.expect(T![*]);
-                m.complete(p, CSS_TAILWIND_VALUE_THEME_REFERENCE);
+                m.complete(p, TW_VALUE_THEME_REFERENCE);
             }
         }
     } else {

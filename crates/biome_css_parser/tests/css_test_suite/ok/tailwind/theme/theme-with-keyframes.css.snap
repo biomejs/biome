@@ -28,7 +28,7 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..1 "@" [] [],
-            rule: CssThemeAtRule {
+            rule: TwThemeAtRule {
                 theme_token: THEME_KW@1..7 "theme" [] [Whitespace(" ")],
                 name: missing (optional),
                 block: CssDeclarationOrRuleBlock {
@@ -142,7 +142,7 @@ CssRoot {
   1: CSS_RULE_LIST@0..131
     0: CSS_AT_RULE@0..131
       0: AT@0..1 "@" [] []
-      1: CSS_THEME_AT_RULE@1..131
+      1: TW_THEME_AT_RULE@1..131
         0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
         1: (empty)
         2: CSS_DECLARATION_OR_RULE_BLOCK@7..131

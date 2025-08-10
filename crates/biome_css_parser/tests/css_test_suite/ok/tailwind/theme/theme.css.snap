@@ -35,7 +35,7 @@ CssRoot {
     rules: CssRuleList [
         CssAtRule {
             at_token: AT@0..24 "@" [Comments("/* @theme directive */"), Newline("\n")] [],
-            rule: CssThemeAtRule {
+            rule: TwThemeAtRule {
                 theme_token: THEME_KW@24..30 "theme" [] [Whitespace(" ")],
                 name: missing (optional),
                 block: CssDeclarationOrRuleBlock {
@@ -120,7 +120,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@143..165 "@" [Newline("\n"), Newline("\n"), Comments("/* Empty @theme */"), Newline("\n")] [],
-            rule: CssThemeAtRule {
+            rule: TwThemeAtRule {
                 theme_token: THEME_KW@165..171 "theme" [] [Whitespace(" ")],
                 name: missing (optional),
                 block: CssDeclarationOrRuleBlock {
@@ -132,7 +132,7 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@174..210 "@" [Newline("\n"), Newline("\n"), Comments("/* @theme with comple ..."), Newline("\n")] [],
-            rule: CssThemeAtRule {
+            rule: TwThemeAtRule {
                 theme_token: THEME_KW@210..216 "theme" [] [Whitespace(" ")],
                 name: missing (optional),
                 block: CssDeclarationOrRuleBlock {
@@ -334,7 +334,7 @@ CssRoot {
   1: CSS_RULE_LIST@0..374
     0: CSS_AT_RULE@0..143
       0: AT@0..24 "@" [Comments("/* @theme directive */"), Newline("\n")] []
-      1: CSS_THEME_AT_RULE@24..143
+      1: TW_THEME_AT_RULE@24..143
         0: THEME_KW@24..30 "theme" [] [Whitespace(" ")]
         1: (empty)
         2: CSS_DECLARATION_OR_RULE_BLOCK@30..143
@@ -391,7 +391,7 @@ CssRoot {
           2: R_CURLY@141..143 "}" [Newline("\n")] []
     1: CSS_AT_RULE@143..174
       0: AT@143..165 "@" [Newline("\n"), Newline("\n"), Comments("/* Empty @theme */"), Newline("\n")] []
-      1: CSS_THEME_AT_RULE@165..174
+      1: TW_THEME_AT_RULE@165..174
         0: THEME_KW@165..171 "theme" [] [Whitespace(" ")]
         1: (empty)
         2: CSS_DECLARATION_OR_RULE_BLOCK@171..174
@@ -400,7 +400,7 @@ CssRoot {
           2: R_CURLY@172..174 "}" [Newline("\n")] []
     2: CSS_AT_RULE@174..374
       0: AT@174..210 "@" [Newline("\n"), Newline("\n"), Comments("/* @theme with comple ..."), Newline("\n")] []
-      1: CSS_THEME_AT_RULE@210..374
+      1: TW_THEME_AT_RULE@210..374
         0: THEME_KW@210..216 "theme" [] [Whitespace(" ")]
         1: (empty)
         2: CSS_DECLARATION_OR_RULE_BLOCK@216..374

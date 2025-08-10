@@ -1,6 +1,5 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
-pub(crate) mod apply_class_list;
 pub(crate) mod bracketed_value_list;
 pub(crate) mod component_value_list;
 pub(crate) mod composes_class_list;
@@ -29,7 +28,6 @@ pub(crate) mod relative_selector_list;
 pub(crate) mod rule_list;
 pub(crate) mod selector_list;
 pub(crate) mod sub_selector_list;
-pub(crate) mod tailwind_value_list;
 pub(crate) mod url_modifier_list;
 pub(crate) mod value_at_rule_import_specifier_list;
 pub(crate) mod value_at_rule_property_list;
