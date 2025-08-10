@@ -25,3 +25,7 @@ require("./sub/foo")
 import "./sub/styles.css"
 import "./sub/component.svg.svelte";
 import "./sub/component.svg.svelte?query=string&query2#hash";
+
+// Invalid extension
+import "./sub/foo.js";
+import "./sub/bar/index.js";

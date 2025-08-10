@@ -603,3 +603,65 @@ fn test_resolve_alias_with_multiple_target_values() {
         Ok(Utf8PathBuf::from(format!("{base_dir}/src/lib/d.js")))
     );
 }
+
+#[test]
+fn test_resolve_extension_alias() {
+    let base_dir = get_fixtures_path("resolver_cases_7");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        default_files: &["index"],
+        extensions: &["js"],
+        extension_aliases: &[("js", &["ts", "js"]), ("mjs", &["mts"])],
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve("./index.js", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/index.ts"))),
+        "should alias fully specified file",
+    );
+
+    assert_eq!(
+        resolve("./dir/index.js", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir/index.ts"))),
+        "should alias fully specified file when there are two alternatives",
+    );
+
+    assert_eq!(
+        resolve("./dir2/index.js", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.js"))),
+        "should also allow the second alternative",
+    );
+
+    assert_eq!(
+        resolve("./dir2/index.mjs", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.mts"))),
+        "should support alias option without an array",
+    );
+}
+
+#[test]
+fn test_resolve_extension_alias_not_apply_to_extension_nor_main_files() {
+    let base_dir = get_fixtures_path("resolver_cases_7");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        default_files: &["index"],
+        extensions: &["js"],
+        extension_aliases: &[("js", &[])],
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve("./dir2", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.js"))),
+        "directory",
+    );
+
+    assert_eq!(
+        resolve("./dir2/index", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.js"))),
+        "file",
+    );
+}
