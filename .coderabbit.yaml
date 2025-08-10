@@ -12,6 +12,16 @@ reviews:
   estimate_code_review_effort: false
   sequence_diagrams: false
   changed_files_summary: false
+  path_filters:
+    - "**"
+    - "!**/generated/**"
+    - "!**/biome_unicode_table/src/tables.rs"
+    - "!**/migrate/eslint_any_rule_to_biome.rs"
+    - "!**/nursery.rs"
+    - "!**/categories.rs"
+    - "!**/rules.rs"
+    - "!**/configuration_schema.json"
+    - "!**/backend-jsonrpc/src/workspace.ts"
   auto_review:
     enabled: true
     drafts: false
