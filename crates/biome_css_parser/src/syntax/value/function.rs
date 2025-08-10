@@ -43,7 +43,7 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
             parse_tailwind_function(p)
         } else {
             p.error(tailwind_disabled(p, p.cur_range()));
-            return Absent;
+            Absent
         }
     } else {
         parse_function(p)

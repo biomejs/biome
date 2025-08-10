@@ -173,13 +173,14 @@ fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_dashed_identifier(p) {
         let ident = parse_dashed_identifier(p).ok();
-        if let Some(ident) = ident {
-            if p.options().is_tailwind_directives_enabled() && p.at(T![-]) {
-                let m = ident.precede(p);
-                p.expect(T![-]);
-                p.expect(T![*]);
-                m.complete(p, TW_VALUE_THEME_REFERENCE);
-            }
+        if let Some(ident) = ident
+            && p.options().is_tailwind_directives_enabled()
+            && p.at(T![-])
+        {
+            let m = ident.precede(p);
+            p.expect(T![-]);
+            p.expect(T![*]);
+            m.complete(p, TW_VALUE_THEME_REFERENCE);
         }
     } else {
         parse_regular_identifier(p).ok();
