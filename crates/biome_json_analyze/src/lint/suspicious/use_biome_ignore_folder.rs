@@ -109,7 +109,7 @@ impl Rule for UseBiomeIgnoreFolder {
                     "Incorrect usage of ignore a folder found."
                 },
             )
-                .note(markup! {
+            .note(markup! {
                 "Since version 2.2.0, ignoring folders doesn't require the use the trailing "<Emphasis>"/**"</Emphasis>". This is a bug that affects version prior v2.2.0."
             }),
         )
