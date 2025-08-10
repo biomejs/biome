@@ -89,41 +89,37 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() {
                     if verbose {
-                        if execution.is_check() || execution.is_lint() {
-                            if let Some(category) = category {
-                                if category.name().starts_with("lint/") {
-                                    files_to_diagnostics.insert_rule(category.name(), severity);
-                                }
-                            }
+                        if (execution.is_check() || execution.is_lint())
+                            && let Some(category) = category
+                            && category.name().starts_with("lint/")
+                        {
+                            files_to_diagnostics.insert_rule(category.name(), severity);
                         }
                     } else {
                         continue;
                     }
                 }
 
-                if let Some(category) = category {
-                    if category.name() == "parse" {
-                        files_to_diagnostics.insert_parse(location);
-                    }
+                if let Some(category) = category
+                    && category.name() == "parse"
+                {
+                    files_to_diagnostics.insert_parse(location);
                 }
 
-                if execution.is_check() || execution.is_lint() || execution.is_ci() {
-                    if let Some(category) = category {
-                        if category.name().starts_with("lint/")
-                            || category.name().starts_with("suppressions/")
-                            || category.name().starts_with("assist/")
-                        {
-                            files_to_diagnostics.insert_rule(category.name(), severity);
-                        }
-                    }
+                if (execution.is_check() || execution.is_lint() || execution.is_ci())
+                    && let Some(category) = category
+                    && (category.name().starts_with("lint/")
+                        || category.name().starts_with("suppressions/")
+                        || category.name().starts_with("assist/"))
+                {
+                    files_to_diagnostics.insert_rule(category.name(), severity);
                 }
 
-                if execution.is_check() || execution.is_format() || execution.is_ci() {
-                    if let Some(category) = category {
-                        if category.name() == "format" {
-                            files_to_diagnostics.insert_format(location);
-                        }
-                    }
+                if (execution.is_check() || execution.is_format() || execution.is_ci())
+                    && let Some(category) = category
+                    && category.name() == "format"
+                {
+                    files_to_diagnostics.insert_format(location);
                 }
             }
         }

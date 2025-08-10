@@ -455,10 +455,10 @@ where
     fn flush_matches(&mut self, cutoff: Option<TextSize>) -> ControlFlow<Break> {
         while let Some(entry) = self.signal_queue.peek() {
             let start = entry.text_range.start();
-            if let Some(cutoff) = cutoff {
-                if start >= cutoff {
-                    break;
-                }
+            if let Some(cutoff) = cutoff
+                && start >= cutoff
+            {
+                break;
             }
 
             if self

@@ -102,14 +102,14 @@ pub fn max_satisfying(
     let mut max_version: Option<Version> = None;
 
     for version_str in versions {
-        if let Ok(version) = parse_version(version_str) {
-            if range.satisfies(&version) {
-                match &max_version {
-                    None => max_version = Some(version),
-                    Some(current_max) => {
-                        if version > *current_max {
-                            max_version = Some(version);
-                        }
+        if let Ok(version) = parse_version(version_str)
+            && range.satisfies(&version)
+        {
+            match &max_version {
+                None => max_version = Some(version),
+                Some(current_max) => {
+                    if version > *current_max {
+                        max_version = Some(version);
                     }
                 }
             }
@@ -145,14 +145,14 @@ pub fn min_satisfying(
     let mut min_version: Option<Version> = None;
 
     for version_str in versions {
-        if let Ok(version) = parse_version(version_str) {
-            if range.satisfies(&version) {
-                match &min_version {
-                    None => min_version = Some(version),
-                    Some(current_min) => {
-                        if version < *current_min {
-                            min_version = Some(version);
-                        }
+        if let Ok(version) = parse_version(version_str)
+            && range.satisfies(&version)
+        {
+            match &min_version {
+                None => min_version = Some(version),
+                Some(current_min) => {
+                    if version < *current_min {
+                        min_version = Some(version);
                     }
                 }
             }

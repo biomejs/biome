@@ -128,13 +128,13 @@ impl Rule for NoInvalidConstructorSuper {
             (Some(super_range), Some(extends_clause)) => {
                 let super_class = extends_clause.super_class().ok()?;
                 let extends_range = super_class.range();
-                if let Some(is_valid) = is_valid_constructor(super_class) {
-                    if !is_valid {
-                        return Some(NoInvalidConstructorSuperState::BadExtends {
-                            super_range,
-                            extends_range,
-                        });
-                    }
+                if let Some(is_valid) = is_valid_constructor(super_class)
+                    && !is_valid
+                {
+                    return Some(NoInvalidConstructorSuperState::BadExtends {
+                        super_range,
+                        extends_range,
+                    });
                 }
                 None
             }

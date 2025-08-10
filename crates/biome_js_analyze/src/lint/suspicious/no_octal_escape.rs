@@ -51,19 +51,18 @@ impl Rule for NoOctalEscape {
         let token = ctx.query().string_literal_token()?;
         let mut it = token.text_trimmed().bytes().enumerate();
         while let Some((index, byte)) = it.next() {
-            if byte == b'\\' {
-                if let Some((_, byte)) = it.next() {
-                    if matches!(byte, b'0'..=b'7') {
-                        let len = 2 + it
-                            .clone()
-                            .take(5)
-                            .take_while(|(_, byte)| matches!(byte, b'0'..=b'7'))
-                            .count();
-                        // Ignore the non-deprecated `\0`
-                        if byte != b'0' || len > 2 {
-                            return Some(RuleState { index, len });
-                        }
-                    }
+            if byte == b'\\'
+                && let Some((_, byte)) = it.next()
+                && matches!(byte, b'0'..=b'7')
+            {
+                let len = 2 + it
+                    .clone()
+                    .take(5)
+                    .take_while(|(_, byte)| matches!(byte, b'0'..=b'7'))
+                    .count();
+                // Ignore the non-deprecated `\0`
+                if byte != b'0' || len > 2 {
+                    return Some(RuleState { index, len });
                 }
             }
         }

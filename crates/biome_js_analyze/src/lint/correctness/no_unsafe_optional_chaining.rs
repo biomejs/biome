@@ -246,15 +246,14 @@ impl Rule for NoUnsafeOptionalChaining {
                         }
                     } else if let Some(parent) =
                         initializer.parent::<JsArrayAssignmentPatternElement>()
-                    {
-                        if matches!(
+                        && matches!(
                             parent.pattern(),
                             Ok(AnyJsAssignmentPattern::JsObjectAssignmentPattern(_)
                                 | AnyJsAssignmentPattern::JsArrayAssignmentPattern(_))
-                        ) {
-                            // [{ foo } = obj?.bar] = [];
-                            return Some(parent.range());
-                        }
+                        )
+                    {
+                        // [{ foo } = obj?.bar] = [];
+                        return Some(parent.range());
                     }
                 }
                 RuleNode::JsAssignmentExpression(expression) => {

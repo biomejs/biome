@@ -152,12 +152,11 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
             ElementList.parse_list(p);
             if let Some(mut closing) =
                 parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
+                && !closing.text(p).contains(opening_tag_name.as_str())
             {
-                if !closing.text(p).contains(opening_tag_name.as_str()) {
-                    p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
-                    closing.change_to_bogus(p);
-                    continue;
-                }
+                p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
+                closing.change_to_bogus(p);
+                continue;
             }
             break;
         }

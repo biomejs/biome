@@ -200,16 +200,16 @@ impl Settings {
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.rules.as_ref();
-            if let Some(pattern_rules) = pattern_rules {
-                if pattern.is_file_included(path) {
-                    result = if let Some(mut result) = result.take() {
-                        // Override rules
-                        result.to_mut().merge_with(pattern_rules.clone());
-                        Some(result)
-                    } else {
-                        Some(Cow::Borrowed(pattern_rules))
-                    };
-                }
+            if let Some(pattern_rules) = pattern_rules
+                && pattern.is_file_included(path)
+            {
+                result = if let Some(mut result) = result.take() {
+                    // Override rules
+                    result.to_mut().merge_with(pattern_rules.clone());
+                    Some(result)
+                } else {
+                    Some(Cow::Borrowed(pattern_rules))
+                };
             }
         }
         result
@@ -221,16 +221,16 @@ impl Settings {
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.domains.as_ref();
-            if let Some(pattern_rules) = pattern_rules {
-                if pattern.is_file_included(path) {
-                    result = if let Some(mut result) = result.take() {
-                        // Override rules
-                        result.to_mut().merge_with(pattern_rules.clone());
-                        Some(result)
-                    } else {
-                        Some(Cow::Borrowed(pattern_rules))
-                    };
-                }
+            if let Some(pattern_rules) = pattern_rules
+                && pattern.is_file_included(path)
+            {
+                result = if let Some(mut result) = result.take() {
+                    // Override rules
+                    result.to_mut().merge_with(pattern_rules.clone());
+                    Some(result)
+                } else {
+                    Some(Cow::Borrowed(pattern_rules))
+                };
             }
         }
 
@@ -243,16 +243,16 @@ impl Settings {
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.assist.actions.as_ref();
-            if let Some(pattern_rules) = pattern_rules {
-                if pattern.is_file_included(path) {
-                    result = if let Some(mut result) = result.take() {
-                        // Override rules
-                        result.to_mut().merge_with(pattern_rules.clone());
-                        Some(result)
-                    } else {
-                        Some(Cow::Borrowed(pattern_rules))
-                    };
-                }
+            if let Some(pattern_rules) = pattern_rules
+                && pattern.is_file_included(path)
+            {
+                result = if let Some(mut result) = result.take() {
+                    // Override rules
+                    result.to_mut().merge_with(pattern_rules.clone());
+                    Some(result)
+                } else {
+                    Some(Cow::Borrowed(pattern_rules))
+                };
             }
         }
         result
@@ -1117,10 +1117,10 @@ impl Settings {
             .iter()
             .rev()
             .find_map(|pattern| {
-                if let Some(enabled) = pattern.formatter.format_with_errors {
-                    if pattern.is_file_included(path) {
-                        return Some(enabled);
-                    }
+                if let Some(enabled) = pattern.formatter.format_with_errors
+                    && pattern.is_file_included(path)
+                {
+                    return Some(enabled);
                 }
                 None
             })

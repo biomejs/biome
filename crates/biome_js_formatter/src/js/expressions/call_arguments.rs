@@ -844,10 +844,10 @@ fn should_group_last_argument(
 
             let penultimate = iter.next_back();
 
-            if let Some(Ok(penultimate)) = &penultimate {
-                if penultimate.syntax().kind() == last.syntax().kind() {
-                    return Ok(false);
-                }
+            if let Some(Ok(penultimate)) = &penultimate
+                && penultimate.syntax().kind() == last.syntax().kind()
+            {
+                return Ok(false);
             }
 
             match last {

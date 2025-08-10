@@ -145,16 +145,16 @@ impl Rule for UseValidTypeof {
     }
 
     fn diagnostic(_: &RuleContext<Self>, expr: &Self::State) -> Option<RuleDiagnostic> {
-        if let Some(literal) = expr.as_static_value() {
-            if let Some(literal) = literal.as_string_constant() {
-                return Some(RuleDiagnostic::new(
-                    rule_category!(),
-                    expr.range(),
-                    markup! {
-                        "\""{literal}"\" is not a valid "<Emphasis>"typeof"</Emphasis>" value."
-                    },
-                ));
-            }
+        if let Some(literal) = expr.as_static_value()
+            && let Some(literal) = literal.as_string_constant()
+        {
+            return Some(RuleDiagnostic::new(
+                rule_category!(),
+                expr.range(),
+                markup! {
+                    "\""{literal}"\" is not a valid "<Emphasis>"typeof"</Emphasis>" value."
+                },
+            ));
         }
         Some(
             RuleDiagnostic::new(

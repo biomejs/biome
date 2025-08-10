@@ -96,13 +96,13 @@ impl Rule for NoInvalidDirectionInLinearGradient {
         if IN_KEYWORD.is_match(&first_css_parameter_text) {
             return None;
         }
-        if let Some(first_byte) = first_css_parameter_text.bytes().next() {
-            if first_byte.is_ascii_digit() {
-                if ANGLE.is_match(&first_css_parameter_text) {
-                    return None;
-                }
-                return Some(first_css_parameter);
+        if let Some(first_byte) = first_css_parameter_text.bytes().next()
+            && first_byte.is_ascii_digit()
+        {
+            if ANGLE.is_match(&first_css_parameter_text) {
+                return None;
             }
+            return Some(first_css_parameter);
         }
         let direction_property = ["top", "left", "bottom", "right"];
         if !direction_property.iter().any(|&keyword| {

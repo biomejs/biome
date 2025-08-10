@@ -180,18 +180,17 @@ impl ReactComponentInfo {
             result.name = Some(name);
             return Some(result);
         }
-        if let Some(export_default) = JsExportDefaultExpressionClause::cast_ref(syntax) {
-            if let Some(result) = Self::from_expression(export_default.expression().ok()?.syntax())
-            {
-                if let ReactComponentKind::Function(function_info) = &result.kind {
-                    // If the function is not wrapped in memo or forwardRef and has no name,
-                    // we can't be sure that it's a React component.
-                    if function_info.wrappers.is_empty() {
-                        return None;
-                    }
+        if let Some(export_default) = JsExportDefaultExpressionClause::cast_ref(syntax)
+            && let Some(result) = Self::from_expression(export_default.expression().ok()?.syntax())
+        {
+            if let ReactComponentKind::Function(function_info) = &result.kind {
+                // If the function is not wrapped in memo or forwardRef and has no name,
+                // we can't be sure that it's a React component.
+                if function_info.wrappers.is_empty() {
+                    return None;
                 }
-                return Some(result);
             }
+            return Some(result);
         }
         None
     }
@@ -280,13 +279,13 @@ impl ReactComponentInfo {
         match exported {
             AnyJsExported::AnyJsExpression(expression) => {
                 let mut result = Self::from_expression(expression.syntax())?;
-                if let Some(ident) = item.identifier.as_ref() {
-                    if let Some(name) = ident.name_token() {
-                        if !is_react_component_name(name.text_trimmed()) {
-                            return None;
-                        }
-                        result.name = Some(name);
+                if let Some(ident) = item.identifier.as_ref()
+                    && let Some(name) = ident.name_token()
+                {
+                    if !is_react_component_name(name.text_trimmed()) {
+                        return None;
                     }
+                    result.name = Some(name);
                 }
                 Some(result)
             }
@@ -871,10 +870,10 @@ mod test {
                 .syntax()
                 .descendants()
                 .filter_map(|syntax| {
-                    if let Some(expr) = AnyJsExpression::cast_ref(&syntax) {
-                        if expr.parent::<JsInitializerClause>().is_some() {
-                            return Some(expr);
-                        }
+                    if let Some(expr) = AnyJsExpression::cast_ref(&syntax)
+                        && expr.parent::<JsInitializerClause>().is_some()
+                    {
+                        return Some(expr);
                     }
                     None
                 })
@@ -1013,10 +1012,10 @@ mod test {
                 .syntax()
                 .descendants()
                 .filter_map(|node| {
-                    if let Some(expr) = AnyJsExpression::cast(node.clone()) {
-                        if matches!(expr, AnyJsExpression::JsClassExpression(_)) {
-                            return Some(expr);
-                        }
+                    if let Some(expr) = AnyJsExpression::cast(node.clone())
+                        && matches!(expr, AnyJsExpression::JsClassExpression(_))
+                    {
+                        return Some(expr);
                     }
                     None
                 })

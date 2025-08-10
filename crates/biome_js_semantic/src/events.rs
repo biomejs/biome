@@ -546,10 +546,9 @@ impl SemanticEventExtractor {
                     | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
                         if let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
                             declaration.parent_binding_pattern_declaration()
+                            && declarator.declaration().is_some_and(|x| x.is_var())
                         {
-                            if declarator.declaration().is_some_and(|x| x.is_var()) {
-                                hoisted_scope_id = self.scope_index_to_hoist_declarations(0)
-                            }
+                            hoisted_scope_id = self.scope_index_to_hoist_declarations(0)
                         }
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }

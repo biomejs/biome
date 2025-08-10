@@ -1624,12 +1624,12 @@ pub fn format_range<Language: FormatLanguage>(
 
     // If the range ends before the trimmed start of the token, move the
     // end to the trimmed end of the previous token if it exists
-    if end_token_trimmed_start >= range.end() {
-        if let Some(next_token) = end_token.prev_token() {
-            let next_token_end = text_non_whitespace_range(&next_token).end();
-            if next_token_end >= trimmed_start {
-                end_token = next_token;
-            }
+    if end_token_trimmed_start >= range.end()
+        && let Some(next_token) = end_token.prev_token()
+    {
+        let next_token_end = text_non_whitespace_range(&next_token).end();
+        if next_token_end >= trimmed_start {
+            end_token = next_token;
         }
     }
 

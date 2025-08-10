@@ -445,11 +445,12 @@ impl Deserializable for Schema {
                 range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                if let Some(captures) = SCHEMA_REGEX.captures(value.text()) {
-                    if let Some(config_version_match) = captures.get(1) {
-                        let cli_version = Version::new(VERSION);
-                        let config_version_str = Version::new(config_version_match.as_str());
-                        match config_version_str.cmp(&cli_version) {
+                if let Some(captures) = SCHEMA_REGEX.captures(value.text())
+                    && let Some(config_version_match) = captures.get(1)
+                {
+                    let cli_version = Version::new(VERSION);
+                    let config_version_str = Version::new(config_version_match.as_str());
+                    match config_version_str.cmp(&cli_version) {
                             Ordering::Less | Ordering::Greater => {
                                 ctx.report(
                                     DeserializationDiagnostic::new(
@@ -468,7 +469,6 @@ impl Deserializable for Schema {
                             }
                             _ => {},
                         }
-                    }
                 }
 
                 Some(Schema(value.text().into()))

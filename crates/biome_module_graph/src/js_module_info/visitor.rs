@@ -398,26 +398,24 @@ impl<'a> JsModuleVisitor<'a> {
                             }
                         }
                         AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(node) => {
-                            if let Ok(binding) = node.binding() {
-                                if let Some(binding) = binding.as_js_identifier_binding() {
+                            if let Ok(binding) = node.binding()
+                                && let Some(binding) = binding.as_js_identifier_binding() {
                                     self.visit_identifier_binding(
                                         binding,
                                         collector,
                                     );
                                 }
-                            }
                         }
                         AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
                             node,
                         ) => {
-                            if let Ok(binding) = node.identifier() {
-                                if let Some(binding) = binding.as_js_identifier_binding() {
+                            if let Ok(binding) = node.identifier()
+                                && let Some(binding) = binding.as_js_identifier_binding() {
                                     self.visit_identifier_binding(
                                         binding,
                                         collector,
                                     );
                                 }
-                            }
                         }
                         AnyJsObjectBindingPatternMember::JsBogusBinding(_)
                         | AnyJsObjectBindingPatternMember::JsMetavariable(_) => {}

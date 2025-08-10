@@ -139,12 +139,12 @@ impl Rule for NoUndeclaredDependencies {
         if !package_name.starts_with('@') {
             // Handle DefinitelyTyped imports https://github.com/DefinitelyTyped/DefinitelyTyped
             // e.g. `lodash` can import types from `@types/lodash`.
-            if let Some(import_clause) = node.parent::<AnyJsImportClause>() {
-                if import_clause.type_token().is_some() {
-                    let package_name = format!("@types/{package_name}");
-                    if is_available(&package_name) {
-                        return None;
-                    }
+            if let Some(import_clause) = node.parent::<AnyJsImportClause>()
+                && import_clause.type_token().is_some()
+            {
+                let package_name = format!("@types/{package_name}");
+                if is_available(&package_name) {
+                    return None;
                 }
             }
         }

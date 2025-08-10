@@ -66,10 +66,10 @@ impl Visitor for MissingYieldVisitor {
         match event {
             WalkEvent::Enter(node) => {
                 // When the visitor enters a function node, push a new entry on the stack
-                if let Some(node) = AnyFunctionLike::cast_ref(node) {
-                    if node.is_generator() {
-                        self.stack.push((node.range().start(), false));
-                    }
+                if let Some(node) = AnyFunctionLike::cast_ref(node)
+                    && node.is_generator()
+                {
+                    self.stack.push((node.range().start(), false));
                 }
 
                 if JsYieldExpression::can_cast(node.kind()) {
@@ -83,15 +83,13 @@ impl Visitor for MissingYieldVisitor {
             WalkEvent::Leave(node) => {
                 // When the visitor exits a function, if it matches the node of the top-most
                 // entry of the stack and the `has_yield` flag is `false`, emit a query match
-                if let Some(node) = AnyFunctionLike::cast_ref(node) {
-                    if let Some((function_start_range, has_yield)) = self.stack.pop() {
-                        if function_start_range == node.range().start()
-                            && !has_yield
-                            && node.is_generator()
-                        {
-                            ctx.match_query(MissingYield(node));
-                        }
-                    }
+                if let Some(node) = AnyFunctionLike::cast_ref(node)
+                    && let Some((function_start_range, has_yield)) = self.stack.pop()
+                    && function_start_range == node.range().start()
+                    && !has_yield
+                    && node.is_generator()
+                {
+                    ctx.match_query(MissingYield(node));
                 }
             }
         }

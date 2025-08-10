@@ -2086,14 +2086,14 @@ pub(super) fn parse_unary_expr(p: &mut JsParser, context: ExpressionContext) -> 
             rewrite_events(&mut rewriter, checkpoint, p);
 
             rewriter.result.take().inspect(|_| {
-                if StrictMode.is_supported(p) {
-                    if let Some(range) = rewriter.exited_ident_expr {
-                        kind = JS_BOGUS_EXPRESSION;
-                        p.error(p.err_builder(
-                            "the target for a delete operator cannot be a single identifier",
-                            range,
-                        ));
-                    }
+                if StrictMode.is_supported(p)
+                    && let Some(range) = rewriter.exited_ident_expr
+                {
+                    kind = JS_BOGUS_EXPRESSION;
+                    p.error(p.err_builder(
+                        "the target for a delete operator cannot be a single identifier",
+                        range,
+                    ));
                 }
 
                 if let Some(range) = rewriter.exited_private_member_expr {

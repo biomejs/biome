@@ -88,11 +88,12 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         )?;
 
         // Handle whitespace sensitivity in cases where the HtmlElementList formatter is not invoked because the element has no children.
-        if let Ok(r_angle_token) = &r_angle_token {
-            if is_whitespace_sensitive && r_angle_token.has_trailing_whitespace() {
-                // we can't get rid of the whitespace if the element is whitespace sensitive
-                write!(f, [space()])?;
-            }
+        if let Ok(r_angle_token) = &r_angle_token
+            && is_whitespace_sensitive
+            && r_angle_token.has_trailing_whitespace()
+        {
+            // we can't get rid of the whitespace if the element is whitespace sensitive
+            write!(f, [space()])?;
         }
 
         Ok(())

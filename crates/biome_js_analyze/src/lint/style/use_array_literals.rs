@@ -277,11 +277,11 @@ fn get_type_arg_if_safe(node: &JsNewOrCallExpression) -> Option<AnyTsType> {
         JsNewOrCallExpression::JsCallExpression(expr) => expr.type_arguments(),
     };
     // check there's exactly one type arg
-    if let Some(type_arguments) = type_arguments {
-        if type_arguments.ts_type_argument_list().len() == 1 {
-            let list = type_arguments.ts_type_argument_list();
-            return list.first()?.ok();
-        }
+    if let Some(type_arguments) = type_arguments
+        && type_arguments.ts_type_argument_list().len() == 1
+    {
+        let list = type_arguments.ts_type_argument_list();
+        return list.first()?.ok();
     }
     None
 }

@@ -106,11 +106,11 @@ impl Rule for NoVoidTypeReturn {
         let ret = ctx.query();
         // Ignore arg-less returns such as `return;`
         let arg = ret.argument()?;
-        if let AnyJsExpression::JsUnaryExpression(expr) = arg {
-            if expr.operator_token().ok()?.kind() == JsSyntaxKind::VOID_KW {
-                // Ignore `return void <foo>;`
-                return None;
-            }
+        if let AnyJsExpression::JsUnaryExpression(expr) = arg
+            && expr.operator_token().ok()?.kind() == JsSyntaxKind::VOID_KW
+        {
+            // Ignore `return void <foo>;`
+            return None;
         }
         let func = ret
             .syntax()

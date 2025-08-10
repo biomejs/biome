@@ -135,14 +135,14 @@ fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBi
         .unwrap_or(binding.scope());
 
     for upper in binding_hoisted_scope.ancestors().skip(1) {
-        if let Some(upper_binding) = upper.get_binding(name.clone()) {
-            if evaluate_shadowing(model, &binding, &upper_binding) {
-                // we found a shadowed binding
-                return Some(ShadowedBinding {
-                    binding,
-                    shadowed_binding: upper_binding,
-                });
-            }
+        if let Some(upper_binding) = upper.get_binding(name.clone())
+            && evaluate_shadowing(model, &binding, &upper_binding)
+        {
+            // we found a shadowed binding
+            return Some(ShadowedBinding {
+                binding,
+                shadowed_binding: upper_binding,
+            });
         }
     }
     None
@@ -221,12 +221,10 @@ fn is_on_initializer(a: &Binding, b: &Binding) -> bool {
         .parent::<JsVariableDeclarator>()
         .and_then(|d| d.initializer())
         .and_then(|i| i.expression().ok())
+        && let Some(a_parent) = a.tree().parent::<AnyIdentifiableExpression>()
+        && a_parent.syntax() == b_initializer_expression.syntax()
     {
-        if let Some(a_parent) = a.tree().parent::<AnyIdentifiableExpression>() {
-            if a_parent.syntax() == b_initializer_expression.syntax() {
-                return true;
-            }
-        }
+        return true;
     }
 
     false

@@ -149,43 +149,43 @@ declare_node_union! {
 fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
     let mut it = str.bytes().enumerate();
     while let Some((i, c)) = it.next() {
-        if c == b'\\' {
-            if let Some((_, c)) = it.next() {
-                match c {
-                    // Meaningful escaped character
-                    b'^'
-                    | b'\r'
-                    | b'\n'
-                    | b'0'..=b'7'
-                    | b'\\'
-                    | b'b'
-                    | b'f'
-                    | b'n'
-                    | b'r'
-                    | b't'
-                    | b'u'
-                    | b'v'
-                    | b'x' => {}
-                    // In template literals, \${ is a valid escape for producing a literal ${
-                    b'$' => {
-                        // Clone iterator to peek ahead without advancing, so other escapes like \${\a aren't missed
-                        if !(quote == b'`' && (matches!(it.clone().next(), Some((_, b'{'))))) {
-                            return Some(i);
-                        }
+        if c == b'\\'
+            && let Some((_, c)) = it.next()
+        {
+            match c {
+                // Meaningful escaped character
+                b'^'
+                | b'\r'
+                | b'\n'
+                | b'0'..=b'7'
+                | b'\\'
+                | b'b'
+                | b'f'
+                | b'n'
+                | b'r'
+                | b't'
+                | b'u'
+                | b'v'
+                | b'x' => {}
+                // In template literals, \${ is a valid escape for producing a literal ${
+                b'$' => {
+                    // Clone iterator to peek ahead without advancing, so other escapes like \${\a aren't missed
+                    if !(quote == b'`' && (matches!(it.clone().next(), Some((_, b'{'))))) {
+                        return Some(i);
                     }
-                    // Preserve escaping of Unicode characters U+2028 and U+2029
-                    0xE2 => {
-                        if !(matches!(it.next(), Some((_, 0x80)))
-                            && matches!(it.next(), Some((_, 0xA8 | 0xA9))))
-                        {
-                            return Some(i);
-                        }
+                }
+                // Preserve escaping of Unicode characters U+2028 and U+2029
+                0xE2 => {
+                    if !(matches!(it.next(), Some((_, 0x80)))
+                        && matches!(it.next(), Some((_, 0xA8 | 0xA9))))
+                    {
+                        return Some(i);
                     }
-                    _ => {
-                        // The quote can be escaped
-                        if c != quote {
-                            return Some(i);
-                        }
+                }
+                _ => {
+                    // The quote can be escaped
+                    if c != quote {
+                        return Some(i);
                     }
                 }
             }

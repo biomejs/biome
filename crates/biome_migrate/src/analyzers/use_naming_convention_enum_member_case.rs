@@ -90,10 +90,10 @@ impl Rule for UseNamingConventionEnumMemberCase {
         let conventions = parent.into_iter().find_map(|member| {
             let member = member.ok()?;
             let member_name = member.name().ok()?.inner_string_text().ok()?;
-            if member_name.text() == "conventions" {
-                if let Ok(AnyJsonValue::JsonArrayValue(conventions)) = member.value() {
-                    return Some(conventions);
-                }
+            if member_name.text() == "conventions"
+                && let Ok(AnyJsonValue::JsonArrayValue(conventions)) = member.value()
+            {
+                return Some(conventions);
             }
             None
         });
