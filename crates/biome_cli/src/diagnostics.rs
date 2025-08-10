@@ -258,17 +258,6 @@ pub struct MigrationDiagnostic {
 }
 
 #[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "internalError/fs",
-    severity = Warning,
-    tags(DEPRECATED_CODE)
-)]
-pub struct DeprecatedArgument {
-    #[message]
-    pub message: MessageAndDescription,
-}
-
-#[derive(Debug, Diagnostic)]
 pub enum ReportDiagnostic {
     /// Emitted when trying to serialise the report
     Serialization(SerdeJsonError),

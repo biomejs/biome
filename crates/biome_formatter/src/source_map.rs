@@ -139,7 +139,7 @@ impl TransformSourceMap {
     }
 
     /// Returns an iterator over all deleted ranges in increasing order by their start position.
-    pub fn deleted_ranges(&self) -> DeletedRanges {
+    pub fn deleted_ranges(&self) -> DeletedRanges<'_> {
         DeletedRanges {
             source_text: self.source(),
             deleted_ranges: self.deleted_ranges.iter(),

@@ -43,7 +43,7 @@ pub fn should_nestle_adjacent_doc_comments<L: Language>(
 /// Formats the leading comments of `node`
 pub const fn format_leading_comments<L: Language>(
     node: &SyntaxNode<L>,
-) -> FormatLeadingComments<L> {
+) -> FormatLeadingComments<'_, L> {
     FormatLeadingComments::Node(node)
 }
 
@@ -108,7 +108,7 @@ where
 /// Formats the trailing comments of `node`.
 pub const fn format_trailing_comments<L: Language>(
     node: &SyntaxNode<L>,
-) -> FormatTrailingComments<L> {
+) -> FormatTrailingComments<'_, L> {
     FormatTrailingComments::Node(node)
 }
 
@@ -207,7 +207,7 @@ where
 /// Formats the dangling comments of `node`.
 pub const fn format_dangling_comments<L: Language>(
     node: &SyntaxNode<L>,
-) -> FormatDanglingComments<L> {
+) -> FormatDanglingComments<'_, L> {
     FormatDanglingComments::Node {
         node,
         indent: DanglingIndentMode::None,
@@ -605,7 +605,7 @@ where
 /// Formats the skipped token trivia of `token`.
 pub const fn format_skipped_token_trivia<L: Language>(
     token: &SyntaxToken<L>,
-) -> FormatSkippedTokenTrivia<L> {
+) -> FormatSkippedTokenTrivia<'_, L> {
     FormatSkippedTokenTrivia { token }
 }
 

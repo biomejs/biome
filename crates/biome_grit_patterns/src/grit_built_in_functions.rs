@@ -577,7 +577,7 @@ fn uppercase_fn<'a>(
     Ok(ResolvedPattern::from_string(string.to_uppercase()))
 }
 
-fn capitalize(s: &str) -> Cow<str> {
+fn capitalize(s: &str) -> Cow<'_, str> {
     if let Some(first_char) = s.chars().next()
         && !first_char.is_uppercase()
     {

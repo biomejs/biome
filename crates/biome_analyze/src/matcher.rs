@@ -362,7 +362,7 @@ mod tests {
         fn parse_suppression_comment(
             comment: &str,
             _piece_range: TextRange,
-        ) -> Vec<Result<AnalyzerSuppression, Infallible>> {
+        ) -> Vec<Result<AnalyzerSuppression<'_>, Infallible>> {
             comment
                 .trim_start_matches("//")
                 .split(' ')

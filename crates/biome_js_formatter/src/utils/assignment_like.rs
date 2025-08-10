@@ -1362,7 +1362,7 @@ pub(crate) struct WithAssignmentLayout<'a> {
 pub(crate) fn with_assignment_layout(
     expression: &AnyJsExpression,
     layout: Option<AssignmentLikeLayout>,
-) -> WithAssignmentLayout {
+) -> WithAssignmentLayout<'_> {
     WithAssignmentLayout { expression, layout }
 }
 

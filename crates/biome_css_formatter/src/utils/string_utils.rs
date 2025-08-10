@@ -71,7 +71,7 @@ impl<'token> FormatLiteralStringToken<'token> {
         self.token
     }
 
-    pub fn clean_text(&self, options: &CssFormatOptions) -> CleanedStringLiteralText {
+    pub fn clean_text(&self, options: &CssFormatOptions) -> CleanedStringLiteralText<'_> {
         let token = self.token();
         debug_assert!(
             matches!(

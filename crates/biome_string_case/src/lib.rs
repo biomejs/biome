@@ -645,7 +645,7 @@ pub trait StrLikeExtension: ToOwned {
     /// Returns the same value as String::to_lowercase. The only difference
     /// is that this functions returns ```Cow``` and does not allocate
     /// if the string is already in lowercase.
-    fn to_ascii_lowercase_cow(&self) -> Cow<Self>;
+    fn to_ascii_lowercase_cow(&self) -> Cow<'_, Self>;
 
     /// Compare two strings using a natural ASCII order.
     ///
@@ -658,11 +658,11 @@ pub trait StrOnlyExtension: ToOwned {
     /// Returns the same value as String::to_lowercase. The only difference
     /// is that this functions returns ```Cow``` and does not allocate
     /// if the string is already in lowercase.
-    fn to_lowercase_cow(&self) -> Cow<Self>;
+    fn to_lowercase_cow(&self) -> Cow<'_, Self>;
 }
 
 impl StrLikeExtension for str {
-    fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
+    fn to_ascii_lowercase_cow(&self) -> Cow<'_, Self> {
         let has_ascii_uppercase = self.bytes().any(|b| b.is_ascii_uppercase());
         if has_ascii_uppercase {
             #[expect(clippy::disallowed_methods)]
@@ -678,7 +678,7 @@ impl StrLikeExtension for str {
 }
 
 impl StrOnlyExtension for str {
-    fn to_lowercase_cow(&self) -> Cow<Self> {
+    fn to_lowercase_cow(&self) -> Cow<'_, Self> {
         let has_uppercase = self.chars().any(char::is_uppercase);
         if has_uppercase {
             #[expect(clippy::disallowed_methods)]
@@ -690,7 +690,7 @@ impl StrOnlyExtension for str {
 }
 
 impl StrLikeExtension for std::ffi::OsStr {
-    fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
+    fn to_ascii_lowercase_cow(&self) -> Cow<'_, Self> {
         let has_ascii_uppercase = self
             .as_encoded_bytes()
             .iter()
@@ -710,7 +710,7 @@ impl StrLikeExtension for std::ffi::OsStr {
 }
 
 impl StrLikeExtension for [u8] {
-    fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
+    fn to_ascii_lowercase_cow(&self) -> Cow<'_, Self> {
         let has_ascii_uppercase = self.iter().any(|b| b.is_ascii_uppercase());
         if has_ascii_uppercase {
             Cow::Owned(self.to_ascii_lowercase())

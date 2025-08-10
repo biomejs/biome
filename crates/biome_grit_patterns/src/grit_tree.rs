@@ -25,11 +25,11 @@ impl Ast for GritTargetTree {
     where
         Self: 'a;
 
-    fn root_node(&self) -> GritTargetNode {
+    fn root_node(&self) -> GritTargetNode<'_> {
         GritTargetNode::new(self.root.clone(), self)
     }
 
-    fn source(&self) -> Cow<str> {
+    fn source(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.source)
     }
 }

@@ -20,7 +20,7 @@ use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
 ///
 /// These nodes and tokens get tracked as [VerbatimKind::Verbatim], useful to understand
 /// if these nodes still need to have their own implementation.
-pub fn format_json_verbatim_node(node: &JsonSyntaxNode) -> FormatJsonVerbatimNode {
+pub fn format_json_verbatim_node(node: &JsonSyntaxNode) -> FormatJsonVerbatimNode<'_> {
     FormatJsonVerbatimNode {
         node,
         kind: VerbatimKind::Verbatim {
@@ -150,7 +150,7 @@ impl Format<JsonFormatContext> for FormatJsonVerbatimNode<'_> {
 
 /// Formats bogus nodes. The difference between this method  and `format_verbatim` is that this method
 /// doesn't track nodes/tokens as [VerbatimKind::Verbatim]. They are just printed as they are.
-pub fn format_bogus_node(node: &JsonSyntaxNode) -> FormatJsonVerbatimNode {
+pub fn format_bogus_node(node: &JsonSyntaxNode) -> FormatJsonVerbatimNode<'_> {
     FormatJsonVerbatimNode {
         node,
         kind: VerbatimKind::Bogus,
@@ -159,7 +159,7 @@ pub fn format_bogus_node(node: &JsonSyntaxNode) -> FormatJsonVerbatimNode {
 }
 
 /// Format a node having formatter suppression comment applied to it
-pub fn format_suppressed_node(node: &JsonSyntaxNode) -> FormatJsonVerbatimNode {
+pub fn format_suppressed_node(node: &JsonSyntaxNode) -> FormatJsonVerbatimNode<'_> {
     FormatJsonVerbatimNode {
         node,
         kind: VerbatimKind::Suppressed,

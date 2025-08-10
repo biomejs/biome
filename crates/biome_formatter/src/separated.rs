@@ -22,7 +22,7 @@ where
 }
 
 /// Formats a single element inside a separated list.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct FormatSeparatedElement<N, R, C>
 where
     N: AstNode,

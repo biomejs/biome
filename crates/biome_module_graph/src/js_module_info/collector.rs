@@ -897,7 +897,7 @@ impl TypeResolver for JsModuleInfoCollector {
         self.types.get_by_id(id)
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
         let mut id = id;
         loop {
             let resolved_data: ResolvedTypeData = match id.level() {
@@ -983,7 +983,11 @@ impl TypeResolver for JsModuleInfoCollector {
         GLOBAL_RESOLVER.resolve_type_of(identifier, scope_id)
     }
 
-    fn resolve_expression(&mut self, _scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+    fn resolve_expression(
+        &mut self,
+        _scope_id: ScopeId,
+        expr: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
         match self.parsed_expressions.get(&expr.range()) {
             Some(resolved_id) => match resolved_id.level() {
                 TypeResolverLevel::Thin => Cow::Borrowed(self.get_by_id(resolved_id.id())),

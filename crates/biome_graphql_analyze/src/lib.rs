@@ -63,7 +63,7 @@ where
     fn parse_linter_suppression_comment(
         text: &str,
         piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression, SuppressionDiagnostic>> {
+    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
         let mut result = Vec::new();
 
         for suppression in parse_suppression_comment(text) {

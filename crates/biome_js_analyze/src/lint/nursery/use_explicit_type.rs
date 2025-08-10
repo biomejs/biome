@@ -363,7 +363,7 @@ pub enum ViolationKind {
 }
 
 impl ViolationKind {
-    fn as_message(&self) -> Markup {
+    fn as_message(&self) -> Markup<'_> {
         match self {
             Self::UntypedParameter => markup! {
                 "The parameter doesn't have a type defined."
@@ -386,7 +386,7 @@ impl ViolationKind {
         }
     }
 
-    fn as_advice(&self) -> Markup {
+    fn as_advice(&self) -> Markup<'_> {
         match self {
             Self::UntypedParameter => markup! {
                 "Add a type to the parameter."

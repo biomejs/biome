@@ -517,7 +517,7 @@ impl AstSrc {
         self.lists.insert(String::from(name), src);
     }
 
-    pub fn lists(&self) -> std::collections::btree_map::Iter<String, AstListSrc> {
+    pub fn lists(&self) -> std::collections::btree_map::Iter<'_, String, AstListSrc> {
         self.lists.iter()
     }
 
