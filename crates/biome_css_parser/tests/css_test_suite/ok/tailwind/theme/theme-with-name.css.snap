@@ -25,9 +25,9 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@7..11 "foo" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@11..12 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -68,9 +68,9 @@ CssRoot {
         0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@7..11
           0: IDENT@7..11 "foo" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@11..28
+        2: CSS_DECLARATION_OR_RULE_BLOCK@11..28
           0: L_CURLY@11..12 "{" [] []
-          1: CSS_DECLARATION_LIST@12..26
+          1: CSS_DECLARATION_OR_RULE_LIST@12..26
             0: CSS_DECLARATION_WITH_SEMICOLON@12..26
               0: CSS_DECLARATION@12..25
                 0: CSS_GENERIC_PROPERTY@12..25

@@ -6676,7 +6676,7 @@ impl CssThemeAtRule {
     pub fn name(&self) -> Option<CssIdentifier> {
         support::node(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -6692,7 +6692,7 @@ impl Serialize for CssThemeAtRule {
 pub struct CssThemeAtRuleFields {
     pub theme_token: SyntaxResult<SyntaxToken>,
     pub name: Option<CssIdentifier>,
-    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+    pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssTypeSelector {

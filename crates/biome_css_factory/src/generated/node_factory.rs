@@ -2327,7 +2327,7 @@ pub fn css_tailwind_value_theme_reference(
 }
 pub fn css_theme_at_rule(
     theme_token: SyntaxToken,
-    block: AnyCssDeclarationBlock,
+    block: AnyCssDeclarationOrRuleBlock,
 ) -> CssThemeAtRuleBuilder {
     CssThemeAtRuleBuilder {
         theme_token,
@@ -2337,7 +2337,7 @@ pub fn css_theme_at_rule(
 }
 pub struct CssThemeAtRuleBuilder {
     theme_token: SyntaxToken,
-    block: AnyCssDeclarationBlock,
+    block: AnyCssDeclarationOrRuleBlock,
     name: Option<CssIdentifier>,
 }
 impl CssThemeAtRuleBuilder {

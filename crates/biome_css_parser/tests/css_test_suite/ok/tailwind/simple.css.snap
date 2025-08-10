@@ -46,9 +46,9 @@ CssRoot {
             rule: CssThemeAtRule {
                 theme_token: THEME_KW@49..55 "theme" [] [Whitespace(" ")],
                 name: missing (optional),
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@55..56 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -353,9 +353,9 @@ CssRoot {
       1: CSS_THEME_AT_RULE@49..110
         0: THEME_KW@49..55 "theme" [] [Whitespace(" ")]
         1: (empty)
-        2: CSS_DECLARATION_BLOCK@55..110
+        2: CSS_DECLARATION_OR_RULE_BLOCK@55..110
           0: L_CURLY@55..56 "{" [] []
-          1: CSS_DECLARATION_LIST@56..108
+          1: CSS_DECLARATION_OR_RULE_LIST@56..108
             0: CSS_DECLARATION_WITH_SEMICOLON@56..84
               0: CSS_DECLARATION@56..83
                 0: CSS_GENERIC_PROPERTY@56..83

@@ -2748,7 +2748,7 @@ impl CssThemeAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_block(self, element: AnyCssDeclarationBlock) -> Self {
+    pub fn with_block(self, element: AnyCssDeclarationOrRuleBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),

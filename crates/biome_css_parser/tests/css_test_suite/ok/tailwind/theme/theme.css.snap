@@ -38,9 +38,9 @@ CssRoot {
             rule: CssThemeAtRule {
                 theme_token: THEME_KW@24..30 "theme" [] [Whitespace(" ")],
                 name: missing (optional),
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@30..31 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -123,9 +123,9 @@ CssRoot {
             rule: CssThemeAtRule {
                 theme_token: THEME_KW@165..171 "theme" [] [Whitespace(" ")],
                 name: missing (optional),
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@171..172 "{" [] [],
-                    declarations: CssDeclarationList [],
+                    items: CssDeclarationOrRuleList [],
                     r_curly_token: R_CURLY@172..174 "}" [Newline("\n")] [],
                 },
             },
@@ -135,9 +135,9 @@ CssRoot {
             rule: CssThemeAtRule {
                 theme_token: THEME_KW@210..216 "theme" [] [Whitespace(" ")],
                 name: missing (optional),
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@216..217 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -337,9 +337,9 @@ CssRoot {
       1: CSS_THEME_AT_RULE@24..143
         0: THEME_KW@24..30 "theme" [] [Whitespace(" ")]
         1: (empty)
-        2: CSS_DECLARATION_BLOCK@30..143
+        2: CSS_DECLARATION_OR_RULE_BLOCK@30..143
           0: L_CURLY@30..31 "{" [] []
-          1: CSS_DECLARATION_LIST@31..141
+          1: CSS_DECLARATION_OR_RULE_LIST@31..141
             0: CSS_DECLARATION_WITH_SEMICOLON@31..59
               0: CSS_DECLARATION@31..58
                 0: CSS_GENERIC_PROPERTY@31..58
@@ -394,18 +394,18 @@ CssRoot {
       1: CSS_THEME_AT_RULE@165..174
         0: THEME_KW@165..171 "theme" [] [Whitespace(" ")]
         1: (empty)
-        2: CSS_DECLARATION_BLOCK@171..174
+        2: CSS_DECLARATION_OR_RULE_BLOCK@171..174
           0: L_CURLY@171..172 "{" [] []
-          1: CSS_DECLARATION_LIST@172..172
+          1: CSS_DECLARATION_OR_RULE_LIST@172..172
           2: R_CURLY@172..174 "}" [Newline("\n")] []
     2: CSS_AT_RULE@174..374
       0: AT@174..210 "@" [Newline("\n"), Newline("\n"), Comments("/* @theme with comple ..."), Newline("\n")] []
       1: CSS_THEME_AT_RULE@210..374
         0: THEME_KW@210..216 "theme" [] [Whitespace(" ")]
         1: (empty)
-        2: CSS_DECLARATION_BLOCK@216..374
+        2: CSS_DECLARATION_OR_RULE_BLOCK@216..374
           0: L_CURLY@216..217 "{" [] []
-          1: CSS_DECLARATION_LIST@217..372
+          1: CSS_DECLARATION_OR_RULE_LIST@217..372
             0: CSS_DECLARATION_WITH_SEMICOLON@217..282
               0: CSS_DECLARATION@217..281
                 0: CSS_GENERIC_PROPERTY@217..281

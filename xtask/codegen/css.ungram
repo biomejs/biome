@@ -1942,7 +1942,7 @@ CssFunctionalUtilityName =
 CssThemeAtRule =
     'theme'
     name: CssIdentifier?
-    block: AnyCssDeclarationBlock
+    block: AnyCssDeclarationOrRuleBlock
 
 // Tailwind 4.0 @variant directive
 // @variant dark { background: black; }
