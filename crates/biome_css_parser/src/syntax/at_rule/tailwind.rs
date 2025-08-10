@@ -1,7 +1,8 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::block::{parse_declaration_block, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{expected_identifier, expected_string, tailwind_disabled};
-use crate::syntax::{is_at_identifier, parse_regular_identifier, parse_string};
+use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::{self, *};
 use biome_css_syntax::T;
 use biome_parser::parse_lists::ParseNodeList;
@@ -166,7 +167,7 @@ pub(crate) fn parse_apply_at_rule(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(T![apply]);
+    p.bump_with_context(T![apply], CssLexContext::TailwindUtility);
     ApplyClassList.parse_list(p);
     p.expect(T![;]);
 
@@ -181,7 +182,7 @@ impl ParseNodeList for ApplyClassList {
     const LIST_KIND: Self::Kind = CSS_APPLY_CLASS_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_regular_identifier(p)
+        parse_identifier(p, CssLexContext::TailwindUtility)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

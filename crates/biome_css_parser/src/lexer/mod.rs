@@ -43,6 +43,10 @@ pub enum CssLexContext {
     /// support U+0-9A-F? U+0-9A-F{1,6} U+0-9A-F{1,6}?
     /// https://drafts.csswg.org/css-fonts/#unicode-range-desc
     UnicodeRange,
+
+    /// Applied when lexing Tailwind CSS utility classes.
+    /// Currently, only applicable to when we encounter a `@apply` rule.
+    TailwindUtility,
 }
 
 impl LexContext for CssLexContext {
@@ -132,6 +136,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 CssLexContext::UrlRawValue => self.consume_url_raw_value_token(current),
                 CssLexContext::Color => self.consume_color_token(current),
                 CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
+                CssLexContext::TailwindUtility => self.consume_token_tailwind_utility(current),
             },
             None => EOF,
         };
@@ -1323,6 +1328,38 @@ impl<'src> CssLexer<'src> {
             BSL => self.is_valid_escape_at(1),
             _ => false,
         }
+    }
+
+    fn consume_token_tailwind_utility(&mut self, current: u8) -> CssSyntaxKind {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => {
+                let kind = self.consume_newline_or_whitespaces();
+                if kind == Self::NEWLINE {
+                    self.after_newline = true;
+                }
+                kind
+            }
+            SEM => self.consume_byte(T![;]),
+            _ => self.consume_tailwind_utility(),
+        }
+    }
+
+    /// Consume a single tailwind utility as a css identifier.
+    ///
+    /// This is intentionally very loose, and pretty much considers anything that isn't whitespace or semicolon.
+    fn consume_tailwind_utility(&mut self) -> CssSyntaxKind {
+        while let Some(current) = self.current_byte() {
+            let dispatched = lookup_byte(current);
+            match dispatched {
+                WHS | SEM => break,
+                _ => {}
+            }
+            self.advance(1);
+        }
+
+        T![ident]
     }
 }
 
