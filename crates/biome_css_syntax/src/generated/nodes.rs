@@ -1386,7 +1386,6 @@ impl CssCustomVariantAtRule {
             custom_variant_token: self.custom_variant_token(),
             name: self.name(),
             selector: self.selector(),
-            semicolon_token: self.semicolon_token(),
         }
     }
     pub fn custom_variant_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -1395,11 +1394,8 @@ impl CssCustomVariantAtRule {
     pub fn name(&self) -> SyntaxResult<CssIdentifier> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn selector(&self) -> SyntaxResult<CssString> {
+    pub fn selector(&self) -> SyntaxResult<AnyCssTwCustomVariantSelector> {
         support::required_node(&self.syntax, 2usize)
-    }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for CssCustomVariantAtRule {
@@ -1414,8 +1410,7 @@ impl Serialize for CssCustomVariantAtRule {
 pub struct CssCustomVariantAtRuleFields {
     pub custom_variant_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssIdentifier>,
-    pub selector: SyntaxResult<CssString>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub selector: SyntaxResult<AnyCssTwCustomVariantSelector>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssDashedIdentifier {
@@ -6695,6 +6690,56 @@ pub struct CssThemeAtRuleFields {
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssTwCustomVariantShorthand {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssTwCustomVariantShorthand {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssTwCustomVariantShorthandFields {
+        CssTwCustomVariantShorthandFields {
+            l_paren_token: self.l_paren_token(),
+            selector: self.selector(),
+            r_paren_token: self.r_paren_token(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn selector(&self) -> SyntaxResult<AnyCssSelector> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssTwCustomVariantShorthand {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssTwCustomVariantShorthandFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub selector: SyntaxResult<AnyCssSelector>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssTypeSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -9634,6 +9679,25 @@ impl AnyCssTailwindValueExpression {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssTwCustomVariantSelector {
+    AnyCssRuleBlock(AnyCssRuleBlock),
+    CssTwCustomVariantShorthand(CssTwCustomVariantShorthand),
+}
+impl AnyCssTwCustomVariantSelector {
+    pub fn as_any_css_rule_block(&self) -> Option<&AnyCssRuleBlock> {
+        match &self {
+            Self::AnyCssRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_tw_custom_variant_shorthand(&self) -> Option<&CssTwCustomVariantShorthand> {
+        match &self {
+            Self::CssTwCustomVariantShorthand(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssUnicodeValue {
     CssBogusUnicodeRangeValue(CssBogusUnicodeRangeValue),
     CssUnicodeCodepoint(CssUnicodeCodepoint),
@@ -11530,10 +11594,6 @@ impl std::fmt::Debug for CssCustomVariantAtRule {
                 )
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field("selector", &support::DebugSyntaxResult(self.selector()))
-                .field(
-                    "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
-                )
                 .finish()
         } else {
             f.debug_struct("CssCustomVariantAtRule").finish()
@@ -17945,6 +18005,65 @@ impl From<CssThemeAtRule> for SyntaxNode {
 }
 impl From<CssThemeAtRule> for SyntaxElement {
     fn from(n: CssThemeAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssTwCustomVariantShorthand {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_TW_CUSTOM_VARIANT_SHORTHAND as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_TW_CUSTOM_VARIANT_SHORTHAND
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssTwCustomVariantShorthand {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssTwCustomVariantShorthand")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssTwCustomVariantShorthand").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssTwCustomVariantShorthand> for SyntaxNode {
+    fn from(n: CssTwCustomVariantShorthand) -> Self {
+        n.syntax
+    }
+}
+impl From<CssTwCustomVariantShorthand> for SyntaxElement {
+    fn from(n: CssTwCustomVariantShorthand) -> Self {
         n.syntax.into()
     }
 }
@@ -24842,6 +24961,71 @@ impl From<AnyCssTailwindValueExpression> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssTwCustomVariantShorthand> for AnyCssTwCustomVariantSelector {
+    fn from(node: CssTwCustomVariantShorthand) -> Self {
+        Self::CssTwCustomVariantShorthand(node)
+    }
+}
+impl AstNode for AnyCssTwCustomVariantSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssRuleBlock::KIND_SET.union(CssTwCustomVariantShorthand::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_TW_CUSTOM_VARIANT_SHORTHAND => true,
+            k if AnyCssRuleBlock::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_TW_CUSTOM_VARIANT_SHORTHAND => {
+                Self::CssTwCustomVariantShorthand(CssTwCustomVariantShorthand { syntax })
+            }
+            _ => {
+                if let Some(any_css_rule_block) = AnyCssRuleBlock::cast(syntax) {
+                    return Some(Self::AnyCssRuleBlock(any_css_rule_block));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssTwCustomVariantShorthand(it) => &it.syntax,
+            Self::AnyCssRuleBlock(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssTwCustomVariantShorthand(it) => it.syntax,
+            Self::AnyCssRuleBlock(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssTwCustomVariantSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AnyCssRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssTwCustomVariantShorthand(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssTwCustomVariantSelector> for SyntaxNode {
+    fn from(n: AnyCssTwCustomVariantSelector) -> Self {
+        match n {
+            AnyCssTwCustomVariantSelector::AnyCssRuleBlock(it) => it.into(),
+            AnyCssTwCustomVariantSelector::CssTwCustomVariantShorthand(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssTwCustomVariantSelector> for SyntaxElement {
+    fn from(n: AnyCssTwCustomVariantSelector) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusUnicodeRangeValue> for AnyCssUnicodeValue {
     fn from(node: CssBogusUnicodeRangeValue) -> Self {
         Self::CssBogusUnicodeRangeValue(node)
@@ -25931,6 +26115,11 @@ impl std::fmt::Display for AnyCssTailwindValueExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssTwCustomVariantSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssUnicodeValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -26747,6 +26936,11 @@ impl std::fmt::Display for CssTailwindValueThemeReference {
     }
 }
 impl std::fmt::Display for CssThemeAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssTwCustomVariantShorthand {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

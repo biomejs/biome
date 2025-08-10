@@ -72,6 +72,7 @@ pub(crate) mod supports_condition;
 pub(crate) mod supports_in_parens;
 pub(crate) mod supports_or_combinable_condition;
 pub(crate) mod tailwind_value_expression;
+pub(crate) mod tw_custom_variant_selector;
 pub(crate) mod unicode_value;
 pub(crate) mod url_modifier;
 pub(crate) mod url_value;

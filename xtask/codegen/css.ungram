@@ -1919,9 +1919,9 @@ CssTailwindValueThemeReference =
 // @utility tab-* { tab-size: --value([integer]); }
 // @utility tab-* { tab-size: --value("inherit", "initial", "unset"); }
 CssUtilityAtRule =
-    'utility'
-    name: AnyCssUtilityName
-    block: AnyCssDeclarationBlock
+  'utility'
+  name: AnyCssUtilityName
+  block: AnyCssDeclarationBlock
 
 // Support both simple utility names and functional utility names
 AnyCssUtilityName =
@@ -1940,58 +1940,65 @@ CssFunctionalUtilityName =
 // Tailwind 4.0 @theme directive
 // @theme { --color-primary: #3b82f6; }
 CssThemeAtRule =
-    'theme'
-    name: CssIdentifier?
-    block: AnyCssDeclarationOrRuleBlock
+  'theme'
+  name: CssIdentifier?
+  block: AnyCssDeclarationOrRuleBlock
 
 // Tailwind 4.0 @variant directive
 // @variant dark { background: black; }
 CssVariantAtRule =
-    'variant'
-    name: CssIdentifier
-    block: AnyCssDeclarationOrRuleBlock
+  'variant'
+  name: CssIdentifier
+  block: AnyCssDeclarationOrRuleBlock
 
 // Tailwind 4.0 @custom-variant directive
 // @custom-variant theme-midnight (&:where([data-theme="midnight"] *));
 CssCustomVariantAtRule =
-    'custom-variant'
-    name: CssIdentifier
-    selector: CssString
-    ';'
+  'custom-variant'
+  name: CssIdentifier
+  selector: AnyCssTwCustomVariantSelector
+
+AnyCssTwCustomVariantSelector = AnyCssRuleBlock | CssTwCustomVariantShorthand
+
+CssTwCustomVariantShorthand =
+  '('
+  selector: AnyCssSelector
+  ')'
+  ';'
 
 // Tailwind 4.0 @apply directive (enhanced)
 // @apply text-lg font-bold;
 CssApplyAtRule =
-    'apply'
-    classes: CssApplyClassList
-    ';'
+  'apply'
+  classes: CssApplyClassList
+  ';'
 
 CssApplyClassList = CssIdentifier*
 
 // Tailwind 4.0 @source directive
 // @source "../node_modules/@my-company/ui-lib";
 CssSourceAtRule =
-    'source'
-    path: CssString
-    ';'
+  'source'
+  path: CssString
+  ';'
 
 // Tailwind 4.0 @reference directive
 // @reference "../../app.css";
 CssReferenceAtRule =
-    'reference'
-    path: CssString
-    ';'
+  'reference'
+  path: CssString
+  ';'
 
 // Tailwind 4.0 @config directive (compatibility)
 // @config "../../tailwind.config.js";
 CssConfigAtRule =
-    'config'
-    path: CssString
-    ';'
+  'config'
+  path: CssString
+  ';'
 
 // Tailwind 4.0 @plugin directive (compatibility)
 // @plugin "@tailwindcss/typography";
 CssPluginAtRule =
-    'plugin'
-    name: CssString
-    ';'
+  'plugin'
+  name: CssString
+  ';'

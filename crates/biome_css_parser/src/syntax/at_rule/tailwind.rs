@@ -1,7 +1,10 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::block::{parse_declaration_block, parse_declaration_or_rule_list_block};
+use crate::syntax::block::{
+    parse_declaration_block, parse_declaration_or_rule_list_block, parse_rule_block,
+};
 use crate::syntax::parse_error::{expected_identifier, expected_string, tailwind_disabled};
+use crate::syntax::selector::parse_selector;
 use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::{self, *};
 use biome_css_syntax::T;
@@ -127,32 +130,36 @@ pub(crate) fn parse_custom_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     parse_regular_identifier(p).ok();
 
-    // Parse selector - can be a string or parenthesized expression
-    if p.at(CSS_STRING_LITERAL) {
-        parse_string(p).or_add_diagnostic(p, expected_string);
-    } else if p.at(T!['(']) {
-        p.bump(T!['(']);
-        // Parse the selector expression inside parentheses
-        let mut paren_count = 1;
-        while paren_count > 0 && !p.at(EOF) {
-            if p.at(T!['(']) {
-                paren_count += 1;
-            } else if p.at(T![')']) {
-                paren_count -= 1;
-            }
-            if paren_count > 0 {
-                p.bump_any();
-            }
-        }
-        p.expect(T![')']);
+    if p.at(T!['(']) {
+        // shorthand syntax
+        // @custom-variant theme-midnight (&:where([data-theme="midnight"] *));
+        parse_custom_variant_shorthand(p).ok();
     } else {
-        p.error(expected_string(p, p.cur_range()));
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+        // longhand syntax
+        // @custom-variant theme-midnight {
+        //   &:where([data-theme="midnight"] *) {
+        //     @slot;
+        //   }
+        // }
+        parse_rule_block(p);
     }
 
+    Present(m.complete(p, CSS_CUSTOM_VARIANT_AT_RULE))
+}
+
+fn parse_custom_variant_shorthand(p: &mut CssParser) -> ParsedSyntax {
+    if !p.at(T!['(']) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(T!['(']);
+    parse_selector(p).ok();
+    p.expect(T![')']);
     p.expect(T![;]);
 
-    Present(m.complete(p, CSS_CUSTOM_VARIANT_AT_RULE))
+    Present(m.complete(p, CSS_TW_CUSTOM_VARIANT_SHORTHAND))
 }
 
 // @apply text-lg font-bold;

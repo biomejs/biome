@@ -684,6 +684,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssThemeAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_TW_CUSTOM_VARIANT_SHORTHAND => {
+                    let $pattern =
+                        unsafe { $crate::CssTwCustomVariantShorthand::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_TYPE_SELECTOR => {
                     let $pattern = unsafe { $crate::CssTypeSelector::new_unchecked(node) };
                     $body

@@ -5359,6 +5359,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssThemeAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssTwCustomVariantShorthand>
+    for crate::css::auxiliary::tw_custom_variant_shorthand::FormatCssTwCustomVariantShorthand
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssTwCustomVariantShorthand,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssTwCustomVariantShorthand>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssTwCustomVariantShorthand {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssTwCustomVariantShorthand,
+        crate::css::auxiliary::tw_custom_variant_shorthand::FormatCssTwCustomVariantShorthand,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: tw_custom_variant_shorthand :: FormatCssTwCustomVariantShorthand :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssTwCustomVariantShorthand {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssTwCustomVariantShorthand,
+        crate::css::auxiliary::tw_custom_variant_shorthand::FormatCssTwCustomVariantShorthand,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: tw_custom_variant_shorthand :: FormatCssTwCustomVariantShorthand :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssTypeSelector>
     for crate::css::selectors::type_selector::FormatCssTypeSelector
 {
@@ -9577,6 +9609,25 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssTailwindValueExpre
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: css :: any :: tailwind_value_expression :: FormatAnyCssTailwindValueExpression :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssTwCustomVariantSelector {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssTwCustomVariantSelector,
+        crate::css::any::tw_custom_variant_selector::FormatAnyCssTwCustomVariantSelector,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: tw_custom_variant_selector :: FormatAnyCssTwCustomVariantSelector :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssTwCustomVariantSelector {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssTwCustomVariantSelector,
+        crate::css::any::tw_custom_variant_selector::FormatAnyCssTwCustomVariantSelector,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: tw_custom_variant_selector :: FormatAnyCssTwCustomVariantSelector :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssUnicodeValue {

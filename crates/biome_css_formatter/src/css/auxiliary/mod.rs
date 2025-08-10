@@ -83,6 +83,7 @@ pub(crate) mod tailwind_spacing_function;
 pub(crate) mod tailwind_value_arbitrary_type;
 pub(crate) mod tailwind_value_function;
 pub(crate) mod tailwind_value_theme_reference;
+pub(crate) mod tw_custom_variant_shorthand;
 pub(crate) mod unicode_codepoint;
 pub(crate) mod unicode_range;
 pub(crate) mod unicode_range_interval;

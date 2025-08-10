@@ -513,8 +513,7 @@ pub fn css_custom_identifier(value_token: SyntaxToken) -> CssCustomIdentifier {
 pub fn css_custom_variant_at_rule(
     custom_variant_token: SyntaxToken,
     name: CssIdentifier,
-    selector: CssString,
-    semicolon_token: SyntaxToken,
+    selector: AnyCssTwCustomVariantSelector,
 ) -> CssCustomVariantAtRule {
     CssCustomVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CUSTOM_VARIANT_AT_RULE,
@@ -522,7 +521,6 @@ pub fn css_custom_variant_at_rule(
             Some(SyntaxElement::Token(custom_variant_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Node(selector.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
         ],
     ))
 }
@@ -2356,6 +2354,22 @@ impl CssThemeAtRuleBuilder {
             ],
         ))
     }
+}
+pub fn css_tw_custom_variant_shorthand(
+    l_paren_token: SyntaxToken,
+    selector: AnyCssSelector,
+    r_paren_token: SyntaxToken,
+    semicolon_token: SyntaxToken,
+) -> CssTwCustomVariantShorthand {
+    CssTwCustomVariantShorthand::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_TW_CUSTOM_VARIANT_SHORTHAND,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
 }
 pub fn css_type_selector(ident: CssIdentifier) -> CssTypeSelectorBuilder {
     CssTypeSelectorBuilder {
