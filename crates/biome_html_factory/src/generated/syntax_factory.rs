@@ -21,25 +21,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [---] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [---]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [---] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [---]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -54,18 +54,18 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if HtmlAttributeName::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlAttributeName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlAttributeInitializerClause::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlAttributeInitializerClause::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -80,18 +80,18 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [=] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [=]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlString::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlString::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -106,11 +106,11 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -125,25 +125,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!["<![CDATA["] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!["<![CDATA["]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!["]]>"] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!["]]>"]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -158,32 +158,32 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [<] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [<]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [/] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [/]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlTagName::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlTagName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [>] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -198,11 +198,11 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -217,60 +217,60 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<8usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [<] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [<]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![!] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![!]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![doctype] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![doctype]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![html] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![html]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_STRING_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_STRING_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_STRING_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_STRING_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [>] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -285,25 +285,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if HtmlOpeningElement::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlOpeningElement::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlElementList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlElementList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlClosingElement::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlClosingElement::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -318,32 +318,32 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [<] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [<]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlTagName::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlTagName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlAttributeList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlAttributeList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [>] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -358,39 +358,39 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![UNICODE_BOM] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![UNICODE_BOM]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyAstroFrontmatterElement::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && AnyAstroFrontmatterElement::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlDirective::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlDirective::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlElementList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlElementList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![EOF] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T![EOF]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -405,39 +405,39 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [<] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [<]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlTagName::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlTagName::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if HtmlAttributeList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && HtmlAttributeList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [/] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [/]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [>] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [>]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -452,11 +452,11 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_STRING_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_STRING_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -471,11 +471,11 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -490,25 +490,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!["{{"] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!["{{"]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!["}}"] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!["}}"]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
@@ -523,25 +523,25 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!['{'] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == HTML_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == HTML_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T!['}'] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
                 }
                 slots.next_slot();
                 if current_element.is_some() {
