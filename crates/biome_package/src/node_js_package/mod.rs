@@ -3,7 +3,7 @@ mod tsconfig_json;
 
 use camino::Utf8Path;
 pub use package_json::{Dependencies, PackageJson, PackageType, Version};
-pub use tsconfig_json::{CompilerOptions, TsConfigJson};
+pub use tsconfig_json::{CompilerOptions, Module, ModuleResolution, TsConfigJson};
 
 use biome_rowan::Language;
 

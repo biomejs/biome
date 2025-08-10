@@ -1329,6 +1329,7 @@ dependencies = [
  "biome_json_value",
  "biome_parser",
  "biome_rowan",
+ "biome_string_case",
  "biome_text_size",
  "camino",
  "codspeed-divan-compat",

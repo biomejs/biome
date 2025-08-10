@@ -20,6 +20,8 @@ pub(crate) struct ContainerAttrs {
     pub try_from: Option<Path>,
     /// Ignore unknown fields in a struct upon deserialization.
     pub unknown_fields: Option<UnknownFields>,
+    /// Allow case-insensitive match for enum variants. Only supported in enums.
+    pub case_insensitive: bool,
 }
 
 /// Attributes for struct that control how unkinown fields are handled.
@@ -73,6 +75,9 @@ impl TryFrom<&Vec<Attribute>> for ContainerAttrs {
                                 Ok(value) => opts.unknown_fields = Some(value),
                                 Err(error) => return Err(Error::new(meta.span(), error)),
                             }
+                        }
+                        Meta::Path(path) if path.is_ident("case_insensitive") => {
+                            opts.case_insensitive = true
                         }
                         _ => {
                             let meta_str = meta.to_token_stream().to_string();

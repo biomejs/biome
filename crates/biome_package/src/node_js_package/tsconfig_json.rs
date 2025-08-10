@@ -125,9 +125,49 @@ pub struct CompilerOptions {
     /// See: https://www.typescriptlang.org/tsconfig/#typeRoots
     #[deserializable(rename = "typeRoots")]
     pub type_roots: Option<Vec<String>>,
+
+    /// Sets the module system for the program.
+    /// https://www.typescriptlang.org/tsconfig/#module
+    pub module: Option<Module>,
+
+    /// Specify the module resolution strategy.
+    /// https://www.typescriptlang.org/tsconfig/#moduleResolution
+    #[deserializable(rename = "moduleResolution")]
+    pub module_resolution: Option<ModuleResolution>,
 }
 
 pub type CompilerOptionsPathsMap = IndexMap<String, Vec<String>, BuildHasherDefault<FxHasher>>;
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Deserializable)]
+#[deserializable(case_insensitive)]
+pub enum Module {
+    None,
+    CommonJS,
+    Amd,
+    Umd,
+    System,
+    ES6,
+    ES2015,
+    ES2020,
+    ES2022,
+    ESNext,
+    Node16,
+    Node18,
+    Node20,
+    NodeNext,
+    Preserve,
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Deserializable)]
+#[deserializable(case_insensitive)]
+pub enum ModuleResolution {
+    Classic,
+    Node,
+    Node10,
+    Node16,
+    NodeNext,
+    Bundler,
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ExtendsField {

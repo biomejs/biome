@@ -6,10 +6,11 @@ use self::container_attrs::{ContainerAttrs, UnknownFields};
 use self::struct_field_attrs::DeprecatedField;
 use crate::deserializable_derive::enum_variant_attrs::EnumVariantAttrs;
 use crate::deserializable_derive::struct_field_attrs::StructFieldAttrs;
-use biome_string_case::Case;
+use biome_string_case::{Case, StrLikeExtension};
 use proc_macro_error2::*;
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
+use std::borrow::Cow;
 use syn::{Data, GenericParam, Generics, Path, Type};
 
 pub(crate) struct DeriveInput {
@@ -66,6 +67,7 @@ impl DeriveInput {
                     .collect();
                     DeserializableData::Enum(DeserializableEnumData {
                         variants,
+                        case_insensitive: attrs.case_insensitive,
                         with_validator: attrs.with_validator,
                     })
                 }
@@ -167,6 +169,7 @@ pub enum DeserializableData {
 #[derive(Debug)]
 pub struct DeserializableEnumData {
     variants: Vec<DeserializableVariantData>,
+    case_insensitive: bool,
     with_validator: bool,
 }
 
@@ -240,7 +243,14 @@ fn generate_deserializable_enum(
     let allowed_variants: Vec<_> = data
         .variants
         .iter()
-        .map(|DeserializableVariantData { key, .. }| quote! { #key })
+        .map(|DeserializableVariantData { key, .. }| {
+            let key = if data.case_insensitive {
+                key.to_ascii_lowercase_cow()
+            } else {
+                Cow::Borrowed(key.as_str())
+            };
+            quote! { #key }
+        })
         .collect();
 
     let deserialize_variants: Vec<_> = data
@@ -251,10 +261,21 @@ fn generate_deserializable_enum(
                  ident: variant_ident,
                  key,
              }| {
+                let key = if data.case_insensitive {
+                    key.to_ascii_lowercase_cow()
+                } else {
+                    Cow::Borrowed(key.as_str())
+                };
                 quote! { #key => Self::#variant_ident }
             },
         )
         .collect();
+
+    let discriminant = if data.case_insensitive {
+        quote! { biome_string_case::StrLikeExtension::to_ascii_lowercase_cow(text.text()).as_ref() }
+    } else {
+        quote! { text.text() }
+    };
 
     let validator = if data.with_validator {
         quote! {
@@ -275,7 +296,8 @@ fn generate_deserializable_enum(
                 value: &impl biome_deserialize::DeserializableValue,
                 name: &str,
             ) -> Option<Self> {
-                let mut result = match biome_deserialize::Text::deserialize(ctx, value, name)?.text() {
+                let text = biome_deserialize::Text::deserialize(ctx, value, name)?;
+                let mut result = match #discriminant {
                     #(#deserialize_variants),*,
                     unknown_variant => {
                         const ALLOWED_VARIANTS: &[&str] = &[#(#allowed_variants),*];
