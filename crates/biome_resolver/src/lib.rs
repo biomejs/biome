@@ -85,7 +85,7 @@ fn resolve_absolute_path_with_extension_alias(
     for alias in aliases {
         match resolve_absolute_path(path.with_extension(alias), fs, options) {
             Ok(path) => return Ok(path),
-            Err(ResolveError::NotFound) => continue,
+            Err(ResolveError::NotFound) => { /* continue */ }
             Err(error) => return Err(error),
         }
     }
