@@ -460,7 +460,7 @@ fn parse_double_text_expression(p: &mut HtmlParser, context: HtmlLexContext) -> 
         if let Ok(m) = recovery.enable_recovery_on_line_break().recover(p) {
             let diagnostic = expected_text_expression(p, m.range(p), opening_range);
             p.error(diagnostic);
-            return Present(m);
+            Present(m)
         } else {
             Absent
         }
