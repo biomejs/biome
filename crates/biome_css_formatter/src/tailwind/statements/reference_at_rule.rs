@@ -1,10 +1,25 @@
 use crate::prelude::*;
-use biome_css_syntax::TwReferenceAtRule;
-use biome_rowan::AstNode;
+use biome_css_syntax::{TwReferenceAtRule, TwReferenceAtRuleFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatTwReferenceAtRule;
 impl FormatNodeRule<TwReferenceAtRule> for FormatTwReferenceAtRule {
     fn fmt_fields(&self, node: &TwReferenceAtRule, f: &mut CssFormatter) -> FormatResult<()> {
-        format_css_verbatim_node(node.syntax()).fmt(f)
+        let TwReferenceAtRuleFields {
+            reference_token,
+            path,
+            semicolon_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                reference_token.format(),
+                space(),
+                path.format(),
+                semicolon_token.format()
+            ]
+        )
     }
 }
