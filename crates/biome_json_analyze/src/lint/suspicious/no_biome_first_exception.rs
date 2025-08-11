@@ -89,8 +89,6 @@ impl Rule for NoBiomeFirstException {
             .and_then(|object| object.find_member("extends"))
             .is_some_and(|extends| extends.value().ok().is_some());
 
-        dbg!(extends_root);
-
         if extends_root {
             return None;
         }
