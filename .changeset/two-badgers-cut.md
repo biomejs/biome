@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#7162](https://github.com/biomejs/biome/7162): The `noUndeclaredDependencies` now considers a type-only import as a dev dependency.
+Fixed [#7162](https://github.com/biomejs/biome/issues/7162): The `noUndeclaredDependencies` rule now considers a type-only import as a dev dependency.
 
 For example, the following code is no longer reported:
 
