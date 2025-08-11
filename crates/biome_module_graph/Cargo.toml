@@ -41,7 +41,7 @@ biome_js_parser    = { workspace = true }
 biome_json_parser  = { workspace = true }
 biome_json_value   = { workspace = true }
 biome_test_utils   = { workspace = true }
-criterion          = { package = "codspeed-criterion-compat", version = "=3.0.3" }
+criterion          = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta              = { workspace = true }
 walkdir            = { workspace = true }
 
