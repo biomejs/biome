@@ -699,12 +699,12 @@ impl Rule for OrganizeImports {
         }
 
         fn report_unsorted_chunk(chunk: Option<ChunkBuilder>, result: &mut Vec<Issue>) {
-            if let Some(chunk) = chunk {
-                if !chunk.slot_indexes.is_empty() {
-                    result.push(Issue::UnsortedChunkPrefix {
-                        slot_indexes: chunk.slot_indexes,
-                    });
-                }
+            if let Some(chunk) = chunk
+                && !chunk.slot_indexes.is_empty()
+            {
+                result.push(Issue::UnsortedChunkPrefix {
+                    slot_indexes: chunk.slot_indexes,
+                });
             }
         }
 
@@ -791,12 +791,12 @@ impl Rule for OrganizeImports {
                 report_unsorted_chunk(chunk.take(), &mut result);
                 prev_group = 0;
                 // A statement must be separated of a chunk with a blank line
-                if let AnyJsModuleItem::AnyJsStatement(statement) = &item {
-                    if leading_newlines(statement.syntax()).count() == 1 {
-                        result.push(Issue::AddLeadingNewline {
-                            slot_index: statement.syntax().index() as u32,
-                        });
-                    }
+                if let AnyJsModuleItem::AnyJsStatement(statement) = &item
+                    && leading_newlines(statement.syntax()).count() == 1
+                {
+                    result.push(Issue::AddLeadingNewline {
+                        slot_index: statement.syntax().index() as u32,
+                    });
                 }
             }
             prev_kind = Some(item.syntax().kind());
@@ -856,13 +856,11 @@ impl Rule for OrganizeImports {
                             let mut clause = export.export_clause().ok()?;
                             if *are_specifiers_unsorted {
                                 // Sort named specifiers
-                                if let AnyJsExportClause::JsExportNamedFromClause(cast) = &clause {
-                                    if let Some(sorted_specifiers) =
+                                if let AnyJsExportClause::JsExportNamedFromClause(cast) = &clause
+                                    && let Some(sorted_specifiers) =
                                         sort_export_specifiers(&cast.specifiers(), sort_order)
-                                    {
-                                        clause =
-                                            cast.clone().with_specifiers(sorted_specifiers).into();
-                                    }
+                                {
+                                    clause = cast.clone().with_specifiers(sorted_specifiers).into();
                                 }
                             }
                             if *are_attributes_unsorted {
@@ -952,14 +950,14 @@ impl Rule for OrganizeImports {
                             ..
                         } = &import_keys[i - 1];
                         let KeyedItem { key, item, .. } = &import_keys[i];
-                        if prev_key.is_mergeable(key) {
-                            if let Some(merged) =
+                        if prev_key.is_mergeable(key)
+                            && let Some(merged) =
                                 merge(prev_item.as_ref(), item.as_ref(), sort_order)
                             {
                                 import_keys[i - 1].was_merged = true;
                                 import_keys[i - 1].item = Some(merged);
                                 import_keys[i].item = None;
-                            }
+
                         }
                         i -= 1;
                     }

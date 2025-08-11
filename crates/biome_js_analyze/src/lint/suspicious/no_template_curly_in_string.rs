@@ -63,12 +63,12 @@ impl Rule for NoTemplateCurlyInString {
 
         let mut byte_iter = text.bytes().enumerate();
         while let Some((i, byte)) = byte_iter.next() {
-            if byte == b'$' {
-                if let Some((_, b'{')) = byte_iter.next() {
-                    for (j, inner_byte) in byte_iter.by_ref() {
-                        if inner_byte == b'}' {
-                            return Some((i as u32, (j + 1) as u32));
-                        }
+            if byte == b'$'
+                && let Some((_, b'{')) = byte_iter.next()
+            {
+                for (j, inner_byte) in byte_iter.by_ref() {
+                    if inner_byte == b'}' {
+                        return Some((i as u32, (j + 1) as u32));
                     }
                 }
             }

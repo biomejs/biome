@@ -227,49 +227,49 @@ impl Source {
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.organize_imports.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
-            }
+        if let Some(rule) = self.organize_imports.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
         }
-        if let Some(rule) = self.use_sorted_attributes.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
-            }
+        if let Some(rule) = self.use_sorted_attributes.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
-            }
+        if let Some(rule) = self.use_sorted_keys.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
-            }
+        if let Some(rule) = self.use_sorted_properties.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.organize_imports.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
-            }
+        if let Some(rule) = self.organize_imports.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
         }
-        if let Some(rule) = self.use_sorted_attributes.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
-            }
+        if let Some(rule) = self.use_sorted_attributes.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
-            }
+        if let Some(rule) = self.use_sorted_keys.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
-            }
+        if let Some(rule) = self.use_sorted_properties.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
         index_set
     }

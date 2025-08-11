@@ -199,10 +199,10 @@ impl Rule for NoDuplicateObjectKeys {
                 }
             }
         }
-        if let Some(NodeOrToken::Token(next_token)) = member.next_sibling_or_token() {
-            if next_token.kind() == JsSyntaxKind::COMMA {
-                mutation.remove_token(next_token);
-            }
+        if let Some(NodeOrToken::Token(next_token)) = member.next_sibling_or_token()
+            && next_token.kind() == JsSyntaxKind::COMMA
+        {
+            mutation.remove_token(next_token);
         }
         mutation.remove_element(member.into());
         Some(JsRuleAction::new(

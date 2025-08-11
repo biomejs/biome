@@ -118,24 +118,24 @@ impl Visitor for NestedTestVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if let Some(node) = JsCallExpression::cast_ref(node) {
-                    if let Ok(callee) = node.callee() {
-                        if callee.contains_describe_call() && !is_member(&node) {
-                            self.curr_count += 1;
-                            if self.curr_count == self.max_count + 1 {
-                                ctx.match_query(NestedTest(node.clone()));
-                            }
-                        }
+                if let Some(node) = JsCallExpression::cast_ref(node)
+                    && let Ok(callee) = node.callee()
+                    && callee.contains_describe_call()
+                    && !is_member(&node)
+                {
+                    self.curr_count += 1;
+                    if self.curr_count == self.max_count + 1 {
+                        ctx.match_query(NestedTest(node.clone()));
                     }
                 }
             }
             WalkEvent::Leave(node) => {
-                if let Some(node) = JsCallExpression::cast_ref(node) {
-                    if let Ok(callee) = node.callee() {
-                        if callee.contains_describe_call() && !is_member(&node) {
-                            self.curr_count -= 1;
-                        }
-                    }
+                if let Some(node) = JsCallExpression::cast_ref(node)
+                    && let Ok(callee) = node.callee()
+                    && callee.contains_describe_call()
+                    && !is_member(&node)
+                {
+                    self.curr_count -= 1;
                 }
             }
         }

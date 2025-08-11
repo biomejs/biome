@@ -530,19 +530,16 @@ fn collect_mutated_class_property_names(members: &JsClassMemberList) -> Vec<Text
             }
             // assignments in property class member if it is an arrow function
             AnyJsClassMember::JsPropertyClassMember(property) => {
-                if let Ok(expression) = property.value()?.expression() {
-                    if let Some(arrow_function) =
+                if let Ok(expression) = property.value()?.expression()
+                    && let Some(arrow_function) =
                         JsArrowFunctionExpression::cast(expression.into_syntax())
-                    {
-                        if let Ok(any_js_body) = arrow_function.body() {
-                            if let Some(body) = any_js_body.as_js_function_body() {
-                                return collect_names_from_class_member_body(
-                                    MethodBodyElementOrStatementList::from(arrow_function),
-                                    body,
-                                );
-                            }
-                        }
-                    }
+                    && let Ok(any_js_body) = arrow_function.body()
+                    && let Some(body) = any_js_body.as_js_function_body()
+                {
+                    return collect_names_from_class_member_body(
+                        MethodBodyElementOrStatementList::from(arrow_function),
+                        body,
+                    );
                 };
                 None
             }
@@ -570,21 +567,20 @@ fn contains_this_or_static_member_kind(
             return true;
         }
 
-        if let Some(js_identifier_expression) = object.as_js_identifier_expression() {
-            if let Ok(name) = js_identifier_expression.name() {
-                if let Ok(value_token) = name.value_token() {
-                    let name_syntax = name.syntax();
+        if let Some(js_identifier_expression) = object.as_js_identifier_expression()
+            && let Ok(name) = js_identifier_expression.name()
+            && let Ok(value_token) = name.value_token()
+        {
+            let name_syntax = name.syntax();
 
-                    return this_aliases.iter().any(
-                        |ThisAliasesAndTheirScope { aliases, scope }| {
-                            aliases.contains(&Text::from(value_token.token_text_trimmed()))
-                                && name_syntax
-                                    .ancestors()
-                                    .any(|ancestor| ancestor.key() == scope.syntax().key())
-                        },
-                    );
-                }
-            }
+            return this_aliases
+                .iter()
+                .any(|ThisAliasesAndTheirScope { aliases, scope }| {
+                    aliases.contains(&Text::from(value_token.token_text_trimmed()))
+                        && name_syntax
+                            .ancestors()
+                            .any(|ancestor| ancestor.key() == scope.syntax().key())
+                });
         }
     }
 
@@ -915,12 +911,11 @@ fn collect_descendants_of_body_this_aliases(
         }
         // Check arrow functions with block bodies
         else if let Some(arrow_func) = JsArrowFunctionExpression::cast(child.clone()) {
-            if let Ok(body) = arrow_func.body() {
-                if let Some(block) = body.as_any_js_expression() {
-                    if let Some(body) = JsFunctionBody::cast(block.syntax().clone()) {
-                        update_fn_body_and_aliases(parent_this_aliases, &mut results, &body);
-                    }
-                }
+            if let Ok(body) = arrow_func.body()
+                && let Some(block) = body.as_any_js_expression()
+                && let Some(body) = JsFunctionBody::cast(block.syntax().clone())
+            {
+                update_fn_body_and_aliases(parent_this_aliases, &mut results, &body);
             }
         }
         // Check method definitions

@@ -189,16 +189,14 @@ impl ControlFlowStatement {
                 break;
             }
 
-            if let Some(label) = &label {
-                if let Some(parent) = node.parent().and_then(JsLabeledStatement::cast) {
-                    if parent
-                        .label_token()
-                        .ok()
-                        .is_some_and(|it| it.text_trimmed() == label.text_trimmed())
-                    {
-                        is_label_inside_finally = true;
-                    }
-                }
+            if let Some(label) = &label
+                && let Some(parent) = node.parent().and_then(JsLabeledStatement::cast)
+                && parent
+                    .label_token()
+                    .ok()
+                    .is_some_and(|it| it.text_trimmed() == label.text_trimmed())
+            {
+                is_label_inside_finally = true;
             }
             if node.kind() == JsSyntaxKind::JS_FINALLY_CLAUSE {
                 return Some(!is_label_inside_finally);

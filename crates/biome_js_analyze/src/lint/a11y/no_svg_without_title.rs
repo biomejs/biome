@@ -121,12 +121,12 @@ impl Rule for NoSvgWithoutTitle {
             return None;
         }
 
-        if let Some(aria_hidden_attr) = node.find_attribute_by_name("aria-hidden") {
-            if let Some(attr_static_val) = aria_hidden_attr.as_static_value() {
-                let attr_text = attr_static_val.text();
-                if attr_text == "true" {
-                    return None;
-                }
+        if let Some(aria_hidden_attr) = node.find_attribute_by_name("aria-hidden")
+            && let Some(attr_static_val) = aria_hidden_attr.as_static_value()
+        {
+            let attr_text = attr_static_val.text();
+            if attr_text == "true" {
+                return None;
             }
         }
 

@@ -114,7 +114,7 @@ impl LoadedConfiguration {
     }
 
     /// It returns an iterator over the diagnostics emitted during the resolution of the configuration file
-    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
+    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter<'_> {
         ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
     }
 }

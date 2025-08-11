@@ -393,10 +393,10 @@ impl<L: Language + Default> RegistryRule<L> {
         where
             R: Rule<Options: Default, Query: Queryable<Output: Clone>> + 'static,
         {
-            if let Some(node) = params.query.downcast_ref::<SyntaxNode<RuleLanguage<R>>>() {
-                if state.suppressions.inner.contains(node) {
-                    return Ok(());
-                }
+            if let Some(node) = params.query.downcast_ref::<SyntaxNode<RuleLanguage<R>>>()
+                && state.suppressions.inner.contains(node)
+            {
+                return Ok(());
             }
 
             // SAFETY: The rule should never get executed in the first place

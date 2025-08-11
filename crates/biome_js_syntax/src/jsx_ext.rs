@@ -282,22 +282,21 @@ impl JsxAttributeList {
         let mut missing = N;
 
         for att in self {
-            if let AnyJsxAttribute::JsxAttribute(attribute) = att {
-                if let Some(name) = attribute
+            if let AnyJsxAttribute::JsxAttribute(attribute) = att
+                && let Some(name) = attribute
                     .name()
                     .ok()
                     .and_then(|x| x.as_jsx_name()?.value_token().ok())
-                {
-                    let name = name.text_trimmed();
-                    for i in 0..N {
-                        if results[i].is_none() && names_to_lookup[i] == name {
-                            results[i] = Some(attribute);
-                            if missing == 1 {
-                                return results;
-                            } else {
-                                missing -= 1;
-                                break;
-                            }
+            {
+                let name = name.text_trimmed();
+                for i in 0..N {
+                    if results[i].is_none() && names_to_lookup[i] == name {
+                        results[i] = Some(attribute);
+                        if missing == 1 {
+                            return results;
+                        } else {
+                            missing -= 1;
+                            break;
                         }
                     }
                 }
@@ -309,12 +308,11 @@ impl JsxAttributeList {
 
     pub fn find_by_name(&self, name_to_lookup: &str) -> Option<JsxAttribute> {
         self.iter().find_map(|attribute| {
-            if let AnyJsxAttribute::JsxAttribute(attribute) = attribute {
-                if let Ok(AnyJsxAttributeName::JsxName(name)) = attribute.name() {
-                    if name.value_token().ok()?.text_trimmed() == name_to_lookup {
-                        return Some(attribute);
-                    }
-                }
+            if let AnyJsxAttribute::JsxAttribute(attribute) = attribute
+                && let Ok(AnyJsxAttributeName::JsxName(name)) = attribute.name()
+                && name.value_token().ok()?.text_trimmed() == name_to_lookup
+            {
+                return Some(attribute);
             }
             None
         })
@@ -323,11 +321,11 @@ impl JsxAttributeList {
     pub fn has_trailing_spread_prop(&self, current_attribute: &JsxAttribute) -> bool {
         let mut current_attribute_found = false;
         for attribute in self {
-            if let Some(attribute) = attribute.as_jsx_attribute() {
-                if attribute == current_attribute {
-                    current_attribute_found = true;
-                    continue;
-                }
+            if let Some(attribute) = attribute.as_jsx_attribute()
+                && attribute == current_attribute
+            {
+                current_attribute_found = true;
+                continue;
             }
             if current_attribute_found && attribute.as_jsx_spread_attribute().is_some() {
                 return true;

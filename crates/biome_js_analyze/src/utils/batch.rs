@@ -139,12 +139,11 @@ fn remove_js_formal_parameter_from_js_parameter_list(
 
     // if it is the last parameter of the list
     // removes the comma before this element
-    if elements.next().is_none() {
-        if let Some(element) = previous_element {
-            if let Ok(Some(comma)) = element.trailing_separator() {
-                batch.remove_token(comma.clone());
-            }
-        }
+    if elements.next().is_none()
+        && let Some(element) = previous_element
+        && let Ok(Some(comma)) = element.trailing_separator()
+    {
+        batch.remove_token(comma.clone());
     }
 
     Some(true)
@@ -181,12 +180,11 @@ fn remove_js_formal_parameter_from_js_constructor_parameter_list(
 
     // if it is the last parameter of the list
     // removes the comma before this element
-    if elements.next().is_none() {
-        if let Some(element) = previous_element {
-            if let Ok(Some(comma)) = element.trailing_separator() {
-                batch.remove_token(comma.clone());
-            }
-        }
+    if elements.next().is_none()
+        && let Some(element) = previous_element
+        && let Ok(Some(comma)) = element.trailing_separator()
+    {
+        batch.remove_token(comma.clone());
     }
 
     Some(true)
@@ -209,14 +207,14 @@ impl JsBatchMutation for BatchMutation<JsLanguage> {
                     // remove its trailing comma, if there is one
                     let mut previous_element = None;
                     for element in elements.by_ref() {
-                        if let Ok(node) = element.node() {
-                            if node == declarator {
-                                self.remove_node(node.clone());
-                                if let Ok(Some(comma)) = element.trailing_separator() {
-                                    self.remove_token(comma.clone());
-                                }
-                                break;
+                        if let Ok(node) = element.node()
+                            && node == declarator
+                        {
+                            self.remove_node(node.clone());
+                            if let Ok(Some(comma)) = element.trailing_separator() {
+                                self.remove_token(comma.clone());
                             }
+                            break;
                         }
                         previous_element = Some(element);
                     }
@@ -229,12 +227,11 @@ impl JsBatchMutation for BatchMutation<JsLanguage> {
                         _ => false,
                     };
 
-                    if remove_previous_element_comma {
-                        if let Some(element) = previous_element {
-                            if let Ok(Some(comma)) = element.trailing_separator() {
-                                self.remove_token(comma.clone());
-                            }
-                        }
+                    if remove_previous_element_comma
+                        && let Some(element) = previous_element
+                        && let Ok(Some(comma)) = element.trailing_separator()
+                    {
+                        self.remove_token(comma.clone());
                     }
                 }
 

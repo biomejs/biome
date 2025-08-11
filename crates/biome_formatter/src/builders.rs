@@ -276,7 +276,7 @@ impl std::fmt::Debug for StaticText {
 }
 
 /// Creates a text from a dynamic string and a range of the input source
-pub fn dynamic_text(text: &str, position: TextSize) -> DynamicText {
+pub fn dynamic_text(text: &str, position: TextSize) -> DynamicText<'_> {
     debug_assert_no_newlines(text);
 
     DynamicText { text, position }
@@ -420,7 +420,7 @@ fn debug_assert_no_newlines(text: &str) {
 /// # }
 /// ```
 #[inline]
-pub fn line_suffix<Content, Context>(inner: &Content) -> LineSuffix<Context>
+pub fn line_suffix<Content, Context>(inner: &Content) -> LineSuffix<'_, Context>
 where
     Content: Format<Context>,
 {
@@ -550,7 +550,10 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 /// Use `Memoized.inspect(f)?.has_label(LabelId::of(MyLabels::Main)` if you need to know if some content breaks that should
 /// only be written later.
 #[inline]
-pub fn labelled<Content, Context>(label_id: LabelId, content: &Content) -> FormatLabelled<Context>
+pub fn labelled<Content, Context>(
+    label_id: LabelId,
+    content: &Content,
+) -> FormatLabelled<'_, Context>
 where
     Content: Format<Context>,
 {
@@ -772,7 +775,7 @@ impl<Context> Format<Context> for HardSpace {
 /// # }
 /// ```
 #[inline]
-pub fn indent<Content, Context>(content: &Content) -> Indent<Context>
+pub fn indent<Content, Context>(content: &Content) -> Indent<'_, Context>
 where
     Content: Format<Context>,
 {
@@ -929,7 +932,7 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 /// # }
 /// ```
 #[inline]
-pub fn dedent<Content, Context>(content: &Content) -> Dedent<Context>
+pub fn dedent<Content, Context>(content: &Content) -> Dedent<'_, Context>
 where
     Content: Format<Context>,
 {
@@ -1002,7 +1005,7 @@ impl<Context> std::fmt::Debug for Dedent<'_, Context> {
 ///
 /// This resembles the behaviour of Prettier's `align(Number.NEGATIVE_INFINITY, content)` IR element.
 #[inline]
-pub fn dedent_to_root<Content, Context>(content: &Content) -> Dedent<Context>
+pub fn dedent_to_root<Content, Context>(content: &Content) -> Dedent<'_, Context>
 where
     Content: Format<Context>,
 {
@@ -1115,7 +1118,7 @@ where
 ///
 /// * tab indention: Printer indents the expression with two tabs because the `align` increases the indention level.
 /// * space indention: Printer indents the expression by 4 spaces (one indention level) **and** 2 spaces for the align.
-pub fn align<Content, Context>(count: u8, content: &Content) -> Align<Context>
+pub fn align<Content, Context>(count: u8, content: &Content) -> Align<'_, Context>
 where
     Content: Format<Context>,
 {
@@ -1183,7 +1186,7 @@ impl<Context> std::fmt::Debug for Align<'_, Context> {
 /// # }
 /// ```
 #[inline]
-pub fn block_indent<Context>(content: &impl Format<Context>) -> BlockIndent<Context> {
+pub fn block_indent<Context>(content: &impl Format<Context>) -> BlockIndent<'_, Context> {
     BlockIndent {
         content: Argument::new(content),
         mode: IndentMode::Block,
@@ -1254,7 +1257,7 @@ pub fn block_indent<Context>(content: &impl Format<Context>) -> BlockIndent<Cont
 /// # }
 /// ```
 #[inline]
-pub fn soft_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent<Context> {
+pub fn soft_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent<'_, Context> {
     BlockIndent {
         content: Argument::new(content),
         mode: IndentMode::Soft,
@@ -1357,7 +1360,7 @@ pub fn soft_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent
 pub fn soft_block_indent_with_maybe_space<Context>(
     content: &impl Format<Context>,
     should_add_space: bool,
-) -> BlockIndent<Context> {
+) -> BlockIndent<'_, Context> {
     if should_add_space {
         soft_space_or_block_indent(content)
     } else {
@@ -1432,7 +1435,9 @@ pub fn soft_block_indent_with_maybe_space<Context>(
 /// # }
 /// ```
 #[inline]
-pub fn soft_line_indent_or_space<Context>(content: &impl Format<Context>) -> BlockIndent<Context> {
+pub fn soft_line_indent_or_space<Context>(
+    content: &impl Format<Context>,
+) -> BlockIndent<'_, Context> {
     BlockIndent {
         content: Argument::new(content),
         mode: IndentMode::SoftLineOrSpace,
@@ -1534,7 +1539,7 @@ pub fn soft_line_indent_or_space<Context>(content: &impl Format<Context>) -> Blo
 #[inline]
 pub fn soft_line_indent_or_hard_space<Context>(
     content: &impl Format<Context>,
-) -> BlockIndent<Context> {
+) -> BlockIndent<'_, Context> {
     BlockIndent {
         content: Argument::new(content),
         mode: IndentMode::HardSpace,
@@ -1670,7 +1675,9 @@ impl<Context> std::fmt::Debug for BlockIndent<'_, Context> {
 /// # Ok(())
 /// # }
 /// ```
-pub fn soft_space_or_block_indent<Context>(content: &impl Format<Context>) -> BlockIndent<Context> {
+pub fn soft_space_or_block_indent<Context>(
+    content: &impl Format<Context>,
+) -> BlockIndent<'_, Context> {
     BlockIndent {
         content: Argument::new(content),
         mode: IndentMode::SoftSpace,
@@ -1750,7 +1757,7 @@ pub fn soft_space_or_block_indent<Context>(content: &impl Format<Context>) -> Bl
 /// # }
 /// ```
 #[inline]
-pub fn group<Context>(content: &impl Format<Context>) -> Group<Context> {
+pub fn group<Context>(content: &impl Format<Context>) -> Group<'_, Context> {
     Group {
         content: Argument::new(content),
         group_id: None,
@@ -1933,7 +1940,7 @@ impl<Context> Format<Context> for ExpandParent {
 /// # }
 /// ```
 #[inline]
-pub fn if_group_breaks<Content, Context>(content: &Content) -> IfGroupBreaks<Context>
+pub fn if_group_breaks<Content, Context>(content: &Content) -> IfGroupBreaks<'_, Context>
 where
     Content: Format<Context>,
 {
@@ -2014,7 +2021,7 @@ where
 /// # }
 /// ```
 #[inline]
-pub fn if_group_fits_on_line<Content, Context>(flat_content: &Content) -> IfGroupBreaks<Context>
+pub fn if_group_fits_on_line<Content, Context>(flat_content: &Content) -> IfGroupBreaks<'_, Context>
 where
     Content: Format<Context>,
 {
@@ -2200,7 +2207,7 @@ impl<Context> std::fmt::Debug for IfGroupBreaks<'_, Context> {
 pub fn indent_if_group_breaks<Content, Context>(
     content: &Content,
     group_id: GroupId,
-) -> IndentIfGroupBreaks<Context>
+) -> IndentIfGroupBreaks<'_, Context>
 where
     Content: Format<Context>,
 {
@@ -2441,10 +2448,10 @@ where
     /// Adds a new entry to the join output.
     pub fn entry(&mut self, entry: &dyn Format<Context>) -> &mut Self {
         self.result = self.result.and_then(|_| {
-            if let Some(with) = &self.with {
-                if self.has_elements {
-                    with.fmt(self.fmt)?;
-                }
+            if let Some(with) = &self.with
+                && self.has_elements
+            {
+                with.fmt(self.fmt)?;
             }
             self.has_elements = true;
 

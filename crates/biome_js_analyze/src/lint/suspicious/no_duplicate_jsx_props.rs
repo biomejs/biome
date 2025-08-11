@@ -53,13 +53,13 @@ impl Rule for NoDuplicateJsxProps {
 
         let mut defined_attributes: FxHashMap<Box<str>, Vec<JsxAttribute>> = FxHashMap::default();
         for attribute in node.attributes() {
-            if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
-                if let Ok(name) = attr.name() {
-                    defined_attributes
-                        .entry(name.to_trimmed_text().text().into())
-                        .or_default()
-                        .push(attr);
-                }
+            if let AnyJsxAttribute::JsxAttribute(attr) = attribute
+                && let Ok(name) = attr.name()
+            {
+                defined_attributes
+                    .entry(name.to_trimmed_text().text().into())
+                    .or_default()
+                    .push(attr);
             }
         }
 

@@ -86,7 +86,7 @@ const RANGE_END_PATTERNS: [&str; 2] = ["-END", "-end"];
 
 pub fn parse_suppression_comment(
     base: &str,
-) -> impl Iterator<Item = Result<Suppression, SuppressionDiagnostic>> {
+) -> impl Iterator<Item = Result<Suppression<'_>, SuppressionDiagnostic>> {
     let (head, mut comment) = if base.starts_with('#') {
         base.split_at(1)
     } else if base.starts_with("<!--") {
@@ -330,7 +330,7 @@ fn parse_suppression_line(
     kind: SuppressionKind,
     range: TextRange,
     extra_offset: TextSize,
-) -> Result<Suppression, SuppressionDiagnostic> {
+) -> Result<Suppression<'_>, SuppressionDiagnostic> {
     let mut line = base;
     let mut categories = Vec::new();
 

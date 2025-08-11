@@ -5946,42 +5946,42 @@ mod tests {
     }
 
     #[test]
-    fn test_kown_edge_properties_order() {
+    fn test_known_edge_properties_order() {
         for items in KNOWN_EDGE_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
 
     #[test]
-    fn test_kown_explorer_properties_order() {
+    fn test_known_explorer_properties_order() {
         for items in KNOWN_EXPLORER_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
 
     #[test]
-    fn test_kown_firefox_properties_order() {
+    fn test_known_firefox_properties_order() {
         for items in KNOWN_FIREFOX_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
 
     #[test]
-    fn test_kown_safari_properties_order() {
+    fn test_known_safari_properties_order() {
         for items in KNOWN_SAFARI_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
 
     #[test]
-    fn test_kown_sumsung_internet_properties_order() {
+    fn test_known_samsung_internet_properties_order() {
         for items in KNOWN_SAMSUNG_INTERNET_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
 
     #[test]
-    fn test_kown_us_browser_properties_order() {
+    fn test_known_us_browser_properties_order() {
         for items in KNOWN_US_BROWSER_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }

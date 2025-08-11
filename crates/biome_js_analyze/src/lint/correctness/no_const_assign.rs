@@ -72,10 +72,9 @@ impl Rule for NoConstAssign {
         let decl = id_binding.declaration()?;
         if let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
             decl.parent_binding_pattern_declaration().unwrap_or(decl)
+            && declarator.declaration()?.is_const()
         {
-            if declarator.declaration()?.is_const() {
-                return Some(id_binding.range());
-            }
+            return Some(id_binding.range());
         };
         None
     }

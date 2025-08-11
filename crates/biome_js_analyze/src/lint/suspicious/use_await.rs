@@ -77,10 +77,10 @@ impl Visitor for MissingAwaitVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if let Some(node) = AnyFunctionLike::cast_ref(node) {
-                    if node.is_async() {
-                        self.stack.push((node.range().start(), false));
-                    }
+                if let Some(node) = AnyFunctionLike::cast_ref(node)
+                    && node.is_async()
+                {
+                    self.stack.push((node.range().start(), false));
                 }
                 if let Some((_, has_await)) = self.stack.last_mut() {
                     if JsAwaitExpression::can_cast(node.kind()) {
@@ -91,14 +91,13 @@ impl Visitor for MissingAwaitVisitor {
                 }
             }
             WalkEvent::Leave(node) => {
-                if let Some(node) = AnyFunctionLike::cast_ref(node) {
-                    if let Some((function_start_range, has_await)) = self.stack.last().copied() {
-                        if function_start_range == node.range().start() {
-                            self.stack.pop();
-                            if !has_await && node.is_async() {
-                                ctx.match_query(MissingAwait(node));
-                            }
-                        }
+                if let Some(node) = AnyFunctionLike::cast_ref(node)
+                    && let Some((function_start_range, has_await)) = self.stack.last().copied()
+                    && function_start_range == node.range().start()
+                {
+                    self.stack.pop();
+                    if !has_await && node.is_async() {
+                        ctx.match_query(MissingAwait(node));
                     }
                 }
             }

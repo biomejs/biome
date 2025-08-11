@@ -242,7 +242,7 @@ impl TypeData {
     /// This iterator does not return members of [`TypeData::InstanceOf`] or
     /// [`TypeData::Reference`] variants. If that's what you want, you will need
     /// to dereference them first.
-    pub fn own_members(&self) -> OwnTypeMemberIterator {
+    pub fn own_members(&self) -> OwnTypeMemberIterator<'_> {
         OwnTypeMemberIterator {
             owner: TypeMemberOwner::from_type_data(self),
             index: 0,

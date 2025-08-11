@@ -62,7 +62,7 @@ impl ModuleGraph {
     }
 
     /// Returns the data of the module graph in test
-    pub fn data(&self) -> HashMapRef<Utf8PathBuf, JsModuleInfo, FxBuildHasher, LocalGuard> {
+    pub fn data(&self) -> HashMapRef<'_, Utf8PathBuf, JsModuleInfo, FxBuildHasher, LocalGuard<'_>> {
         self.data.pin()
     }
 

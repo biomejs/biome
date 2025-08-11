@@ -223,11 +223,11 @@ fn exceeds_complexity_threshold(cfg: &JsControlFlowGraph) -> bool {
         let mut cleanup_handlers = NonZeroU32::new(block.cleanup_handlers.len() as u32);
 
         for inst in &block.instructions {
-            if has_side_effects(inst) {
-                if let Some(handlers) = exception_handlers.take() {
-                    edges += handlers.get();
-                    conditionals += 1;
-                }
+            if has_side_effects(inst)
+                && let Some(handlers) = exception_handlers.take()
+            {
+                edges += handlers.get();
+                conditionals += 1;
             }
 
             match inst.kind {
@@ -297,10 +297,10 @@ fn analyze_simple(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
                 // If this block has a pending exception edge, create an
                 // additional path diverging towards the corresponding
                 // catch or finally block
-                if let Some((handler, handlers)) = exception_handlers.take() {
-                    if reachable_blocks.insert(handler.target.index()) {
-                        queue.push_back((handler.target, find_catch_handlers(handlers)));
-                    }
+                if let Some((handler, handlers)) = exception_handlers.take()
+                    && reachable_blocks.insert(handler.target.index())
+                {
+                    queue.push_back((handler.target, find_catch_handlers(handlers)));
                 }
             }
 
@@ -316,10 +316,10 @@ fn analyze_simple(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
                         // handlers, otherwise return from the function
                         let handlers = handlers.and_then(<[_]>::split_first);
 
-                        if let Some((handler, handlers)) = handlers {
-                            if reachable_blocks.insert(handler.target.index()) {
-                                queue.push_back((handler.target, Some(handlers)));
-                            }
+                        if let Some((handler, handlers)) = handlers
+                            && reachable_blocks.insert(handler.target.index())
+                        {
+                            queue.push_back((handler.target, Some(handlers)));
                         }
                     }
 
@@ -334,10 +334,10 @@ fn analyze_simple(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
                     }
                 }
                 InstructionKind::Return => {
-                    if let Some((handler, handlers)) = block.cleanup_handlers.split_first() {
-                        if reachable_blocks.insert(handler.target.index()) {
-                            queue.push_back((handler.target, Some(handlers)));
-                        }
+                    if let Some((handler, handlers)) = block.cleanup_handlers.split_first()
+                        && reachable_blocks.insert(handler.target.index())
+                    {
+                        queue.push_back((handler.target, Some(handlers)));
                     }
 
                     has_terminator = true;
@@ -472,23 +472,23 @@ fn traverse_cfg(
                 // If this block has a pending exception edge, create an
                 // additional path diverging towards the corresponding
                 // catch or finally block
-                if let Some((handler, handlers)) = exception_handlers.take() {
-                    if !path.visited.contains(handler.target.index()) {
-                        queue.push_back(PathState {
-                            next_block: handler.target,
-                            visited: path.visited.clone(),
-                            terminator: path.terminator,
-                            exception_handlers: find_catch_handlers(handlers),
-                        });
-                    }
+                if let Some((handler, handlers)) = exception_handlers.take()
+                    && !path.visited.contains(handler.target.index())
+                {
+                    queue.push_back(PathState {
+                        next_block: handler.target,
+                        visited: path.visited.clone(),
+                        terminator: path.terminator,
+                        exception_handlers: find_catch_handlers(handlers),
+                    });
                 }
             }
 
             // If this block has already ended, immediately mark this instruction as unreachable
-            if let Some(terminator) = path.terminator.filter(|_| has_direct_terminator) {
-                if let Some(node) = &inst.node {
-                    signals.push(node, terminator);
-                }
+            if let Some(terminator) = path.terminator.filter(|_| has_direct_terminator)
+                && let Some(node) = &inst.node
+            {
+                signals.push(node, terminator);
             }
 
             match inst.kind {
@@ -579,15 +579,15 @@ fn handle_jump<'cfg>(
         // handlers, otherwise return from the function
         let handlers = path.exception_handlers.and_then(<[_]>::split_first);
 
-        if let Some((handler, handlers)) = handlers {
-            if !path.visited.contains(handler.target.index()) {
-                queue.push_back(PathState {
-                    next_block: handler.target,
-                    visited: path.visited.clone(),
-                    terminator: path.terminator,
-                    exception_handlers: Some(handlers),
-                });
-            }
+        if let Some((handler, handlers)) = handlers
+            && !path.visited.contains(handler.target.index())
+        {
+            queue.push_back(PathState {
+                next_block: handler.target,
+                visited: path.visited.clone(),
+                terminator: path.terminator,
+                exception_handlers: Some(handlers),
+            });
         }
     } else if !path.visited.contains(block.index()) {
         // Push the jump target block to the queue if it hasn't
@@ -608,15 +608,15 @@ fn handle_return<'cfg>(
     path: &PathState<'cfg>,
     cleanup_handlers: &'cfg [ExceptionHandler],
 ) {
-    if let Some((handler, handlers)) = cleanup_handlers.split_first() {
-        if !path.visited.contains(handler.target.index()) {
-            queue.push_back(PathState {
-                next_block: handler.target,
-                visited: path.visited.clone(),
-                terminator: path.terminator,
-                exception_handlers: Some(handlers),
-            });
-        }
+    if let Some((handler, handlers)) = cleanup_handlers.split_first()
+        && !path.visited.contains(handler.target.index())
+    {
+        queue.push_back(PathState {
+            next_block: handler.target,
+            visited: path.visited.clone(),
+            terminator: path.terminator,
+            exception_handlers: Some(handlers),
+        });
     }
 }
 

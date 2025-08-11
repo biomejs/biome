@@ -29,7 +29,7 @@ jobs:
 
       - name: Warm up wasm-pack cache
         id: cache-restore
-        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: |
             ./target
@@ -53,7 +53,7 @@ jobs:
         continue-on-error: true
 
       - name: Save new wasm-pack cache
-        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: |
             ./target
@@ -67,7 +67,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20
+          node-version: 20.19.4
           cache: pnpm
 
       - name: Update package.json

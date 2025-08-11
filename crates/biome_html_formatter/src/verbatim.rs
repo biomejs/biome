@@ -9,11 +9,11 @@ use biome_formatter::prelude::{
 };
 
 use biome_formatter::{
-    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatRefWithRule,
-    FormatResult, FormatWithRule, LINE_TERMINATORS, normalize_newlines,
+    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatRefWithRule,
+    FormatResult, LINE_TERMINATORS, normalize_newlines,
 };
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode};
-use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
+use biome_rowan::{Direction, SyntaxElement, TextRange};
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
 /// a node "as is" is useful if a node contains syntax errors. Formatting a node with syntax errors
@@ -25,7 +25,7 @@ use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
 ///
 /// These nodes and tokens get tracked as [VerbatimKind::Verbatim], useful to understand
 /// if these nodes still need to have their own implementation.
-pub fn format_html_verbatim_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
+pub fn format_html_verbatim_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
         kind: VerbatimKind::Verbatim {
@@ -37,7 +37,7 @@ pub fn format_html_verbatim_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNod
 
 /// "Formats" a node according to its original formatting in the source text. It's functionally equal to
 /// [`format_html_verbatim_node`], but it doesn't track the node as [VerbatimKind::Verbatim].
-pub fn format_verbatim_skipped(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
+pub fn format_verbatim_skipped(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
         kind: VerbatimKind::Skipped,
@@ -178,7 +178,7 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
 
 /// Formats bogus nodes. The difference between this method  and `format_verbatim` is that this method
 /// doesn't track nodes/tokens as [VerbatimKind::Verbatim]. They are just printed as they are.
-pub fn format_bogus_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
+pub fn format_bogus_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
         kind: VerbatimKind::Bogus,
@@ -187,7 +187,7 @@ pub fn format_bogus_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
 }
 
 /// Format a node having formatter suppression comment applied to it
-pub fn format_suppressed_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
+pub fn format_suppressed_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode<'_> {
     FormatHtmlVerbatimNode {
         node,
         kind: VerbatimKind::Suppressed,
@@ -195,37 +195,8 @@ pub fn format_suppressed_node(node: &HtmlSyntaxNode) -> FormatHtmlVerbatimNode {
     }
 }
 
-/// Formats a node or falls back to verbatim printing if formating this node fails.
-#[derive(Copy, Clone)]
-pub struct FormatNodeOrVerbatim<F> {
-    inner: F,
-}
-
-impl<F, Item> Format<HtmlFormatContext> for FormatNodeOrVerbatim<F>
-where
-    F: FormatWithRule<HtmlFormatContext, Item = Item>,
-    Item: AstNode<Language = HtmlLanguage>,
-{
-    fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
-        let snapshot = Formatter::state_snapshot(f);
-
-        match self.inner.fmt(f) {
-            Ok(result) => Ok(result),
-
-            Err(FormatError::SyntaxError) => {
-                f.restore_state_snapshot(snapshot);
-
-                // Lists that yield errors are formatted as they were suppressed nodes.
-                // Doing so, the formatter formats the nodes/tokens as is.
-                format_suppressed_node(self.inner.item().syntax()).fmt(f)
-            }
-            Err(err) => Err(err),
-        }
-    }
-}
-
 /// Formats the leading comments of `node`
-pub const fn format_html_leading_comments(node: &HtmlSyntaxNode) -> FormatLHtmlLeadingComments {
+pub const fn format_html_leading_comments(node: &HtmlSyntaxNode) -> FormatLHtmlLeadingComments<'_> {
     FormatLHtmlLeadingComments::Node(node)
 }
 
@@ -281,7 +252,9 @@ impl<'a> Format<HtmlFormatContext> for FormatLHtmlLeadingComments<'a> {
 }
 
 /// Formats the leading comments of `node`
-pub const fn format_html_trailing_comments(node: &HtmlSyntaxNode) -> FormatLHtmlTrailingComments {
+pub const fn format_html_trailing_comments(
+    node: &HtmlSyntaxNode,
+) -> FormatLHtmlTrailingComments<'_> {
     FormatLHtmlTrailingComments::Node(node)
 }
 

@@ -85,14 +85,16 @@ fn lex_compact_mapping_in_sequence() {
         FLOW_START:0,
         PLAIN_LITERAL:1,
         FLOW_END:0,
-        NEWLINE:3,
+        NEWLINE:1,
+        WHITESPACE:2,
         PLAIN_LITERAL:1,
         COLON:1,
         WHITESPACE:1,
         FLOW_START:0,
         PLAIN_LITERAL:1,
         FLOW_END:0,
-        NEWLINE:3,
+        NEWLINE:1,
+        WHITESPACE:2,
         PLAIN_LITERAL:1,
         COLON:1,
         WHITESPACE:1,
@@ -123,7 +125,8 @@ fn lex_nested_sequence() {
         FLOW_START:0
         PLAIN_LITERAL:2
         FLOW_END:0
-        NEWLINE:3
+        NEWLINE:1
+        WHITESPACE:2
         DASH:1
         WHITESPACE:1
         FLOW_START:0

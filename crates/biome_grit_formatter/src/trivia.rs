@@ -9,7 +9,7 @@ pub(crate) struct FormatRemoved<'a> {
     token: &'a GritSyntaxToken,
 }
 
-pub(crate) fn format_removed(token: &GritSyntaxToken) -> FormatRemoved {
+pub(crate) fn format_removed(token: &GritSyntaxToken) -> FormatRemoved<'_> {
     FormatRemoved { token }
 }
 

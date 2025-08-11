@@ -315,14 +315,14 @@ impl HookConfigMaps {
     pub fn new(hooks: &UseExhaustiveDependenciesOptions) -> Self {
         let mut result = Self::default();
         for hook in &hooks.hooks {
-            if let Some(stable_result) = &hook.stable_result {
-                if *stable_result != StableHookResult::None {
-                    result.stable_config.insert(StableReactHookConfiguration {
-                        hook_name: hook.name.clone(),
-                        result: stable_result.clone(),
-                        builtin: false,
-                    });
-                }
+            if let Some(stable_result) = &hook.stable_result
+                && *stable_result != StableHookResult::None
+            {
+                result.stable_config.insert(StableReactHookConfiguration {
+                    hook_name: hook.name.clone(),
+                    result: stable_result.clone(),
+                    builtin: false,
+                });
             }
             if let (Some(closure_index), Some(dependencies_index)) =
                 (hook.closure_index, hook.dependencies_index)

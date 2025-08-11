@@ -206,7 +206,7 @@ where
         builder.finish(relative_file_name);
     }
 
-    fn test_file(&self) -> &PrettierTestFile {
+    fn test_file(&self) -> &PrettierTestFile<'_> {
         &self.test_file
     }
 }

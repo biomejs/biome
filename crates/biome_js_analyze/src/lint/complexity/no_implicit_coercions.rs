@@ -314,16 +314,14 @@ impl Rule for NoImplicitCoercions {
             RuleState::ExpressionToTypeCall(expression_info) => {
                 // This is a special case when replacing an expression which is a typeof argument.
                 // We need to add a space after typeof, otherwise `typeof+x` -> `typeofNumber(x)`.
-                if let Some(parent) = expression_info.expression.parent::<JsUnaryExpression>() {
-                    if let Ok(operator_token) = parent.operator_token() {
-                        if operator_token.trailing_trivia().is_empty() {
-                            mutation.replace_token_discard_trivia(
-                                operator_token.clone(),
-                                operator_token
-                                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                            )
-                        }
-                    }
+                if let Some(parent) = expression_info.expression.parent::<JsUnaryExpression>()
+                    && let Ok(operator_token) = parent.operator_token()
+                    && operator_token.trailing_trivia().is_empty()
+                {
+                    mutation.replace_token_discard_trivia(
+                        operator_token.clone(),
+                        operator_token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    )
                 }
 
                 let new_expression = expression_info
@@ -468,16 +466,16 @@ trait ExpressionExt {
         let Some(expression) = self.inner_expression() else {
             return false;
         };
-        if let AnyJsExpression::JsCallExpression(call_expression) = expression {
-            if let Ok(callee) = call_expression.callee() {
-                let Some(callee) = callee.inner_expression() else {
-                    return false;
-                };
-                return callee
-                    .get_callee_member_name()
-                    .filter(|name| name.text_trimmed() == "indexOf")
-                    .is_some();
-            }
+        if let AnyJsExpression::JsCallExpression(call_expression) = expression
+            && let Ok(callee) = call_expression.callee()
+        {
+            let Some(callee) = callee.inner_expression() else {
+                return false;
+            };
+            return callee
+                .get_callee_member_name()
+                .filter(|name| name.text_trimmed() == "indexOf")
+                .is_some();
         }
         false
     }
@@ -495,16 +493,13 @@ trait ExpressionExt {
                 return true;
             }
             AnyJsExpression::JsCallExpression(call) => {
-                if let Ok(callee) = call.callee() {
-                    if let Some(AnyJsExpression::JsIdentifierExpression(ident)) =
+                if let Ok(callee) = call.callee()
+                    && let Some(AnyJsExpression::JsIdentifierExpression(ident)) =
                         callee.inner_expression()
-                    {
-                        if let Ok(name) = ident.name() {
-                            if let Ok(token) = name.value_token() {
-                                return TO_NUMBER_METHODS.contains(&token.text_trimmed());
-                            }
-                        }
-                    }
+                    && let Ok(name) = ident.name()
+                    && let Ok(token) = name.value_token()
+                {
+                    return TO_NUMBER_METHODS.contains(&token.text_trimmed());
                 }
             }
             AnyJsExpression::JsUnaryExpression(expr) => {
@@ -535,10 +530,10 @@ trait ExpressionExt {
                     ) {
                         return true;
                     }
-                    if matches!(operator, JsBinaryOperator::Plus) {
-                        if let (Ok(left), Ok(right)) = (expr.left(), expr.right()) {
-                            return left.is_number() && right.is_number();
-                        }
+                    if matches!(operator, JsBinaryOperator::Plus)
+                        && let (Ok(left), Ok(right)) = (expr.left(), expr.right())
+                    {
+                        return left.is_number() && right.is_number();
                     }
                 }
             }
@@ -554,10 +549,9 @@ trait ExpressionExt {
         if let AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsNumberLiteralExpression(number_literal),
         ) = expression
+            && let Ok(token) = number_literal.value_token()
         {
-            if let Ok(token) = number_literal.value_token() {
-                return token.text_trimmed() == "1";
-            }
+            return token.text_trimmed() == "1";
         }
         false
     }
@@ -569,10 +563,9 @@ trait ExpressionExt {
         if let AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsNumberLiteralExpression(number_literal),
         ) = expression
+            && let Ok(token) = number_literal.value_token()
         {
-            if let Ok(token) = number_literal.value_token() {
-                return token.text_trimmed() == "0";
-            }
+            return token.text_trimmed() == "0";
         }
         false
     }
@@ -590,10 +583,10 @@ impl ExpressionExt for AnyJsExpression {
             .clone()
             .with_leading_trivia_pieces([])
             .and_then(|expression| {
-                if let Some(last_token) = expression.syntax().last_token() {
-                    if last_token.has_trailing_comments() {
-                        return expression.trim_trailing_trivia();
-                    }
+                if let Some(last_token) = expression.syntax().last_token()
+                    && last_token.has_trailing_comments()
+                {
+                    return expression.trim_trailing_trivia();
                 }
                 expression.with_trailing_trivia_pieces([])
             })

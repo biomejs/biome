@@ -146,8 +146,7 @@ impl Rule for NoUnusedFunctionParameters {
             // e.g. `{ a, ...rest }`
             if let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_) = &declaration
-            {
-                if declaration
+                && declaration
                     .syntax()
                     .siblings(Direction::Next)
                     .last()
@@ -157,9 +156,8 @@ impl Rule for NoUnusedFunctionParameters {
                             JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
                         )
                     })
-                {
-                    return None;
-                }
+            {
+                return None;
             }
         }
 

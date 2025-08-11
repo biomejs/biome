@@ -306,16 +306,16 @@ impl Rule for NoVoidElementsWithChildren {
                         .into_iter()
                         .filter_map(|attribute| {
                             if let AnyJsxAttribute::JsxAttribute(attribute) = &attribute {
-                                if let Some(children_prop) = children_prop {
-                                    if children_prop == attribute {
-                                        return None;
-                                    }
+                                if let Some(children_prop) = children_prop
+                                    && children_prop == attribute
+                                {
+                                    return None;
                                 }
 
-                                if let Some(dangerous_prop_cause) = dangerous_prop_cause {
-                                    if dangerous_prop_cause == attribute {
-                                        return None;
-                                    }
+                                if let Some(dangerous_prop_cause) = dangerous_prop_cause
+                                    && dangerous_prop_cause == attribute
+                                {
+                                    return None;
                                 }
                             }
                             Some(attribute)
@@ -346,10 +346,10 @@ impl Rule for NoVoidElementsWithChildren {
                     children_cause,
                 } = &state.cause
                 {
-                    if *children_cause {
-                        if let Some(children) = react_create_element.children.as_ref() {
-                            mutation.remove_node(children.clone());
-                        }
+                    if *children_cause
+                        && let Some(children) = react_create_element.children.as_ref()
+                    {
+                        mutation.remove_node(children.clone());
                     }
                     if let Some(children_prop) = children_prop.as_ref() {
                         mutation.remove_node(children_prop.clone());

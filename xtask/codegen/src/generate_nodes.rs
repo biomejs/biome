@@ -1069,18 +1069,14 @@ fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> 
                     // last element, otherwise Rust warns about the value being unused.
                     if is_last {
                         quote! {
-                            if let Some(element) = &current_element {
-                                if #field_predicate {
-                                    slot_map[#this_field_index] = current_slot;
-                                }
+                            if let Some(element) = &current_element && #field_predicate {
+                                slot_map[#this_field_index] = current_slot;
                             }
                         }
                     } else {
                         quote! {
-                            if let Some(element) = &current_element {
-                                if #field_predicate {
-                                    slot_map[#this_field_index] = current_slot;
-                                }
+                            if let Some(element) = &current_element && #field_predicate {
+                                slot_map[#this_field_index] = current_slot;
                             }
                             current_slot += 1;
                             current_element = children.next();

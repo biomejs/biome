@@ -208,7 +208,7 @@ impl Type {
     }
 
     #[inline]
-    pub fn resolved_data(&self) -> Option<ResolvedTypeData> {
+    pub fn resolved_data(&self) -> Option<ResolvedTypeData<'_>> {
         self.resolver.get_by_resolved_id(self.id)
     }
 

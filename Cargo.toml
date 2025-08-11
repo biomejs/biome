@@ -189,7 +189,7 @@ tests_macros         = { path = "./crates/tests_macros" }
 # Crates needed in the workspace
 anyhow               = "1.0.98"
 bpaf                 = { version = "0.9.20", features = ["derive"] }
-camino               = "1.1.10"
+camino               = "1.1.11"
 cfg-if               = "1.0.1"
 countme              = "3.0.1"
 crossbeam            = "0.8.4"
@@ -200,7 +200,7 @@ getrandom            = "0.2.15"
 globset              = "0.4.16"
 grit-pattern-matcher = "0.5.1"
 grit-util            = "0.5.1"
-hashbrown            = { version = "0.15.4", default-features = false }
+hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.23"
 indexmap             = { version = "2.10.0" }
 insta                = "1.43.1"
@@ -208,7 +208,7 @@ mimalloc             = "0.1.47"
 papaya               = "0.2.3"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 proc-macro-error2    = { version = "2.0.1", default-features = false }
-proc-macro2          = "1.0.95"
+proc-macro2          = "1.0.96"
 quickcheck           = "1.0.3"
 quickcheck_macros    = "1.1.0"
 quote                = "1.0.40"
@@ -228,7 +228,7 @@ terminal_size        = "0.4.2"
 tikv-jemallocator    = "0.6.0"
 tokio                = "1.47.1"
 tower                = "0.5.2"
-tower-lsp-server     = "0.22.0"
+tower-lsp-server     = "0.22.1"
 tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }
 tracing-subscriber   = "0.3.19"
 unicode-bom          = "2.0.3"

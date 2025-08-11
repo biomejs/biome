@@ -238,18 +238,17 @@ impl Arguments {
                 }
             }
             // Fallback: try to align by the last component of the static prefix
-            if start_idx.is_none() {
-                if let Some(last_sc) = static_components.last() {
-                    if let Some(pos) = parent_components.iter().rposition(|c| c == last_sc) {
-                        start_idx = Some(pos);
-                    }
-                }
+            if start_idx.is_none()
+                && let Some(last_sc) = static_components.last()
+                && let Some(pos) = parent_components.iter().rposition(|c| c == last_sc)
+            {
+                start_idx = Some(pos);
             }
             // Fallback: start after a "tests" directory if present
-            if start_idx.is_none() {
-                if let Some(pos) = parent_components.iter().position(|c| c == "tests") {
-                    start_idx = Some(pos + 1);
-                }
+            if start_idx.is_none()
+                && let Some(pos) = parent_components.iter().position(|c| c == "tests")
+            {
+                start_idx = Some(pos + 1);
             }
 
             let path_components: Vec<String> = match start_idx {

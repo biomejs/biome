@@ -21,7 +21,7 @@ use biome_text_size::TextRange;
 ///
 /// These nodes and tokens get tracked as [VerbatimKind::Verbatim], useful to understand
 /// if these nodes still need to have their own implementation.
-pub fn format_js_verbatim_node(node: &JsSyntaxNode) -> FormatJsVerbatimNode {
+pub fn format_js_verbatim_node(node: &JsSyntaxNode) -> FormatJsVerbatimNode<'_> {
     FormatJsVerbatimNode {
         node,
         kind: VerbatimKind::Verbatim {
@@ -151,7 +151,7 @@ impl Format<JsFormatContext> for FormatJsVerbatimNode<'_> {
 
 /// Formats bogus nodes. The difference between this method  and `format_verbatim` is that this method
 /// doesn't track nodes/tokens as [VerbatimKind::Verbatim]. They are just printed as they are.
-pub fn format_bogus_node(node: &JsSyntaxNode) -> FormatJsVerbatimNode {
+pub fn format_bogus_node(node: &JsSyntaxNode) -> FormatJsVerbatimNode<'_> {
     FormatJsVerbatimNode {
         node,
         kind: VerbatimKind::Bogus,
@@ -160,7 +160,7 @@ pub fn format_bogus_node(node: &JsSyntaxNode) -> FormatJsVerbatimNode {
 }
 
 /// Format a node having formatter suppression comment applied to it
-pub fn format_suppressed_node(node: &JsSyntaxNode) -> FormatJsVerbatimNode {
+pub fn format_suppressed_node(node: &JsSyntaxNode) -> FormatJsVerbatimNode<'_> {
     FormatJsVerbatimNode {
         node,
         kind: VerbatimKind::Suppressed,
@@ -169,7 +169,7 @@ pub fn format_suppressed_node(node: &JsSyntaxNode) -> FormatJsVerbatimNode {
 }
 
 /// Format a node having formatter suppression comment applied to it
-pub fn format_suppressed_node_skip_comments(node: &JsSyntaxNode) -> FormatJsVerbatimNode {
+pub fn format_suppressed_node_skip_comments(node: &JsSyntaxNode) -> FormatJsVerbatimNode<'_> {
     FormatJsVerbatimNode {
         node,
         kind: VerbatimKind::Suppressed,

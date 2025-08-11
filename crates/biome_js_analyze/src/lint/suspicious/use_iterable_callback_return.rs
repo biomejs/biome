@@ -266,14 +266,14 @@ struct FunctionReturnsInfo {
 /// the return statements. It also counts the number of blocks that do not have any return
 /// statements.
 fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
-    if let Some(arrow_expression) = JsArrowFunctionExpression::cast_ref(&cfg.node) {
-        if let Ok(AnyJsFunctionBody::AnyJsExpression(expression)) = arrow_expression.body() {
-            return FunctionReturnsInfo {
-                has_paths_without_returns: false,
-                returns_with_value: vec![expression.range()],
-                returns_without_value: Vec::new(),
-            };
-        }
+    if let Some(arrow_expression) = JsArrowFunctionExpression::cast_ref(&cfg.node)
+        && let Ok(AnyJsFunctionBody::AnyJsExpression(expression)) = arrow_expression.body()
+    {
+        return FunctionReturnsInfo {
+            has_paths_without_returns: false,
+            returns_with_value: vec![expression.range()],
+            returns_without_value: Vec::new(),
+        };
     }
 
     let mut function_returns_info = FunctionReturnsInfo {

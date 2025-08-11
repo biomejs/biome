@@ -191,31 +191,29 @@ impl Rule for NoUnusedPrivateClassMembers {
                     for modifier in modifiers.iter() {
                         if let Some(accessibility_modifier) =
                             TsAccessibilityModifier::cast(modifier.into_syntax())
+                            && accessibility_modifier.is_private()
                         {
-                            if accessibility_modifier.is_private() {
-                                mutation.remove_node(accessibility_modifier);
-                                break;
-                            }
+                            mutation.remove_node(accessibility_modifier);
+                            break;
                         }
                     }
                     // If needed, rename with underscore prefix
-                    if *rename_with_underscore {
-                        if let Ok(AnyJsFormalParameter::JsFormalParameter(param)) =
+                    if *rename_with_underscore
+                        && let Ok(AnyJsFormalParameter::JsFormalParameter(param)) =
                             ts_property_param.formal_parameter()
-                        {
-                            let binding = param.binding().ok()?;
-                            let identifier_binding =
-                                binding.as_any_js_binding()?.as_js_identifier_binding()?;
-                            let name_token = identifier_binding.name_token().ok()?;
-                            let name_trimmed = name_token.text_trimmed();
-                            let new_name = format!("_{name_trimmed}");
-                            if !mutation.rename_node_declaration(
-                                ctx.model(),
-                                identifier_binding,
-                                &new_name,
-                            ) {
-                                return None;
-                            }
+                    {
+                        let binding = param.binding().ok()?;
+                        let identifier_binding =
+                            binding.as_any_js_binding()?.as_js_identifier_binding()?;
+                        let name_token = identifier_binding.name_token().ok()?;
+                        let name_trimmed = name_token.text_trimmed();
+                        let new_name = format!("_{name_trimmed}");
+                        if !mutation.rename_node_declaration(
+                            ctx.model(),
+                            identifier_binding,
+                            &new_name,
+                        ) {
+                            return None;
                         }
                     }
                 }
@@ -330,19 +328,19 @@ fn get_constructor_params(class_declaration: &JsClassDeclaration) -> FxHashSet<A
             _ => None,
         });
 
-    if let Some(constructor_member) = constructor_member {
-        if let Ok(constructor_params) = constructor_member.parameters() {
-            return constructor_params
-                .parameters()
-                .iter()
-                .filter_map(|param| match param.ok()? {
-                    biome_js_syntax::AnyJsConstructorParameter::TsPropertyParameter(
-                        ts_property,
-                    ) => Some(ts_property.into()),
-                    _ => None,
-                })
-                .collect();
-        }
+    if let Some(constructor_member) = constructor_member
+        && let Ok(constructor_params) = constructor_member.parameters()
+    {
+        return constructor_params
+            .parameters()
+            .iter()
+            .filter_map(|param| match param.ok()? {
+                biome_js_syntax::AnyJsConstructorParameter::TsPropertyParameter(ts_property) => {
+                    Some(ts_property.into())
+                }
+                _ => None,
+            })
+            .collect();
     }
 
     FxHashSet::default()

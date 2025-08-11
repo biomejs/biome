@@ -141,7 +141,7 @@ impl LanguageKind {
         format!("{self}_target_language")
     }
 
-    pub fn kinds(&self) -> KindsSrc {
+    pub fn kinds(&self) -> KindsSrc<'_> {
         match self {
             Self::Js => JS_KINDS_SRC,
             Self::Css => CSS_KINDS_SRC,

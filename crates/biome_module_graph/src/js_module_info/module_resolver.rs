@@ -318,7 +318,7 @@ impl TypeResolver for ModuleResolver {
         self.types.get_by_id(id)
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
         match id.level() {
             TypeResolverLevel::Full => Some(ResolvedTypeData::from((id, self.get_by_id(id.id())))),
             TypeResolverLevel::Thin => {
@@ -401,7 +401,11 @@ impl TypeResolver for ModuleResolver {
         }
     }
 
-    fn resolve_expression(&mut self, _scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+    fn resolve_expression(
+        &mut self,
+        _scope_id: ScopeId,
+        expr: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
         let id = self.resolved_id_for_expression(expr);
         match self.get_by_resolved_id(id) {
             Some(resolved) => Cow::Owned(resolved.to_data()),

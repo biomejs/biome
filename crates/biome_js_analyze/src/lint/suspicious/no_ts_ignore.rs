@@ -63,14 +63,13 @@ impl Rule for NoTsIgnore {
             let comments: Vec<_> = leading_trivia
                 .pieces()
                 .filter_map(|trivia| {
-                    if let Some(comment) = trivia.as_comments() {
-                        if let Some((index, _)) = comment.text().match_indices("@ts-ignore").next()
-                        {
-                            return Some((
-                                token.clone(),
-                                comment.text_range().add_start(TextSize::from(index as u32)),
-                            ));
-                        }
+                    if let Some(comment) = trivia.as_comments()
+                        && let Some((index, _)) = comment.text().match_indices("@ts-ignore").next()
+                    {
+                        return Some((
+                            token.clone(),
+                            comment.text_range().add_start(TextSize::from(index as u32)),
+                        ));
                     }
                     None
                 })

@@ -621,25 +621,24 @@ impl AnyPotentialTsOverloadSignature {
     fn wrapper_syntax(&self) -> JsSyntaxNode {
         match self {
             Self::TsDeclareFunctionDeclaration(function_decl) => {
-                if let Some(parent) = function_decl.syntax().parent() {
-                    if matches!(
+                if let Some(parent) = function_decl.syntax().parent()
+                    && matches!(
                         parent.kind(),
                         JsSyntaxKind::JS_EXPORT | JsSyntaxKind::TS_DECLARE_STATEMENT
-                    ) {
-                        return parent;
-                    }
+                    )
+                {
+                    return parent;
                 }
             }
             Self::TsDeclareFunctionExportDefaultDeclaration(function_decl) => {
-                if let Some(parent) = function_decl.syntax().parent() {
-                    if matches!(
+                if let Some(parent) = function_decl.syntax().parent()
+                    && matches!(
                         parent.kind(),
                         JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE
-                    ) {
-                        if let Some(export) = parent.parent() {
-                            return export;
-                        }
-                    }
+                    )
+                    && let Some(export) = parent.parent()
+                {
+                    return export;
                 }
             }
             _ => {}
@@ -710,15 +709,14 @@ impl OverloadInfo {
     fn from_overload_signature(signature: &AnyPotentialTsOverloadSignature) -> Option<Self> {
         let name = signature.name();
         let prev_sibling = signature.prev_sibling();
-        if let Some(prev_sibling) = prev_sibling {
-            if let Some(prev_signature) =
+        if let Some(prev_sibling) = prev_sibling
+            && let Some(prev_signature) =
                 AnyPotentialTsOverloadSignature::cast(prev_sibling.clone())
-            {
-                // If the previous signature has the same name,
-                // return None as it is not the first overload.
-                if name.is_name_equal(&prev_signature.name()) {
-                    return None;
-                }
+        {
+            // If the previous signature has the same name,
+            // return None as it is not the first overload.
+            if name.is_name_equal(&prev_signature.name()) {
+                return None;
             }
         }
         let mut overload_signatures = vec![signature.clone()];
@@ -1187,10 +1185,10 @@ bogus_types![
 impl TypeEquals for biome_js_syntax::AnyJsExpression {
     fn is_type_equal(&self, other: &Self) -> bool {
         // We only compare literal expressions, the rest would be too complex.
-        if let (Self::AnyJsLiteralExpression(a), Self::AnyJsLiteralExpression(b)) = (self, other) {
-            if let (Ok(a), Ok(b)) = (a.value_token(), b.value_token()) {
-                return a.text_trimmed() == b.text_trimmed();
-            }
+        if let (Self::AnyJsLiteralExpression(a), Self::AnyJsLiteralExpression(b)) = (self, other)
+            && let (Ok(a), Ok(b)) = (a.value_token(), b.value_token())
+        {
+            return a.text_trimmed() == b.text_trimmed();
         }
         false
     }

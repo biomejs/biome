@@ -87,13 +87,13 @@ impl Rule for NoClassAssign {
         let node = ctx.query();
         let model = ctx.model();
 
-        if let Some(id) = node.id() {
-            if let Some(id_binding) = id.as_js_identifier_binding() {
-                return id_binding
-                    .all_writes(model)
-                    .collect::<Vec<_>>()
-                    .into_boxed_slice();
-            }
+        if let Some(id) = node.id()
+            && let Some(id_binding) = id.as_js_identifier_binding()
+        {
+            return id_binding
+                .all_writes(model)
+                .collect::<Vec<_>>()
+                .into_boxed_slice();
         }
 
         Vec::new().into_boxed_slice()
