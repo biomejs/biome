@@ -19,7 +19,7 @@ expression: invalid.biome.jsonc
 
 # Diagnostics
 ```
-invalid.biome.jsonc:6:7 lint/nursery/useBiomeIgnoreFolder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.biome.jsonc:6:7 lint/suspicious/useBiomeIgnoreFolder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Incorrect usage of ignore a folder found.
   
@@ -40,7 +40,7 @@ invalid.biome.jsonc:6:7 lint/nursery/useBiomeIgnoreFolder  FIXABLE  ━━━━
 ```
 
 ```
-invalid.biome.jsonc:7:7 lint/nursery/useBiomeIgnoreFolder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.biome.jsonc:7:7 lint/suspicious/useBiomeIgnoreFolder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Incorrect usage of ignore a folder found.
   
