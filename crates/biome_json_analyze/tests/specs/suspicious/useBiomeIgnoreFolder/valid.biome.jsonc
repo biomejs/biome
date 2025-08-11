@@ -1,0 +1,10 @@
+// should not generate diagnostics
+{
+  "files": {
+    "includes": [
+      "**",
+      "!dist",
+      "!**/dist"
+    ]
+  }
+}

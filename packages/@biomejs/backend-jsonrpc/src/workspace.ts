@@ -2122,6 +2122,10 @@ export interface Suspicious {
 	 */
 	noAsyncPromiseExecutor?: RuleConfiguration_for_NoAsyncPromiseExecutorOptions;
 	/**
+	 * Prevents the use of the ! pattern in the first position of files.includes in the configuration file.
+	 */
+	noBiomeFirstException?: RuleFixConfiguration_for_NoBiomeFirstExceptionOptions;
+	/**
 	 * Disallow bitwise operators.
 	 */
 	noBitwiseOperators?: RuleConfiguration_for_NoBitwiseOperatorsOptions;
@@ -2429,6 +2433,10 @@ export interface Suspicious {
 	 * Ensure async functions utilize await.
 	 */
 	useAwait?: RuleConfiguration_for_UseAwaitOptions;
+	/**
+	 * Promotes the correct usage for ignoring folders in the configuration file.
+	 */
+	useBiomeIgnoreFolder?: RuleFixConfiguration_for_UseBiomeIgnoreFolderOptions;
 	/**
 	 * Enforce default clauses in switch statements to be last
 	 */
@@ -3295,6 +3303,9 @@ export type RuleConfiguration_for_NoAssignInExpressionsOptions =
 export type RuleConfiguration_for_NoAsyncPromiseExecutorOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAsyncPromiseExecutorOptions;
+export type RuleFixConfiguration_for_NoBiomeFirstExceptionOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoBiomeFirstExceptionOptions;
 export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
@@ -3523,6 +3534,9 @@ export type RuleConfiguration_for_UseAdjacentOverloadSignaturesOptions =
 export type RuleConfiguration_for_UseAwaitOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAwaitOptions;
+export type RuleFixConfiguration_for_UseBiomeIgnoreFolderOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseBiomeIgnoreFolderOptions;
 export type RuleConfiguration_for_UseDefaultSwitchClauseLastOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseDefaultSwitchClauseLastOptions;
@@ -6664,6 +6678,20 @@ export interface RuleWithOptions_for_NoAsyncPromiseExecutorOptions {
 	 */
 	options: NoAsyncPromiseExecutorOptions;
 }
+export interface RuleWithFixOptions_for_NoBiomeFirstExceptionOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoBiomeFirstExceptionOptions;
+}
 export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -7524,6 +7552,20 @@ export interface RuleWithOptions_for_UseAwaitOptions {
 	 */
 	options: UseAwaitOptions;
 }
+export interface RuleWithFixOptions_for_UseBiomeIgnoreFolderOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseBiomeIgnoreFolderOptions;
+}
 export interface RuleWithOptions_for_UseDefaultSwitchClauseLastOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8160,6 +8202,7 @@ export interface NoApproximativeNumericConstantOptions {}
 export interface NoArrayIndexKeyOptions {}
 export interface NoAssignInExpressionsOptions {}
 export interface NoAsyncPromiseExecutorOptions {}
+export interface NoBiomeFirstExceptionOptions {}
 export interface NoBitwiseOperatorsOptions {
 	/**
 	 * Allows a list of bitwise operators to be used as exceptions.
@@ -8263,6 +8306,7 @@ export interface NoVarOptions {}
 export interface NoWithOptions {}
 export interface UseAdjacentOverloadSignaturesOptions {}
 export interface UseAwaitOptions {}
+export interface UseBiomeIgnoreFolderOptions {}
 export interface UseDefaultSwitchClauseLastOptions {}
 export interface UseErrorMessageOptions {}
 export interface UseGetterReturnOptions {}
@@ -8649,7 +8693,6 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noFloatingPromises"
@@ -8666,9 +8709,9 @@ export type Category =
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessUndefined"
+	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
-	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentObjectDefinition"
@@ -8777,6 +8820,7 @@ export type Category =
 	| "lint/suspicious/noArrayIndexKey"
 	| "lint/suspicious/noAssignInExpressions"
 	| "lint/suspicious/noAsyncPromiseExecutor"
+	| "lint/suspicious/noBiomeFirstException"
 	| "lint/suspicious/noBitwiseOperators"
 	| "lint/suspicious/noCatchAssign"
 	| "lint/suspicious/noClassAssign"
@@ -8853,6 +8897,7 @@ export type Category =
 	| "lint/suspicious/noWith"
 	| "lint/suspicious/useAdjacentOverloadSignatures"
 	| "lint/suspicious/useAwait"
+	| "lint/suspicious/useBiomeIgnoreFolder"
 	| "lint/suspicious/useIterableCallbackReturn"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
 	| "lint/suspicious/useErrorMessage"
