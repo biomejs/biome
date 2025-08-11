@@ -30,7 +30,11 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
     fn is_bogus(&self) -> bool {
         matches!(
             self,
-            Self::YAML_BOGUS | Self::YAML_BOGUS_BLOCK_NODE | Self::YAML_BOGUS_BLOCK_MAP_ENTRY
+            Self::YAML_BOGUS
+                | Self::YAML_BOGUS_BLOCK_NODE
+                | Self::YAML_BOGUS_BLOCK_MAP_ENTRY
+                | Self::YAML_BOGUS_BLOCK_HEADER
+                | Self::YAML_BOGUS_FLOW_NODE
         )
     }
 
@@ -38,6 +42,7 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
         match self {
             kind if AnyYamlBlockMapEntry::can_cast(*kind) => Self::YAML_BOGUS_BLOCK_MAP_ENTRY,
             kind if AnyYamlBlockNode::can_cast(*kind) => Self::YAML_BOGUS_BLOCK_NODE,
+            kind if AnyYamlBlockHeader::can_cast(*kind) => Self::YAML_BOGUS_BLOCK_HEADER,
             kind if AnyYamlFlowNode::can_cast(*kind) => Self::YAML_BOGUS_FLOW_NODE,
             _ => Self::YAML_BOGUS,
         }
@@ -67,16 +72,6 @@ impl biome_rowan::SyntaxKind for YamlSyntaxKind {
 
     fn to_string(&self) -> Option<&'static str> {
         Self::to_string(self)
-    }
-}
-
-impl YamlSyntaxKind {
-    pub fn is_trivia(self) -> bool {
-        matches!(self, Self::WHITESPACE)
-    }
-
-    pub fn is_comments(self) -> bool {
-        matches!(self, Self::COMMENT)
     }
 }
 

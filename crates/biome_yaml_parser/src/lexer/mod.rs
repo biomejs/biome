@@ -76,6 +76,7 @@ impl<'src> YamlLexer<'src> {
             // ':', '?', '-' can be a valid plain token start
             (b'?' | b':', _) => self.consume_mapping_key(current),
             (b'-', _) => self.consume_sequence_entry(),
+            (b'|' | b'>', _) => self.consume_block_scalar(current),
             _ => self.consume_unexpected_token().into(),
         };
         self.tokens.append(&mut tokens);
@@ -155,12 +156,8 @@ impl<'src> YamlLexer<'src> {
                 tokens.push_front(LexToken::pseudo(FLOW_START, start));
                 // Consume any trailing trivia remaining before closing the flow, as we must not
                 // have trailing trivia followed FLOW_END token
-                if self.current_byte().is_some_and(is_space) {
-                    tokens.push_back(self.consume_whitespace_token());
-                }
-                if self.current_byte().is_some_and(|c| c == b'#') {
-                    tokens.push_back(self.consume_comment());
-                }
+                let mut trivia = self.consume_trivia(true);
+                tokens.append(&mut trivia);
                 tokens.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
             }
         } else if let Some(mut trivia) = self.cached_scope_closing_tokens.take() {
@@ -175,10 +172,125 @@ impl<'src> YamlLexer<'src> {
         tokens
     }
 
+    fn consume_block_scalar(&mut self, current: u8) -> LinkedList<LexToken> {
+        debug_assert!(matches!(current, b'|' | b'>'));
+
+        let mut tokens = LinkedList::new();
+
+        let style_token = if current == b'|' {
+            self.consume_byte_as_token(T![|])
+        } else {
+            self.consume_byte_as_token(T![>])
+        };
+        tokens.push_back(style_token);
+
+        let mut headers = self.consume_block_header_tokens();
+        tokens.append(&mut headers);
+
+        // The spec only allows trailing trivia followed a block header
+        let mut trivia = self.consume_trivia(true);
+        tokens.append(&mut trivia);
+
+        // So that the block content can cleanly start at a newline
+        while let Some(c) = self.current_byte() {
+            if is_break(c) {
+                break;
+            }
+            tokens.push_back(self.consume_unexpected_token());
+        }
+
+        tokens.push_back(self.lex_block_content());
+
+        // Block content trailing trivia
+        if let Some(mut trivia) = self.cached_scope_closing_tokens.take() {
+            tokens.append(&mut trivia);
+        }
+
+        tokens
+    }
+
+    /// Lex block scalar header indicators, returning tokens and indent size
+    fn consume_block_header_tokens(&mut self) -> LinkedList<LexToken> {
+        let mut tokens = LinkedList::new();
+
+        while let Some(current) = self.current_byte() {
+            match current {
+                b'0'..=b'9' => {
+                    tokens.push_back(self.consume_indentation_indicator(current));
+                }
+                b'-' => {
+                    tokens.push_back(self.consume_byte_as_token(T![-]));
+                }
+                b'+' => {
+                    tokens.push_back(self.consume_byte_as_token(T![+]));
+                }
+                _ => break,
+            }
+        }
+
+        tokens
+    }
+
+    fn consume_indentation_indicator(&mut self, first_digit: u8) -> LexToken {
+        debug_assert!(first_digit.is_ascii_digit());
+        let start_coordinate = self.current_coordinate;
+        let start_pos = self.text_position();
+        self.advance(1);
+
+        let has_more_digits = self.current_byte().is_some_and(|c| c.is_ascii_digit());
+        let starts_with_zero = first_digit == b'0';
+
+        if starts_with_zero || has_more_digits {
+            // Consume any remaining digits for better diagnostic
+            while self.current_byte().is_some_and(|c| c.is_ascii_digit()) {
+                self.advance(1);
+            }
+
+            let err = ParseDiagnostic::new(
+                "Block scalar indentation indicator must be between '1' and '9'",
+                start_pos..self.text_position(),
+            );
+            self.diagnostics.push(err);
+        }
+
+        LexToken::new(
+            INDENTATION_INDICATOR,
+            start_coordinate,
+            self.current_coordinate,
+        )
+    }
+
+    /// Lex the content of a block scalar.
+    /// We don't need to take into account the indentation size declared in the header, since it's
+    /// only relevant when we need to extract/format the content of the scalar.
+    /// By ignoring the declared indentation and just lex the block content like a plain
+    /// literal, we can provide better diagnostic messages when the content is indented less
+    /// than the declared value.
+    /// A syntax analyzer rule can then be used to identify erroneous blocks.
+    /// Start with the newline followed the header, to handle cases where the block content is
+    /// empty
+    fn lex_block_content(&mut self) -> LexToken {
+        debug_assert!(self.current_byte().is_none_or(is_break));
+        let start = self.current_coordinate;
+
+        while let Some(current) = self.current_byte() {
+            if is_break(current) {
+                let might_be_token_end = self.current_coordinate;
+                if !self.is_scalar_continuation() {
+                    return LexToken::new(BLOCK_CONTENT_LITERAL, start, might_be_token_end);
+                }
+            } else {
+                self.advance(1);
+            }
+        }
+
+        LexToken::new(BLOCK_CONTENT_LITERAL, start, self.current_coordinate)
+    }
+
     fn evaluate_block_scope(&mut self) -> LinkedList<LexToken> {
         debug_assert!(self.current_byte().is_some_and(is_break));
         let start = self.current_coordinate;
-        let mut trivia = self.consume_trivia();
+        let mut trivia = self.consume_trivia(false);
         let mut scope_end_tokens = self.close_scope(start);
         scope_end_tokens.append(&mut trivia);
         scope_end_tokens
@@ -327,7 +439,7 @@ impl<'src> YamlLexer<'src> {
                 self.consume_whitespaces();
             } else if is_break(c) {
                 let might_be_token_end = self.current_coordinate;
-                if !self.is_literal_continuation() {
+                if !self.is_scalar_continuation() {
                     return LexToken::new(PLAIN_LITERAL, start, might_be_token_end);
                 }
             } else {
@@ -359,7 +471,7 @@ impl<'src> YamlLexer<'src> {
                 Some(c) if is_space(c) => self.consume_whitespaces(),
                 Some(c) if is_break(c) => {
                     let might_be_token_end = self.current_coordinate;
-                    if !self.is_literal_continuation() {
+                    if !self.is_scalar_continuation() {
                         break might_be_token_end;
                     }
                 }
@@ -398,7 +510,7 @@ impl<'src> YamlLexer<'src> {
                 }
                 Some(current) if is_break(current) => {
                     let might_be_token_end = self.current_coordinate;
-                    if !self.is_literal_continuation() {
+                    if !self.is_scalar_continuation() {
                         break might_be_token_end;
                     }
                 }
@@ -429,8 +541,8 @@ impl<'src> YamlLexer<'src> {
     fn evaluate_flow_scope(&mut self) -> Option<LinkedList<LexToken>> {
         debug_assert!(self.current_byte().is_some_and(is_break));
         let start = self.current_coordinate;
-        let mut trivia = self.consume_trivia();
-        if self.no_longer_flow() {
+        let mut trivia = self.consume_trivia(false);
+        if self.breach_parent_scope() {
             let mut scope_end_tokens = self.close_scope(start);
             scope_end_tokens.append(&mut trivia);
             self.cached_scope_closing_tokens = Some(scope_end_tokens);
@@ -440,12 +552,15 @@ impl<'src> YamlLexer<'src> {
         }
     }
 
-    fn consume_trivia(&mut self) -> LinkedList<LexToken> {
+    fn consume_trivia(&mut self, trailing: bool) -> LinkedList<LexToken> {
         let mut trivia = LinkedList::new();
         while let Some(current) = self.current_byte() {
             if is_space(current) {
                 trivia.push_back(self.consume_whitespace_token());
             } else if is_break(current) {
+                if trailing {
+                    break;
+                }
                 trivia.push_back(self.consume_newline_token());
             } else if current == b'#' {
                 trivia.push_back(self.consume_comment());
@@ -456,7 +571,7 @@ impl<'src> YamlLexer<'src> {
         trivia
     }
 
-    fn is_literal_continuation(&mut self) -> bool {
+    fn is_scalar_continuation(&mut self) -> bool {
         debug_assert!(self.current_byte().is_some_and(is_break));
         let start = self.current_coordinate;
         let mut trivia = LinkedList::new();
@@ -469,7 +584,7 @@ impl<'src> YamlLexer<'src> {
                 break;
             }
         }
-        if self.no_longer_flow() {
+        if self.breach_parent_scope() {
             let mut scope_end_tokens = self.close_scope(start);
             scope_end_tokens.append(&mut trivia);
             self.cached_scope_closing_tokens = Some(scope_end_tokens);
@@ -529,9 +644,7 @@ impl<'src> YamlLexer<'src> {
         self.current_byte().is_some_and(|c| c == b':') && self.peek_byte().is_none_or(is_blank)
     }
 
-    // Flow node must be indented by at least one more space than the parent's scope
-    // https://yaml.org/spec/1.2.2/#rule-s-l+flow-in-block
-    fn no_longer_flow(&self) -> bool {
+    fn breach_parent_scope(&self) -> bool {
         self.scopes
             .last()
             .is_some_and(|scope| !scope.indent(self.current_coordinate))
