@@ -9529,7 +9529,6 @@ export interface Workspace {
 	isPathIgnored(params: PathIsIgnoredParams): Promise<boolean>;
 	updateModuleGraph(params: UpdateModuleGraphParams): Promise<void>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
-	fileExists(params: FileExitsParams): Promise<boolean>;
 	checkFileSize(params: CheckFileSizeParams): Promise<CheckFileSizeResult>;
 	getFileContent(params: GetFileContentParams): Promise<string>;
 	getControlFlowGraph(params: GetControlFlowGraphParams): Promise<string>;
@@ -9586,9 +9585,6 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		getSyntaxTree(params) {
 			return transport.request("biome/get_syntax_tree", params);
-		},
-		fileExists(params) {
-			return transport.request("biome/file_exists", params);
 		},
 		checkFileSize(params) {
 			return transport.request("biome/check_file_size", params);
