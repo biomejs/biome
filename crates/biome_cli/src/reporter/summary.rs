@@ -102,10 +102,10 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
                             && category.name().starts_with("lint/")
                         {
                             files_to_diagnostics.insert_rule_for_file(
-                                        category.name(),
-                                        severity,
-                                        location,
-                                    );
+                                category.name(),
+                                severity,
+                                location,
+                            );
                         }
                     } else {
                         continue;
@@ -124,11 +124,7 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
                         || category.name().starts_with("suppressions/")
                         || category.name().starts_with("assist/"))
                 {
-                    files_to_diagnostics.insert_rule_for_file(
-                                category.name(),
-                                severity,
-                                location,
-                            );
+                    files_to_diagnostics.insert_rule_for_file(category.name(), severity, location);
                 }
 
                 if (execution.is_check() || execution.is_format() || execution.is_ci())

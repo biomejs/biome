@@ -953,11 +953,10 @@ impl Rule for OrganizeImports {
                         if prev_key.is_mergeable(key)
                             && let Some(merged) =
                                 merge(prev_item.as_ref(), item.as_ref(), sort_order)
-                            {
-                                import_keys[i - 1].was_merged = true;
-                                import_keys[i - 1].item = Some(merged);
-                                import_keys[i].item = None;
-
+                        {
+                            import_keys[i - 1].was_merged = true;
+                            import_keys[i - 1].item = Some(merged);
+                            import_keys[i].item = None;
                         }
                         i -= 1;
                     }
