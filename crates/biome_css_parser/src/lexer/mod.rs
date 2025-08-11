@@ -938,10 +938,6 @@ impl<'src> CssLexer<'src> {
             b"reference" => REFERENCE_KW,
             b"config" => CONFIG_KW,
             b"plugin" => PLUGIN_KW,
-            // b"--alpha" => _ALPHA_KW,
-            // b"--spacing" => _SPACING_KW,
-            // b"--value" => _VALUE_KW,
-            // b"--modifier" => _MODIFIER_KW,
             _ => IDENT,
         }
     }
