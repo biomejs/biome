@@ -228,7 +228,7 @@ terminal_size        = "0.4.2"
 tikv-jemallocator    = "0.6.0"
 tokio                = "1.47.1"
 tower                = "0.5.2"
-tower-lsp-server     = "0.22.0"
+tower-lsp-server     = "0.22.1"
 tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }
 tracing-subscriber   = "0.3.19"
 unicode-bom          = "2.0.3"
