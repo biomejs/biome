@@ -127,10 +127,10 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "reference",
         "config",
         "plugin",
-        "--alpha",
-        "--spacing",
-        "--value",
-        "--modifier",
+        // "--alpha",
+        // "--spacing",
+        // "--value",
+        // "--modifier",
         // HERE: Add new regular keywords _above_ here. Be sure to also add them
         // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords
@@ -511,14 +511,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "TW_REFERENCE_AT_RULE",
         "TW_CONFIG_AT_RULE",
         "TW_PLUGIN_AT_RULE",
-        "TW_ALPHA_FUNCTION",
-        "TW_SPACING_FUNCTION",
-        "TW_VALUE_FUNCTION",
-        "TW_MODIFIER_FUNCTION",
-        "TW_VALUE_LIST",
-        "TW_VALUE_ARBITRARY_TYPE",
         "TW_VALUE_THEME_REFERENCE",
-        "TW_SIMPLE_UTILITY_NAME",
         "TW_FUNCTIONAL_UTILITY_NAME",
         "TW_CUSTOM_VARIANT_SHORTHAND",
         // Unknowns
@@ -552,8 +545,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_KEYFRAMES_NAME",
         "CSS_BOGUS_UNICODE_RANGE_VALUE",
         "CSS_BOGUS_SUPPORTS_CONDITION",
-        // Bogus Tailwind Nodes
-        "CSS_BOGUS_TW_UTILITY_VALUE",
         // Grit metavariable
         "CSS_METAVARIABLE",
     ],

@@ -232,10 +232,6 @@ pub(crate) fn expected_declaration(p: &CssParser, range: TextRange) -> ParseDiag
     expected_node("<declaration>", range, p)
 }
 
-pub(crate) fn expected_tailwind_utility_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("tailwind utility value", range, p)
-}
-
 pub(crate) fn tailwind_disabled(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder(markup! { "Tailwind-specific syntax is disabled."}, range)
         .with_hint(markup! {

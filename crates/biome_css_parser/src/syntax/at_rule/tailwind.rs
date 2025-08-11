@@ -65,11 +65,11 @@ pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
 }
 
 fn parse_utility_name(p: &mut CssParser) -> ParsedSyntax {
-    let m = p.start();
-
     // Check if this is a functional utility (ends with -*)
     if p.at(T![ident]) && p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
         // Functional utility: tab-*
+        let m = p.start();
+
         parse_regular_identifier(p).ok();
         p.expect(T![-]);
         p.expect(T![*]);
@@ -77,9 +77,7 @@ fn parse_utility_name(p: &mut CssParser) -> ParsedSyntax {
         Present(m.complete(p, TW_FUNCTIONAL_UTILITY_NAME))
     } else {
         // Simple utility: center-flex
-        parse_regular_identifier(p).ok();
-
-        Present(m.complete(p, TW_SIMPLE_UTILITY_NAME))
+        parse_regular_identifier(p)
     }
 }
 

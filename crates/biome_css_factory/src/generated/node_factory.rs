@@ -2364,42 +2364,6 @@ pub fn css_view_transition_at_rule(
         ],
     ))
 }
-pub fn tw_alpha_function(
-    alpha_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-) -> TwAlphaFunctionBuilder {
-    TwAlphaFunctionBuilder {
-        alpha_token,
-        l_paren_token,
-        r_paren_token,
-        value: None,
-    }
-}
-pub struct TwAlphaFunctionBuilder {
-    alpha_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-    value: Option<AnyCssExpression>,
-}
-impl TwAlphaFunctionBuilder {
-    pub fn with_value(mut self, value: AnyCssExpression) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> TwAlphaFunction {
-        TwAlphaFunction::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::TW_ALPHA_FUNCTION,
-            [
-                Some(SyntaxElement::Token(self.alpha_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                self.value
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-            ],
-        ))
-    }
-}
 pub fn tw_apply_at_rule(
     apply_token: SyntaxToken,
     classes: TwApplyClassList,
@@ -2472,22 +2436,6 @@ pub fn tw_functional_utility_name(
         ],
     ))
 }
-pub fn tw_modifier_function(
-    modifier_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    value: TwValueList,
-    r_paren_token: SyntaxToken,
-) -> TwModifierFunction {
-    TwModifierFunction::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::TW_MODIFIER_FUNCTION,
-        [
-            Some(SyntaxElement::Token(modifier_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
-}
 pub fn tw_plugin_at_rule(
     plugin_token: SyntaxToken,
     name: CssString,
@@ -2516,12 +2464,6 @@ pub fn tw_reference_at_rule(
         ],
     ))
 }
-pub fn tw_simple_utility_name(css_identifier: CssIdentifier) -> TwSimpleUtilityName {
-    TwSimpleUtilityName::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::TW_SIMPLE_UTILITY_NAME,
-        [Some(SyntaxElement::Node(css_identifier.into_syntax()))],
-    ))
-}
 pub fn tw_source_at_rule(
     source_token: SyntaxToken,
     path: CssString,
@@ -2535,42 +2477,6 @@ pub fn tw_source_at_rule(
             Some(SyntaxElement::Token(semicolon_token)),
         ],
     ))
-}
-pub fn tw_spacing_function(
-    spacing_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-) -> TwSpacingFunctionBuilder {
-    TwSpacingFunctionBuilder {
-        spacing_token,
-        l_paren_token,
-        r_paren_token,
-        value: None,
-    }
-}
-pub struct TwSpacingFunctionBuilder {
-    spacing_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-    value: Option<AnyCssExpression>,
-}
-impl TwSpacingFunctionBuilder {
-    pub fn with_value(mut self, value: AnyCssExpression) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> TwSpacingFunction {
-        TwSpacingFunction::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::TW_SPACING_FUNCTION,
-            [
-                Some(SyntaxElement::Token(self.spacing_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                self.value
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-            ],
-        ))
-    }
 }
 pub fn tw_theme_at_rule(
     theme_token: SyntaxToken,
@@ -2615,36 +2521,6 @@ pub fn tw_utility_at_rule(
             Some(SyntaxElement::Token(utility_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
-        ],
-    ))
-}
-pub fn tw_value_arbitrary_type(
-    l_brack_token: SyntaxToken,
-    ty: CssIdentifier,
-    r_brack_token: SyntaxToken,
-) -> TwValueArbitraryType {
-    TwValueArbitraryType::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::TW_VALUE_ARBITRARY_TYPE,
-        [
-            Some(SyntaxElement::Token(l_brack_token)),
-            Some(SyntaxElement::Node(ty.into_syntax())),
-            Some(SyntaxElement::Token(r_brack_token)),
-        ],
-    ))
-}
-pub fn tw_value_function(
-    value_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    value: TwValueList,
-    r_paren_token: SyntaxToken,
-) -> TwValueFunction {
-    TwValueFunction::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::TW_VALUE_FUNCTION,
-        [
-            Some(SyntaxElement::Token(value_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
 }
@@ -3191,27 +3067,6 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
-pub fn tw_value_list<I, S>(items: I, separators: S) -> TwValueList
-where
-    I: IntoIterator<Item = AnyTwValueExpression>,
-    I::IntoIter: ExactSizeIterator,
-    S: IntoIterator<Item = CssSyntaxToken>,
-    S::IntoIter: ExactSizeIterator,
-{
-    let mut items = items.into_iter();
-    let mut separators = separators.into_iter();
-    let length = items.len() + separators.len();
-    TwValueList::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::TW_VALUE_LIST,
-        (0..length).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
-    ))
-}
 pub fn css_bogus<I>(slots: I) -> CssBogus
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -3436,16 +3291,6 @@ where
 {
     CssBogusSupportsCondition::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SUPPORTS_CONDITION,
-        slots,
-    ))
-}
-pub fn css_bogus_tw_utility_value<I>(slots: I) -> CssBogusTwUtilityValue
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssBogusTwUtilityValue::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_TW_UTILITY_VALUE,
         slots,
     ))
 }

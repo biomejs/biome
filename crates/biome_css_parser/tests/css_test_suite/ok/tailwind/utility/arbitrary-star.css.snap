@@ -40,16 +40,26 @@ CssRoot {
                                     },
                                     colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
-                                        TwValueFunction {
-                                            value_token: _VALUE_KW@28..35 "--value" [] [],
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@28..35 "--value" [] [],
+                                            },
                                             l_paren_token: L_PAREN@35..36 "(" [] [],
-                                            value: TwValueList [
-                                                TwValueArbitraryType {
-                                                    l_brack_token: L_BRACK@36..37 "[" [] [],
-                                                    ty: CssIdentifier {
-                                                        value_token: IDENT@37..38 "*" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssBracketedValue {
+                                                                l_brack_token: L_BRACK@36..37 "[" [] [],
+                                                                items: CssBracketedValueList [
+                                                                    CssCustomIdentifier {
+                                                                        value_token: IDENT@37..38 "*" [] [],
+                                                                    },
+                                                                ],
+                                                                r_brack_token: R_BRACK@38..39 "]" [] [],
+                                                            },
+                                                        ],
                                                     },
-                                                    r_brack_token: R_BRACK@38..39 "]" [] [],
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@39..40 ")" [] [],
@@ -95,15 +105,20 @@ CssRoot {
                     0: IDENT@16..26 "tab-size" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@26..28 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@28..40
-                    0: TW_VALUE_FUNCTION@28..40
-                      0: _VALUE_KW@28..35 "--value" [] []
+                    0: CSS_FUNCTION@28..40
+                      0: CSS_IDENTIFIER@28..35
+                        0: IDENT@28..35 "--value" [] []
                       1: L_PAREN@35..36 "(" [] []
-                      2: TW_VALUE_LIST@36..39
-                        0: TW_VALUE_ARBITRARY_TYPE@36..39
-                          0: L_BRACK@36..37 "[" [] []
-                          1: CSS_IDENTIFIER@37..38
-                            0: IDENT@37..38 "*" [] []
-                          2: R_BRACK@38..39 "]" [] []
+                      2: CSS_PARAMETER_LIST@36..39
+                        0: CSS_PARAMETER@36..39
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@36..39
+                            0: CSS_COMPONENT_VALUE_LIST@36..39
+                              0: CSS_BRACKETED_VALUE@36..39
+                                0: L_BRACK@36..37 "[" [] []
+                                1: CSS_BRACKETED_VALUE_LIST@37..38
+                                  0: CSS_CUSTOM_IDENTIFIER@37..38
+                                    0: IDENT@37..38 "*" [] []
+                                2: R_BRACK@38..39 "]" [] []
                       3: R_PAREN@39..40 ")" [] []
                 1: (empty)
               1: SEMICOLON@40..41 ";" [] []

@@ -2,4 +2,3 @@
 
 pub(crate) mod custom_variant_selector;
 pub(crate) mod utility_name;
-pub(crate) mod value_expression;

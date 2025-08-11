@@ -10,10 +10,6 @@ impl FormatRule<AnyCssFunction> for FormatAnyCssFunction {
         match node {
             AnyCssFunction::CssFunction(node) => node.format().fmt(f),
             AnyCssFunction::CssUrlFunction(node) => node.format().fmt(f),
-            AnyCssFunction::TwAlphaFunction(node) => node.format().fmt(f),
-            AnyCssFunction::TwModifierFunction(node) => node.format().fmt(f),
-            AnyCssFunction::TwSpacingFunction(node) => node.format().fmt(f),
-            AnyCssFunction::TwValueFunction(node) => node.format().fmt(f),
         }
     }
 }

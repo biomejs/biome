@@ -10,14 +10,18 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::parse_declaration_or_rule_list_block;
-use crate::syntax::parse_error::{expected_any_rule, expected_non_css_wide_keyword_identifier};
+use crate::syntax::parse_error::{
+    expected_any_rule, expected_non_css_wide_keyword_identifier, tailwind_disabled,
+};
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::relative_selector::{RelativeSelectorList, is_at_relative_selector};
-use crate::syntax::value::function::BINARY_OPERATION_TOKEN;
+use crate::syntax::value::function::{
+    BINARY_OPERATION_TOKEN, parse_tailwind_value_theme_reference,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -315,10 +319,21 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
+    let tailwind_enabled = p.options().is_tailwind_directives_enabled();
+
     if is_at_any_function(p) {
         parse_any_function(p)
     } else if is_at_dashed_identifier(p) {
-        parse_dashed_identifier(p)
+        if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
+            if tailwind_enabled {
+                parse_tailwind_value_theme_reference(p)
+            } else {
+                p.error(tailwind_disabled(p, p.cur_range()));
+                parse_dashed_identifier(p)
+            }
+        } else {
+            parse_dashed_identifier(p)
+        }
     } else if is_at_unicode_range(p) {
         parse_unicode_range(p)
     } else if is_at_identifier(p) {
@@ -470,7 +485,7 @@ pub(crate) fn parse_custom_identifier_with_keywords(
 
 #[inline]
 pub(crate) fn is_at_dashed_identifier(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && p.cur_text().starts_with("--") || p.at(T![__spacing])
+    is_at_identifier(p) && p.cur_text().starts_with("--")
 }
 
 /// Dashed identifiers are any identifiers that start with two dashes (`--`).
@@ -483,14 +498,7 @@ pub(crate) fn parse_dashed_identifier(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    // HACK: tailwind has some functions that start with two dashes (`--`)
-    // The more correct way to handle this would be to make it so that the lexer
-    // only emits the `--spacing` token where it is actually applicable.
-    if p.at(T![__spacing]) {
-        p.bump_remap(T![ident]);
-    } else {
-        p.bump(T![ident]);
-    }
+    p.bump(T![ident]);
     Present(m.complete(p, CSS_DASHED_IDENTIFIER))
 }
 
@@ -567,6 +575,16 @@ impl ParseNodeList for BracketedValueList {
     const LIST_KIND: Self::Kind = CSS_BRACKETED_VALUE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if p.at(T![*]) {
+            if p.options().is_tailwind_directives_enabled() {
+                let m = p.start();
+                p.bump_remap(T![ident]);
+                return Present(m.complete(p, CSS_CUSTOM_IDENTIFIER));
+            } else {
+                p.error(tailwind_disabled(p, p.cur_range()));
+            }
+        }
+
         parse_custom_identifier(p, CssLexContext::Regular)
     }
 

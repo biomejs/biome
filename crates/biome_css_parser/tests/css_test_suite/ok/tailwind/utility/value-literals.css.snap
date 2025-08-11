@@ -40,20 +40,40 @@ CssRoot {
                                     },
                                     colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
-                                        TwValueFunction {
-                                            value_token: _VALUE_KW@28..35 "--value" [] [],
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@28..35 "--value" [] [],
+                                            },
                                             l_paren_token: L_PAREN@35..36 "(" [] [],
-                                            value: TwValueList [
-                                                CssString {
-                                                    value_token: CSS_STRING_LITERAL@36..45 "\"inherit\"" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssString {
+                                                                value_token: CSS_STRING_LITERAL@36..45 "\"inherit\"" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                 },
                                                 COMMA@45..47 "," [] [Whitespace(" ")],
-                                                CssString {
-                                                    value_token: CSS_STRING_LITERAL@47..56 "\"initial\"" [] [],
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssString {
+                                                                value_token: CSS_STRING_LITERAL@47..56 "\"initial\"" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                 },
                                                 COMMA@56..58 "," [] [Whitespace(" ")],
-                                                CssString {
-                                                    value_token: CSS_STRING_LITERAL@58..65 "\"unset\"" [] [],
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssString {
+                                                                value_token: CSS_STRING_LITERAL@58..65 "\"unset\"" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                 },
                                             ],
                                             r_paren_token: R_PAREN@65..66 ")" [] [],
@@ -99,18 +119,28 @@ CssRoot {
                     0: IDENT@16..26 "tab-size" [Newline("\n"), Whitespace("\t")] []
                   1: COLON@26..28 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@28..66
-                    0: TW_VALUE_FUNCTION@28..66
-                      0: _VALUE_KW@28..35 "--value" [] []
+                    0: CSS_FUNCTION@28..66
+                      0: CSS_IDENTIFIER@28..35
+                        0: IDENT@28..35 "--value" [] []
                       1: L_PAREN@35..36 "(" [] []
-                      2: TW_VALUE_LIST@36..65
-                        0: CSS_STRING@36..45
-                          0: CSS_STRING_LITERAL@36..45 "\"inherit\"" [] []
+                      2: CSS_PARAMETER_LIST@36..65
+                        0: CSS_PARAMETER@36..45
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@36..45
+                            0: CSS_COMPONENT_VALUE_LIST@36..45
+                              0: CSS_STRING@36..45
+                                0: CSS_STRING_LITERAL@36..45 "\"inherit\"" [] []
                         1: COMMA@45..47 "," [] [Whitespace(" ")]
-                        2: CSS_STRING@47..56
-                          0: CSS_STRING_LITERAL@47..56 "\"initial\"" [] []
+                        2: CSS_PARAMETER@47..56
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@47..56
+                            0: CSS_COMPONENT_VALUE_LIST@47..56
+                              0: CSS_STRING@47..56
+                                0: CSS_STRING_LITERAL@47..56 "\"initial\"" [] []
                         3: COMMA@56..58 "," [] [Whitespace(" ")]
-                        4: CSS_STRING@58..65
-                          0: CSS_STRING_LITERAL@58..65 "\"unset\"" [] []
+                        4: CSS_PARAMETER@58..65
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@58..65
+                            0: CSS_COMPONENT_VALUE_LIST@58..65
+                              0: CSS_STRING@58..65
+                                0: CSS_STRING_LITERAL@58..65 "\"unset\"" [] []
                       3: R_PAREN@65..66 ")" [] []
                 1: (empty)
               1: SEMICOLON@66..67 ";" [] []

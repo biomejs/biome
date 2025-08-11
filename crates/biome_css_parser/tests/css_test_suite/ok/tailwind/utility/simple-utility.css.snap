@@ -42,10 +42,8 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: TwUtilityAtRule {
                 utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
-                name: TwSimpleUtilityName {
-                    css_identifier: CssIdentifier {
-                        value_token: IDENT@9..21 "center-flex" [] [Whitespace(" ")],
-                    },
+                name: CssIdentifier {
+                    value_token: IDENT@9..21 "center-flex" [] [Whitespace(" ")],
                 },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@21..22 "{" [] [],
@@ -110,10 +108,8 @@ CssRoot {
             at_token: AT@88..91 "@" [Newline("\n"), Newline("\n")] [],
             rule: TwUtilityAtRule {
                 utility_token: UTILITY_KW@91..99 "utility" [] [Whitespace(" ")],
-                name: TwSimpleUtilityName {
-                    css_identifier: CssIdentifier {
-                        value_token: IDENT@99..107 "sr-only" [] [Whitespace(" ")],
-                    },
+                name: CssIdentifier {
+                    value_token: IDENT@99..107 "sr-only" [] [Whitespace(" ")],
                 },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@107..108 "{" [] [],
@@ -328,10 +324,8 @@ CssRoot {
             at_token: AT@264..267 "@" [Newline("\n"), Newline("\n")] [],
             rule: TwUtilityAtRule {
                 utility_token: UTILITY_KW@267..275 "utility" [] [Whitespace(" ")],
-                name: TwSimpleUtilityName {
-                    css_identifier: CssIdentifier {
-                        value_token: IDENT@275..281 "tab-4" [] [Whitespace(" ")],
-                    },
+                name: CssIdentifier {
+                    value_token: IDENT@275..281 "tab-4" [] [Whitespace(" ")],
                 },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@281..282 "{" [] [],
@@ -362,10 +356,8 @@ CssRoot {
             at_token: AT@298..301 "@" [Newline("\n"), Newline("\n")] [],
             rule: TwUtilityAtRule {
                 utility_token: UTILITY_KW@301..309 "utility" [] [Whitespace(" ")],
-                name: TwSimpleUtilityName {
-                    css_identifier: CssIdentifier {
-                        value_token: IDENT@309..320 "empty-util" [] [Whitespace(" ")],
-                    },
+                name: CssIdentifier {
+                    value_token: IDENT@309..320 "empty-util" [] [Whitespace(" ")],
                 },
                 block: CssDeclarationBlock {
                     l_curly_token: L_CURLY@320..321 "{" [] [],
@@ -389,9 +381,8 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: TW_UTILITY_AT_RULE@1..88
         0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
-        1: TW_SIMPLE_UTILITY_NAME@9..21
-          0: CSS_IDENTIFIER@9..21
-            0: IDENT@9..21 "center-flex" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@9..21
+          0: IDENT@9..21 "center-flex" [] [Whitespace(" ")]
         2: CSS_DECLARATION_BLOCK@21..88
           0: L_CURLY@21..22 "{" [] []
           1: CSS_DECLARATION_LIST@22..86
@@ -433,9 +424,8 @@ CssRoot {
       0: AT@88..91 "@" [Newline("\n"), Newline("\n")] []
       1: TW_UTILITY_AT_RULE@91..264
         0: UTILITY_KW@91..99 "utility" [] [Whitespace(" ")]
-        1: TW_SIMPLE_UTILITY_NAME@99..107
-          0: CSS_IDENTIFIER@99..107
-            0: IDENT@99..107 "sr-only" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@99..107
+          0: IDENT@99..107 "sr-only" [] [Whitespace(" ")]
         2: CSS_DECLARATION_BLOCK@107..264
           0: L_CURLY@107..108 "{" [] []
           1: CSS_DECLARATION_LIST@108..262
@@ -573,9 +563,8 @@ CssRoot {
       0: AT@264..267 "@" [Newline("\n"), Newline("\n")] []
       1: TW_UTILITY_AT_RULE@267..298
         0: UTILITY_KW@267..275 "utility" [] [Whitespace(" ")]
-        1: TW_SIMPLE_UTILITY_NAME@275..281
-          0: CSS_IDENTIFIER@275..281
-            0: IDENT@275..281 "tab-4" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@275..281
+          0: IDENT@275..281 "tab-4" [] [Whitespace(" ")]
         2: CSS_DECLARATION_BLOCK@281..298
           0: L_CURLY@281..282 "{" [] []
           1: CSS_DECLARATION_LIST@282..296
@@ -595,9 +584,8 @@ CssRoot {
       0: AT@298..301 "@" [Newline("\n"), Newline("\n")] []
       1: TW_UTILITY_AT_RULE@301..322
         0: UTILITY_KW@301..309 "utility" [] [Whitespace(" ")]
-        1: TW_SIMPLE_UTILITY_NAME@309..320
-          0: CSS_IDENTIFIER@309..320
-            0: IDENT@309..320 "empty-util" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@309..320
+          0: IDENT@309..320 "empty-util" [] [Whitespace(" ")]
         2: CSS_DECLARATION_BLOCK@320..322
           0: L_CURLY@320..321 "{" [] []
           1: CSS_DECLARATION_LIST@321..321

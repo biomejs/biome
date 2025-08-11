@@ -707,10 +707,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssViewTransitionAtRule::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::TW_ALPHA_FUNCTION => {
-                    let $pattern = unsafe { $crate::TwAlphaFunction::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::TW_APPLY_AT_RULE => {
                     let $pattern = unsafe { $crate::TwApplyAtRule::new_unchecked(node) };
                     $body
@@ -731,10 +727,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TwFunctionalUtilityName::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::TW_MODIFIER_FUNCTION => {
-                    let $pattern = unsafe { $crate::TwModifierFunction::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::TW_PLUGIN_AT_RULE => {
                     let $pattern = unsafe { $crate::TwPluginAtRule::new_unchecked(node) };
                     $body
@@ -743,16 +735,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TwReferenceAtRule::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::TW_SIMPLE_UTILITY_NAME => {
-                    let $pattern = unsafe { $crate::TwSimpleUtilityName::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::TW_SOURCE_AT_RULE => {
                     let $pattern = unsafe { $crate::TwSourceAtRule::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::TW_SPACING_FUNCTION => {
-                    let $pattern = unsafe { $crate::TwSpacingFunction::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::TW_THEME_AT_RULE => {
@@ -761,14 +745,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::TW_UTILITY_AT_RULE => {
                     let $pattern = unsafe { $crate::TwUtilityAtRule::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::TW_VALUE_ARBITRARY_TYPE => {
-                    let $pattern = unsafe { $crate::TwValueArbitraryType::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::TW_VALUE_FUNCTION => {
-                    let $pattern = unsafe { $crate::TwValueFunction::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::TW_VALUE_THEME_REFERENCE => {
@@ -872,10 +848,6 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_BOGUS_SUPPORTS_CONDITION => {
                     let $pattern =
                         unsafe { $crate::CssBogusSupportsCondition::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_BOGUS_TW_UTILITY_VALUE => {
-                    let $pattern = unsafe { $crate::CssBogusTwUtilityValue::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_UNICODE_RANGE_VALUE => {
@@ -1031,10 +1003,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::TW_APPLY_CLASS_LIST => {
                     let $pattern = unsafe { $crate::TwApplyClassList::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::TW_VALUE_LIST => {
-                    let $pattern = unsafe { $crate::TwValueList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

@@ -6833,56 +6833,6 @@ pub struct CssViewTransitionAtRuleFields {
     pub block: SyntaxResult<AnyCssDeclarationBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TwAlphaFunction {
-    pub(crate) syntax: SyntaxNode,
-}
-impl TwAlphaFunction {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> TwAlphaFunctionFields {
-        TwAlphaFunctionFields {
-            alpha_token: self.alpha_token(),
-            l_paren_token: self.l_paren_token(),
-            value: self.value(),
-            r_paren_token: self.r_paren_token(),
-        }
-    }
-    pub fn alpha_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn value(&self) -> Option<AnyCssExpression> {
-        support::node(&self.syntax, 2usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-}
-impl Serialize for TwAlphaFunction {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct TwAlphaFunctionFields {
-    pub alpha_token: SyntaxResult<SyntaxToken>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value: Option<AnyCssExpression>,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwApplyAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7113,56 +7063,6 @@ pub struct TwFunctionalUtilityNameFields {
     pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TwModifierFunction {
-    pub(crate) syntax: SyntaxNode,
-}
-impl TwModifierFunction {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> TwModifierFunctionFields {
-        TwModifierFunctionFields {
-            modifier_token: self.modifier_token(),
-            l_paren_token: self.l_paren_token(),
-            value: self.value(),
-            r_paren_token: self.r_paren_token(),
-        }
-    }
-    pub fn modifier_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn value(&self) -> TwValueList {
-        support::list(&self.syntax, 2usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-}
-impl Serialize for TwModifierFunction {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct TwModifierFunctionFields {
-    pub modifier_token: SyntaxResult<SyntaxToken>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value: TwValueList,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwPluginAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7253,41 +7153,6 @@ pub struct TwReferenceAtRuleFields {
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TwSimpleUtilityName {
-    pub(crate) syntax: SyntaxNode,
-}
-impl TwSimpleUtilityName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> TwSimpleUtilityNameFields {
-        TwSimpleUtilityNameFields {
-            css_identifier: self.css_identifier(),
-        }
-    }
-    pub fn css_identifier(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for TwSimpleUtilityName {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct TwSimpleUtilityNameFields {
-    pub css_identifier: SyntaxResult<CssIdentifier>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwSourceAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7331,56 +7196,6 @@ pub struct TwSourceAtRuleFields {
     pub source_token: SyntaxResult<SyntaxToken>,
     pub path: SyntaxResult<CssString>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TwSpacingFunction {
-    pub(crate) syntax: SyntaxNode,
-}
-impl TwSpacingFunction {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> TwSpacingFunctionFields {
-        TwSpacingFunctionFields {
-            spacing_token: self.spacing_token(),
-            l_paren_token: self.l_paren_token(),
-            value: self.value(),
-            r_paren_token: self.r_paren_token(),
-        }
-    }
-    pub fn spacing_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn value(&self) -> Option<AnyCssExpression> {
-        support::node(&self.syntax, 2usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-}
-impl Serialize for TwSpacingFunction {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct TwSpacingFunctionFields {
-    pub spacing_token: SyntaxResult<SyntaxToken>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value: Option<AnyCssExpression>,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwThemeAtRule {
@@ -7471,101 +7286,6 @@ pub struct TwUtilityAtRuleFields {
     pub utility_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyTwUtilityName>,
     pub block: SyntaxResult<AnyCssDeclarationBlock>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TwValueArbitraryType {
-    pub(crate) syntax: SyntaxNode,
-}
-impl TwValueArbitraryType {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> TwValueArbitraryTypeFields {
-        TwValueArbitraryTypeFields {
-            l_brack_token: self.l_brack_token(),
-            ty: self.ty(),
-            r_brack_token: self.r_brack_token(),
-        }
-    }
-    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn ty(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 1usize)
-    }
-    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for TwValueArbitraryType {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct TwValueArbitraryTypeFields {
-    pub l_brack_token: SyntaxResult<SyntaxToken>,
-    pub ty: SyntaxResult<CssIdentifier>,
-    pub r_brack_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TwValueFunction {
-    pub(crate) syntax: SyntaxNode,
-}
-impl TwValueFunction {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> TwValueFunctionFields {
-        TwValueFunctionFields {
-            value_token: self.value_token(),
-            l_paren_token: self.l_paren_token(),
-            value: self.value(),
-            r_paren_token: self.r_paren_token(),
-        }
-    }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn value(&self) -> TwValueList {
-        support::list(&self.syntax, 2usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-}
-impl Serialize for TwValueFunction {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct TwValueFunctionFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value: TwValueList,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwValueThemeReference {
@@ -8509,10 +8229,6 @@ impl AnyCssFontFeatureValuesItem {
 pub enum AnyCssFunction {
     CssFunction(CssFunction),
     CssUrlFunction(CssUrlFunction),
-    TwAlphaFunction(TwAlphaFunction),
-    TwModifierFunction(TwModifierFunction),
-    TwSpacingFunction(TwSpacingFunction),
-    TwValueFunction(TwValueFunction),
 }
 impl AnyCssFunction {
     pub fn as_css_function(&self) -> Option<&CssFunction> {
@@ -8524,30 +8240,6 @@ impl AnyCssFunction {
     pub fn as_css_url_function(&self) -> Option<&CssUrlFunction> {
         match &self {
             Self::CssUrlFunction(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_alpha_function(&self) -> Option<&TwAlphaFunction> {
-        match &self {
-            Self::TwAlphaFunction(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_modifier_function(&self) -> Option<&TwModifierFunction> {
-        match &self {
-            Self::TwModifierFunction(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_spacing_function(&self) -> Option<&TwSpacingFunction> {
-        match &self {
-            Self::TwSpacingFunction(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_value_function(&self) -> Option<&TwValueFunction> {
-        match &self {
-            Self::TwValueFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -9794,6 +9486,7 @@ pub enum AnyCssValue {
     CssRatio(CssRatio),
     CssString(CssString),
     CssUnicodeRange(CssUnicodeRange),
+    TwValueThemeReference(TwValueThemeReference),
 }
 impl AnyCssValue {
     pub fn as_any_css_dimension(&self) -> Option<&AnyCssDimension> {
@@ -9865,6 +9558,12 @@ impl AnyCssValue {
     pub fn as_css_unicode_range(&self) -> Option<&CssUnicodeRange> {
         match &self {
             Self::CssUnicodeRange(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_tw_value_theme_reference(&self) -> Option<&TwValueThemeReference> {
+        match &self {
+            Self::TwValueThemeReference(item) => Some(item),
             _ => None,
         }
     }
@@ -9970,52 +9669,19 @@ impl AnyTwCustomVariantSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTwUtilityName {
+    CssIdentifier(CssIdentifier),
     TwFunctionalUtilityName(TwFunctionalUtilityName),
-    TwSimpleUtilityName(TwSimpleUtilityName),
 }
 impl AnyTwUtilityName {
-    pub fn as_tw_functional_utility_name(&self) -> Option<&TwFunctionalUtilityName> {
-        match &self {
-            Self::TwFunctionalUtilityName(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_simple_utility_name(&self) -> Option<&TwSimpleUtilityName> {
-        match &self {
-            Self::TwSimpleUtilityName(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyTwValueExpression {
-    CssIdentifier(CssIdentifier),
-    CssString(CssString),
-    TwValueArbitraryType(TwValueArbitraryType),
-    TwValueThemeReference(TwValueThemeReference),
-}
-impl AnyTwValueExpression {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_css_string(&self) -> Option<&CssString> {
+    pub fn as_tw_functional_utility_name(&self) -> Option<&TwFunctionalUtilityName> {
         match &self {
-            Self::CssString(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_value_arbitrary_type(&self) -> Option<&TwValueArbitraryType> {
-        match &self {
-            Self::TwValueArbitraryType(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_tw_value_theme_reference(&self) -> Option<&TwValueThemeReference> {
-        match &self {
-            Self::TwValueThemeReference(item) => Some(item),
+            Self::TwFunctionalUtilityName(item) => Some(item),
             _ => None,
         }
     }
@@ -18263,65 +17929,6 @@ impl From<CssViewTransitionAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for TwAlphaFunction {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TW_ALPHA_FUNCTION as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TW_ALPHA_FUNCTION
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for TwAlphaFunction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwAlphaFunction")
-                .field(
-                    "alpha_token",
-                    &support::DebugSyntaxResult(self.alpha_token()),
-                )
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("value", &support::DebugOptionalElement(self.value()))
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwAlphaFunction").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<TwAlphaFunction> for SyntaxNode {
-    fn from(n: TwAlphaFunction) -> Self {
-        n.syntax
-    }
-}
-impl From<TwAlphaFunction> for SyntaxElement {
-    fn from(n: TwAlphaFunction) -> Self {
-        n.syntax.into()
-    }
-}
 impl AstNode for TwApplyAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18595,65 +18202,6 @@ impl From<TwFunctionalUtilityName> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for TwModifierFunction {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TW_MODIFIER_FUNCTION as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TW_MODIFIER_FUNCTION
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for TwModifierFunction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwModifierFunction")
-                .field(
-                    "modifier_token",
-                    &support::DebugSyntaxResult(self.modifier_token()),
-                )
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("value", &self.value())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwModifierFunction").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<TwModifierFunction> for SyntaxNode {
-    fn from(n: TwModifierFunction) -> Self {
-        n.syntax
-    }
-}
-impl From<TwModifierFunction> for SyntaxElement {
-    fn from(n: TwModifierFunction) -> Self {
-        n.syntax.into()
-    }
-}
 impl AstNode for TwPluginAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18764,56 +18312,6 @@ impl From<TwReferenceAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for TwSimpleUtilityName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TW_SIMPLE_UTILITY_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TW_SIMPLE_UTILITY_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for TwSimpleUtilityName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwSimpleUtilityName")
-                .field(
-                    "css_identifier",
-                    &support::DebugSyntaxResult(self.css_identifier()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwSimpleUtilityName").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<TwSimpleUtilityName> for SyntaxNode {
-    fn from(n: TwSimpleUtilityName) -> Self {
-        n.syntax
-    }
-}
-impl From<TwSimpleUtilityName> for SyntaxElement {
-    fn from(n: TwSimpleUtilityName) -> Self {
-        n.syntax.into()
-    }
-}
 impl AstNode for TwSourceAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -18866,65 +18364,6 @@ impl From<TwSourceAtRule> for SyntaxNode {
 }
 impl From<TwSourceAtRule> for SyntaxElement {
     fn from(n: TwSourceAtRule) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for TwSpacingFunction {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TW_SPACING_FUNCTION as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TW_SPACING_FUNCTION
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for TwSpacingFunction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwSpacingFunction")
-                .field(
-                    "spacing_token",
-                    &support::DebugSyntaxResult(self.spacing_token()),
-                )
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("value", &support::DebugOptionalElement(self.value()))
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwSpacingFunction").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<TwSpacingFunction> for SyntaxNode {
-    fn from(n: TwSpacingFunction) -> Self {
-        n.syntax
-    }
-}
-impl From<TwSpacingFunction> for SyntaxElement {
-    fn from(n: TwSpacingFunction) -> Self {
         n.syntax.into()
     }
 }
@@ -19029,120 +18468,6 @@ impl From<TwUtilityAtRule> for SyntaxNode {
 }
 impl From<TwUtilityAtRule> for SyntaxElement {
     fn from(n: TwUtilityAtRule) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for TwValueArbitraryType {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TW_VALUE_ARBITRARY_TYPE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TW_VALUE_ARBITRARY_TYPE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for TwValueArbitraryType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwValueArbitraryType")
-                .field(
-                    "l_brack_token",
-                    &support::DebugSyntaxResult(self.l_brack_token()),
-                )
-                .field("ty", &support::DebugSyntaxResult(self.ty()))
-                .field(
-                    "r_brack_token",
-                    &support::DebugSyntaxResult(self.r_brack_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwValueArbitraryType").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<TwValueArbitraryType> for SyntaxNode {
-    fn from(n: TwValueArbitraryType) -> Self {
-        n.syntax
-    }
-}
-impl From<TwValueArbitraryType> for SyntaxElement {
-    fn from(n: TwValueArbitraryType) -> Self {
-        n.syntax.into()
-    }
-}
-impl AstNode for TwValueFunction {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TW_VALUE_FUNCTION as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TW_VALUE_FUNCTION
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for TwValueFunction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
-        let current_depth = DEPTH.get();
-        let result = if current_depth < 16 {
-            DEPTH.set(current_depth + 1);
-            f.debug_struct("TwValueFunction")
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
-                .field(
-                    "l_paren_token",
-                    &support::DebugSyntaxResult(self.l_paren_token()),
-                )
-                .field("value", &self.value())
-                .field(
-                    "r_paren_token",
-                    &support::DebugSyntaxResult(self.r_paren_token()),
-                )
-                .finish()
-        } else {
-            f.debug_struct("TwValueFunction").finish()
-        };
-        DEPTH.set(current_depth);
-        result
-    }
-}
-impl From<TwValueFunction> for SyntaxNode {
-    fn from(n: TwValueFunction) -> Self {
-        n.syntax
-    }
-}
-impl From<TwValueFunction> for SyntaxElement {
-    fn from(n: TwValueFunction) -> Self {
         n.syntax.into()
     }
 }
@@ -21581,53 +20906,16 @@ impl From<CssUrlFunction> for AnyCssFunction {
         Self::CssUrlFunction(node)
     }
 }
-impl From<TwAlphaFunction> for AnyCssFunction {
-    fn from(node: TwAlphaFunction) -> Self {
-        Self::TwAlphaFunction(node)
-    }
-}
-impl From<TwModifierFunction> for AnyCssFunction {
-    fn from(node: TwModifierFunction) -> Self {
-        Self::TwModifierFunction(node)
-    }
-}
-impl From<TwSpacingFunction> for AnyCssFunction {
-    fn from(node: TwSpacingFunction) -> Self {
-        Self::TwSpacingFunction(node)
-    }
-}
-impl From<TwValueFunction> for AnyCssFunction {
-    fn from(node: TwValueFunction) -> Self {
-        Self::TwValueFunction(node)
-    }
-}
 impl AstNode for AnyCssFunction {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssFunction::KIND_SET
-        .union(CssUrlFunction::KIND_SET)
-        .union(TwAlphaFunction::KIND_SET)
-        .union(TwModifierFunction::KIND_SET)
-        .union(TwSpacingFunction::KIND_SET)
-        .union(TwValueFunction::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssFunction::KIND_SET.union(CssUrlFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_FUNCTION
-                | CSS_URL_FUNCTION
-                | TW_ALPHA_FUNCTION
-                | TW_MODIFIER_FUNCTION
-                | TW_SPACING_FUNCTION
-                | TW_VALUE_FUNCTION
-        )
+        matches!(kind, CSS_FUNCTION | CSS_URL_FUNCTION)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_FUNCTION => Self::CssFunction(CssFunction { syntax }),
             CSS_URL_FUNCTION => Self::CssUrlFunction(CssUrlFunction { syntax }),
-            TW_ALPHA_FUNCTION => Self::TwAlphaFunction(TwAlphaFunction { syntax }),
-            TW_MODIFIER_FUNCTION => Self::TwModifierFunction(TwModifierFunction { syntax }),
-            TW_SPACING_FUNCTION => Self::TwSpacingFunction(TwSpacingFunction { syntax }),
-            TW_VALUE_FUNCTION => Self::TwValueFunction(TwValueFunction { syntax }),
             _ => return None,
         };
         Some(res)
@@ -21636,20 +20924,12 @@ impl AstNode for AnyCssFunction {
         match self {
             Self::CssFunction(it) => &it.syntax,
             Self::CssUrlFunction(it) => &it.syntax,
-            Self::TwAlphaFunction(it) => &it.syntax,
-            Self::TwModifierFunction(it) => &it.syntax,
-            Self::TwSpacingFunction(it) => &it.syntax,
-            Self::TwValueFunction(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssFunction(it) => it.syntax,
             Self::CssUrlFunction(it) => it.syntax,
-            Self::TwAlphaFunction(it) => it.syntax,
-            Self::TwModifierFunction(it) => it.syntax,
-            Self::TwSpacingFunction(it) => it.syntax,
-            Self::TwValueFunction(it) => it.syntax,
         }
     }
 }
@@ -21658,10 +20938,6 @@ impl std::fmt::Debug for AnyCssFunction {
         match self {
             Self::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwAlphaFunction(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwModifierFunction(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwSpacingFunction(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwValueFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -21670,10 +20946,6 @@ impl From<AnyCssFunction> for SyntaxNode {
         match n {
             AnyCssFunction::CssFunction(it) => it.into(),
             AnyCssFunction::CssUrlFunction(it) => it.into(),
-            AnyCssFunction::TwAlphaFunction(it) => it.into(),
-            AnyCssFunction::TwModifierFunction(it) => it.into(),
-            AnyCssFunction::TwSpacingFunction(it) => it.into(),
-            AnyCssFunction::TwValueFunction(it) => it.into(),
         }
     }
 }
@@ -25265,6 +24537,11 @@ impl From<CssUnicodeRange> for AnyCssValue {
         Self::CssUnicodeRange(node)
     }
 }
+impl From<TwValueThemeReference> for AnyCssValue {
+    fn from(node: TwValueThemeReference) -> Self {
+        Self::TwValueThemeReference(node)
+    }
+}
 impl AstNode for AnyCssValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
@@ -25278,7 +24555,8 @@ impl AstNode for AnyCssValue {
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
         .union(CssString::KIND_SET)
-        .union(CssUnicodeRange::KIND_SET);
+        .union(CssUnicodeRange::KIND_SET)
+        .union(TwValueThemeReference::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_BRACKETED_VALUE
@@ -25290,7 +24568,8 @@ impl AstNode for AnyCssValue {
             | CSS_NUMBER
             | CSS_RATIO
             | CSS_STRING
-            | CSS_UNICODE_RANGE => true,
+            | CSS_UNICODE_RANGE
+            | TW_VALUE_THEME_REFERENCE => true,
             k if AnyCssDimension::can_cast(k) => true,
             k if AnyCssFunction::can_cast(k) => true,
             _ => false,
@@ -25308,6 +24587,9 @@ impl AstNode for AnyCssValue {
             CSS_RATIO => Self::CssRatio(CssRatio { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_UNICODE_RANGE => Self::CssUnicodeRange(CssUnicodeRange { syntax }),
+            TW_VALUE_THEME_REFERENCE => {
+                Self::TwValueThemeReference(TwValueThemeReference { syntax })
+            }
             _ => {
                 let syntax = match AnyCssDimension::try_cast(syntax) {
                     Ok(any_css_dimension) => {
@@ -25335,6 +24617,7 @@ impl AstNode for AnyCssValue {
             Self::CssRatio(it) => &it.syntax,
             Self::CssString(it) => &it.syntax,
             Self::CssUnicodeRange(it) => &it.syntax,
+            Self::TwValueThemeReference(it) => &it.syntax,
             Self::AnyCssDimension(it) => it.syntax(),
             Self::AnyCssFunction(it) => it.syntax(),
         }
@@ -25351,6 +24634,7 @@ impl AstNode for AnyCssValue {
             Self::CssRatio(it) => it.syntax,
             Self::CssString(it) => it.syntax,
             Self::CssUnicodeRange(it) => it.syntax,
+            Self::TwValueThemeReference(it) => it.syntax,
             Self::AnyCssDimension(it) => it.into_syntax(),
             Self::AnyCssFunction(it) => it.into_syntax(),
         }
@@ -25371,6 +24655,7 @@ impl std::fmt::Debug for AnyCssValue {
             Self::CssRatio(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnicodeRange(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwValueThemeReference(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -25389,6 +24674,7 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::CssRatio(it) => it.into(),
             AnyCssValue::CssString(it) => it.into(),
             AnyCssValue::CssUnicodeRange(it) => it.into(),
+            AnyCssValue::TwValueThemeReference(it) => it.into(),
         }
     }
 }
@@ -25723,107 +25009,28 @@ impl From<AnyTwCustomVariantSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssIdentifier> for AnyTwUtilityName {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
 impl From<TwFunctionalUtilityName> for AnyTwUtilityName {
     fn from(node: TwFunctionalUtilityName) -> Self {
         Self::TwFunctionalUtilityName(node)
     }
 }
-impl From<TwSimpleUtilityName> for AnyTwUtilityName {
-    fn from(node: TwSimpleUtilityName) -> Self {
-        Self::TwSimpleUtilityName(node)
-    }
-}
 impl AstNode for AnyTwUtilityName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        TwFunctionalUtilityName::KIND_SET.union(TwSimpleUtilityName::KIND_SET);
+        CssIdentifier::KIND_SET.union(TwFunctionalUtilityName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, TW_FUNCTIONAL_UTILITY_NAME | TW_SIMPLE_UTILITY_NAME)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            TW_FUNCTIONAL_UTILITY_NAME => {
-                Self::TwFunctionalUtilityName(TwFunctionalUtilityName { syntax })
-            }
-            TW_SIMPLE_UTILITY_NAME => Self::TwSimpleUtilityName(TwSimpleUtilityName { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::TwFunctionalUtilityName(it) => &it.syntax,
-            Self::TwSimpleUtilityName(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::TwFunctionalUtilityName(it) => it.syntax,
-            Self::TwSimpleUtilityName(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyTwUtilityName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::TwFunctionalUtilityName(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwSimpleUtilityName(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyTwUtilityName> for SyntaxNode {
-    fn from(n: AnyTwUtilityName) -> Self {
-        match n {
-            AnyTwUtilityName::TwFunctionalUtilityName(it) => it.into(),
-            AnyTwUtilityName::TwSimpleUtilityName(it) => it.into(),
-        }
-    }
-}
-impl From<AnyTwUtilityName> for SyntaxElement {
-    fn from(n: AnyTwUtilityName) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<CssIdentifier> for AnyTwValueExpression {
-    fn from(node: CssIdentifier) -> Self {
-        Self::CssIdentifier(node)
-    }
-}
-impl From<CssString> for AnyTwValueExpression {
-    fn from(node: CssString) -> Self {
-        Self::CssString(node)
-    }
-}
-impl From<TwValueArbitraryType> for AnyTwValueExpression {
-    fn from(node: TwValueArbitraryType) -> Self {
-        Self::TwValueArbitraryType(node)
-    }
-}
-impl From<TwValueThemeReference> for AnyTwValueExpression {
-    fn from(node: TwValueThemeReference) -> Self {
-        Self::TwValueThemeReference(node)
-    }
-}
-impl AstNode for AnyTwValueExpression {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssIdentifier::KIND_SET
-        .union(CssString::KIND_SET)
-        .union(TwValueArbitraryType::KIND_SET)
-        .union(TwValueThemeReference::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_IDENTIFIER | CSS_STRING | TW_VALUE_ARBITRARY_TYPE | TW_VALUE_THEME_REFERENCE
-        )
+        matches!(kind, CSS_IDENTIFIER | TW_FUNCTIONAL_UTILITY_NAME)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
-            CSS_STRING => Self::CssString(CssString { syntax }),
-            TW_VALUE_ARBITRARY_TYPE => Self::TwValueArbitraryType(TwValueArbitraryType { syntax }),
-            TW_VALUE_THEME_REFERENCE => {
-                Self::TwValueThemeReference(TwValueThemeReference { syntax })
+            TW_FUNCTIONAL_UTILITY_NAME => {
+                Self::TwFunctionalUtilityName(TwFunctionalUtilityName { syntax })
             }
             _ => return None,
         };
@@ -25832,42 +25039,34 @@ impl AstNode for AnyTwValueExpression {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssIdentifier(it) => &it.syntax,
-            Self::CssString(it) => &it.syntax,
-            Self::TwValueArbitraryType(it) => &it.syntax,
-            Self::TwValueThemeReference(it) => &it.syntax,
+            Self::TwFunctionalUtilityName(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssIdentifier(it) => it.syntax,
-            Self::CssString(it) => it.syntax,
-            Self::TwValueArbitraryType(it) => it.syntax,
-            Self::TwValueThemeReference(it) => it.syntax,
+            Self::TwFunctionalUtilityName(it) => it.syntax,
         }
     }
 }
-impl std::fmt::Debug for AnyTwValueExpression {
+impl std::fmt::Debug for AnyTwUtilityName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssString(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwValueArbitraryType(it) => std::fmt::Debug::fmt(it, f),
-            Self::TwValueThemeReference(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwFunctionalUtilityName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
-impl From<AnyTwValueExpression> for SyntaxNode {
-    fn from(n: AnyTwValueExpression) -> Self {
+impl From<AnyTwUtilityName> for SyntaxNode {
+    fn from(n: AnyTwUtilityName) -> Self {
         match n {
-            AnyTwValueExpression::CssIdentifier(it) => it.into(),
-            AnyTwValueExpression::CssString(it) => it.into(),
-            AnyTwValueExpression::TwValueArbitraryType(it) => it.into(),
-            AnyTwValueExpression::TwValueThemeReference(it) => it.into(),
+            AnyTwUtilityName::CssIdentifier(it) => it.into(),
+            AnyTwUtilityName::TwFunctionalUtilityName(it) => it.into(),
         }
     }
 }
-impl From<AnyTwValueExpression> for SyntaxElement {
-    fn from(n: AnyTwValueExpression) -> Self {
+impl From<AnyTwUtilityName> for SyntaxElement {
+    fn from(n: AnyTwUtilityName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -26273,11 +25472,6 @@ impl std::fmt::Display for AnyTwCustomVariantSelector {
     }
 }
 impl std::fmt::Display for AnyTwUtilityName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnyTwValueExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -27082,11 +26276,6 @@ impl std::fmt::Display for CssViewTransitionAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for TwAlphaFunction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for TwApplyAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -27112,11 +26301,6 @@ impl std::fmt::Display for TwFunctionalUtilityName {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for TwModifierFunction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for TwPluginAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -27127,17 +26311,7 @@ impl std::fmt::Display for TwReferenceAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for TwSimpleUtilityName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for TwSourceAtRule {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for TwSpacingFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -27148,16 +26322,6 @@ impl std::fmt::Display for TwThemeAtRule {
     }
 }
 impl std::fmt::Display for TwUtilityAtRule {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for TwValueArbitraryType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for TwValueFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -28461,62 +27625,6 @@ impl From<CssBogusSupportsCondition> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct CssBogusTwUtilityValue {
-    syntax: SyntaxNode,
-}
-impl CssBogusTwUtilityValue {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for CssBogusTwUtilityValue {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_TW_UTILITY_VALUE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BOGUS_TW_UTILITY_VALUE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssBogusTwUtilityValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBogusTwUtilityValue")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<CssBogusTwUtilityValue> for SyntaxNode {
-    fn from(n: CssBogusTwUtilityValue) -> Self {
-        n.syntax
-    }
-}
-impl From<CssBogusTwUtilityValue> for SyntaxElement {
-    fn from(n: CssBogusTwUtilityValue) -> Self {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssBogusUnicodeRangeValue {
     syntax: SyntaxNode,
 }
@@ -28740,7 +27848,7 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusTwUtilityValue | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
+biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclarationItem | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssBracketedValueList {
     syntax_list: SyntaxList,
@@ -31363,88 +30471,6 @@ impl IntoIterator for &TwApplyClassList {
 impl IntoIterator for TwApplyClassList {
     type Item = CssIdentifier;
     type IntoIter = AstNodeListIterator<Language, CssIdentifier>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub struct TwValueList {
-    syntax_list: SyntaxList,
-}
-impl TwValueList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for TwValueList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TW_VALUE_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TW_VALUE_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-impl Serialize for TwValueList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstSeparatedList for TwValueList {
-    type Language = Language;
-    type Node = AnyTwValueExpression;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for TwValueList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("TwValueList ")?;
-        f.debug_list().entries(self.elements()).finish()
-    }
-}
-impl IntoIterator for TwValueList {
-    type Item = SyntaxResult<AnyTwValueExpression>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwValueExpression>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for &TwValueList {
-    type Item = SyntaxResult<AnyTwValueExpression>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, AnyTwValueExpression>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

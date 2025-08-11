@@ -45,16 +45,30 @@ CssRoot {
                                                 items: [
                                                     CssBogusSupportsCondition {
                                                         items: [
-                                                            _VALUE_KW@25..32 "--value" [] [],
+                                                            CssIdentifier {
+                                                                value_token: IDENT@25..32 "--value" [] [],
+                                                            },
                                                             L_PAREN@32..33 "(" [] [],
                                                             CssBogus {
                                                                 items: [
-                                                                    CssIdentifier {
-                                                                        value_token: IDENT@33..39 "length" [] [],
-                                                                    },
-                                                                    CssBogusTwUtilityValue {
+                                                                    CssBogus {
                                                                         items: [
-                                                                            R_CURLY@39..41 "}" [Newline("\n")] [],
+                                                                            CssBogus {
+                                                                                items: [
+                                                                                    CssBogus {
+                                                                                        items: [
+                                                                                            CssIdentifier {
+                                                                                                value_token: IDENT@33..39 "length" [] [],
+                                                                                            },
+                                                                                            CssBogus {
+                                                                                                items: [
+                                                                                                    R_CURLY@39..41 "}" [Newline("\n")] [],
+                                                                                                ],
+                                                                                            },
+                                                                                        ],
+                                                                                    },
+                                                                                ],
+                                                                            },
                                                                         ],
                                                                     },
                                                                 ],
@@ -105,13 +119,17 @@ CssRoot {
                   1: COLON@23..25 ":" [] [Whitespace(" ")]
                   2: CSS_BOGUS@25..41
                     0: CSS_BOGUS_SUPPORTS_CONDITION@25..41
-                      0: _VALUE_KW@25..32 "--value" [] []
+                      0: CSS_IDENTIFIER@25..32
+                        0: IDENT@25..32 "--value" [] []
                       1: L_PAREN@32..33 "(" [] []
                       2: CSS_BOGUS@33..41
-                        0: CSS_IDENTIFIER@33..39
-                          0: IDENT@33..39 "length" [] []
-                        1: CSS_BOGUS_TW_UTILITY_VALUE@39..41
-                          0: R_CURLY@39..41 "}" [Newline("\n")] []
+                        0: CSS_BOGUS@33..41
+                          0: CSS_BOGUS@33..41
+                            0: CSS_BOGUS@33..41
+                              0: CSS_IDENTIFIER@33..39
+                                0: IDENT@33..39 "length" [] []
+                              1: CSS_BOGUS@39..41
+                                0: R_CURLY@39..41 "}" [Newline("\n")] []
                 1: (empty)
               1: (empty)
   2: EOF@41..42 "" [Newline("\n")] []
@@ -123,7 +141,7 @@ CssRoot {
 ```
 value-incomplete.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `}`
+  × Unexpected value or character.
   
     1 │ @utility foo-* {
     2 │ 	width: --value(length
@@ -131,7 +149,15 @@ value-incomplete.css:3:1 parse ━━━━━━━━━━━━━━━━�
       │ ^
     4 │ 
   
-  i Remove }
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
   
 value-incomplete.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -1,17 +1,15 @@
 use super::parse_error::expected_expression;
 use super::url::{is_at_url_function, parse_url_function};
 use crate::parser::CssParser;
-use crate::syntax::parse_error::{
-    expected_declaration_item, expected_tailwind_utility_value, tailwind_disabled,
-};
+use crate::syntax::parse_error::expected_declaration_item;
 use crate::syntax::{
     CssComponentValueList, is_at_any_value, is_at_dashed_identifier, is_nth_at_identifier,
-    parse_dashed_identifier, parse_regular_identifier, parse_string,
+    parse_dashed_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, TokenSet, token_set};
@@ -22,7 +20,7 @@ use biome_parser::{Parser, TokenSet, token_set};
 /// It's used to quickly determine if the parser is positioned at a relevant function.
 #[inline]
 pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
-    is_at_url_function(p) || is_at_function(p) || is_at_tailwind_function(p)
+    is_at_url_function(p) || is_at_function(p)
 }
 
 /// Parses any recognized CSS function at the current position in the `CssParser`.
@@ -38,13 +36,6 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_url_function(p) {
         parse_url_function(p)
-    } else if is_at_tailwind_function(p) {
-        if p.options().is_tailwind_directives_enabled() {
-            parse_tailwind_function(p)
-        } else {
-            p.error(tailwind_disabled(p, p.cur_range()));
-            Absent
-        }
     } else {
         parse_function(p)
     }
@@ -269,158 +260,7 @@ pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> Pa
     Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
 }
 
-/// Checks if the current position is at a Tailwind function
-pub(crate) fn is_at_tailwind_function(p: &mut CssParser) -> bool {
-    p.at(T![__alpha]) || p.at(T![__spacing]) || p.at(T![__value]) || p.at(T![__modifier])
-}
-
-/// Parses Tailwind CSS 4.0 functions
-pub(crate) fn parse_tailwind_function(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_tailwind_function(p) {
-        return Absent;
-    }
-
-    if !p.options().is_tailwind_directives_enabled() {
-        p.error(tailwind_disabled(p, p.cur_range()));
-        return Absent;
-    }
-
-    if p.at(T![__alpha]) {
-        parse_alpha_function(p)
-    } else if p.at(T![__spacing]) {
-        parse_spacing_function(p)
-    } else if p.at(T![__value]) {
-        parse_value_function(p)
-    } else if p.at(T![__modifier]) {
-        parse_modifier_function(p)
-    } else {
-        Absent
-    }
-}
-
-fn parse_alpha_function(p: &mut CssParser) -> ParsedSyntax {
-    // --alpha(0.5) or --alpha(var(--opacity))
-    let m = p.start();
-    p.bump(T![__alpha]);
-    p.expect(T!['(']);
-
-    // Parse optional expression parameter
-    if !p.at(T![')']) {
-        parse_any_expression(p).ok();
-    }
-
-    p.expect(T![')']);
-    Present(m.complete(p, TW_ALPHA_FUNCTION))
-}
-
-fn parse_spacing_function(p: &mut CssParser) -> ParsedSyntax {
-    // --spacing(4) or --spacing(var(--spacing-base))
-    let m = p.start();
-    p.bump(T![__spacing]);
-    p.expect(T!['(']);
-
-    // Parse optional expression parameter
-    if !p.at(T![')']) {
-        parse_any_expression(p).ok();
-    }
-
-    p.expect(T![')']);
-    Present(m.complete(p, TW_SPACING_FUNCTION))
-}
-
-fn parse_value_function(p: &mut CssParser) -> ParsedSyntax {
-    // --value(4) or --value(var(--value-base))
-    // --value("inherit", "initial", "unset")
-    // --value([integer])
-    // --value(--tab-size-*)
-    // --value(integer, [integer], --tab-size-*)
-    if !p.at(T![__value]) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    p.bump(T![__value]);
-    p.expect(T!['(']);
-    TailwindValueList.parse_list(p);
-    p.expect(T![')']);
-
-    Present(m.complete(p, TW_VALUE_FUNCTION))
-}
-
-fn parse_modifier_function(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at(T![__modifier]) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    p.bump(T![__modifier]);
-    p.expect(T!['(']);
-    TailwindValueList.parse_list(p);
-    p.expect(T![')']);
-
-    Present(m.complete(p, TW_MODIFIER_FUNCTION))
-}
-
-const TAILWIND_VALUE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T![')']];
-
-struct TailwindValueList;
-
-impl ParseSeparatedList for TailwindValueList {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = TW_VALUE_LIST;
-
-    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_string(p)
-            .or_else(|| parse_tailwind_value_arbitrary_type(p))
-            .or_else(|| parse_tailwind_value_theme_reference(p))
-            .or_else(|| parse_regular_identifier(p))
-    }
-
-    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')']) || p.at(EOF)
-    }
-
-    fn recover(
-        &mut self,
-        p: &mut Self::Parser<'_>,
-        parsed_element: ParsedSyntax,
-    ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_TW_UTILITY_VALUE, TAILWIND_VALUE_RECOVERY_SET),
-            expected_tailwind_utility_value,
-        )
-    }
-
-    fn separating_element_kind(&mut self) -> Self::Kind {
-        T![,]
-    }
-}
-
-/// Parses arbitrary type values: --value([integer])
-fn parse_tailwind_value_arbitrary_type(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at(T!['[']) {
-        return Absent;
-    }
-    let m = p.start();
-
-    p.expect(T!['[']);
-    if p.at(T![*]) {
-        let m = p.start();
-        p.bump_remap(T![ident]);
-        m.complete(p, CSS_IDENTIFIER);
-    } else {
-        parse_regular_identifier(p).ok();
-    }
-    p.expect(T![']']);
-
-    Present(m.complete(p, TW_VALUE_ARBITRARY_TYPE))
-}
-
-/// Parses theme references: --value(--tab-size-*)
+/// Parses theme references: --tab-size-*
 pub(crate) fn parse_tailwind_value_theme_reference(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_dashed_identifier(p) {
         return Absent;
@@ -428,14 +268,7 @@ pub(crate) fn parse_tailwind_value_theme_reference(p: &mut CssParser) -> ParsedS
 
     let m = p.start();
 
-    if p.at(T![__spacing]) || p.at(T![__alpha]) {
-        let ident = p.start();
-        p.bump_remap(T![ident]);
-        ident.complete(p, CSS_DASHED_IDENTIFIER);
-    } else {
-        parse_dashed_identifier(p).ok();
-    }
-
+    parse_dashed_identifier(p).ok();
     p.expect(T![-]);
     p.expect(T![*]);
 

@@ -8,8 +8,8 @@ impl FormatRule<AnyTwUtilityName> for FormatAnyTwUtilityName {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyTwUtilityName, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
+            AnyTwUtilityName::CssIdentifier(node) => node.format().fmt(f),
             AnyTwUtilityName::TwFunctionalUtilityName(node) => node.format().fmt(f),
-            AnyTwUtilityName::TwSimpleUtilityName(node) => node.format().fmt(f),
         }
     }
 }
