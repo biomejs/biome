@@ -44,7 +44,7 @@ impl Format<CssFormatContext> for FormatTokenAsLowercase {
 
 #[derive(Eq, PartialEq, Debug)]
 pub(crate) enum StringLiteralParentKind {
-    /// Variants to track tokens that are inside a CssCharasetRule
+    /// Variants to track tokens that are inside a CssCharsetRule
     /// @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding
     CharsetAtRule,
     /// other types, will add more later

@@ -58,7 +58,7 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
         // /* comment longlonglonglong */
         // .a c {}
 
-        // The complext selector
+        // The complex selector
         // /* comment longlonglonglong */
         // .a c {}
         // get formatted to
