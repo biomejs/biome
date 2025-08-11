@@ -200,7 +200,7 @@ getrandom            = "0.2.15"
 globset              = "0.4.16"
 grit-pattern-matcher = "0.5.1"
 grit-util            = "0.5.1"
-hashbrown            = { version = "0.15.4", default-features = false }
+hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.23"
 indexmap             = { version = "2.10.0" }
 insta                = "1.43.1"
