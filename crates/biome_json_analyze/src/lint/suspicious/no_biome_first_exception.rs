@@ -80,6 +80,21 @@ impl Rule for NoBiomeFirstException {
             return None;
         }
 
+        let root = ctx.root();
+
+        let extends_root = root
+            .value()
+            .ok()
+            .and_then(|value| value.as_json_object_value().cloned())
+            .and_then(|object| object.find_member("extends"))
+            .is_some_and(|extends| extends.value().ok().is_some());
+
+        dbg!(extends_root);
+
+        if extends_root {
+            return None;
+        }
+
         let value = node.value().ok()?;
         let value = value.as_json_array_value()?;
         if let Some(element) = value.elements().first() {

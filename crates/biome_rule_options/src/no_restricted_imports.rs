@@ -310,7 +310,7 @@ pub trait ImportRestrictions {
     fn check_restriction(&self, imported_name: &str) -> Restriction;
     fn has_import_name_constraints(&self) -> bool;
     fn message(&self, import_source: &str, imported_name: &str, cause: Cause) -> String;
-    fn options(&self) -> Options;
+    fn options(&self) -> Options<'_>;
 }
 
 impl ImportRestrictions for PathOptions {
@@ -323,7 +323,7 @@ impl ImportRestrictions for PathOptions {
     fn message(&self, import_source: &str, imported_name: &str, cause: Cause) -> String {
         self.message(import_source, imported_name, cause)
     }
-    fn options(&self) -> Options {
+    fn options(&self) -> Options<'_> {
         Options::PathOptions(self)
     }
 }
@@ -338,7 +338,7 @@ impl ImportRestrictions for PatternOptions {
     fn message(&self, import_source: &str, imported_name: &str, cause: Cause) -> String {
         self.message(import_source, imported_name, cause)
     }
-    fn options(&self) -> Options {
+    fn options(&self) -> Options<'_> {
         Options::PatternOptions(self)
     }
 }
