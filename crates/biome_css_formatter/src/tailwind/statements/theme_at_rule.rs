@@ -12,14 +12,10 @@ impl FormatNodeRule<TwThemeAtRule> for FormatTwThemeAtRule {
             block,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                theme_token.format(),
-                name.format().map(|name| format_args![space(), name]),
-                space(),
-                block.format()
-            ]
-        )
+        write!(f, [theme_token.format()])?;
+        if let Some(name) = name {
+            write!(f, [space(), name.format()])?;
+        }
+        write!(f, [space(), block.format()])
     }
 }
