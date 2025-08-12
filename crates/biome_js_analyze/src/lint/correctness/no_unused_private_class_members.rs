@@ -159,19 +159,19 @@ fn get_constructor_params(class_declaration: &JsClassDeclaration) -> FxHashSet<A
             _ => None,
         });
 
-    if let Some(constructor_member) = constructor_member {
-        if let Ok(constructor_params) = constructor_member.parameters() {
-            return constructor_params
-                .parameters()
-                .iter()
-                .filter_map(|param| match param.ok()? {
-                    biome_js_syntax::AnyJsConstructorParameter::TsPropertyParameter(
-                        ts_property,
-                    ) => Some(ts_property.into()),
-                    _ => None,
-                })
-                .collect();
-        }
+    if let Some(constructor_member) = constructor_member
+        && let Ok(constructor_params) = constructor_member.parameters()
+    {
+        return constructor_params
+            .parameters()
+            .iter()
+            .filter_map(|param| match param.ok()? {
+                biome_js_syntax::AnyJsConstructorParameter::TsPropertyParameter(ts_property) => {
+                    Some(ts_property.into())
+                }
+                _ => None,
+            })
+            .collect();
     }
 
     FxHashSet::default()

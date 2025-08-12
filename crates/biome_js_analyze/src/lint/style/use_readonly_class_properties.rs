@@ -1,7 +1,6 @@
 use crate::JsRuleAction;
 use crate::class_member_references::{
-    ClassMemberReference, ClassMemberReferences, AnyPropertyMember,
-    class_member_references,
+    AnyPropertyMember, ClassMemberReference, ClassMemberReferences, class_member_references,
 };
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -280,7 +279,7 @@ struct TextAndRange {
 fn collect_non_readonly_class_member_properties(
     members: &JsClassMemberList,
     private_only: bool,
-) -> impl Iterator<Item =AnyPropertyMember> {
+) -> impl Iterator<Item = AnyPropertyMember> {
     members.iter().filter_map(move |member| {
         let property_class_member = member.as_js_property_class_member()?;
 
@@ -342,9 +341,7 @@ fn collect_non_readonly_constructor_parameters(
             AnyJsConstructorParameter::TsPropertyParameter(ts_property)
                 if is_non_readonly_and_optionally_private(&ts_property, private_only) =>
             {
-                Some(AnyPropertyMember::TsPropertyParameter(
-                    ts_property,
-                ))
+                Some(AnyPropertyMember::TsPropertyParameter(ts_property))
             }
             _ => None,
         })

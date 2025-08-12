@@ -62,9 +62,7 @@ pub fn class_member_references(list: &JsClassMemberList) -> ClassMemberReference
                         {
                             return collect_references_from_body(arrow_function.syntax(), body);
                         }
-                    }
-
-                    if let Some(static_member_expression) =
+                    } else if let Some(static_member_expression) =
                         expression.as_js_static_member_expression()
                     {
                         return collect_class_property_reads_from_static_member(
@@ -174,10 +172,10 @@ impl ThisScopeVisitor<'_> {
             }
 
             WalkEvent::Leave(node) => {
-                if let Some(last) = self.skipped_ranges.last() {
-                    if *last == node.text_range() {
-                        self.skipped_ranges.pop();
-                    }
+                if let Some(last) = self.skipped_ranges.last()
+                    && *last == node.text_range()
+                {
+                    self.skipped_ranges.pop();
                 }
             }
         }
@@ -482,7 +480,7 @@ fn handle_object_binding_pattern(
     scoped_this_references: &[FunctionThisReferences],
     reads: &mut HashSet<ClassMemberReference>,
 ) {
-    if let Some(binding) = JsObjectBindingPattern::cast_ref(&node)
+    if let Some(binding) = JsObjectBindingPattern::cast_ref(node)
         && let Some(parent) = binding.syntax().parent()
         && let Some(variable_declarator) = JsVariableDeclarator::cast_ref(&parent)
         && let Some(initializer) = variable_declarator.initializer()
@@ -557,10 +555,9 @@ fn handle_assignment_expression(
     reads: &mut HashSet<ClassMemberReference>,
     writes: &mut HashSet<ClassMemberReference>,
 ) {
-    if let Some(assignment) = JsAssignmentExpression::cast_ref(&node)
+    if let Some(assignment) = JsAssignmentExpression::cast_ref(node)
         && let Ok(left) = assignment.left()
     {
-        println!("Processing assignment: {:?}", left.syntax().text_trimmed());
         if let Ok(operator) = assignment.operator_token()
             && let Some(operand) = left.as_any_js_assignment()
             && matches!(
@@ -578,24 +575,24 @@ fn handle_assignment_expression(
                 scoped_this_references,
             )
         {
-            println!("Processing name: {:?}", name);
             reads.insert(name.clone());
         }
 
         if let Some(array) = left.as_js_array_assignment_pattern().cloned() {
-            ThisPatternResolver::collect_array_assignment_names(&array, scoped_this_references)
-                .into_iter()
-                .for_each(|class_member_reference: ClassMemberReference| {
-                    writes.insert(class_member_reference.clone());
-                });
+            for class_member_reference in
+                ThisPatternResolver::collect_array_assignment_names(&array, scoped_this_references)
+            {
+                writes.insert(class_member_reference.clone());
+            }
         }
 
         if let Some(object) = left.as_js_object_assignment_pattern().cloned() {
-            ThisPatternResolver::collect_object_assignment_names(&object, scoped_this_references)
-                .into_iter()
-                .for_each(|class_member_reference: ClassMemberReference| {
-                    writes.insert(class_member_reference.clone());
-                });
+            for class_member_reference in ThisPatternResolver::collect_object_assignment_names(
+                &object,
+                scoped_this_references,
+            ) {
+                writes.insert(class_member_reference.clone());
+            }
         }
 
         if let Some(assignment) = left.as_any_js_assignment().cloned()
@@ -746,7 +743,7 @@ mod tests {
         source
     }
 
-    fn parse_first_object_binding(syntax: JsSyntaxNode) -> SyntaxNode<JsLanguage> {
+    fn parse_first_object_binding(syntax: &JsSyntaxNode) -> SyntaxNode<JsLanguage> {
         // Find the first JsObjectBindingPattern in the syntax tree
         syntax
             .descendants()
@@ -796,7 +793,7 @@ mod tests {
 
             let function_this_references =
                 ThisScopeReferences::new(&body).collect_function_this_references();
-            let node = parse_first_object_binding(body.syntax().clone());
+            let node = parse_first_object_binding(body.syntax());
             let mut reads = HashSet::new();
 
             handle_object_binding_pattern(&node, &function_this_references, &mut reads);
@@ -805,7 +802,7 @@ mod tests {
 
             for expected_reads in &case.expected_reads {
                 assert!(
-                    names.contains(&expected_reads.to_string()),
+                    names.contains(&(*expected_reads).to_string()),
                     "Case '{}' failed: expected to find '{}'",
                     case.description,
                     expected_reads
@@ -875,7 +872,7 @@ mod tests {
 
             for expected_reads in &case.expected_reads {
                 assert!(
-                    names.contains(&expected_reads.to_string()),
+                    names.contains(&(*expected_reads).to_string()),
                     "Case '{}' failed: expected to find '{}'",
                     case.description,
                     expected_reads
@@ -950,7 +947,7 @@ mod tests {
 
             for expected_read in &case.expected_reads {
                 assert!(
-                    read_names.contains(&expected_read.to_string()),
+                    read_names.contains(&(*expected_read).to_string()),
                     "Case '{}' failed: expected to find read '{}'",
                     case.description,
                     expected_read
@@ -959,7 +956,7 @@ mod tests {
 
             for expected_write in &case.expected_writes {
                 assert!(
-                    write_names.contains(&expected_write.to_string()),
+                    write_names.contains(&(*expected_write).to_string()),
                     "Case '{}' failed: expected to find write '{}'",
                     case.description,
                     expected_write
@@ -1029,7 +1026,7 @@ mod tests {
 
             for expected_name in &case.expected_reads {
                 assert!(
-                    read_names.contains(&expected_name.to_string()),
+                    read_names.contains(&(*expected_name).to_string()),
                     "Case '{}' failed: expected to find read '{}'",
                     case.description,
                     expected_name
@@ -1038,7 +1035,7 @@ mod tests {
 
             for expected_name in &case.expected_writes {
                 assert!(
-                    write_names.contains(&expected_name.to_string()),
+                    write_names.contains(&(*expected_name).to_string()),
                     "Case '{}' failed: expected to find write '{}'",
                     case.description,
                     expected_name
