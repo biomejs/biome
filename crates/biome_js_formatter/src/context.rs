@@ -569,8 +569,10 @@ impl fmt::Display for ArrowParentheses {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum OperatorLinebreak {
+    /// The operator is placed after the expression
     #[default]
     After,
+    /// The operator is placed before the expression
     Before,
 }
 
