@@ -5,6 +5,8 @@ pub(crate) struct FormatTwApplyClassList;
 impl FormatRule<TwApplyClassList> for FormatTwApplyClassList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &TwApplyClassList, f: &mut CssFormatter) -> FormatResult<()> {
-        f.join().entries(node.iter().formatted()).finish()
+        f.join_with(space())
+            .entries(node.iter().formatted())
+            .finish()
     }
 }
