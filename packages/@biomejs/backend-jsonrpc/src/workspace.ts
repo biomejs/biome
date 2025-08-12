@@ -9192,7 +9192,9 @@ export type JsonFileVariant = "standard" | "jsonc";
 /**
 	* The style of CSS contained in the file.
 
-Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
+Currently, Biome aims to be compatible with the latest Recommendation level standards.
+
+It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
 	 */
 export type CssVariant = "standard";
 /**
