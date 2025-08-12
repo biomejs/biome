@@ -38,7 +38,7 @@
 
 **Biome 是一個 [快速格式化工具](./benchmark#formatting)**，支援 _JavaScript_、_TypeScript_、_JSX_、_JSON_、_CSS_ 和 _GraphQL_，其 **與 _Prettier_ 的相容性達到 [97%](https://console.algora.io/challenges/prettier)**。
 
-**Biome 是一個 [高效能的語法檢查工具](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，支援 _JavaScript_、_TypeScript_、_JSX_、_CSS_ 和 _GraphQL_，擁有來自 ESLint、typescript-eslint 和 [其他來源](https://github.com/biomejs/biome/discussions/3)的 **超過 270 條規則**。
+**Biome 是一個 [高效能的語法檢查工具](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，支援 _JavaScript_、_TypeScript_、_JSX_、_CSS_ 和 _GraphQL_，擁有來自 ESLint、typescript-eslint 和 [其他來源](https://github.com/biomejs/biome/discussions/3)的 **[超過 340 條規則](https://biomejs.dev/linter/javascript/rules)**。
 它 **輸出詳細且具上下文的診斷資訊**，幫助你改進程式碼並成為更好的程式設計師！
 
 **Biome** 從一開始就設計為可在 [編輯器中互動使用](https://biomejs.dev/guides/editors/first-party-extensions/)。
