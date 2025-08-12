@@ -50,7 +50,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     };
 
     let options = CssFormatOptions::default();
-    let language = language::CssTestFormatLanguage::default();
+    let language = language::CssTestFormatLanguage::default().allow_tailwind_directives();
 
     let snapshot = SpecSnapshot::new(
         test_file,
