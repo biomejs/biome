@@ -38,17 +38,13 @@ class Foo {
 	}
 }
 
-class Foo {
-	#usedOnlyInWriteStatement = 5;
-	method() {
-			this.#usedOnlyInWriteStatement += 42;
-	}
-}
+// a is not alias to this
+class UsedMember18 {
+	#usedInInnerClass;
 
-class C {
-	#usedOnlyInIncrement;
-
-	foo() {
-			this.#usedOnlyInIncrement++;
+	method(a) {
+		return class {
+			foo = a.#usedInInnerClass;
+		}
 	}
 }
