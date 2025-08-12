@@ -20,3 +20,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           labels: "S-Needs repro"
           inactive-day: 3
+          body: "This issue has been automatically closed because it has been inactive for more than 3 days and it does not have a minimal reproduction."
