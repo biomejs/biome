@@ -5082,7 +5082,20 @@
 				{ "description": "`{foo}`", "type": "string", "enum": ["shorthand"] }
 			]
 		},
-		"OperatorLinebreak": { "type": "string", "enum": ["after", "before"] },
+		"OperatorLinebreak": {
+			"oneOf": [
+				{
+					"description": "The operator is placed after the expression",
+					"type": "string",
+					"enum": ["after"]
+				},
+				{
+					"description": "The operator is placed before the expression",
+					"type": "string",
+					"enum": ["before"]
+				}
+			]
+		},
 		"OrganizeImportsOptions": {
 			"type": "object",
 			"properties": {
