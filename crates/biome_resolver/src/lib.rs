@@ -41,11 +41,7 @@ pub fn resolve(
     }
 
     if specifier.starts_with('/') {
-        return resolve_absolute_path_with_extension_alias(
-            Utf8PathBuf::from(specifier),
-            fs,
-            options,
-        );
+        return resolve_absolute_path(Utf8PathBuf::from(specifier), fs, options);
     }
 
     if is_relative_specifier(specifier) {
@@ -60,37 +56,6 @@ pub fn resolve(
     }
 
     resolve_module(specifier, base_dir, fs, options)
-}
-
-fn resolve_absolute_path_with_extension_alias(
-    path: Utf8PathBuf,
-    fs: &dyn ResolverFsProxy,
-    options: &ResolveOptions,
-) -> Result<Utf8PathBuf, ResolveError> {
-    // Skip if no extension is in the path.
-    let Some(extension) = path.extension() else {
-        return resolve_absolute_path(path, fs, options);
-    };
-
-    // Skip if no extension alias is configured.
-    let Some(&(_, aliases)) = options
-        .extension_alias
-        .iter()
-        .find(|(ext, _)| *ext == extension)
-    else {
-        return resolve_absolute_path(path, fs, options);
-    };
-
-    // Try to resolve the path for each extension alias.
-    for alias in aliases {
-        match resolve_absolute_path(path.with_extension(alias), fs, options) {
-            Ok(path) => return Ok(path),
-            Err(ResolveError::NotFound) => { /* continue */ }
-            Err(error) => return Err(error),
-        }
-    }
-
-    Err(ResolveError::NotFound)
 }
 
 /// Resolves the given absolute `path`.
@@ -146,7 +111,7 @@ fn resolve_relative_path(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    resolve_absolute_path_with_extension_alias(base_dir.join(path), fs, options)
+    resolve_absolute_path(base_dir.join(path), fs, options)
 }
 
 /// Resolve the directory `dir_path`.
@@ -755,15 +720,8 @@ pub struct ResolveOptions<'a> {
     /// Extensions are checked in the order given, meaning the first extension
     /// in the list has the highest priority.
     ///
-    /// Extensions should be provided without a leading dot.
+    /// Extensions should be provided without leading dot.
     pub extensions: &'a [&'a str],
-
-    /// List of extension aliases to search for in absolute or relative paths.
-    /// Typically used to resolve `.ts` files by `.js` extension.
-    /// Same behavior as the `extensionAlias` option in [enhanced-resolve](https://github.com/webpack/enhanced-resolve?tab=readme-ov-file#resolver-options).
-    ///
-    /// Extensions should be provided without a leading dot.
-    pub extension_alias: &'a [(&'a str, &'a [&'a str])],
 
     /// Defines which `package.json` file should be used.
     ///
@@ -834,7 +792,6 @@ impl<'a> ResolveOptions<'a> {
             condition_names: &[],
             default_files: &[],
             extensions: &[],
-            extension_alias: &[],
             package_json: DiscoverableManifest::Auto,
             resolve_node_builtins: false,
             resolve_types: false,
@@ -870,15 +827,6 @@ impl<'a> ResolveOptions<'a> {
     /// Sets [`Self::extensions`] and returns this instance.
     pub const fn with_extensions(mut self, extensions: &'a [&'a str]) -> Self {
         self.extensions = extensions;
-        self
-    }
-
-    /// Sets [`Self::extension_alias`] and returns this instance.
-    pub const fn with_extension_alias(
-        mut self,
-        extension_alias: &'a [(&'a str, &'a [&'a str])],
-    ) -> Self {
-        self.extension_alias = extension_alias;
         self
     }
 
@@ -921,7 +869,6 @@ impl<'a> ResolveOptions<'a> {
             condition_names: self.condition_names,
             default_files: self.default_files,
             extensions: self.extensions,
-            extension_alias: self.extension_alias,
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
             resolve_types: self.resolve_types,
@@ -936,7 +883,6 @@ impl<'a> ResolveOptions<'a> {
             condition_names: self.condition_names,
             default_files: self.default_files,
             extensions: &[],
-            extension_alias: &[],
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
             resolve_types: self.resolve_types,
