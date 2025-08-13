@@ -45,7 +45,7 @@ if (
 	let x= 10;
 }
 
-if (aVeryLongVeriableNameSoThatTheConditionBreaksAcrossMultipleLinesAndIDontKnow) {
+if (aVeryLongVariableNameSoThatTheConditionBreaksAcrossMultipleLinesAndIDontKnow) {
 
 
 
@@ -142,7 +142,7 @@ if (true) {
 }
 
 if (
-	aVeryLongVeriableNameSoThatTheConditionBreaksAcrossMultipleLinesAndIDontKnow
+	aVeryLongVariableNameSoThatTheConditionBreaksAcrossMultipleLinesAndIDontKnow
 ) {
 } else {
 }
