@@ -159,6 +159,21 @@ const APPLY_BRACKET_SAME_LINE_AFTER: &str = r#"<Foo
 </Foo>;
 "#;
 
+const SPACING_GRAPHQLS_SANITY_BEFORE: &str = r#"  scalar Time
+  scalar UUID
+
+
+ type   User   {
+  id:  UUID!
+   name: String!
+    updatedAt: Time!
+ }
+
+
+
+
+"#;
+
 const APPLY_ATTRIBUTE_POSITION_BEFORE: &str = r#"<Foo className={style}	reallyLongAttributeName1={longComplexValue}
 reallyLongAttributeName2={anotherLongValue} />;
 
@@ -3358,6 +3373,31 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_error_if_unchanged_files_only_with_changed_flag",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn can_format_graphphs_files() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.graphqls");
+    fs.insert(file_path.into(), SPACING_GRAPHQLS_SANITY_BEFORE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "can_format_graphphs_files",
         fs,
         console,
         result,
