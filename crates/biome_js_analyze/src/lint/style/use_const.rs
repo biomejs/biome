@@ -1,7 +1,4 @@
-use crate::{
-    JsRuleAction,
-    services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
-};
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -219,7 +216,7 @@ fn check_binding_can_be_const(
 
     let binding_scope = binding.scope(model);
     let write = writes.next()?;
-    // If teher are multiple assignement or the write is not in the same scope
+    // If there are multiple assignment or the write is not in the same scope
     if writes.next().is_some() || write.scope() != binding_scope {
         return None;
     }
@@ -231,23 +228,8 @@ fn check_binding_can_be_const(
         return None;
     }
 
-    let mut refs = binding.all_references(model);
-    // If a read precedes the write, don't report it.
-    // Ignore reads that are in an inner control flow root.
-    // For example, this ignores reads inside a function:
-    // ```js
-    // let v;
-    // function f() { v; }
-    // ```
-    let next_ref = refs.find(|x| {
-        x.is_write()
-            || !x
-                .scope()
-                .ancestors()
-                .take_while(|scope| scope != &binding_scope)
-                .any(|scope| AnyJsControlFlowRoot::can_cast(scope.syntax().kind()))
-    });
-    if matches!(next_ref, Some(next_ref) if next_ref.is_read()) {
+    // If a read occurs before a write.
+    if binding.all_references(model).next()?.is_read() {
         return None;
     }
 
