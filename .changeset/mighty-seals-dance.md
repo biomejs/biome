@@ -6,7 +6,7 @@ Added a new option to Biome's JavaScript formatter, `javascript.formatter.operat
 
 For example, the following configuration:
 
-```json
+```json5
 {
   "formatter": {
     "javascript": {

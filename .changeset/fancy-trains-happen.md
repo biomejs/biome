@@ -10,5 +10,5 @@ Allow customization of the sort order for different sorting actions. These actio
 
 For each of these options, the supported values are the same:
 
-1. **`natural`**. Compares two strings using a natural ASCII order. Uppercase letters come first (e.g. `A` < `a` < `B` < `b`) and number are compared in a human way (e.g. `9` < `10`). This is the default value.
+1. **`natural`**. Compares two strings using a natural ASCII order. Uppercase letters come first (e.g. `A < a < B < b`) and number are compared in a human way (e.g. `9` < `10`). This is the default value.
 2. **`lexicographic`**. Strings are ordered lexicographically by their byte values. This orders Unicode code points based on their positions in the code charts. This is not necessarily the same as “alphabetical” order, which varies by language and locale.
