@@ -4,182 +4,171 @@ class UsedMember {
 	#usedMember = 42;
 
 	method() {
-			return this.#usedMember;
+		return this.#usedMember;
 	}
 }
 
-class UsedMember {
+class UsedMember2 {
 	#usedMethod() {
-			return 42;
+		return 42;
 	}
 
 	anotherMethod() {
-			return this.#usedMethod();
+		return this.#usedMethod();
 	}
 }
 
-
-class UsedMember {
+class UsedMember3 {
 	get #usedAccessor() {}
 	set #usedAccessor(value) {}
 
 	method() {
-			this.#usedAccessor = 42;
+		this.#usedAccessor = 42;
 	}
 }
 
-class UsedMember {
+class UsedMember4 {
 	publicMember = 42;
 }
 
-class UsedMember {
+class UsedMember5 {
 	#usedMember = 42;
 	anotherMember = this.#usedMember;
 }
 
-class UsedMember {
+class UsedMember6 {
 	#usedMember = 42;
 	foo() {
 		this.#usedMember = this.#usedMember;
 	}
 }
 
-class UsedMember {
+class UsedMember7 {
 	#usedMember;
 
 	foo() {
-			bar(this.#usedMember += 1);
+		bar(this.#usedMember += 1);
 	}
 }
 
-class UsedMember {
+class UsedMember8 {
 	#usedMember = 42;
 	method() {
-			return someGlobalMethod(this.#usedMember);
+		return someGlobalMethod(this.#usedMember);
 	}
 }
 
-class UsedMember {
+class UsedMember9 {
 	#usedInOuterClass;
 
 	foo() {
-			return class {};
+		return class {};
 	}
 
 	bar() {
-			return this.#usedInOuterClass;
+		return this.#usedInOuterClass;
 	}
 }
 
-
-class UsedMember {
+class UsedMember10 {
 	#usedInForInLoop;
 	method() {
-			for (const bar in this.#usedInForInLoop) {
+		for (const bar in this.#usedInForInLoop) {
 
-			}
+		}
 	}
 }
 
-class UsedMember {
+class UsedMember11 {
 	#usedInForOfLoop;
 	method() {
-			for (const bar of this.#usedInForOfLoop) {
+		for (const bar of this.#usedInForOfLoop) {
 
-			}
+		}
 	}
 }
 
-class UsedMember {
+class UsedMember12 {
 	#usedInAssignmentPattern;
 	method() {
-			[bar = 1] = this.#usedInAssignmentPattern;
+		[bar = 1] = this.#usedInAssignmentPattern;
 	}
 }
 
-class UsedMember {
+class UsedMember13 {
 	#usedInArrayPattern;
 	method() {
-			[bar] = this.#usedInArrayPattern;
+		[bar] = this.#usedInArrayPattern;
 	}
 }
 
-class UsedMember {
+class UsedMember14 {
 	#usedInAssignmentPattern;
 	method() {
-			[bar] = this.#usedInAssignmentPattern;
+		[bar] = this.#usedInAssignmentPattern;
 	}
 }
 
-class UsedMember {
+class UsedMember15 {
 	#usedInObjectAssignment;
 
 	method() {
-			({ [this.#usedInObjectAssignment]: a } = foo);
+		({ [this.#usedInObjectAssignment]: a } = foo);
 	}
 }
 
-class UsedMember {
+class UsedMember16 {
 	set #accessorWithSetterFirst(value) {
-			doSomething(value);
+		doSomething(value);
 	}
 	get #accessorWithSetterFirst() {
-			return something();
+		return something();
 	}
 	method() {
-			this.#accessorWithSetterFirst += 1;
+		this.#accessorWithSetterFirst += 1;
 	}
 }
 
-class UsedMember {
+class UsedMember17 {
 	set #accessorUsedInMemberAccess(value) {}
 
 	method(a) {
-			[this.#accessorUsedInMemberAccess] = a;
+		[this.#accessorUsedInMemberAccess] = a;
 	}
 }
 
-class UsedMember {
+class UsedMember18 {
 	get #accessorWithGetterFirst() {
-			return something();
+		return something();
 	}
 	set #accessorWithGetterFirst(value) {
-			doSomething(value);
+		doSomething(value);
 	}
 	method() {
-			this.#accessorWithGetterFirst += 1;
-	}
-}
-
-class UsedMember {
-	#usedInInnerClass;
-
-	method(a) {
-			return class {
-					foo = a.#usedInInnerClass;
-			}
+		this.#accessorWithGetterFirst += 1;
 	}
 }
 
 class Foo {
 	#usedMethod() {
-			return 42;
+		return 42;
 	}
 	anotherMethod() {
-			return this.#usedMethod();
+		return this.#usedMethod();
 	}
 }
 
 class C {
 	set #x(value) {
-			doSomething(value);
+		doSomething(value);
 	}
 
 	foo() {
-			this.#x = 1;
+		this.#x = 1;
 	}
 }
 
+<<<<<<< HEAD
 // issue #6994
 class UsedAssignmentExpr {
   #val = 0;
@@ -203,3 +192,12 @@ class UsedPostUpdateExpr {
     return this.#val++;
   }
 }
+=======
+class C2 {
+	#usedOnlyInIncrement;
+
+	foo() {
+		this.#usedOnlyInIncrement++;
+	}
+}
+>>>>>>> 22f48652e2 (feat(biome-js-analyze): introduce class_member_analyzer to find all reads and writes of class members and props)

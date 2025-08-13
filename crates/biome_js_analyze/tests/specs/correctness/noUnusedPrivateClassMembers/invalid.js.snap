@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 146
 expression: invalid.js
 ---
 # Input
@@ -44,18 +45,14 @@ class Foo {
 	}
 }
 
-class Foo {
-	#usedOnlyInWriteStatement = 5;
-	method() {
-			this.#usedOnlyInWriteStatement += 42;
-	}
-}
+// a is not alias to this
+class UsedMember18 {
+	#usedInInnerClass;
 
-class C {
-	#usedOnlyInIncrement;
-
-	foo() {
-			this.#usedOnlyInIncrement++;
+	method(a) {
+		return class {
+			foo = a.#usedInInnerClass;
+		}
 	}
 }
 
@@ -128,28 +125,6 @@ invalid.js:10:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     10    │ - → #usedOnlyInWrite·=·5;
     11 10 │   
     12 11 │   	method() {
-  
-
-```
-
-```
-invalid.js:18:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    17 │ class SelfUpdate {
-  > 18 │ 	#usedOnlyToUpdateItself = 5;
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^
-    19 │ 
-    20 │ 	method() {
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    16 16 │   
-    17 17 │   class SelfUpdate {
-    18    │ - → #usedOnlyToUpdateItself·=·5;
-    19 18 │   
-    20 19 │   	method() {
   
 
 ```
@@ -244,45 +219,24 @@ invalid.js:35:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
 ```
 
 ```
-invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This private class member is defined but never used.
   
-    41 │ class Foo {
-  > 42 │ 	#usedOnlyInWriteStatement = 5;
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
-    43 │ 	method() {
-    44 │ 			this.#usedOnlyInWriteStatement += 42;
+    41 │ // a is not alias to this
+    42 │ class UsedMember18 {
+  > 43 │ 	#usedInInnerClass;
+       │ 	^^^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ 	method(a) {
   
   i Unsafe fix: Remove unused declaration.
   
-    40 40 │   
-    41 41 │   class Foo {
-    42    │ - → #usedOnlyInWriteStatement·=·5;
-    43 42 │   	method() {
-    44 43 │   			this.#usedOnlyInWriteStatement += 42;
-  
-
-```
-
-```
-invalid.js:49:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    48 │ class C {
-  > 49 │ 	#usedOnlyInIncrement;
-       │ 	^^^^^^^^^^^^^^^^^^^^
-    50 │ 
-    51 │ 	foo() {
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    47 47 │   
-    48 48 │   class C {
-    49    │ - → #usedOnlyInIncrement;
-    50 49 │   
-    51 50 │   	foo() {
+    41 41 │   // a is not alias to this
+    42 42 │   class UsedMember18 {
+    43    │ - → #usedInInnerClass;
+    44 43 │   
+    45 44 │   	method(a) {
   
 
 ```
