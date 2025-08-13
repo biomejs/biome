@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": major
+"@biomejs/biome": minor 
 ---
 
 Implemented [#7174](https://github.com/biomejs/biome/issues/7174). [`useConst`](https://biomejs.dev/linter/rules/use-const/) no longer reports variables read before to be written.
