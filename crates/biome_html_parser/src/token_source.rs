@@ -22,7 +22,7 @@ pub(crate) enum HtmlLexContext {
     ///
     /// When the lexer is outside of a tag, special characters are lexed as text.
     ///
-    /// The exceptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceeded with a `<`.
+    /// The exceptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceded with a `<`.
     #[default]
     Regular,
     /// When the lexer is inside a tag, special characters are lexed as tag tokens.
