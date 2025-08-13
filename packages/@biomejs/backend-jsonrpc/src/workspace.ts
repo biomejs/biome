@@ -2005,7 +2005,7 @@ export interface Style {
 	 */
 	useFilenamingConvention?: RuleConfiguration_for_UseFilenamingConventionOptions;
 	/**
-	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
+	 * Prefer using for...of loops over standard for loops where possible.
 	 */
 	useForOf?: RuleConfiguration_for_UseForOfOptions;
 	/**

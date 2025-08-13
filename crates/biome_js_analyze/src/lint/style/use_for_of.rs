@@ -18,14 +18,14 @@ use crate::{services::semantic::Semantic, utils::is_node_equal};
 declare_lint_rule! {
     /// Prefer using `for...of` loops over standard `for` loops where possible.
     ///
-    /// This rule recommends using a `for...of` loop in place of a `for` loop 
+    /// This rule recommends using a `for...of` loop in place of a `for` loop
     /// when the loop index is solely used to read from the iterated array.
-    /// 
+    ///
     /// ### Exceptions for Index Usage
     /// When the loop index is declared within the outer scope or used anywhere within the loop body,
     /// it is acceptable to use a `for` loop.
     /// (`Array.entries()` can be used to a similar effect.)
-    /// 
+    ///
     /// ## Examples
     ///
     /// ### Invalid
