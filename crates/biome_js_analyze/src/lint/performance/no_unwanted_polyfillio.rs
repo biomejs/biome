@@ -255,7 +255,7 @@ fn test_check_unwanted_polyfill() {
     let actual = check_unwanted_polyfill(src, NEXT_POLYFILLED_FEATURES);
     assert_eq!(actual, None);
 
-    // Differente URL
+    // Different URL
     let src = "https://example.com/polyfill.min.js?features=Array.prototype.includes";
     let actual = check_unwanted_polyfill(src, NEXT_POLYFILLED_FEATURES);
     assert_eq!(actual, None);

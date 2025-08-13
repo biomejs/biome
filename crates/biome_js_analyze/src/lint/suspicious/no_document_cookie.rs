@@ -83,7 +83,7 @@ fn is_global_document(expr: &AnyJsExpression, model: &SemanticModel) -> Option<(
         let decl = bind.tree().declaration()?;
         let decl = decl.parent_binding_pattern_declaration().unwrap_or(decl);
         match decl {
-            // const foo = documnet;
+            // const foo = document;
             AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
                 let initializer = declarator.initializer()?;
                 let right_expr = initializer.expression().ok()?;

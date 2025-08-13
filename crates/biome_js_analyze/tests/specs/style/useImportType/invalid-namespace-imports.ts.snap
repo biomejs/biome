@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid-namesapce-imports.ts
+expression: invalid-namespace-imports.ts
 ---
 # Input
 ```ts
@@ -13,7 +13,7 @@ let a: A.Type1;
 
 # Diagnostics
 ```
-invalid-namesapce-imports.ts:1:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-namespace-imports.ts:1:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All these imports are only used as types.
   

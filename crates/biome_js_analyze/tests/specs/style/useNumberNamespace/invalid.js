@@ -71,12 +71,12 @@ function foo() {
 
 globalThis.parseFloat(foo);
 
-// Biome doesn't suport `global` for global namespacing
+// Biome doesn't support `global` for global namespacing
 // global.parseFloat(foo);
 
 window.parseFloat(foo);
 
-// Biome doesn't suport `self` for global namespacing
+// Biome doesn't support `self` for global namespacing
 // self.parseFloat(foo);
 
 globalThis.NaN - globalThis.Infinity;

@@ -297,7 +297,7 @@ const invalidTestObject = {
 		this["returnsPromiseMethod"]();
 	},
 };
-async function testInvalidObejctMethodCalls(): Promise<void> {
+async function testInvalidObjectMethodCalls(): Promise<void> {
 	invalidTestObject.returnsPromiseArrowFunction();
 	invalidTestObject.returnsPromiseFunction().then(() => {});
 	invalidTestObject
@@ -1398,7 +1398,7 @@ invalid.ts:295:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
     293 │ };
-    294 │ async function testInvalidObejctMethodCalls(): Promise<void> {
+    294 │ async function testInvalidObjectMethodCalls(): Promise<void> {
   > 295 │ 	invalidTestObject.returnsPromiseArrowFunction();
         │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     296 │ 	invalidTestObject.returnsPromiseFunction().then(() => {});
@@ -1418,7 +1418,7 @@ invalid.ts:296:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    294 │ async function testInvalidObejctMethodCalls(): Promise<void> {
+    294 │ async function testInvalidObjectMethodCalls(): Promise<void> {
     295 │ 	invalidTestObject.returnsPromiseArrowFunction();
   > 296 │ 	invalidTestObject.returnsPromiseFunction().then(() => {});
         │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

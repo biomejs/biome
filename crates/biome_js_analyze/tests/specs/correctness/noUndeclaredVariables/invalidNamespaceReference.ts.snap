@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalidNamesapceReference.ts
+expression: invalidNamespaceReference.ts
 ---
 # Input
 ```ts
@@ -13,7 +13,7 @@ export type T2 = Ns2;  // This doesn't reference the import namespace `Ns1`
 
 # Diagnostics
 ```
-invalidNamesapceReference.ts:2:18 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNamespaceReference.ts:2:18 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Ns1 variable is undeclared.
   
@@ -30,7 +30,7 @@ invalidNamesapceReference.ts:2:18 lint/correctness/noUndeclaredVariables ━━�
 ```
 
 ```
-invalidNamesapceReference.ts:5:18 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNamespaceReference.ts:5:18 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Ns2 variable is undeclared.
   

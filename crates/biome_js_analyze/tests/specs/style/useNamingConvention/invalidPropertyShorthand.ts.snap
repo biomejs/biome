@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalidPorpertyShorthyand.ts
+expression: invalidPropertyShorthand.ts
 ---
 # Input
 ```ts
@@ -14,7 +14,7 @@ const SERVICE = {
 
 # Diagnostics
 ```
-invalidPorpertyShorthyand.ts:4:3 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidPropertyShorthand.ts:4:3 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This object property name should be in camelCase.
   

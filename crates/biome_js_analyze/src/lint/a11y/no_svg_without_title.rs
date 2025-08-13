@@ -188,7 +188,7 @@ impl Rule for NoSvgWithoutTitle {
     }
 }
 
-/// Checks if the given attribute is attached to the `svg` element and the attribute value is used by the `id` of the childs element.
+/// Checks if the given attribute is attached to the `svg` element and the attribute value is used by the `id` of the child element.
 fn is_valid_attribute_value(
     attribute: Option<JsxAttribute>,
     jsx_child_list: &JsxChildList,

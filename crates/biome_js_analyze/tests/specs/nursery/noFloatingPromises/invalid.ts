@@ -291,7 +291,7 @@ const invalidTestObject = {
 		this["returnsPromiseMethod"]();
 	},
 };
-async function testInvalidObejctMethodCalls(): Promise<void> {
+async function testInvalidObjectMethodCalls(): Promise<void> {
 	invalidTestObject.returnsPromiseArrowFunction();
 	invalidTestObject.returnsPromiseFunction().then(() => {});
 	invalidTestObject

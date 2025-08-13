@@ -374,7 +374,7 @@ fn analyze_fine(cfg: &JsControlFlowGraph, signals: &mut UnreachableRanges) {
     'blocks: for (block_id, block) in cfg.block_id_iter() {
         match block_paths.get(&block_id) {
             // Block has incoming paths, but may be unreachable if they all
-            // have a dominating terminator intruction
+            // have a dominating terminator instruction
             Some(paths) => {
                 let mut terminators = Vec::new();
                 for path in paths {
@@ -444,7 +444,7 @@ fn traverse_cfg(
     });
 
     // This maps holds a list of "path state", the active terminator
-    // intruction for each path that can reach the block
+    // instruction for each path that can reach the block
     let mut block_paths = FxHashMap::default();
 
     while let Some(mut path) = queue.pop_front() {

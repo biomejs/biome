@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: assigments.jsx
+expression: assignments.jsx
 ---
 # Input
 ```jsx
@@ -12,7 +12,7 @@ err = <React.Fragment>Error</React.Fragment>;
 
 # Diagnostics
 ```
-assigments.jsx:1:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+assignments.jsx:1:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This fragment is unnecessary.
   
@@ -34,7 +34,7 @@ assigments.jsx:1:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
 ```
 
 ```
-assigments.jsx:2:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+assignments.jsx:2:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This fragment is unnecessary.
   
@@ -58,7 +58,7 @@ assigments.jsx:2:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
 ```
 
 ```
-assigments.jsx:3:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+assignments.jsx:3:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This fragment is unnecessary.
   
