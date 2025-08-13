@@ -251,8 +251,9 @@ fn get_extensionless_import(
     };
 
     let is_index_file = resolved_stem.is_some_and(|stem| stem == "index");
+    let import_path_ends_with_index = path.file_name().is_some_and(|name| name == "index");
 
-    let new_path = if is_index_file {
+    let new_path = if is_index_file && !import_path_ends_with_index {
         let mut path_parts = path.as_str().split('/');
 
         // Remove trailing slash and useless path segment.
