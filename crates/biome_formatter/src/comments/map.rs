@@ -589,7 +589,7 @@ impl InOrderEntry {
 
 #[derive(Debug)]
 struct OutOfOrderEntry {
-    /// Index into the [CommentsMap::out_of_order] vector at which offset the leaading vec is stored.
+    /// Index into the [CommentsMap::out_of_order] vector at which offset the leading vec is stored.
     leading_index: usize,
     #[cfg(feature = "countme")]
     _count: countme::Count<OutOfOrderEntry>,
