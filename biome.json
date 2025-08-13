@@ -25,13 +25,13 @@
       "**/packages/tailwindcss-config-analyzer/**",
       "**/benchmark/**",
       "scripts/**",
-      "!**/crates/**",
-      "!**/dist/**",
+      "!**/crates",
+      "!**/dist",
       "!**/packages/@biomejs/backend-jsonrpc/src/workspace.ts",
       "!**/__snapshots__",
-      "!**/undefined/**",
-      "!**/benchmark/target/**",
-      "!**/benches/**"
+      "!**/undefined",
+      "!**/benchmark/target",
+      "!**/benches"
     ],
     "experimentalScannerIgnores": [
       ".cargo",

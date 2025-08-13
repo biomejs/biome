@@ -99,7 +99,9 @@ export interface Workspace<Configuration, Diagnostic> {
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): PullDiagnosticsResult<Diagnostic>;
+	// biome-ignore lint: code generation is broken
 	formatRange(params: FormatRangeParams): any;
+	// biome-ignore lint: code generation is broken
 	formatFile(params: FormatFileParams): any;
 	getFormatterIr(params: GetFormatterIRParams): string;
 	fixFile(params: FixFileParams): FixFileResult;

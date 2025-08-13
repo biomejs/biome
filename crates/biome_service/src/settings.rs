@@ -600,6 +600,10 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
             language_setting.formatter = formatter.into();
         }
 
+        if let Some(parser) = html.parser {
+            language_setting.parser = parser.into();
+        }
+
         // NOTE: uncomment once ready
         // if let Some(linter) = html.linter {
         //     language_setting.linter = linter.into();
@@ -858,13 +862,7 @@ impl VcsIgnoredPatterns {
         };
 
         let nested_ignored = nested.iter().any(|gitignore| {
-            let ignore_directory = if gitignore.path().is_file() {
-                // SAFETY: if it's a file, it always has a parent
-                gitignore.path().parent().unwrap()
-            } else {
-                gitignore.path()
-            };
-            if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
+            if let Ok(stripped_path) = path.strip_prefix(gitignore.path()) {
                 gitignore.matched(stripped_path, is_dir).is_ignore()
             } else {
                 false
@@ -1427,6 +1425,9 @@ impl OverrideSettingPattern {
             .or(formatter.attribute_position)
         {
             options.set_attribute_position(attribute_position);
+        }
+        if let Some(operator_line_break) = js_formatter.operator_linebreak {
+            options.set_operator_linebreak(operator_line_break);
         }
     }
 

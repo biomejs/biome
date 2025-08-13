@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `check.js`
 
@@ -40,22 +39,6 @@ check.js:1:16 suppressions/parse ━━━━━━━━━━━━━━━�
 ```
 
 ```block
-check.js:1:16 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected token, expected one of ':' or whitespace.
-  
-  > 1 │ // biome-ignore(:
-      │                ^
-    2 │ 
-  
-  i A category is mandatory: try lint, format, assist or plugin.
-  
-  i Example of suppression: // biome-ignore lint: reason
-  
-
-```
-
-```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
 ```

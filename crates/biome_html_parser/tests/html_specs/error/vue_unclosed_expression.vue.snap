@@ -20,32 +20,31 @@ HtmlRoot {
     frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
-        HtmlBogusElement {
-            items: [
-                HtmlOpeningElement {
-                    l_angle_token: L_ANGLE@0..1 "<" [] [],
-                    name: HtmlTagName {
-                        value_token: HTML_LITERAL@1..9 "template" [] [],
-                    },
-                    attributes: HtmlAttributeList [],
-                    r_angle_token: R_ANGLE@9..10 ">" [] [],
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..9 "template" [] [],
                 },
-                HtmlBogus {
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlBogusTextExpression {
                     items: [
                         L_DOUBLE_CURLY@10..14 "{{" [Newline("\n"), Whitespace("\t")] [],
                         HTML_LITERAL@14..17 "xyz" [] [],
-                        HtmlContent {
-                            value_token: HTML_LITERAL@17..19 "<" [Newline("\n")] [],
-                        },
-                        HtmlBogusElement {
-                            items: [
-                                SLASH@19..20 "/" [] [],
-                                HTML_LITERAL@20..29 "template>" [] [],
-                            ],
-                        },
                     ],
                 },
             ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@17..19 "<" [Newline("\n")] [],
+                slash_token: SLASH@19..20 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@20..28 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@28..29 ">" [] [],
+            },
         },
     ],
     eof_token: EOF@29..30 "" [Newline("\n")] [],
@@ -60,21 +59,23 @@ HtmlRoot {
   1: (empty)
   2: (empty)
   3: HTML_ELEMENT_LIST@0..29
-    0: HTML_BOGUS_ELEMENT@0..29
+    0: HTML_ELEMENT@0..29
       0: HTML_OPENING_ELEMENT@0..10
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..9
           0: HTML_LITERAL@1..9 "template" [] []
         2: HTML_ATTRIBUTE_LIST@9..9
         3: R_ANGLE@9..10 ">" [] []
-      1: HTML_BOGUS@10..29
-        0: L_DOUBLE_CURLY@10..14 "{{" [Newline("\n"), Whitespace("\t")] []
-        1: HTML_LITERAL@14..17 "xyz" [] []
-        2: HTML_CONTENT@17..19
-          0: HTML_LITERAL@17..19 "<" [Newline("\n")] []
-        3: HTML_BOGUS_ELEMENT@19..29
-          0: SLASH@19..20 "/" [] []
-          1: HTML_LITERAL@20..29 "template>" [] []
+      1: HTML_ELEMENT_LIST@10..17
+        0: HTML_BOGUS_TEXT_EXPRESSION@10..17
+          0: L_DOUBLE_CURLY@10..14 "{{" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_LITERAL@14..17 "xyz" [] []
+      2: HTML_CLOSING_ELEMENT@17..29
+        0: L_ANGLE@17..19 "<" [Newline("\n")] []
+        1: SLASH@19..20 "/" [] []
+        2: HTML_TAG_NAME@20..28
+          0: HTML_LITERAL@20..28 "template" [] []
+        3: R_ANGLE@28..29 ">" [] []
   4: EOF@29..30 "" [Newline("\n")] []
 
 ```
@@ -82,14 +83,14 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-vue_unclosed_expression.vue:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+vue_unclosed_expression.vue:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found a text expression that doesn't have the closing }}
+  × Found a text expression that doesn't have the closing expression:
   
     1 │ <template>
-    2 │ 	{{xyz
-  > 3 │ </template>
-      │ ^
+  > 2 │ 	{{xyz
+      │ 	^^^^^
+    3 │ </template>
     4 │ 
   
   i This is where the opening expression was found:
@@ -99,36 +100,5 @@ vue_unclosed_expression.vue:3:1 parse ━━━━━━━━━━━━━━
       │ 	^^
     3 │ </template>
     4 │ 
-  
-vue_unclosed_expression.vue:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    1 │ <template>
-    2 │ 	{{xyz
-  > 3 │ </template>
-      │  ^^^^^^^^^^
-    4 │ 
-  
-  i Expected one of:
-  
-  - element
-  - text
-  
-vue_unclosed_expression.vue:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a closing tag but instead found the end of the file.
-  
-    2 │ 	{{xyz
-    3 │ </template>
-  > 4 │ 
-      │ 
-  
-  i Expected a closing tag here.
-  
-    2 │ 	{{xyz
-    3 │ </template>
-  > 4 │ 
-      │ 
   
 ```

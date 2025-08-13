@@ -20,7 +20,7 @@ expression: redactor(content)
 ```json
 {
   "files": {
-    "includes": ["**/*.js", "!vendor/**"]
+    "includes": ["**/*.js", "!vendor"]
   },
   "linter": {
     "rules": {
