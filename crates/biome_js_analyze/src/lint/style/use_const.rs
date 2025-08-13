@@ -71,6 +71,19 @@ declare_lint_rule! {
     /// a; // the variable is read before its assignment
     /// a = 0;
     /// ```
+    ///
+    /// ## Caveats
+    ///
+    /// Since v2.2, the rule no longer reports variables that are read in an inner function before being written.
+    /// This can result in false negatives. For example, the following code is now valid:
+    ///
+    /// ```js
+    /// let a;
+    /// function f() {
+    ///     return a; // read
+    /// }
+    /// a = 0; // written
+    /// ```
     pub UseConst {
         version: "1.0.0",
         name: "useConst",
