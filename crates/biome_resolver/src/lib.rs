@@ -760,7 +760,7 @@ pub struct ResolveOptions<'a> {
     ///   extensions for definition files yourself. These extensions will be
     ///   tried automatically with a priority that is higher than the
     ///   corresponding JavaScript extension, but lower than the extension that
-    ///   preceeds it.
+    ///   precedes it.
     pub resolve_types: bool,
 
     /// Defines which `tsconfig.json` file should be used.
