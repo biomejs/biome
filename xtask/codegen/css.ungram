@@ -1831,7 +1831,7 @@ CssUnicodeRangeInterval =
 	end: CssUnicodeCodepoint
 
 
-// Any identifier. Case insensitve, used for standard property names, values, type selectors, etc.
+// Any identifier. Case insensitive, used for standard property names, values, type selectors, etc.
 CssIdentifier = value: 'ident'
 // Any non-standard identifier. Case sensitive, used for class names, ids, etc. Custom identifiers
 // _may_ overlap with standard identifiers defined by CSS (e.g., `color`).

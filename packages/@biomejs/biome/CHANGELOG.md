@@ -3824,7 +3824,7 @@
     }
   ```
 
-- Fix a parsing error when a `JsxElementName` is `JsxMemberExpression`, and a `JsLogicalExpreesion` before it without a semicolon.
+- Fix a parsing error when a `JsxElementName` is `JsxMemberExpression`, and a `JsLogicalExpression` before it without a semicolon.
 
   The following case will now not throw error:
 
