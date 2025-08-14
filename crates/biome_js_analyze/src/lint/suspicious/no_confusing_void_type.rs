@@ -22,7 +22,7 @@ declare_lint_rule! {
     /// > If you think you need this then you probably want the `undefined` type instead.
     ///
     /// The code action suggests using `undefined` instead of `void`.
-    /// It is unsafe because a variable with the `void` type cannot be asigned to a variable with the `undefined` type.
+    /// It is unsafe because a variable with the `void` type cannot be assigned to a variable with the `undefined` type.
     ///
     /// ## Examples
     ///

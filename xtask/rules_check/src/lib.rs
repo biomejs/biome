@@ -320,7 +320,7 @@ where
 {
     let path = BiomePath::new(Utf8PathBuf::from(&file_path));
     let file_source = &test.document_file_source();
-    let supression_reason = None;
+    let suppression_reason = None;
 
     let Some(settings) = workspace_settings.get_root_settings(project_key) else {
         return AnalyzerOptions::default();
@@ -335,7 +335,7 @@ where
         environment,
         &path,
         file_source,
-        supression_reason,
+        suppression_reason,
     )
 }
 

@@ -501,7 +501,7 @@ fn visit_import_call(
                 // const [ ... ] = await import(...)
                 //
                 // Array binding patterns do not really make sense for an import,
-                // so discard the additonal information and use fallback instead.
+                // so discard the additional information and use fallback instead.
             }
         }
     };

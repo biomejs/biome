@@ -33,12 +33,12 @@ type FunctionTypeWithReturnUnion2 = () => BBBBBBBBBBBBBBBBBBBBBBBB | CCCCCCCCCCC
 type InlineType = TypeName | null | void;
 type InlineTypeWithLongName = TypeNameTypeNameTypeNameTypeNameTypeNameTypeNameTypeName | null | void;
 
-type TypeWithTypleInsideShort = [
+type TypeWithTupleInsideShort = [
     A | [A, B, C] | C,
     A | [A, B, C] | C,
   ];
 
-type TypeWithTypleInsideLong = [
+type TypeWithTupleInsideLong = [
     AAAAAAAAAAAAAAAAA | [AAAAAAAAAAAAAAAAA, BBBBBBBBBBBB, CCCCCCCCCCCCC] | CCCCCCCCCCCCCCCCCCCC,
     AAAAAAAAAAAAAAAAA | [AAAAAAAAAAAAAAAAA, BBBBBBBBBBBB, CCCCCCCCCCCCC] | CCCCCCCCCCCCCCCCCCCC,
   ];

@@ -103,7 +103,7 @@ TwRoot {
 ## Diagnostics
 
 ```
-incomplete-arbirary-value-2.txt:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+incomplete-arbitrary-value-2.txt:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a value but instead found '['.
   

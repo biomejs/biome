@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalidBaseExpoentHigherPrecedence.js
+expression: invalidBaseExponentHigherPrecedence.js
 ---
 # Input
 ```js
@@ -19,7 +19,7 @@ expression: invalidBaseExpoentHigherPrecedence.js
 
 # Diagnostics
 ```
-invalidBaseExpoentHigherPrecedence.js:2:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+invalidBaseExponentHigherPrecedence.js:2:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -41,7 +41,7 @@ invalidBaseExpoentHigherPrecedence.js:2:2 lint/style/useExponentiationOperator  
 ```
 
 ```
-invalidBaseExpoentHigherPrecedence.js:3:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+invalidBaseExponentHigherPrecedence.js:3:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -65,7 +65,7 @@ invalidBaseExpoentHigherPrecedence.js:3:2 lint/style/useExponentiationOperator  
 ```
 
 ```
-invalidBaseExpoentHigherPrecedence.js:4:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+invalidBaseExponentHigherPrecedence.js:4:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -89,7 +89,7 @@ invalidBaseExpoentHigherPrecedence.js:4:2 lint/style/useExponentiationOperator  
 ```
 
 ```
-invalidBaseExpoentHigherPrecedence.js:5:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+invalidBaseExponentHigherPrecedence.js:5:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -113,7 +113,7 @@ invalidBaseExpoentHigherPrecedence.js:5:2 lint/style/useExponentiationOperator  
 ```
 
 ```
-invalidBaseExpoentHigherPrecedence.js:6:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+invalidBaseExponentHigherPrecedence.js:6:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -137,7 +137,7 @@ invalidBaseExpoentHigherPrecedence.js:6:2 lint/style/useExponentiationOperator  
 ```
 
 ```
-invalidBaseExpoentHigherPrecedence.js:7:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+invalidBaseExponentHigherPrecedence.js:7:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -161,7 +161,7 @@ invalidBaseExpoentHigherPrecedence.js:7:2 lint/style/useExponentiationOperator  
 ```
 
 ```
-invalidBaseExpoentHigherPrecedence.js:8:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+invalidBaseExponentHigherPrecedence.js:8:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -185,7 +185,7 @@ invalidBaseExpoentHigherPrecedence.js:8:2 lint/style/useExponentiationOperator  
 ```
 
 ```
-invalidBaseExpoentHigherPrecedence.js:9:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+invalidBaseExponentHigherPrecedence.js:9:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -209,7 +209,7 @@ invalidBaseExpoentHigherPrecedence.js:9:2 lint/style/useExponentiationOperator  
 ```
 
 ```
-invalidBaseExpoentHigherPrecedence.js:10:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
+invalidBaseExponentHigherPrecedence.js:10:2 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   

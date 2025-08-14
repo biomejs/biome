@@ -149,6 +149,6 @@ f(1)
 f((-1))
 
 // type predicate
-function isFourtyTwo(num): num is 42 {
+function isFortyTwo(num): num is 42 {
 	return true;
 }

@@ -169,13 +169,15 @@ jobs:
   build-binaries-gnu:
     needs: version
     if: needs.version.outputs.cli-version
+    env:
+      RUST_BACKTRACE: 1
     strategy:
       matrix:
         include:
           - os: depot-ubuntu-24.04
             target: x86_64-unknown-linux-gnu
             code-target: linux-x64
-          - os: depot-ubuntu-24.04-arm
+          - os: depot-ubuntu-24.04-arm-4
             target: aarch64-unknown-linux-gnu
             code-target: linux-arm64
 

@@ -22,7 +22,7 @@ pub struct ReferenceId(BindingId, u32);
 impl ReferenceId {
     pub fn new(binding_id: BindingId, index: usize) -> Self {
         // SAFETY: We didn't handle files exceeding `u32::MAX` bytes.
-        // Thus, it isn't possible to exceed `u32::MAX` refernces.
+        // Thus, it isn't possible to exceed `u32::MAX` references.
         Self(binding_id, index as u32)
     }
 
@@ -57,7 +57,7 @@ impl ScopeId {
 
     pub fn index(self) -> usize {
         // SAFETY: The internal representation ensures that the value is never equal to 0.
-        // Thus, it is safe to substract 1.
+        // Thus, it is safe to subtract 1.
         (unsafe { self.0.get().unchecked_sub(1) }) as usize
     }
 }

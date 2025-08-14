@@ -7,8 +7,8 @@ info: js/module/string/quotePreserve/directives.js
 ```js
 'use preferred quote';
 "use preferred quote";
-"keep quotes and escpaes \" ";
-'keep quotes and escpaes \' ';
+"keep quotes and escapes \" ";
+'keep quotes and escapes \' ';
 ```
 
 
@@ -39,8 +39,8 @@ Operator linebreak: After
 ```js
 "use preferred quote";
 "use preferred quote";
-"keep quotes and escpaes \" ";
-'keep quotes and escpaes \' ';
+"keep quotes and escapes \" ";
+'keep quotes and escapes \' ';
 ```
 
 ## Output 1
@@ -66,6 +66,6 @@ Operator linebreak: After
 ```js
 "use preferred quote";
 "use preferred quote";
-"keep quotes and escpaes \" ";
-'keep quotes and escpaes \' ';
+"keep quotes and escapes \" ";
+'keep quotes and escapes \' ';
 ```

@@ -219,7 +219,7 @@ const validTestObject = {
 		this["returnsPromiseMethod"]().catch(() => {});
 	},
 }
-async function testValidObejctMethodCalls(): Promise<string> {
+async function testValidObjectMethodCalls(): Promise<string> {
   await validTestObject.returnsPromiseArrowFunction();
   validTestObject.returnsPromiseFunction().catch(() => { });
   validTestObject.returnsPromiseMethod().then(() => { }, () => { }).finally(() => { });

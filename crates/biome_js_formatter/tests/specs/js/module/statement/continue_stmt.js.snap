@@ -6,7 +6,7 @@ info: js/module/statement/continue_stmt.js
 
 ```js
 for (const f of fs) {
-    if (condition) continue; //commment
+    if (condition) continue; //comment
     else continue; // comment
 }
 ```
@@ -39,7 +39,7 @@ Operator linebreak: After
 ```js
 for (const f of fs) {
 	if (condition)
-		continue; //commment
+		continue; //comment
 	else continue; // comment
 }
 ```

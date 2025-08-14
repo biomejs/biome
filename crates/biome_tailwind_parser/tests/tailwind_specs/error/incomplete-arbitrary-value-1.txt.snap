@@ -59,7 +59,7 @@ TwRoot {
 ## Diagnostics
 
 ```
-incomplete-arbirary-value-1.txt:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+incomplete-arbitrary-value-1.txt:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a value but instead found '[#ff0000'.
   

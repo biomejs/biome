@@ -175,7 +175,7 @@ impl Rule for UseArrayLiterals {
                 && !type_arg.is_primitive_type()
                 && !matches!(type_arg, AnyTsType::TsReferenceType(_))
             {
-                // only wrap the type in parens if its not a literal, primative, or reference
+                // only wrap the type in parens if its not a literal, primitive, or reference
                 make::parenthesized_ts(type_arg).into()
             } else {
                 type_arg

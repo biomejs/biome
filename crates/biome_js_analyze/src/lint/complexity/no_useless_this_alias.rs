@@ -98,7 +98,7 @@ impl Rule for NoUselessThisAlias {
             }
             is_this_alias = true;
         }
-        // This cehck is useful when the loop is not executed (no write).
+        // This check is useful when the loop is not executed (no write).
         if !is_this_alias {
             return None;
         }

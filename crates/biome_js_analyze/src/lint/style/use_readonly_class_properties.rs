@@ -443,7 +443,7 @@ fn collect_non_readonly_class_member_properties(
 
 /// Collects all all mutable (non-readonly) constructor parameters from a given class declaration. If private_only is true, it only includes parameters with private visibility.
 /// It returns a Vec<PropOrParam> representing these parameters, which are candidates for being marked as readonly.
-/// e.g. constructor(private paramOne: string, public paramTwo: number) {} makes both paramOne and paramTwo classs member properties.
+/// e.g. constructor(private paramOne: string, public paramTwo: number) {} makes both paramOne and paramTwo class member properties.
 fn collect_non_readonly_constructor_parameters(
     class_declaration: &JsClassDeclaration,
     private_only: bool,

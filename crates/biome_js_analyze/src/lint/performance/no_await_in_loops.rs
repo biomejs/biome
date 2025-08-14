@@ -89,7 +89,7 @@ impl Rule for NoAwaitInLoops {
                         preorder.skip_subtree();
                     }
 
-                    // skip valid case: bidning in `for in`
+                    // skip valid case: binding in `for in`
                     // `async function foo() { for (var bar = await baz in qux) {} }`
                     if JsForVariableDeclaration::can_cast(node.kind()) {
                         preorder.skip_subtree();

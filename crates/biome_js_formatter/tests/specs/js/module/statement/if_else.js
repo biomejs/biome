@@ -38,7 +38,7 @@ if (
 	let x= 10;
 }
 
-if (aVeryLongVeriableNameSoThatTheConditionBreaksAcrossMultipleLinesAndIDontKnow) {
+if (aVeryLongVariableNameSoThatTheConditionBreaksAcrossMultipleLinesAndIDontKnow) {
 
 
 
