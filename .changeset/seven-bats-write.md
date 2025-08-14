@@ -2,8 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the new nursery rule `noDuplicateDependencies`, which detects if there isn't a dependency listed twice.
-In the dependencies, devDependencies, optionalDependencies & peerDependencies.
+Added the new nursery rule [`noDuplicateDependencies`](https://next.biomejs.dev/linter/rules/no-duplicate-dependencies/), which verifies that no dependencies are duplicated between the `bundledDependencies`, `bundleDependencies`, `dependencies`, `devDependencies`, `overrides`, `optionalDependencies`, and `peerDependencies` sections.
 
 For example, the following snippets will trigger the rule:
 

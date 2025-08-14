@@ -1,0 +1,44 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+  "name": "invalid-dependencies-optional-dependencies",
+  "dependencies": {
+    "foo": "",
+    "bar": ""
+  },
+  "optionalDependencies": {
+    "foo": "",
+    "baz": ""
+  }
+}
+
+```
+
+# Diagnostics
+```
+package.json:4:5 lint/nursery/noDuplicateDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The dependency foo is also listed in another dependency group.
+  
+    2 │   "name": "invalid-dependencies-optional-dependencies",
+    3 │   "dependencies": {
+  > 4 │     "foo": "",
+      │     ^^^^^
+    5 │     "bar": ""
+    6 │   },
+  
+  i The dependency is also specified here.
+  
+     6 │   },
+     7 │   "optionalDependencies": {
+   > 8 │     "foo": "",
+       │     ^^^^^
+     9 │     "baz": ""
+    10 │   }
+  
+
+```
