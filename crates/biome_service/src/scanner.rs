@@ -497,15 +497,18 @@ impl Scanner {
         }
     }
 
-    /// Unloads the folder with the given `path` from the index.
+    /// Instructs the watcher to stop watching the given folder with the given
+    /// `path`.
+    ///
+    /// This will remove the folder from [`Self::watched_folders`].
     pub fn unload_folder(&self, path: Utf8PathBuf) {
         let _ = self
             .watcher_tx
             .try_send(WatcherInstruction::UnwatchFolder(path));
     }
 
-    /// Unloads the project with the given `project_key` and `project_path` from
-    /// the index.
+    /// Unloads the project from the scanner and instructs the watcher to stop
+    /// watching it.
     ///
     /// This does _not_ take care of unloading the documents inside the folder.
     pub fn unload_project(&self, project_key: ProjectKey, project_path: Utf8PathBuf) {
@@ -542,12 +545,17 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
     let mut folders: FxHashSet<_> = {
         let mut folders = FxHashSet::default();
         for dependency_path in &dependencies {
-            folders.extend(
-                dependency_path
-                    .ancestors()
-                    .skip(1)
-                    .take_while(|ancestor| *ancestor != project_path),
-            );
+            for ancestor in dependency_path.ancestors().skip(1) {
+                if ancestor == project_path {
+                    break;
+                }
+
+                if !folders.insert(ancestor) {
+                    // If an ancestor was already in the set, its parents must
+                    // be too.
+                    break;
+                }
+            }
         }
         folders.into_iter().map(Utf8Path::to_path_buf).collect()
     };
