@@ -550,19 +550,26 @@ impl WorkspaceServer {
             }
             IndexRequestKind::Explicit(IndexTrigger::Update) => IgnoreKind::Ancestors,
 
-            // If the path is a dependency of an indexed file, we accept them
+            // If the path is a node_modules dependency of an indexed file, we accept them
             // under the following conditions:
             // - If the path is inside `node_modules`, we only care about
             //   `package.json` and type declarations, to avoid accidentally
             //   indexing minified files.
             // - The path shouldn't be indexed yet, to avoid double indexing.
+            //
+            // If the path isn't a node_modules dependency, we fallback to [IgnoreKind::Ancestors],
+            // and check whether the file is ignored
             IndexRequestKind::Dependency(_) => {
                 let path = BiomePath::new(path);
-                if path.is_dependency() && !path.is_package_json() && !path.is_type_declaration() {
-                    return Ok(true);
+                if path.is_dependency() {
+                    return if !path.is_package_json() && !path.is_type_declaration() {
+                        Ok(true)
+                    } else {
+                        Ok(!self.is_indexed(&path))
+                    };
+                } else {
+                    IgnoreKind::Ancestors
                 }
-
-                return Ok(self.is_indexed(&path));
             }
         };
 
