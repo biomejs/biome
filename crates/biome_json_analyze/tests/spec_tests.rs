@@ -185,13 +185,13 @@ pub(crate) fn analyze_and_snap(
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
     }
-    let langauge = format!("{}", file_source.variant());
+    let language = format!("{}", file_source.variant());
     write_analyzer_snapshot(
         snapshot,
         input_code,
         diagnostics.as_slice(),
         code_fixes.as_slice(),
-        langauge.as_str(),
+        language.as_str(),
     );
 
     assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);

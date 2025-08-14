@@ -24,7 +24,7 @@ fn lex_mapping_key_special_char() {
 }
 
 #[test]
-fn lex_unambigous_mapping_and_comment() {
+fn lex_unambiguous_mapping_and_comment() {
     assert_lex!(
         "abc: #abc",
         MAPPING_START:0,

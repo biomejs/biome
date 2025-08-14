@@ -787,7 +787,7 @@ impl Rule for ForLoopCountReferences {
             .as_any_js_binding()?
             .as_js_identifier_binding()?;
 
-        // How many times this variable appers in the code
+        // How many times this variable appears in the code
         let count = binding.all_references(model).count();
 
         // Get all read references

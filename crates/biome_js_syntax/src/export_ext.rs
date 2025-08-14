@@ -190,7 +190,7 @@ impl JsExport {
                     default_declaration_clause
                         .declaration()
                         .ok()
-                        .and_then(|default_declation| match default_declation {
+                        .and_then(|default_declaration| match default_declaration {
                             // export default function x() {}
                             AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(
                                 function_declaration,
