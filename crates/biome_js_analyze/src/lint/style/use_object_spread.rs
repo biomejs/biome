@@ -145,7 +145,7 @@ impl Rule for UseObjectSpread {
                     object_member_separators.extend(separators);
                     object_members.extend(members);
                 }
-                // All the other expressions will be spreaded.
+                // All the other expressions will be spread.
                 _ => {
                     object_members.push(AnyJsObjectMember::JsSpread(make::js_spread(
                         make::token(JsSyntaxKind::DOT3),

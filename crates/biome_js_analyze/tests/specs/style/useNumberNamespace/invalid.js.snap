@@ -77,12 +77,12 @@ function foo() {
 
 globalThis.parseFloat(foo);
 
-// Biome doesn't suport `global` for global namespacing
+// Biome doesn't support `global` for global namespacing
 // global.parseFloat(foo);
 
 window.parseFloat(foo);
 
-// Biome doesn't suport `self` for global namespacing
+// Biome doesn't support `self` for global namespacing
 // self.parseFloat(foo);
 
 globalThis.NaN - globalThis.Infinity;
@@ -1030,7 +1030,7 @@ invalid.js:72:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
   > 72 │ globalThis.parseFloat(foo);
        │ ^^^^^^^^^^^^^^^^^^^^^
     73 │ 
-    74 │ // Biome doesn't suport `global` for global namespacing
+    74 │ // Biome doesn't support `global` for global namespacing
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
@@ -1041,7 +1041,7 @@ invalid.js:72:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
     72    │ - globalThis.parseFloat(foo);
        72 │ + globalThis.Number.parseFloat(foo);
     73 73 │   
-    74 74 │   // Biome doesn't suport `global` for global namespacing
+    74 74 │   // Biome doesn't support `global` for global namespacing
   
 
 ```
@@ -1056,7 +1056,7 @@ invalid.js:77:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
   > 77 │ window.parseFloat(foo);
        │ ^^^^^^^^^^^^^^^^^
     78 │ 
-    79 │ // Biome doesn't suport `self` for global namespacing
+    79 │ // Biome doesn't support `self` for global namespacing
   
   i ES2015 moved some globals into the Number namespace for consistency.
   
@@ -1067,7 +1067,7 @@ invalid.js:77:1 lint/style/useNumberNamespace  FIXABLE  ━━━━━━━━
     77    │ - window.parseFloat(foo);
        77 │ + window.Number.parseFloat(foo);
     78 78 │   
-    79 79 │   // Biome doesn't suport `self` for global namespacing
+    79 79 │   // Biome doesn't support `self` for global namespacing
   
 
 ```

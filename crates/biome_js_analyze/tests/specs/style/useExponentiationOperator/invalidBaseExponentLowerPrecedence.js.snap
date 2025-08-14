@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalidBaseExpoentLowerPrecedence.js
+expression: invalidBaseExponentLowerPrecedence.js
 ---
 # Input
 ```js
@@ -21,7 +21,7 @@ function *f() { Math.pow(yield, yield) }
 
 # Diagnostics
 ```
-invalidBaseExpoentLowerPrecedence.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -43,7 +43,7 @@ invalidBaseExpoentLowerPrecedence.js:2:1 lint/style/useExponentiationOperator  F
 ```
 
 ```
-invalidBaseExpoentLowerPrecedence.js:3:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:3:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -67,7 +67,7 @@ invalidBaseExpoentLowerPrecedence.js:3:1 lint/style/useExponentiationOperator  F
 ```
 
 ```
-invalidBaseExpoentLowerPrecedence.js:4:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:4:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -91,7 +91,7 @@ invalidBaseExpoentLowerPrecedence.js:4:1 lint/style/useExponentiationOperator  F
 ```
 
 ```
-invalidBaseExpoentLowerPrecedence.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -115,7 +115,7 @@ invalidBaseExpoentLowerPrecedence.js:5:1 lint/style/useExponentiationOperator  F
 ```
 
 ```
-invalidBaseExpoentLowerPrecedence.js:6:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:6:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -139,7 +139,7 @@ invalidBaseExpoentLowerPrecedence.js:6:1 lint/style/useExponentiationOperator  F
 ```
 
 ```
-invalidBaseExpoentLowerPrecedence.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -163,7 +163,7 @@ invalidBaseExpoentLowerPrecedence.js:7:1 lint/style/useExponentiationOperator  F
 ```
 
 ```
-invalidBaseExpoentLowerPrecedence.js:8:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:8:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -187,7 +187,7 @@ invalidBaseExpoentLowerPrecedence.js:8:1 lint/style/useExponentiationOperator  F
 ```
 
 ```
-invalidBaseExpoentLowerPrecedence.js:9:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:9:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -211,7 +211,7 @@ invalidBaseExpoentLowerPrecedence.js:9:1 lint/style/useExponentiationOperator  F
 ```
 
 ```
-invalidBaseExpoentLowerPrecedence.js:10:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:10:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -235,7 +235,7 @@ invalidBaseExpoentLowerPrecedence.js:10:1 lint/style/useExponentiationOperator  
 ```
 
 ```
-invalidBaseExpoentLowerPrecedence.js:11:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:11:1 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   
@@ -259,7 +259,7 @@ invalidBaseExpoentLowerPrecedence.js:11:1 lint/style/useExponentiationOperator  
 ```
 
 ```
-invalidBaseExpoentLowerPrecedence.js:12:17 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
+invalidBaseExponentLowerPrecedence.js:12:17 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
 
   i Use the '**' operator instead of 'Math.pow'.
   

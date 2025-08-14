@@ -325,7 +325,7 @@ declare_source_rule! {
     ///
     /// Group matchers can also be glob patterns and list of glob patterns.
     /// Glob patterns select imports and exports with a source that matches the pattern.
-    /// In the following example, we create two groups: one that gathers imports/exports with a source starting with `@my/lib` except `@my/lib/speciaal` and the other that gathers imports/exports starting with `@/`.
+    /// In the following example, we create two groups: one that gathers imports/exports with a source starting with `@my/lib` except `@my/lib/special` and the other that gathers imports/exports starting with `@/`.
     ///
     /// ```json
     /// {

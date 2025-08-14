@@ -54,7 +54,7 @@ const REACT_COMPONENT_PARAMS_LIMIT: usize = 1;
 /// Represents information about a React component.
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct ReactComponentInfo {
-    /// Range of the component defintion start token.
+    /// Range of the component definition start token.
     /// This can be used for diagnostics in the absence of the names.
     pub(crate) start_range: TextRange,
     /// Name of the component.

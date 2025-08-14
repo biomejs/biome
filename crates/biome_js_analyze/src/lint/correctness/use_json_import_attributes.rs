@@ -201,11 +201,11 @@ impl Rule for UseJsonImportAttributes {
                 let prev_assertions = prev_assertion.assertions();
 
                 let mut items = vec![entry];
-                let mut seperators = vec![];
+                let mut separators = vec![];
 
                 // if there is more than 1 assertion, we need to add a comma after the first attribute
                 if prev_assertions.len() > 0 {
-                    seperators.push(
+                    separators.push(
                         make::token(T![,])
                             .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
                     );
@@ -220,12 +220,12 @@ impl Rule for UseJsonImportAttributes {
                         items.push(node);
                     }
                     if let Ok(Some(trailing_separator)) = trailing_separator {
-                        seperators.push(trailing_separator);
+                        separators.push(trailing_separator);
                     }
                 }
 
                 prev_assertion
-                    .with_assertions(make::js_import_assertion_entry_list(items, seperators))
+                    .with_assertions(make::js_import_assertion_entry_list(items, separators))
             }
         };
 
