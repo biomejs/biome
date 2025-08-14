@@ -48,16 +48,16 @@ const PACKAGE_JSON: &str = "package.json";
 
 // dependencies <-> devDependencies / optionalDependencies / peerDependencies
 // optionalDependencies <-> peerDependencies
-const UNIQUE_PROPERTY_KEYS: [(&str, [&str; 3]); 2] = [
+const UNIQUE_PROPERTY_KEYS: [(&str, &[&str]); 2] = [
     (
         "dependencies",
-        [
+        &[
             "devDependencies",
             "optionalDependencies",
             "peerDependencies",
         ],
     ),
-    ("optionalDependencies", ["peerDependencies", "", ""]),
+    ("optionalDependencies", &["peerDependencies"]),
 ];
 
 const DUPLICATE_PROPERTY_KEYS: &[&str; 7] = &[
@@ -186,11 +186,7 @@ impl Rule for NoDuplicateDependencies {
             }
 
             for property in properties {
-                if property.is_empty() {
-                    continue;
-                }
-
-                let deps = dependencies.get(property);
+                let deps = dependencies.get(*property);
 
                 if deps.is_none() {
                     continue;

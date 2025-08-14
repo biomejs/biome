@@ -1,17 +1,16 @@
 ---
 source: crates/biome_json_analyze/tests/spec_tests.rs
-assertion_line: 82
 expression: package.json
 ---
 # Input
 ```json
 {
-  "name": "invalid-dependencies",
-  "dependencies": {
-    "foo": "",
-    "bar": "",
-    "foo": ""
-  }
+  "name": "invalid-bundle-dependencies",
+  "bundleDependencies": [
+    "foo",
+    "bar",
+    "foo"
+  ]
 }
 
 ```
@@ -22,20 +21,20 @@ package.json:4:5 lint/nursery/noDuplicateDependencies ━━━━━━━━�
 
   i The dependency "foo" is also listed in another dependency group.
   
-    2 │   "name": "invalid-dependencies",
-    3 │   "dependencies": {
-  > 4 │     "foo": "",
+    2 │   "name": "invalid-bundle-dependencies",
+    3 │   "bundleDependencies": [
+  > 4 │     "foo",
       │     ^^^^^
-    5 │     "bar": "",
-    6 │     "foo": ""
+    5 │     "bar",
+    6 │     "foo"
   
   i The dependency is also specified here.
   
-    4 │     "foo": "",
-    5 │     "bar": "",
-  > 6 │     "foo": ""
+    4 │     "foo",
+    5 │     "bar",
+  > 6 │     "foo"
       │     ^^^^^
-    7 │   }
+    7 │   ]
     8 │ }
   
 
