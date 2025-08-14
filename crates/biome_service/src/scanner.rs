@@ -608,13 +608,17 @@ fn scan_dependencies<W: WorkspaceScannerBridge>(
     let dependencies_mutex = mem::take(&mut ctx.dependencies);
     let dependencies = dependencies_mutex.into_inner().unwrap();
     for dependency_path in dependencies {
-        folders.extend(
-            dependency_path
-                .ancestors()
-                .skip(1)
-                .take_while(|ancestor| *ancestor != project_path)
-                .map(Utf8Path::to_path_buf),
-        );
+        for ancestor in dependency_path.ancestors().skip(1) {
+            if ancestor == project_path {
+                break;
+            }
+
+            if !folders.insert(ancestor.to_path_buf()) {
+                // If an ancestor was already in the set, its parents must
+                // be too.
+                break;
+            }
+        }
     }
 
     (start.elapsed(), folders)
