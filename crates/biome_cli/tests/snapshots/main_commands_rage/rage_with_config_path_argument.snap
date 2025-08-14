@@ -1,0 +1,53 @@
+---
+source: crates/biome_cli/tests/commands/rage.rs
+expression: content
+---
+## `custom-config.json`
+
+```json
+{\n  \"formatter\": {\n    \"enabled\": false\n  }\n}
+```
+
+# Emitted Messages
+
+```block
+CLI:
+  Version:                      0.0.0
+  Color support:                **PLACEHOLDER**
+
+Platform:
+  CPU Architecture:             **PLACEHOLDER**
+  OS:                           **PLACEHOLDER**
+
+Environment:
+  BIOME_LOG_PATH:               **PLACEHOLDER**
+  BIOME_LOG_PREFIX_NAME:        unset
+  BIOME_CONFIG_PATH:            unset
+  BIOME_THREADS:                unset
+  NO_COLOR:                     **PLACEHOLDER**
+  TERM:                         **PLACEHOLDER**
+  JS_RUNTIME_VERSION:           unset
+  JS_RUNTIME_NAME:              unset
+  NODE_PACKAGE_MANAGER:         unset
+
+Biome Configuration:
+  Error:                        unexpected character `\`
+  Error:                        unexpected character `\`
+  Error:                        Missing closing quote
+  Error:                        expected `}` but instead the file ends
+  Status:                       Loaded with errors
+  Path:                         custom-config.json
+  Formatter enabled:            true
+  Linter enabled:               true
+  Assist enabled:               true
+  VCS enabled:                  false
+
+Server:
+  Version:                      0.0.0
+  Name:                         biome_lsp
+  CPU Architecture:             **PLACEHOLDER**
+  OS:                           **PLACEHOLDER**
+
+Workspace:
+  Open Documents:               0
+```
