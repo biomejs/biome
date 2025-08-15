@@ -72,6 +72,7 @@ fn bench_index_d_ts(bencher: Bencher, name: &str) {
                 &[(&path, root)],
                 &[],
             );
+            divan::black_box(&module_graph);
         });
 }
 
