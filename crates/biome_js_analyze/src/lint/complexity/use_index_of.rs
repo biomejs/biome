@@ -175,7 +175,7 @@ impl Rule for UseIndexOf {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Prefer "<Emphasis>"Array#"{old_member_name}"()"</Emphasis>" over "<Emphasis>"Array#"{new_member_name}"()"</Emphasis>" when looking for the index of an item.`"
+                    "Prefer "<Emphasis>"Array#"{new_member_name}"()"</Emphasis>" over "<Emphasis>"Array#"{old_member_name}"()"</Emphasis>" when looking for the index of an item."
                 },
             ).note(markup! {
                 "This callback only tests for equality against a single value. This value can be passed directly to "<Emphasis>""{new_member_name}"()"</Emphasis>" instead."
