@@ -1267,7 +1267,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "cfg-if",
- "codspeed-criterion-compat",
+ "codspeed-divan-compat",
  "indexmap",
  "insta",
  "mimalloc",
