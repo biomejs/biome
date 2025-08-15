@@ -274,3 +274,9 @@ jobs:
             biome-*
           fail_on_unmatched_files: true
           generate_release_notes: true
+      - name: Generate docker images
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: biomejs/docker
+          event-type: build_images
