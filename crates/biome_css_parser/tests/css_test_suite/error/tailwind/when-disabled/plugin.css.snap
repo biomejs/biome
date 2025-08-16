@@ -101,7 +101,7 @@ plugin.css:1:2 parse ━━━━━━━━━━━━━━━━━━━�
       │  ^^^^^^
     2 │ 
   
-  i Enable `tailwind_directives` in the css parser options.
+  i Enable `tailwindDirectives` in the css parser options.
   
 plugin.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

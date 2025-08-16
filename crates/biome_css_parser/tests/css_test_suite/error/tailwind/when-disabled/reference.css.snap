@@ -101,7 +101,7 @@ reference.css:1:2 parse ━━━━━━━━━━━━━━━━━━�
       │  ^^^^^^^^^
     2 │ 
   
-  i Enable `tailwind_directives` in the css parser options.
+  i Enable `tailwindDirectives` in the css parser options.
   
 reference.css:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

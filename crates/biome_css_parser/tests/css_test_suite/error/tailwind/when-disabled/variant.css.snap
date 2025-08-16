@@ -210,6 +210,6 @@ variant.css:4:3 parse ━━━━━━━━━━━━━━━━━━━�
     5 │ 		background: black;
     6 │ 	}
   
-  i Enable `tailwind_directives` in the css parser options.
+  i Enable `tailwindDirectives` in the css parser options.
   
 ```

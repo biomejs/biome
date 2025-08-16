@@ -115,6 +115,6 @@ theme.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━
     2 │ 	--color-primary: #3b82f6;
     3 │ }
   
-  i Enable `tailwind_directives` in the css parser options.
+  i Enable `tailwindDirectives` in the css parser options.
   
 ```

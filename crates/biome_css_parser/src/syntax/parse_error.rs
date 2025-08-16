@@ -235,6 +235,6 @@ pub(crate) fn expected_declaration(p: &CssParser, range: TextRange) -> ParseDiag
 pub(crate) fn tailwind_disabled(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder(markup! { "Tailwind-specific syntax is disabled."}, range)
         .with_hint(markup! {
-            "Enable "<Emphasis>"`tailwind_directives`"</Emphasis>" in the css parser options."
+            "Enable "<Emphasis>"`tailwindDirectives`"</Emphasis>" in the css parser options."
         })
 }
