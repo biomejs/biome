@@ -58,55 +58,55 @@ importers:
         version: 3.2.4(@types/node@22.17.1)(happy-dom@18.0.1)(jiti@1.21.6)
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-win32-x64
 
   packages/@biomejs/biome:
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.2.0
+        specifier: 2.2.1
         version: link:../cli-win32-x64
 
   packages/@biomejs/cli-darwin-arm64: {}
