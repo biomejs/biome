@@ -22,6 +22,7 @@ pub(crate) mod prelude;
 mod trivia;
 pub mod utils;
 mod verbatim;
+mod vue;
 
 /// Formats a Html file based on its features.
 ///

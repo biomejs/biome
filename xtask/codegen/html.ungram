@@ -155,6 +155,7 @@ HtmlAttributeList = AnyHtmlAttribute*
 AnyHtmlAttribute =
 	HtmlAttribute
 	| HtmlDoubleTextExpression
+	| AnyVueDirective
 	| HtmlBogusAttribute
 
 // <a href="">
@@ -181,3 +182,67 @@ HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
 HtmlContent = value: 'html_literal'
+
+// ==================================
+// Vue
+// ==================================
+
+// reference: https://vuejs.org/guide/essentials/template-syntax
+
+AnyVueDirective =
+	VueDirective
+	| VueVBindShorthandDirective
+	| VueVOnShorthandDirective
+
+// <div v-bind:href="url" />
+//      ^^^^^^^^^^^^^^^^^
+VueDirective =
+  name: 'html_literal'
+  arg: VueDirectiveArgument?
+  modifiers: VueModifierList
+	initializer: HtmlAttributeInitializerClause?
+
+// <div v-bind:href="url" />
+//            ^^^^^
+VueDirectiveArgument =
+	':'
+	arg: AnyVueDirectiveArgument
+
+// <div :href="url" />
+//      ^^^^^^^^^^^
+VueVBindShorthandDirective =
+	arg: VueDirectiveArgument
+	modifiers: VueModifierList
+	initializer: HtmlAttributeInitializerClause?
+
+// <div @click="onClick" />
+//      ^^^^^^^^^^^^^^^^
+VueVOnShorthandDirective =
+	'@'
+	arg: AnyVueDirectiveArgument
+	modifiers: VueModifierList
+	initializer: HtmlAttributeInitializerClause?
+
+AnyVueDirectiveArgument =
+	VueStaticArgument
+	| VueDynamicArgument
+
+// <div v-bind:href="url" />
+//             ^^^^
+VueStaticArgument =
+	name: 'html_literal'
+
+// <div v-bind:[field]="url" />
+//             ^^^^^^^
+VueDynamicArgument =
+	'['
+	name: 'html_literal'
+	']'
+
+VueModifierList = VueModifier*
+
+// <div @click.prevent="onClick" />
+//            ^^^^^^^^
+VueModifier =
+	'.'
+	modifier: 'html_literal'
