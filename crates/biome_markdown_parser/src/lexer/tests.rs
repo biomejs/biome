@@ -25,6 +25,9 @@ macro_rules! assert_lex {
             tokens.push((lexer.current(), lexer.current_range()));
         }
 
+        // TODO: remove this debug print
+        println!("tokens: {:#?}", tokens);
+
         $(
             assert_eq!(
                 tokens[idx].0,
@@ -137,6 +140,118 @@ fn whitespace() {
     assert_lex! {
         " ",
         WHITESPACE:1,
+    }
+}
+
+#[test]
+fn heading_level_1() {
+    assert_lex! {
+        "# Heading 1",
+        HASH:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_1_with_newline() {
+    assert_lex! {
+        "# Heading 1\n",
+        HASH:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn heading_level_2() {
+    assert_lex! {
+        "## Heading 2",
+        HASH:1,
+        HASH:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_3() {
+    assert_lex! {
+        "### Heading 3",
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_4() {
+    assert_lex! {
+        "#### Heading 4",
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_5() {
+    assert_lex! {
+        "##### Heading 5",
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_6() {
+    assert_lex! {
+        "###### Heading 6",
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+// todo: this should be a MD_TEXTUAL_LITERAL token
+fn not_a_heading() {
+    assert_lex! {
+        "############## not-heading",
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:3,
+        ERROR_TOKEN:1,
+        MD_TEXTUAL_LITERAL:7,
     }
 }
 
