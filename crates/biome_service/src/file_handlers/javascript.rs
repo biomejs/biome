@@ -325,6 +325,10 @@ impl ServiceLanguage for JsLanguage {
             } else if filename.ends_with(".svelte")
                 || filename.ends_with(".svelte.js")
                 || filename.ends_with(".svelte.ts")
+                || filename.ends_with(".svelte.test.ts")
+                || filename.ends_with(".svelte.test.js")
+                || filename.ends_with(".svelte.spec.ts")
+                || filename.ends_with(".svelte.spec.js")
             {
                 // Svelte 5 runes
                 globals.extend(
