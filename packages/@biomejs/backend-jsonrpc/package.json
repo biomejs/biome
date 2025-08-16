@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/backend-jsonrpc",
-  "version": "2.0.12",
+  "version": "2.0.13",
   "main": "dist/index.js",
   "scripts": {
     "test": "vitest",
@@ -45,13 +45,13 @@
     "provenance": true
   },
   "optionalDependencies": {
-    "@biomejs/cli-win32-x64": "2.2.0",
-    "@biomejs/cli-win32-arm64": "2.2.0",
-    "@biomejs/cli-darwin-x64": "2.2.0",
-    "@biomejs/cli-darwin-arm64": "2.2.0",
-    "@biomejs/cli-linux-x64": "2.2.0",
-    "@biomejs/cli-linux-arm64": "2.2.0",
-    "@biomejs/cli-linux-x64-musl": "2.2.0",
-    "@biomejs/cli-linux-arm64-musl": "2.2.0"
+    "@biomejs/cli-win32-x64": "2.2.1",
+    "@biomejs/cli-win32-arm64": "2.2.1",
+    "@biomejs/cli-darwin-x64": "2.2.1",
+    "@biomejs/cli-darwin-arm64": "2.2.1",
+    "@biomejs/cli-linux-x64": "2.2.1",
+    "@biomejs/cli-linux-arm64": "2.2.1",
+    "@biomejs/cli-linux-x64-musl": "2.2.1",
+    "@biomejs/cli-linux-arm64-musl": "2.2.1"
   }
 }
