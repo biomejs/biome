@@ -108,6 +108,7 @@ impl<'src> Parser for HtmlParser<'src> {
 pub struct HtmlParseOptions {
     pub(crate) frontmatter: bool,
     pub(crate) text_expression: Option<TextExpressionKind>,
+    pub(crate) vue: bool,
 }
 
 impl HtmlParseOptions {
@@ -137,6 +138,11 @@ impl HtmlParseOptions {
             false => self.text_expression = None,
         }
     }
+
+    pub fn with_vue(mut self) -> Self {
+        self.vue = true;
+        self
+    }
 }
 
 impl From<&HtmlFileSource> for HtmlParseOptions {
@@ -157,7 +163,7 @@ impl From<&HtmlFileSource> for HtmlParseOptions {
                 options = options.with_single_text_expression().with_frontmatter();
             }
             HtmlVariant::Vue => {
-                options = options.with_double_text_expression();
+                options = options.with_double_text_expression().with_vue();
             }
             HtmlVariant::Svelte => {
                 options = options.with_single_text_expression();

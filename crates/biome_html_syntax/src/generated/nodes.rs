@@ -1534,6 +1534,311 @@ pub struct SvelteRenderBlockFields {
     pub expression: SyntaxResult<HtmlTextExpression>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueDirectiveFields {
+        VueDirectiveFields {
+            name_token: self.name_token(),
+            arg: self.arg(),
+            modifiers: self.modifiers(),
+            initializer: self.initializer(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn arg(&self) -> Option<VueDirectiveArgument> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn modifiers(&self) -> VueModifierList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for VueDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueDirectiveFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
+    pub arg: Option<VueDirectiveArgument>,
+    pub modifiers: VueModifierList,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueDirectiveArgument {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueDirectiveArgument {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueDirectiveArgumentFields {
+        VueDirectiveArgumentFields {
+            colon_token: self.colon_token(),
+            arg: self.arg(),
+        }
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn arg(&self) -> SyntaxResult<AnyVueDirectiveArgument> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for VueDirectiveArgument {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueDirectiveArgumentFields {
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub arg: SyntaxResult<AnyVueDirectiveArgument>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueDynamicArgument {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueDynamicArgument {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueDynamicArgumentFields {
+        VueDynamicArgumentFields {
+            l_brack_token: self.l_brack_token(),
+            name_token: self.name_token(),
+            r_brack_token: self.r_brack_token(),
+        }
+    }
+    pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn r_brack_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for VueDynamicArgument {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueDynamicArgumentFields {
+    pub l_brack_token: SyntaxResult<SyntaxToken>,
+    pub name_token: SyntaxResult<SyntaxToken>,
+    pub r_brack_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueModifier {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueModifier {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueModifierFields {
+        VueModifierFields {
+            dot_token: self.dot_token(),
+            modifier_token: self.modifier_token(),
+        }
+    }
+    pub fn dot_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn modifier_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for VueModifier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueModifierFields {
+    pub dot_token: SyntaxResult<SyntaxToken>,
+    pub modifier_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueStaticArgument {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueStaticArgument {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueStaticArgumentFields {
+        VueStaticArgumentFields {
+            name_token: self.name_token(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for VueStaticArgument {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueStaticArgumentFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVBindShorthandDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVBindShorthandDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVBindShorthandDirectiveFields {
+        VueVBindShorthandDirectiveFields {
+            arg: self.arg(),
+            modifiers: self.modifiers(),
+            initializer: self.initializer(),
+        }
+    }
+    pub fn arg(&self) -> SyntaxResult<VueDirectiveArgument> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn modifiers(&self) -> VueModifierList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for VueVBindShorthandDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVBindShorthandDirectiveFields {
+    pub arg: SyntaxResult<VueDirectiveArgument>,
+    pub modifiers: VueModifierList,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct VueVOnShorthandDirective {
+    pub(crate) syntax: SyntaxNode,
+}
+impl VueVOnShorthandDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> VueVOnShorthandDirectiveFields {
+        VueVOnShorthandDirectiveFields {
+            at_token: self.at_token(),
+            arg: self.arg(),
+            modifiers: self.modifiers(),
+            initializer: self.initializer(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn arg(&self) -> SyntaxResult<AnyVueDirectiveArgument> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn modifiers(&self) -> VueModifierList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn initializer(&self) -> Option<HtmlAttributeInitializerClause> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for VueVOnShorthandDirective {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct VueVOnShorthandDirectiveFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub arg: SyntaxResult<AnyVueDirectiveArgument>,
+    pub modifiers: VueModifierList,
+    pub initializer: Option<HtmlAttributeInitializerClause>,
+}
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyAstroFrontmatterElement {
     AstroBogusFrontmatter(AstroBogusFrontmatter),
@@ -1555,6 +1860,7 @@ impl AnyAstroFrontmatterElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlAttribute {
+    AnyVueDirective(AnyVueDirective),
     HtmlAttribute(HtmlAttribute),
     HtmlBogusAttribute(HtmlBogusAttribute),
     HtmlDoubleTextExpression(HtmlDoubleTextExpression),
@@ -1562,6 +1868,12 @@ pub enum AnyHtmlAttribute {
     SvelteAttachAttribute(SvelteAttachAttribute),
 }
 impl AnyHtmlAttribute {
+    pub fn as_any_vue_directive(&self) -> Option<&AnyVueDirective> {
+        match &self {
+            Self::AnyVueDirective(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_html_attribute(&self) -> Option<&HtmlAttribute> {
         match &self {
             Self::HtmlAttribute(item) => Some(item),
@@ -1761,6 +2073,65 @@ impl AnySvelteBlock {
     pub fn as_svelte_render_block(&self) -> Option<&SvelteRenderBlock> {
         match &self {
             Self::SvelteRenderBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyVueDirective {
+    VueBogusDirective(VueBogusDirective),
+    VueDirective(VueDirective),
+    VueVBindShorthandDirective(VueVBindShorthandDirective),
+    VueVOnShorthandDirective(VueVOnShorthandDirective),
+}
+impl AnyVueDirective {
+    pub fn as_vue_bogus_directive(&self) -> Option<&VueBogusDirective> {
+        match &self {
+            Self::VueBogusDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_directive(&self) -> Option<&VueDirective> {
+        match &self {
+            Self::VueDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_v_bind_shorthand_directive(&self) -> Option<&VueVBindShorthandDirective> {
+        match &self {
+            Self::VueVBindShorthandDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_v_on_shorthand_directive(&self) -> Option<&VueVOnShorthandDirective> {
+        match &self {
+            Self::VueVOnShorthandDirective(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyVueDirectiveArgument {
+    VueBogusDirectiveArgument(VueBogusDirectiveArgument),
+    VueDynamicArgument(VueDynamicArgument),
+    VueStaticArgument(VueStaticArgument),
+}
+impl AnyVueDirectiveArgument {
+    pub fn as_vue_bogus_directive_argument(&self) -> Option<&VueBogusDirectiveArgument> {
+        match &self {
+            Self::VueBogusDirectiveArgument(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_dynamic_argument(&self) -> Option<&VueDynamicArgument> {
+        match &self {
+            Self::VueDynamicArgument(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_vue_static_argument(&self) -> Option<&VueStaticArgument> {
+        match &self {
+            Self::VueStaticArgument(item) => Some(item),
             _ => None,
         }
     }
@@ -3595,6 +3966,368 @@ impl From<SvelteRenderBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for VueDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueDirective")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field("arg", &support::DebugOptionalElement(self.arg()))
+                .field("modifiers", &self.modifiers())
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("VueDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueDirective> for SyntaxNode {
+    fn from(n: VueDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<VueDirective> for SyntaxElement {
+    fn from(n: VueDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueDirectiveArgument {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_DIRECTIVE_ARGUMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_DIRECTIVE_ARGUMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueDirectiveArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueDirectiveArgument")
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("arg", &support::DebugSyntaxResult(self.arg()))
+                .finish()
+        } else {
+            f.debug_struct("VueDirectiveArgument").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueDirectiveArgument> for SyntaxNode {
+    fn from(n: VueDirectiveArgument) -> Self {
+        n.syntax
+    }
+}
+impl From<VueDirectiveArgument> for SyntaxElement {
+    fn from(n: VueDirectiveArgument) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueDynamicArgument {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_DYNAMIC_ARGUMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_DYNAMIC_ARGUMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueDynamicArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueDynamicArgument")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("VueDynamicArgument").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueDynamicArgument> for SyntaxNode {
+    fn from(n: VueDynamicArgument) -> Self {
+        n.syntax
+    }
+}
+impl From<VueDynamicArgument> for SyntaxElement {
+    fn from(n: VueDynamicArgument) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueModifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_MODIFIER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_MODIFIER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueModifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueModifier")
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("VueModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueModifier> for SyntaxNode {
+    fn from(n: VueModifier) -> Self {
+        n.syntax
+    }
+}
+impl From<VueModifier> for SyntaxElement {
+    fn from(n: VueModifier) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueStaticArgument {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_STATIC_ARGUMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_STATIC_ARGUMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueStaticArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueStaticArgument")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .finish()
+        } else {
+            f.debug_struct("VueStaticArgument").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueStaticArgument> for SyntaxNode {
+    fn from(n: VueStaticArgument) -> Self {
+        n.syntax
+    }
+}
+impl From<VueStaticArgument> for SyntaxElement {
+    fn from(n: VueStaticArgument) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueVBindShorthandDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_BIND_SHORTHAND_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_BIND_SHORTHAND_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVBindShorthandDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVBindShorthandDirective")
+                .field("arg", &support::DebugSyntaxResult(self.arg()))
+                .field("modifiers", &self.modifiers())
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("VueVBindShorthandDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVBindShorthandDirective> for SyntaxNode {
+    fn from(n: VueVBindShorthandDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVBindShorthandDirective> for SyntaxElement {
+    fn from(n: VueVBindShorthandDirective) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for VueVOnShorthandDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_V_ON_SHORTHAND_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_V_ON_SHORTHAND_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueVOnShorthandDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("VueVOnShorthandDirective")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("arg", &support::DebugSyntaxResult(self.arg()))
+                .field("modifiers", &self.modifiers())
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("VueVOnShorthandDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<VueVOnShorthandDirective> for SyntaxNode {
+    fn from(n: VueVOnShorthandDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<VueVOnShorthandDirective> for SyntaxElement {
+    fn from(n: VueVOnShorthandDirective) -> Self {
+        n.syntax.into()
+    }
+}
 impl From<AstroBogusFrontmatter> for AnyAstroFrontmatterElement {
     fn from(node: AstroBogusFrontmatter) -> Self {
         Self::AstroBogusFrontmatter(node)
@@ -3686,20 +4419,22 @@ impl From<SvelteAttachAttribute> for AnyHtmlAttribute {
 }
 impl AstNode for AnyHtmlAttribute {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = HtmlAttribute::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyVueDirective::KIND_SET
+        .union(HtmlAttribute::KIND_SET)
         .union(HtmlBogusAttribute::KIND_SET)
         .union(HtmlDoubleTextExpression::KIND_SET)
         .union(HtmlSingleTextExpression::KIND_SET)
         .union(SvelteAttachAttribute::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
+        match kind {
             HTML_ATTRIBUTE
-                | HTML_BOGUS_ATTRIBUTE
-                | HTML_DOUBLE_TEXT_EXPRESSION
-                | HTML_SINGLE_TEXT_EXPRESSION
-                | SVELTE_ATTACH_ATTRIBUTE
-        )
+            | HTML_BOGUS_ATTRIBUTE
+            | HTML_DOUBLE_TEXT_EXPRESSION
+            | HTML_SINGLE_TEXT_EXPRESSION
+            | SVELTE_ATTACH_ATTRIBUTE => true,
+            k if AnyVueDirective::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -3714,7 +4449,12 @@ impl AstNode for AnyHtmlAttribute {
             SVELTE_ATTACH_ATTRIBUTE => {
                 Self::SvelteAttachAttribute(SvelteAttachAttribute { syntax })
             }
-            _ => return None,
+            _ => {
+                if let Some(any_vue_directive) = AnyVueDirective::cast(syntax) {
+                    return Some(Self::AnyVueDirective(any_vue_directive));
+                }
+                return None;
+            }
         };
         Some(res)
     }
@@ -3725,6 +4465,7 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlDoubleTextExpression(it) => it.syntax(),
             Self::HtmlSingleTextExpression(it) => it.syntax(),
             Self::SvelteAttachAttribute(it) => it.syntax(),
+            Self::AnyVueDirective(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -3734,12 +4475,14 @@ impl AstNode for AnyHtmlAttribute {
             Self::HtmlDoubleTextExpression(it) => it.into_syntax(),
             Self::HtmlSingleTextExpression(it) => it.into_syntax(),
             Self::SvelteAttachAttribute(it) => it.into_syntax(),
+            Self::AnyVueDirective(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyHtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnyVueDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusAttribute(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlDoubleTextExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -3751,6 +4494,7 @@ impl std::fmt::Debug for AnyHtmlAttribute {
 impl From<AnyHtmlAttribute> for SyntaxNode {
     fn from(n: AnyHtmlAttribute) -> Self {
         match n {
+            AnyHtmlAttribute::AnyVueDirective(it) => it.into_syntax(),
             AnyHtmlAttribute::HtmlAttribute(it) => it.into_syntax(),
             AnyHtmlAttribute::HtmlBogusAttribute(it) => it.into_syntax(),
             AnyHtmlAttribute::HtmlDoubleTextExpression(it) => it.into_syntax(),
@@ -4218,6 +4962,174 @@ impl From<AnySvelteBlock> for SyntaxElement {
         node.into()
     }
 }
+impl From<VueBogusDirective> for AnyVueDirective {
+    fn from(node: VueBogusDirective) -> Self {
+        Self::VueBogusDirective(node)
+    }
+}
+impl From<VueDirective> for AnyVueDirective {
+    fn from(node: VueDirective) -> Self {
+        Self::VueDirective(node)
+    }
+}
+impl From<VueVBindShorthandDirective> for AnyVueDirective {
+    fn from(node: VueVBindShorthandDirective) -> Self {
+        Self::VueVBindShorthandDirective(node)
+    }
+}
+impl From<VueVOnShorthandDirective> for AnyVueDirective {
+    fn from(node: VueVOnShorthandDirective) -> Self {
+        Self::VueVOnShorthandDirective(node)
+    }
+}
+impl AstNode for AnyVueDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = VueBogusDirective::KIND_SET
+        .union(VueDirective::KIND_SET)
+        .union(VueVBindShorthandDirective::KIND_SET)
+        .union(VueVOnShorthandDirective::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            VUE_BOGUS_DIRECTIVE
+                | VUE_DIRECTIVE
+                | VUE_V_BIND_SHORTHAND_DIRECTIVE
+                | VUE_V_ON_SHORTHAND_DIRECTIVE
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            VUE_BOGUS_DIRECTIVE => Self::VueBogusDirective(VueBogusDirective { syntax }),
+            VUE_DIRECTIVE => Self::VueDirective(VueDirective { syntax }),
+            VUE_V_BIND_SHORTHAND_DIRECTIVE => {
+                Self::VueVBindShorthandDirective(VueVBindShorthandDirective { syntax })
+            }
+            VUE_V_ON_SHORTHAND_DIRECTIVE => {
+                Self::VueVOnShorthandDirective(VueVOnShorthandDirective { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::VueBogusDirective(it) => it.syntax(),
+            Self::VueDirective(it) => it.syntax(),
+            Self::VueVBindShorthandDirective(it) => it.syntax(),
+            Self::VueVOnShorthandDirective(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::VueBogusDirective(it) => it.into_syntax(),
+            Self::VueDirective(it) => it.into_syntax(),
+            Self::VueVBindShorthandDirective(it) => it.into_syntax(),
+            Self::VueVOnShorthandDirective(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyVueDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::VueBogusDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueVBindShorthandDirective(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueVOnShorthandDirective(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyVueDirective> for SyntaxNode {
+    fn from(n: AnyVueDirective) -> Self {
+        match n {
+            AnyVueDirective::VueBogusDirective(it) => it.into_syntax(),
+            AnyVueDirective::VueDirective(it) => it.into_syntax(),
+            AnyVueDirective::VueVBindShorthandDirective(it) => it.into_syntax(),
+            AnyVueDirective::VueVOnShorthandDirective(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyVueDirective> for SyntaxElement {
+    fn from(n: AnyVueDirective) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<VueBogusDirectiveArgument> for AnyVueDirectiveArgument {
+    fn from(node: VueBogusDirectiveArgument) -> Self {
+        Self::VueBogusDirectiveArgument(node)
+    }
+}
+impl From<VueDynamicArgument> for AnyVueDirectiveArgument {
+    fn from(node: VueDynamicArgument) -> Self {
+        Self::VueDynamicArgument(node)
+    }
+}
+impl From<VueStaticArgument> for AnyVueDirectiveArgument {
+    fn from(node: VueStaticArgument) -> Self {
+        Self::VueStaticArgument(node)
+    }
+}
+impl AstNode for AnyVueDirectiveArgument {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = VueBogusDirectiveArgument::KIND_SET
+        .union(VueDynamicArgument::KIND_SET)
+        .union(VueStaticArgument::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            VUE_BOGUS_DIRECTIVE_ARGUMENT | VUE_DYNAMIC_ARGUMENT | VUE_STATIC_ARGUMENT
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            VUE_BOGUS_DIRECTIVE_ARGUMENT => {
+                Self::VueBogusDirectiveArgument(VueBogusDirectiveArgument { syntax })
+            }
+            VUE_DYNAMIC_ARGUMENT => Self::VueDynamicArgument(VueDynamicArgument { syntax }),
+            VUE_STATIC_ARGUMENT => Self::VueStaticArgument(VueStaticArgument { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::VueBogusDirectiveArgument(it) => it.syntax(),
+            Self::VueDynamicArgument(it) => it.syntax(),
+            Self::VueStaticArgument(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::VueBogusDirectiveArgument(it) => it.into_syntax(),
+            Self::VueDynamicArgument(it) => it.into_syntax(),
+            Self::VueStaticArgument(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyVueDirectiveArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::VueBogusDirectiveArgument(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueDynamicArgument(it) => std::fmt::Debug::fmt(it, f),
+            Self::VueStaticArgument(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyVueDirectiveArgument> for SyntaxNode {
+    fn from(n: AnyVueDirectiveArgument) -> Self {
+        match n {
+            AnyVueDirectiveArgument::VueBogusDirectiveArgument(it) => it.into_syntax(),
+            AnyVueDirectiveArgument::VueDynamicArgument(it) => it.into_syntax(),
+            AnyVueDirectiveArgument::VueStaticArgument(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyVueDirectiveArgument> for SyntaxElement {
+    fn from(n: AnyVueDirectiveArgument) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl std::fmt::Display for AnyAstroFrontmatterElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -4249,6 +5161,16 @@ impl std::fmt::Display for AnyHtmlTextExpression {
     }
 }
 impl std::fmt::Display for AnySvelteBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyVueDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyVueDirectiveArgument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4414,6 +5336,41 @@ impl std::fmt::Display for SvelteName {
     }
 }
 impl std::fmt::Display for SvelteRenderBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueDirectiveArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueDynamicArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueModifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueStaticArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVBindShorthandDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for VueVOnShorthandDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -4754,7 +5711,119 @@ impl From<SvelteBogusBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = AstroBogusFrontmatter | HtmlBogus | HtmlBogusAttribute | HtmlBogusElement | HtmlBogusTextExpression | SvelteBogusBlock }
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct VueBogusDirective {
+    syntax: SyntaxNode,
+}
+impl VueBogusDirective {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for VueBogusDirective {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_BOGUS_DIRECTIVE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_BOGUS_DIRECTIVE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueBogusDirective {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("VueBogusDirective")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<VueBogusDirective> for SyntaxNode {
+    fn from(n: VueBogusDirective) -> Self {
+        n.syntax
+    }
+}
+impl From<VueBogusDirective> for SyntaxElement {
+    fn from(n: VueBogusDirective) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct VueBogusDirectiveArgument {
+    syntax: SyntaxNode,
+}
+impl VueBogusDirectiveArgument {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for VueBogusDirectiveArgument {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_BOGUS_DIRECTIVE_ARGUMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_BOGUS_DIRECTIVE_ARGUMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for VueBogusDirectiveArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("VueBogusDirectiveArgument")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<VueBogusDirectiveArgument> for SyntaxNode {
+    fn from(n: VueBogusDirectiveArgument) -> Self {
+        n.syntax
+    }
+}
+impl From<VueBogusDirectiveArgument> for SyntaxElement {
+    fn from(n: VueBogusDirectiveArgument) -> Self {
+        n.syntax.into()
+    }
+}
+biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = AstroBogusFrontmatter | HtmlBogus | HtmlBogusAttribute | HtmlBogusElement | HtmlBogusTextExpression | SvelteBogusBlock | VueBogusDirective | VueBogusDirectiveArgument }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct HtmlAttributeList {
     syntax_list: SyntaxList,
@@ -5079,6 +6148,88 @@ impl IntoIterator for &SvelteElseIfClauseList {
 impl IntoIterator for SvelteElseIfClauseList {
     type Item = SvelteElseIfClause;
     type IntoIter = AstNodeListIterator<Language, SvelteElseIfClause>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct VueModifierList {
+    syntax_list: SyntaxList,
+}
+impl VueModifierList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for VueModifierList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(VUE_MODIFIER_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == VUE_MODIFIER_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for VueModifierList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for VueModifierList {
+    type Language = Language;
+    type Node = VueModifier;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for VueModifierList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("VueModifierList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &VueModifierList {
+    type Item = VueModifier;
+    type IntoIter = AstNodeListIterator<Language, VueModifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for VueModifierList {
+    type Item = VueModifier;
+    type IntoIter = AstNodeListIterator<Language, VueModifier>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

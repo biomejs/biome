@@ -25,6 +25,7 @@ mod svelte;
 mod trivia;
 pub mod utils;
 mod verbatim;
+mod vue;
 
 /// Formats a HTML file based on its features.
 ///

@@ -34,6 +34,7 @@ enum IdentifierContext {
     None,
     Doctype,
     Svelte,
+    Vue,
 }
 
 impl IdentifierContext {
@@ -91,8 +92,59 @@ impl<'src> HtmlLexer<'src> {
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
                 self.consume_tag_name(current)
             }
-            _ if (self.current_kind != T![<] && is_attribute_name_byte(current)) => {
+            _ if self.current_kind != T![<] && is_attribute_name_byte(current) => {
                 self.consume_identifier(current, IdentifierContext::None)
+            }
+            _ if is_at_svelte_start_identifier(current) => {
+                self.consume_identifier(current, IdentifierContext::Svelte)
+            }
+            _ => {
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
+                }
+                self.consume_unexpected_character()
+            }
+        }
+    }
+
+    /// Consume a token in the [HtmlLexContext::InsideTagVue] context.
+    fn consume_token_inside_tag_vue(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'<' => self.consume_l_angle(),
+            b'>' => self.consume_byte(T![>]),
+            b'/' => self.consume_byte(T![/]),
+            b'=' => self.consume_byte(T![=]),
+            b'!' => self.consume_byte(T![!]),
+            b'{' => {
+                if self.at_opening_double_text_expression() {
+                    self.consume_l_double_text_expression()
+                } else {
+                    self.consume_byte(T!['{'])
+                }
+            }
+            b'}' => {
+                if self.at_closing_double_text_expression() {
+                    self.consume_r_double_text_expression()
+                } else {
+                    self.consume_byte(T!['}'])
+                }
+            }
+            // `:`, `@`, and `.` are used in Vue directives
+            b':' => self.consume_byte(T![:]),
+            b'@' => self.consume_byte(T![@]),
+            b'.' => self.consume_byte(T![.]),
+            b'\'' | b'"' => self.consume_string_literal(current),
+            _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
+                // tag names must immediately follow a `<`
+                // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
+                self.consume_tag_name(current)
+            }
+            _ if (self.current_kind != T![<] && is_attribute_name_byte_vue(current)) => {
+                self.consume_identifier(current, IdentifierContext::Vue)
             }
             _ => self.consume_unexpected_character(),
         }
@@ -403,6 +455,18 @@ impl<'src> HtmlLexer<'src> {
                             buffer[len] = byte;
                             len += 1;
                         }
+                        self.advance(1)
+                    } else {
+                        break;
+                    }
+                }
+                IdentifierContext::Vue => {
+                    if is_attribute_name_byte_vue(byte) {
+                        if len < BUFFER_SIZE {
+                            buffer[len] = byte;
+                            len += 1;
+                        }
+
                         self.advance(1)
                     } else {
                         break;
@@ -877,6 +941,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                 Some(current) => match context {
                     HtmlLexContext::Regular => self.consume_token(current),
                     HtmlLexContext::InsideTag => self.consume_token_inside_tag(current),
+                    HtmlLexContext::InsideTagVue => self.consume_token_inside_tag_vue(current),
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
@@ -1003,6 +1068,10 @@ fn is_attribute_name_byte(byte: u8) -> bool {
             byte,
             b' ' | b'\t' | b'\n' | b'"' | b'\'' | b'>' | b'<' | b'/' | b'='
         )
+}
+
+fn is_attribute_name_byte_vue(byte: u8) -> bool {
+    is_attribute_name_byte(byte) && byte != b':' && byte != b'.'
 }
 
 /// Identifiers can contain letters, numbers and `_`
