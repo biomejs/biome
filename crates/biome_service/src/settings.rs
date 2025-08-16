@@ -1606,6 +1606,9 @@ impl OverrideSettingPattern {
         if let Some(css_modules) = css_parser.css_modules_enabled {
             options.css_modules = css_modules.value();
         }
+        if let Some(tailwind_directives) = css_parser.tailwind_directives {
+            options.tailwind_directives = tailwind_directives.value();
+        }
     }
 
     #[expect(dead_code)]
@@ -1763,6 +1766,9 @@ fn to_css_language_settings(
         .or(parent_parser.allow_wrong_line_comments);
     language_setting.parser.css_modules_enabled =
         parser.css_modules.or(parent_parser.css_modules_enabled);
+    language_setting.parser.tailwind_directives = parser
+        .tailwind_directives
+        .or(parent_parser.tailwind_directives);
 
     let linter = conf.linter.take().unwrap_or_default();
     language_setting.linter.enabled = linter.enabled;

@@ -1,0 +1,229 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+/* @reference directive */
+@reference "./app.css";
+
+@reference "./base-styles.css";
+
+/* @reference with relative path */
+@reference "./variables.css";
+
+/* @reference with node_modules path */
+@reference "../node_modules/normalize.css/normalize.css";
+
+/* @reference with scoped package */
+@reference "../node_modules/@company/design-tokens/index.css";
+
+/* @reference with file extension */
+@reference "./typography.css";
+
+/* @reference without file extension */
+@reference "./mixins";
+
+/* @reference with CSS file in different directory */
+@reference "../assets/fonts.css";
+
+/* @reference with vendor prefixed file */
+@reference "./vendor/bootstrap-grid.css";
+
+/* @reference with versioned file */
+@reference "./theme-v2.css";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..28 "@" [Comments("/* @reference directi ..."), Newline("\n")] [],
+            rule: TwReferenceAtRule {
+                reference_token: REFERENCE_KW@28..38 "reference" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@38..49 "\"./app.css\"" [] [],
+                },
+                semicolon_token: SEMICOLON@49..50 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@50..53 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwReferenceAtRule {
+                reference_token: REFERENCE_KW@53..63 "reference" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@63..82 "\"./base-styles.css\"" [] [],
+                },
+                semicolon_token: SEMICOLON@82..83 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@83..122 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with re ..."), Newline("\n")] [],
+            rule: TwReferenceAtRule {
+                reference_token: REFERENCE_KW@122..132 "reference" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@132..149 "\"./variables.css\"" [] [],
+                },
+                semicolon_token: SEMICOLON@149..150 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@150..193 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with no ..."), Newline("\n")] [],
+            rule: TwReferenceAtRule {
+                reference_token: REFERENCE_KW@193..203 "reference" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@203..248 "\"../node_modules/normalize.css/normalize.css\"" [] [],
+                },
+                semicolon_token: SEMICOLON@248..249 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@249..289 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with sc ..."), Newline("\n")] [],
+            rule: TwReferenceAtRule {
+                reference_token: REFERENCE_KW@289..299 "reference" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@299..349 "\"../node_modules/@company/design-tokens/index.css\"" [] [],
+                },
+                semicolon_token: SEMICOLON@349..350 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@350..390 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with fi ..."), Newline("\n")] [],
+            rule: TwReferenceAtRule {
+                reference_token: REFERENCE_KW@390..400 "reference" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@400..418 "\"./typography.css\"" [] [],
+                },
+                semicolon_token: SEMICOLON@418..419 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@419..462 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference without ..."), Newline("\n")] [],
+            rule: TwReferenceAtRule {
+                reference_token: REFERENCE_KW@462..472 "reference" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@472..482 "\"./mixins\"" [] [],
+                },
+                semicolon_token: SEMICOLON@482..483 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@483..540 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with CS ..."), Newline("\n")] [],
+            rule: TwReferenceAtRule {
+                reference_token: REFERENCE_KW@540..550 "reference" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@550..571 "\"../assets/fonts.css\"" [] [],
+                },
+                semicolon_token: SEMICOLON@571..572 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@572..618 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with ve ..."), Newline("\n")] [],
+            rule: TwReferenceAtRule {
+                reference_token: REFERENCE_KW@618..628 "reference" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@628..657 "\"./vendor/bootstrap-grid.css\"" [] [],
+                },
+                semicolon_token: SEMICOLON@657..658 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@658..698 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with ve ..."), Newline("\n")] [],
+            rule: TwReferenceAtRule {
+                reference_token: REFERENCE_KW@698..708 "reference" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@708..724 "\"./theme-v2.css\"" [] [],
+                },
+                semicolon_token: SEMICOLON@724..725 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@725..726 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..726
+  0: (empty)
+  1: CSS_RULE_LIST@0..725
+    0: CSS_AT_RULE@0..50
+      0: AT@0..28 "@" [Comments("/* @reference directi ..."), Newline("\n")] []
+      1: TW_REFERENCE_AT_RULE@28..50
+        0: REFERENCE_KW@28..38 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@38..49
+          0: CSS_STRING_LITERAL@38..49 "\"./app.css\"" [] []
+        2: SEMICOLON@49..50 ";" [] []
+    1: CSS_AT_RULE@50..83
+      0: AT@50..53 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_REFERENCE_AT_RULE@53..83
+        0: REFERENCE_KW@53..63 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@63..82
+          0: CSS_STRING_LITERAL@63..82 "\"./base-styles.css\"" [] []
+        2: SEMICOLON@82..83 ";" [] []
+    2: CSS_AT_RULE@83..150
+      0: AT@83..122 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with re ..."), Newline("\n")] []
+      1: TW_REFERENCE_AT_RULE@122..150
+        0: REFERENCE_KW@122..132 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@132..149
+          0: CSS_STRING_LITERAL@132..149 "\"./variables.css\"" [] []
+        2: SEMICOLON@149..150 ";" [] []
+    3: CSS_AT_RULE@150..249
+      0: AT@150..193 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with no ..."), Newline("\n")] []
+      1: TW_REFERENCE_AT_RULE@193..249
+        0: REFERENCE_KW@193..203 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@203..248
+          0: CSS_STRING_LITERAL@203..248 "\"../node_modules/normalize.css/normalize.css\"" [] []
+        2: SEMICOLON@248..249 ";" [] []
+    4: CSS_AT_RULE@249..350
+      0: AT@249..289 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with sc ..."), Newline("\n")] []
+      1: TW_REFERENCE_AT_RULE@289..350
+        0: REFERENCE_KW@289..299 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@299..349
+          0: CSS_STRING_LITERAL@299..349 "\"../node_modules/@company/design-tokens/index.css\"" [] []
+        2: SEMICOLON@349..350 ";" [] []
+    5: CSS_AT_RULE@350..419
+      0: AT@350..390 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with fi ..."), Newline("\n")] []
+      1: TW_REFERENCE_AT_RULE@390..419
+        0: REFERENCE_KW@390..400 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@400..418
+          0: CSS_STRING_LITERAL@400..418 "\"./typography.css\"" [] []
+        2: SEMICOLON@418..419 ";" [] []
+    6: CSS_AT_RULE@419..483
+      0: AT@419..462 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference without ..."), Newline("\n")] []
+      1: TW_REFERENCE_AT_RULE@462..483
+        0: REFERENCE_KW@462..472 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@472..482
+          0: CSS_STRING_LITERAL@472..482 "\"./mixins\"" [] []
+        2: SEMICOLON@482..483 ";" [] []
+    7: CSS_AT_RULE@483..572
+      0: AT@483..540 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with CS ..."), Newline("\n")] []
+      1: TW_REFERENCE_AT_RULE@540..572
+        0: REFERENCE_KW@540..550 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@550..571
+          0: CSS_STRING_LITERAL@550..571 "\"../assets/fonts.css\"" [] []
+        2: SEMICOLON@571..572 ";" [] []
+    8: CSS_AT_RULE@572..658
+      0: AT@572..618 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with ve ..."), Newline("\n")] []
+      1: TW_REFERENCE_AT_RULE@618..658
+        0: REFERENCE_KW@618..628 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@628..657
+          0: CSS_STRING_LITERAL@628..657 "\"./vendor/bootstrap-grid.css\"" [] []
+        2: SEMICOLON@657..658 ";" [] []
+    9: CSS_AT_RULE@658..725
+      0: AT@658..698 "@" [Newline("\n"), Newline("\n"), Comments("/* @reference with ve ..."), Newline("\n")] []
+      1: TW_REFERENCE_AT_RULE@698..725
+        0: REFERENCE_KW@698..708 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@708..724
+          0: CSS_STRING_LITERAL@708..724 "\"./theme-v2.css\"" [] []
+        2: SEMICOLON@724..725 ";" [] []
+  2: EOF@725..726 "" [Newline("\n")] []
+
+```

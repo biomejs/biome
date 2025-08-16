@@ -1,0 +1,209 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+.foo {
+	@apply text-lg font-bold;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..5 "foo" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [
+                    L_CURLY@5..6 "{" [] [],
+                    CssDeclarationOrRuleList [
+                        CssBogusRule {
+                            items: [
+                                AT@6..9 "@" [Newline("\n"), Whitespace("\t")] [],
+                            ],
+                        },
+                        CssNestedQualifiedRule {
+                            prelude: CssRelativeSelectorList [
+                                CssRelativeSelector {
+                                    combinator: missing (optional),
+                                    selector: CssComplexSelector {
+                                        left: CssComplexSelector {
+                                            left: CssCompoundSelector {
+                                                nesting_selectors: CssNestedSelectorList [],
+                                                simple_selector: CssTypeSelector {
+                                                    namespace: missing (optional),
+                                                    ident: CssIdentifier {
+                                                        value_token: IDENT@9..14 "apply" [] [],
+                                                    },
+                                                },
+                                                sub_selectors: CssSubSelectorList [],
+                                            },
+                                            combinator: CSS_SPACE_LITERAL@14..15 " " [] [],
+                                            right: CssCompoundSelector {
+                                                nesting_selectors: CssNestedSelectorList [],
+                                                simple_selector: CssTypeSelector {
+                                                    namespace: missing (optional),
+                                                    ident: CssIdentifier {
+                                                        value_token: IDENT@15..22 "text-lg" [] [],
+                                                    },
+                                                },
+                                                sub_selectors: CssSubSelectorList [],
+                                            },
+                                        },
+                                        combinator: CSS_SPACE_LITERAL@22..23 " " [] [],
+                                        right: CssCompoundSelector {
+                                            nesting_selectors: CssNestedSelectorList [],
+                                            simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
+                                                ident: CssIdentifier {
+                                                    value_token: IDENT@23..32 "font-bold" [] [],
+                                                },
+                                            },
+                                            sub_selectors: CssSubSelectorList [],
+                                        },
+                                    },
+                                },
+                                missing separator,
+                                CssBogusSelector {
+                                    items: [
+                                        SEMICOLON@32..33 ";" [] [],
+                                        R_CURLY@33..35 "}" [Newline("\n")] [],
+                                    ],
+                                },
+                            ],
+                            block: CssBogusBlock {
+                                items: [],
+                            },
+                        },
+                    ],
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..36
+  0: (empty)
+  1: CSS_RULE_LIST@0..35
+    0: CSS_QUALIFIED_RULE@0..35
+      0: CSS_SELECTOR_LIST@0..5
+        0: CSS_COMPOUND_SELECTOR@0..5
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..5
+            0: CSS_CLASS_SELECTOR@0..5
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..5
+                0: IDENT@1..5 "foo" [] [Whitespace(" ")]
+      1: CSS_BOGUS_BLOCK@5..35
+        0: L_CURLY@5..6 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@6..35
+          0: CSS_BOGUS_RULE@6..9
+            0: AT@6..9 "@" [Newline("\n"), Whitespace("\t")] []
+          1: CSS_NESTED_QUALIFIED_RULE@9..35
+            0: CSS_RELATIVE_SELECTOR_LIST@9..35
+              0: CSS_RELATIVE_SELECTOR@9..32
+                0: (empty)
+                1: CSS_COMPLEX_SELECTOR@9..32
+                  0: CSS_COMPLEX_SELECTOR@9..22
+                    0: CSS_COMPOUND_SELECTOR@9..14
+                      0: CSS_NESTED_SELECTOR_LIST@9..9
+                      1: CSS_TYPE_SELECTOR@9..14
+                        0: (empty)
+                        1: CSS_IDENTIFIER@9..14
+                          0: IDENT@9..14 "apply" [] []
+                      2: CSS_SUB_SELECTOR_LIST@14..14
+                    1: CSS_SPACE_LITERAL@14..15 " " [] []
+                    2: CSS_COMPOUND_SELECTOR@15..22
+                      0: CSS_NESTED_SELECTOR_LIST@15..15
+                      1: CSS_TYPE_SELECTOR@15..22
+                        0: (empty)
+                        1: CSS_IDENTIFIER@15..22
+                          0: IDENT@15..22 "text-lg" [] []
+                      2: CSS_SUB_SELECTOR_LIST@22..22
+                  1: CSS_SPACE_LITERAL@22..23 " " [] []
+                  2: CSS_COMPOUND_SELECTOR@23..32
+                    0: CSS_NESTED_SELECTOR_LIST@23..23
+                    1: CSS_TYPE_SELECTOR@23..32
+                      0: (empty)
+                      1: CSS_IDENTIFIER@23..32
+                        0: IDENT@23..32 "font-bold" [] []
+                    2: CSS_SUB_SELECTOR_LIST@32..32
+              1: (empty)
+              2: CSS_BOGUS_SELECTOR@32..35
+                0: SEMICOLON@32..33 ";" [] []
+                1: R_CURLY@33..35 "}" [Newline("\n")] []
+            1: CSS_BOGUS_BLOCK@35..35
+  2: EOF@35..36 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+apply.css:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+    1 │ .foo {
+  > 2 │ 	@apply text-lg font-bold;
+      │ 	 ^^^^^
+    3 │ }
+    4 │ 
+  
+  i Enable `tailwind_directives` in the css parser options.
+  
+apply.css:2:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `;`
+  
+    1 │ .foo {
+  > 2 │ 	@apply text-lg font-bold;
+      │ 	                        ^
+    3 │ }
+    4 │ 
+  
+  i Remove ;
+  
+apply.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead the file ends
+  
+    2 │ 	@apply text-lg font-bold;
+    3 │ }
+  > 4 │ 
+      │ 
+  
+  i the file ends here
+  
+    2 │ 	@apply text-lg font-bold;
+    3 │ }
+  > 4 │ 
+      │ 
+  
+```

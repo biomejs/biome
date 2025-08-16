@@ -1,0 +1,18 @@
+/* @theme directive */
+@theme {
+  --color-primary: #3b82f6;
+  --color-secondary: #10b981;
+  --spacing-base: 1rem;
+  --font-size-lg: 1.125rem;
+}
+
+/* Empty @theme */
+@theme {
+}
+
+/* @theme with complex values */
+@theme {
+  --color-gradient: linear-gradient(to right, #3b82f6, #10b981);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --spacing-custom: calc(1rem + 2px);
+}
