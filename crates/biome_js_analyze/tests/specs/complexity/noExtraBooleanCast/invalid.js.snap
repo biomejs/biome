@@ -244,20 +244,20 @@ invalid.js:23:2 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:26:18 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:18 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Avoid redundant `Boolean` call
   
-    24 │ const b0 = false;
-    25 │ const b1 = false;
-  > 26 │ const boolean = !Boolean(b0 && b1);
+    26 │ const b0 = false;
+    27 │ const b1 = false;
+  > 28 │ const boolean = !Boolean(b0 && b1);
        │                  ^^^^^^^^^^^^^^^^^
   
   i It is not necessary to use `Boolean` call when a value will already be coerced to a boolean.
   
   i Safe fix: Remove redundant `Boolean` call
   
-    26 │ const·boolean·=·!Boolean(b0·&&·b1);
+    28 │ const·boolean·=·!Boolean(b0·&&·b1);
        │                  -------           
 
 ```
