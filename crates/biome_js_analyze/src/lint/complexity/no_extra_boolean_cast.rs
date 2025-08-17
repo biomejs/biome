@@ -4,9 +4,11 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsNewExpression,
-    JsSyntaxNode, JsUnaryOperator, is_in_boolean_context, is_negation,
+    AnyJsExpression, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, 
+    JsConditionalExpression, JsNewExpression, JsParenthesizedExpression, JsSyntaxNode, 
+    JsUnaryExpression, JsUnaryOperator, T, is_in_boolean_context, is_negation,
 };
+use biome_js_factory::make;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions;
 
@@ -188,7 +190,34 @@ impl Rule for NoExtraBooleanCast {
             ExtraBooleanCastType::DoubleNegation => "Remove redundant double-negation",
             ExtraBooleanCastType::BooleanCall => "Remove redundant `Boolean` call",
         };
-        mutation.replace_node(node.clone(), node_to_replace.clone());
+
+        // Check if the Boolean call is inside a unary negation and the argument needs parentheses
+        let replacement = if matches!(extra_boolean_cast_type, ExtraBooleanCastType::BooleanCall) {
+            // Check if this Boolean call is inside a unary negation
+            if let Some(unary_expr) = node.syntax().parent().and_then(JsUnaryExpression::cast) {
+                if matches!(unary_expr.operator(), Ok(JsUnaryOperator::LogicalNot)) {
+                    // Check if the argument is a complex expression that needs parentheses
+                    if needs_parentheses_when_negated(node_to_replace) {
+                        // Wrap in parentheses to preserve operator precedence
+                        AnyJsExpression::JsParenthesizedExpression(make::js_parenthesized_expression(
+                            make::token(T!['(']),
+                            node_to_replace.clone(),
+                            make::token(T![')']),
+                        ))
+                    } else {
+                        node_to_replace.clone()
+                    }
+                } else {
+                    node_to_replace.clone()
+                }
+            } else {
+                node_to_replace.clone()
+            }
+        } else {
+            node_to_replace.clone()
+        };
+
+        mutation.replace_node(node.clone(), replacement);
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -196,6 +225,23 @@ impl Rule for NoExtraBooleanCast {
             markup! { {message} }.to_owned(),
             mutation,
         ))
+    }
+}
+
+/// Determines if an expression needs parentheses when it becomes the operand of a unary negation.
+/// This is needed to preserve operator precedence for expressions like binary expressions.
+fn needs_parentheses_when_negated(expr: &AnyJsExpression) -> bool {
+    match expr {
+        // Binary expressions like `a && b` need parentheses in `!(a && b)` to maintain precedence
+        AnyJsExpression::JsBinaryExpression(_) => true,
+        // Conditional expressions like `a ? b : c` need parentheses 
+        AnyJsExpression::JsConditionalExpression(_) => true,
+        // Assignment expressions need parentheses
+        AnyJsExpression::JsAssignmentExpression(_) => true,
+        // Logical expressions that are already parenthesized don't need additional ones
+        AnyJsExpression::JsParenthesizedExpression(_) => false,
+        // Simple expressions like identifiers, literals, calls don't need parentheses
+        _ => false,
     }
 }
 
