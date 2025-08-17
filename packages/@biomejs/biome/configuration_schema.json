@@ -5029,6 +5029,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentArrowReturn": {
+					"description": "Enforce consistent arrow function bodies.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConsistentArrowReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentTypeDefinitions": {
 					"description": "Enforce type definitions to consistently use either interface or type.",
 					"anyOf": [
@@ -9990,6 +9997,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseConsistentArrowReturnOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseConsistentArrowReturnOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseConsistentBuiltinInstantiationOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13409,6 +13431,16 @@
 					"allOf": [{ "$ref": "#/definitions/ConsistentArrayType" }]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseConsistentArrowReturnConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseConsistentArrowReturnOptions" }
+			]
+		},
+		"UseConsistentArrowReturnOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseConsistentBuiltinInstantiationConfiguration": {

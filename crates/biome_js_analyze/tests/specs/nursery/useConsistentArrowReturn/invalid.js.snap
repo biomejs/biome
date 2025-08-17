@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: invalid.js
+---
+# Input
+```js
+function foo() {
+    return 0;
+}
+
+const returnsObjectArrow = () => {
+    return { a: 1, b: 2 };
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useConsistentArrowReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function can be written as an arrow function.
+  
+  > 1 │ function foo() {
+      │ ^^^^^^^^^^^^^^^^
+  > 2 │     return 0;
+  > 3 │ }
+      │ ^
+    4 │ 
+    5 │ const returnsObjectArrow = () => {
+  
+  i Consider using an arrow function here.
+  
+
+```
+
+```
+invalid.js:5:28 lint/nursery/useConsistentArrowReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function can be written as an arrow function.
+  
+    3 │ }
+    4 │ 
+  > 5 │ const returnsObjectArrow = () => {
+      │                            ^^^^^^^
+  > 6 │     return { a: 1, b: 2 };
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i Consider using an arrow function here.
+  
+
+```
