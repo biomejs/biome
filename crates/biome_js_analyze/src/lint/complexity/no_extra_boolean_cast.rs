@@ -6,9 +6,9 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList,
-    JsCallArguments, JsCallExpression, JsConditionalExpression, JsLogicalExpression, JsNewExpression,
-    JsParenthesizedExpression, JsSequenceExpression, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, T,
-    is_in_boolean_context, is_negation,
+    JsCallArguments, JsCallExpression, JsConditionalExpression, JsLogicalExpression,
+    JsNewExpression, JsParenthesizedExpression, JsSequenceExpression, JsSyntaxNode,
+    JsUnaryExpression, JsUnaryOperator, T, is_in_boolean_context, is_negation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions;
