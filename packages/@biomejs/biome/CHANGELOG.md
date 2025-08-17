@@ -214,8 +214,8 @@
   - Promoted [`noTsIgnore`](https://biomejs.dev/linter/rules/no-ts-ignore) to the `suspicious` group.
   - Promoted [`noUnassignedVariables`](https://biomejs.dev/linter/rules/no-unassigned-variables) to the `suspicious` group.
   - Promoted [`noUselessRegexBackrefs`](https://biomejs.dev/linter/rules/no-useless-regex-backrefs) to the `suspicious` group.
-  - Promoted [`noUselessStringEscapes`](https://biomejs.dev/linter/rules/no-useless-string-escapes) to the `suspicious` group.
-  - Promoted [`useConsistentIterableCallbackReturnValues`](https://biomejs.dev/linter/rules/use-consistent-iterable-callback-return-values) to the `suspicious` group.
+  - Promoted [`noUselessEscapeInString`](https://biomejs.dev/linter/rules/no-useless-escape-in-string/) to the `suspicious` group.
+  - Promoted [`useIterableCallbackReturn`](https://biomejs.dev/linter/rules/use-iterable-callback-return/) to the `suspicious` group.
   - Promoted [`useStaticResponseMethods`](https://biomejs.dev/linter/rules/use-static-response-methods) to the `suspicious` group.
 
   #### Renamed rules
