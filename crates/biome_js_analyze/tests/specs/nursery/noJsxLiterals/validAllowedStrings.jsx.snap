@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validAllowedStrings.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<>
+	<div>
+		{'allowed'}
+		{'allowed'}
+		{'allowed'}
+	</div>
+	<Foo bar={"allowed"} />
+	<Foo bar="allowed">
+		{'allowed' + name}
+	</Foo>
+</>
+
+```

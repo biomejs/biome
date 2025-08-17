@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<>
+  <div>test</div>
+	<>test</>
+	<>
+		<div>
+			asdjfl
+			test
+			foo
+		</div>
+	</>
+</>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of JSX literals is not allowed.
+  
+    1 │ // should generate diagnostics
+    2 │ <>
+  > 3 │   <div>test</div>
+      │        ^^^^
+    4 │ 	<>test</>
+    5 │ 	<>
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of JSX literals is not allowed.
+  
+    2 │ <>
+    3 │   <div>test</div>
+  > 4 │ 	<>test</>
+      │ 	  ^^^^
+    5 │ 	<>
+    6 │ 		<div>
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:6:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of JSX literals is not allowed.
+  
+     4 │ 	<>test</>
+     5 │ 	<>
+   > 6 │ 		<div>
+       │ 		     
+   > 7 │ 			asdjfl
+   > 8 │ 			test
+   > 9 │ 			foo
+  > 10 │ 		</div>
+       │ 		
+    11 │ 	</>
+    12 │ </>
+  
+  i This note will give you more information.
+  
+
+```
