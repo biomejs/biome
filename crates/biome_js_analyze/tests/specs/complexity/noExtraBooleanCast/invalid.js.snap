@@ -27,6 +27,11 @@ new Boolean(!!x);
 !!!x;
 
 !Boolean(x);
+
+// Test case for issue #7225 - should preserve parentheses
+const b0 = false;
+const b1 = false;
+const boolean = !Boolean(b0 && b1);
 ```
 
 # Diagnostics
@@ -226,6 +231,8 @@ invalid.js:23:2 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
     22 │ 
   > 23 │ !Boolean(x);
        │  ^^^^^^^^^^
+    24 │ 
+    25 │ // Test case for issue #7225 - should preserve parentheses
   
   i It is not necessary to use `Boolean` call when a value will already be coerced to a boolean.
   
@@ -233,5 +240,24 @@ invalid.js:23:2 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━�
   
     23 │ !Boolean(x);
        │  -------- - 
+
+```
+
+```
+invalid.js:26:18 lint/complexity/noExtraBooleanCast  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid redundant `Boolean` call
+  
+    24 │ const b0 = false;
+    25 │ const b1 = false;
+  > 26 │ const boolean = !Boolean(b0 && b1);
+       │                  ^^^^^^^^^^^^^^^^^
+  
+  i It is not necessary to use `Boolean` call when a value will already be coerced to a boolean.
+  
+  i Safe fix: Remove redundant `Boolean` call
+  
+    26 │ const·boolean·=·!Boolean(b0·&&·b1);
+       │                  -------           
 
 ```
