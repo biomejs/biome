@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<>
+	<div>
+		{'asdjfl'}
+		{'test'}
+		{'foo'}
+	</div>
+	<Foo bar={"bar"} />
+	<Foo bar="test">
+		{'Test' + name}
+	</Foo>
+	<Foo bar={`${baz} test`} />
+</>
+
+```

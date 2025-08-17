@@ -3576,6 +3576,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoJsxLiteralsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoJsxLiteralsOptions" }
+			]
+		},
+		"NoJsxLiteralsOptions": { "type": "object", "additionalProperties": false },
 		"NoLabelVarConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4911,6 +4918,13 @@
 					"description": "Prevent import cycles.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoImportCyclesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsxLiterals": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoJsxLiteralsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7494,6 +7508,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoIrregularWhitespaceOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoJsxLiteralsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoJsxLiteralsOptions" }]
 				}
 			},
 			"additionalProperties": false
