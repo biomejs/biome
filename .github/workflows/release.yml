@@ -15,6 +15,7 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   BIOME_WEBSITE_REPO: biomejs/website
+  BIOME_DOCKER_REPO: biomejs/docker
   BIOME_RELEASE_CLI_EVENT: biome-release-cli-event
 
 jobs:
@@ -374,7 +375,7 @@ jobs:
           fail_on_unmatched_files: true
           generate_release_notes: true
 
-      - name: Dispatch event on release
+      - name: Codegen website schema
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
         with:
           token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
@@ -382,6 +383,12 @@ jobs:
           event-type: ${{ env.BIOME_RELEASE_CLI_EVENT }}
           client-payload: |
             { "sha": "${{ github.sha }}", "tag": "@biomejs/biome@${{ needs.build-binaries.outputs.version }}", "version": "${{ needs.build-binaries.outputs.version }}" }
+      - name: Generate docker images
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3
+        with:
+          token: ${{ secrets.BIOME_REPOSITORY_DISPATCH }}
+          repository: ${{ env.BIOME_DOCKER_REPO }}
+          event-type: ${{ env.BIOME_RELEASE_CLI_EVENT }}
 
   publish-js-api:
     name: Publish JS API
