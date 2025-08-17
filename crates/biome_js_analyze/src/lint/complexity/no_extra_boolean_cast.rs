@@ -198,19 +198,20 @@ impl Rule for NoExtraBooleanCast {
 
         // Only wrap in parentheses if this is a Boolean call inside a logical NOT with complex expression
         if matches!(extra_boolean_cast_type, ExtraBooleanCastType::BooleanCall) {
-            let is_negated_boolean_call = node.syntax().parent()
+            let is_negated_boolean_call = node
+                .syntax()
+                .parent()
                 .and_then(JsUnaryExpression::cast)
                 .and_then(|expr| expr.operator().ok())
                 .is_some_and(|op| op == JsUnaryOperator::LogicalNot);
-            
+
             if is_negated_boolean_call && needs_parentheses_when_negated(node_to_replace) {
-                replacement = AnyJsExpression::JsParenthesizedExpression(
-                    make::js_parenthesized_expression(
+                replacement =
+                    AnyJsExpression::JsParenthesizedExpression(make::js_parenthesized_expression(
                         make::token(T!['(']),
                         replacement,
                         make::token(T![')']),
-                    ),
-                );
+                    ));
             }
         }
 
