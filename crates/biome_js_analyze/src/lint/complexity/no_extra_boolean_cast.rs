@@ -194,32 +194,25 @@ impl Rule for NoExtraBooleanCast {
         };
 
         // Check if the Boolean call is inside a unary negation and the argument needs parentheses
-        let replacement = if matches!(extra_boolean_cast_type, ExtraBooleanCastType::BooleanCall) {
-            // Check if this Boolean call is inside a unary negation
-            if let Some(unary_expr) = node.syntax().parent().and_then(JsUnaryExpression::cast) {
-                if matches!(unary_expr.operator(), Ok(JsUnaryOperator::LogicalNot)) {
-                    // Check if the argument is a complex expression that needs parentheses
-                    if needs_parentheses_when_negated(node_to_replace) {
-                        // Wrap in parentheses to preserve operator precedence
-                        AnyJsExpression::JsParenthesizedExpression(
-                            make::js_parenthesized_expression(
-                                make::token(T!['(']),
-                                node_to_replace.clone(),
-                                make::token(T![')']),
-                            ),
-                        )
-                    } else {
-                        node_to_replace.clone()
-                    }
-                } else {
-                    node_to_replace.clone()
-                }
-            } else {
-                node_to_replace.clone()
+        let mut replacement = node_to_replace.clone();
+
+        // Only wrap in parentheses if this is a Boolean call inside a logical NOT with complex expression
+        if matches!(extra_boolean_cast_type, ExtraBooleanCastType::BooleanCall) {
+            let is_negated_boolean_call = node.syntax().parent()
+                .and_then(JsUnaryExpression::cast)
+                .and_then(|expr| expr.operator().ok())
+                .is_some_and(|op| op == JsUnaryOperator::LogicalNot);
+            
+            if is_negated_boolean_call && needs_parentheses_when_negated(node_to_replace) {
+                replacement = AnyJsExpression::JsParenthesizedExpression(
+                    make::js_parenthesized_expression(
+                        make::token(T!['(']),
+                        replacement,
+                        make::token(T![')']),
+                    ),
+                );
             }
-        } else {
-            node_to_replace.clone()
-        };
+        }
 
         mutation.replace_node(node.clone(), replacement);
 
