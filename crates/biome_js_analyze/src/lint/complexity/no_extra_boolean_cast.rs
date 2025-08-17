@@ -3,12 +3,13 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{
-    AnyJsExpression, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, 
-    JsConditionalExpression, JsNewExpression, JsParenthesizedExpression, JsSyntaxNode, 
-    JsUnaryExpression, JsUnaryOperator, T, is_in_boolean_context, is_negation,
-};
 use biome_js_factory::make;
+use biome_js_syntax::{
+    AnyJsExpression, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsConditionalExpression, JsNewExpression,
+    JsParenthesizedExpression, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, T,
+    is_in_boolean_context, is_negation,
+};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions;
 
@@ -199,11 +200,13 @@ impl Rule for NoExtraBooleanCast {
                     // Check if the argument is a complex expression that needs parentheses
                     if needs_parentheses_when_negated(node_to_replace) {
                         // Wrap in parentheses to preserve operator precedence
-                        AnyJsExpression::JsParenthesizedExpression(make::js_parenthesized_expression(
-                            make::token(T!['(']),
-                            node_to_replace.clone(),
-                            make::token(T![')']),
-                        ))
+                        AnyJsExpression::JsParenthesizedExpression(
+                            make::js_parenthesized_expression(
+                                make::token(T!['(']),
+                                node_to_replace.clone(),
+                                make::token(T![')']),
+                            ),
+                        )
                     } else {
                         node_to_replace.clone()
                     }
@@ -234,7 +237,7 @@ fn needs_parentheses_when_negated(expr: &AnyJsExpression) -> bool {
     match expr {
         // Binary expressions like `a && b` need parentheses in `!(a && b)` to maintain precedence
         AnyJsExpression::JsBinaryExpression(_) => true,
-        // Conditional expressions like `a ? b : c` need parentheses 
+        // Conditional expressions like `a ? b : c` need parentheses
         AnyJsExpression::JsConditionalExpression(_) => true,
         // Assignment expressions need parentheses
         AnyJsExpression::JsAssignmentExpression(_) => true,
