@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, 
-    JsConditionalExpression, JsNewExpression, JsParenthesizedExpression, JsSyntaxNode, 
+    JsConditionalExpression, JsLogicalExpression, JsNewExpression, JsParenthesizedExpression, JsSequenceExpression, JsSyntaxNode, 
     JsUnaryExpression, JsUnaryOperator, T, is_in_boolean_context, is_negation,
 };
 use biome_js_factory::make;
@@ -232,12 +232,16 @@ impl Rule for NoExtraBooleanCast {
 /// This is needed to preserve operator precedence for expressions like binary expressions.
 fn needs_parentheses_when_negated(expr: &AnyJsExpression) -> bool {
     match expr {
-        // Binary expressions like `a && b` need parentheses in `!(a && b)` to maintain precedence
+        // Binary expressions like `a + b` need parentheses in `!(a + b)` to maintain precedence
         AnyJsExpression::JsBinaryExpression(_) => true,
+        // Logical expressions like `a && b` need parentheses in `!(a && b)` to maintain precedence
+        AnyJsExpression::JsLogicalExpression(_) => true,
         // Conditional expressions like `a ? b : c` need parentheses 
         AnyJsExpression::JsConditionalExpression(_) => true,
         // Assignment expressions need parentheses
         AnyJsExpression::JsAssignmentExpression(_) => true,
+        // Sequence expressions (comma operator) need parentheses
+        AnyJsExpression::JsSequenceExpression(_) => true,
         // Logical expressions that are already parenthesized don't need additional ones
         AnyJsExpression::JsParenthesizedExpression(_) => false,
         // Simple expressions like identifiers, literals, calls don't need parentheses
