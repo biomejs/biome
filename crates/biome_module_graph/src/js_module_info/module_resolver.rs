@@ -13,7 +13,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
     JsExport, JsImportPath, JsOwnExport, ModuleGraph,
-    js_module_info::{JsModuleInfoInner, scope::TsBindingReference},
+    js_module_info::{JsModuleInfoInner, scope::TsBindingReference, utils::reached_too_many_types},
 };
 
 use super::JsModuleInfo;
@@ -214,6 +214,10 @@ impl ModuleResolver {
 
             let mut i = 0;
             while i < self.types.len() {
+                if reached_too_many_types(i) {
+                    return;
+                }
+
                 if let Some(ty) = self.types.get(i).flattened(self) {
                     self.types.replace(i, ty);
                     did_flatten = true;

@@ -27,6 +27,7 @@ use crate::js_module_info::{
     binding::{JsBindingReference, JsBindingReferenceKind, JsDeclarationKind},
     scope::TsBindingReference,
     scope_id_for_range,
+    utils::reached_too_many_types,
 };
 use crate::{JsImportPath, JsImportPhase};
 
@@ -750,6 +751,10 @@ impl JsModuleInfoCollector {
 
             let mut i = 0;
             while i < self.types.len() {
+                if reached_too_many_types(i) {
+                    return;
+                }
+
                 if let Some(ty) = self.types.get(i).flattened(self) {
                     self.types.replace(i, ty);
                     did_flatten = true;

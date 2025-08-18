@@ -2,6 +2,7 @@ mod binding;
 mod collector;
 mod module_resolver;
 mod scope;
+mod utils;
 mod visitor;
 
 use biome_js_syntax::AnyJsImportLike;
