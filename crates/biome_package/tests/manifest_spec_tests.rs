@@ -184,7 +184,7 @@ fn run_valid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
     snapshot_result.push_str(&input_code);
     snapshot_result.push_str("\n\n");
     snapshot_result.push_str("## Data structure\n\n");
-    snapshot_result.push_str(&format!("{tsconfig:#?}"));
+    snapshot_result.push_str(&format!("{tsconfig:#?}").replace("\\\\", "/"));
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
