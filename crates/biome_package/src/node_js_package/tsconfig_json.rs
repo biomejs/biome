@@ -86,14 +86,19 @@ impl TsConfigJson {
 
 #[derive(Clone, Debug, Default, Deserializable)]
 pub struct CompilerOptions {
+    /// https://www.typescriptlang.org/tsconfig/#baseUrl
+    ///
+    /// The base URL is normalised to an absolute path after parsing.
     pub base_url: Option<Utf8PathBuf>,
 
     /// Path aliases.
     pub paths: Option<CompilerOptionsPathsMap>,
 
     /// The actual base from where path aliases are resolved.
+    ///
+    /// The base URL is normalised to an absolute path.
     #[deserializable(skip)]
-    paths_base: Utf8PathBuf,
+    pub paths_base: Utf8PathBuf,
 
     /// See: https://www.typescriptlang.org/tsconfig/#typeRoots
     #[deserializable(rename = "typeRoots")]

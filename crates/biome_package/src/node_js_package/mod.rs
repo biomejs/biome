@@ -2,7 +2,7 @@ mod package_json;
 mod tsconfig_json;
 
 pub use package_json::{Dependencies, PackageJson, PackageType, Version};
-pub use tsconfig_json::TsConfigJson;
+pub use tsconfig_json::{CompilerOptions, TsConfigJson};
 
 use biome_rowan::Language;
 

@@ -10,7 +10,7 @@ use biome_fs::FileSystem;
 use camino::Utf8Path;
 pub use license::generated::*;
 pub use node_js_package::{
-    Dependencies, NodeJsPackage, PackageJson, PackageType, TsConfigJson, Version,
+    CompilerOptions, Dependencies, NodeJsPackage, PackageJson, PackageType, TsConfigJson, Version,
 };
 
 use std::any::TypeId;
