@@ -1,7 +1,7 @@
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_package::{NodeJsPackage, Package};
-use camino::Utf8Path;
+use camino::{Utf8Component, Utf8Path, Utf8PathBuf};
 use std::fs::read_to_string;
 
 mod manifest {
@@ -153,11 +153,38 @@ fn run_valid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
 
     let mut snapshot_result = String::new();
 
+    let strip_prefix = |path: &mut Utf8PathBuf| {
+        if path.to_string().is_empty() {
+            return;
+        }
+
+        assert!(path.is_absolute());
+        let mut stripped_path = Utf8PathBuf::from("<PREFIX>");
+        let mut past_prefix = false;
+        for component in path.components() {
+            if past_prefix {
+                stripped_path.push(component);
+            } else if component == Utf8Component::Normal("tests") {
+                past_prefix = true;
+            }
+        }
+        *path = stripped_path;
+    };
+
+    let mut tsconfig = project.tsconfig.unwrap();
+    strip_prefix(&mut tsconfig.path);
+    strip_prefix(&mut tsconfig.compiler_options.paths_base);
+    tsconfig
+        .compiler_options
+        .base_url
+        .as_mut()
+        .map(strip_prefix);
+
     snapshot_result.push_str("## Input\n\n");
     snapshot_result.push_str(&input_code);
     snapshot_result.push_str("\n\n");
     snapshot_result.push_str("## Data structure\n\n");
-    snapshot_result.push_str(&format!("{:#?}", project.tsconfig.unwrap()));
+    snapshot_result.push_str(&format!("{tsconfig:#?}"));
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
