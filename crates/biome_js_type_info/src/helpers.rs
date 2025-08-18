@@ -255,7 +255,7 @@ impl TypeData {
     /// remains, an instance of `Self::Reference` is returned instead of
     /// `Self::Union`.
     pub fn union_of(resolver: &dyn TypeResolver, types: Box<[TypeReference]>) -> Self {
-        // We use a hash table separately of a vector to quickly check for
+        // We use a hash table in addition to a vector to quickly check for
         // duplicates, without messing with the original order.
         let mut table: HashTable<usize> = HashTable::with_capacity(types.len());
         let mut vec = Vec::with_capacity(types.len());
@@ -584,5 +584,6 @@ generate_matcher!(is_interface, Interface, _);
 generate_matcher!(is_null, Null);
 generate_matcher!(is_reference, Reference, _);
 generate_matcher!(is_never_keyword, NeverKeyword);
+generate_matcher!(is_union, Union, _);
 generate_matcher!(is_unknown_keyword, UnknownKeyword);
 generate_matcher!(is_void_keyword, VoidKeyword);
