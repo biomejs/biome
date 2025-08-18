@@ -106,3 +106,30 @@ fn store_embedded_nodes_with_current_ranges() {
     let style_node = style.node();
     assert!(style_node.text_range_with_trivia().start() > TextSize::from(0));
 }
+
+#[test]
+fn call_info_for_file() {
+    let source = include_str!("./fixture.js");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.js"), source);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.js"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    let result = workspace.update_module_graph(UpdateModuleGraphParams {
+        path: BiomePath::new("/project/file.js"),
+        update_kind: crate::workspace::UpdateKind::AddOrUpdate,
+    });
+
+    dbg!(&result);
+}
