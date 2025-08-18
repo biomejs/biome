@@ -1,0 +1,170 @@
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
+use biome_console::markup;
+use biome_diagnostics::Severity;
+use biome_js_syntax::{AnyJsFunction, JsCallExpression, JsVariableDeclarator};
+use biome_rowan::AstNode;
+use biome_rule_options::use_qwik_method_usage::UseQwikMethodUsageOptions;
+declare_lint_rule! {
+    /// Disallow use* hooks outside of component$ or other use* hooks.
+    ///
+    /// Ensures Qwik's lifecycle hooks are only used in valid reactive contexts.
+    /// See [Qwik Component Lifecycle](https://qwik.dev/docs/components/lifecycle/) for proper hook usage.
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```js,expect_diagnostic
+    /// export const Counter = () => {
+    ///   const count = useSignal(0);
+    /// };
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// export const Counter = component$(() => {
+    ///   const count = useSignal(0);
+    /// });
+    ///
+    /// export const useCounter = () => {
+    ///   const count = useSignal(0);
+    ///   return count;
+    /// };
+    /// ```
+    pub UseQwikMethodUsage {
+        version: "next",
+        name: "useQwikMethodUsage",
+        language: "jsx",
+        sources: &[RuleSource::EslintQwik("use-method-usage").same()],
+        recommended: true,
+        severity: Severity::Error,
+        domains: &[RuleDomain::Qwik],
+    }
+}
+
+impl Rule for UseQwikMethodUsage {
+    type Query = Ast<JsCallExpression>;
+    type State = biome_rowan::TextRange;
+    type Signals = Option<Self::State>;
+    type Options = UseQwikMethodUsageOptions;
+
+    fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
+        let call = ctx.query();
+        let is_hook = is_qwik_hook(call)?;
+        if !is_hook {
+            return None;
+        }
+        let is_valid_context = is_inside_component_or_hook(call).unwrap_or(false)
+            || is_in_named_function(call).unwrap_or(false);
+        if is_valid_context {
+            None
+        } else {
+            Some(call.range())
+        }
+    }
+
+    fn diagnostic(
+        _: &biome_analyze::context::RuleContext<Self>,
+        range: &Self::State,
+    ) -> Option<RuleDiagnostic> {
+        RuleDiagnostic::new(
+            rule_category!(),
+            range,
+            markup! {
+                "Qwik hook detected outside of allowed scope"
+            },
+        )
+            .note(markup! {
+            "Qwik's reactive hooks (functions starting with  "<Emphasis>"use*"</Emphasis>" followed by uppercase letter) must be:"
+            "\n- Used exclusively within `component$` functions"
+            "\n- Or encapsulated within other valid Qwik hooks"
+        })
+            .note(markup! {
+            "Check the "<Hyperlink href="https://qwik.dev/docs/components/state/#use-methods">"Qwik documentation"</Hyperlink>"."
+        })
+            .into()
+    }
+}
+
+fn is_qwik_hook(call: &JsCallExpression) -> Option<bool> {
+    let binding = call
+        .callee()
+        .ok()?
+        .as_js_reference_identifier()?
+        .value_token()
+        .ok()?;
+    let name = binding.text();
+    Some(name.starts_with("use") && name.chars().nth(3).is_some_and(|c| c.is_uppercase()))
+}
+
+fn is_inside_component_or_hook(call: &JsCallExpression) -> Option<bool> {
+    let outer_call = call
+        .syntax()
+        .ancestors()
+        .find_map(AnyJsFunction::cast)
+        .and_then(|function| {
+            function
+                .syntax()
+                .ancestors()
+                .find_map(JsCallExpression::cast)
+        });
+
+    outer_call.and_then(|call_expr| {
+        call_expr
+            .callee()
+            .ok()
+            .and_then(|callee| callee.as_js_reference_identifier())
+            .and_then(|ident| ident.value_token().ok())
+            .map(|token| {
+                let name = token.text();
+                name == "component$"
+                    || (name.starts_with("use")
+                        && name.chars().nth(3).is_some_and(|c| c.is_uppercase()))
+            })
+    })
+}
+
+fn is_in_named_function(call: &JsCallExpression) -> Option<bool> {
+    let function_name = call
+        .syntax()
+        .ancestors()
+        .find_map(AnyJsFunction::cast)
+        .and_then(|func| match func {
+            AnyJsFunction::JsFunctionDeclaration(decl) => decl
+                .id()
+                .ok()
+                .and_then(|binding| binding.as_js_identifier_binding().cloned())
+                .and_then(|ident| ident.name_token().ok())
+                .map(|token| token.token_text_trimmed()),
+            AnyJsFunction::JsFunctionExpression(expr) => expr
+                .id()
+                .and_then(|binding| binding.as_js_identifier_binding().cloned())
+                .and_then(|ident| ident.name_token().ok())
+                .map(|token| token.token_text_trimmed()),
+            AnyJsFunction::JsArrowFunctionExpression(_) => func
+                .syntax()
+                .ancestors()
+                .find(|a| JsVariableDeclarator::can_cast(a.kind()))
+                .and_then(JsVariableDeclarator::cast)
+                .and_then(|decl| decl.id().ok())
+                .and_then(|binding_pattern| {
+                    binding_pattern
+                        .as_any_js_binding()
+                        .and_then(|binding| binding.as_js_identifier_binding().cloned())
+                })
+                .and_then(|ident| ident.name_token().ok())
+                .map(|token| token.token_text_trimmed()),
+            AnyJsFunction::JsFunctionExportDefaultDeclaration(decl) => decl
+                .id()
+                .and_then(|binding| binding.as_js_identifier_binding().cloned())
+                .and_then(|ident| ident.name_token().ok())
+                .map(|token| token.token_text_trimmed()),
+        });
+
+    function_name.map(|name| {
+        name.text() == "component$"
+            || (name.text().starts_with("use")
+                && name.text().chars().nth(3).is_some_and(|c| c.is_uppercase()))
+    })
+}

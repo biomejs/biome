@@ -1714,6 +1714,14 @@ export interface Nursery {
 	 */
 	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
 	/**
+	 * Disallow use* hooks outside of component$ or other use* hooks.
+	 */
+	useQwikMethodUsage?: RuleConfiguration_for_UseQwikMethodUsageOptions;
+	/**
+	 * Disallow unserializable expressions in Qwik dollar ($) scopes.
+	 */
+	useQwikValidLexicalScope?: RuleConfiguration_for_UseQwikValidLexicalScopeOptions;
+	/**
 	 * Enforce that components are defined as functions and never as classes.
 	 */
 	useReactFunctionComponents?: RuleConfiguration_for_UseReactFunctionComponentsOptions;
@@ -3021,6 +3029,12 @@ export type RuleConfiguration_for_UseMaxParamsOptions =
 export type RuleConfiguration_for_UseQwikClasslistOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseQwikClasslistOptions;
+export type RuleConfiguration_for_UseQwikMethodUsageOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikMethodUsageOptions;
+export type RuleConfiguration_for_UseQwikValidLexicalScopeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikValidLexicalScopeOptions;
 export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseReactFunctionComponentsOptions;
@@ -5546,6 +5560,26 @@ export interface RuleWithOptions_for_UseQwikClasslistOptions {
 	 */
 	options: UseQwikClasslistOptions;
 }
+export interface RuleWithOptions_for_UseQwikMethodUsageOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikMethodUsageOptions;
+}
+export interface RuleWithOptions_for_UseQwikValidLexicalScopeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikValidLexicalScopeOptions;
+}
 export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8003,6 +8037,8 @@ export interface UseMaxParamsOptions {
 	max?: number;
 }
 export interface UseQwikClasslistOptions {}
+export type UseQwikMethodUsageOptions = null;
+export interface UseQwikValidLexicalScopeOptions {}
 export interface UseReactFunctionComponentsOptions {}
 export interface UseSortedClassesOptions {
 	/**
@@ -8724,6 +8760,8 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikClasslist"
+	| "lint/nursery/useQwikMethodUsage"
+	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
