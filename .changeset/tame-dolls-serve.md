@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Added support for automatically recognizing Svelte globals ($state and so on) inside `.svelte.test.ts/js` `.svelte.spec.ts/js` files.
+Fixed an issue where Svelte globals ($state and so on) were not properly recognized inside `.svelte.test.ts/js` and `.svelte.spec.ts/js` files.
