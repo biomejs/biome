@@ -124,7 +124,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.89.0-bullseye@sha256:6dd47db91f6637af2cb581979d1b01164826780591edba9859a6cb24b48da7b8
+      image: rust:1.89.0-bullseye@sha256:5b0defc2e3b26c97c917406f3d7c682028f87b2ae9adee184694b5c0279e2740
 
     env:
       version: ${{ needs.version.outputs.version }}
