@@ -809,9 +809,8 @@ mod test {
 
     #[test]
     fn module_diagnostic() {
-        let diagnostics =
-            ModuleDiagnostic::JsInfo(JsModuleInfoDiagnostic::exceeded_types_limit(200_000))
-                .with_file_path("example.js");
+        let diagnostics = ModuleDiagnostic::JsInfo(JsModuleInfoDiagnostic::exceeded_types_limit())
+            .with_file_path("example.js");
         snap_diagnostic("module_diagnostic", diagnostics);
     }
 }

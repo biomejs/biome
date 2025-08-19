@@ -66,15 +66,13 @@ impl Diagnostic for JsModuleInfoDiagnostic {
 }
 
 impl JsModuleInfoDiagnostic {
-    pub fn exceeded_types_limit(types_count: usize) -> Self {
-        Self::ExceededTypesLimit(ExceededTypesLimitDiagnostic { types_count })
+    pub fn exceeded_types_limit() -> Self {
+        Self::ExceededTypesLimit(ExceededTypesLimitDiagnostic)
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct ExceededTypesLimitDiagnostic {
-    pub types_count: usize,
-}
+pub struct ExceededTypesLimitDiagnostic;
 
 impl Diagnostic for ExceededTypesLimitDiagnostic {
     fn severity(&self) -> Severity {
@@ -87,7 +85,7 @@ impl Diagnostic for ExceededTypesLimitDiagnostic {
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(markup! {
-            "Biome encountered an unusually large amount of types ("{self.types_count}") which exceeded the limit of "{MAX_NUM_TYPES}"."
+            "Biome encountered an unusually large amount of types which exceeded the limit of "{MAX_NUM_TYPES}"."
         })?;
 
         fmt.write_str("\n\n")?;
@@ -113,7 +111,7 @@ impl Diagnostic for ExceededTypesLimitDiagnostic {
             "In the meantime, you can ignore this file by adding its name or folder in the "<Emphasis>"files.experimentalScannerIgnores"</Emphasis>" option in your configuration file."
         })?;
         visitor.record_log(LogCategory::Info, &markup!{
-            "Refer to the "<Hyperlink href={"https://biomejs.dev/reference/configuration/#filesexperimentalscannerignoress"}>"documentation"</Hyperlink>" for more information."
+            "Refer to the "<Hyperlink href={"https://biomejs.dev/reference/configuration/#filesexperimentalscannerignores"}>"documentation"</Hyperlink>" for more information."
         })?;
 
         visitor.record_log(

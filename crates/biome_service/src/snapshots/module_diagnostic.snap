@@ -4,7 +4,7 @@ expression: content
 ---
 example.js project ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome encountered an unusually large amount of types (200000) which exceeded the limit of 100000.
+  ! Biome encountered an unusually large amount of types which exceeded the limit of 100000.
     
     Either you are analyzing very large files (did you make sure to exclude your build/ or dist/ folder?), or you've encountered a bug in Biome.
     

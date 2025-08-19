@@ -9,5 +9,5 @@ pub(crate) fn reached_too_many_types(num_types: usize) -> Result<(), JsModuleInf
         return Ok(());
     }
 
-    Err(JsModuleInfoDiagnostic::exceeded_types_limit(num_types))
+    Err(JsModuleInfoDiagnostic::exceeded_types_limit())
 }
