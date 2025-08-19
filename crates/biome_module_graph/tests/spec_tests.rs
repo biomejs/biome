@@ -1531,7 +1531,7 @@ fn test_resolve_redis_commander_types() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "/RedisCommander.d.ts".into(),
-        include_bytes!("./fixtures/RedisCommander_stripped.d.ts"),
+        include_bytes!("../benches/RedisCommander.d.ts"),
     );
     fs.insert(
         "/index.ts".into(),
