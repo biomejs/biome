@@ -18,47 +18,36 @@ expression: snapshot
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssBogusRule {
-            items: [
-                AT@0..1 "@" [] [],
-            ],
-        },
-        CssQualifiedRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selectors: CssNestedSelectorList [],
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@1..7 "theme" [] [Whitespace(" ")],
-                        },
-                    },
-                    sub_selectors: CssSubSelectorList [],
-                },
-            ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@7..8 "{" [] [],
-                items: CssDeclarationOrRuleList [
-                    CssDeclarationWithSemicolon {
-                        declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssDashedIdentifier {
-                                    value_token: IDENT@8..25 "--color-primary" [Newline("\n"), Whitespace("\t")] [],
-                                },
-                                colon_token: COLON@25..27 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssColor {
-                                        hash_token: HASH@27..28 "#" [] [],
-                                        value_token: CSS_COLOR_LITERAL@28..34 "3b82f6" [] [],
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    THEME_KW@1..7 "theme" [] [Whitespace(" ")],
+                    CssDeclarationOrRuleBlock {
+                        l_curly_token: L_CURLY@7..8 "{" [] [],
+                        items: CssDeclarationOrRuleList [
+                            CssDeclarationWithSemicolon {
+                                declaration: CssDeclaration {
+                                    property: CssGenericProperty {
+                                        name: CssDashedIdentifier {
+                                            value_token: IDENT@8..25 "--color-primary" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                        colon_token: COLON@25..27 ":" [] [Whitespace(" ")],
+                                        value: CssGenericComponentValueList [
+                                            CssColor {
+                                                hash_token: HASH@27..28 "#" [] [],
+                                                value_token: CSS_COLOR_LITERAL@28..34 "3b82f6" [] [],
+                                            },
+                                        ],
                                     },
-                                ],
+                                    important: missing (optional),
+                                },
+                                semicolon_token: SEMICOLON@34..35 ";" [] [],
                             },
-                            important: missing (optional),
-                        },
-                        semicolon_token: SEMICOLON@34..35 ";" [] [],
+                        ],
+                        r_curly_token: R_CURLY@35..37 "}" [Newline("\n")] [],
                     },
                 ],
-                r_curly_token: R_CURLY@35..37 "}" [Newline("\n")] [],
             },
         },
     ],
@@ -72,33 +61,26 @@ CssRoot {
 0: CSS_ROOT@0..38
   0: (empty)
   1: CSS_RULE_LIST@0..37
-    0: CSS_BOGUS_RULE@0..1
+    0: CSS_AT_RULE@0..37
       0: AT@0..1 "@" [] []
-    1: CSS_QUALIFIED_RULE@1..37
-      0: CSS_SELECTOR_LIST@1..7
-        0: CSS_COMPOUND_SELECTOR@1..7
-          0: CSS_NESTED_SELECTOR_LIST@1..1
-          1: CSS_TYPE_SELECTOR@1..7
-            0: (empty)
-            1: CSS_IDENTIFIER@1..7
-              0: IDENT@1..7 "theme" [] [Whitespace(" ")]
-          2: CSS_SUB_SELECTOR_LIST@7..7
-      1: CSS_DECLARATION_OR_RULE_BLOCK@7..37
-        0: L_CURLY@7..8 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@8..35
-          0: CSS_DECLARATION_WITH_SEMICOLON@8..35
-            0: CSS_DECLARATION@8..34
-              0: CSS_GENERIC_PROPERTY@8..34
-                0: CSS_DASHED_IDENTIFIER@8..25
-                  0: IDENT@8..25 "--color-primary" [Newline("\n"), Whitespace("\t")] []
-                1: COLON@25..27 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@27..34
-                  0: CSS_COLOR@27..34
-                    0: HASH@27..28 "#" [] []
-                    1: CSS_COLOR_LITERAL@28..34 "3b82f6" [] []
-              1: (empty)
-            1: SEMICOLON@34..35 ";" [] []
-        2: R_CURLY@35..37 "}" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@1..37
+        0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_BLOCK@7..37
+          0: L_CURLY@7..8 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@8..35
+            0: CSS_DECLARATION_WITH_SEMICOLON@8..35
+              0: CSS_DECLARATION@8..34
+                0: CSS_GENERIC_PROPERTY@8..34
+                  0: CSS_DASHED_IDENTIFIER@8..25
+                    0: IDENT@8..25 "--color-primary" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@25..27 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@27..34
+                    0: CSS_COLOR@27..34
+                      0: HASH@27..28 "#" [] []
+                      1: CSS_COLOR_LITERAL@28..34 "3b82f6" [] []
+                1: (empty)
+              1: SEMICOLON@34..35 ";" [] []
+          2: R_CURLY@35..37 "}" [Newline("\n")] []
   2: EOF@37..38 "" [Newline("\n")] []
 
 ```
@@ -111,10 +93,12 @@ theme.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━
   × Tailwind-specific syntax is disabled.
   
   > 1 │ @theme {
-      │  ^^^^^
-    2 │ 	--color-primary: #3b82f6;
-    3 │ }
+      │  ^^^^^^^
+  > 2 │ 	--color-primary: #3b82f6;
+  > 3 │ }
+      │ ^
+    4 │ 
   
-  i Enable `tailwindDirectives` in the css parser options.
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
   
 ```

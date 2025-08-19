@@ -28,11 +28,26 @@ use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, token_set};
+use biome_parser::{Parser, SyntaxFeature, token_set};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
 
 use self::parse_error::{expected_component_value, expected_declaration_item};
+
+pub(crate) enum CssSyntaxFeatures {
+    /// Enable support for Tailwind CSS directives and syntax.
+    Tailwind,
+}
+
+impl SyntaxFeature for CssSyntaxFeatures {
+    type Parser<'source> = CssParser<'source>;
+
+    fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
+        match self {
+            Self::Tailwind => p.options().is_tailwind_directives_enabled(),
+        }
+    }
+}
 
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
@@ -319,18 +334,15 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
-    let tailwind_enabled = p.options().is_tailwind_directives_enabled();
-
     if is_at_any_function(p) {
         parse_any_function(p)
     } else if is_at_dashed_identifier(p) {
         if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
-            if tailwind_enabled {
-                parse_tailwind_value_theme_reference(p)
-            } else {
-                p.error(tailwind_disabled(p, p.cur_range()));
-                parse_dashed_identifier(p)
-            }
+            CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
+                p,
+                parse_tailwind_value_theme_reference,
+                |p, m| tailwind_disabled(p, m.range(p)),
+            )
         } else {
             parse_dashed_identifier(p)
         }
@@ -576,13 +588,15 @@ impl ParseNodeList for BracketedValueList {
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if p.at(T![*]) {
-            if p.options().is_tailwind_directives_enabled() {
-                let m = p.start();
-                p.bump_remap(T![ident]);
-                return Present(m.complete(p, CSS_CUSTOM_IDENTIFIER));
-            } else {
-                p.error(tailwind_disabled(p, p.cur_range()));
-            }
+            return CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
+                p,
+                |p| {
+                    let m = p.start();
+                    p.bump_remap(T![ident]);
+                    return Present(m.complete(p, CSS_CUSTOM_IDENTIFIER));
+                },
+                |p, m| tailwind_disabled(p, m.range(p)),
+            );
         }
 
         parse_custom_identifier(p, CssLexContext::Regular)

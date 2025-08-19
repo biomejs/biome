@@ -3,7 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::block::{
     parse_declaration_block, parse_declaration_or_rule_list_block, parse_rule_block,
 };
-use crate::syntax::parse_error::{expected_identifier, expected_string, tailwind_disabled};
+use crate::syntax::parse_error::{expected_identifier, expected_string};
 use crate::syntax::selector::parse_selector;
 use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::{self, *};
@@ -17,11 +17,6 @@ use biome_parser::prelude::*;
 // @theme { --color-primary: #3b82f6; }
 pub(crate) fn parse_theme_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![theme]) {
-        return Absent;
-    }
-
-    if !p.options().is_tailwind_directives_enabled() {
-        p.error(tailwind_disabled(p, p.cur_range()));
         return Absent;
     }
 
@@ -40,11 +35,6 @@ pub(crate) fn parse_theme_at_rule(p: &mut CssParser) -> ParsedSyntax {
 // @utility tab-* { tab-size: --value([integer]); }
 pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![utility]) {
-        return Absent;
-    }
-
-    if !p.options().is_tailwind_directives_enabled() {
-        p.error(tailwind_disabled(p, p.cur_range()));
         return Absent;
     }
 
@@ -87,11 +77,6 @@ pub(crate) fn parse_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if !p.options().is_tailwind_directives_enabled() {
-        p.error(tailwind_disabled(p, p.cur_range()));
-        return Absent;
-    }
-
     let m = p.start();
     p.bump(T![variant]);
 
@@ -110,11 +95,6 @@ pub(crate) fn parse_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
 // @custom-variant theme-midnight (&:where([data-theme="midnight"] *));
 pub(crate) fn parse_custom_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![custom_variant]) {
-        return Absent;
-    }
-
-    if !p.options().is_tailwind_directives_enabled() {
-        p.error(tailwind_disabled(p, p.cur_range()));
         return Absent;
     }
 
@@ -166,11 +146,6 @@ pub(crate) fn parse_apply_at_rule(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if !p.options().is_tailwind_directives_enabled() {
-        p.error(tailwind_disabled(p, p.cur_range()));
-        return Absent;
-    }
-
     let m = p.start();
     p.bump_with_context(T![apply], CssLexContext::TailwindUtility);
     ApplyClassList.parse_list(p);
@@ -214,11 +189,6 @@ pub(crate) fn parse_config_at_rule(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if !p.options().is_tailwind_directives_enabled() {
-        p.error(tailwind_disabled(p, p.cur_range()));
-        return Absent;
-    }
-
     let m = p.start();
     p.bump(T![config]);
     parse_string(p).or_add_diagnostic(p, expected_string);
@@ -230,11 +200,6 @@ pub(crate) fn parse_config_at_rule(p: &mut CssParser) -> ParsedSyntax {
 // @plugin "@tailwindcss/typography";
 pub(crate) fn parse_plugin_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![plugin]) {
-        return Absent;
-    }
-
-    if !p.options().is_tailwind_directives_enabled() {
-        p.error(tailwind_disabled(p, p.cur_range()));
         return Absent;
     }
 
@@ -252,11 +217,6 @@ pub(crate) fn parse_source_at_rule(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if !p.options().is_tailwind_directives_enabled() {
-        p.error(tailwind_disabled(p, p.cur_range()));
-        return Absent;
-    }
-
     let m = p.start();
     p.bump(T![source]);
     parse_string(p).or_add_diagnostic(p, expected_string);
@@ -268,11 +228,6 @@ pub(crate) fn parse_source_at_rule(p: &mut CssParser) -> ParsedSyntax {
 // @reference "../../app.css";
 pub(crate) fn parse_reference_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(T![reference]) {
-        return Absent;
-    }
-
-    if !p.options().is_tailwind_directives_enabled() {
-        p.error(tailwind_disabled(p, p.cur_range()));
         return Absent;
     }
 

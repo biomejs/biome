@@ -16,41 +16,15 @@ expression: snapshot
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssBogusRule {
-            items: [
-                AT@0..1 "@" [] [],
-            ],
-        },
-        CssQualifiedRule {
-            prelude: CssSelectorList [
-                CssComplexSelector {
-                    left: CssCompoundSelector {
-                        nesting_selectors: CssNestedSelectorList [],
-                        simple_selector: CssTypeSelector {
-                            namespace: missing (optional),
-                            ident: CssIdentifier {
-                                value_token: IDENT@1..7 "config" [] [],
-                            },
-                        },
-                        sub_selectors: CssSubSelectorList [],
-                    },
-                    combinator: CSS_SPACE_LITERAL@7..8 " " [] [],
-                    right: missing (required),
-                },
-                missing separator,
-                CssBogusSelector {
-                    items: [
-                        CSS_STRING_LITERAL@8..30 "\"./tailwind.config.js\"" [] [],
-                    ],
-                },
-            ],
-            block: CssBogusBlock {
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
                 items: [
-                    CssDeclarationOrRuleList [
-                        CssEmptyDeclaration {
-                            semicolon_token: SEMICOLON@30..31 ";" [] [],
-                        },
-                    ],
+                    CONFIG_KW@1..8 "config" [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@8..30 "\"./tailwind.config.js\"" [] [],
+                    },
+                    SEMICOLON@30..31 ";" [] [],
                 ],
             },
         },
@@ -65,27 +39,13 @@ CssRoot {
 0: CSS_ROOT@0..32
   0: (empty)
   1: CSS_RULE_LIST@0..31
-    0: CSS_BOGUS_RULE@0..1
+    0: CSS_AT_RULE@0..31
       0: AT@0..1 "@" [] []
-    1: CSS_QUALIFIED_RULE@1..31
-      0: CSS_SELECTOR_LIST@1..30
-        0: CSS_COMPLEX_SELECTOR@1..8
-          0: CSS_COMPOUND_SELECTOR@1..7
-            0: CSS_NESTED_SELECTOR_LIST@1..1
-            1: CSS_TYPE_SELECTOR@1..7
-              0: (empty)
-              1: CSS_IDENTIFIER@1..7
-                0: IDENT@1..7 "config" [] []
-            2: CSS_SUB_SELECTOR_LIST@7..7
-          1: CSS_SPACE_LITERAL@7..8 " " [] []
-          2: (empty)
-        1: (empty)
-        2: CSS_BOGUS_SELECTOR@8..30
+      1: CSS_BOGUS_AT_RULE@1..31
+        0: CONFIG_KW@1..8 "config" [] [Whitespace(" ")]
+        1: CSS_STRING@8..30
           0: CSS_STRING_LITERAL@8..30 "\"./tailwind.config.js\"" [] []
-      1: CSS_BOGUS_BLOCK@30..31
-        0: CSS_DECLARATION_OR_RULE_LIST@30..31
-          0: CSS_EMPTY_DECLARATION@30..31
-            0: SEMICOLON@30..31 ";" [] []
+        2: SEMICOLON@30..31 ";" [] []
   2: EOF@31..32 "" [Newline("\n")] []
 
 ```
@@ -98,47 +58,9 @@ config.css:1:2 parse ━━━━━━━━━━━━━━━━━━━�
   × Tailwind-specific syntax is disabled.
   
   > 1 │ @config "./tailwind.config.js";
-      │  ^^^^^^
+      │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
   
-  i Enable `tailwindDirectives` in the css parser options.
-  
-config.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '"./tailwind.config.js"'.
-  
-  > 1 │ @config "./tailwind.config.js";
-      │         ^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
-  
-  i Expected a compound selector here.
-  
-  > 1 │ @config "./tailwind.config.js";
-      │         ^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
-  
-config.css:1:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-  > 1 │ @config "./tailwind.config.js";
-      │                               ^
-    2 │ 
-  
-  i Remove ;
-  
-config.css:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `}` but instead the file ends
-  
-    1 │ @config "./tailwind.config.js";
-  > 2 │ 
-      │ 
-  
-  i the file ends here
-  
-    1 │ @config "./tailwind.config.js";
-  > 2 │ 
-      │ 
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
   
 ```
