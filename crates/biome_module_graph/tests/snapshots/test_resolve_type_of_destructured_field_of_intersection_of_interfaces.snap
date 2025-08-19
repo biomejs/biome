@@ -43,83 +43,79 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof Promise<Module(0) TypeId(10)>
+Module TypeId(0) => Module(0) TypeId(9) | Module(0) TypeId(10) | Module(0) TypeId(20)
 
-Module TypeId(1) => Module(0) TypeId(10) | Module(0) TypeId(0) | Module(0) TypeId(22)
+Module TypeId(1) => boolean
 
-Module TypeId(2) => boolean
+Module TypeId(2) => Module(0) TypeId(1) | Module(0) TypeId(20)
 
-Module TypeId(3) => Module(0) TypeId(2) | Module(0) TypeId(22)
-
-Module TypeId(4) => sync Function {
+Module TypeId(3) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(6)
+  returns: Module(0) TypeId(5)
 }
 
-Module TypeId(5) => Module(0) TypeId(4)
+Module TypeId(4) => Module(0) TypeId(3)
 
-Module TypeId(6) => interface "(merged)" {
+Module TypeId(5) => interface "(merged)" {
   extends: []
   type_args: []
   members: [
-    "cache": Module(0) TypeId(22),
-    "mutate": Module(0) TypeId(7),
+    "cache": Module(0) TypeId(20),
+    "mutate": Module(0) TypeId(6),
     "errorRetryInterval": number
   ]
 }
 
-Module TypeId(7) => instanceof Module(0) TypeId(18)<Module(0) TypeId(20), Module(0) TypeId(21)>
+Module TypeId(6) => instanceof Module(0) TypeId(16)<Module(0) TypeId(18), Module(0) TypeId(19)>
 
-Module TypeId(8) => interface "InternalConfiguration" {
+Module TypeId(7) => interface "InternalConfiguration" {
   extends: []
   type_args: []
-  members: ["cache": Module(0) TypeId(22), "mutate": Module(0) TypeId(7)]
+  members: ["cache": Module(0) TypeId(20), "mutate": Module(0) TypeId(6)]
 }
 
-Module TypeId(9) => interface "PublicConfiguration" {
+Module TypeId(8) => interface "PublicConfiguration" {
   extends: []
   type_args: []
   members: ["errorRetryInterval": number]
 }
 
-Module TypeId(10) => instanceof Module(0) TypeId(21)
+Module TypeId(9) => instanceof Module(0) TypeId(19)
 
-Module TypeId(11) => instanceof Promise<Module(0) TypeId(10)>
+Module TypeId(10) => instanceof Promise<Module(0) TypeId(9)>
 
-Module TypeId(12) => Module(0) TypeId(10) | Module(0) TypeId(11) | Module(0) TypeId(22)
+Module TypeId(11) => Module(0) TypeId(9) | Module(0) TypeId(10) | Module(0) TypeId(20)
 
-Module TypeId(13) => instanceof Module(0) TypeId(20)
+Module TypeId(12) => instanceof Module(0) TypeId(18)
 
-Module TypeId(14) => Module(0) TypeId(2) | Module(0) TypeId(22)
+Module TypeId(13) => undefined
 
-Module TypeId(15) => undefined
+Module TypeId(14) => Module(0) TypeId(9) | Module(0) TypeId(13)
 
-Module TypeId(16) => Module(0) TypeId(10) | Module(0) TypeId(15)
+Module TypeId(15) => instanceof Promise<Module(0) TypeId(14)>
 
-Module TypeId(17) => instanceof Promise<Module(0) TypeId(16)>
-
-Module TypeId(18) => sync Function {
+Module TypeId(16) => sync Function {
   accepts: {
     params: [
-      required key: Module(0) TypeId(22)
-      optional data: Module(0) TypeId(12)
-      optional opts: Module(0) TypeId(14)
+      required key: Module(0) TypeId(20)
+      optional data: Module(0) TypeId(11)
+      optional opts: Module(0) TypeId(2)
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(17)
+  returns: Module(0) TypeId(15)
 }
 
-Module TypeId(19) => any
+Module TypeId(17) => any
 
-Module TypeId(20) => Data = unknown
+Module TypeId(18) => Data = unknown
 
-Module TypeId(21) => T = unknown
+Module TypeId(19) => T = unknown
 
-Module TypeId(22) => unknown
+Module TypeId(20) => unknown
 ```
 
 # Module Resolver
@@ -127,77 +123,75 @@ Module TypeId(22) => unknown
 ## Registered types
 
 ```
-Full TypeId(0) => instanceof Promise<Module(0) TypeId(10)>
+Full TypeId(0) => Module(0) TypeId(9) | Module(0) TypeId(10) | Module(0) TypeId(20)
 
-Full TypeId(1) => Module(0) TypeId(10) | Module(0) TypeId(0) | Module(0) TypeId(22)
+Full TypeId(1) => boolean
 
-Full TypeId(2) => boolean
+Full TypeId(2) => Module(0) TypeId(1) | Module(0) TypeId(20)
 
-Full TypeId(3) => Module(0) TypeId(2) | Module(0) TypeId(22)
-
-Full TypeId(4) => sync Function {
+Full TypeId(3) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(6)
+  returns: Module(0) TypeId(5)
 }
 
-Full TypeId(5) => Module(0) TypeId(4)
+Full TypeId(4) => Module(0) TypeId(3)
 
-Full TypeId(6) => interface "(merged)" {
+Full TypeId(5) => interface "(merged)" {
   extends: []
   type_args: []
   members: [
-    "cache": Module(0) TypeId(22),
-    "mutate": Module(0) TypeId(7),
+    "cache": Module(0) TypeId(20),
+    "mutate": Module(0) TypeId(6),
     "errorRetryInterval": number
   ]
 }
 
-Full TypeId(7) => instanceof Module(0) TypeId(18)<Module(0) TypeId(20), Module(0) TypeId(21)>
+Full TypeId(6) => instanceof Module(0) TypeId(16)<Module(0) TypeId(18), Module(0) TypeId(19)>
 
-Full TypeId(8) => interface "InternalConfiguration" {
+Full TypeId(7) => interface "InternalConfiguration" {
   extends: []
   type_args: []
-  members: ["cache": Module(0) TypeId(22), "mutate": Module(0) TypeId(7)]
+  members: ["cache": Module(0) TypeId(20), "mutate": Module(0) TypeId(6)]
 }
 
-Full TypeId(9) => interface "PublicConfiguration" {
+Full TypeId(8) => interface "PublicConfiguration" {
   extends: []
   type_args: []
   members: ["errorRetryInterval": number]
 }
 
-Full TypeId(10) => instanceof Module(0) TypeId(21)
+Full TypeId(9) => instanceof Module(0) TypeId(19)
 
-Full TypeId(11) => Module(0) TypeId(10) | Module(0) TypeId(11) | Module(0) TypeId(22)
+Full TypeId(10) => instanceof Promise<Module(0) TypeId(9)>
 
-Full TypeId(12) => instanceof Module(0) TypeId(20)
+Full TypeId(11) => instanceof Module(0) TypeId(18)
 
-Full TypeId(13) => undefined
+Full TypeId(12) => undefined
 
-Full TypeId(14) => Module(0) TypeId(10) | Module(0) TypeId(15)
+Full TypeId(13) => Module(0) TypeId(9) | Module(0) TypeId(13)
 
-Full TypeId(15) => instanceof Promise<Module(0) TypeId(16)>
+Full TypeId(14) => instanceof Promise<Module(0) TypeId(14)>
 
-Full TypeId(16) => sync Function {
+Full TypeId(15) => sync Function {
   accepts: {
     params: [
-      required key: Module(0) TypeId(22)
-      optional data: Module(0) TypeId(12)
-      optional opts: Module(0) TypeId(14)
+      required key: Module(0) TypeId(20)
+      optional data: Module(0) TypeId(11)
+      optional opts: Module(0) TypeId(2)
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(17)
+  returns: Module(0) TypeId(15)
 }
 
-Full TypeId(17) => any
+Full TypeId(16) => any
 
-Full TypeId(18) => Data = unknown
+Full TypeId(17) => Data = unknown
 
-Full TypeId(19) => T = unknown
+Full TypeId(18) => T = unknown
 
-Full TypeId(20) => unknown
+Full TypeId(19) => unknown
 ```

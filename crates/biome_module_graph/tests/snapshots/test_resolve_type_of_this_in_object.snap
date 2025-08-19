@@ -77,7 +77,7 @@ Module TypeId(2) => sync Function {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(6)
+  returns: Module(0) TypeId(18)
 }
 
 Module TypeId(3) => sync Function {
@@ -85,7 +85,7 @@ Module TypeId(3) => sync Function {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(6)
+  returns: Module(0) TypeId(18)
 }
 
 Module TypeId(4) => Module(0) TypeId(3)
@@ -95,69 +95,69 @@ Module TypeId(5) => Object {
   members: [
     "x": Module(0) TypeId(20),
     "y": Module(0) TypeId(23),
-    get "fooGetter": Module(0) TypeId(10),
+    get "fooGetter": Module(0) TypeId(9),
     "arrow": Module(0) TypeId(1),
     "func": Module(0) TypeId(2),
-    "meth": Module(0) TypeId(11),
-    "nestedArrow": Module(0) TypeId(12),
-    "inObject": Module(0) TypeId(13)
+    "meth": Module(0) TypeId(10),
+    "nestedArrow": Module(0) TypeId(11),
+    "inObject": Module(0) TypeId(12)
   ]
 }
 
-Module TypeId(6) => Module(0) TypeId(20)
-
-Module TypeId(7) => Object {
+Module TypeId(6) => Object {
   prototype: No prototype
-  members: ["x": Module(0) TypeId(6)]
+  members: ["x": Module(0) TypeId(18)]
 }
 
-Module TypeId(8) => Module(0) TypeId(7)
+Module TypeId(7) => Module(0) TypeId(6)
 
-Module TypeId(9) => Module(0) TypeId(6)
+Module TypeId(8) => Module(0) TypeId(18)
 
-Module TypeId(10) => sync Function "fooGetter" {
+Module TypeId(9) => sync Function "fooGetter" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(6)
+  returns: Module(0) TypeId(18)
 }
 
-Module TypeId(11) => sync Function "meth" {
+Module TypeId(10) => sync Function "meth" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(6)
+  returns: Module(0) TypeId(18)
 }
 
-Module TypeId(12) => sync Function "nestedArrow" {
+Module TypeId(11) => sync Function "nestedArrow" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(20)
+  returns: Module(0) TypeId(18)
 }
 
-Module TypeId(13) => sync Function "inObject" {
+Module TypeId(12) => sync Function "inObject" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(9)
+  returns: Module(0) TypeId(8)
 }
 
-Module TypeId(14) => Module(0) TypeId(5)
+Module TypeId(13) => Module(0) TypeId(5)
 
-Module TypeId(15) => Module(0) TypeId(6)
+Module TypeId(14) => Module(0) TypeId(18)
 
-Module TypeId(16) => Module(0) TypeId(2)
+Module TypeId(15) => Module(0) TypeId(2)
+
+Module TypeId(16) => Module(0) TypeId(10)
 
 Module TypeId(17) => Module(0) TypeId(11)
 
-Module TypeId(18) => Module(0) TypeId(12)
+Module TypeId(18) => Module(0) TypeId(20)
 
-Module TypeId(19) => Module(0) TypeId(13)
+Module TypeId(19) => Module(0) TypeId(12)
 
 Module TypeId(20) => value: foo
 

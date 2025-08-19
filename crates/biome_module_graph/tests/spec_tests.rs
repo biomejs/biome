@@ -480,7 +480,7 @@ fn test_resolve_exports() {
     );
 
     assert_eq!(
-        data.blanket_reexports.as_ref(),
+        data.blanket_reexports,
         &[JsReexport {
             import: JsImport {
                 specifier: "./reexports".into(),
@@ -1524,6 +1524,51 @@ fn test_resolve_react_types() {
         .expect("promise variable not found");
     let promise_ty = resolver.resolved_type_for_id(promise_id);
     assert!(promise_ty.is_promise_instance());
+}
+
+#[test]
+fn test_resolve_redis_commander_types() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/RedisCommander.d.ts".into(),
+        include_bytes!("./fixtures/RedisCommander_stripped.d.ts"),
+    );
+    fs.insert(
+        "/index.ts".into(),
+        r#"import RedisCommander from "./RedisCommander.d.ts";
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/RedisCommander.d.ts"),
+        BiomePath::new("/index.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    // We previously had an issue with `RedisCommander.d.ts` that caused types
+    // to be duplicated. We should look out in this snapshot that method
+    // signatures are registered only once per signature.
+    let redis_commander_module = module_graph
+        .module_info_for_path(Utf8Path::new("/RedisCommander.d.ts"))
+        .expect("module must exist");
+    let num_registered_signatures = redis_commander_module
+        .types()
+        .iter()
+        .filter(|ty| {
+            matches!(
+                ty,
+                TypeData::Function(function)
+                    if function
+                        .name
+                        .as_ref()
+                        .is_some_and(|name| *name == "zunionstore")
+            )
+        })
+        .count();
+    assert_eq!(num_registered_signatures, 24);
 }
 
 #[test]

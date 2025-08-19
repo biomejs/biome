@@ -556,6 +556,9 @@ pub struct NamedFunctionParameter {
 
     /// Whether the parameter is optional or not.
     pub is_optional: bool,
+
+    /// Whether this is a rest parameter (`...`) or not.
+    pub is_rest: bool,
 }
 
 /// A function parameter that is bound to either one or more positional
