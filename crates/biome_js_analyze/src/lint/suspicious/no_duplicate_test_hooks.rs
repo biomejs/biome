@@ -121,24 +121,8 @@ impl Visitor for DuplicateHooksVisitor {
                 };
 
                 // When the visitor enters a function node, push a new entry on the stack
-                if let Ok(callee) = node.callee() {
-                    if callee.contains_a_test_pattern() == Ok(true) {
-                        if let Some(function_name) = callee.get_callee_object_name()
-                            && function_name.text_trimmed() == "describe"
-                        {
-                            self.stack.push(HooksContext::default());
-                        }
-                    }
-                    // describe.each has a different syntax
-                    else if let AnyJsExpression::JsCallExpression(call_expression) = callee
-                        && let Ok(callee) = call_expression.callee()
-                        && matches!(
-                            callee.to_trimmed_text().text(),
-                            "describe.each" | "describe.only.each" | "fdescribe.each"
-                        )
-                    {
-                        self.stack.push(HooksContext::default());
-                    }
+                if DuplicateHooksVisitor::is_test_describe_call(&node) {
+                    self.stack.push(HooksContext::default());
                 }
 
                 if let Ok(AnyJsExpression::JsIdentifierExpression(identifier)) = node.callee() {
@@ -166,15 +150,39 @@ impl Visitor for DuplicateHooksVisitor {
                 // When the visitor exits a function, if it matches the node of the top-most
                 // entry of the stack and the `has_yield` flag is `false`, emit a query match
                 if let Some(node) = JsCallExpression::cast_ref(node)
-                    && let Ok(callee) = node.callee()
-                    && callee.contains_a_test_pattern() == Ok(true)
-                    && let Some(function_name) = callee.get_callee_object_name()
-                    && function_name.text_trimmed() == "describe"
+                    && DuplicateHooksVisitor::is_test_describe_call(&node)
                 {
                     self.stack.pop();
                 }
             }
         }
+    }
+}
+
+impl DuplicateHooksVisitor {
+    fn is_test_describe_call(node: &JsCallExpression) -> bool {
+        if let Ok(callee) = node.callee()
+            && node.is_test_call_expression() == Ok(true)
+        {
+            // describe.each has a nested call expression
+            let callee = if let AnyJsExpression::JsCallExpression(call_expression) = callee {
+                if let Ok(callee) = call_expression.callee() {
+                    callee
+                } else {
+                    return false;
+                }
+            } else {
+                callee
+            };
+
+            if let Some(function_name) = callee.get_callee_object_name()
+                && function_name.text_trimmed() == "describe"
+            {
+                return true;
+            }
+        }
+
+        false
     }
 }
 

@@ -690,111 +690,9 @@ impl JsTemplateExpression {
         self.is_test_each_pattern_callee() && self.is_test_each_pattern_elements()
     }
 
-    /// This function checks if a call expressions has one of the following members:
-    /// - `describe.each`
-    /// - `describe.only.each`
-    /// - `describe.skip.each`
-    /// - `test.concurrent.each`
-    /// - `test.concurrent.only.each`
-    /// - `test.concurrent.skip.each`
-    /// - `test.each`
-    /// - `test.only.each`
-    /// - `test.skip.each`
-    /// - `test.failing.each`
-    /// - `it.concurrent.each`
-    /// - `it.concurrent.only.each`
-    /// - `it.concurrent.skip.each`
-    /// - `it.each`
-    /// - `it.only.each`
-    /// - `it.skip.each`
-    /// - `it.failing.each`
-    ///
-    /// - `xdescribe.each`
-    /// - `xdescribe.only.each`
-    /// - `xdescribe.skip.each`
-    /// - `xtest.concurrent.each`
-    /// - `xtest.concurrent.only.each`
-    /// - `xtest.concurrent.skip.each`
-    /// - `xtest.each`
-    /// - `xtest.only.each`
-    /// - `xtest.skip.each`
-    /// - `xtest.failing.each`
-    /// - `xit.concurrent.each`
-    /// - `xit.concurrent.only.each`
-    /// - `xit.concurrent.skip.each`
-    /// - `xit.each`
-    /// - `xit.only.each`
-    /// - `xit.skip.each`
-    /// - `xit.failing.each`
-    ///
-    /// - `fdescribe.each`
-    /// - `fdescribe.only.each`
-    /// - `fdescribe.skip.each`
-    /// - `ftest.concurrent.each`
-    /// - `ftest.concurrent.only.each`
-    /// - `ftest.concurrent.skip.each`
-    /// - `ftest.each`
-    /// - `ftest.only.each`
-    /// - `ftest.skip.each`
-    /// - `ftest.failing.each`
-    /// - `fit.concurrent.each`
-    /// - `fit.concurrent.only.each`
-    /// - `fit.concurrent.skip.each`
-    /// - `fit.each`
-    /// - `fit.only.each`
-    /// - `fit.skip.each`
-    /// - `xit.failing.each`
-    ///
-    /// Based on this [article]
-    ///
-    /// [article]: https://craftinginterpreters.com/scanning-on-demand.html#tries-and-state-machines
     pub fn is_test_each_pattern_callee(&self) -> bool {
         if let Some(tag) = self.tag() {
-            let mut members = CalleeNamesIterator::new(tag);
-
-            let texts: [Option<TokenText>; 5] = [
-                members.next(),
-                members.next(),
-                members.next(),
-                members.next(),
-                members.next(),
-            ];
-
-            let mut rev = texts.iter().rev().flatten();
-
-            let first = rev.next().map(|t| t.text());
-            let second = rev.next().map(|t| t.text());
-            let third = rev.next().map(|t| t.text());
-            let fourth = rev.next().map(|t| t.text());
-            let fifth = rev.next().map(|t| t.text());
-
-            match first {
-                Some("describe" | "xdescribe" | "fdescribe") => match second {
-                    Some("each") => third.is_none(),
-                    Some("skip" | "only") => match third {
-                        Some("each") => fourth.is_none(),
-                        _ => false,
-                    },
-                    _ => false,
-                },
-                Some("test" | "xtest" | "ftest" | "it" | "xit" | "fit") => match second {
-                    Some("each") => third.is_none(),
-                    Some("skip" | "only" | "failing") => match third {
-                        Some("each") => fourth.is_none(),
-                        _ => false,
-                    },
-                    Some("concurrent") => match third {
-                        Some("each") => fourth.is_none(),
-                        Some("only" | "skip") => match fourth {
-                            Some("each") => fifth.is_none(),
-                            _ => false,
-                        },
-                        _ => false,
-                    },
-                    _ => false,
-                },
-                _ => false,
-            }
+            tag.contains_a_test_each_pattern()
         } else {
             false
         }
@@ -1060,7 +958,7 @@ impl AnyJsExpression {
     /// Based on this [article]
     ///
     /// [article]: https://craftinginterpreters.com/scanning-on-demand.html#tries-and-state-machines
-    pub fn contains_a_test_pattern(&self) -> SyntaxResult<bool> {
+    pub fn contains_a_test_pattern(&self) -> bool {
         let mut members = CalleeNamesIterator::new(self.clone());
 
         let texts: [Option<TokenText>; 5] = [
@@ -1079,7 +977,7 @@ impl AnyJsExpression {
         let fourth = rev.next().map(|t| t.text());
         let fifth = rev.next().map(|t| t.text());
 
-        Ok(match first {
+        match first {
             Some("it" | "describe" | "Deno") => match second {
                 None => true,
                 Some("only" | "skip" | "test") => third.is_none(),
@@ -1102,7 +1000,113 @@ impl AnyJsExpression {
             },
             Some("skip" | "xit" | "xdescribe" | "xtest" | "fit" | "fdescribe" | "ftest") => true,
             _ => false,
-        })
+        }
+    }
+
+    /// This function checks if a call expressions has one of the following members:
+    /// - `describe.each`
+    /// - `describe.only.each`
+    /// - `describe.skip.each`
+    /// - `test.concurrent.each`
+    /// - `test.concurrent.only.each`
+    /// - `test.concurrent.skip.each`
+    /// - `test.each`
+    /// - `test.only.each`
+    /// - `test.skip.each`
+    /// - `test.failing.each`
+    /// - `it.concurrent.each`
+    /// - `it.concurrent.only.each`
+    /// - `it.concurrent.skip.each`
+    /// - `it.each`
+    /// - `it.only.each`
+    /// - `it.skip.each`
+    /// - `it.failing.each`
+    ///
+    /// - `xdescribe.each`
+    /// - `xdescribe.only.each`
+    /// - `xdescribe.skip.each`
+    /// - `xtest.concurrent.each`
+    /// - `xtest.concurrent.only.each`
+    /// - `xtest.concurrent.skip.each`
+    /// - `xtest.each`
+    /// - `xtest.only.each`
+    /// - `xtest.skip.each`
+    /// - `xtest.failing.each`
+    /// - `xit.concurrent.each`
+    /// - `xit.concurrent.only.each`
+    /// - `xit.concurrent.skip.each`
+    /// - `xit.each`
+    /// - `xit.only.each`
+    /// - `xit.skip.each`
+    /// - `xit.failing.each`
+    ///
+    /// - `fdescribe.each`
+    /// - `fdescribe.only.each`
+    /// - `fdescribe.skip.each`
+    /// - `ftest.concurrent.each`
+    /// - `ftest.concurrent.only.each`
+    /// - `ftest.concurrent.skip.each`
+    /// - `ftest.each`
+    /// - `ftest.only.each`
+    /// - `ftest.skip.each`
+    /// - `ftest.failing.each`
+    /// - `fit.concurrent.each`
+    /// - `fit.concurrent.only.each`
+    /// - `fit.concurrent.skip.each`
+    /// - `fit.each`
+    /// - `fit.only.each`
+    /// - `fit.skip.each`
+    /// - `xit.failing.each`
+    ///
+    /// Based on this [article]
+    ///
+    /// [article]: https://craftinginterpreters.com/scanning-on-demand.html#tries-and-state-machines
+    pub fn contains_a_test_each_pattern(&self) -> bool {
+        let mut members = CalleeNamesIterator::new(self.clone());
+
+        let texts: [Option<TokenText>; 5] = [
+            members.next(),
+            members.next(),
+            members.next(),
+            members.next(),
+            members.next(),
+        ];
+
+        let mut rev = texts.iter().rev().flatten();
+
+        let first = rev.next().map(|t| t.text());
+        let second = rev.next().map(|t| t.text());
+        let third = rev.next().map(|t| t.text());
+        let fourth = rev.next().map(|t| t.text());
+        let fifth = rev.next().map(|t| t.text());
+
+        match first {
+            Some("describe" | "xdescribe" | "fdescribe") => match second {
+                Some("each") => third.is_none(),
+                Some("skip" | "only") => match third {
+                    Some("each") => fourth.is_none(),
+                    _ => false,
+                },
+                _ => false,
+            },
+            Some("test" | "xtest" | "ftest" | "it" | "xit" | "fit") => match second {
+                Some("each") => third.is_none(),
+                Some("skip" | "only" | "failing") => match third {
+                    Some("each") => fourth.is_none(),
+                    _ => false,
+                },
+                Some("concurrent") => match third {
+                    Some("each") => fourth.is_none(),
+                    Some("only" | "skip") => match fourth {
+                        Some("each") => fifth.is_none(),
+                        _ => false,
+                    },
+                    _ => false,
+                },
+                _ => false,
+            },
+            _ => false,
+        }
     }
 
     /// Checks whether the current function call is:
@@ -2066,7 +2070,9 @@ impl JsCallExpression {
             // it("description", ..)
             // it(Test.name, ..)
             (Some(Ok(AnyJsCallArgument::AnyJsExpression(_))), Some(Ok(second)), third)
-                if arguments.args().len() <= 3 && callee.contains_a_test_pattern()? =>
+                if arguments.args().len() <= 3
+                    && (callee.contains_a_test_pattern()
+                        || matches!(callee, AnyJsExpression::JsCallExpression(call_expression) if call_expression.callee()?.contains_a_test_each_pattern())) =>
             {
                 // it('name', callback, duration)
                 if !matches!(
@@ -2272,43 +2278,28 @@ mod test {
     #[test]
     fn matches_simple_call() {
         let call_expression = extract_call_expression("test();");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_a_test_pattern(),
-            Ok(true)
-        );
+        assert!(call_expression.callee().unwrap().contains_a_test_pattern());
 
         let call_expression = extract_call_expression("it();");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_a_test_pattern(),
-            Ok(true)
-        );
+        assert!(call_expression.callee().unwrap().contains_a_test_pattern());
     }
 
     #[test]
     fn matches_static_member_expression() {
         let call_expression = extract_call_expression("test.only();");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_a_test_pattern(),
-            Ok(true)
-        );
+        assert!(call_expression.callee().unwrap().contains_a_test_pattern());
     }
 
     #[test]
     fn matches_static_member_expression_deep() {
         let call_expression = extract_call_expression("test.describe.parallel.only();");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_a_test_pattern(),
-            Ok(true)
-        );
+        assert!(call_expression.callee().unwrap().contains_a_test_pattern());
     }
 
     #[test]
     fn doesnt_static_member_expression_deep() {
         let call_expression = extract_call_expression("test.describe.parallel.only.AHAHA();");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_a_test_pattern(),
-            Ok(false)
-        );
+        assert!(!call_expression.callee().unwrap().contains_a_test_pattern());
     }
 
     #[test]
@@ -2331,6 +2322,9 @@ mod test {
 
         let call_expression =
             extract_call_expression("describe.only(name = name || 'test', () => {});");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        let call_expression = extract_call_expression("describe.each([])(name, () => {});");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
     }
 
