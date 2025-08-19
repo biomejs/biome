@@ -84,6 +84,9 @@ impl TsConfigJson {
     ///
     /// `path` must be an absolute path to the `tsconfig.json` file itself.
     fn initialise_paths(&mut self, path: &Utf8Path) {
+        // Some tests that use UNIX paths are not recognised as absolute on
+        // Windows...
+        #[cfg(not(target_os = "windows"))]
         debug_assert!(path.is_absolute());
 
         self.root = true; // For now we only support root configs.
