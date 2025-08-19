@@ -37,11 +37,10 @@ const INDEX_D_TS_CASES: &[(&str, &[u8])] = &[
         "@next/font/google/index.d.ts",
         include_bytes!("./next_font_google.d.ts") as &[u8],
     ),
-    // FIXME: enable it once the perf reaches a decent number
-    // (
-    //     "RedisCommander.d.ts",
-    //     include_bytes!("./RedisCommander.d.ts") as &[u8],
-    // )
+    (
+        "RedisCommander.d.ts",
+        include_bytes!("./RedisCommander.d.ts") as &[u8],
+    ),
 ];
 
 fn index_d_ts_cases() -> impl Iterator<Item = &'static str> {

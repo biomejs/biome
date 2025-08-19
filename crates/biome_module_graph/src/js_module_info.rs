@@ -174,10 +174,10 @@ pub struct JsModuleInfoInner {
 
     /// Re-exports that apply to all symbols from another module, without
     /// assigning a name to them.
-    pub blanket_reexports: Box<[JsReexport]>,
+    pub blanket_reexports: Vec<JsReexport>,
 
     /// Collection of all the declarations in the module.
-    pub(crate) bindings: Box<[JsBindingData]>,
+    pub(crate) bindings: Vec<JsBindingData>,
 
     /// Parsed expressions, mapped from their range to their type ID.
     pub(crate) expressions: FxHashMap<TextRange, ResolvedTypeId>,
@@ -185,13 +185,17 @@ pub struct JsModuleInfoInner {
     /// All scopes in this module.
     ///
     /// The first entry is expected to be the global scope.
-    pub(crate) scopes: Box<[JsScopeData]>,
+    pub(crate) scopes: Vec<JsScopeData>,
 
     /// Lookup tree to find scopes by text range.
     pub(crate) scope_by_range: Lapper<u32, ScopeId>,
 
     /// Collection of all types in the module.
-    pub(crate) types: Box<[Arc<TypeData>]>,
+    ///
+    /// We do not store these using our `TypeStore`, because once the module
+    /// info is constructed, no new types can be registered in it, and we have
+    /// no use for a hash table anymore.
+    pub(crate) types: Vec<Arc<TypeData>>,
 }
 
 #[derive(Debug, Default)]
