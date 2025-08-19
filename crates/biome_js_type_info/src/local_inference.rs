@@ -1479,26 +1479,7 @@ impl FunctionParameter {
                 is_rest: false,
             }),
             AnyJsParameter::JsRestParameter(param) => {
-                let ty = param
-                    .type_annotation()
-                    .and_then(|annotation| annotation.ty().ok())
-                    .map(|ty| TypeData::from_any_ts_type(resolver, scope_id, &ty))
-                    .unwrap_or_default();
-                let bindings = param
-                    .binding()
-                    .ok()
-                    .and_then(|binding| {
-                        FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
-                            resolver, scope_id, &binding, &ty,
-                        )
-                    })
-                    .unwrap_or_default();
-                Self::Pattern(PatternFunctionParameter {
-                    ty: resolver.reference_to_owned_data(ty),
-                    bindings,
-                    is_optional: false,
-                    is_rest: true,
-                })
+                Self::from_js_rest_parameter(resolver, scope_id, param)
             }
             AnyJsParameter::TsThisParameter(param) => Self::Named(NamedFunctionParameter {
                 name: Text::new_static("this"),
