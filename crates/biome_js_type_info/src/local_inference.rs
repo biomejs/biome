@@ -1504,6 +1504,7 @@ impl FunctionParameter {
             scope_id,
             param.binding(),
             param.type_annotation(),
+            param.question_mark_token().is_some(),
             false,
         )
     }
@@ -1518,6 +1519,7 @@ impl FunctionParameter {
             scope_id,
             param.binding(),
             param.type_annotation(),
+            false,
             true,
         )
     }
@@ -1527,6 +1529,7 @@ impl FunctionParameter {
         scope_id: ScopeId,
         binding: SyntaxResult<AnyJsBindingPattern>,
         annotation: Option<TsTypeAnnotation>,
+        is_optional: bool,
         is_rest: bool,
     ) -> Self {
         let name = binding
@@ -1544,7 +1547,7 @@ impl FunctionParameter {
             Self::Named(NamedFunctionParameter {
                 name,
                 ty: resolver.reference_to_owned_data(ty),
-                is_optional: false,
+                is_optional,
                 is_rest,
             })
         } else {
@@ -1559,7 +1562,7 @@ impl FunctionParameter {
             Self::Pattern(PatternFunctionParameter {
                 bindings,
                 ty: resolver.reference_to_owned_data(ty),
-                is_optional: false,
+                is_optional,
                 is_rest,
             })
         }
