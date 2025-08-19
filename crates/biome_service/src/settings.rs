@@ -311,6 +311,8 @@ impl Settings {
 
     /// Returns whether the given `path` is ignored for the given `feature`,
     /// based on the current settings.
+    ///
+    /// `path` is expected to point to a file and not a directory.
     #[inline]
     pub fn is_path_ignored_for_feature(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
         let feature_includes_files = match feature {
@@ -321,7 +323,11 @@ impl Settings {
             FeatureKind::Debug => return false,
         };
 
-        !feature_includes_files.is_included(path)
+        if is_dir(path) {
+            !feature_includes_files.is_dir_included(path)
+        } else {
+            !feature_includes_files.is_file_included(path)
+        }
     }
 }
 
@@ -933,15 +939,22 @@ impl Includes {
         current_globs.extend(globs.into());
     }
 
-    /// Returns whether the given `path` is included.
+    /// Returns whether the given `file_path` is included.
+    ///
+    /// `file_path` must point to an ordinary file. If it is a directory, you
+    /// should use [Self::is_dir_included()] instead.
     #[inline]
-    pub fn is_included(&self, path: &Utf8Path) -> bool {
-        self.is_unset()
-            || if is_dir(path) {
-                self.matches_directory_with_exceptions(path)
-            } else {
-                self.matches_with_exceptions(path)
-            }
+    pub fn is_file_included(&self, file_path: &Utf8Path) -> bool {
+        self.is_unset() || self.matches_with_exceptions(file_path)
+    }
+
+    /// Returns whether the given `dir_path` is included.
+    ///
+    /// `file_path` must point to a directory. If it is a file, you should use
+    /// [Self::is_file_included()] instead.
+    #[inline]
+    pub fn is_dir_included(&self, dir_path: &Utf8Path) -> bool {
+        self.is_unset() || self.matches_directory_with_exceptions(dir_path)
     }
 
     /// Returns `true` is no globs are set.
