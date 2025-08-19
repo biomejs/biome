@@ -814,7 +814,12 @@ fn open_file<W: WorkspaceScannerBridge>(
         ctx.workspace
             .index_file(ctx.project_key, path.clone(), trigger)
     }) {
-        Ok(Ok(dependencies)) => dependencies,
+        Ok(Ok((dependencies, diagnostics))) => {
+            for diagnostic in diagnostics {
+                ctx.send_diagnostic(Diagnostic::new(diagnostic.with_file_path(path.as_str())));
+            }
+            dependencies
+        }
         Ok(Err(err)) => {
             let mut error: Error = err.into();
             if !path.is_config() && error.severity() == Severity::Error {

@@ -1,7 +1,7 @@
 use std::panic::RefUnwindSafe;
 
 use biome_fs::FileSystem;
-use biome_module_graph::ModuleDependencies;
+use biome_module_graph::{ModuleDependencies, ModuleDiagnostic};
 use camino::Utf8Path;
 
 use crate::{WorkspaceError, projects::ProjectKey, workspace::ServiceNotification};
@@ -45,7 +45,7 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
         trigger: IndexTrigger,
-    ) -> Result<ModuleDependencies, WorkspaceError>;
+    ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError>;
 
     /// Informs the workspace of the list of nested config files.
     ///

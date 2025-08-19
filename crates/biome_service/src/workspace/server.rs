@@ -20,7 +20,7 @@ use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with
 use biome_js_syntax::{AnyJsRoot, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
-use biome_module_graph::{ModuleDependencies, ModuleGraph};
+use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
@@ -416,9 +416,12 @@ impl WorkspaceServer {
 
         // Manifest files need to update the module graph
         if is_indexed && let Some(root) = syntax.and_then(Result::ok).map(AnyParse::into_root) {
-            let dependencies =
+            let (dependencies, diagnostics) =
                 self.update_service_data(&path, UpdateKind::AddedOrChanged(reason, root))?;
-            Ok(InternalOpenFileResult { dependencies })
+            Ok(InternalOpenFileResult {
+                dependencies,
+                diagnostics,
+            })
         } else {
             // If the document was never opened by the scanner, we don't care
             // about updating service data.
@@ -705,7 +708,7 @@ impl WorkspaceServer {
         &self,
         path: &BiomePath,
         update_kind: &UpdateKind,
-    ) -> ModuleDependencies {
+    ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         let (added_or_changed_paths, removed_paths) = match update_kind {
             UpdateKind::AddedOrChanged(_, root) => {
                 let Some(root) = SendNode::into_node(root.clone()).and_then(AnyJsRoot::cast) else {
@@ -734,13 +737,13 @@ impl WorkspaceServer {
         &self,
         path: &Utf8Path,
         update_kind: UpdateKind,
-    ) -> Result<ModuleDependencies, WorkspaceError> {
+    ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
         let path = BiomePath::from(path);
         if path.is_manifest() {
             self.update_project_layout(&path, &update_kind)?;
         }
 
-        let dependencies = self.update_module_graph_internal(&path, &update_kind);
+        let result = self.update_module_graph_internal(&path, &update_kind);
 
         match update_kind {
             UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan), _) => {
@@ -751,7 +754,7 @@ impl WorkspaceServer {
             }
         }
 
-        Ok(dependencies)
+        Ok(result)
     }
 }
 
@@ -1179,7 +1182,8 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(WorkspaceError::not_found)?;
 
         if self.is_indexed(&path) {
-            let dependencies = self.update_service_data(
+            // TODO: dump diagnostics somewhere
+            let (dependencies, _diagnostics) = self.update_service_data(
                 &path,
                 UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root),
             )?;
@@ -1669,7 +1673,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
         trigger: IndexTrigger,
-    ) -> Result<ModuleDependencies, WorkspaceError> {
+    ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
         self.open_file_internal(
             OpenFileReason::Index(trigger),
             OpenFileParams {
@@ -1680,7 +1684,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
                 persist_node_cache: false,
             },
         )
-        .map(|result| result.dependencies)
+        .map(|result| (result.dependencies, result.diagnostics))
     }
 
     fn update_project_config_files(
@@ -1842,6 +1846,9 @@ impl WorkspaceScannerBridge for WorkspaceServer {
 pub(super) struct InternalOpenFileResult {
     /// Dependencies we discovered of the opened file.
     pub dependencies: ModuleDependencies,
+
+    ///
+    pub diagnostics: Vec<ModuleDiagnostic>,
 }
 
 /// Reports the reason why a file is being opened/indexed.

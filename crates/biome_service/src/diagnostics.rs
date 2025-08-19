@@ -698,6 +698,7 @@ mod test {
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
+    use biome_module_graph::{JsModuleInfoDiagnostic, ModuleDiagnostic};
     use std::ffi::OsString;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
@@ -804,5 +805,13 @@ mod test {
             "non_utf8_path",
             Error::from(WorkspaceError::non_utf8_path(OsString::from("path.js"))),
         )
+    }
+
+    #[test]
+    fn module_diagnostic() {
+        let diagnostics =
+            ModuleDiagnostic::JsInfo(JsModuleInfoDiagnostic::exceeded_types_limit(200_000))
+                .with_file_path("example.js");
+        snap_diagnostic("module_diagnostic", diagnostics);
     }
 }

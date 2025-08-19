@@ -146,7 +146,7 @@ fn should_index_on_create_and_unload_on_delete() {
             .recv_timeout(Duration::from_secs(1))
             .expect("watcher should've sent notification");
 
-        sleep(Duration::from_millis(10)); // Give the hash set a moment to clean up.
+        sleep(Duration::from_millis(30)); // Give the hash set a moment to clean up.
 
         assert!(
             mock_bridge.indexed_files.is_empty(),

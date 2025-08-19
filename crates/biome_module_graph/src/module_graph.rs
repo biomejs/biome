@@ -20,7 +20,9 @@ use camino::{Utf8Path, Utf8PathBuf};
 use papaya::{HashMap, HashMapRef, LocalGuard};
 use rustc_hash::{FxBuildHasher, FxHashSet};
 
-use crate::{JsExport, JsModuleInfo, JsOwnExport, js_module_info::JsModuleVisitor};
+use crate::{
+    JsExport, JsModuleInfo, JsOwnExport, ModuleDiagnostic, js_module_info::JsModuleVisitor,
+};
 
 pub(crate) use fs_proxy::ModuleGraphFsProxy;
 
@@ -80,7 +82,7 @@ impl ModuleGraph {
         project_layout: &ProjectLayout,
         added_or_updated_paths: &[(&BiomePath, AnyJsRoot)],
         removed_paths: &[&BiomePath],
-    ) -> ModuleDependencies {
+    ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
         for (path, _) in added_or_updated_paths {
@@ -100,6 +102,7 @@ impl ModuleGraph {
 
         let fs_proxy = ModuleGraphFsProxy::new(fs, self, project_layout);
         let mut dependencies = ModuleDependencies::default();
+        let mut diagnostics = Vec::new();
 
         // Traverse all the added and updated paths and insert their module
         // info.
@@ -115,6 +118,10 @@ impl ModuleGraph {
                 }
             }
 
+            for diagnostic in module_info.as_diagnostics() {
+                diagnostics.push(diagnostic.clone());
+            }
+
             modules.insert(path.to_path_buf(), module_info);
         }
 
@@ -124,7 +131,7 @@ impl ModuleGraph {
             path_info.remove(removed_path.as_path());
         }
 
-        dependencies
+        (dependencies, diagnostics)
     }
 
     pub fn get_or_insert_path_info(
