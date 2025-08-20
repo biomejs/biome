@@ -1,0 +1,400 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: logicalOrNegationCases.js
+---
+# Input
+```js
+// negation patterns with logical OR
+
+// basic negation cases
+!foo || !foo.bar
+!foo || !foo.bar.baz
+!foo || !foo()
+!foo.bar || !foo.bar.baz
+!foo || !foo.bar || !foo.bar.baz
+!foo.bar || !foo.bar.baz || !foo.bar.baz.buzz
+
+// with element access
+!foo || !foo[bar]
+!foo || !foo[bar].baz
+!foo[bar] || !foo[bar].baz
+
+// with function calls
+!foo || !foo.bar()
+!foo.bar || !foo.bar()
+!foo || !foo.bar || !foo.bar.baz()
+
+// complex cases
+!foo || !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz
+!foo || !foo[bar] || !foo[bar].baz || !foo[bar].baz.buzz
+
+// should also handle parentheses
+!(foo) || !(foo.bar)
+!(foo) || !(foo).bar
+
+// mixed with other expressions (should still be handled)
+!foo || !foo.bar || someOtherCondition
+someCondition || !foo || !foo.bar
+
+// cases that should NOT be transformed
+!foo || !bar
+!foo.bar || !baz.bar
+foo || !foo.bar  // not both negated
+!foo || foo.bar  // not both negated
+```
+
+# Diagnostics
+```
+logicalOrNegationCases.js:4:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    3 │ // basic negation cases
+  > 4 │ !foo || !foo.bar
+      │ ^^^^^^^^^^^^^^^^
+    5 │ !foo || !foo.bar.baz
+    6 │ !foo || !foo()
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     2  2 │   
+     3  3 │   // basic negation cases
+     4    │ - !foo·||·!foo.bar
+        4 │ + !foo?.bar
+     5  5 │   !foo || !foo.bar.baz
+     6  6 │   !foo || !foo()
+  
+
+```
+
+```
+logicalOrNegationCases.js:5:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    3 │ // basic negation cases
+    4 │ !foo || !foo.bar
+  > 5 │ !foo || !foo.bar.baz
+      │ ^^^^^^^^^^^^^^^^^^^^
+    6 │ !foo || !foo()
+    7 │ !foo.bar || !foo.bar.baz
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     3  3 │   // basic negation cases
+     4  4 │   !foo || !foo.bar
+     5    │ - !foo·||·!foo.bar.baz
+        5 │ + !foo?.bar?.baz
+     6  6 │   !foo || !foo()
+     7  7 │   !foo.bar || !foo.bar.baz
+  
+
+```
+
+```
+logicalOrNegationCases.js:6:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    4 │ !foo || !foo.bar
+    5 │ !foo || !foo.bar.baz
+  > 6 │ !foo || !foo()
+      │ ^^^^^^^^^^^^^^
+    7 │ !foo.bar || !foo.bar.baz
+    8 │ !foo || !foo.bar || !foo.bar.baz
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     4  4 │   !foo || !foo.bar
+     5  5 │   !foo || !foo.bar.baz
+     6    │ - !foo·||·!foo()
+        6 │ + !foo?.()
+     7  7 │   !foo.bar || !foo.bar.baz
+     8  8 │   !foo || !foo.bar || !foo.bar.baz
+  
+
+```
+
+```
+logicalOrNegationCases.js:7:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    5 │ !foo || !foo.bar.baz
+    6 │ !foo || !foo()
+  > 7 │ !foo.bar || !foo.bar.baz
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ !foo || !foo.bar || !foo.bar.baz
+    9 │ !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     5  5 │   !foo || !foo.bar.baz
+     6  6 │   !foo || !foo()
+     7    │ - !foo.bar·||·!foo.bar.baz
+        7 │ + !foo?.bar?.baz
+     8  8 │   !foo || !foo.bar || !foo.bar.baz
+     9  9 │   !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz
+  
+
+```
+
+```
+logicalOrNegationCases.js:8:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+     6 │ !foo || !foo()
+     7 │ !foo.bar || !foo.bar.baz
+   > 8 │ !foo || !foo.bar || !foo.bar.baz
+       │ ^^^^^^^^^^^^^^^^
+     9 │ !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz
+    10 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     6  6 │   !foo || !foo()
+     7  7 │   !foo.bar || !foo.bar.baz
+     8    │ - !foo·||·!foo.bar·||·!foo.bar.baz
+        8 │ + !foo?.bar·||·!foo.bar.baz
+     9  9 │   !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz
+    10 10 │   
+  
+
+```
+
+```
+logicalOrNegationCases.js:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+     7 │ !foo.bar || !foo.bar.baz
+     8 │ !foo || !foo.bar || !foo.bar.baz
+   > 9 │ !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ // with element access
+  
+  i Unsafe fix: Change to an optional chain.
+  
+     7  7 │   !foo.bar || !foo.bar.baz
+     8  8 │   !foo || !foo.bar || !foo.bar.baz
+     9    │ - !foo.bar·||·!foo.bar.baz·||·!foo.bar.baz.buzz
+        9 │ + !foo?.bar?.baz·||·!foo.bar.baz.buzz
+    10 10 │   
+    11 11 │   // with element access
+  
+
+```
+
+```
+logicalOrNegationCases.js:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    11 │ // with element access
+  > 12 │ !foo || !foo[bar]
+       │ ^^^^^^^^^^^^^^^^^
+    13 │ !foo || !foo[bar].baz
+    14 │ !foo[bar] || !foo[bar].baz
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    10 10 │   
+    11 11 │   // with element access
+    12    │ - !foo·||·!foo[bar]
+       12 │ + !foo?.[bar]
+    13 13 │   !foo || !foo[bar].baz
+    14 14 │   !foo[bar] || !foo[bar].baz
+  
+
+```
+
+```
+logicalOrNegationCases.js:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    11 │ // with element access
+    12 │ !foo || !foo[bar]
+  > 13 │ !foo || !foo[bar].baz
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    14 │ !foo[bar] || !foo[bar].baz
+    15 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    11 11 │   // with element access
+    12 12 │   !foo || !foo[bar]
+    13    │ - !foo·||·!foo[bar].baz
+       13 │ + !foo?.[bar]?.baz
+    14 14 │   !foo[bar] || !foo[bar].baz
+    15 15 │   
+  
+
+```
+
+```
+logicalOrNegationCases.js:14:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    12 │ !foo || !foo[bar]
+    13 │ !foo || !foo[bar].baz
+  > 14 │ !foo[bar] || !foo[bar].baz
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // with function calls
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    12 12 │   !foo || !foo[bar]
+    13 13 │   !foo || !foo[bar].baz
+    14    │ - !foo[bar]·||·!foo[bar].baz
+       14 │ + !foo?.[bar]?.baz
+    15 15 │   
+    16 16 │   // with function calls
+  
+
+```
+
+```
+logicalOrNegationCases.js:17:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    16 │ // with function calls
+  > 17 │ !foo || !foo.bar()
+       │ ^^^^^^^^^^^^^^^^^^
+    18 │ !foo.bar || !foo.bar()
+    19 │ !foo || !foo.bar || !foo.bar.baz()
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    15 15 │   
+    16 16 │   // with function calls
+    17    │ - !foo·||·!foo.bar()
+       17 │ + !foo?.bar?.()
+    18 18 │   !foo.bar || !foo.bar()
+    19 19 │   !foo || !foo.bar || !foo.bar.baz()
+  
+
+```
+
+```
+logicalOrNegationCases.js:18:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    16 │ // with function calls
+    17 │ !foo || !foo.bar()
+  > 18 │ !foo.bar || !foo.bar()
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    19 │ !foo || !foo.bar || !foo.bar.baz()
+    20 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    16 16 │   // with function calls
+    17 17 │   !foo || !foo.bar()
+    18    │ - !foo.bar·||·!foo.bar()
+       18 │ + !foo?.bar?.()
+    19 19 │   !foo || !foo.bar || !foo.bar.baz()
+    20 20 │   
+  
+
+```
+
+```
+logicalOrNegationCases.js:19:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    17 │ !foo || !foo.bar()
+    18 │ !foo.bar || !foo.bar()
+  > 19 │ !foo || !foo.bar || !foo.bar.baz()
+       │ ^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ // complex cases
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    17 17 │   !foo || !foo.bar()
+    18 18 │   !foo.bar || !foo.bar()
+    19    │ - !foo·||·!foo.bar·||·!foo.bar.baz()
+       19 │ + !foo?.bar·||·!foo.bar.baz()
+    20 20 │   
+    21 21 │   // complex cases
+  
+
+```
+
+```
+logicalOrNegationCases.js:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    21 │ // complex cases
+  > 22 │ !foo || !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz
+       │ ^^^^^^^^^^^^^^^^
+    23 │ !foo || !foo[bar] || !foo[bar].baz || !foo[bar].baz.buzz
+    24 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    20 20 │   
+    21 21 │   // complex cases
+    22    │ - !foo·||·!foo.bar·||·!foo.bar.baz·||·!foo.bar.baz.buzz
+       22 │ + !foo?.bar·||·!foo.bar.baz·||·!foo.bar.baz.buzz
+    23 23 │   !foo || !foo[bar] || !foo[bar].baz || !foo[bar].baz.buzz
+    24 24 │   
+  
+
+```
+
+```
+logicalOrNegationCases.js:23:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    21 │ // complex cases
+    22 │ !foo || !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz
+  > 23 │ !foo || !foo[bar] || !foo[bar].baz || !foo[bar].baz.buzz
+       │ ^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ // should also handle parentheses
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    21 21 │   // complex cases
+    22 22 │   !foo || !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz
+    23    │ - !foo·||·!foo[bar]·||·!foo[bar].baz·||·!foo[bar].baz.buzz
+       23 │ + !foo?.[bar]·||·!foo[bar].baz·||·!foo[bar].baz.buzz
+    24 24 │   
+    25 25 │   // should also handle parentheses
+  
+
+```
+
+```
+logicalOrNegationCases.js:30:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    29 │ // mixed with other expressions (should still be handled)
+  > 30 │ !foo || !foo.bar || someOtherCondition
+       │ ^^^^^^^^^^^^^^^^
+    31 │ someCondition || !foo || !foo.bar
+    32 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    28 28 │   
+    29 29 │   // mixed with other expressions (should still be handled)
+    30    │ - !foo·||·!foo.bar·||·someOtherCondition
+       30 │ + !foo?.bar·||·someOtherCondition
+    31 31 │   someCondition || !foo || !foo.bar
+    32 32 │   
+  
+
+```

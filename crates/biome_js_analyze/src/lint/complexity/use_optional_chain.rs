@@ -5,7 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsLogicalExpression, JsLogicalOperator,
-    OperatorPrecedence, T,
+    JsUnaryOperator, OperatorPrecedence, T,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxResult};
 use biome_rule_options::use_optional_chain::UseOptionalChainOptions;
@@ -86,6 +86,7 @@ declare_lint_rule! {
 pub enum UseOptionalChainState {
     LogicalAnd(VecDeque<AnyJsExpression>),
     LogicalOrLike(LogicalOrLikeChain),
+    NegatedLogicalOr(VecDeque<AnyJsExpression>),
 }
 
 impl Rule for UseOptionalChain {
@@ -110,6 +111,18 @@ impl Rule for UseOptionalChain {
                 ))
             }
             JsLogicalOperator::NullishCoalescing | JsLogicalOperator::LogicalOr => {
+                // Check if this is a negated logical OR pattern (!foo || !foo.bar)
+                if let JsLogicalOperator::LogicalOr = operator {
+                    if let Some(negated_chain) = NegatedLogicalOrChain::from_expression(logical) {
+                        let optional_chain_expression_nodes =
+                            negated_chain.optional_chain_expression_nodes()?;
+                        return Some(UseOptionalChainState::NegatedLogicalOr(
+                            optional_chain_expression_nodes,
+                        ));
+                    }
+                }
+
+                // Otherwise check for the (foo || {}).bar pattern
                 let chain = LogicalOrLikeChain::from_expression(logical)?;
 
                 if chain.is_inside_another_chain() {
@@ -124,6 +137,7 @@ impl Rule for UseOptionalChain {
         let range = match state {
             UseOptionalChainState::LogicalAnd(_) => ctx.query().range(),
             UseOptionalChainState::LogicalOrLike(state) => state.member.range(),
+            UseOptionalChainState::NegatedLogicalOr(_) => ctx.query().range(),
         };
         Some(RuleDiagnostic::new(
             rule_category!(),
@@ -249,6 +263,82 @@ impl Rule for UseOptionalChain {
                 let (prev_member, new_member) = prev_chain?;
                 let mut mutation = ctx.root().begin();
                 mutation.replace_node(prev_member, new_member);
+                Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    ctx.metadata().applicability(),
+                    markup! { "Change to an optional chain." }.to_owned(),
+                    mutation,
+                ))
+            }
+            UseOptionalChainState::NegatedLogicalOr(optional_chain_expression_nodes) => {
+                // The NegatedLogicalOr pattern is simpler - we just need to make one access optional
+                // For !foo || !foo.bar, the optional_chain_expression_nodes contains [bar]
+                // For !foo.bar || !foo.bar.baz, it contains [baz]
+
+                let logical = ctx.query();
+                let right = logical.right().ok()?;
+
+                // The right side is !expr, we need to get the inner expr and make it optional
+                let right_unary = right.as_js_unary_expression()?;
+                let right_inner = right_unary.argument().ok()?;
+
+                // Apply the optional chain transformation
+                let mut chain_with_replacement = None;
+                for subject in optional_chain_expression_nodes {
+                    let updated_subject = chain_with_replacement
+                        .take()
+                        .and_then(|(prev_subject, prev_replacement)| {
+                            subject.clone().replace_node(prev_subject, prev_replacement)
+                        })
+                        .unwrap_or_else(|| subject.clone());
+
+                    let replacement = match updated_subject {
+                        AnyJsExpression::JsCallExpression(call_expression) => {
+                            let optional_chain_token = call_expression
+                                .optional_chain_token()
+                                .unwrap_or_else(|| make::token(T![?.]));
+                            call_expression
+                                .with_optional_chain_token(Some(optional_chain_token))
+                                .into()
+                        }
+                        AnyJsExpression::JsStaticMemberExpression(member_expression) => {
+                            let operator = member_expression.operator_token().ok()?;
+                            AnyJsExpression::from(make::js_static_member_expression(
+                                member_expression.object().ok()?,
+                                make::token(T![?.])
+                                    .with_leading_trivia_pieces(operator.leading_trivia().pieces())
+                                    .with_trailing_trivia_pieces(
+                                        operator.trailing_trivia().pieces(),
+                                    ),
+                                member_expression.member().ok()?,
+                            ))
+                        }
+                        AnyJsExpression::JsComputedMemberExpression(member_expression) => {
+                            let optional_chain_token = member_expression
+                                .optional_chain_token()
+                                .unwrap_or_else(|| make::token(T![?.]));
+                            member_expression
+                                .with_optional_chain_token(Some(optional_chain_token))
+                                .into()
+                        }
+                        _ => return None,
+                    };
+                    chain_with_replacement = Some((subject.clone(), replacement));
+                }
+
+                // Replace the part that needs to be optional in the right inner expression
+                let (chain, chain_replacement) = chain_with_replacement?;
+                let new_right_inner = right_inner
+                    .replace_node(chain, chain_replacement.clone())
+                    .unwrap_or(chain_replacement);
+
+                // Recreate the negation with the transformed expression
+                let new_right =
+                    make::js_unary_expression(make::token(T![!]), new_right_inner).into();
+
+                // Replace the entire logical expression with just the negated optional chain
+                let mut mutation = ctx.root().begin();
+                mutation.replace_node(AnyJsExpression::from(logical.clone()), new_right);
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
@@ -897,6 +987,84 @@ impl LogicalOrLikeChain {
             _ => return None,
         };
         Some(expression)
+    }
+}
+
+/// `NegatedLogicalOrChain` handles negated logical OR patterns:
+/// `!foo || !foo.bar` → `!foo?.bar`
+#[derive(Debug)]
+pub struct NegatedLogicalOrChain {
+    /// The member access that needs to be made optional
+    member_to_make_optional: AnyJsExpression,
+}
+
+impl NegatedLogicalOrChain {
+    fn from_expression(logical: &JsLogicalExpression) -> Option<Self> {
+        let left = logical.left().ok()?;
+        let right = logical.right().ok()?;
+
+        let left_unary = left.as_js_unary_expression()?;
+        let right_unary = right.as_js_unary_expression()?;
+
+        if !matches!(left_unary.operator().ok()?, JsUnaryOperator::LogicalNot)
+            || !matches!(right_unary.operator().ok()?, JsUnaryOperator::LogicalNot)
+        {
+            return None;
+        }
+
+        let left_inner = left_unary.argument().ok()?;
+        let right_inner = right_unary.argument().ok()?;
+
+        // Check if right_inner starts with left_inner as a prefix
+        // For !foo || !foo.bar, left_inner is 'foo' and right_inner is 'foo.bar'
+        let member_to_make_optional = Self::find_first_differing_member(&left_inner, &right_inner)?;
+
+        Some(Self {
+            member_to_make_optional,
+        })
+    }
+
+    /// Find the first member access in `right` that differs from `left`
+    /// For example: left=foo, right=foo.bar.baz returns Some(bar from foo.bar)
+    fn find_first_differing_member(
+        left: &AnyJsExpression,
+        right: &AnyJsExpression,
+    ) -> Option<AnyJsExpression> {
+        // Build the chain for the right expression to find where it differs from left
+        let mut current = right.clone();
+        let mut chain = Vec::new();
+
+        // Traverse up the member access chain
+        loop {
+            match &current {
+                AnyJsExpression::JsStaticMemberExpression(expr) => {
+                    chain.push(current.clone());
+                    current = expr.object().ok()?;
+                }
+                AnyJsExpression::JsComputedMemberExpression(expr) => {
+                    chain.push(current.clone());
+                    current = expr.object().ok()?;
+                }
+                AnyJsExpression::JsCallExpression(expr) => {
+                    chain.push(current.clone());
+                    current = expr.callee().ok()?;
+                }
+                _ => {
+                    // We've reached the base - check if it matches left
+                    if current.to_trimmed_text() == left.to_trimmed_text() {
+                        // Return the last (outermost) member access that extends beyond left
+                        return chain.into_iter().last();
+                    }
+                    return None;
+                }
+            }
+        }
+    }
+
+    fn optional_chain_expression_nodes(self) -> Option<VecDeque<AnyJsExpression>> {
+        let mut result = VecDeque::new();
+        result.push_back(self.member_to_make_optional);
+        Some(result)
     }
 }
 
