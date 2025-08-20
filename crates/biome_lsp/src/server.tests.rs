@@ -13,8 +13,9 @@ use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_service::Watcher;
 use biome_service::workspace::{
     FileContent, GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams, OpenProjectResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams, ScanProjectResult,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult, OpenProjectParams,
+    OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams,
+    ScanProjectResult,
 };
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{Sender, channel};
@@ -3439,7 +3440,7 @@ export function bar() {
         .expect("scan_project returned an error");
     assert_eq!(result.diagnostics.len(), 0);
 
-    let _: () = server
+    let _: OpenFileResult = server
         .request(
             "biome/open_file",
             "open_file",
@@ -3649,7 +3650,7 @@ export function bar() {
         .expect("scan_project returned an error");
     assert_eq!(result.diagnostics.len(), 0);
 
-    let _: () = server
+    let _: OpenFileResult = server
         .request(
             "biome/open_file",
             "open_file",

@@ -28,7 +28,7 @@ gen-all:
 # Generates TypeScript types and JSON schema of the configuration
 gen-bindings:
   cargo codegen-schema
-  jsut gen-types
+  just gen-types
 
 gen-types:
   cargo run -p xtask_codegen --features schema -- bindings
