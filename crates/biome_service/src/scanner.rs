@@ -634,7 +634,7 @@ impl DiagnosticsCollector {
             diagnostic_level: if verbose {
                 Severity::Hint
             } else {
-                Severity::Warning
+                Severity::Error
             },
         }
     }
