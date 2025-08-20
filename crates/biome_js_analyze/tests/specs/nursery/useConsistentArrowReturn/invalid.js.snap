@@ -5,10 +5,6 @@ expression: invalid.js
 ---
 # Input
 ```js
-function foo() {
-    return 0;
-}
-
 const returnsObjectArrow = () => {
     return { a: 1, b: 2 };
 }
@@ -17,38 +13,18 @@ const returnsObjectArrow = () => {
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/useConsistentArrowReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:28 lint/nursery/useConsistentArrowReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This function can be written as an arrow function.
+  i This arrow function doesn't need a return statement.
   
-  > 1 │ function foo() {
-      │ ^^^^^^^^^^^^^^^^
-  > 2 │     return 0;
+  > 1 │ const returnsObjectArrow = () => {
+      │                            ^^^^^^^
+  > 2 │     return { a: 1, b: 2 };
   > 3 │ }
       │ ^
     4 │ 
-    5 │ const returnsObjectArrow = () => {
   
-  i Consider using an arrow function here.
-  
-
-```
-
-```
-invalid.js:5:28 lint/nursery/useConsistentArrowReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This function can be written as an arrow function.
-  
-    3 │ }
-    4 │ 
-  > 5 │ const returnsObjectArrow = () => {
-      │                            ^^^^^^^
-  > 6 │     return { a: 1, b: 2 };
-  > 7 │ }
-      │ ^
-    8 │ 
-  
-  i Consider using an arrow function here.
+  i Consider changing the function body into the returned expression.
   
 
 ```

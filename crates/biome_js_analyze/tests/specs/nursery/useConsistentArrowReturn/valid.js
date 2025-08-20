@@ -23,6 +23,10 @@ function noReturn() {
     // I do nothing
 }
 
+function foo() {
+    return 0;
+}
+
 const noReturnArrow = () => {};
 
 function conditionalReturn(a) {
