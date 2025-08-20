@@ -270,18 +270,17 @@ impl TypeData {
                         // No point in adding `never` to the union.
                         continue;
                     }
-                    Self::Union(union) => {
+                    Self::Union(_) => {
                         // Flatten existing union into the new one:
-                        for ty in union.types() {
-                            let ty = resolved.apply_module_id_to_reference(ty);
+                        for ty in resolved.flattened_union_variants(resolver) {
                             let entry = table.entry(
                                 hash_reference(&ty),
-                                |i| &vec[*i] == ty.as_ref(),
+                                |i| vec[*i] == ty,
                                 |i| hash_reference(&vec[*i]),
                             );
                             if let Entry::Vacant(entry) = entry {
                                 let index = vec.len();
-                                vec.push(ty.into_owned());
+                                vec.push(ty);
                                 entry.insert(index);
                             }
                         }

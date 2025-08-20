@@ -2,13 +2,13 @@ use std::hash::{Hash, Hasher};
 
 use biome_rowan::Text;
 use hashbrown::{HashTable, hash_table::Entry};
-use rustc_hash::{FxHashSet, FxHasher};
+use rustc_hash::FxHasher;
 
 use crate::{
     CallArgumentType, DestructureField, Function, FunctionParameter, Literal, MAX_FLATTEN_DEPTH,
     Resolvable, ResolvedTypeData, ResolvedTypeMember, ResolverId, TypeData, TypeMember,
     TypeReference, TypeResolver, TypeofCallExpression, TypeofExpression,
-    TypeofStaticMemberExpression, Union,
+    TypeofStaticMemberExpression,
     conditionals::{
         ConditionalType, reference_to_falsy_subset_of, reference_to_non_nullish_subset_of,
         reference_to_truthy_subset_of,
@@ -332,7 +332,8 @@ pub(super) fn flattened_expression(
                 }
 
                 TypeData::Union(_) => {
-                    let types: Vec<_> = union_variants(object, resolver)
+                    let types: Vec<_> = object
+                        .flattened_union_variants(resolver)
                         .filter(|variant| *variant != GLOBAL_UNDEFINED_ID.into())
                         .collect();
                     let types = types
@@ -603,73 +604,5 @@ fn flattened_typeof_data(resolved: ResolvedTypeData) -> TypeData {
         TypeData::Symbol => TypeData::reference(GLOBAL_SYMBOL_STRING_LITERAL_ID),
         TypeData::Undefined => TypeData::reference(GLOBAL_UNDEFINED_STRING_LITERAL_ID),
         _ => TypeData::reference(GLOBAL_TYPEOF_OPERATOR_RETURN_UNION_ID),
-    }
-}
-
-/// Returns an iterator over the variants of `union`, while deduplicating
-/// variants and flattening nested unions in the process.
-fn union_variants(
-    union: ResolvedTypeData,
-    resolver: &dyn TypeResolver,
-) -> impl Iterator<Item = TypeReference> {
-    if let TypeData::Union(union) = union.to_data() {
-        UnionVariantIterator::new(*union, resolver)
-    } else {
-        UnionVariantIterator::new_empty(resolver)
-    }
-}
-
-struct UnionVariantIterator<'a> {
-    resolver: &'a dyn TypeResolver,
-    unions: Vec<Vec<TypeReference>>,
-    previous_references: FxHashSet<TypeReference>,
-}
-
-impl<'a> UnionVariantIterator<'a> {
-    fn new(union: Union, resolver: &'a dyn TypeResolver) -> Self {
-        Self {
-            resolver,
-            unions: vec![union.types().to_vec()],
-            previous_references: Default::default(),
-        }
-    }
-
-    fn new_empty(resolver: &'a dyn TypeResolver) -> Self {
-        Self {
-            resolver,
-            unions: Vec::new(),
-            previous_references: Default::default(),
-        }
-    }
-}
-
-impl<'a> Iterator for UnionVariantIterator<'a> {
-    type Item = TypeReference;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let mut union = self.unions.last_mut()?;
-        loop {
-            let reference = match union.pop() {
-                Some(reference) => reference,
-                None => {
-                    self.unions.pop();
-                    union = self.unions.last_mut()?;
-                    continue;
-                }
-            };
-
-            if self.previous_references.insert(reference.clone()) {
-                if let Some(ty) = self.resolver.resolve_and_get(&reference)
-                    && ty.is_union()
-                    && let TypeData::Union(nested) = ty.to_data()
-                {
-                    self.unions.push(nested.types().to_vec());
-                    union = self.unions.last_mut()?;
-                    continue;
-                }
-
-                return Some(reference);
-            }
-        }
     }
 }

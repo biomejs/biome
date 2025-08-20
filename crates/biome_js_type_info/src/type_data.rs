@@ -1479,6 +1479,10 @@ impl Union {
         self.0.contains(ty)
     }
 
+    pub fn into_types(self) -> Vec<TypeReference> {
+        self.0.into_vec()
+    }
+
     pub fn types(&self) -> &[TypeReference] {
         &self.0
     }
