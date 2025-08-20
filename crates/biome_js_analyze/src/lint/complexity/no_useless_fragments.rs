@@ -314,14 +314,14 @@ impl Rule for NoUselessFragments {
                         // This works since the expected JS syntax kinds based on the AST would be:
                         // JSX_TEXT = JSX_CHILD_LIST => (JSX_FRAGMENT || JSX_ELEMENT) => JSX_CHILD_LIST => (JSX_FRAGMENT || JSX_ELEMENT)
                         if let AnyJsxChild::JsxText(text) = &first {
-                            let great_grand_parent =
+                            let great_great_grand_parent =
                                 text.syntax().grand_parent()?.grand_parent()?;
 
-                            let is_valid_fragment = match great_grand_parent.kind() {
+                            let is_valid_fragment = match great_great_grand_parent.kind() {
                                 JsSyntaxKind::JSX_FRAGMENT => true,
                                 JsSyntaxKind::JSX_ELEMENT => {
                                     if let Some(element) =
-                                        JsxElement::cast(great_grand_parent.clone())
+                                        JsxElement::cast(great_great_grand_parent.clone())
                                     {
                                         let opening_element = element.opening_element().ok()?;
                                         let is_valid_react_fragment =
