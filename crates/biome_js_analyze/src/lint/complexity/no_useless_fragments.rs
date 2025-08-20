@@ -310,7 +310,7 @@ impl Rule for NoUselessFragments {
                             Some(NoUselessFragmentsState::Child(first))
                         }
                     } else {
-                        // Do not report the fragment if its great great grandparent SyntaxNode is a valid React fragment.
+                        // Do not report the fragment unless its great great grandparent SyntaxNode is a valid React fragment.
                         // This works since the expected JS syntax kinds based on the AST would be:
                         // JSX_TEXT = JSX_CHILD_LIST => (JSX_FRAGMENT || JSX_ELEMENT) => JSX_CHILD_LIST => (JSX_FRAGMENT || JSX_ELEMENT)
                         if let AnyJsxChild::JsxText(text) = &first {
