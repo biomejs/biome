@@ -16,41 +16,15 @@ expression: snapshot
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssBogusRule {
-            items: [
-                AT@0..1 "@" [] [],
-            ],
-        },
-        CssQualifiedRule {
-            prelude: CssSelectorList [
-                CssComplexSelector {
-                    left: CssCompoundSelector {
-                        nesting_selectors: CssNestedSelectorList [],
-                        simple_selector: CssTypeSelector {
-                            namespace: missing (optional),
-                            ident: CssIdentifier {
-                                value_token: IDENT@1..7 "source" [] [],
-                            },
-                        },
-                        sub_selectors: CssSubSelectorList [],
-                    },
-                    combinator: CSS_SPACE_LITERAL@7..8 " " [] [],
-                    right: missing (required),
-                },
-                missing separator,
-                CssBogusSelector {
-                    items: [
-                        CSS_STRING_LITERAL@8..44 "\"../node_modules/@my-company/ui-lib\"" [] [],
-                    ],
-                },
-            ],
-            block: CssBogusBlock {
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
                 items: [
-                    CssDeclarationOrRuleList [
-                        CssEmptyDeclaration {
-                            semicolon_token: SEMICOLON@44..45 ";" [] [],
-                        },
-                    ],
+                    SOURCE_KW@1..8 "source" [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@8..44 "\"../node_modules/@my-company/ui-lib\"" [] [],
+                    },
+                    SEMICOLON@44..45 ";" [] [],
                 ],
             },
         },
@@ -65,27 +39,13 @@ CssRoot {
 0: CSS_ROOT@0..46
   0: (empty)
   1: CSS_RULE_LIST@0..45
-    0: CSS_BOGUS_RULE@0..1
+    0: CSS_AT_RULE@0..45
       0: AT@0..1 "@" [] []
-    1: CSS_QUALIFIED_RULE@1..45
-      0: CSS_SELECTOR_LIST@1..44
-        0: CSS_COMPLEX_SELECTOR@1..8
-          0: CSS_COMPOUND_SELECTOR@1..7
-            0: CSS_NESTED_SELECTOR_LIST@1..1
-            1: CSS_TYPE_SELECTOR@1..7
-              0: (empty)
-              1: CSS_IDENTIFIER@1..7
-                0: IDENT@1..7 "source" [] []
-            2: CSS_SUB_SELECTOR_LIST@7..7
-          1: CSS_SPACE_LITERAL@7..8 " " [] []
-          2: (empty)
-        1: (empty)
-        2: CSS_BOGUS_SELECTOR@8..44
+      1: CSS_BOGUS_AT_RULE@1..45
+        0: SOURCE_KW@1..8 "source" [] [Whitespace(" ")]
+        1: CSS_STRING@8..44
           0: CSS_STRING_LITERAL@8..44 "\"../node_modules/@my-company/ui-lib\"" [] []
-      1: CSS_BOGUS_BLOCK@44..45
-        0: CSS_DECLARATION_OR_RULE_LIST@44..45
-          0: CSS_EMPTY_DECLARATION@44..45
-            0: SEMICOLON@44..45 ";" [] []
+        2: SEMICOLON@44..45 ";" [] []
   2: EOF@45..46 "" [Newline("\n")] []
 
 ```
@@ -95,69 +55,12 @@ CssRoot {
 ```
 source.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected value or character.
+  × Tailwind-specific syntax is disabled.
   
   > 1 │ @source "../node_modules/@my-company/ui-lib";
-      │  ^^^^^^
+      │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
   
-  i Expected one of:
-  
-  - charset
-  - color-profile
-  - container
-  - counter-style
-  - document
-  - font-face
-  - font-feature-values
-  - font-palette-values
-  - import
-  - keyframes
-  - layer
-  - media
-  - namespace
-  - page
-  - property
-  - supports
-  - viewport
-  - scope
-  
-source.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '"../node_modules/@my-company/ui-lib"'.
-  
-  > 1 │ @source "../node_modules/@my-company/ui-lib";
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
-  
-  i Expected a compound selector here.
-  
-  > 1 │ @source "../node_modules/@my-company/ui-lib";
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
-  
-source.css:1:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `;`
-  
-  > 1 │ @source "../node_modules/@my-company/ui-lib";
-      │                                             ^
-    2 │ 
-  
-  i Remove ;
-  
-source.css:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `}` but instead the file ends
-  
-    1 │ @source "../node_modules/@my-company/ui-lib";
-  > 2 │ 
-      │ 
-  
-  i the file ends here
-  
-    1 │ @source "../node_modules/@my-company/ui-lib";
-  > 2 │ 
-      │ 
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
   
 ```

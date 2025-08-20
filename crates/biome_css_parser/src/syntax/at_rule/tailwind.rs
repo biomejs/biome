@@ -213,7 +213,7 @@ pub(crate) fn parse_plugin_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
 // @source "../node_modules/@my-company/ui-lib";
 pub(crate) fn parse_source_at_rule(p: &mut CssParser) -> ParsedSyntax {
-    if !p.options().is_tailwind_directives_enabled() || !p.at(T![source]) {
+    if !p.at(T![source]) {
         return Absent;
     }
 

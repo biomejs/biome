@@ -593,7 +593,7 @@ impl ParseNodeList for BracketedValueList {
                 |p| {
                     let m = p.start();
                     p.bump_remap(T![ident]);
-                    return Present(m.complete(p, CSS_CUSTOM_IDENTIFIER));
+                    Present(m.complete(p, CSS_CUSTOM_IDENTIFIER))
                 },
                 |p, m| tailwind_disabled(p, m.range(p)),
             );
