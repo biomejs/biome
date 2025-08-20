@@ -3,7 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::block::{
     parse_declaration_block, parse_declaration_or_rule_list_block, parse_rule_block,
 };
-use crate::syntax::parse_error::{expected_identifier, expected_string};
+use crate::syntax::parse_error::{expected_identifier, expected_selector, expected_string};
 use crate::syntax::selector::parse_selector;
 use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::{self, *};
@@ -133,7 +133,7 @@ fn parse_custom_variant_shorthand(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['(']);
-    parse_selector(p).ok();
+    parse_selector(p).or_add_diagnostic(p, expected_selector);
     p.expect(T![')']);
     p.expect(T![;]);
 
@@ -166,7 +166,7 @@ impl ParseNodeList for ApplyClassList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![;]) || p.at(EOF)
+        p.at(T![;])
     }
 
     fn recover(
