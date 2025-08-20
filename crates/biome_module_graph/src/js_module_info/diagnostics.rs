@@ -2,67 +2,12 @@ use crate::js_module_info::utils::MAX_NUM_TYPES;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{
-    Category, Diagnostic, DiagnosticTags, Location, LogCategory, Severity, Visit, category,
+    Category, Diagnostic, DiagnosticTags, LogCategory, Severity, Visit, category,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Diagnostic)]
 pub enum JsModuleInfoDiagnostic {
     ExceededTypesLimit(ExceededTypesLimitDiagnostic),
-}
-
-impl Diagnostic for JsModuleInfoDiagnostic {
-    fn severity(&self) -> Severity {
-        match self {
-            Self::ExceededTypesLimit(d) => d.severity(),
-        }
-    }
-    fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
-        match self {
-            Self::ExceededTypesLimit(d) => d.message(fmt),
-        }
-    }
-
-    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::ExceededTypesLimit(d) => d.description(fmt),
-        }
-    }
-
-    fn source(&self) -> Option<&dyn Diagnostic> {
-        match self {
-            Self::ExceededTypesLimit(d) => d.source(),
-        }
-    }
-
-    fn location(&self) -> Location<'_> {
-        match self {
-            Self::ExceededTypesLimit(d) => d.location(),
-        }
-    }
-
-    fn tags(&self) -> DiagnosticTags {
-        match self {
-            Self::ExceededTypesLimit(d) => d.tags(),
-        }
-    }
-
-    fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
-        match self {
-            Self::ExceededTypesLimit(d) => d.advices(visitor),
-        }
-    }
-
-    fn category(&self) -> Option<&'static Category> {
-        match self {
-            Self::ExceededTypesLimit(d) => d.category(),
-        }
-    }
-
-    fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
-        match self {
-            Self::ExceededTypesLimit(d) => d.verbose_advices(visitor),
-        }
-    }
 }
 
 impl JsModuleInfoDiagnostic {
@@ -83,9 +28,23 @@ impl Diagnostic for ExceededTypesLimitDiagnostic {
         Some(category!("project"))
     }
 
+    fn tags(&self) -> DiagnosticTags {
+        DiagnosticTags::INTERNAL
+    }
+
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
+        // format with a thousand separators for readability:
+        let num = MAX_NUM_TYPES
+            .to_string()
+            .as_bytes()
+            .rchunks(3)
+            .rev()
+            .map(|bytes| std::str::from_utf8(bytes).unwrap())
+            .collect::<Vec<_>>()
+            .join(",");
+
         fmt.write_markup(markup! {
-            "Biome encountered an unusually large amount of types which exceeded the limit of "{MAX_NUM_TYPES}"."
+            "Biome encountered an unusually large amount of types which exceeded the limit of "{num}"."
         })?;
 
         fmt.write_str("\n\n")?;
@@ -123,7 +82,7 @@ impl Diagnostic for ExceededTypesLimitDiagnostic {
         visitor.record_list(&[
             &"source code of the file;",
             &"how the file is imported in the project (by a test file, a dependency, etc.);",
-            &"how the file/folder is excluded.",
+            &"if and how the file/folder is excluded.",
         ])?;
         visitor.record_log(
             LogCategory::Warn,

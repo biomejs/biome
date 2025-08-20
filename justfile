@@ -28,7 +28,11 @@ gen-all:
 # Generates TypeScript types and JSON schema of the configuration
 gen-bindings:
   cargo codegen-schema
+  jsut gen-types
+
+gen-types:
   cargo run -p xtask_codegen --features schema -- bindings
+
 
 # Generates code generated files for the linter
 gen-analyzer:

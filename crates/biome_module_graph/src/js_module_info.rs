@@ -50,7 +50,7 @@ impl JsModuleInfo {
         }
     }
 
-    pub fn as_diagnostics(&self) -> &[ModuleDiagnostic] {
+    pub fn diagnostics(&self) -> &[ModuleDiagnostic] {
         self.diagnostics.as_slice()
     }
 

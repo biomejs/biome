@@ -1,6 +1,6 @@
 use crate::js_module_info::JsModuleInfoDiagnostic;
 
-pub(crate) const MAX_NUM_TYPES: usize = 100_000;
+pub(crate) const MAX_NUM_TYPES: usize = 10;
 
 /// Checks the given `num_types` against a threshold and returns a diagnostic
 /// if the threshold is exceeded.

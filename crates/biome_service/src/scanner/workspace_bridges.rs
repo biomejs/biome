@@ -86,7 +86,7 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
 
     /// Unloads the index of the file with the given `path` within the
     /// workspace.
-    fn unload_file(&self, path: &Utf8Path) -> Result<(), WorkspaceError>;
+    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Unloads the given `path` from the workspace index.
     ///
@@ -97,7 +97,7 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     ///
     /// If you already know the path is a file, you should use
     /// [`WorkspaceWatcherBridge::unload_file()`] directly instead.
-    fn unload_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError>;
+    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
 }
 
 /// Trait used to give access to workspace functionality required by the
@@ -133,7 +133,7 @@ pub(crate) trait WorkspaceWatcherBridge {
         &self,
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
-    ) -> Result<(), WorkspaceError>;
+    ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Scans and watches the folder with the given `path` within the project
     /// with the given `project_key` in the workspace, while indexing all the
@@ -141,7 +141,7 @@ pub(crate) trait WorkspaceWatcherBridge {
     ///
     /// If relevant to the given `scan_kind`, dependencies of the files in the
     /// folder are indexed as well.
-    fn index_folder(&self, path: &Utf8Path) -> Result<(), WorkspaceError>;
+    fn index_folder(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Informs the workspace the given folder is watched.
     ///
@@ -157,7 +157,7 @@ pub(crate) trait WorkspaceWatcherBridge {
 
     /// Unloads the index of the file with the given `path` within the
     /// workspace.
-    fn unload_file(&self, path: &Utf8Path) -> Result<(), WorkspaceError>;
+    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Unloads the given `path` from the workspace index.
     ///
@@ -168,7 +168,7 @@ pub(crate) trait WorkspaceWatcherBridge {
     ///
     /// If you already know the path is a file, you should use
     /// [`WorkspaceWatcherBridge::unload_file()`] directly instead.
-    fn unload_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError>;
+    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Notifies service notification listeners that the watcher has stopped.
     fn notify_stopped(&self);
@@ -239,16 +239,21 @@ where
         &self,
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.workspace
             .index_file(project_key, path, IndexTrigger::Update)
-            .map(|_| ())
+            .map(|(_, diagnostics)| {
+                diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect::<Vec<_>>()
+            })
     }
 
     #[inline]
-    fn index_folder(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn index_folder(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let Some(project_key) = self.find_project_for_path(path) else {
-            return Ok(()); // file events outside our projects can be safely ignored.
+            return Ok(vec![]); // file events outside our projects can be safely ignored.
         };
 
         self.scanner.index_folder(self.workspace, project_key, path)
@@ -265,12 +270,12 @@ where
     }
 
     #[inline]
-    fn unload_file(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.workspace.unload_file(path)
     }
 
     #[inline]
-    fn unload_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.workspace.unload_path(path)
     }
 

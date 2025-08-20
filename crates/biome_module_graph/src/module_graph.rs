@@ -118,7 +118,7 @@ impl ModuleGraph {
                 }
             }
 
-            for diagnostic in module_info.as_diagnostics() {
+            for diagnostic in module_info.diagnostics() {
                 diagnostics.push(diagnostic.clone());
             }
 

@@ -418,6 +418,7 @@ impl WorkspaceServer {
         if is_indexed && let Some(root) = syntax.and_then(Result::ok).map(AnyParse::into_root) {
             let (dependencies, diagnostics) =
                 self.update_service_data(&path, UpdateKind::AddedOrChanged(reason, root))?;
+
             Ok(InternalOpenFileResult {
                 dependencies,
                 diagnostics,
@@ -782,6 +783,7 @@ impl Workspace for WorkspaceServer {
             verbose,
         }: ScanProjectParams,
     ) -> Result<ScanProjectResult, WorkspaceError> {
+        let mut diagnostics = Vec::new();
         if scan_kind.is_none() {
             let path = self
                 .projects
@@ -791,10 +793,16 @@ impl Workspace for WorkspaceServer {
             let manifest = path.join("package.json");
             if self.fs.path_exists(&manifest) {
                 let trigger = IndexTrigger::InitialScan;
-                self.index_file(project_key, manifest.clone(), trigger)?;
+                let (_, _diagnostics) = self.index_file(project_key, manifest.clone(), trigger)?;
+                diagnostics.extend(
+                    _diagnostics
+                        .into_iter()
+                        .map(biome_diagnostics::serde::Diagnostic::new)
+                        .collect::<Vec<_>>(),
+                );
             }
             return Ok(ScanProjectResult {
-                diagnostics: Vec::new(),
+                diagnostics,
                 duration: Duration::from_millis(0),
                 configuration_files: vec![],
             });
@@ -807,7 +815,13 @@ impl Workspace for WorkspaceServer {
             watch,
         };
 
-        self.scanner.index_project(self, project_key, scan_options)
+        let mut result = self
+            .scanner
+            .index_project(self, project_key, scan_options)?;
+
+        result.diagnostics.extend(diagnostics);
+
+        Ok(result)
     }
 
     /// Updates the global settings for this workspace.
@@ -950,9 +964,17 @@ impl Workspace for WorkspaceServer {
         Ok(())
     }
 
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        self.open_file_internal(OpenFileReason::ClientRequest, params)
-            .map(|_| ())
+    fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError> {
+        let diagnostics = self
+            .open_file_internal(OpenFileReason::ClientRequest, params)
+            .map(|result| {
+                result
+                    .diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect::<Vec<_>>()
+            })?;
+        Ok(OpenFileResult { diagnostics })
     }
 
     fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError> {
@@ -1120,7 +1142,7 @@ impl Workspace for WorkspaceServer {
             content,
             version,
         }: ChangeFileParams,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<ChangeFileResult, WorkspaceError> {
         let documents = self.documents.pin();
         let (index, existing_version) = documents
             .get(path.as_path())
@@ -1129,7 +1151,9 @@ impl Workspace for WorkspaceServer {
 
         if existing_version.is_some_and(|existing_version| existing_version >= version) {
             warn!(%version, %path, "outdated_file_change");
-            return Ok(()); // Safely ignore older versions.
+            return Ok(ChangeFileResult {
+                diagnostics: vec![],
+            }); // Safely ignore older versions.
         }
 
         // We remove the node cache for the document, if it exists.
@@ -1181,26 +1205,37 @@ impl Workspace for WorkspaceServer {
             .insert(path.clone().into(), document)
             .ok_or_else(WorkspaceError::not_found)?;
 
+        let mut final_diagnostics = vec![];
+
         if self.is_indexed(&path) {
             // TODO: dump diagnostics somewhere
-            let (dependencies, _diagnostics) = self.update_service_data(
+            let (dependencies, diagnostics) = self.update_service_data(
                 &path,
                 UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root),
             )?;
+            final_diagnostics.extend(
+                diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect::<Vec<_>>(),
+            );
             if !dependencies.is_empty()
                 && let Some(project_path) = self.projects.get_project_path(project_key)
             {
-                let _ = self.scanner.index_dependencies(
+                let diagnostics = self.scanner.index_dependencies(
                     self,
                     project_key,
                     &project_path,
                     dependencies,
                     IndexTrigger::Update,
-                );
+                )?;
+                final_diagnostics.extend(diagnostics);
             }
         }
 
-        Ok(())
+        Ok(ChangeFileResult {
+            diagnostics: final_diagnostics,
+        })
     }
 
     /// Retrieves the list of diagnostics associated with a file
@@ -1818,12 +1853,23 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         let _ = self.notification_tx.send(notification);
     }
 
-    fn unload_file(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn unload_file(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
         self.update_service_data(path, UpdateKind::Removed)
-            .map(|_| ())
+            .map(|(_, diagnostics)| {
+                diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect()
+            })
     }
 
-    fn unload_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn unload_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
         // Note that we cannot check the kind of the path, because the watcher
         // would only attempt to unload a file or folder after it has been
         // removed. So asking the filesystem wouldn't work anymore. So we just
@@ -1836,9 +1882,7 @@ impl WorkspaceScannerBridge for WorkspaceServer {
         self.project_layout.unload_folder(path);
 
         // Finally unloads the path itself.
-        self.unload_file(path)?;
-
-        Ok(())
+        self.unload_file(path)
     }
 }
 

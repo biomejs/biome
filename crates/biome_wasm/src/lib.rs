@@ -125,10 +125,14 @@ impl Workspace {
     }
 
     #[wasm_bindgen(js_name = openFile)]
-    pub fn open_file(&self, params: IOpenFileParams) -> Result<(), Error> {
+    pub fn open_file(&self, params: IOpenFileParams) -> Result<IOpenFileResult, Error> {
         let params: OpenFileParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
-        self.inner.open_file(params).map_err(into_error)
+        let result = self.inner.open_file(params).map_err(into_error)?;
+
+        to_value(&result)
+            .map(IOpenFileResult::from)
+            .map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = getFileContent)]
@@ -192,10 +196,14 @@ impl Workspace {
     }
 
     #[wasm_bindgen(js_name = changeFile)]
-    pub fn change_file(&self, params: IChangeFileParams) -> Result<(), Error> {
+    pub fn change_file(&self, params: IChangeFileParams) -> Result<IChangeFileResult, Error> {
         let params: ChangeFileParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
-        self.inner.change_file(params).map_err(into_error)
+        let result = self.inner.change_file(params).map_err(into_error)?;
+
+        to_value(&result)
+            .map(IChangeFileResult::from)
+            .map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = closeFile)]
