@@ -316,12 +316,20 @@ impl Watcher {
         from: &Utf8Path,
         to: &Utf8Path,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        if workspace.fs().path_is_file(from) {
-            workspace.unload_file(from)?;
-        } else {
-            workspace.unload_path(from)?;
-        }
-        Self::index_path(workspace, to)
+fn rename_path(
+    workspace: &impl WorkspaceWatcherBridge,
+    from: &Utf8Path,
+    to: &Utf8Path,
+) -> Result<Vec<Diagnostic>, WorkspaceError> {
+    let mut diagnostics = vec![];
+    if workspace.fs().path_is_file(from) {
+        diagnostics.extend(workspace.unload_file(from)?);
+    } else {
+        diagnostics.extend(workspace.unload_path(from)?);
+    }
+    diagnostics.extend(Self::index_path(workspace, to)?);
+    Ok(diagnostics)
+}
     }
 
     /// Reindexes an individual file if the watcher (still) has interest in it.
