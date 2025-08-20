@@ -51,3 +51,11 @@ const withDirective = () => {
   "use strict";
   return 1;
 };
+
+const emptyReturnWithComment = () => {
+  return; // explicitly empty
+};
+
+const withInlineComment = () => { return 1; /* inline */ };
+const withBlockCommentBefore = () => { /* leading */ return 1; };
+const withCommentBetweenReturnAndExpr = () => { return /* comment */ 1; };
