@@ -14,7 +14,7 @@ use std::sync::Arc;
 ///
 /// This service is used for retrieving [`Type`] instances for arbitrary
 /// expressions or function definitions from the module graph.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct TypedService {
     resolver: Option<Arc<ModuleResolver>>,
 }

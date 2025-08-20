@@ -4,8 +4,8 @@ use biome_js_semantic::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
     AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportDefaultDeclaration, AnyJsExpression,
     AnyJsImportClause, JsForVariableDeclaration, JsFormalParameter, JsIdentifierBinding,
-    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration, TsIdentifierBinding,
-    TsTypeParameter, TsTypeParameterName, inner_string_text,
+    JsRestParameter, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration,
+    TsIdentifierBinding, TsTypeParameter, TsTypeParameterName, inner_string_text,
 };
 use biome_js_type_info::{
     BindingId, FunctionParameter, GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GenericTypeParameter,
@@ -52,8 +52,8 @@ pub(super) struct JsModuleInfoCollector {
     /// Re-used from the semantic model in `biome_js_semantic`.
     extractor: SemanticEventExtractor,
 
-    /// Formal parameters.
-    formal_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
+    /// Function parameters, both formal parameters as well as rest parameters.
+    function_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
 
     /// Variable declarations.
     variable_declarations: FxHashMap<JsSyntaxNode, Box<[(Text, TypeReference)]>>,
@@ -174,7 +174,12 @@ impl JsModuleInfoCollector {
         } else if let Some(param) = JsFormalParameter::cast_ref(node) {
             let scope_id = *self.scope_stack.last().expect("there must be a scope");
             let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
-            self.formal_parameters
+            self.function_parameters
+                .insert(param.syntax().clone(), parsed_param);
+        } else if let Some(param) = JsRestParameter::cast_ref(node) {
+            let scope_id = *self.scope_stack.last().expect("there must be a scope");
+            let parsed_param = FunctionParameter::from_js_rest_parameter(self, scope_id, &param);
+            self.function_parameters
                 .insert(param.syntax().clone(), parsed_param);
         } else if let Some(decl) = JsVariableDeclaration::cast_ref(node) {
             let scope_id = *self.scope_stack.last().expect("there must be a scope");
@@ -543,6 +548,10 @@ impl JsModuleInfoCollector {
 
         self.infer_all_types(&scope_by_range);
         self.resolve_all_and_downgrade_project_references();
+
+        // Purging before flattening will save us from duplicate work during
+        // flattening. We'll purge again after for a final cleanup.
+        self.purge_redundant_types();
         self.flatten_all();
         self.purge_redundant_types();
 
@@ -553,13 +562,12 @@ impl JsModuleInfoCollector {
 
     fn infer_all_types(&mut self, scope_by_range: &Lapper<u32, ScopeId>) {
         for index in 0..self.bindings.len() {
-            let binding_id = BindingId::new(index);
-            let binding = &self.bindings[binding_id.index()];
+            let binding = &self.bindings[index];
             if let Some(node) = self.binding_node_by_start.get(&binding.range.start()) {
                 let name = binding.name.clone();
                 let scope_id = scope_id_for_range(scope_by_range, binding.range);
                 let ty = self.infer_type(&node.clone(), &name, scope_id);
-                self.bindings[binding_id.index()].ty = ty;
+                self.bindings[index].ty = ty;
             }
         }
     }
@@ -596,7 +604,11 @@ impl JsModuleInfoCollector {
                     .find_map(|(name, ty)| (name == binding_name).then(|| ty.clone()))
                     .unwrap_or_default();
             } else if let Some(param) = JsFormalParameter::cast_ref(&ancestor)
-                .and_then(|param| self.formal_parameters.get(param.syntax()))
+                .and_then(|param| self.function_parameters.get(param.syntax()))
+                .or_else(|| {
+                    JsRestParameter::cast_ref(&ancestor)
+                        .and_then(|param| self.function_parameters.get(param.syntax()))
+                })
             {
                 return match param {
                     FunctionParameter::Named(named) => named.ty.clone(),
@@ -1031,10 +1043,10 @@ impl JsModuleInfo {
             static_import_paths: collector.static_import_paths,
             dynamic_import_paths: collector.dynamic_import_paths,
             exports: Exports(exports),
-            blanket_reexports: collector.blanket_reexports.into(),
-            bindings: collector.bindings.into(),
+            blanket_reexports: collector.blanket_reexports,
+            bindings: collector.bindings,
             expressions: collector.parsed_expressions,
-            scopes: collector.scopes.into(),
+            scopes: collector.scopes,
             scope_by_range,
             types: collector.types.into(),
         }))
