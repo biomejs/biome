@@ -35,3 +35,19 @@ function conditionalReturn(a) {
     }
     return 0;
 }
+
+
+const withComment = () => {
+  // intentional comment
+  return 1;
+};
+
+
+const emptyReturn = () => {
+  return;
+};
+
+const withDirective = () => {
+  "use strict";
+  return 1;
+};
