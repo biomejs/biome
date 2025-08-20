@@ -1388,6 +1388,11 @@
 					"description": "Enables parsing of CSS Modules specific features.",
 					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
+				"tailwindDirectives": {
+					"description": "Enables parsing of Tailwind CSS 4.0 directives and functions.",
+					"default": null,
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

@@ -71,6 +71,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             options = options.allow_wrong_line_comments();
         }
 
+        if settings.tailwind_directives_enabled() {
+            options = options.allow_tailwind_directives();
+        }
+
         if !diagnostics.is_empty() {
             for diagnostic in diagnostics {
                 println!("{:?}", print_diagnostic_to_string(&diagnostic));
