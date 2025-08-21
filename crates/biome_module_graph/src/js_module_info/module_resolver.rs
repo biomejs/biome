@@ -42,7 +42,6 @@ const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Thin);
 /// statements.
 ///
 /// The module resolver is typically consumed through the `Typed` service.
-#[derive(Debug)]
 pub struct ModuleResolver {
     module_graph: Arc<ModuleGraph>,
 

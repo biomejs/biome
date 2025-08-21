@@ -68,7 +68,7 @@ Module TypeId(0) => sync Function {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(5)
+  returns: Module(0) TypeId(16)
 }
 
 Module TypeId(1) => sync Function {
@@ -76,7 +76,7 @@ Module TypeId(1) => sync Function {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(5)
+  returns: Module(0) TypeId(16)
 }
 
 Module TypeId(2) => sync Function {
@@ -84,39 +84,39 @@ Module TypeId(2) => sync Function {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(5)
+  returns: Module(0) TypeId(16)
 }
 
 Module TypeId(3) => Module(0) TypeId(2)
 
 Module TypeId(4) => instanceof Module(0) TypeId(23)
 
-Module TypeId(5) => Module(0) TypeId(18)
-
-Module TypeId(6) => Object {
+Module TypeId(5) => Object {
   prototype: No prototype
-  members: ["x": Module(0) TypeId(5)]
+  members: ["x": Module(0) TypeId(16)]
 }
 
-Module TypeId(7) => Module(0) TypeId(6)
+Module TypeId(6) => Module(0) TypeId(5)
 
-Module TypeId(8) => Module(0) TypeId(5)
+Module TypeId(7) => Module(0) TypeId(16)
 
-Module TypeId(9) => Module(0) TypeId(23)
+Module TypeId(8) => Module(0) TypeId(23)
 
-Module TypeId(10) => instanceof Module(0) TypeId(9)
+Module TypeId(9) => instanceof Module(0) TypeId(8)
 
-Module TypeId(11) => Module(0) TypeId(5)
+Module TypeId(10) => Module(0) TypeId(16)
 
-Module TypeId(12) => Module(0) TypeId(5)
+Module TypeId(11) => Module(0) TypeId(16)
 
-Module TypeId(13) => Module(0) TypeId(0)
+Module TypeId(12) => Module(0) TypeId(0)
 
-Module TypeId(14) => Module(0) TypeId(1)
+Module TypeId(13) => Module(0) TypeId(1)
 
-Module TypeId(15) => Module(0) TypeId(20)
+Module TypeId(14) => Module(0) TypeId(20)
 
-Module TypeId(16) => Module(0) TypeId(21)
+Module TypeId(15) => Module(0) TypeId(21)
+
+Module TypeId(16) => Module(0) TypeId(18)
 
 Module TypeId(17) => Module(0) TypeId(22)
 
@@ -127,7 +127,7 @@ Module TypeId(19) => sync Function "fooGetter" {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(5)
+  returns: Module(0) TypeId(16)
 }
 
 Module TypeId(20) => sync Function "meth" {
@@ -135,7 +135,7 @@ Module TypeId(20) => sync Function "meth" {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(5)
+  returns: Module(0) TypeId(16)
 }
 
 Module TypeId(21) => sync Function "nestedArrow" {
@@ -143,7 +143,7 @@ Module TypeId(21) => sync Function "nestedArrow" {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(18)
+  returns: Module(0) TypeId(16)
 }
 
 Module TypeId(22) => sync Function "inObject" {
@@ -151,7 +151,7 @@ Module TypeId(22) => sync Function "inObject" {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(8)
+  returns: Module(0) TypeId(7)
 }
 
 Module TypeId(23) => class "Foo" {
