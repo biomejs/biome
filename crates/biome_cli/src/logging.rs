@@ -35,7 +35,7 @@ pub fn setup_cli_subscriber(file: Option<&str>, level: LoggingLevel, kind: Loggi
         let format = format.with_writer(file);
         match kind {
             LoggingKind::Pretty => {
-                let format = format.compact();
+                let format = format.pretty();
                 registry()
                     .with(format.with_filter(LoggingFilter { level }))
                     .init()
@@ -56,7 +56,7 @@ pub fn setup_cli_subscriber(file: Option<&str>, level: LoggingLevel, kind: Loggi
     } else {
         match kind {
             LoggingKind::Pretty => {
-                let format = format.compact();
+                let format = format.pretty();
                 registry()
                     .with(format.with_filter(LoggingFilter { level }))
                     .init()

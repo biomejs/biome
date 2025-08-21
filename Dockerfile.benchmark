@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1@sha256:38387523653efa0039f8e1c89bb74a30504e76ee9f565e25c9a09841f9427b05
-FROM rust:1.89.0-bookworm@sha256:c50cd6e20c46b0b36730b5eb27289744e4bb8f32abc90d8c64ca09decf4f55ba
+FROM rust:1.89.0-bookworm@sha256:e090f7b4adf86191313dba91260351d7f5e15cac0fe34f26706a805c0cb9641f
 WORKDIR /usr/src/
 
 # https://github.com/nodesource/distributions
