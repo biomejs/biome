@@ -404,7 +404,10 @@ impl Scanner {
                 ..
             } = self.scan_folder(folder, &ctx);
 
+            // Close the diagnostics channel before collecting to avoid a deadlock on WASM.
+            drop(ctx);
             let diagnostics = collector.run(diagnostics_receiver);
+
             (duration, diagnostics, configuration_files)
         };
 
