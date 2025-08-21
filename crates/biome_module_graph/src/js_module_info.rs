@@ -1,7 +1,9 @@
 mod binding;
 mod collector;
+mod diagnostics;
 mod module_resolver;
 mod scope;
+mod utils;
 mod visitor;
 
 use biome_js_syntax::AnyJsImportLike;
@@ -20,7 +22,9 @@ use crate::ModuleGraph;
 
 use scope::{JsScope, JsScopeData, TsBindingReference};
 
+use crate::diagnostics::ModuleDiagnostic;
 pub(super) use binding::JsBindingData;
+pub use diagnostics::JsModuleInfoDiagnostic;
 pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
 
@@ -44,6 +48,10 @@ impl JsModuleInfo {
             module_info: self.clone(),
             index: 0,
         }
+    }
+
+    pub fn diagnostics(&self) -> &[ModuleDiagnostic] {
+        self.diagnostics.as_slice()
     }
 
     /// Finds an exported symbol by `name`, using the `module_graph` to
@@ -196,6 +204,9 @@ pub struct JsModuleInfoInner {
     /// info is constructed, no new types can be registered in it, and we have
     /// no use for a hash table anymore.
     pub(crate) types: Vec<Arc<TypeData>>,
+
+    /// Diagnostics emitted during the resolution of the module
+    pub(crate) diagnostics: Vec<ModuleDiagnostic>,
 }
 
 #[derive(Debug, Default)]
