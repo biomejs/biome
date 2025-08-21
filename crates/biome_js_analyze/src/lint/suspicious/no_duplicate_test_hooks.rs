@@ -175,9 +175,10 @@ impl DuplicateHooksVisitor {
                 callee
             };
 
-            if let Some(function_name) = callee.get_callee_object_name()
-                && function_name.text_trimmed() == "describe"
-            {
+            let text = callee.to_trimmed_text();
+            let base = text.split(".").next().unwrap_or_default();
+
+            if base == "describe" {
                 return true;
             }
         }
