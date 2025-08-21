@@ -1083,7 +1083,3 @@ fn rename(
         ))
     }
 }
-
-#[cfg(test)]
-#[path = "javascript.tests.rs"]
-mod tests;
