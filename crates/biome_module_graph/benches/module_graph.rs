@@ -41,6 +41,10 @@ const INDEX_D_TS_CASES: &[(&str, &[u8])] = &[
         "RedisCommander.d.ts",
         include_bytes!("./RedisCommander.d.ts") as &[u8],
     ),
+    (
+        "astro_server.mjs",
+        include_bytes!("./astro_server.mjs") as &[u8],
+    ),
 ];
 
 fn index_d_ts_cases() -> impl Iterator<Item = &'static str> {

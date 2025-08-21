@@ -9208,11 +9208,17 @@ export type HtmlVariant =
 	| "Svelte";
 export type GritVariant = "Standard";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
+export interface OpenFileResult {
+	diagnostics: Diagnostic[];
+}
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
 	projectKey: ProjectKey;
 	version: number;
+}
+export interface ChangeFileResult {
+	diagnostics: Diagnostic[];
 }
 export interface CloseFileParams {
 	path: BiomePath;
@@ -9528,8 +9534,8 @@ export interface Workspace {
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
 	openProject(params: OpenProjectParams): Promise<OpenProjectResult>;
 	scanProject(params: ScanProjectParams): Promise<ScanProjectResult>;
-	openFile(params: OpenFileParams): Promise<void>;
-	changeFile(params: ChangeFileParams): Promise<void>;
+	openFile(params: OpenFileParams): Promise<OpenFileResult>;
+	changeFile(params: ChangeFileParams): Promise<ChangeFileResult>;
 	closeFile(params: CloseFileParams): Promise<void>;
 	fileExists(params: FileExitsParams): Promise<boolean>;
 	isPathIgnored(params: PathIsIgnoredParams): Promise<boolean>;
