@@ -405,6 +405,10 @@ impl Scanner {
             } = self.scan_folder(folder, &ctx);
 
             let diagnostics = collector.run(diagnostics_receiver);
+
+            // Make sure the diagnostics sender is dropped.
+            drop(ctx);
+
             (duration, diagnostics, configuration_files)
         };
 
