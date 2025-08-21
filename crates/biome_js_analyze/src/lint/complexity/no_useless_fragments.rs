@@ -29,18 +29,6 @@ declare_lint_rule! {
     ///
     /// ```jsx,expect_diagnostic
     /// <>
-    /// foo
-    /// </>
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
-    /// <React.Fragment>
-    /// foo
-    /// </React.Fragment>
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
-    /// <>
     ///     <>foo</>
     ///     <SomeComponent />
     /// </>
@@ -51,6 +39,18 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### Valid
+    ///
+    /// ```jsx
+    /// <>
+    /// foo
+    /// </>
+    /// ```
+    ///
+    /// ```jsx
+    /// <React.Fragment>
+    /// foo
+    /// </React.Fragment>
+    /// ```
     ///
     /// ```jsx
     /// <>
@@ -324,10 +324,8 @@ impl Rule for NoUselessFragments {
                                         JsxElement::cast(great_great_grand_parent.clone())
                                     {
                                         let opening_element = element.opening_element().ok()?;
-                                        let is_valid_react_fragment =
-                                            is_jsx_element_valid_fragment(&opening_element, model)?;
 
-                                        is_valid_react_fragment
+                                        is_jsx_element_valid_fragment(&opening_element, model)?
                                     } else {
                                         false
                                     }
