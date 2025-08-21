@@ -1,5 +1,6 @@
 import "./sub/foo";
 import "./sub/bar/";
+import "./sub/index";
 
 // Guaranteed resolve to 'index.js' file
 import './sub/bar/../'

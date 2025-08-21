@@ -2,6 +2,7 @@ use crate::{TypeData, TypeInstance, TypeReference, TypeResolver};
 
 mod expressions;
 mod intersections;
+mod unions;
 
 use expressions::flattened_expression;
 use intersections::flattened_intersection;

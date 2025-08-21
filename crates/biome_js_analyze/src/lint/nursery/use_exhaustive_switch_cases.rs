@@ -136,36 +136,21 @@ impl Rule for UseExhaustiveSwitchCases {
         let discriminant = stmt.discriminant().ok()?;
         let discriminant_ty = flatten_type(&ctx.type_of_expression(&discriminant))?;
 
-        for union_part in match discriminant_ty.deref() {
-            TypeData::Union(union) => union
-                .types()
-                .iter()
-                .filter_map(|r| discriminant_ty.resolve(r))
-                .collect(),
-            _ => vec![discriminant_ty],
+        for intersection_part in match discriminant_ty.is_union() {
+            true => discriminant_ty.flattened_union_variants().collect(),
+            false => vec![discriminant_ty],
         } {
-            let union_part = flatten_type(&union_part)?;
+            let intersection_part = flatten_type(&intersection_part)?;
 
-            for intersection_part in match union_part.deref() {
-                TypeData::Intersection(intersection) => intersection
-                    .types()
-                    .iter()
-                    .filter_map(|r| union_part.resolve(r))
-                    .collect(),
-                _ => vec![union_part],
-            } {
-                let intersection_part = flatten_type(&intersection_part)?;
-
-                if !matches!(
-                    intersection_part.deref(),
-                    TypeData::Literal(_) | TypeData::Null | TypeData::Undefined | TypeData::Symbol
-                ) || found_cases.contains(&intersection_part)
-                {
-                    continue;
-                }
-
-                missing_cases.push(intersection_part);
+            if !matches!(
+                intersection_part.deref(),
+                TypeData::Literal(_) | TypeData::Null | TypeData::Undefined | TypeData::Symbol
+            ) || found_cases.contains(&intersection_part)
+            {
+                continue;
             }
+
+            missing_cases.push(intersection_part);
         }
 
         if missing_cases.is_empty() {

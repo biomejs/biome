@@ -103,10 +103,10 @@ impl ConditionalType {
                         }
                     }
                     TypeData::Reference(reference) => derive_from_reference(reference),
-                    TypeData::Union(union) => {
+                    TypeData::Union(_) => {
                         let mut conditional = ConditionalType::Unknown;
-                        for ty in union.types() {
-                            let next = derive_from_reference(ty);
+                        for ty in ty.flattened_union_variants(resolver) {
+                            let next = derive_from_reference(&ty);
                             conditional = if conditional == ConditionalType::Unknown {
                                 next
                             } else {
@@ -413,9 +413,9 @@ fn to_filtered_value(
                 }
             }
             TypeData::Reference(reference) => reference_to_non_nullish_value(reference),
-            TypeData::Union(union) => {
-                let types = union
-                    .types()
+            TypeData::Union(_) => {
+                let types: Vec<_> = resolved.flattened_union_variants(resolver).collect();
+                let types = types
                     .iter()
                     .filter_map(|reference| {
                         let ty = resolver

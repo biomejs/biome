@@ -45,6 +45,14 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             "assignment_expression" => JS_ASSIGNMENT_EXPRESSION,
             "call_expression" => JS_CALL_EXPRESSION,
             "new_expression" => JS_NEW_EXPRESSION,
+            "jsx_expression" => JSX_EXPRESSION_CHILD,
+            "jsx_attribute" => JSX_ATTRIBUTE,
+            "jsx_element" => JSX_ELEMENT,
+            "jsx_self_closing_element" => JSX_SELF_CLOSING_ELEMENT,
+            "jsx_opening_element" => JSX_OPENING_ELEMENT,
+            "jsx_closing_element" => JSX_CLOSING_ELEMENT,
+            "jsx_text" => JSX_TEXT,
+            "jsx_namespace_name" => JSX_NAMESPACE_NAME,
             // TODO: Many more of these. We should probably find a way to
             // generate these impls from TS `grammar.js` files, combined with
             // our `js.ungram`.
@@ -69,6 +77,14 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             JS_ASSIGNMENT_EXPRESSION => "assignment_expression",
             JS_CALL_EXPRESSION => "call_expression",
             JS_NEW_EXPRESSION => "new_expression",
+            JSX_EXPRESSION_CHILD => "jsx_expression",
+            JSX_ATTRIBUTE => "jsx_attribute",
+            JSX_ELEMENT => "jsx_element",
+            JSX_SELF_CLOSING_ELEMENT => "jsx_self_closing_element",
+            JSX_OPENING_ELEMENT => "jsx_opening_element",
+            JSX_CLOSING_ELEMENT => "jsx_closing_element",
+            JSX_TEXT => "jsx_text",
+            JSX_NAMESPACE_NAME => "jsx_namespace_name",
             // TODO: Many more of these. We should probably find a way to
             // generate these impls from TS `grammar.js` files, combined with
             // our `js.ungram`.
@@ -91,6 +107,18 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             JS_ASSIGNMENT_EXPRESSION => &[],
             JS_CALL_EXPRESSION => &[("function", 0), ("type_arguments", 2), ("arguments", 3)],
             JS_NEW_EXPRESSION => &[],
+            JSX_ELEMENT => &[
+                ("opening_element", 0),
+                ("children", 1),
+                ("closing_element", 2),
+            ],
+            JSX_SELF_CLOSING_ELEMENT => &[("name", 1), ("attributes", 2)],
+            JSX_OPENING_ELEMENT => &[("name", 1), ("attributes", 2)],
+            JSX_CLOSING_ELEMENT => &[("name", 2)],
+            JSX_ATTRIBUTE => &[],
+            JSX_EXPRESSION_CHILD => &[("expression", 1)],
+            JSX_TEXT => &[],
+            JSX_NAMESPACE_NAME => &[("namespace", 0), ("name", 2)],
             // TODO: Many more of these. We should probably find a way to
             // generate these impls from TS `grammar.js` files, combined with
             // our `js.ungram`.

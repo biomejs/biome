@@ -18,6 +18,9 @@ declare_lint_rule! {
     /// This means that if the package `@org/foo` has a dependency on `lodash`, and then you use
     /// `import "lodash"` somewhere in your project, the rule will trigger a diagnostic for this import.
     ///
+    /// The rule is meant to catch those dependencies that aren't declared inside the closest `package.json`, and
+    /// isn't meant to detect dependencies declared in other manifest files, e.g. the root `package.json` in a monorepo setting.
+    ///
     /// The rule ignores imports that are not valid package names.
     /// This includes internal imports that start with `#` and `@/` and imports with a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
     ///
