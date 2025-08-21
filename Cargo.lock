@@ -1249,7 +1249,9 @@ dependencies = [
 name = "biome_module_graph"
 version = "0.0.1"
 dependencies = [
+ "biome_console",
  "biome_deserialize",
+ "biome_diagnostics",
  "biome_formatter",
  "biome_fs",
  "biome_js_formatter",

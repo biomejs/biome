@@ -13,10 +13,10 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
     JsExport, JsImportPath, JsOwnExport, ModuleGraph,
-    js_module_info::{JsModuleInfoInner, scope::TsBindingReference},
+    js_module_info::{JsModuleInfoInner, scope::TsBindingReference, utils::reached_too_many_types},
 };
 
-use super::JsModuleInfo;
+use super::{JsModuleInfo, JsModuleInfoDiagnostic};
 
 const MAX_IMPORT_DEPTH: usize = 10; // Arbitrary depth, may require tweaking.
 
@@ -42,7 +42,6 @@ const MODULE_0_ID: ResolverId = ResolverId::from_level(TypeResolverLevel::Thin);
 /// statements.
 ///
 /// The module resolver is typically consumed through the `Typed` service.
-#[derive(Debug)]
 pub struct ModuleResolver {
     module_graph: Arc<ModuleGraph>,
 
@@ -68,6 +67,9 @@ pub struct ModuleResolver {
     /// Maps from `TypeId` indices in module 0 to indices in our own `types`
     /// store.
     type_id_map: Vec<TypeId>,
+
+    /// Diagnostics emitted during the resolution of types
+    diagnostics: Vec<JsModuleInfoDiagnostic>,
 }
 
 impl ModuleResolver {
@@ -81,6 +83,7 @@ impl ModuleResolver {
             expressions: Default::default(),
             types: TypeStore::with_capacity(num_initial_types),
             type_id_map: Default::default(),
+            diagnostics: Default::default(),
         };
 
         resolver.run_inference();
@@ -215,6 +218,11 @@ impl ModuleResolver {
 
             let mut i = 0;
             while i < self.types.len() {
+                if let Err(diagnostic) = reached_too_many_types(i) {
+                    self.diagnostics.push(diagnostic);
+                    return;
+                }
+
                 if let Some(ty) = self.types.get(i).flattened(self) {
                     self.types.replace(i, ty);
                     did_flatten = true;
