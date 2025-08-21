@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Partially fixes [#6782](https://github.com/biomejs/biome/issues/6782). Adds JSX node mappings to `GritTargetLanguageImpl`.
+Partially fixed [#6782](https://github.com/biomejs/biome/issues/6782): JSX node kinds are now supported in GritQL AST nodes.
