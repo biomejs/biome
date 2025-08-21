@@ -1208,7 +1208,6 @@ impl Workspace for WorkspaceServer {
         let mut final_diagnostics = vec![];
 
         if self.is_indexed(&path) {
-            // TODO: dump diagnostics somewhere
             let (dependencies, diagnostics) = self.update_service_data(
                 &path,
                 UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root),

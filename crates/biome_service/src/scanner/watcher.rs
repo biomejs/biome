@@ -201,13 +201,11 @@ impl Watcher {
             },
             EventKind::Any | EventKind::Other => Ok(vec![]),
         };
-        match result {
-            Ok(diagnostics) => diagnostics,
-            Err(error) => {
-                warn!("Error processing watch event: {error}");
-                vec![]
-            }
-        }
+        result.unwrap_or_else(|error| {
+            // TODO: improve error propagation
+            warn!("Error processing watch event: {error}");
+            vec![]
+        })
     }
 
     /// Filters the paths to make sure only paths within watched folders remain.
