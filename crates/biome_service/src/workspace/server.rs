@@ -488,7 +488,7 @@ impl WorkspaceServer {
         for plugin_config in plugins.iter() {
             match plugin_config {
                 PluginConfiguration::Path(plugin_path) => {
-                    match BiomePlugin::load(self.fs.as_ref(), plugin_path, base_path) {
+                    match BiomePlugin::load(self.fs.clone(), plugin_path, base_path) {
                         Ok((plugin, _)) => {
                             plugin_cache.insert_plugin(plugin_path.clone().into(), plugin);
                         }

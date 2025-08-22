@@ -1,3 +1,9 @@
+use std::fmt::{Debug, Formatter};
+
+use boa_engine::JsError;
+use camino::Utf8PathBuf;
+use serde::{Deserialize, Serialize};
+
 use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::DeserializationDiagnostic;
@@ -6,9 +12,6 @@ use biome_fs::FileSystemDiagnostic;
 use biome_grit_patterns::CompileError;
 use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::SyntaxError;
-use camino::Utf8PathBuf;
-use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Formatter};
 
 /// Series of errors that can be thrown while loading a plugin.
 #[derive(Deserialize, Diagnostic, Serialize)]
@@ -40,9 +43,22 @@ pub enum PluginDiagnostic {
 
 impl From<CompileError> for PluginDiagnostic {
     fn from(value: CompileError) -> Self {
-        println!("Compile Error: {value:?}");
         Self::Compile(CompileDiagnostic {
+            message: MessageAndDescription::from(
+                markup! {"Failed to compile the Grit plugin"}.to_owned(),
+            ),
             source: Some(Error::from(value)),
+        })
+    }
+}
+
+impl From<JsError> for PluginDiagnostic {
+    fn from(value: JsError) -> Self {
+        Self::Compile(CompileDiagnostic {
+            message: MessageAndDescription::from(
+                markup! {"Failed to compile the JS plugin: "{value.to_string()}}.to_owned(),
+            ),
+            source: None,
         })
     }
 }
@@ -126,10 +142,13 @@ impl From<PluginDiagnostic> for biome_diagnostics::serde::Diagnostic {
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "plugin",
-    message = "Error compiling plugin",
     severity = Error,
 )]
 pub struct CompileDiagnostic {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+
     #[serde(skip)]
     #[source]
     source: Option<Error>,
