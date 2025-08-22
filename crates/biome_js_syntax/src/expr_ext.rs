@@ -962,13 +962,12 @@ impl AnyJsExpression {
             Some("describe") => match second {
                 None => true,
                 Some("concurrent" | "sequential" | "only" | "skip" | "todo" | "shuffle") => {
-                    match third {
-                        None
-                        | Some(
+                    matches!(
+                        third,
+                        None | Some(
                             "concurrent" | "sequential" | "only" | "skip" | "todo" | "shuffle",
-                        ) => true,
-                        _ => false,
-                    }
+                        )
+                    )
                 }
                 _ => false,
             },
@@ -976,14 +975,18 @@ impl AnyJsExpression {
                 None => true,
                 Some(
                     "concurrent" | "sequential" | "only" | "skip" | "todo" | "fails" | "failing",
-                ) => match third {
-                    None
-                    | Some(
-                        "concurrent" | "sequential" | "only" | "skip" | "todo" | "fails"
-                        | "failing",
-                    ) => true,
-                    _ => false,
-                },
+                ) => matches!(
+                    third,
+                    None | Some(
+                        "concurrent"
+                            | "sequential"
+                            | "only"
+                            | "skip"
+                            | "todo"
+                            | "fails"
+                            | "failing",
+                    )
+                ),
                 Some("describe") => match third {
                     None => true,
                     Some("only" | "skip") => fourth.is_none(),
@@ -1009,25 +1012,28 @@ impl AnyJsExpression {
     /// - Starts with a valid test pattern
     /// - Ends with `.each` or `.for`
     pub fn contains_a_test_each_pattern(&self) -> bool {
-        let AnyJsExpression::JsStaticMemberExpression(member_expression) = (*self).clone() else {
+        let Self::JsStaticMemberExpression(member_expression) = self else {
             return false;
         };
 
-        if matches!(member_expression.object().ok(), Some(rest) if !rest.contains_a_test_pattern())
-        {
+        if matches!(member_expression.object(), Ok(rest) if !rest.contains_a_test_pattern()) {
             return false;
         }
 
-        if let Ok(AnyJsName::JsName(name)) = member_expression.member()
-            && let Some(first) = name
-                .value_token()
-                .ok()
-                .map(|name| name.token_text_trimmed())
-        {
-            return matches!(first.text(), "each" | "for");
-        };
+        match member_expression.member().ok() {
+            Some(AnyJsName::JsName(name)) => {
+                if let Some(token) = name
+                    .value_token()
+                    .ok()
+                    .map(|token| token.token_text_trimmed())
+                {
+                    return matches!(token.text(), "each" | "for");
+                }
 
-        false
+                false
+            }
+            _ => false,
+        }
     }
 
     /// Checks whether the current function call is:

@@ -121,7 +121,7 @@ impl Visitor for DuplicateHooksVisitor {
                 };
 
                 // When the visitor enters a function node, push a new entry on the stack
-                if DuplicateHooksVisitor::is_test_describe_call(&node) {
+                if Self::is_test_describe_call(&node) {
                     self.stack.push(HooksContext::default());
                 }
 
@@ -150,7 +150,7 @@ impl Visitor for DuplicateHooksVisitor {
                 // When the visitor exits a function, if it matches the node of the top-most
                 // entry of the stack and the `has_yield` flag is `false`, emit a query match
                 if let Some(node) = JsCallExpression::cast_ref(node)
-                    && DuplicateHooksVisitor::is_test_describe_call(&node)
+                    && Self::is_test_describe_call(&node)
                 {
                     self.stack.pop();
                 }
@@ -164,19 +164,8 @@ impl DuplicateHooksVisitor {
         if let Ok(callee) = node.callee()
             && node.is_test_call_expression() == Ok(true)
         {
-            // describe.each has a nested call expression
-            let callee = if let AnyJsExpression::JsCallExpression(call_expression) = callee {
-                if let Ok(callee) = call_expression.callee() {
-                    callee
-                } else {
-                    return false;
-                }
-            } else {
-                callee
-            };
-
             let text = callee.to_trimmed_text();
-            let base = text.split(".").next().unwrap_or_default();
+            let base = text.split('.').next().unwrap_or_default();
 
             if base == "describe" {
                 return true;
