@@ -13,14 +13,6 @@ use biome_service::{
 #[derive(Default)]
 pub struct CssTestFormatLanguage {
     _source_type: CssFileSource,
-    tailwind_directives: bool,
-}
-
-impl CssTestFormatLanguage {
-    pub fn allow_tailwind_directives(mut self) -> Self {
-        self.tailwind_directives = true;
-        self
-    }
 }
 
 impl TestFormatLanguage for CssTestFormatLanguage {
@@ -29,12 +21,10 @@ impl TestFormatLanguage for CssTestFormatLanguage {
     type FormatLanguage = CssFormatLanguage;
 
     fn parse(&self, text: &str) -> AnyParse {
-        let mut options = CssParserOptions::default()
+        let options = CssParserOptions::default()
             .allow_wrong_line_comments()
-            .allow_css_modules();
-        if self.tailwind_directives {
-            options = options.allow_tailwind_directives();
-        }
+            .allow_css_modules()
+            .allow_tailwind_directives();
 
         parse_css(text, options).into()
     }
