@@ -226,11 +226,11 @@ impl Rule for NoDuplicateTestHooks {
                 rule_category!(),
                 ctx.query().range(),
                 markup! {
-                    "Disallow duplicate setup and teardown hooks."
+                    "Duplicate "<Emphasis>{node_name.text_trimmed()}</Emphasis>" hook found."
                 },
             )
             .note(markup! {
-                "Disallow "<Emphasis>{node_name.text_trimmed()}</Emphasis>" duplicacy inside the describe function."
+                "Remove this duplicate hook or consolidate the logic into a single hook."
             }),
         )
     }
