@@ -22,7 +22,7 @@ expression: package.json
 ```
 package.json:4:5 lint/nursery/noDuplicateDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The dependency "foo" is also listed in another dependency group.
+  i The dependency "foo" is also listed under devDependencies.
   
     2 │   "name": "invalid-dependencies-dev-dependencies",
     3 │   "dependencies": {

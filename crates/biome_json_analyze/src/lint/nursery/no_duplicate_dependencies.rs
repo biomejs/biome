@@ -2,13 +2,13 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_json_syntax::{JsonRoot, JsonSyntaxKind, JsonSyntaxToken, TextRange};
+use biome_json_syntax::{JsonRoot, JsonSyntaxKind, JsonSyntaxToken};
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::no_duplicate_dependencies::NoDuplicateDependenciesOptions;
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
-    /// Disallow any dependency from being specified more than once (i.e. in `dependencies` and `devDependencies`)
+    /// Disallow any dependency from being specified more than once (e.g. in `dependencies` and `devDependencies`)
     ///
     /// ## Examples
     ///
@@ -47,7 +47,7 @@ declare_lint_rule! {
 const PACKAGE_JSON: &str = "package.json";
 
 // dependencies <-> devDependencies / optionalDependencies / peerDependencies
-// optionalDependencies <-> peerDependencies
+// peerDependencies <-> optionalDependencies
 const UNIQUE_PROPERTY_KEYS: [(&str, &[&str]); 2] = [
     (
         "dependencies",
@@ -57,7 +57,7 @@ const UNIQUE_PROPERTY_KEYS: [(&str, &[&str]); 2] = [
             "peerDependencies",
         ],
     ),
-    ("optionalDependencies", &["peerDependencies"]),
+    ("peerDependencies", &["optionalDependencies"]),
 ];
 
 const DUPLICATE_PROPERTY_KEYS: &[&str; 7] = &[
@@ -70,9 +70,14 @@ const DUPLICATE_PROPERTY_KEYS: &[&str; 7] = &[
     "peerDependencies",
 ];
 
+pub struct Duplicate {
+    pub group: String,
+    pub token: JsonSyntaxToken,
+}
+
 impl Rule for NoDuplicateDependencies {
     type Query = Ast<JsonRoot>;
-    type State = (JsonSyntaxToken, Vec<TextRange>);
+    type State = (JsonSyntaxToken, Duplicate);
     type Signals = Option<Self::State>;
     type Options = NoDuplicateDependenciesOptions;
 
@@ -87,7 +92,6 @@ impl Rule for NoDuplicateDependencies {
             return None;
         }
 
-        let mut duplicates = FxHashMap::<JsonSyntaxToken, Vec<TextRange>>::default();
         let mut dependencies = FxHashMap::<String, FxHashMap<String, JsonSyntaxToken>>::default();
 
         // Filter JsonMembers matching the valid dependency group keys
@@ -100,9 +104,7 @@ impl Rule for NoDuplicateDependencies {
                 if let Ok(name) = name {
                     let text = name.inner_string_text();
                     if let Ok(text) = text {
-                        if DUPLICATE_PROPERTY_KEYS.contains(&text.text()) {
-                            return true;
-                        }
+                        return DUPLICATE_PROPERTY_KEYS.contains(&text.text());
                     }
                 }
                 return false;
@@ -126,12 +128,12 @@ impl Rule for NoDuplicateDependencies {
 
                         // Add dependencies to deps if not exists else to duplicates
                         if let Some(original_member) = deps.get(&dependency_text.to_string()) {
-                            if let Some(ranges) = duplicates.get_mut(original_member) {
-                                ranges.push(dependency_name.range());
-                            } else {
-                                duplicates
-                                    .insert(original_member.clone(), vec![dependency_name.range()]);
-                            }
+                            let dupe = Duplicate {
+                                group: dependency_group_text.to_string(),
+                                token: dependency_name.value_token().ok()?,
+                            };
+
+                            return Some((original_member.clone(), dupe));
                         } else {
                             deps.insert(
                                 dependency_text.to_string(),
@@ -153,12 +155,12 @@ impl Rule for NoDuplicateDependencies {
                         let dependency_text = dependency_name.inner_string_text().ok()?;
 
                         if let Some(original_member) = deps.get(&dependency_text.to_string()) {
-                            if let Some(ranges) = duplicates.get_mut(original_member) {
-                                ranges.push(dependency_name.range());
-                            } else {
-                                duplicates
-                                    .insert(original_member.clone(), vec![dependency_name.range()]);
-                            }
+                            let dupe = Duplicate {
+                                group: dependency_group_text.to_string(),
+                                token: dependency_name.value_token().ok()?,
+                            };
+
+                            return Some((original_member.clone(), dupe));
                         } else {
                             deps.insert(
                                 dependency_text.to_string(),
@@ -194,42 +196,36 @@ impl Rule for NoDuplicateDependencies {
 
                 for (dependency_name, original_member) in key_deps? {
                     if let Some(member) = deps?.get(dependency_name) {
-                        if let Some(ranges) = duplicates.get_mut(original_member) {
-                            ranges.push(member.text_trimmed_range());
-                        } else {
-                            duplicates
-                                .insert(original_member.clone(), vec![member.text_trimmed_range()]);
-                        }
+                        let dupe = Duplicate {
+                            group: property.to_string(),
+                            token: member.clone(),
+                        };
+
+                        return Some((original_member.clone(), dupe));
                     }
                 }
             }
         }
 
-        if duplicates.is_empty() {
-            return None;
-        }
-
-        return duplicates.into_iter().next();
+        return None;
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let (original, ranges) = state;
+        let (original, dupe) = state;
         let name = original.text_trimmed();
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
             original.text_trimmed_range(),
             markup! {
-                "The dependency "<Emphasis>{name}</Emphasis>" is also listed in another dependency group."
+                "The dependency "<Emphasis>{name}</Emphasis>" is also listed under "<Emphasis>{dupe.group.to_string()}</Emphasis>"."
             },
         );
-        for range in ranges {
-            diagnostic = diagnostic.detail(
-                range,
-                markup! {
-                    "The dependency is also specified here."
-                },
-            );
-        }
+        diagnostic = diagnostic.detail(
+            dupe.token.text_trimmed_range(),
+            markup! {
+                "The dependency is also specified here."
+            },
+        );
         Some(diagnostic)
     }
 }
