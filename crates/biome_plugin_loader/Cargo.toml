@@ -30,8 +30,16 @@ papaya                   = { workspace = true }
 rustc-hash               = { workspace = true }
 serde                    = { workspace = true }
 
+biome_js_runtime         = { workspace = true, optional = true }
+boa_engine               = { workspace = true, optional = true }
+
 [dev-dependencies]
-insta = { workspace = true }
+biome_js_parser = { workspace = true }
+insta           = { workspace = true }
 
 [lints]
 workspace = true
+
+[features]
+default = ["js_plugin"]
+js_plugin = ["dep:biome_js_runtime", "dep:boa_engine"]

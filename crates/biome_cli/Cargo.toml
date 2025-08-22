@@ -90,6 +90,7 @@ tokio                = { workspace = true, features = ["io-util"] }
 
 [features]
 docgen = ["bpaf/docgen"]
+js_plugin = ["biome_service/js_plugin"]
 
 [lints]
 workspace = true

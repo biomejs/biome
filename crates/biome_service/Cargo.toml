@@ -98,6 +98,7 @@ schema = [
   "biome_fs/schema",
   "biome_module_graph/schema",
 ]
+js_plugin = ["biome_plugin_loader/js_plugin"]
 
 [lints]
 workspace = true

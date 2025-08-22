@@ -24,6 +24,7 @@
       "**/packages/@biomejs/**",
       "**/packages/tailwindcss-config-analyzer/**",
       "**/benchmark/**",
+      "plugins/*.js",
       "scripts/**",
       "!**/crates",
       "!**/dist",
@@ -81,7 +82,8 @@
     }
   },
   "plugins": [
-    "plugins/no-object-assign.grit"
+    "plugins/no-object-assign.grit",
+    "plugins/plugin.js"
   ],
   "vcs": {
     "clientKind": "git",
