@@ -84,6 +84,7 @@ describe("hello", () => {
 
 describe("something", () => {
   beforeEach(() => {});
+  
   describe("something", () => {
     beforeEach(() => {});
   });
@@ -101,6 +102,26 @@ describe("something", () => {
   });
 
   describe.todo.each([])("something", () => {
+    beforeEach(() => {});
+  });
+});
+
+describe("something", () => {
+  beforeEach(() => {});
+  
+  describe("something", () => {
+    beforeEach(() => {});
+  });
+
+  test.describe.skip.each([])("something", () => {
+    beforeEach(() => {});
+  });
+
+  xdescribe.for([])("something", () => {
+    beforeEach(() => {});
+  });
+
+  fdescribe.todo("something", () => {
     beforeEach(() => {});
   });
 });

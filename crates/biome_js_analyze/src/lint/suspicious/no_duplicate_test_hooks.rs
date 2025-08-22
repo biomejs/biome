@@ -165,9 +165,12 @@ impl DuplicateHooksVisitor {
             && node.is_test_call_expression() == Ok(true)
         {
             let text = callee.to_trimmed_text();
-            let base = text.split('.').next().unwrap_or_default();
+            let mut split = text.split('.');
 
-            if base == "describe" {
+            let first = split.next().unwrap_or_default();
+            let second = split.next().unwrap_or_default();
+
+            if matches!(first, "describe" | "fdescribe" | "xdescribe") || second == "describe" {
                 return true;
             }
         }
