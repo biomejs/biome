@@ -228,3 +228,115 @@ function Foo({cond}) {
         Err(error) => panic!("File not formatted: {error}"),
     }
 }
+
+#[test]
+fn js_everywhere_disabled_correct_variant() {
+    const JS_FILE_CONTENT: &[u8] = br"
+function Foo({cond}) {
+  return cond ? (
+    <True />
+  ) : (
+    <False />
+  );
+}
+    ";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/a.js"), JS_FILE_CONTENT);
+    fs.insert(Utf8PathBuf::from("/project/a.jsx"), JS_FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    let js_conf = JsConfiguration {
+        parser: Some(JsParserConfiguration {
+            jsx_everywhere: Some(Bool(false)),
+            ..Default::default()
+        }),
+        formatter: Some(JsFormatterConfiguration {
+            line_width: Some(LineWidth::try_from(30).unwrap()),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let configuration = Configuration {
+        javascript: Some(js_conf),
+        formatter: Some(FormatterConfiguration {
+            indent_style: Some(IndentStyle::Space),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration,
+            workspace_directory: Some(BiomePath::new("/project")),
+        })
+        .unwrap();
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/a.js"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/a.jsx"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    let js_file_source = workspace.get_file_source("/project/a.js".into());
+    let js = js_file_source.to_js_file_source().expect("JS file source");
+    assert!(!js.is_typescript());
+    assert!(!js.is_jsx());
+    match workspace.get_parse("/project/a.js".into()) {
+        Ok(parse) => assert_ne!(parse.diagnostics().len(), 0),
+        Err(error) => panic!("File not available: {error}"),
+    }
+
+    let jsx_file_source = workspace.get_file_source("/project/a.jsx".into());
+    let jsx = jsx_file_source.to_js_file_source().expect("JS file source");
+    assert!(!jsx.is_typescript());
+    assert!(jsx.is_jsx());
+    match workspace.get_parse("/project/a.jsx".into()) {
+        Ok(parse) => assert_eq!(parse.diagnostics().len(), 0),
+        Err(error) => panic!("File not available: {error}"),
+    }
+    match workspace.format_file(FormatFileParams {
+        project_key,
+        path: BiomePath::new("/project/a.jsx"),
+    }) {
+        Ok(printed) => {
+            insta::assert_snapshot!(printed.as_code(), @r###"
+            function Foo({ cond }) {
+              return cond ? (
+                <True />
+              ) : (
+                <False />
+              );
+            }
+            "###);
+        }
+        Err(error) => panic!("File not formatted: {error}"),
+    }
+}
