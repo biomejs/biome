@@ -6,14 +6,6 @@ class Bioo {
 	};
 }
 
-class OnlyWrite {
-	#usedOnlyInWrite = 5;
-
-	method() {
-			this.#usedOnlyInWrite = 212;
-	}
-}
-
 class SelfUpdate {
 	#usedOnlyToUpdateItself = 5;
 
@@ -29,13 +21,6 @@ class Accessor {
 
 class First {
 	#unusedMemberInFirstClass = 5;
-}
-
-class Foo {
-	#usedOnlyInWrite = 5;
-	method() {
-			this.#usedOnlyInWrite = 42;
-	}
 }
 
 // a is not alias to this

@@ -8,7 +8,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, JsClassDeclaration, JsSyntaxKind,
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, JsClassDeclaration,
     TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
@@ -100,7 +100,7 @@ impl Rule for NoUnusedPrivateClassMembers {
                     .iter()
                     .any(|ClassMemberReference { name, .. }| private_member.match_js_name(name));
 
-                let is_write_only = !is_read && is_write && private_member.is_accessor();
+                let is_write_only = !is_read && is_write;
 
                 if is_write_only {
                     return None;
@@ -178,13 +178,6 @@ fn get_constructor_params(class_declaration: &JsClassDeclaration) -> FxHashSet<A
 }
 
 impl AnyMember {
-    fn is_accessor(&self) -> bool {
-        matches!(
-            self.syntax().kind(),
-            JsSyntaxKind::JS_SETTER_CLASS_MEMBER | JsSyntaxKind::JS_GETTER_CLASS_MEMBER
-        )
-    }
-
     fn is_private(&self) -> bool {
         match self {
             Self::AnyJsClassMember(member) => {

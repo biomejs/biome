@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 146
+assertion_line: 152
 expression: valid.ts
 ---
 # Input
@@ -41,4 +41,13 @@ export class ToastService {
 		this.activeToasts.push({ id, message, type, autoClose });
 	}
 }
+
+class TsOnlyWrite {
+	private usedOnlyInWrite = 5;
+
+	method() {
+		this.usedOnlyInWrite = 21;
+	}
+}
+
 ```

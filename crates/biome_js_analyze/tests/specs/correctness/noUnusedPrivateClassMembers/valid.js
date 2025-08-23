@@ -168,7 +168,6 @@ class C {
 	}
 }
 
-<<<<<<< HEAD
 // issue #6994
 class UsedAssignmentExpr {
   #val = 0;
@@ -192,7 +191,7 @@ class UsedPostUpdateExpr {
     return this.#val++;
   }
 }
-=======
+
 class C2 {
 	#usedOnlyInIncrement;
 
@@ -200,4 +199,12 @@ class C2 {
 		this.#usedOnlyInIncrement++;
 	}
 }
->>>>>>> 22f48652e2 (feat(biome-js-analyze): introduce class_member_analyzer to find all reads and writes of class members and props)
+
+class OnlyWrite {
+	#usedOnlyInWrite = 5;
+
+	method() {
+		this.#usedOnlyInWrite = 212;
+	}
+}
+
