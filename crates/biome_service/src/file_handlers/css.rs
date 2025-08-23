@@ -392,7 +392,13 @@ fn parse(
             .unwrap_or_default()
             .into(),
         grit_metavariables: false,
-        tailwind_directives: false,
+        tailwind_directives: settings
+            .languages
+            .css
+            .parser
+            .tailwind_directives
+            .unwrap_or_default()
+            .into(),
     };
 
     settings
