@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 432
 expression: redactor(content)
 ---
 ## `package.json`
@@ -45,7 +46,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeEach hook found.
   
     3 │ 	beforeEach(() => {
     4 │ 	});
@@ -56,7 +57,7 @@ test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━�
     7 │ 	test("bar", () => {
     8 │ 		someFn();
   
-  i Disallow beforeEach duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
