@@ -31,5 +31,6 @@ mod reporter_summary;
 mod reporter_terminal;
 mod rules_via_dependencies;
 mod suppressions;
+mod tailwind_directives;
 mod unknown_files;
 mod vcs_ignored_files;
