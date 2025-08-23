@@ -141,7 +141,7 @@ impl Rule for UseReadonlyClassProperties {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>().language();
         if !source_type.is_typescript() {
-            return Box::new([]);
+            return Box::default();
         }
 
         let root = ctx.query();
