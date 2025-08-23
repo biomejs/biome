@@ -1206,7 +1206,18 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             | AnyJsBindingDeclaration::JsFormalParameter(_)
             | AnyJsBindingDeclaration::JsRestParameter(_) => Some(Kind::FunctionParameter.into()),
             AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(Kind::CatchParameter.into()),
-            AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Kind::ClassProperty.into()),
+            AnyJsBindingDeclaration::TsPropertyParameter(param) => {
+                let modifiers: BitFlags<Modifier> = (&param.modifiers()).into();
+                if modifiers.contains(Modifier::Override) {
+                    // Ignore explicitly overridden members
+                    None
+                } else {
+                    Some(Selector::with_modifiers(
+                        Kind::ClassProperty,
+                        to_restricted_modifiers(modifiers),
+                    ))
+                }
+            },
             AnyJsBindingDeclaration::TsIndexSignatureParameter(member_name) => {
                 if let Some(member) = member_name.parent::<>() {
                     selector_from_class_member(&member)
