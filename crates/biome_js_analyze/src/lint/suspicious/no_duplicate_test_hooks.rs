@@ -160,6 +160,15 @@ impl Visitor for DuplicateHooksVisitor {
 }
 
 impl DuplicateHooksVisitor {
+    /// Determines if a [call expression] is a `describe.` call by checking:
+    /// 1. The node must be a test call expression
+    ///     e.g. `it.only`, `describe.skip`, `test`
+    /// 2. The test call must be a `describe.` call
+    ///     first section = `describe` | `fdescribe` | `xdescribe` e.g. `describe.only`, `describe.skip`
+    ///     or
+    ///     second section = `describe` e.g. `test.describe`
+    ///
+    /// [call expression]: crate::JsCallExpression
     fn is_test_describe_call(node: &JsCallExpression) -> bool {
         if let Ok(callee) = node.callee()
             && node.is_test_call_expression() == Ok(true)
@@ -167,10 +176,12 @@ impl DuplicateHooksVisitor {
             let text = callee.to_trimmed_text();
             let mut split = text.split('.');
 
-            let first = split.next().unwrap_or_default();
-            let second = split.next().unwrap_or_default();
+            let first = split.next();
+            let second = split.next();
 
-            if matches!(first, "describe" | "fdescribe" | "xdescribe") || second == "describe" {
+            if matches!(first, Some("describe" | "fdescribe" | "xdescribe"))
+                || second == Some("describe")
+            {
                 return true;
             }
         }

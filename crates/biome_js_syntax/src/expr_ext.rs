@@ -945,7 +945,7 @@ impl AnyJsExpression {
     /// - `ftest`
     /// - `Deno.test`
     ///
-    /// Based on this [article]
+    /// Inspired by this [article]
     ///
     /// [article]: https://craftinginterpreters.com/scanning-on-demand.html#tries-and-state-machines
     pub fn contains_a_test_pattern(&self) -> bool {
@@ -1008,9 +1008,26 @@ impl AnyJsExpression {
         }
     }
 
-    /// A valid pattern:
-    /// - Starts with a valid test pattern
-    /// - Ends with `.each` or `.for`
+    /// Checks if this expression contains a test.each pattern.
+    ///
+    /// A valid test.each pattern must:
+    /// - Start with a valid test pattern (see [`contains_a_test_pattern`])
+    /// - End with `.each` or `.for`
+    ///
+    /// ## Examples
+    ///
+    /// Valid patterns:
+    /// ```javascript
+    /// test.each([...])
+    /// describe.each([...])
+    /// it.each([...])
+    /// test.only.each([...])
+    /// describe.skip.each([...])
+    /// it.concurrent.each([...])
+    /// ```
+    ///
+    /// [`contains_a_test_pattern`]:  crate::AnyJsExpression::contains_a_test_pattern
+    /// #
     pub fn contains_a_test_each_pattern(&self) -> bool {
         let Self::JsStaticMemberExpression(member_expression) = self else {
             return false;
