@@ -1004,8 +1004,8 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
     };
 
     // collect the diagnostic codes for easier comparison
-    let codes: Vec<_> = params.diagnostics.iter().filter_map(|d| {
-        if let Some(lsp::NumberOrString::String(code)) = &d.code {
+    let codes: Vec<_> = params.diagnostics.iter().filter_map(|diagnostic| {
+        if let Some(lsp::NumberOrString::String(code)) = &diagnostic.code {
             Some(code.as_str())
         } else {
             None
@@ -1022,13 +1022,13 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
     );
 
     // Optionally also check messages (ignoring positions/ranges to avoid brittleness)
-    let messages: Vec<_> = params.diagnostics.iter().map(|d| d.message.as_str()).collect();
+    let messages: Vec<_> = params.diagnostics.iter().map(|diagnostic| diagnostic.message.as_str()).collect();
     assert!(
-        messages.iter().any(|m| m.contains("Duplicate private class member")),
+        messages.iter().any(|message| message.contains("Duplicate private class member")),
         "Expected duplicate member message"
     );
     assert!(
-        messages.iter().any(|m| m.contains("unused")),
+        messages.iter().any(|message| message.contains("unused")),
         "Expected unused variable message"
     );
 
