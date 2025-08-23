@@ -7,7 +7,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsClassDeclaration, JsClassMemberList, JsSyntaxKind, JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter, TsReadonlyModifier, feat, biome, js, analyze, introduce, class_member_analyzer, to, find, all, reads, and, writes, of, class, members, props, JsFileSource};
+use biome_js_syntax::{
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsPropertyModifier,
+    AnyTsPropertyParameterModifier, JsClassDeclaration, JsClassMemberList, JsFileSource,
+    JsSyntaxKind, JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter,
+    TsReadonlyModifier,
+};
 use biome_rowan::{
     AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TriviaPiece,
 };

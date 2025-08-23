@@ -34,11 +34,3 @@ export class ToastService {
 		this.activeToasts.push({ id, message, type, autoClose });
 	}
 }
-
-class TsOnlyWrite {
-	private usedOnlyInWrite = 5;
-
-	method() {
-		this.usedOnlyInWrite = 21;
-	}
-}

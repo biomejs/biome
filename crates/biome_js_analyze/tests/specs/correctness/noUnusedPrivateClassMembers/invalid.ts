@@ -40,3 +40,11 @@ class TSPartiallyUsedPrivateConstructor {
 	}
 }
 
+class TsOnlyWrite {
+	private usedOnlyInWrite = 5;
+
+	method() {
+		this.usedOnlyInWrite = 21;
+	}
+}
+

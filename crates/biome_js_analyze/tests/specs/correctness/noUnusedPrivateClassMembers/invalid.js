@@ -33,3 +33,19 @@ class UsedMember18 {
 		}
 	}
 }
+class OnlyWrite {
+	#usedOnlyInWrite = 5;
+
+	method() {
+		this.#usedOnlyInWrite = 212;
+	}
+}
+
+// issue #6994
+class UsedAssignmentExpr {
+	#val = 0;
+	method() {
+		return this.#val = 1
+	}
+}
+

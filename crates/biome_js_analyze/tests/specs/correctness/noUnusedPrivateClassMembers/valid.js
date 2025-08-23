@@ -168,14 +168,6 @@ class C {
 	}
 }
 
-// issue #6994
-class UsedAssignmentExpr {
-  #val = 0;
-  method() {
-    return this.#val = 1
-  }
-}
-
 // issue #6933
 class UsedPreUpdateExpr {
   #val = 0;
@@ -199,12 +191,3 @@ class C2 {
 		this.#usedOnlyInIncrement++;
 	}
 }
-
-class OnlyWrite {
-	#usedOnlyInWrite = 5;
-
-	method() {
-		this.#usedOnlyInWrite = 212;
-	}
-}
-

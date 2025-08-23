@@ -40,6 +40,22 @@ class UsedMember18 {
 		}
 	}
 }
+class OnlyWrite {
+	#usedOnlyInWrite = 5;
+
+	method() {
+		this.#usedOnlyInWrite = 212;
+	}
+}
+
+// issue #6994
+class UsedAssignmentExpr {
+	#val = 0;
+	method() {
+		return this.#val = 1
+	}
+}
+
 
 ```
 
@@ -178,6 +194,52 @@ invalid.js:28:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     28    │ - → #usedInInnerClass;
     29 28 │   
     30 29 │   	method(a) {
+  
+
+```
+
+```
+invalid.js:37:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    35 │ }
+    36 │ class OnlyWrite {
+  > 37 │ 	#usedOnlyInWrite = 5;
+       │ 	^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ 	method() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    35 35 │   }
+    36 36 │   class OnlyWrite {
+    37    │ - → #usedOnlyInWrite·=·5;
+    38 37 │   
+    39 38 │   	method() {
+  
+
+```
+
+```
+invalid.js:46:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    44 │ // issue #6994
+    45 │ class UsedAssignmentExpr {
+  > 46 │ 	#val = 0;
+       │ 	^^^^
+    47 │ 	method() {
+    48 │ 		return this.#val = 1
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    44 44 │   // issue #6994
+    45 45 │   class UsedAssignmentExpr {
+    46    │ - → #val·=·0;
+    47 46 │   	method() {
+    48 47 │   		return this.#val = 1
   
 
 ```

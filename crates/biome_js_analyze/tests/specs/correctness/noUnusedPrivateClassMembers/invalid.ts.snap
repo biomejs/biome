@@ -35,6 +35,27 @@ class TsBioo2 {
 	}
 }
 
+class TSDoubleUnusedPrivateConstructor {
+	constructor(private unusedOne: number, #unusedTwo: unknown) {
+		// This constructor has two unused private properties
+	}
+}
+
+class TSPartiallyUsedPrivateConstructor {
+	constructor(private param: number) {
+		foo(param)
+	}
+}
+
+class TsOnlyWrite {
+	private usedOnlyInWrite = 5;
+
+	method() {
+		this.usedOnlyInWrite = 21;
+	}
+}
+
+
 ```
 
 # Diagnostics
@@ -191,6 +212,64 @@ invalid.ts:23:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     23    │ - → private·unusedMethod()·{}
     24 23 │   
     25 24 │   	private usedProperty = 4;
+  
+
+```
+
+```
+invalid.ts:32:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    31 │ class TSDoubleUnusedPrivateConstructor {
+  > 32 │ 	constructor(private unusedOne: number, #unusedTwo: unknown) {
+       │ 	                    ^^^^^^^^^
+    33 │ 		// This constructor has two unused private properties
+    34 │ 	}
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    32 │ → constructor(private·unusedOne:·number,·#unusedTwo:·unknown)·{
+       │               -------------------------                        
+
+```
+
+```
+invalid.ts:38:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    37 │ class TSPartiallyUsedPrivateConstructor {
+  > 38 │ 	constructor(private param: number) {
+       │ 	                    ^^^^^
+    39 │ 		foo(param)
+    40 │ 	}
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    38 │ → constructor(private·param:·number)·{
+       │               ---------------------   
+
+```
+
+```
+invalid.ts:44:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    43 │ class TsOnlyWrite {
+  > 44 │ 	private usedOnlyInWrite = 5;
+       │ 	        ^^^^^^^^^^^^^^^
+    45 │ 
+    46 │ 	method() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    42 42 │   
+    43 43 │   class TsOnlyWrite {
+    44    │ - → private·usedOnlyInWrite·=·5;
+    45 44 │   
+    46 45 │   	method() {
   
 
 ```
