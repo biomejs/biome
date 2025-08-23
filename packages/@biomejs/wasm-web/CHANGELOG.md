@@ -1,5 +1,11 @@
 # @biomejs/wasm-web
 
+## 2.2.1
+
+### Patch Changes
+
+- [#7281](https://github.com/biomejs/biome/pull/7281) [`6436180`](https://github.com/biomejs/biome/commit/6436180f4a3b257e2de018bac45c99a76eff58be) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where the function `scanProject` wouldn't work as expected.
+
 ## 2.2.0
 
 ### Minor Changes
