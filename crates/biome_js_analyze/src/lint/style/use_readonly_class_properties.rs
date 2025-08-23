@@ -139,7 +139,6 @@ impl Rule for UseReadonlyClassProperties {
     type Options = UseReadonlyClassPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        // Only run this rule on TypeScript files since `readonly` is a TypeScript feature
         let source_type = ctx.source_type::<JsFileSource>().language();
         if !source_type.is_typescript() {
             return Box::new([]);
