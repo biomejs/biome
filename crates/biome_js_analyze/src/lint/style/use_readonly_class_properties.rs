@@ -10,8 +10,8 @@ use biome_js_syntax::{
     JsArrowFunctionExpression, JsAssignmentExpression, JsAwaitExpression, JsBlockStatement,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassMemberList,
     JsConditionalExpression, JsConstructorClassMember, JsElseClause, JsExpressionStatement,
-    JsFunctionBody, JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsIfStatement,
-    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
+    JsFileSource, JsFunctionBody, JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember,
+    JsIfStatement, JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
     JsObjectAssignmentPattern, JsObjectExpression, JsObjectMemberList, JsParenthesizedExpression,
     JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember, JsReturnStatement,
     JsSetterClassMember, JsSetterObjectMember, JsStatementList, JsStaticMemberAssignment,
@@ -139,6 +139,12 @@ impl Rule for UseReadonlyClassProperties {
     type Options = UseReadonlyClassPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        // Only run this rule on TypeScript files since `readonly` is a TypeScript feature
+        let source_type = ctx.source_type::<JsFileSource>().language();
+        if !source_type.is_typescript() {
+            return Box::new([]);
+        }
+
         let root = ctx.query();
         let members = root.members();
         let private_only = !ctx.options().check_all_properties;
