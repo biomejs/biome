@@ -997,39 +997,61 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
 
     server.open_document("class A { #foo; #foo }").await?;
 
-    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let notification = wait_for_notification(&mut receiver, |notification| {
+        notification.is_publish_diagnostics()
+    })
+        .await;
 
-    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+    let Some(ServerNotification::PublishDiagnostics(publish_params)) = notification else {
         panic!("No PublishDiagnostics received");
     };
 
-    // collect the diagnostic codes for easier comparison
-    let codes: Vec<_> = params.diagnostics.iter().filter_map(|diagnostic| {
-        if let Some(lsp::NumberOrString::String(code)) = &diagnostic.code {
-            Some(code.as_str())
-        } else {
-            None
-        }
-    }).collect();
+    // Collect all diagnostic codes into a vector of strings
+    let diagnostic_codes: Vec<_> = publish_params
+        .diagnostics
+        .iter()
+        .filter_map(|diagnostic| {
+            if let Some(lsp::NumberOrString::String(code)) = &diagnostic.code {
+                Some(code.as_str())
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    // Expected rules that must appear
+    let expected_rules = [
+        "syntax/correctness/noDuplicatePrivateClassMembers",
+        "lint/correctness/noUnusedVariables",
+        "lint/correctness/noUnusedPrivateClassMembers",
+    ];
+
+    for expected_rule in expected_rules {
+        assert!(
+            diagnostic_codes.contains(&expected_rule),
+            "Expected diagnostic for rule {expected_rule}, got {diagnostic_codes:?}"
+        );
+    }
+
+    // Collect all messages
+    let diagnostic_messages: Vec<_> = publish_params
+        .diagnostics
+        .iter()
+        .map(|diagnostic| diagnostic.message.as_str())
+        .collect();
 
     assert!(
-        codes.contains(&"syntax/correctness/noDuplicatePrivateClassMembers"),
-        "Expected duplicate private member diagnostic, got {codes:?}"
-    );
-    assert!(
-        codes.contains(&"lint/correctness/noUnusedVariables"),
-        "Expected unused variable diagnostic, got {codes:?}"
+        diagnostic_messages
+            .iter()
+            .any(|message| message.contains("Duplicate private class member")),
+        "Expected duplicate private member diagnostic message"
     );
 
-    // Optionally also check messages (ignoring positions/ranges to avoid brittleness)
-    let messages: Vec<_> = params.diagnostics.iter().map(|diagnostic| diagnostic.message.as_str()).collect();
     assert!(
-        messages.iter().any(|message| message.contains("Duplicate private class member")),
-        "Expected duplicate member message"
-    );
-    assert!(
-        messages.iter().any(|message| message.contains("unused")),
-        "Expected unused variable message"
+        diagnostic_messages
+            .iter()
+            .any(|message| message.contains("unused")),
+        "Expected unused diagnostic messages"
     );
 
     server.close_document().await?;
