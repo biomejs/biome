@@ -25,21 +25,16 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 }
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
-// #[ignore]
+#[ignore]
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"
-class Test {
-  private thing: any;
+    const SOURCE: &str = r#"import * as postcssModules from "postcss-modules"
 
-  public doStuff(): void {
-    ui.showText("example", {
-      callback: () => {
-        this.thing = x;
-      },
-    });
-  }
+type PostcssOptions = Parameters<postcssModules>[0]
+
+export function f(options: PostcssOptions) {
+	console.log(options)
 }
 "#;
 
@@ -57,7 +52,7 @@ class Test {
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
         );
-    let rule_filter = RuleFilter::Rule("style", "useReadonlyClassProperties");
+    let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
