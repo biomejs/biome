@@ -17,6 +17,14 @@ expression: invalid.jsx
 	</>
 </>
 
+
+class Comp1 extends Component {
+	render() {
+		const varObjectTest = { testKey : (<div>test</div>) };
+		return varObjectTest.testKey;
+	}
+}
+
 ```
 
 # Diagnostics
@@ -70,6 +78,23 @@ invalid.jsx:6:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━�
        │ 		
     11 │ 	</>
     12 │ </>
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.jsx:17:43 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of JSX literals is not allowed.
+  
+    15 │ class Comp1 extends Component {
+    16 │ 	render() {
+  > 17 │ 		const varObjectTest = { testKey : (<div>test</div>) };
+       │ 		                                        ^^^^
+    18 │ 		return varObjectTest.testKey;
+    19 │ 	}
   
   i This note will give you more information.
   

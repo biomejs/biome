@@ -1,10 +1,10 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsFileSource, JsIdentifierBinding,
-    JsStringLiteralExpression, JsxExpressionAttributeValue, JsxString, JsxText,
+    AnyJsExpression, AnyJsLiteralExpression, JsFileSource, JsStringLiteralExpression, JsxAttribute,
+    JsxExpressionAttributeValue, JsxString, JsxText,
 };
-use biome_rowan::{AstNode, AstNodeList, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, TextRange, declare_node_union};
 use biome_rule_options::no_jsx_literals::NoJsxLiteralsOptions;
 
 declare_lint_rule! {
@@ -40,7 +40,7 @@ declare_lint_rule! {
 
 impl Rule for NoJsxLiterals {
     type Query = Ast<AnyJsxText>;
-    type State = ();
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = NoJsxLiteralsOptions;
 
@@ -52,6 +52,17 @@ impl Rule for NoJsxLiterals {
 
         let node = ctx.query();
         let options = ctx.options();
+
+        if options.ignore_props
+            && node
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .any(|n| JsxAttribute::can_cast(n.kind()))
+        {
+            return None;
+        }
+
         let value_token = match node {
             AnyJsxText::JsxText(text) => text.value_token().ok()?,
             AnyJsxText::JsStringLiteralExpression(expression) => {
@@ -71,19 +82,22 @@ impl Rule for NoJsxLiterals {
                     return None;
                 }
                 let expression = expression.expression().ok()?;
-                return match expression {
+                match expression {
+                    AnyJsExpression::AnyJsLiteralExpression(
+                        AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
+                    ) => string_literal.value_token().ok()?,
                     AnyJsExpression::JsTemplateExpression(expression) => {
-                        if expression.elements().len() == 0 {
-                            Some(())
+                        return if expression.elements().len() == 0 {
+                            Some(expression.range())
                         } else if expression.elements().len() == 1 {
-                            Some(())
+                            Some(expression.range())
                         } else {
                             None
-                        }
+                        };
                     }
 
-                    _ => None,
-                };
+                    _ => return None,
+                }
             }
         };
 
@@ -97,15 +111,14 @@ impl Rule for NoJsxLiterals {
             return None;
         }
 
-        Some(())
+        Some(value_token.text_trimmed_range())
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                state,
                 markup! {
                     "The use of JSX literals is not allowed."
                 },
