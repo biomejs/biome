@@ -1,8 +1,6 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::block::{
-    parse_declaration_block, parse_declaration_or_rule_list_block, parse_rule_block,
-};
+use crate::syntax::block::{parse_declaration_or_rule_list_block, parse_rule_block};
 use crate::syntax::parse_error::{expected_identifier, expected_selector, expected_string};
 use crate::syntax::selector::parse_selector;
 use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier, parse_string};
@@ -47,7 +45,7 @@ pub(crate) fn parse_utility_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     parse_utility_name(p).ok();
 
-    parse_declaration_block(p);
+    parse_declaration_or_rule_list_block(p);
 
     Present(m.complete(p, TW_UTILITY_AT_RULE))
 }

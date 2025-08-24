@@ -2513,7 +2513,7 @@ impl TwThemeAtRuleBuilder {
 pub fn tw_utility_at_rule(
     utility_token: SyntaxToken,
     name: AnyTwUtilityName,
-    block: AnyCssDeclarationBlock,
+    block: AnyCssDeclarationOrRuleBlock,
 ) -> TwUtilityAtRule {
     TwUtilityAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::TW_UTILITY_AT_RULE,

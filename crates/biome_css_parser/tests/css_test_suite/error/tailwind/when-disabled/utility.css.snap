@@ -24,9 +24,9 @@ CssRoot {
                     CssIdentifier {
                         value_token: IDENT@9..20 "empty-util" [] [Whitespace(" ")],
                     },
-                    CssDeclarationBlock {
+                    CssDeclarationOrRuleBlock {
                         l_curly_token: L_CURLY@20..21 "{" [] [],
-                        declarations: CssDeclarationList [],
+                        items: CssDeclarationOrRuleList [],
                         r_curly_token: R_CURLY@21..22 "}" [] [],
                     },
                 ],
@@ -49,9 +49,9 @@ CssRoot {
         0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@9..20
           0: IDENT@9..20 "empty-util" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@20..22
+        2: CSS_DECLARATION_OR_RULE_BLOCK@20..22
           0: L_CURLY@20..21 "{" [] []
-          1: CSS_DECLARATION_LIST@21..21
+          1: CSS_DECLARATION_OR_RULE_LIST@21..21
           2: R_CURLY@21..22 "}" [] []
   2: EOF@22..23 "" [Newline("\n")] []
 

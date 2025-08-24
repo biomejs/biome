@@ -179,26 +179,3 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         insta::assert_snapshot!(file_name, snapshot);
     });
 }
-
-#[ignore]
-#[test]
-pub fn quick_test() {
-    let code = r#"
-html:active-view-transition-type(backwards forwards backwards forwards) {
-}
-
-    "#;
-
-    let root = parse_css(
-        code,
-        CssParserOptions::default()
-            .allow_wrong_line_comments()
-            .allow_css_modules()
-            .allow_metavariables(),
-    );
-    let syntax = root.syntax();
-    dbg!(&syntax, root.diagnostics(), root.has_errors());
-    if has_bogus_nodes_or_empty_slots(&syntax) {
-        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
-    }
-}

@@ -59,9 +59,9 @@ CssRoot {
                     minus_token: MINUS@76..77 "-" [] [],
                     star_token: STAR@77..79 "*" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@79..80 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -116,9 +116,9 @@ CssRoot {
                     minus_token: MINUS@131..132 "-" [] [],
                     star_token: STAR@132..134 "*" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@134..135 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -173,9 +173,9 @@ CssRoot {
                     minus_token: MINUS@180..181 "-" [] [],
                     star_token: STAR@181..183 "*" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@183..184 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -230,9 +230,9 @@ CssRoot {
                     minus_token: MINUS@291..292 "-" [] [],
                     star_token: STAR@292..294 "*" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@294..295 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -285,9 +285,9 @@ CssRoot {
                     minus_token: MINUS@344..345 "-" [] [],
                     star_token: STAR@345..347 "*" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@347..348 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -340,9 +340,9 @@ CssRoot {
                     minus_token: MINUS@448..449 "-" [] [],
                     star_token: STAR@449..451 "*" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@451..452 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -391,9 +391,9 @@ CssRoot {
                     minus_token: MINUS@567..568 "-" [] [],
                     star_token: STAR@568..570 "*" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@570..571 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -585,9 +585,9 @@ CssRoot {
             0: IDENT@69..76 "opacity" [] []
           1: MINUS@76..77 "-" [] []
           2: STAR@77..79 "*" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@79..115
+        2: CSS_DECLARATION_OR_RULE_BLOCK@79..115
           0: L_CURLY@79..80 "{" [] []
-          1: CSS_DECLARATION_LIST@80..113
+          1: CSS_DECLARATION_OR_RULE_LIST@80..113
             0: CSS_DECLARATION_WITH_SEMICOLON@80..113
               0: CSS_DECLARATION@80..112
                 0: CSS_GENERIC_PROPERTY@80..112
@@ -622,9 +622,9 @@ CssRoot {
             0: IDENT@126..131 "width" [] []
           1: MINUS@131..132 "-" [] []
           2: STAR@132..134 "*" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@134..164
+        2: CSS_DECLARATION_OR_RULE_BLOCK@134..164
           0: L_CURLY@134..135 "{" [] []
-          1: CSS_DECLARATION_LIST@135..162
+          1: CSS_DECLARATION_OR_RULE_LIST@135..162
             0: CSS_DECLARATION_WITH_SEMICOLON@135..162
               0: CSS_DECLARATION@135..161
                 0: CSS_GENERIC_PROPERTY@135..161
@@ -659,9 +659,9 @@ CssRoot {
             0: IDENT@175..180 "color" [] []
           1: MINUS@180..181 "-" [] []
           2: STAR@181..183 "*" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@183..212
+        2: CSS_DECLARATION_OR_RULE_BLOCK@183..212
           0: L_CURLY@183..184 "{" [] []
-          1: CSS_DECLARATION_LIST@184..210
+          1: CSS_DECLARATION_OR_RULE_LIST@184..210
             0: CSS_DECLARATION_WITH_SEMICOLON@184..210
               0: CSS_DECLARATION@184..209
                 0: CSS_GENERIC_PROPERTY@184..209
@@ -696,9 +696,9 @@ CssRoot {
             0: IDENT@284..291 "spacing" [] []
           1: MINUS@291..292 "-" [] []
           2: STAR@292..294 "*" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@294..328
+        2: CSS_DECLARATION_OR_RULE_BLOCK@294..328
           0: L_CURLY@294..295 "{" [] []
-          1: CSS_DECLARATION_LIST@295..326
+          1: CSS_DECLARATION_OR_RULE_LIST@295..326
             0: CSS_DECLARATION_WITH_SEMICOLON@295..326
               0: CSS_DECLARATION@295..325
                 0: CSS_GENERIC_PROPERTY@295..325
@@ -732,9 +732,9 @@ CssRoot {
             0: IDENT@339..344 "color" [] []
           1: MINUS@344..345 "-" [] []
           2: STAR@345..347 "*" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@347..378
+        2: CSS_DECLARATION_OR_RULE_BLOCK@347..378
           0: L_CURLY@347..348 "{" [] []
-          1: CSS_DECLARATION_LIST@348..376
+          1: CSS_DECLARATION_OR_RULE_LIST@348..376
             0: CSS_DECLARATION_WITH_SEMICOLON@348..376
               0: CSS_DECLARATION@348..375
                 0: CSS_GENERIC_PROPERTY@348..375
@@ -768,9 +768,9 @@ CssRoot {
             0: IDENT@444..448 "flex" [] []
           1: MINUS@448..449 "-" [] []
           2: STAR@449..451 "*" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@451..479
+        2: CSS_DECLARATION_OR_RULE_BLOCK@451..479
           0: L_CURLY@451..452 "{" [] []
-          1: CSS_DECLARATION_LIST@452..477
+          1: CSS_DECLARATION_OR_RULE_LIST@452..477
             0: CSS_DECLARATION_WITH_SEMICOLON@452..477
               0: CSS_DECLARATION@452..476
                 0: CSS_GENERIC_PROPERTY@452..476
@@ -801,9 +801,9 @@ CssRoot {
             0: IDENT@560..567 "complex" [] []
           1: MINUS@567..568 "-" [] []
           2: STAR@568..570 "*" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@570..711
+        2: CSS_DECLARATION_OR_RULE_BLOCK@570..711
           0: L_CURLY@570..571 "{" [] []
-          1: CSS_DECLARATION_LIST@571..709
+          1: CSS_DECLARATION_OR_RULE_LIST@571..709
             0: CSS_DECLARATION_WITH_SEMICOLON@571..625
               0: CSS_DECLARATION@571..624
                 0: CSS_GENERIC_PROPERTY@571..624
