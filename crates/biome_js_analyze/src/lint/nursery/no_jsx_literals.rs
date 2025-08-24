@@ -176,9 +176,7 @@ impl Rule for NoJsxLiterals {
                         AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
                     ) => string_literal.value_token().ok()?,
                     AnyJsExpression::JsTemplateExpression(expression) => {
-                        return if expression.elements().len() == 0 {
-                            Some(expression.range())
-                        } else if expression.elements().len() == 1 {
+                        return if expression.elements().len() <= 1 {
                             Some(expression.range())
                         } else {
                             None
