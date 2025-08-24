@@ -177,7 +177,10 @@ impl Rule for UseImportType {
         let import_clause = import.import_clause().ok()?;
         // Import attributes and type-only imports are not compatible in ESM.
         if import_clause.attribute().is_some()
-            && ctx.file_path().extension().is_none_or(|extension| extension != "cts")
+            && ctx
+                .file_path()
+                .extension()
+                .is_none_or(|extension| extension != "cts")
             && !matches!(ctx.root(), AnyJsRoot::JsScript(_))
         {
             return None;
