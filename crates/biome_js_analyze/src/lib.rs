@@ -121,7 +121,7 @@ where
         source_type,
     } = services;
 
-    let (registry, mut services, diagnostics, visitors, categories) = registry.build();
+    let (registry, mut services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -134,7 +134,6 @@ where
         parse_linter_suppression_comment,
         Box::new(JsSuppressionAction),
         &mut emit_signal,
-        categories,
     );
 
     for plugin in plugins {

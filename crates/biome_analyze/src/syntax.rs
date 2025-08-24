@@ -100,8 +100,8 @@ mod tests {
 
     use crate::{
         Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression, ControlFlow,
-        MetadataRegistry, Never, QueryMatcher, RuleCategoriesBuilder, ServiceBag,
-        SuppressionAction, SyntaxVisitor, matcher::MatchQueryParams, registry::Phases,
+        MetadataRegistry, Never, QueryMatcher, ServiceBag, SuppressionAction, SyntaxVisitor,
+        matcher::MatchQueryParams, registry::Phases,
     };
 
     #[derive(Default)]
@@ -191,7 +191,6 @@ mod tests {
             |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
             Box::new(TestAction),
             &mut emit_signal,
-            RuleCategoriesBuilder::default().with_syntax().build(),
         );
 
         analyzer.add_visitor(Phases::Syntax, Box::<SyntaxVisitor<RawLanguage>>::default());
