@@ -6,6 +6,14 @@ class Bioo {
 	};
 }
 
+class OnlyWrite {
+	#usedOnlyInWrite = 5;
+
+	method() {
+			this.#usedOnlyInWrite = 212;
+	}
+}
+
 class SelfUpdate {
 	#usedOnlyToUpdateItself = 5;
 
@@ -23,29 +31,24 @@ class First {
 	#unusedMemberInFirstClass = 5;
 }
 
-// a is not alias to this
-class UsedMember18 {
-	#usedInInnerClass;
-
-	method(a) {
-		return class {
-			foo = a.#usedInInnerClass;
-		}
-	}
-}
-class OnlyWrite {
+class Foo {
 	#usedOnlyInWrite = 5;
-
 	method() {
-		this.#usedOnlyInWrite = 212;
+			this.#usedOnlyInWrite = 42;
 	}
 }
 
-// issue #6994
-class UsedAssignmentExpr {
-	#val = 0;
+class Foo {
+	#usedOnlyInWriteStatement = 5;
 	method() {
-		return this.#val = 1
+			this.#usedOnlyInWriteStatement += 42;
 	}
 }
 
+class C {
+	#usedOnlyInIncrement;
+
+	foo() {
+			this.#usedOnlyInIncrement++;
+	}
+}

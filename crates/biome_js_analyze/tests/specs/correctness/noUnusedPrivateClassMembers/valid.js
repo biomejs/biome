@@ -4,168 +4,188 @@ class UsedMember {
 	#usedMember = 42;
 
 	method() {
-		return this.#usedMember;
+			return this.#usedMember;
 	}
 }
 
-class UsedMember2 {
+class UsedMember {
 	#usedMethod() {
-		return 42;
+			return 42;
 	}
 
 	anotherMethod() {
-		return this.#usedMethod();
+			return this.#usedMethod();
 	}
 }
 
-class UsedMember3 {
+
+class UsedMember {
 	get #usedAccessor() {}
 	set #usedAccessor(value) {}
 
 	method() {
-		this.#usedAccessor = 42;
+			this.#usedAccessor = 42;
 	}
 }
 
-class UsedMember4 {
+class UsedMember {
 	publicMember = 42;
 }
 
-class UsedMember5 {
+class UsedMember {
 	#usedMember = 42;
 	anotherMember = this.#usedMember;
 }
 
-class UsedMember6 {
+class UsedMember {
 	#usedMember = 42;
 	foo() {
 		this.#usedMember = this.#usedMember;
 	}
 }
 
-class UsedMember7 {
+class UsedMember {
 	#usedMember;
 
 	foo() {
-		bar(this.#usedMember += 1);
+			bar(this.#usedMember += 1);
 	}
 }
 
-class UsedMember8 {
+class UsedMember {
 	#usedMember = 42;
 	method() {
-		return someGlobalMethod(this.#usedMember);
+			return someGlobalMethod(this.#usedMember);
 	}
 }
 
-class UsedMember9 {
+class UsedMember {
 	#usedInOuterClass;
 
 	foo() {
-		return class {};
+			return class {};
 	}
 
 	bar() {
-		return this.#usedInOuterClass;
+			return this.#usedInOuterClass;
 	}
 }
 
-class UsedMember10 {
+
+class UsedMember {
 	#usedInForInLoop;
 	method() {
-		for (const bar in this.#usedInForInLoop) {
+			for (const bar in this.#usedInForInLoop) {
 
-		}
+			}
 	}
 }
 
-class UsedMember11 {
+class UsedMember {
 	#usedInForOfLoop;
 	method() {
-		for (const bar of this.#usedInForOfLoop) {
+			for (const bar of this.#usedInForOfLoop) {
 
-		}
+			}
 	}
 }
 
-class UsedMember12 {
+class UsedMember {
 	#usedInAssignmentPattern;
 	method() {
-		[bar = 1] = this.#usedInAssignmentPattern;
+			[bar = 1] = this.#usedInAssignmentPattern;
 	}
 }
 
-class UsedMember13 {
+class UsedMember {
 	#usedInArrayPattern;
 	method() {
-		[bar] = this.#usedInArrayPattern;
+			[bar] = this.#usedInArrayPattern;
 	}
 }
 
-class UsedMember14 {
+class UsedMember {
 	#usedInAssignmentPattern;
 	method() {
-		[bar] = this.#usedInAssignmentPattern;
+			[bar] = this.#usedInAssignmentPattern;
 	}
 }
 
-class UsedMember15 {
+class UsedMember {
 	#usedInObjectAssignment;
 
 	method() {
-		({ [this.#usedInObjectAssignment]: a } = foo);
+			({ [this.#usedInObjectAssignment]: a } = foo);
 	}
 }
 
-class UsedMember16 {
+class UsedMember {
 	set #accessorWithSetterFirst(value) {
-		doSomething(value);
+			doSomething(value);
 	}
 	get #accessorWithSetterFirst() {
-		return something();
+			return something();
 	}
 	method() {
-		this.#accessorWithSetterFirst += 1;
+			this.#accessorWithSetterFirst += 1;
 	}
 }
 
-class UsedMember17 {
+class UsedMember {
 	set #accessorUsedInMemberAccess(value) {}
 
 	method(a) {
-		[this.#accessorUsedInMemberAccess] = a;
+			[this.#accessorUsedInMemberAccess] = a;
 	}
 }
 
-class UsedMember18 {
+class UsedMember {
 	get #accessorWithGetterFirst() {
-		return something();
+			return something();
 	}
 	set #accessorWithGetterFirst(value) {
-		doSomething(value);
+			doSomething(value);
 	}
 	method() {
-		this.#accessorWithGetterFirst += 1;
+			this.#accessorWithGetterFirst += 1;
+	}
+}
+
+class UsedMember {
+	#usedInInnerClass;
+
+	method(a) {
+			return class {
+					foo = a.#usedInInnerClass;
+			}
 	}
 }
 
 class Foo {
 	#usedMethod() {
-		return 42;
+			return 42;
 	}
 	anotherMethod() {
-		return this.#usedMethod();
+			return this.#usedMethod();
 	}
 }
 
 class C {
 	set #x(value) {
-		doSomething(value);
+			doSomething(value);
 	}
 
 	foo() {
-		this.#x = 1;
+			this.#x = 1;
 	}
+}
+
+// issue #6994
+class UsedAssignmentExpr {
+  #val = 0;
+  method() {
+    return this.#val = 1
+  }
 }
 
 // issue #6933
@@ -182,12 +202,4 @@ class UsedPostUpdateExpr {
   method() {
     return this.#val++;
   }
-}
-
-class C2 {
-	#usedOnlyInIncrement;
-
-	foo() {
-		this.#usedOnlyInIncrement++;
-	}
 }

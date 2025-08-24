@@ -997,64 +997,128 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
 
     server.open_document("class A { #foo; #foo }").await?;
 
-    let notification = wait_for_notification(&mut receiver, |notification| {
-        notification.is_publish_diagnostics()
-    })
-        .await;
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
 
-    let Some(ServerNotification::PublishDiagnostics(publish_params)) = notification else {
-        panic!("No PublishDiagnostics received");
-    };
-
-    // Collect all diagnostic codes into a vector of strings
-    let diagnostic_codes: Vec<_> = publish_params
-        .diagnostics
-        .iter()
-        .filter_map(|diagnostic| {
-            if let Some(lsp::NumberOrString::String(code)) = &diagnostic.code {
-                Some(code.as_str())
-            } else {
-                None
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.js"),
+                version: Some(0),
+                diagnostics: vec![
+                    lsp::Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 0,
+                                character: 16,
+                            },
+                            end: Position {
+                                line: 0,
+                                character: 20,
+                            },
+                        },
+                        severity: Some(lsp::DiagnosticSeverity::ERROR),
+                        code: Some(lsp::NumberOrString::String(String::from(
+                            "syntax/correctness/noDuplicatePrivateClassMembers",
+                        ))),
+                        code_description: None,
+                        source: Some(String::from("biome")),
+                        message: String::from("Duplicate private class member \"#foo\"",),
+                        related_information: None,
+                        tags: None,
+                        data: None,
+                    },
+                    lsp::Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 0,
+                                character: 10,
+                            },
+                            end: Position {
+                                line: 0,
+                                character: 14,
+                            },
+                        },
+                        severity: Some(lsp::DiagnosticSeverity::WARNING),
+                        code: Some(lsp::NumberOrString::String(String::from(
+                            "lint/correctness/noUnusedPrivateClassMembers",
+                        ))),
+                        code_description: Some(lsp::CodeDescription {
+                            href:
+                                "https://biomejs.dev/linter/rules/no-unused-private-class-members"
+                                    .parse()
+                                    .unwrap(),
+                        }),
+                        source: Some(String::from("biome")),
+                        message: String::from(
+                            "This private class member is defined but never used.",
+                        ),
+                        related_information: None,
+                        tags: None,
+                        data: None,
+                    },
+                    lsp::Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 0,
+                                character: 16,
+                            },
+                            end: Position {
+                                line: 0,
+                                character: 20,
+                            },
+                        },
+                        severity: Some(lsp::DiagnosticSeverity::WARNING),
+                        code: Some(lsp::NumberOrString::String(String::from(
+                            "lint/correctness/noUnusedPrivateClassMembers",
+                        ))),
+                        code_description: Some(lsp::CodeDescription {
+                            href:
+                                "https://biomejs.dev/linter/rules/no-unused-private-class-members"
+                                    .parse()
+                                    .unwrap(),
+                        }),
+                        source: Some(String::from("biome")),
+                        message: String::from(
+                            "This private class member is defined but never used.",
+                        ),
+                        related_information: None,
+                        tags: None,
+                        data: None,
+                    },
+                    lsp::Diagnostic {
+                        range: Range {
+                            start: Position {
+                                line: 0,
+                                character: 6,
+                            },
+                            end: Position {
+                                line: 0,
+                                character: 7,
+                            },
+                        },
+                        severity: Some(lsp::DiagnosticSeverity::WARNING),
+                        code: Some(lsp::NumberOrString::String(String::from(
+                            "lint/correctness/noUnusedVariables",
+                        ))),
+                        code_description: Some(lsp::CodeDescription {
+                            href: "https://biomejs.dev/linter/rules/no-unused-variables"
+                                .parse()
+                                .unwrap(),
+                        }),
+                        source: Some(String::from("biome")),
+                        message: String::from("This class A is unused.",),
+                        related_information: None,
+                        tags: None,
+                        data: None,
+                    }
+                ],
             }
-        })
-        .collect();
-
-    // Expected rules that must appear
-    let expected_rules = [
-        "syntax/correctness/noDuplicatePrivateClassMembers",
-        "lint/correctness/noUnusedVariables",
-        "lint/correctness/noUnusedPrivateClassMembers",
-    ];
-
-    for expected_rule in expected_rules {
-        assert!(
-            diagnostic_codes.contains(&expected_rule),
-            "Expected diagnostic for rule {expected_rule}, got {diagnostic_codes:?}"
-        );
-    }
-
-    // Collect all messages
-    let diagnostic_messages: Vec<_> = publish_params
-        .diagnostics
-        .iter()
-        .map(|diagnostic| diagnostic.message.as_str())
-        .collect();
-
-    assert!(
-        diagnostic_messages
-            .iter()
-            .any(|message| message.contains("Duplicate private class member")),
-        "Expected duplicate private member diagnostic message"
-    );
-
-    assert!(
-        diagnostic_messages
-            .iter()
-            .any(|message| message.contains("unused")),
-        "Expected unused diagnostic messages"
+        ))
     );
 
     server.close_document().await?;
+
     server.shutdown().await?;
     reader.abort();
 

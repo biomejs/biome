@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: invalid.js
 ---
 # Input
@@ -11,6 +10,14 @@ class Bioo {
 	#unusedMethod() {
 
 	};
+}
+
+class OnlyWrite {
+	#usedOnlyInWrite = 5;
+
+	method() {
+			this.#usedOnlyInWrite = 212;
+	}
 }
 
 class SelfUpdate {
@@ -30,32 +37,27 @@ class First {
 	#unusedMemberInFirstClass = 5;
 }
 
-// a is not alias to this
-class UsedMember18 {
-	#usedInInnerClass;
-
-	method(a) {
-		return class {
-			foo = a.#usedInInnerClass;
-		}
-	}
-}
-class OnlyWrite {
+class Foo {
 	#usedOnlyInWrite = 5;
-
 	method() {
-		this.#usedOnlyInWrite = 212;
+			this.#usedOnlyInWrite = 42;
 	}
 }
 
-// issue #6994
-class UsedAssignmentExpr {
-	#val = 0;
+class Foo {
+	#usedOnlyInWriteStatement = 5;
 	method() {
-		return this.#val = 1
+			this.#usedOnlyInWriteStatement += 42;
 	}
 }
 
+class C {
+	#usedOnlyInIncrement;
+
+	foo() {
+			this.#usedOnlyInIncrement++;
+	}
+}
 
 ```
 
@@ -109,137 +111,178 @@ invalid.js:4:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
 ```
 
 ```
-invalid.js:18:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This private class member is defined but never used.
   
-    17 │ class Accessor {
-  > 18 │ 	get #unusedAccessor() {}
-       │ 	    ^^^^^^^^^^^^^^^
-    19 │ 	set #unusedAccessor(value) {}
-    20 │ }
+     9 │ class OnlyWrite {
+  > 10 │ 	#usedOnlyInWrite = 5;
+       │ 	^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ 	method() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     8  8 │   
+     9  9 │   class OnlyWrite {
+    10    │ - → #usedOnlyInWrite·=·5;
+    11 10 │   
+    12 11 │   	method() {
+  
+
+```
+
+```
+invalid.js:18:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    17 │ class SelfUpdate {
+  > 18 │ 	#usedOnlyToUpdateItself = 5;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ 	method() {
   
   i Unsafe fix: Remove unused declaration.
   
     16 16 │   
-    17 17 │   class Accessor {
-    18    │ - → get·#unusedAccessor()·{}
-    19 18 │   	set #unusedAccessor(value) {}
-    20 19 │   }
+    17 17 │   class SelfUpdate {
+    18    │ - → #usedOnlyToUpdateItself·=·5;
+    19 18 │   
+    20 19 │   	method() {
   
 
 ```
 
 ```
-invalid.js:19:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This private class member is defined but never used.
   
-    17 │ class Accessor {
-    18 │ 	get #unusedAccessor() {}
-  > 19 │ 	set #unusedAccessor(value) {}
+    25 │ class Accessor {
+  > 26 │ 	get #unusedAccessor() {}
        │ 	    ^^^^^^^^^^^^^^^
-    20 │ }
-    21 │ 
+    27 │ 	set #unusedAccessor(value) {}
+    28 │ }
   
   i Unsafe fix: Remove unused declaration.
   
-    17 17 │   class Accessor {
-    18 18 │   	get #unusedAccessor() {}
-    19    │ - → set·#unusedAccessor(value)·{}
-    20 19 │   }
-    21 20 │   
+    24 24 │   
+    25 25 │   class Accessor {
+    26    │ - → get·#unusedAccessor()·{}
+    27 26 │   	set #unusedAccessor(value) {}
+    28 27 │   }
   
 
 ```
 
 ```
-invalid.js:23:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This private class member is defined but never used.
   
-    22 │ class First {
-  > 23 │ 	#unusedMemberInFirstClass = 5;
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
-    24 │ }
-    25 │ 
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    21 21 │   
-    22 22 │   class First {
-    23    │ - → #unusedMemberInFirstClass·=·5;
-    24 23 │   }
-    25 24 │   
-  
-
-```
-
-```
-invalid.js:28:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    26 │ // a is not alias to this
-    27 │ class UsedMember18 {
-  > 28 │ 	#usedInInnerClass;
-       │ 	^^^^^^^^^^^^^^^^^
+    25 │ class Accessor {
+    26 │ 	get #unusedAccessor() {}
+  > 27 │ 	set #unusedAccessor(value) {}
+       │ 	    ^^^^^^^^^^^^^^^
+    28 │ }
     29 │ 
-    30 │ 	method(a) {
   
   i Unsafe fix: Remove unused declaration.
   
-    26 26 │   // a is not alias to this
-    27 27 │   class UsedMember18 {
-    28    │ - → #usedInInnerClass;
+    25 25 │   class Accessor {
+    26 26 │   	get #unusedAccessor() {}
+    27    │ - → set·#unusedAccessor(value)·{}
+    28 27 │   }
     29 28 │   
-    30 29 │   	method(a) {
   
 
 ```
 
 ```
-invalid.js:37:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This private class member is defined but never used.
   
-    35 │ }
-    36 │ class OnlyWrite {
-  > 37 │ 	#usedOnlyInWrite = 5;
+    30 │ class First {
+  > 31 │ 	#unusedMemberInFirstClass = 5;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    29 29 │   
+    30 30 │   class First {
+    31    │ - → #unusedMemberInFirstClass·=·5;
+    32 31 │   }
+    33 32 │   
+  
+
+```
+
+```
+invalid.js:35:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    34 │ class Foo {
+  > 35 │ 	#usedOnlyInWrite = 5;
        │ 	^^^^^^^^^^^^^^^^
-    38 │ 
-    39 │ 	method() {
+    36 │ 	method() {
+    37 │ 			this.#usedOnlyInWrite = 42;
   
   i Unsafe fix: Remove unused declaration.
   
-    35 35 │   }
-    36 36 │   class OnlyWrite {
-    37    │ - → #usedOnlyInWrite·=·5;
-    38 37 │   
-    39 38 │   	method() {
+    33 33 │   
+    34 34 │   class Foo {
+    35    │ - → #usedOnlyInWrite·=·5;
+    36 35 │   	method() {
+    37 36 │   			this.#usedOnlyInWrite = 42;
   
 
 ```
 
 ```
-invalid.js:46:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This private class member is defined but never used.
   
-    44 │ // issue #6994
-    45 │ class UsedAssignmentExpr {
-  > 46 │ 	#val = 0;
-       │ 	^^^^
-    47 │ 	method() {
-    48 │ 		return this.#val = 1
+    41 │ class Foo {
+  > 42 │ 	#usedOnlyInWriteStatement = 5;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 	method() {
+    44 │ 			this.#usedOnlyInWriteStatement += 42;
   
   i Unsafe fix: Remove unused declaration.
   
-    44 44 │   // issue #6994
-    45 45 │   class UsedAssignmentExpr {
-    46    │ - → #val·=·0;
-    47 46 │   	method() {
-    48 47 │   		return this.#val = 1
+    40 40 │   
+    41 41 │   class Foo {
+    42    │ - → #usedOnlyInWriteStatement·=·5;
+    43 42 │   	method() {
+    44 43 │   			this.#usedOnlyInWriteStatement += 42;
+  
+
+```
+
+```
+invalid.js:49:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    48 │ class C {
+  > 49 │ 	#usedOnlyInIncrement;
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    50 │ 
+    51 │ 	foo() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    47 47 │   
+    48 48 │   class C {
+    49    │ - → #usedOnlyInIncrement;
+    50 49 │   
+    51 50 │   	foo() {
   
 
 ```

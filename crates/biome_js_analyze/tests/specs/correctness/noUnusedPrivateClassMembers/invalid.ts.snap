@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
+assertion_line: 146
 expression: invalid.ts
 ---
 # Input
@@ -19,6 +19,23 @@ class TSUnusedPrivateConstructor {
 	}
 }
 
+
+class TsOnlyWrite {
+	private usedOnlyInWrite = 5;
+
+	method() {
+		this.usedOnlyInWrite = 21;
+	}
+}
+
+class TsSelfUpdate {
+	private usedOnlyToUpdateItself = 5;
+
+	method() {
+		this.usedOnlyToUpdateItself++;
+	}
+}
+
 class TsAccessor {
 	private get unusedAccessor() { }
 	private set unusedAccessor(value) { }
@@ -34,27 +51,6 @@ class TsBioo2 {
 		return this.usedProperty;
 	}
 }
-
-class TSDoubleUnusedPrivateConstructor {
-	constructor(private unusedOne: number, #unusedTwo: unknown) {
-		// This constructor has two unused private properties
-	}
-}
-
-class TSPartiallyUsedPrivateConstructor {
-	constructor(private param: number) {
-		foo(param)
-	}
-}
-
-class TsOnlyWrite {
-	private usedOnlyInWrite = 5;
-
-	method() {
-		this.usedOnlyInWrite = 21;
-	}
-}
-
 
 ```
 
@@ -118,158 +114,149 @@ invalid.ts:10:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     11 │ 
     12 │ 	}
   
-  i Unsafe fix: Remove unused declaration.
+  i Unsafe fix: Remove private modifier
   
-    10 │ → constructor(private·nusedProperty·=·3){
-       │               -------------------------  
+     8  8 │   
+     9  9 │   class TSUnusedPrivateConstructor {
+    10    │ - → constructor(private·nusedProperty·=·3){
+       10 │ + → constructor(_nusedProperty·=·3){
+    11 11 │   
+    12 12 │   	}
+  
 
 ```
 
 ```
-invalid.ts:16:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:17:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This private class member is defined but never used.
   
-    15 │ class TsAccessor {
-  > 16 │ 	private get unusedAccessor() { }
-       │ 	            ^^^^^^^^^^^^^^
-    17 │ 	private set unusedAccessor(value) { }
-    18 │ }
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    14 14 │   
-    15 15 │   class TsAccessor {
-    16    │ - → private·get·unusedAccessor()·{·}
-    17 16 │   	private set unusedAccessor(value) { }
-    18 17 │   }
-  
-
-```
-
-```
-invalid.ts:17:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    15 │ class TsAccessor {
-    16 │ 	private get unusedAccessor() { }
-  > 17 │ 	private set unusedAccessor(value) { }
-       │ 	            ^^^^^^^^^^^^^^
-    18 │ }
-    19 │ 
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    15 15 │   class TsAccessor {
-    16 16 │   	private get unusedAccessor() { }
-    17    │ - → private·set·unusedAccessor(value)·{·}
-    18 17 │   }
-    19 18 │   
-  
-
-```
-
-```
-invalid.ts:22:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    20 │ // github.com/biomejs/biome/issues/6165
-    21 │ class TsBioo2 {
-  > 22 │ 	private unusedProperty = 5;
-       │ 	        ^^^^^^^^^^^^^^
-    23 │ 	private unusedMethod() {}
-    24 │ 
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    20 20 │   // github.com/biomejs/biome/issues/6165
-    21 21 │   class TsBioo2 {
-    22    │ - → private·unusedProperty·=·5;
-    23 22 │   	private unusedMethod() {}
-    24 23 │   
-  
-
-```
-
-```
-invalid.ts:23:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    21 │ class TsBioo2 {
-    22 │ 	private unusedProperty = 5;
-  > 23 │ 	private unusedMethod() {}
-       │ 	        ^^^^^^^^^^^^
-    24 │ 
-    25 │ 	private usedProperty = 4;
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    21 21 │   class TsBioo2 {
-    22 22 │   	private unusedProperty = 5;
-    23    │ - → private·unusedMethod()·{}
-    24 23 │   
-    25 24 │   	private usedProperty = 4;
-  
-
-```
-
-```
-invalid.ts:32:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    31 │ class TSDoubleUnusedPrivateConstructor {
-  > 32 │ 	constructor(private unusedOne: number, #unusedTwo: unknown) {
-       │ 	                    ^^^^^^^^^
-    33 │ 		// This constructor has two unused private properties
-    34 │ 	}
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    32 │ → constructor(private·unusedOne:·number,·#unusedTwo:·unknown)·{
-       │               -------------------------                        
-
-```
-
-```
-invalid.ts:38:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    37 │ class TSPartiallyUsedPrivateConstructor {
-  > 38 │ 	constructor(private param: number) {
-       │ 	                    ^^^^^
-    39 │ 		foo(param)
-    40 │ 	}
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    38 │ → constructor(private·param:·number)·{
-       │               ---------------------   
-
-```
-
-```
-invalid.ts:44:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    43 │ class TsOnlyWrite {
-  > 44 │ 	private usedOnlyInWrite = 5;
+    16 │ class TsOnlyWrite {
+  > 17 │ 	private usedOnlyInWrite = 5;
        │ 	        ^^^^^^^^^^^^^^^
-    45 │ 
-    46 │ 	method() {
+    18 │ 
+    19 │ 	method() {
   
   i Unsafe fix: Remove unused declaration.
   
-    42 42 │   
-    43 43 │   class TsOnlyWrite {
-    44    │ - → private·usedOnlyInWrite·=·5;
-    45 44 │   
-    46 45 │   	method() {
+    15 15 │   
+    16 16 │   class TsOnlyWrite {
+    17    │ - → private·usedOnlyInWrite·=·5;
+    18 17 │   
+    19 18 │   	method() {
+  
+
+```
+
+```
+invalid.ts:25:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    24 │ class TsSelfUpdate {
+  > 25 │ 	private usedOnlyToUpdateItself = 5;
+       │ 	        ^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ 	method() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    23 23 │   
+    24 24 │   class TsSelfUpdate {
+    25    │ - → private·usedOnlyToUpdateItself·=·5;
+    26 25 │   
+    27 26 │   	method() {
+  
+
+```
+
+```
+invalid.ts:33:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    32 │ class TsAccessor {
+  > 33 │ 	private get unusedAccessor() { }
+       │ 	            ^^^^^^^^^^^^^^
+    34 │ 	private set unusedAccessor(value) { }
+    35 │ }
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    31 31 │   
+    32 32 │   class TsAccessor {
+    33    │ - → private·get·unusedAccessor()·{·}
+    34 33 │   	private set unusedAccessor(value) { }
+    35 34 │   }
+  
+
+```
+
+```
+invalid.ts:34:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    32 │ class TsAccessor {
+    33 │ 	private get unusedAccessor() { }
+  > 34 │ 	private set unusedAccessor(value) { }
+       │ 	            ^^^^^^^^^^^^^^
+    35 │ }
+    36 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    32 32 │   class TsAccessor {
+    33 33 │   	private get unusedAccessor() { }
+    34    │ - → private·set·unusedAccessor(value)·{·}
+    35 34 │   }
+    36 35 │   
+  
+
+```
+
+```
+invalid.ts:39:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    37 │ // github.com/biomejs/biome/issues/6165
+    38 │ class TsBioo2 {
+  > 39 │ 	private unusedProperty = 5;
+       │ 	        ^^^^^^^^^^^^^^
+    40 │ 	private unusedMethod() {}
+    41 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    37 37 │   // github.com/biomejs/biome/issues/6165
+    38 38 │   class TsBioo2 {
+    39    │ - → private·unusedProperty·=·5;
+    40 39 │   	private unusedMethod() {}
+    41 40 │   
+  
+
+```
+
+```
+invalid.ts:40:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    38 │ class TsBioo2 {
+    39 │ 	private unusedProperty = 5;
+  > 40 │ 	private unusedMethod() {}
+       │ 	        ^^^^^^^^^^^^
+    41 │ 
+    42 │ 	private usedProperty = 4;
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    38 38 │   class TsBioo2 {
+    39 39 │   	private unusedProperty = 5;
+    40    │ - → private·unusedMethod()·{}
+    41 40 │   
+    42 41 │   	private usedProperty = 4;
   
 
 ```

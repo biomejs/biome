@@ -1,6 +1,7 @@
 class TSDoubleUnusedPrivateConstructor {
-	constructor(private unusedOne: number, #unusedTwo: unknown) {
+	constructor(private unusedProperty = 3, private anotherUnusedProperty = 4) {
 		// This constructor has two unused private properties
+
 	}
 }
 
