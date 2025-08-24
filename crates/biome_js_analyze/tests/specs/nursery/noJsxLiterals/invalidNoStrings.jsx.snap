@@ -20,6 +20,9 @@ expression: invalidNoStrings.jsx
 		{'Test' + name}
 	</Foo>
 	<Foo bar={`${baz}`} />
+	<Foo bar={"first" + "second"} />
+	<Foo bar={"third" + binding} />
+	<Foo bar={binding + "fourth"} />
 </>
 
 ```
@@ -128,6 +131,23 @@ invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 
 ```
+invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of JSX literals is not allowed.
+  
+    10 │ 		</div>
+    11 │ 	</>
+  > 12 │ 	<Foo bar={"bar"} />
+       │ 	          ^^^^^
+    13 │ 	<Foo bar="test">
+    14 │ 		{'Test' + name}
+  
+  i This note will give you more information.
+  
+
+```
+
+```
 invalidNoStrings.jsx:13:11 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The use of JSX literals is not allowed.
@@ -162,16 +182,84 @@ invalidNoStrings.jsx:14:4 lint/nursery/noJsxLiterals ━━━━━━━━━
 ```
 
 ```
-invalidNoStrings.jsx:16:11 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNoStrings.jsx:16:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The use of JSX literals is not allowed.
   
     14 │ 		{'Test' + name}
     15 │ 	</Foo>
   > 16 │ 	<Foo bar={`${baz}`} />
-       │ 	         ^^^^^^^^^^
-    17 │ </>
-    18 │ 
+       │ 	          ^^^^^^^^
+    17 │ 	<Foo bar={"first" + "second"} />
+    18 │ 	<Foo bar={"third" + binding} />
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalidNoStrings.jsx:17:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of JSX literals is not allowed.
+  
+    15 │ 	</Foo>
+    16 │ 	<Foo bar={`${baz}`} />
+  > 17 │ 	<Foo bar={"first" + "second"} />
+       │ 	          ^^^^^^^
+    18 │ 	<Foo bar={"third" + binding} />
+    19 │ 	<Foo bar={binding + "fourth"} />
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalidNoStrings.jsx:17:22 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of JSX literals is not allowed.
+  
+    15 │ 	</Foo>
+    16 │ 	<Foo bar={`${baz}`} />
+  > 17 │ 	<Foo bar={"first" + "second"} />
+       │ 	                    ^^^^^^^^
+    18 │ 	<Foo bar={"third" + binding} />
+    19 │ 	<Foo bar={binding + "fourth"} />
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalidNoStrings.jsx:18:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of JSX literals is not allowed.
+  
+    16 │ 	<Foo bar={`${baz}`} />
+    17 │ 	<Foo bar={"first" + "second"} />
+  > 18 │ 	<Foo bar={"third" + binding} />
+       │ 	          ^^^^^^^
+    19 │ 	<Foo bar={binding + "fourth"} />
+    20 │ </>
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalidNoStrings.jsx:19:22 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of JSX literals is not allowed.
+  
+    17 │ 	<Foo bar={"first" + "second"} />
+    18 │ 	<Foo bar={"third" + binding} />
+  > 19 │ 	<Foo bar={binding + "fourth"} />
+       │ 	                    ^^^^^^^^
+    20 │ </>
+    21 │ 
   
   i This note will give you more information.
   

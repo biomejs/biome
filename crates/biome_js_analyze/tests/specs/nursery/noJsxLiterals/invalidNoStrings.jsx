@@ -14,4 +14,7 @@
 		{'Test' + name}
 	</Foo>
 	<Foo bar={`${baz}`} />
+	<Foo bar={"first" + "second"} />
+	<Foo bar={"third" + binding} />
+	<Foo bar={binding + "fourth"} />
 </>

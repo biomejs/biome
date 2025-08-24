@@ -11,4 +11,7 @@ pub struct NoJsxLiteralsOptions {
     /// An array of strings that won't trigger the rule. Whitespaces are taken into consideration
     #[serde(default)]
     pub allowed_strings: Box<[Box<str>]>,
+
+    /// When enabled, strings inside props are always ignored
+    pub ignore_props: bool,
 }
