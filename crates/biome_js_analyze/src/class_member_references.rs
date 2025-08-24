@@ -232,7 +232,7 @@ impl ThisScopeReferences {
             .filter_map(|fields| {
                 let id = fields.id.ok()?;
                 let expr = fields.initializer?.expression().ok()?;
-                let unwrapped = unwrap_expression(&expr);
+                let unwrapped = &expr.omit_parentheses();
 
                 (unwrapped.syntax().first_token()?.text_trimmed() == "this").then(|| {
                     ClassMemberReference {
@@ -684,20 +684,6 @@ fn collect_class_property_reads_from_static_member(
     Some(ClassMemberReferences { reads, writes })
 }
 
-/// Recursively unwraps expressions like parentheses to find the inner expression.
-fn unwrap_expression(expr: &AnyJsExpression) -> AnyJsExpression {
-    match expr {
-        AnyJsExpression::JsParenthesizedExpression(paren_expr) => {
-            if let Ok(inner) = paren_expr.expression() {
-                let cloned_inner = inner.clone();
-                unwrap_expression(&cloned_inner)
-            } else {
-                expr.clone()
-            }
-        }
-        _ => expr.clone(),
-    }
-}
 /// Checks whether a name is within its correct scope
 fn is_within_scope_without_shadowing(
     name_syntax: &SyntaxNode<JsLanguage>,
