@@ -1,4 +1,6 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsFileSource, JsStringLiteralExpression, JsxAttribute,
@@ -121,6 +123,7 @@ declare_lint_rule! {
         name: "noJsxLiterals",
         language: "jsx",
         recommended: false,
+        sources: &[RuleSource::EslintReact("jsx-no-literals").same()],
     }
 }
 
