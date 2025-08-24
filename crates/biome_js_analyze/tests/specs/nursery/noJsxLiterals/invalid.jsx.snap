@@ -31,7 +31,7 @@ class Comp1 extends Component {
 ```
 invalid.jsx:3:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     1 │ // should generate diagnostics
     2 │ <>
@@ -40,7 +40,9 @@ invalid.jsx:3:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━�
     4 │ 	<>test</>
     5 │ 	<>
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -48,7 +50,7 @@ invalid.jsx:3:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━�
 ```
 invalid.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     2 │ <>
     3 │   <div>test</div>
@@ -57,7 +59,9 @@ invalid.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━�
     5 │ 	<>
     6 │ 		<div>
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -65,7 +69,7 @@ invalid.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━�
 ```
 invalid.jsx:6:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
      4 │ 	<>test</>
      5 │ 	<>
@@ -79,7 +83,9 @@ invalid.jsx:6:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━�
     11 │ 	</>
     12 │ </>
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -87,7 +93,7 @@ invalid.jsx:6:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━�
 ```
 invalid.jsx:17:43 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     15 │ class Comp1 extends Component {
     16 │ 	render() {
@@ -96,7 +102,9 @@ invalid.jsx:17:43 lint/nursery/noJsxLiterals ━━━━━━━━━━━�
     18 │ 		return varObjectTest.testKey;
     19 │ 	}
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```

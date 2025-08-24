@@ -31,7 +31,7 @@ expression: invalidNoStrings.jsx
 ```
 invalidNoStrings.jsx:3:9 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     1 │ // should generate diagnostics
     2 │ <>
@@ -40,7 +40,9 @@ invalidNoStrings.jsx:3:9 lint/nursery/noJsxLiterals ━━━━━━━━━�
     4 │ 	<>test</>
     5 │ 	<>
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -48,7 +50,7 @@ invalidNoStrings.jsx:3:9 lint/nursery/noJsxLiterals ━━━━━━━━━�
 ```
 invalidNoStrings.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     2 │ <>
     3 │   <div>{"test"}</div>
@@ -57,7 +59,9 @@ invalidNoStrings.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━�
     5 │ 	<>
     6 │ 		<div>
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -65,7 +69,7 @@ invalidNoStrings.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━�
 ```
 invalidNoStrings.jsx:7:5 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     5 │ 	<>
     6 │ 		<div>
@@ -74,7 +78,9 @@ invalidNoStrings.jsx:7:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
     8 │ 			{'test'}
     9 │ 			{'foo'}
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -82,7 +88,7 @@ invalidNoStrings.jsx:7:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
 ```
 invalidNoStrings.jsx:8:5 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
      6 │ 		<div>
      7 │ 			{'asdjfl'}
@@ -91,7 +97,9 @@ invalidNoStrings.jsx:8:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
      9 │ 			{'foo'}
     10 │ 		</div>
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -99,7 +107,7 @@ invalidNoStrings.jsx:8:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
 ```
 invalidNoStrings.jsx:9:5 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
      7 │ 			{'asdjfl'}
      8 │ 			{'test'}
@@ -108,7 +116,9 @@ invalidNoStrings.jsx:9:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
     10 │ 		</div>
     11 │ 	</>
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -116,7 +126,7 @@ invalidNoStrings.jsx:9:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
 ```
 invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     10 │ 		</div>
     11 │ 	</>
@@ -125,7 +135,9 @@ invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━�
     13 │ 	<Foo bar="test">
     14 │ 		{'Test' + name}
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -133,7 +145,7 @@ invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     10 │ 		</div>
     11 │ 	</>
@@ -142,7 +154,9 @@ invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━�
     13 │ 	<Foo bar="test">
     14 │ 		{'Test' + name}
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -150,7 +164,7 @@ invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:13:11 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     11 │ 	</>
     12 │ 	<Foo bar={"bar"} />
@@ -159,7 +173,9 @@ invalidNoStrings.jsx:13:11 lint/nursery/noJsxLiterals ━━━━━━━━�
     14 │ 		{'Test' + name}
     15 │ 	</Foo>
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -167,7 +183,7 @@ invalidNoStrings.jsx:13:11 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:14:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     12 │ 	<Foo bar={"bar"} />
     13 │ 	<Foo bar="test">
@@ -176,7 +192,9 @@ invalidNoStrings.jsx:14:4 lint/nursery/noJsxLiterals ━━━━━━━━━
     15 │ 	</Foo>
     16 │ 	<Foo bar={`${baz}`} />
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -184,7 +202,7 @@ invalidNoStrings.jsx:14:4 lint/nursery/noJsxLiterals ━━━━━━━━━
 ```
 invalidNoStrings.jsx:16:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     14 │ 		{'Test' + name}
     15 │ 	</Foo>
@@ -193,7 +211,9 @@ invalidNoStrings.jsx:16:12 lint/nursery/noJsxLiterals ━━━━━━━━�
     17 │ 	<Foo bar={"first" + "second"} />
     18 │ 	<Foo bar={"third" + binding} />
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -201,7 +221,7 @@ invalidNoStrings.jsx:16:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:17:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     15 │ 	</Foo>
     16 │ 	<Foo bar={`${baz}`} />
@@ -210,7 +230,9 @@ invalidNoStrings.jsx:17:12 lint/nursery/noJsxLiterals ━━━━━━━━�
     18 │ 	<Foo bar={"third" + binding} />
     19 │ 	<Foo bar={binding + "fourth"} />
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -218,7 +240,7 @@ invalidNoStrings.jsx:17:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:17:22 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     15 │ 	</Foo>
     16 │ 	<Foo bar={`${baz}`} />
@@ -227,7 +249,9 @@ invalidNoStrings.jsx:17:22 lint/nursery/noJsxLiterals ━━━━━━━━�
     18 │ 	<Foo bar={"third" + binding} />
     19 │ 	<Foo bar={binding + "fourth"} />
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -235,7 +259,7 @@ invalidNoStrings.jsx:17:22 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:18:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     16 │ 	<Foo bar={`${baz}`} />
     17 │ 	<Foo bar={"first" + "second"} />
@@ -244,7 +268,9 @@ invalidNoStrings.jsx:18:12 lint/nursery/noJsxLiterals ━━━━━━━━�
     19 │ 	<Foo bar={binding + "fourth"} />
     20 │ </>
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```
@@ -252,7 +278,7 @@ invalidNoStrings.jsx:18:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:19:22 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The use of JSX literals is not allowed.
+  i String literals should not be used in JSX.
   
     17 │ 	<Foo bar={"first" + "second"} />
     18 │ 	<Foo bar={"third" + binding} />
@@ -261,7 +287,9 @@ invalidNoStrings.jsx:19:22 lint/nursery/noJsxLiterals ━━━━━━━━�
     20 │ </>
     21 │ 
   
-  i This note will give you more information.
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
   
 
 ```

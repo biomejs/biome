@@ -8,26 +8,112 @@ use biome_rowan::{AstNode, AstNodeList, TextRange, declare_node_union};
 use biome_rule_options::no_jsx_literals::NoJsxLiteralsOptions;
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Disallow string literals inside JSX elements.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// This rule discourages the use of
+    /// string literals directly within JSX elements. String literals in JSX can make code harder
+    /// to maintain, especially in applications that require internationalization or dynamic content.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// ```jsx,expect_diagnostic
+    /// <div>Hello World</div>
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <>Welcome to our site</>
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <span>
+    ///   Please enter your name
+    /// </span>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
-    /// // var a = 1;
+    /// ```jsx
+    /// <div>{'Hello World'}</div>
+    /// ```
+    ///
+    /// ```jsx
+    /// <>{'Welcome to our site'}</>
+    /// ```
+    ///
+    /// ```jsx
+    /// <span>
+    ///   {'Please enter your name'}
+    /// </span>
+    /// ```
+    ///
+    /// ```jsx
+    /// <div>{`Hello ${name}`}</div>
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `noStrings`
+    ///
+    /// When enabled, the rule will also flag string literals inside JSX expressions and attributes.
+    ///
+    /// > **Default:** `false`
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "noStrings": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic,use_options
+    /// <span>
+    ///   {'Please enter your name'}
+    /// </span>
+    /// ```
+    ///
+    /// ### `allowedStrings`
+    ///
+    /// An array of strings that are allowed as literals. This can be useful for common words
+    /// or characters that don't need to be wrapped in expressions.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "allowedStrings": ["Hello", "&nbsp;", "·"]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <>
+    ///   <div>Hello</div>
+    ///   <div>&nbsp;</div>
+    ///   <div>·</div>
+    /// </>
+    /// ```
+    ///
+    /// ### `ignoreProps`
+    ///
+    /// When enabled, the rule will ignore string literals used as prop values.
+    ///
+    /// > **Default:** `false`
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignoreProps": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <>
+    ///   <Component title="Welcome" />
+    ///   <input placeholder="Enter name" />
+    /// </>
     /// ```
     ///
     pub NoJsxLiterals {
@@ -120,11 +206,14 @@ impl Rule for NoJsxLiterals {
                 rule_category!(),
                 state,
                 markup! {
-                    "The use of JSX literals is not allowed."
+                    "Incorrect use of string literal detected."
                 },
             )
             .note(markup! {
-                "This note will give you more information."
+                "String literals in JSX can make code harder to maintain and internationalize."
+            })
+            .note(markup! {
+                "Consider avoiding hardcoded strings entirely."
             }),
         )
     }
