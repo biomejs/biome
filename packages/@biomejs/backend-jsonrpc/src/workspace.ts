@@ -1666,9 +1666,9 @@ export interface Nursery {
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow unused catch bindings.
 	 */
-	noUselessCatchBinding?: RuleConfiguration_for_NoUselessCatchBindingOptions;
+	noUselessCatchBinding?: RuleFixConfiguration_for_NoUselessCatchBindingOptions;
 	/**
 	 * Disallow the use of useless undefined.
 	 */
@@ -2992,9 +2992,9 @@ export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
-export type RuleConfiguration_for_NoUselessCatchBindingOptions =
+export type RuleFixConfiguration_for_NoUselessCatchBindingOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoUselessCatchBindingOptions;
+	| RuleWithFixOptions_for_NoUselessCatchBindingOptions;
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
@@ -5427,7 +5427,11 @@ export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	 */
 	options: NoUnresolvedImportsOptions;
 }
-export interface RuleWithOptions_for_NoUselessCatchBindingOptions {
+export interface RuleWithFixOptions_for_NoUselessCatchBindingOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
