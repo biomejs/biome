@@ -690,6 +690,10 @@ impl JsTemplateExpression {
         self.is_test_each_pattern_callee() && self.is_test_each_pattern_elements()
     }
 
+    /// Checks if this expression contains a test.each pattern based on [`contains_a_test_each_pattern`].
+    ///
+    /// [`contains_a_test_each_pattern`]: crate::AnyJsExpression::contains_a_test_each_pattern
+    ///
     pub fn is_test_each_pattern_callee(&self) -> bool {
         if let Some(tag) = self.tag() {
             tag.contains_a_test_each_pattern()
@@ -931,11 +935,16 @@ impl AnyJsExpression {
 
     /// This function checks if a call expressions has one of the following members:
     ///
-    /// - `it[.(only|skip|todo|fails|failing|concurrent|sequential)]*`
-    /// - `test[.(only|skip|todo|fails|failing|concurrent|sequential)]*`
-    /// - `describe[.(only|skip|todo|shuffle|concurrent|sequential)]*`
-    /// - `test.describe[.(only|skip)]?`
-    /// - `test.describe.(parallel|serial)[.only]?`
+    /// - `it.(only|skip|todo|fails|failing|concurrent|sequential)`
+    /// - `it.(only|skip|todo|fails|failing|concurrent|sequential).(only|skip|todo|fails|failing|concurrent|sequential)`
+    /// - `test.(only|skip|todo|fails|failing|concurrent|sequential)`
+    /// - `test.(only|skip|todo|fails|failing|concurrent|sequential).(only|skip|todo|fails|failing|concurrent|sequential)`
+    /// - `describe.(only|skip|todo|shuffle|concurrent|sequential)`
+    /// - `describe.(only|skip|todo|shuffle|concurrent|sequential).(only|skip|todo|shuffle|concurrent|sequential)`
+    /// - `test.describe`
+    /// - `test.describe.(only|skip)`
+    /// - `test.describe.(parallel|serial)`
+    /// - `test.describe.(parallel|serial).only`
     /// - `skip`
     /// - `xit`
     /// - `xdescribe`
@@ -945,7 +954,10 @@ impl AnyJsExpression {
     /// - `ftest`
     /// - `Deno.test`
     ///
-    /// Inspired by this [article]
+    /// Elements within parentheses `()` can be any of the listed options separated by `|`.
+    ///
+    /// Implementation first collects the tokens of callee names
+    /// and checks if they match any of the listed options via the tries data structure described in this [article].
     ///
     /// [article]: https://craftinginterpreters.com/scanning-on-demand.html#tries-and-state-machines
     pub fn contains_a_test_pattern(&self) -> bool {
@@ -1017,17 +1029,17 @@ impl AnyJsExpression {
     /// ## Examples
     ///
     /// Valid patterns:
-    /// ```javascript
-    /// test.each([...])
-    /// describe.each([...])
-    /// it.each([...])
-    /// test.only.each([...])
-    /// describe.skip.each([...])
-    /// it.concurrent.each([...])
+    /// ```
+    /// test.each
+    /// describe.each
+    /// it.each
+    /// test.only.each
+    /// describe.skip.each
+    /// it.concurrent.each
     /// ```
     ///
     /// [`contains_a_test_pattern`]:  crate::AnyJsExpression::contains_a_test_pattern
-    /// #
+    ///
     pub fn contains_a_test_each_pattern(&self) -> bool {
         let Self::JsStaticMemberExpression(member_expression) = self else {
             return false;
