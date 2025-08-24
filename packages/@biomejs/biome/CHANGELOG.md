@@ -1,6 +1,6 @@
 # @biomejs/biome
 
-## 2.2.1
+## 2.2.2
 
 ### Patch Changes
 
@@ -41,6 +41,19 @@
 - [#7239](https://github.com/biomejs/biome/pull/7239) [`1d643d8`](https://github.com/biomejs/biome/commit/1d643d850120663e16663574ca3457184cdd4c27) Thanks [@minht11](https://github.com/minht11)! - Fixed an issue where Svelte globals ($state and so on) were not properly recognized inside `.svelte.test.ts/js` and `.svelte.spec.ts/js` files.
 
 - [#7264](https://github.com/biomejs/biome/pull/7264) [`62fdbc8`](https://github.com/biomejs/biome/commit/62fdbc80154f5a92d54af861c31dd334f25c16fc) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a regression where when using `--log-kind-pretty` wasn't working anymore as expected.
+
+- [#7244](https://github.com/biomejs/biome/pull/7244) [`660031b`](https://github.com/biomejs/biome/commit/660031b6707ddeae29388f1d0b4089b64c048e40) Thanks [@JeetuSuthar](https://github.com/JeetuSuthar)! - Fixed [#7225](https://github.com/biomejs/biome/issues/7225): The `noExtraBooleanCast` rule now preserves parentheses when removing `Boolean` calls inside negations.
+
+  ```js
+  // Before
+  !Boolean(b0 && b1);
+  // After
+  !(b0 && b1); // instead of !b0 && b1
+  ```
+
+- [#7298](https://github.com/biomejs/biome/pull/7298) [`46a8e93`](https://github.com/biomejs/biome/commit/46a8e93a65310df566526e6b3fb778455aee2d0b) Thanks [@unvalley](https://github.com/unvalley)! - Fixed [#6695](https://github.com/biomejs/biome/issues/6695): [`useNamingConvention`](https://biomejs.dev/linter/rules/use-naming-convention/) now correctly reports TypeScript parameter properties with modifiers.
+
+  Previously, constructor parameter properties with modifiers like `private` or `readonly` were not checked against naming conventions. These properties are now treated consistently with regular class properties.
 
 ## 2.2.0
 
