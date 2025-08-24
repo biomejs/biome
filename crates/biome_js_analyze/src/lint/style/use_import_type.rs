@@ -175,11 +175,9 @@ impl Rule for UseImportType {
         }
         let import = ctx.query();
         let import_clause = import.import_clause().ok()?;
-        let extension = ctx.file_path().extension()?;
-        let extension = extension.as_bytes();
         // Import attributes and type-only imports are not compatible in ESM.
         if import_clause.attribute().is_some()
-            && extension != b"cts"
+            && ctx.file_path().extension()? != "cts"
             && !matches!(ctx.root(), AnyJsRoot::JsScript(_))
         {
             return None;
@@ -286,10 +284,24 @@ impl Rule for UseImportType {
                 is_only_used_as_type(model, default_binding).then_some(ImportTypeFix::UseImportType)
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
+                let type_token = clause.type_token();
+                if style == Style::InlineType && type_token.is_some() {
+                    // Inline `import type` into `import { type }`
+                    let specifiers = clause
+                        .named_specifiers()
+                        .ok()?
+                        .specifiers()
+                        .iter()
+                        .collect::<Result<Vec<_>, _>>()
+                        .ok()?;
+                    return Some(ImportTypeFix::AddTypeQualifiers(
+                        specifiers.into_boxed_slice(),
+                    ));
+                }
                 match named_import_type_fix(
                     model,
                     &clause.named_specifiers().ok()?,
-                    clause.type_token().is_some(),
+                    type_token.is_some(),
                 )? {
                     NamedImportTypeFix::UseImportType(specifiers) => {
                         if style == Style::InlineType {
@@ -727,6 +739,10 @@ impl Rule for UseImportType {
                 }
             }
             ImportTypeFix::AddTypeQualifiers(specifiers) => {
+                if let Some(type_token) = import_clause.type_token() {
+                    // Inline `import type` into `import { type }`
+                    mutation.remove_token(type_token);
+                }
                 for specifier in specifiers {
                     let new_specifier = specifier
                         .clone()
