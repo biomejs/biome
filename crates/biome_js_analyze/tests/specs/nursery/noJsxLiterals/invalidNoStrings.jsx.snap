@@ -31,7 +31,7 @@ expression: invalidNoStrings.jsx
 ```
 invalidNoStrings.jsx:3:9 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     1 │ // should generate diagnostics
     2 │ <>
@@ -50,7 +50,7 @@ invalidNoStrings.jsx:3:9 lint/nursery/noJsxLiterals ━━━━━━━━━�
 ```
 invalidNoStrings.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     2 │ <>
     3 │   <div>{"test"}</div>
@@ -69,7 +69,7 @@ invalidNoStrings.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━�
 ```
 invalidNoStrings.jsx:7:5 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     5 │ 	<>
     6 │ 		<div>
@@ -88,7 +88,7 @@ invalidNoStrings.jsx:7:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
 ```
 invalidNoStrings.jsx:8:5 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
      6 │ 		<div>
      7 │ 			{'asdjfl'}
@@ -107,7 +107,7 @@ invalidNoStrings.jsx:8:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
 ```
 invalidNoStrings.jsx:9:5 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
      7 │ 			{'asdjfl'}
      8 │ 			{'test'}
@@ -126,7 +126,7 @@ invalidNoStrings.jsx:9:5 lint/nursery/noJsxLiterals ━━━━━━━━━�
 ```
 invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     10 │ 		</div>
     11 │ 	</>
@@ -145,7 +145,7 @@ invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     10 │ 		</div>
     11 │ 	</>
@@ -164,7 +164,7 @@ invalidNoStrings.jsx:12:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:13:11 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     11 │ 	</>
     12 │ 	<Foo bar={"bar"} />
@@ -183,7 +183,7 @@ invalidNoStrings.jsx:13:11 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:14:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     12 │ 	<Foo bar={"bar"} />
     13 │ 	<Foo bar="test">
@@ -202,7 +202,7 @@ invalidNoStrings.jsx:14:4 lint/nursery/noJsxLiterals ━━━━━━━━━
 ```
 invalidNoStrings.jsx:16:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     14 │ 		{'Test' + name}
     15 │ 	</Foo>
@@ -221,7 +221,7 @@ invalidNoStrings.jsx:16:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:17:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     15 │ 	</Foo>
     16 │ 	<Foo bar={`${baz}`} />
@@ -240,7 +240,7 @@ invalidNoStrings.jsx:17:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:17:22 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     15 │ 	</Foo>
     16 │ 	<Foo bar={`${baz}`} />
@@ -259,7 +259,7 @@ invalidNoStrings.jsx:17:22 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:18:12 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     16 │ 	<Foo bar={`${baz}`} />
     17 │ 	<Foo bar={"first" + "second"} />
@@ -278,7 +278,7 @@ invalidNoStrings.jsx:18:12 lint/nursery/noJsxLiterals ━━━━━━━━�
 ```
 invalidNoStrings.jsx:19:22 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     17 │ 	<Foo bar={"first" + "second"} />
     18 │ 	<Foo bar={"third" + binding} />
