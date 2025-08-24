@@ -20,13 +20,15 @@ use rust_lapper::{Interval, Lapper};
 use rustc_hash::FxHashMap;
 
 use super::{
-    Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoInner,
-    JsOwnExport, JsReexport, ResolvedPath, binding::JsBindingData, scope::JsScopeData,
+    Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoDiagnostic,
+    JsModuleInfoInner, JsOwnExport, JsReexport, ResolvedPath, binding::JsBindingData,
+    scope::JsScopeData,
 };
 use crate::js_module_info::{
     binding::{JsBindingReference, JsBindingReferenceKind, JsDeclarationKind},
     scope::TsBindingReference,
     scope_id_for_range,
+    utils::reached_too_many_types,
 };
 use crate::{JsImportPath, JsImportPhase};
 
@@ -94,6 +96,9 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Static imports mapped from the local name of the binding being imported.
     static_imports: IndexMap<Text, JsImport>,
+
+    /// Diagnostics emitted during the collection of module graph information
+    diagnostics: Vec<JsModuleInfoDiagnostic>,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -750,6 +755,11 @@ impl JsModuleInfoCollector {
 
             let mut i = 0;
             while i < self.types.len() {
+                if let Err(diagnostic) = reached_too_many_types(i) {
+                    self.diagnostics.push(diagnostic);
+                    return;
+                }
+
                 if let Some(ty) = self.types.get(i).flattened(self) {
                     self.types.replace(i, ty);
                     did_flatten = true;
@@ -1049,6 +1059,7 @@ impl JsModuleInfo {
             scopes: collector.scopes,
             scope_by_range,
             types: collector.types.into(),
+            diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
         }))
     }
 }

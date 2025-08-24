@@ -331,20 +331,14 @@ pub(super) fn flattened_expression(
                     Some(TypeData::reference(member.ty().into_owned()))
                 }
 
-                TypeData::Union(union) => {
-                    let types: Vec<_> = union
-                        .types()
-                        .iter()
-                        .map(|reference| object.apply_module_id_to_reference(reference))
-                        .map(|reference| reference.into_owned())
+                TypeData::Union(_) => {
+                    let types: Vec<_> = object
+                        .flattened_union_variants(resolver)
+                        .filter(|variant| *variant != GLOBAL_UNDEFINED_ID.into())
                         .collect();
                     let types = types
                         .into_iter()
-                        .filter_map(|variant| {
-                            if variant == GLOBAL_UNDEFINED_ID.into() {
-                                return None;
-                            }
-
+                        .map(|variant| {
                             // Resolve and flatten the type member for each variant.
                             let variant = TypeData::TypeofExpression(Box::new(
                                 TypeofExpression::StaticMember(TypeofStaticMemberExpression {
@@ -353,7 +347,7 @@ pub(super) fn flattened_expression(
                                 }),
                             ));
 
-                            Some(resolver.reference_to_owned_data(variant))
+                            resolver.reference_to_owned_data(variant)
                         })
                         .collect();
 

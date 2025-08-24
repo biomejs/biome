@@ -225,6 +225,9 @@ impl DiagnosticTags {
     pub fn is_verbose(&self) -> bool {
         self.contains(DiagnosticTag::Verbose)
     }
+    pub fn is_internal(&self) -> bool {
+        self.contains(DiagnosticTag::Internal)
+    }
 }
 
 impl BitOr for DiagnosticTags {
