@@ -4605,6 +4605,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessCatchBindingConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUselessCatchBindingOptions" }
+			]
+		},
+		"NoUselessCatchBindingOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessCatchConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4969,6 +4979,13 @@
 					"description": "Warn when importing non-existing exports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnresolvedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessCatchBinding": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessCatchBindingConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9064,6 +9081,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnwantedPolyfillioOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUselessCatchBindingOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUselessCatchBindingOptions" }]
 				}
 			},
 			"additionalProperties": false

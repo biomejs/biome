@@ -206,6 +206,7 @@ pub mod no_unused_template_literal;
 pub mod no_unused_variables;
 pub mod no_unwanted_polyfillio;
 pub mod no_useless_catch;
+pub mod no_useless_catch_binding;
 pub mod no_useless_constructor;
 pub mod no_useless_continue;
 pub mod no_useless_else;

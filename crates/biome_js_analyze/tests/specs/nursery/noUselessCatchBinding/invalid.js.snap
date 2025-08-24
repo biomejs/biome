@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: invalid.js
+---
+# Input
+```js
+try {
+    // Do something
+} catch (unused) {
+    // Do something
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:9 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This catch binding is unused.
+  
+    1 │ try {
+    2 │     // Do something
+  > 3 │ } catch (unused) {
+      │         ^^^^^^^^
+    4 │     // Do something
+    5 │ }
+  
+  i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
+  
+  i Unsafe fix: Remove the catch binding.
+  
+    3 │ }·catch·(unused)·{
+      │         --------- 
+
+```
