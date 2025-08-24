@@ -3592,7 +3592,28 @@
 				{ "$ref": "#/definitions/RuleWithNoJsxLiteralsOptions" }
 			]
 		},
-		"NoJsxLiteralsOptions": { "type": "object", "additionalProperties": false },
+		"NoJsxLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"allowedStrings": {
+					"description": "An array of strings that won't trigger the rule. Whitespaces are taken into consideration",
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"ignoreProps": {
+					"description": "When enabled, strings inside props are always ignored",
+					"default": false,
+					"type": "boolean"
+				},
+				"noStrings": {
+					"description": "When enabled, no strings are allowed inside JSX children",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoLabelVarConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4950,7 +4971,7 @@
 					]
 				},
 				"noJsxLiterals": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow string literals inside JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoJsxLiteralsConfiguration" },
 						{ "type": "null" }
