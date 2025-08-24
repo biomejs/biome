@@ -31,7 +31,7 @@ class Comp1 extends Component {
 ```
 invalid.jsx:3:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     1 │ // should generate diagnostics
     2 │ <>
@@ -50,7 +50,7 @@ invalid.jsx:3:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━�
 ```
 invalid.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     2 │ <>
     3 │   <div>test</div>
@@ -69,7 +69,7 @@ invalid.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━�
 ```
 invalid.jsx:6:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
      4 │ 	<>test</>
      5 │ 	<>
@@ -93,7 +93,7 @@ invalid.jsx:6:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━�
 ```
 invalid.jsx:17:43 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i String literals should not be used in JSX.
+  i Incorrect use of string literal detected.
   
     15 │ class Comp1 extends Component {
     16 │ 	render() {

@@ -10,5 +10,5 @@
 		{'Test' + name}
 	</Foo>
 	<Foo bar={`${baz} test`} />
-	<div>{translate('my.translation.key')}</div>q
+	<div>{translate('my.translation.key')}</div>
 </>
