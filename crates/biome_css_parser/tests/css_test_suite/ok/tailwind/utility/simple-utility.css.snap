@@ -45,9 +45,9 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@9..21 "center-flex" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@21..22 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -111,9 +111,9 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@99..107 "sr-only" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@107..108 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -327,9 +327,9 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@275..281 "tab-4" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@281..282 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -359,9 +359,9 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@309..320 "empty-util" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@320..321 "{" [] [],
-                    declarations: CssDeclarationList [],
+                    items: CssDeclarationOrRuleList [],
                     r_curly_token: R_CURLY@321..322 "}" [] [],
                 },
             },
@@ -383,9 +383,9 @@ CssRoot {
         0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@9..21
           0: IDENT@9..21 "center-flex" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@21..88
+        2: CSS_DECLARATION_OR_RULE_BLOCK@21..88
           0: L_CURLY@21..22 "{" [] []
-          1: CSS_DECLARATION_LIST@22..86
+          1: CSS_DECLARATION_OR_RULE_LIST@22..86
             0: CSS_DECLARATION_WITH_SEMICOLON@22..38
               0: CSS_DECLARATION@22..37
                 0: CSS_GENERIC_PROPERTY@22..37
@@ -426,9 +426,9 @@ CssRoot {
         0: UTILITY_KW@91..99 "utility" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@99..107
           0: IDENT@99..107 "sr-only" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@107..264
+        2: CSS_DECLARATION_OR_RULE_BLOCK@107..264
           0: L_CURLY@107..108 "{" [] []
-          1: CSS_DECLARATION_LIST@108..262
+          1: CSS_DECLARATION_OR_RULE_LIST@108..262
             0: CSS_DECLARATION_WITH_SEMICOLON@108..129
               0: CSS_DECLARATION@108..128
                 0: CSS_GENERIC_PROPERTY@108..128
@@ -565,9 +565,9 @@ CssRoot {
         0: UTILITY_KW@267..275 "utility" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@275..281
           0: IDENT@275..281 "tab-4" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@281..298
+        2: CSS_DECLARATION_OR_RULE_BLOCK@281..298
           0: L_CURLY@281..282 "{" [] []
-          1: CSS_DECLARATION_LIST@282..296
+          1: CSS_DECLARATION_OR_RULE_LIST@282..296
             0: CSS_DECLARATION_WITH_SEMICOLON@282..296
               0: CSS_DECLARATION@282..295
                 0: CSS_GENERIC_PROPERTY@282..295
@@ -586,9 +586,9 @@ CssRoot {
         0: UTILITY_KW@301..309 "utility" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@309..320
           0: IDENT@309..320 "empty-util" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@320..322
+        2: CSS_DECLARATION_OR_RULE_BLOCK@320..322
           0: L_CURLY@320..321 "{" [] []
-          1: CSS_DECLARATION_LIST@321..321
+          1: CSS_DECLARATION_OR_RULE_LIST@321..321
           2: R_CURLY@321..322 "}" [] []
   2: EOF@322..323 "" [Newline("\n")] []
 

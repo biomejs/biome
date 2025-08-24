@@ -29,9 +29,9 @@ CssRoot {
                     minus_token: MINUS@13..14 "-" [] [],
                     star_token: STAR@14..16 "*" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@16..17 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -109,9 +109,9 @@ CssRoot {
             0: IDENT@9..13 "text" [] []
           1: MINUS@13..14 "-" [] []
           2: STAR@14..16 "*" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@16..68
+        2: CSS_DECLARATION_OR_RULE_BLOCK@16..68
           0: L_CURLY@16..17 "{" [] []
-          1: CSS_DECLARATION_LIST@17..66
+          1: CSS_DECLARATION_OR_RULE_LIST@17..66
             0: CSS_DECLARATION_WITH_SEMICOLON@17..66
               0: CSS_DECLARATION@17..65
                 0: CSS_GENERIC_PROPERTY@17..65

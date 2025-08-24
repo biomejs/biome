@@ -97,9 +97,9 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@121..128 "center" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@128..129 "{" [] [],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -397,9 +397,9 @@ CssRoot {
         0: UTILITY_KW@113..121 "utility" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@121..128
           0: IDENT@121..128 "center" [] [Whitespace(" ")]
-        2: CSS_DECLARATION_BLOCK@128..198
+        2: CSS_DECLARATION_OR_RULE_BLOCK@128..198
           0: L_CURLY@128..129 "{" [] []
-          1: CSS_DECLARATION_LIST@129..196
+          1: CSS_DECLARATION_OR_RULE_LIST@129..196
             0: CSS_DECLARATION_WITH_SEMICOLON@129..146
               0: CSS_DECLARATION@129..145
                 0: CSS_GENERIC_PROPERTY@129..145

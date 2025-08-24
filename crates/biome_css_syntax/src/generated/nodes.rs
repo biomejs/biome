@@ -7269,7 +7269,7 @@ impl TwUtilityAtRule {
     pub fn name(&self) -> SyntaxResult<AnyTwUtilityName> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -7285,7 +7285,7 @@ impl Serialize for TwUtilityAtRule {
 pub struct TwUtilityAtRuleFields {
     pub utility_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyTwUtilityName>,
-    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+    pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwValueThemeReference {

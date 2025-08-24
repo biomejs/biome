@@ -1875,7 +1875,7 @@ TwValueThemeReference =
 TwUtilityAtRule =
   'utility'
   name: AnyTwUtilityName
-  block: AnyCssDeclarationBlock
+  block: AnyCssDeclarationOrRuleBlock
 
 // Support both simple utility names and functional utility names
 AnyTwUtilityName =

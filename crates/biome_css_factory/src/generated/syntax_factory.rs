@@ -5157,7 +5157,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && AnyCssDeclarationBlock::can_cast(element.kind())
+                    && AnyCssDeclarationOrRuleBlock::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
