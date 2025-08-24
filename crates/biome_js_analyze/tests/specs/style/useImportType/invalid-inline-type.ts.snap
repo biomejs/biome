@@ -23,8 +23,8 @@ import V5, { T9 } from "mod";
 export type { T9 };
 export { V5 };
 
-import type { T6 } from "mod";
-export type { T6 };
+import type { T10 } from "mod";
+export type { T10 };
 
 ```
 
@@ -184,22 +184,13 @@ invalid-inline-type.ts:16:8 lint/style/useImportType  FIXABLE  ━━━━━�
 ```
 invalid-inline-type.ts:20:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Some named imports are only used as types.
+  ! Use import { type } instead of import type.
   
     18 │ export { V5 };
     19 │ 
-  > 20 │ import type { T6 } from "mod";
-       │        ^^^^^^^^^^^^^^^^^^^^^^
-    21 │ export type { T6 };
-    22 │ 
-  
-  i This import is only used as a type.
-  
-    18 │ export { V5 };
-    19 │ 
-  > 20 │ import type { T6 } from "mod";
-       │               ^^
-    21 │ export type { T6 };
+  > 20 │ import type { T10 } from "mod";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ export type { T10 };
     22 │ 
   
   i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
@@ -208,9 +199,9 @@ invalid-inline-type.ts:20:8 lint/style/useImportType  FIXABLE  ━━━━━�
   
     18 18 │   export { V5 };
     19 19 │   
-    20    │ - import·type·{·T6·}·from·"mod";
-       20 │ + import·{·type·T6·}·from·"mod";
-    21 21 │   export type { T6 };
+    20    │ - import·type·{·T10·}·from·"mod";
+       20 │ + import·{·type·T10·}·from·"mod";
+    21 21 │   export type { T10 };
     22 22 │   
   
 

@@ -17,5 +17,5 @@ import V5, { T9 } from "mod";
 export type { T9 };
 export { V5 };
 
-import type { T6 } from "mod";
-export type { T6 };
+import type { T10 } from "mod";
+export type { T10 };

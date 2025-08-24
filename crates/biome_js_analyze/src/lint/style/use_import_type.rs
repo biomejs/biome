@@ -177,7 +177,7 @@ impl Rule for UseImportType {
         let import_clause = import.import_clause().ok()?;
         // Import attributes and type-only imports are not compatible in ESM.
         if import_clause.attribute().is_some()
-            && ctx.file_path().extension()? != "cts"
+            && ctx.file_path().extension().is_none_or(|extension| extension != "cts")
             && !matches!(ctx.root(), AnyJsRoot::JsScript(_))
         {
             return None;
@@ -294,9 +294,13 @@ impl Rule for UseImportType {
                         .iter()
                         .collect::<Result<Vec<_>, _>>()
                         .ok()?;
-                    return Some(ImportTypeFix::AddTypeQualifiers(
-                        specifiers.into_boxed_slice(),
-                    ));
+                    return if specifiers.is_empty() {
+                        None
+                    } else {
+                        Some(ImportTypeFix::AddTypeQualifiers(
+                            specifiers.into_boxed_slice(),
+                        ))
+                    };
                 }
                 match named_import_type_fix(
                     model,
@@ -406,16 +410,26 @@ impl Rule for UseImportType {
                 }
             }
             ImportTypeFix::AddTypeQualifiers(named_specifiers) => {
-                let mut diagnostic = RuleDiagnostic::new(
-                    rule_category!(),
-                    import_clause.range(),
-                    "Some named imports are only used as types.",
-                );
-                for specifier in named_specifiers {
-                    diagnostic =
-                        diagnostic.detail(specifier.range(), "This import is only used as a type.")
+                if import_clause.type_token().is_some() {
+                    RuleDiagnostic::new(
+                        rule_category!(),
+                        import_clause.range(),
+                        markup! {
+                            "Use "<Emphasis>"import { type }"</Emphasis>" instead of "<Emphasis>"import type"</Emphasis>"."
+                        },
+                    )
+                } else {
+                    let mut diagnostic = RuleDiagnostic::new(
+                        rule_category!(),
+                        import_clause.range(),
+                        "Some named imports are only used as types.",
+                    );
+                    for specifier in named_specifiers {
+                        diagnostic = diagnostic
+                            .detail(specifier.range(), "This import is only used as a type.")
+                    }
+                    diagnostic
                 }
-                diagnostic
             }
             ImportTypeFix::RemoveTypeQualifiers(type_tokens) => {
                 let mut diagnostic = RuleDiagnostic::new(
