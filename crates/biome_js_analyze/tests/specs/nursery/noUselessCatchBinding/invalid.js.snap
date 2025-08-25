@@ -27,6 +27,13 @@ try { /* ... */ } catch /* leading outer */ (/* leading inner */ unused /* trail
 
 try { /* ... */ } catch /* leading outer */ (/* leading inner 1 */ { /* leading inner 2 */ unused /* trailing inner 2 */ } /* trailing inner 1 */) /* trailing outer */ { }
 
+
+try { /* ... */ } catch ({ used: alias }) { }
+
+try { /* ... */ } catch ({ nested: { unused } }) { }
+
+try { /* ... */ } catch ({ ...rest }) { }
+
 ```
 
 # Diagnostics
@@ -222,6 +229,67 @@ invalid.js:21:45 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━
     21    │ - try·{·/*·...·*/·}·catch·/*·leading·outer·*/·(/*·leading·inner·1·*/·{·/*·leading·inner·2·*/·unused·/*·trailing·inner·2·*/·}·/*·trailing·inner·1·*/)·/*·trailing·outer·*/·{·}
        21 │ + try·{·/*·...·*/·}·catch·/*·leading·outer·*/·/*·trailing·outer·*/·{·}
     22 22 │   
+    23 23 │   
   
+
+```
+
+```
+invalid.js:24:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This catch binding is unused.
+  
+  > 24 │ try { /* ... */ } catch ({ used: alias }) { }
+       │                         ^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │ try { /* ... */ } catch ({ nested: { unused } }) { }
+  
+  i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
+  
+  i Unsafe fix: Remove the catch binding.
+  
+    24 │ try·{·/*·...·*/·}·catch·({·used:·alias·})·{·}
+       │                         ------------------   
+
+```
+
+```
+invalid.js:26:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This catch binding is unused.
+  
+    24 │ try { /* ... */ } catch ({ used: alias }) { }
+    25 │ 
+  > 26 │ try { /* ... */ } catch ({ nested: { unused } }) { }
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ try { /* ... */ } catch ({ ...rest }) { }
+  
+  i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
+  
+  i Unsafe fix: Remove the catch binding.
+  
+    26 │ try·{·/*·...·*/·}·catch·({·nested:·{·unused·}·})·{·}
+       │                         -------------------------   
+
+```
+
+```
+invalid.js:28:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This catch binding is unused.
+  
+    26 │ try { /* ... */ } catch ({ nested: { unused } }) { }
+    27 │ 
+  > 28 │ try { /* ... */ } catch ({ ...rest }) { }
+       │                         ^^^^^^^^^^^^^
+    29 │ 
+  
+  i Since ECMAScript 2019, catch bindings are optional; you can omit the catch binding if you don't need it.
+  
+  i Unsafe fix: Remove the catch binding.
+  
+    28 │ try·{·/*·...·*/·}·catch·({·...rest·})·{·}
+       │                         --------------   
 
 ```

@@ -19,3 +19,10 @@ try { /* ... */ } catch /* leading outer */ (unused) /* trailing outer */ { }
 try { /* ... */ } catch /* leading outer */ (/* leading inner */ unused /* trailing inner */) /* trailing outer */ { }
 
 try { /* ... */ } catch /* leading outer */ (/* leading inner 1 */ { /* leading inner 2 */ unused /* trailing inner 2 */ } /* trailing inner 1 */) /* trailing outer */ { }
+
+
+try { /* ... */ } catch ({ used: alias }) { }
+
+try { /* ... */ } catch ({ nested: { unused } }) { }
+
+try { /* ... */ } catch ({ ...rest }) { }
