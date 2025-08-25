@@ -4612,6 +4612,7 @@
 			]
 		},
 		"NoUselessCatchBindingOptions": {
+			"description": "Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).",
 			"type": "object",
 			"additionalProperties": false
 		},

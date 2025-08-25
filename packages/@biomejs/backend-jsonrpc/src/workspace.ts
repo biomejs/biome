@@ -8006,6 +8006,9 @@ export interface NoSecretsOptions {
 export interface NoShadowOptions {}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
+/**
+ * Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).
+ */
 export interface NoUselessCatchBindingOptions {}
 export interface NoUselessUndefinedOptions {}
 export interface NoVueDataObjectDeclarationOptions {}
