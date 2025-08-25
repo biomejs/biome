@@ -1,5 +1,33 @@
 # @biomejs/biome
 
+## 2.2.3
+
+### Patch Changes
+
+- [#7316](https://github.com/biomejs/biome/pull/7316) [`f9636d5`](https://github.com/biomejs/biome/commit/f9636d5de1e8aef742d145a886f05a4cd79eca31) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#7289](https://github.com/biomejs/biome/issues/7289). The rule [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/) now inlines `import type` into `import { type }` when the `style` option is set to `inlineType`.
+
+  Example:
+
+  ```ts
+  import type { T } from "mod";
+  // becomes
+  import { type T } from "mod";
+  ```
+
+- [#7302](https://github.com/biomejs/biome/pull/7302) [`2af2380`](https://github.com/biomejs/biome/commit/2af2380b8210e74efea467139a8a4cb4747c8af4) Thanks [@unvalley](https://github.com/unvalley)! - Fixed [#7301](https://github.com/biomejs/biome/issues/7301): [`useReadonlyClassProperties`](https://biomejs.dev/linter/rules/use-readonly-class-properties/) now correctly skips JavaScript files.
+
+- [#7295](https://github.com/biomejs/biome/pull/7295) [`7638e84`](https://github.com/biomejs/biome/commit/7638e84b026c8b008fa1efdd795b8c0bff0733ab) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7130](https://github.com/biomejs/biome/issues/7130). Removed the emission of a false-positive diagnostic. Biome no longer emits the following diagnostic:
+
+  ```
+  lib/main.ts:1:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    ⚠ Suppression comment has no effect because the tool is not enabled.
+
+    > 1 │ /** biome-ignore-all assist/source/organizeImports: For the lib root file, we don't want to organize exports */
+        │     ^^^^^^^^^^^^^^^^
+
+  ```
+
 ## 2.2.2
 
 ### Patch Changes
