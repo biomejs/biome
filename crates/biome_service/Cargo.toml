@@ -42,6 +42,7 @@ biome_js_analyze        = { workspace = true }
 biome_js_factory        = { workspace = true, optional = true }
 biome_js_formatter      = { workspace = true, features = ["serde"] }
 biome_js_parser         = { workspace = true }
+biome_js_runtime        = { workspace = true }
 biome_js_semantic       = { workspace = true }
 biome_js_syntax         = { workspace = true }
 biome_js_type_info      = { workspace = true }
