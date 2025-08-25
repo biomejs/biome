@@ -1,9 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: issue_459.jsx
+expression: issue_6648.jsx
 ---
 # Input
 ```jsx
-{'' != null && <>stuff</>}
-
+<>
+  Multi-line
+  text
+</>
 ```
