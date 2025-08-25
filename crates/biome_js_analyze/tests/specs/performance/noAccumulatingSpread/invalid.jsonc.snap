@@ -172,90 +172,6 @@ invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━�
 
 # Input
 ```cjs
-foo.reduce((acc, bar) => Object.assign(acc, bar), [])
-```
-
-# Diagnostics
-```
-invalid.jsonc:1:26 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of Object.assign on accumulators.
-  
-  > 1 │ foo.reduce((acc, bar) => Object.assign(acc, bar), [])
-      │                          ^^^^^^^^^^^^^
-  
-  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
-  
-  i Consider methods such as .splice or .push instead.
-  
-
-```
-
-# Input
-```cjs
-foo.reduceRight((acc, bar) => Object.assign(acc, bar), [])
-```
-
-# Diagnostics
-```
-invalid.jsonc:1:31 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of Object.assign on accumulators.
-  
-  > 1 │ foo.reduceRight((acc, bar) => Object.assign(acc, bar), [])
-      │                               ^^^^^^^^^^^^^
-  
-  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
-  
-  i Consider methods such as .splice or .push instead.
-  
-
-```
-
-# Input
-```cjs
-foo.reduce((acc, bar) => { return Object.assign(acc, bar) }, [])
-```
-
-# Diagnostics
-```
-invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of Object.assign on accumulators.
-  
-  > 1 │ foo.reduce((acc, bar) => { return Object.assign(acc, bar) }, [])
-      │                                   ^^^^^^^^^^^^^
-  
-  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
-  
-  i Consider methods such as .splice or .push instead.
-  
-
-```
-
-# Input
-```cjs
-foo.reduceRight((acc, bar) => { return Object.assign(acc, bar) }, [])
-```
-
-# Diagnostics
-```
-invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the use of Object.assign on accumulators.
-  
-  > 1 │ foo.reduceRight((acc, bar) => { return Object.assign(acc, bar) }, [])
-      │                                        ^^^^^^^^^^^^^
-  
-  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
-  
-  i Consider methods such as .splice or .push instead.
-  
-
-```
-
-# Input
-```cjs
 foo.reduce((acc, bar) => ({...acc, [bar.key]: bar.value}), {})
 ```
 
@@ -424,7 +340,7 @@ invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━�
 
 # Input
 ```cjs
-foo.reduce((acc, bar) => Object.assign(acc, bar), {})
+foo.reduce((acc, bar) => Object.assign({}, acc, bar), [])
 ```
 
 # Diagnostics
@@ -433,7 +349,7 @@ invalid.jsonc:1:26 lint/performance/noAccumulatingSpread ━━━━━━━�
 
   ! Avoid the use of Object.assign on accumulators.
   
-  > 1 │ foo.reduce((acc, bar) => Object.assign(acc, bar), {})
+  > 1 │ foo.reduce((acc, bar) => Object.assign({}, acc, bar), [])
       │                          ^^^^^^^^^^^^^
   
   i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
@@ -445,7 +361,7 @@ invalid.jsonc:1:26 lint/performance/noAccumulatingSpread ━━━━━━━�
 
 # Input
 ```cjs
-foo.reduceRight((acc, bar) => Object.assign(acc, bar), {})
+foo.reduceRight((acc, bar) => Object.assign({}, acc, bar), [])
 ```
 
 # Diagnostics
@@ -454,7 +370,7 @@ invalid.jsonc:1:31 lint/performance/noAccumulatingSpread ━━━━━━━�
 
   ! Avoid the use of Object.assign on accumulators.
   
-  > 1 │ foo.reduceRight((acc, bar) => Object.assign(acc, bar), {})
+  > 1 │ foo.reduceRight((acc, bar) => Object.assign({}, acc, bar), [])
       │                               ^^^^^^^^^^^^^
   
   i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
@@ -466,7 +382,7 @@ invalid.jsonc:1:31 lint/performance/noAccumulatingSpread ━━━━━━━�
 
 # Input
 ```cjs
-foo.reduce((acc, bar) => { return Object.assign(acc, bar) }, {})
+foo.reduce((acc, bar) => { return Object.assign([], acc, bar) }, [])
 ```
 
 # Diagnostics
@@ -475,7 +391,7 @@ invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━�
 
   ! Avoid the use of Object.assign on accumulators.
   
-  > 1 │ foo.reduce((acc, bar) => { return Object.assign(acc, bar) }, {})
+  > 1 │ foo.reduce((acc, bar) => { return Object.assign([], acc, bar) }, [])
       │                                   ^^^^^^^^^^^^^
   
   i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
@@ -487,7 +403,7 @@ invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━�
 
 # Input
 ```cjs
-foo.reduceRight((acc, bar) => { return Object.assign(acc, bar) }, {})
+foo.reduceRight((acc, bar) => { return Object.assign([], acc, bar) }, [])
 ```
 
 # Diagnostics
@@ -496,8 +412,176 @@ invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━�
 
   ! Avoid the use of Object.assign on accumulators.
   
-  > 1 │ foo.reduceRight((acc, bar) => { return Object.assign(acc, bar) }, {})
+  > 1 │ foo.reduceRight((acc, bar) => { return Object.assign([], acc, bar) }, [])
       │                                        ^^^^^^^^^^^^^
+  
+  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
+  
+  i Consider methods such as .splice or .push instead.
+  
+
+```
+
+# Input
+```cjs
+foo.reduce((acc, bar) => Object.assign([], acc, bar), {})
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:26 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of Object.assign on accumulators.
+  
+  > 1 │ foo.reduce((acc, bar) => Object.assign([], acc, bar), {})
+      │                          ^^^^^^^^^^^^^
+  
+  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
+  
+  i Consider methods such as .splice or .push instead.
+  
+
+```
+
+# Input
+```cjs
+foo.reduceRight((acc, bar) => Object.assign([], acc, bar), {})
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:31 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of Object.assign on accumulators.
+  
+  > 1 │ foo.reduceRight((acc, bar) => Object.assign([], acc, bar), {})
+      │                               ^^^^^^^^^^^^^
+  
+  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
+  
+  i Consider methods such as .splice or .push instead.
+  
+
+```
+
+# Input
+```cjs
+foo.reduce((acc, bar) => { return Object.assign([], acc, bar) }, {})
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of Object.assign on accumulators.
+  
+  > 1 │ foo.reduce((acc, bar) => { return Object.assign([], acc, bar) }, {})
+      │                                   ^^^^^^^^^^^^^
+  
+  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
+  
+  i Consider methods such as .splice or .push instead.
+  
+
+```
+
+# Input
+```cjs
+foo.reduceRight((acc, bar) => { return Object.assign([], acc, bar) }, {})
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of Object.assign on accumulators.
+  
+  > 1 │ foo.reduceRight((acc, bar) => { return Object.assign([], acc, bar) }, {})
+      │                                        ^^^^^^^^^^^^^
+  
+  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
+  
+  i Consider methods such as .splice or .push instead.
+  
+
+```
+
+# Input
+```cjs
+foo.reduce((acc, bar) => { return Object.assign(new Array(1), acc, bar) }, [])
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of Object.assign on accumulators.
+  
+  > 1 │ foo.reduce((acc, bar) => { return Object.assign(new Array(1), acc, bar) }, [])
+      │                                   ^^^^^^^^^^^^^
+  
+  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
+  
+  i Consider methods such as .splice or .push instead.
+  
+
+```
+
+# Input
+```cjs
+foo.reduceRight((acc, bar) => { return Object.assign(new Array(1), acc, bar) }, [])
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of Object.assign on accumulators.
+  
+  > 1 │ foo.reduceRight((acc, bar) => { return Object.assign(new Array(1), acc, bar) }, [])
+      │                                        ^^^^^^^^^^^^^
+  
+  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
+  
+  i Consider methods such as .splice or .push instead.
+  
+
+```
+
+# Input
+```cjs
+foo.reduce((acc, bar) => Object.assign(new Array(1), acc, bar), {})
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:26 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of Object.assign on accumulators.
+  
+  > 1 │ foo.reduce((acc, bar) => Object.assign(new Array(1), acc, bar), {})
+      │                          ^^^^^^^^^^^^^
+  
+  i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
+  
+  i Consider methods such as .splice or .push instead.
+  
+
+```
+
+# Input
+```cjs
+foo.reduceRight((acc, bar) => Object.assign(new Array(1), acc, bar), {})
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:31 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of Object.assign on accumulators.
+  
+  > 1 │ foo.reduceRight((acc, bar) => Object.assign(new Array(1), acc, bar), {})
+      │                               ^^^^^^^^^^^^^
   
   i Spread syntax should be avoided on accumulators (like those in `.reduce`) because it causes a time complexity of `O(n^2)`.
   
