@@ -190,7 +190,7 @@ tests_macros         = { path = "./crates/tests_macros" }
 anyhow               = "1.0.98"
 bpaf                 = { version = "0.9.20", features = ["derive"] }
 camino               = "1.1.11"
-cfg-if               = "1.0.1"
+cfg-if               = "1.0.3"
 countme              = "3.0.1"
 crossbeam            = "0.8.4"
 dashmap              = "6.1.0"
