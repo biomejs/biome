@@ -21,7 +21,7 @@ jobs:
         run: echo "nightly=true" >> $GITHUB_ENV
 
       - name: Check version changes
-        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
+        uses: EndBug/version-check@5102328418c0130d66ca712d755c303e93368ce2 # v2.1.7
         if: env.nightly != 'true'
         id: version
         with:
