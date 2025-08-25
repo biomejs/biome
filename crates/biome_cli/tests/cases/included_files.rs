@@ -96,11 +96,10 @@ fn does_not_handle_included_files_if_overridden_by_ignore() {
 fn does_not_handle_files_in_ignored_folder() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();
-    let file_path = Utf8Path::new("biome.json");
     fs.insert(
-        file_path.into(),
+        "biome.json".into(),
         r#"{
-  "files": { "includes": ["test.js", "!**/folder"] }
+  "files": { "includes": ["**/*.js", "!**/folder"] }
 }
 "#
         .as_bytes(),
