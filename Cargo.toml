@@ -187,7 +187,7 @@ biome_test_utils     = { path = "./crates/biome_test_utils" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-anyhow               = "1.0.98"
+anyhow               = "1.0.99"
 bpaf                 = { version = "0.9.20", features = ["derive"] }
 camino               = "1.1.11"
 cfg-if               = "1.0.1"
