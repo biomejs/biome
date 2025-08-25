@@ -75,6 +75,11 @@ declare_lint_rule! {
     ///   {'Please enter your name'}
     /// </span>
     /// ```
+    /// ```jsx,expect_diagnostic,use_options
+    /// <Component title="Hello!" />
+    /// ```
+    ///
+    ///
     ///
     /// ### `allowedStrings`
     ///
