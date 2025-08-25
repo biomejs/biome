@@ -40,7 +40,7 @@ camino                   = { workspace = true }
 enumflags2               = { workspace = true }
 globset                  = { workspace = true }
 regex                    = { workspace = true }
-roaring                  = "0.11.1"
+roaring                  = "0.11.2"
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
@@ -53,7 +53,7 @@ biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
 biome_plugin_loader = { workspace = true }
 biome_service       = { workspace = true }
 biome_test_utils    = { path = "../biome_test_utils" }
-criterion           = { package = "codspeed-criterion-compat", version = "=3.0.3" }
+criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
 

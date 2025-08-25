@@ -12,7 +12,7 @@ proc-macro2    = { workspace = true, features = ["span-locations"] }
 pulldown-cmark = { version = "0.13.0", default-features = false, optional = true }
 quote          = "1.0.36"
 serde          = { workspace = true, optional = true }
-ureq           = "3.0.12"
+ureq           = "3.1.0"
 xtask          = { path = '../', version = "0.0" }
 
 biome_analyze         = { workspace = true, features = ["schema"], optional = true }
