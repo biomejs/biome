@@ -4,12 +4,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoJsxLiteralsOptions {
-    /// When enabled, no strings are allowed inside JSX children
+    /// When enabled, also flag string literals inside JSX expressions and attributes
     #[serde(default)]
     pub no_strings: bool,
 
     /// An array of strings that won't trigger the rule. Whitespaces are taken into consideration
-    #[serde(default)]
     pub allowed_strings: Box<[Box<str>]>,
 
     /// When enabled, strings inside props are always ignored
