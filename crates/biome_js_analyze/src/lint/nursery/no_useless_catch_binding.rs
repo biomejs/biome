@@ -89,13 +89,12 @@ impl Rule for NoUselessCatchBinding {
         let catch_declaration = ctx.query();
         let catch_binding = catch_declaration.binding().ok()?;
 
-        let mut idents: Vec<AnyJsIdentifierBinding> = Vec::new();
-        for descendant in catch_binding.syntax().descendants() {
-            if let Some(ident) = AnyJsIdentifierBinding::cast(descendant) {
-                idents.push(ident);
-            }
-        }
-        if idents.iter().all(|ident| is_unused(model, ident)) {
+        let all_unused = catch_binding
+            .syntax()
+            .descendants()
+            .filter_map(AnyJsIdentifierBinding::cast)
+            .all(|ident| is_unused(model, &ident));
+        if all_unused {
             return Some(());
         }
         None
