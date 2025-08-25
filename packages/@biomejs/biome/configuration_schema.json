@@ -3607,7 +3607,7 @@
 					"type": "boolean"
 				},
 				"noStrings": {
-					"description": "When enabled, no strings are allowed inside JSX children",
+					"description": "When enabled, also flag string literals inside JSX expressions and attributes",
 					"default": false,
 					"type": "boolean"
 				}

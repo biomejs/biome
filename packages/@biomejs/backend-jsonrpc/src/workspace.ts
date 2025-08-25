@@ -8076,7 +8076,7 @@ export interface NoJsxLiteralsOptions {
 	 */
 	ignoreProps?: boolean;
 	/**
-	 * When enabled, no strings are allowed inside JSX children
+	 * When enabled, also flag string literals inside JSX expressions and attributes
 	 */
 	noStrings?: boolean;
 }
