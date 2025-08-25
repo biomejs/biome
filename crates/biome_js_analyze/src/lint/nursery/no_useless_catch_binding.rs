@@ -3,15 +3,17 @@ use crate::lint::correctness::no_unused_variables::is_unused;
 use crate::services::semantic::Semantic;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{JsCatchDeclaration, binding_ext::AnyJsIdentifierBinding};
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_js_syntax::{
+    JsCatchClause, JsCatchClauseFields, JsCatchDeclaration, binding_ext::AnyJsIdentifierBinding,
+};
+use biome_rowan::{AstNode, BatchMutationExt, trim_leading_trivia_pieces};
 use biome_rule_options::no_useless_catch_binding::NoUselessCatchBindingOptions;
 
 declare_lint_rule! {
     /// Disallow unused catch bindings.
     ///
-    /// This rule enforces removing unnecessary catch bindings in accordance with ECMAScript 2019.
-    /// See also: [Optional catch binding](https://tc39.es/proposal-optional-catch-binding)
+    /// This rule disallows unnecessary catch bindings in accordance with ECMAScript 2019.
+    /// See also: the ECMAScript 2019 “optional catch binding” feature in the language specification.
     ///
     /// ## Examples
     ///
@@ -23,12 +25,40 @@ declare_lint_rule! {
     /// } catch (unused) {}
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// try {
+    ///     // Do something
+    /// } catch ({ unused }) {}
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// try {
+    ///     // Do something
+    /// } catch ({ unused1, unused2 }) {}
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
     /// try {
     ///     // Do something
     /// } catch (used) {
+    ///     console.error(used);
+    /// }
+    /// ```
+    ///
+    /// ```js
+    /// try {
+    ///     // Do something
+    /// } catch ({ used }) {
+    ///     console.error(used);
+    /// }
+    /// ```
+    ///
+    /// ```js
+    /// try {
+    ///     // Do something
+    /// } catch ({ used, unused }) {
     ///     console.error(used);
     /// }
     /// ```
@@ -55,16 +85,20 @@ impl Rule for NoUselessCatchBinding {
     type Options = NoUselessCatchBindingOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let model = ctx.model();
         let catch_declaration = ctx.query();
         let catch_binding = catch_declaration.binding().ok()?;
-        let catch_binding_ident = catch_binding
-            .as_any_js_binding()?
-            .as_js_identifier_binding()?;
-        let catch_binding_any_ident = AnyJsIdentifierBinding::from(catch_binding_ident.clone());
-        if !is_unused(ctx.model(), &catch_binding_any_ident) {
-            return None;
+
+        let mut idents: Vec<AnyJsIdentifierBinding> = Vec::new();
+        for descendant in catch_binding.syntax().descendants() {
+            if let Some(ident) = AnyJsIdentifierBinding::cast(descendant) {
+                idents.push(ident);
+            }
         }
-        Some(())
+        if idents.iter().all(|ident| is_unused(model, ident)) {
+            return Some(());
+        }
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -85,8 +119,26 @@ impl Rule for NoUselessCatchBinding {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
-        let catch_declaration = ctx.query();
-        mutation.remove_node(catch_declaration.clone());
+        let node = ctx.query();
+
+        let catch_clause = node.syntax().parent()?;
+        let JsCatchClauseFields {
+            catch_token,
+            declaration,
+            ..
+        } = JsCatchClause::cast(catch_clause)?.as_fields();
+
+        let catch_token = catch_token.ok()?;
+        let declaration = declaration?;
+        let catch_token_replacement =
+            catch_token
+                .clone()
+                .append_trivia_pieces(trim_leading_trivia_pieces(
+                    declaration.syntax().last_trailing_trivia()?.pieces(),
+                ));
+        mutation.remove_node(declaration);
+        mutation.replace_token_discard_trivia(catch_token, catch_token_replacement);
+
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),

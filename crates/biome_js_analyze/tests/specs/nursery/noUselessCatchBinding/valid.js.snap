@@ -7,16 +7,20 @@ expression: valid.js
 ```js
 // should not generate diagnostics
 
-try {
-    // Do something
-} catch (used) {
-    console.error(used);
-}
+try { /* ... */ } catch (used) { console.error(used); }
 
-try {
-    // Do something
-} catch {
-    // Do something
-}
+try { /* ... */ } catch ({ used }) { console.error(used); }
+
+try { /* ... */ } catch ({ used, unused }) { console.error(used); }
+
+
+try { /* ... */ } catch (used) { const log = () => console.error(used); log(); }
+
+try { /* ... */ } catch ({ used }) { const log = () => console.error(used); log(); }
+
+try { /* ... */ } catch ({ used, unused }) { const log = () => console.error(used); log(); }
+
+
+try { /* ... */ } catch { }
 
 ```
