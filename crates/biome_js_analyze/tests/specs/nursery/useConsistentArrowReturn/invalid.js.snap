@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: invalid.js
+---
+# Input
+```js
+const returnsObjectArrow = () => {
+    return { a: 1, b: 2 };
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:1:28 lint/nursery/useConsistentArrowReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This arrow function doesn't need a return statement.
+  
+  > 1 │ const returnsObjectArrow = () => {
+      │                            ^^^^^^^
+  > 2 │     return { a: 1, b: 2 };
+  > 3 │ }
+      │ ^
+    4 │ 
+  
+  i Consider changing the function body into the returned expression.
+  
+
+```
