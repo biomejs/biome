@@ -1,9 +1,15 @@
+use crate::JsRuleAction;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource
 };
 use biome_console::markup;
-use biome_js_syntax::{JsArrowFunctionExpression, JsFunctionBody, JsReturnStatement};
-use biome_rowan::{AstNode, AstNodeList};
+use biome_diagnostics::Severity;
+use biome_js_factory::make;
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsFunctionBody, JsArrowFunctionExpression, JsFunctionBody, JsObjectExpression,
+    JsReturnStatement, JsSequenceExpression,
+};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_consistent_arrow_return::UseConsistentArrowReturnOptions;
 
 declare_lint_rule! {
@@ -38,6 +44,8 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("arrow-body-style").same()],
         recommended: false,
+        severity: Severity::Warning,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -81,5 +89,33 @@ impl Rule for UseConsistentArrowReturn {
                 "Consider changing the function body into the returned expression."
             }),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, body: &Self::State) -> Option<JsRuleAction> {
+        let mut mutation = ctx.root().begin();
+
+        let return_statement = body.statements().iter().next()?;
+        let return_statement = JsReturnStatement::cast(return_statement.into_syntax())?;
+        let return_argument = return_statement.argument()?;
+
+        let new_body = if JsObjectExpression::can_cast(return_argument.syntax().kind())
+            || JsSequenceExpression::can_cast(return_argument.syntax().kind())
+        {
+            AnyJsExpression::from(make::parenthesized(return_argument))
+        } else {
+            return_argument
+        };
+
+        mutation.replace_node(
+            AnyJsFunctionBody::from(body.clone()),
+            AnyJsFunctionBody::AnyJsExpression(new_body),
+        );
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Remove the return statement" }.to_owned(),
+            mutation,
+        ))
     }
 }
