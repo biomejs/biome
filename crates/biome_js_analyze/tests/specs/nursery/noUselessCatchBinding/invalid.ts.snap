@@ -5,7 +5,7 @@ expression: invalid.ts
 ---
 # Input
 ```ts
-
+// should generate diagnostics
 
 try { /* ... */ } catch (unused: any) { }
 
@@ -35,6 +35,8 @@ invalid.ts:3:25 lint/nursery/noUselessCatchBinding  FIXABLE  ━━━━━━�
 
   i This catch binding is unused.
   
+    1 │ // should generate diagnostics
+    2 │ 
   > 3 │ try { /* ... */ } catch (unused: any) { }
       │                         ^^^^^^^^^^^^^
     4 │ 

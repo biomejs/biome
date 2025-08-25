@@ -131,11 +131,13 @@ impl Rule for NoUselessCatchBinding {
         let catch_token = catch_token.ok()?;
         let declaration = declaration?;
         let catch_token_replacement =
-            catch_token
-                .clone()
-                .append_trivia_pieces(trim_leading_trivia_pieces(
-                    declaration.syntax().last_trailing_trivia()?.pieces(),
-                ));
+            if let Some(trivia) = declaration.syntax().last_trailing_trivia() {
+                catch_token
+                    .clone()
+                    .append_trivia_pieces(trim_leading_trivia_pieces(trivia.pieces()))
+            } else {
+                catch_token.clone()
+            };
         mutation.remove_node(declaration);
         mutation.replace_token_discard_trivia(catch_token, catch_token_replacement);
 
