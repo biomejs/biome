@@ -1,4 +1,4 @@
-// should not generate diagnostics
+// should generate diagnostics
 
 try { /* ... */ } catch (unused: any) { }
 
