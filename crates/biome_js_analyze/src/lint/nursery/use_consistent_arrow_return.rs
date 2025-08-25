@@ -1,13 +1,13 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, JsArrowFunctionExpression, JsFunctionBody, JsObjectExpression,
-    JsReturnStatement, JsSequenceExpression,
+    AnyJsExpression, AnyJsFunctionBody, JsArrowFunctionExpression, JsFunctionBody,
+    JsObjectExpression, JsReturnStatement, JsSequenceExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_consistent_arrow_return::UseConsistentArrowReturnOptions;
