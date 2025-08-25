@@ -664,3 +664,24 @@ export class ToastService {
 		this.activeToasts.push({id, message, type, autoClose});
 	}
 }
+
+class TestIncrementInAssignment {
+	private thing: number = 0;
+
+	public incrementThing(): void {
+		const temp = { x: 0 };
+		temp.x = this.thing++;
+	}
+}
+
+class TesAssignmentInNestedCallback {
+	private thing: any;
+
+	public doStuff(): void {
+		ui.showText("example", {
+			callback: () => {
+				this.thing = x;
+			},
+		});
+	}
+}
