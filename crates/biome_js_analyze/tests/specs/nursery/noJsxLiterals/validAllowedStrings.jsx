@@ -1,12 +1,13 @@
 /* should not generate diagnostics */
 <>
-	<div>
-		{'allowed'}
-		{'allowed'}
-		{'allowed'}
-	</div>
-	<Foo bar={"allowed"} />
-	<Foo bar="allowed">
-		{'allowed' + name}
-	</Foo>
+	<div>allowed</div>
+	<>allowed</>
 </>
+
+
+class Comp1 extends Component {
+	render() {
+		const varObjectTest = { testKey : (<div>allowed</div>) };
+		return varObjectTest.testKey;
+	}
+}

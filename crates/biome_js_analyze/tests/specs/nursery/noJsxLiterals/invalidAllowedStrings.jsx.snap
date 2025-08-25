@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAllowedStrings.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<>
+	<div>allowed</div>
+	<>test</>
+</>
+
+
+class Comp1 extends Component {
+	render() {
+		const varObjectTest = { testKey : (<div>test</div>) };
+		return varObjectTest.testKey;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidAllowedStrings.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Incorrect use of string literal detected.
+  
+    2 │ <>
+    3 │ 	<div>allowed</div>
+  > 4 │ 	<>test</>
+      │ 	  ^^^^
+    5 │ </>
+    6 │ 
+  
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
+  
+
+```
+
+```
+invalidAllowedStrings.jsx:10:43 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Incorrect use of string literal detected.
+  
+     8 │ class Comp1 extends Component {
+     9 │ 	render() {
+  > 10 │ 		const varObjectTest = { testKey : (<div>test</div>) };
+       │ 		                                        ^^^^
+    11 │ 		return varObjectTest.testKey;
+    12 │ 	}
+  
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
+  
+
+```
