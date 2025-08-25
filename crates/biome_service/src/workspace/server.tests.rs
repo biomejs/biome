@@ -113,7 +113,7 @@ fn store_embedded_nodes_with_current_ranges() {
 }
 
 #[test]
-fn js_everywhere_sets_correct_variant() {
+fn jsx_everywhere_sets_correct_variant() {
     const TS_FILE_CONTENT: &[u8] = br"
 const f = <T1>(arg1: T1) => <T2>(arg2: T2) => {
     return { arg1, arg2 };
@@ -230,7 +230,7 @@ function Foo({cond}) {
 }
 
 #[test]
-fn js_everywhere_disabled_correct_variant() {
+fn jsx_everywhere_disabled_correct_variant() {
     const JS_FILE_CONTENT: &[u8] = br"
 function Foo({cond}) {
   return cond ? (
