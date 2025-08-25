@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsFileSource, JsStringLiteralExpression, JsxAttribute,
-    JsxExpressionAttributeValue, JsxString, JsxText,
+    JsxExpressionAttributeValue, JsxString, JsxText, inner_string_text,
 };
 use biome_rowan::{AstNode, AstNodeList, TextRange, declare_node_union};
 use biome_rule_options::no_jsx_literals::NoJsxLiteralsOptions;
@@ -189,12 +189,12 @@ impl Rule for NoJsxLiterals {
         };
 
         for allowed_string in &options.allowed_strings {
-            if value_token.text() == allowed_string.as_ref() {
+            if inner_string_text(&value_token) == allowed_string.as_ref() {
                 return None;
             }
         }
 
-        if value_token.text().trim().is_empty() {
+        if inner_string_text(&value_token).trim().is_empty() {
             return None;
         }
 
