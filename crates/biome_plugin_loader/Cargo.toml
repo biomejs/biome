@@ -33,6 +33,12 @@ serde                    = { workspace = true }
 biome_js_runtime         = { workspace = true, optional = true }
 boa_engine               = { workspace = true, optional = true }
 
+[target.'cfg(windows)'.dependencies]
+windows = { workspace = true, optional = true }
+
+[target.'cfg(unix)'.dependencies]
+libc = { workspace = true, optional = true }
+
 [dev-dependencies]
 biome_js_parser = { workspace = true }
 insta           = { workspace = true }
@@ -42,4 +48,4 @@ workspace = true
 
 [features]
 default = ["js_plugin"]
-js_plugin = ["dep:biome_js_runtime", "dep:boa_engine"]
+js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:windows"]

@@ -7,6 +7,7 @@ mod plugin_manifest;
 
 #[cfg(feature = "js_plugin")]
 mod analyzer_js_plugin;
+mod thread_local;
 
 #[cfg(feature = "js_plugin")]
 pub use analyzer_js_plugin::AnalyzerJsPlugin;

@@ -6,7 +6,6 @@ use boa_engine::object::FunctionObjectBuilder;
 use boa_engine::{Context, JsValue, Module, NativeFunction, js_string};
 
 use biome_analyze::RuleDiagnostic;
-use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{Severity, category};
 use biome_text_size::TextRange;
 
@@ -40,7 +39,7 @@ impl JsPluginApi {
 
                 let diagnostic = RuleDiagnostic::new(
                     category!("plugin"),
-                    EmptySpan, // TODO: retrieve a span from the AST
+                    None::<TextRange>, // TODO: retrieve a span from the AST
                     message.to_std_string_lossy(),
                 )
                 .with_severity(severity);
@@ -73,13 +72,5 @@ impl JsPluginApi {
 
     pub(crate) fn pull_diagnostics(&self) -> Vec<RuleDiagnostic> {
         std::mem::take(&mut self.diagnostics.borrow_mut())
-    }
-}
-
-struct EmptySpan;
-
-impl AsSpan for EmptySpan {
-    fn as_span(&self) -> Option<TextRange> {
-        None
     }
 }
