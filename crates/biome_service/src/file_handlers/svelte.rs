@@ -1,3 +1,4 @@
+use super::{SearchCapabilities, parse_lang_from_script_opening_tag};
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
@@ -8,15 +9,14 @@ use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, TextRange, TextSize};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
 use std::sync::LazyLock;
-use tracing::debug;
-
-use super::{SearchCapabilities, parse_lang_from_script_opening_tag};
+use tracing::{debug, error};
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct SvelteFileHandler;
@@ -141,7 +141,16 @@ fn format(
     parse: AnyParse,
     settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format(biome_path, document_file_source, parse, settings)
+    let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
+    let tree = parse.syntax();
+    let formatted = format_node(options, &tree)?;
+    match formatted.print_with_indent(1) {
+        Ok(printed) => Ok(printed),
+        Err(error) => {
+            error!("The file {} couldn't be formatted", biome_path.as_str());
+            Err(WorkspaceError::FormatError(error.into()))
+        }
+    }
 }
 pub(crate) fn format_range(
     biome_path: &BiomePath,

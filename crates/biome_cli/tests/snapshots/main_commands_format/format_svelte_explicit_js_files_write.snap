@@ -1,13 +1,13 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `file.svelte`
 
 ```svelte
 <script lang="js">
-import { something } from "file.svelte";
-statement();
+	import { something } from "file.svelte";
+	statement();
 </script>
 <div></div>
 ```
