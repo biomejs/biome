@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `file.svelte`
 
@@ -33,8 +33,8 @@ file.svelte format ━━━━━━━━━━━━━━━━━━━━�
     1 1 │   <script>
     2   │ - import·{····something·}·from·"file.svelte";
     3   │ - statement·(·)·;
-      2 │ + import·{·something·}·from·"file.svelte";
-      3 │ + statement();
+      2 │ + → import·{·something·}·from·"file.svelte";
+      3 │ + → statement();
     4 4 │   </script>
     5 5 │   <div></div>
   
