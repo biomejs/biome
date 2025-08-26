@@ -75,14 +75,22 @@ impl JsExecContext {
                 ctx,
             );
 
-        ctx.run_jobs();
+        // Drive the job queue until the promise settles.
+        while matches!(promise_result.state(), PromiseState::Pending) {
+            ctx.run_jobs();
+        }
 
         match promise_result.state() {
-            PromiseState::Pending => unreachable!(),
             PromiseState::Fulfilled(_) => {}
             PromiseState::Rejected(err) => {
-                return Err(JsError::from_opaque(err).try_native(ctx).unwrap().into());
+                let opaque = JsError::from_opaque(err);
+                if let Some(native) = opaque.try_native(ctx) {
+                    return Err(native.into());
+                }
+                return Err(opaque);
             }
+            // The loop above guarantees settlement.
+            PromiseState::Pending => unreachable!(),
         }
 
         Ok(module)
