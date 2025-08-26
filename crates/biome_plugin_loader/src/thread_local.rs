@@ -13,7 +13,7 @@ mod platform {
 
     impl<T> Key<T> {
         pub(super) unsafe fn new() -> Self {
-            let inner = unsafe { win32::FlsAlloc(Some(dtor::<T>)) };
+            let inner = unsafe { win32::FlsAlloc(None) };
 
             Self {
                 inner,
@@ -26,7 +26,7 @@ mod platform {
         }
 
         pub(super) unsafe fn set(&self, value: *mut T) {
-            let result = unsafe { win32::FlsSetValue(self.inner, value as *const c_void) };
+            let result = unsafe { win32::FlsSetValue(self.inner, Some(value as *const c_void)) };
 
             assert!(result.is_ok());
         }
@@ -35,14 +35,6 @@ mod platform {
     impl<T> Drop for Key<T> {
         fn drop(&mut self) {
             unsafe { win32::FlsFree(self.inner) };
-        }
-    }
-
-    unsafe extern "system" fn dtor<T>(ptr: *mut c_void) {
-        unsafe {
-            if !ptr.is_null() {
-                std::ptr::drop_in_place(ptr as *mut T);
-            }
         }
     }
 }
@@ -62,7 +54,7 @@ mod platform {
         pub(super) unsafe fn new() -> Self {
             let inner = unsafe {
                 let mut inner = MaybeUninit::uninit();
-                let result = libc::pthread_key_create(inner.as_mut_ptr(), Some(dtor::<T>));
+                let result = libc::pthread_key_create(inner.as_mut_ptr(), None);
 
                 assert_eq!(result, 0);
 
@@ -93,19 +85,13 @@ mod platform {
             debug_assert_eq!(result, 0);
         }
     }
-
-    unsafe extern "C" fn dtor<T>(ptr: *mut c_void) {
-        if !ptr.is_null() {
-            // FIXME: Dropping the value here will break Boa's GC
-            // std::ptr::drop_in_place(ptr as *mut T);
-            let _ = ptr as *mut T;
-        }
-    }
 }
 
 /// Thread-local storage.
 /// It uses [`Fiber Local Storage`](https://learn.microsoft.com/en-us/windows/win32/procthread/fibers#fiber-local-storage) on Windows,
 /// or [`pthread_setspecific(3)`](https://linux.die.net/man/3/pthread_setspecific) on Unix.
+/// Note that the inner value is not dropped on thread exit to avoid double-free after another
+/// [`std::thread_local`] is dropped.
 pub(crate) struct ThreadLocalCell<T> {
     key: platform::Key<RefCell<T>>,
 }
