@@ -28,13 +28,15 @@ mod platform {
         pub(super) unsafe fn set(&self, value: *mut T) {
             let result = unsafe { win32::FlsSetValue(self.inner, Some(value as *const c_void)) };
 
-            assert!(result.is_ok());
+            debug_assert!(result.is_ok());
         }
     }
 
     impl<T> Drop for Key<T> {
         fn drop(&mut self) {
-            unsafe { win32::FlsFree(self.inner) };
+            let result = unsafe { win32::FlsFree(self.inner) };
+
+            debug_assert!(result.is_ok());
         }
     }
 }
