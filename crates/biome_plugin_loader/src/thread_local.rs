@@ -14,13 +14,17 @@ mod platform {
     impl<T> Key<T> {
         pub(super) unsafe fn new() -> Self {
             let inner = unsafe { win32::FlsAlloc(None) };
+            // FlsAlloc returns FLS_OUT_OF_INDEXES (u32::MAX) on failure.
+            assert!(
+                inner != u32::MAX,
+                "FlsAlloc failed: out of FLS indexes"
+            );
 
             Self {
                 inner,
                 _phantom: PhantomData,
             }
         }
-
         pub(super) unsafe fn get(&self) -> *mut T {
             unsafe { win32::FlsGetValue(self.inner) as *mut T }
         }
