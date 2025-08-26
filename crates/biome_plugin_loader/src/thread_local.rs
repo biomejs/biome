@@ -15,10 +15,7 @@ mod platform {
         pub(super) unsafe fn new() -> Self {
             let inner = unsafe { win32::FlsAlloc(None) };
             // FlsAlloc returns FLS_OUT_OF_INDEXES (u32::MAX) on failure.
-            assert!(
-                inner != u32::MAX,
-                "FlsAlloc failed: out of FLS indexes"
-            );
+            assert!(inner != u32::MAX, "FlsAlloc failed: out of FLS indexes");
 
             Self {
                 inner,
