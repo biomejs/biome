@@ -331,6 +331,19 @@ impl DocumentFileSource {
         }
     }
 
+    /// Convert the file source from a JS file source into an HTML-like file source, if the file belongs to an HTML-like language.
+    pub fn to_htmlish(&self) -> Self {
+        match self {
+            Self::Js(js) => match js.as_embedding_kind() {
+                EmbeddingKind::Astro => Self::Html(HtmlFileSource::astro()),
+                EmbeddingKind::Vue => Self::Html(HtmlFileSource::vue()),
+                EmbeddingKind::Svelte => Self::Html(HtmlFileSource::svelte()),
+                EmbeddingKind::None => Self::Unknown,
+            },
+            _ => Self::Unknown,
+        }
+    }
+
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);

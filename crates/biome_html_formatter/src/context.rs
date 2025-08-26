@@ -1,4 +1,4 @@
-use std::{fmt, rc::Rc, str::FromStr};
+use std::{fmt, ops::Deref, rc::Rc, str::FromStr};
 
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
@@ -352,6 +352,14 @@ impl FromStr for IndentScriptAndStyle {
                 "Value not supported for IndentScriptAndStyle. Supported values are 'true' and 'false'.",
             ),
         }
+    }
+}
+
+impl Deref for IndentScriptAndStyle {
+    type Target = bool;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
