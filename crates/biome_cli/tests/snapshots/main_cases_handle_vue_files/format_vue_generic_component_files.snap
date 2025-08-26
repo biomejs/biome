@@ -30,7 +30,7 @@ file.vue format ━━━━━━━━━━━━━━━━━━━━━�
   
     1 1 │   <script generic="T extends Record<string, any>" lang="ts" setup>
     2   │ - const·a·····=·····"a";
-      2 │ + → const·a·=·"a";
+      2 │ + const·a·=·"a";
     3 3 │   </script>
   
 

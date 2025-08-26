@@ -6,8 +6,8 @@ expression: redactor(content)
 
 ```vue
 <script lang="js">
-	import { something } from "file.vue";
-	statement();
+import { something } from "file.vue";
+statement();
 </script>
 <template></template>
 ```

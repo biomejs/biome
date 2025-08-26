@@ -6,8 +6,8 @@ expression: redactor(content)
 
 ```svelte
 <script lang="js">
-	import { something } from "file.svelte";
-	statement();
+import { something } from "file.svelte";
+statement();
 </script>
 <div></div>
 ```
