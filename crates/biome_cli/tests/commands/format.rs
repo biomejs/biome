@@ -47,33 +47,15 @@ statement ( ) ;
 </script>
 <div></div>"#;
 
-const SVELTE_IMPLICIT_JS_FILE_FORMATTED: &str = r#"<script>
-import { something } from "file.svelte";
-statement();
-</script>
-<div></div>"#;
-
 const SVELTE_EXPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script lang="js">
 import {    something } from "file.svelte";
 statement ( ) ;
 </script>
 <div></div>"#;
 
-const SVELTE_EXPLICIT_JS_FILE_FORMATTED: &str = r#"<script lang="js">
-import { something } from "file.svelte";
-statement();
-</script>
-<div></div>"#;
-
 const SVELTE_TS_FILE_UNFORMATTED: &str = r#"<script setup lang="ts">
 import     { type     something } from "file.svelte";
 const hello  :      string      = "world";
-</script>
-<div></div>"#;
-
-const SVELTE_TS_FILE_FORMATTED: &str = r#"<script setup lang="ts">
-import { type something } from "file.svelte";
-const hello: string = "world";
 </script>
 <div></div>"#;
 
@@ -2996,8 +2978,6 @@ fn format_svelte_implicit_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_IMPLICIT_JS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_implicit_js_files_write",
@@ -3055,8 +3035,6 @@ fn format_svelte_explicit_js_files_write() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, svelte_file_path, SVELTE_EXPLICIT_JS_FILE_FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3142,8 +3120,6 @@ fn format_svelte_ts_files_write() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, svelte_file_path, SVELTE_TS_FILE_FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
