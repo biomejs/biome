@@ -75,25 +75,22 @@ impl JsExecContext {
                 ctx,
             );
 
-        // Drive the job queue until the promise settles.
-        while matches!(promise_result.state(), PromiseState::Pending) {
-            ctx.run_jobs();
-        }
-
-        match promise_result.state() {
-            PromiseState::Fulfilled(_) => {}
-            PromiseState::Rejected(err) => {
-                let opaque = JsError::from_opaque(err);
-                if let Some(native) = opaque.try_native(ctx) {
-                    return Err(native.into());
+        loop {
+            match promise_result.state() {
+                PromiseState::Fulfilled(_) => break Ok(module),
+                PromiseState::Rejected(err) => {
+                    let opaque = JsError::from_opaque(err);
+                    break match opaque.try_native(ctx) {
+                        Some(native) => Err(native.into()),
+                        None => Err(opaque)
+                    };
                 }
-                return Err(opaque);
+                PromiseState::Pending => {
+                    // Drive the job queue until the promise settles.
+                    ctx.run_jobs();
+                },
             }
-            // The loop above guarantees settlement.
-            PromiseState::Pending => unreachable!(),
         }
-
-        Ok(module)
     }
 
     pub fn get_default_export(&mut self, module: &Module) -> JsResult<JsValue> {
