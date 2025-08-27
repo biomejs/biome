@@ -171,9 +171,7 @@ impl Rule for UseExponentiationOperator {
 }
 
 /// Determines whether the given parent node needs parens if used as the exponent in an exponentiation binary expression.
-fn does_exponentiation_expression_need_parens(
-    node: &JsCallExpression,
-) -> Option<bool> {
+fn does_exponentiation_expression_need_parens(node: &JsCallExpression) -> Option<bool> {
     if let Some(parent) = node.parent::<AnyJsExpression>() {
         if does_expression_need_parens(node, &parent)? {
             return Some(true);
