@@ -49,7 +49,9 @@ pub struct AnalyzerJsPlugin {
 
 impl Debug for AnalyzerJsPlugin {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("AnalyzerJsPlugin").finish_non_exhaustive()
+        f.debug_struct("AnalyzerJsPlugin")
+            .field("path", &self.path)
+            .finish_non_exhaustive()
     }
 }
 
