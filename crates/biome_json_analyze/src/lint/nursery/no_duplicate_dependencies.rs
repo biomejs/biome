@@ -70,14 +70,14 @@ const DUPLICATE_PROPERTY_KEYS: &[&str; 7] = &[
     "peerDependencies",
 ];
 
-pub struct Duplicate {
+pub struct Dependency {
     pub group: String,
     pub token: JsonSyntaxToken,
 }
 
 impl Rule for NoDuplicateDependencies {
     type Query = Ast<JsonRoot>;
-    type State = (JsonSyntaxToken, Duplicate);
+    type State = (Dependency, Dependency);
     type Signals = Option<Self::State>;
     type Options = NoDuplicateDependenciesOptions;
 
@@ -128,12 +128,16 @@ impl Rule for NoDuplicateDependencies {
 
                         // Add dependencies to deps if not exists else to duplicates
                         if let Some(original_member) = deps.get(&dependency_text.to_string()) {
-                            let dupe = Duplicate {
+                            let original = Dependency {
+                                group: dependency_group_text.to_string(),
+                                token: original_member.clone(),
+                            };
+                            let dupe = Dependency {
                                 group: dependency_group_text.to_string(),
                                 token: dependency_name.value_token().ok()?,
                             };
 
-                            return Some((original_member.clone(), dupe));
+                            return Some((original, dupe));
                         } else {
                             deps.insert(
                                 dependency_text.to_string(),
@@ -155,12 +159,16 @@ impl Rule for NoDuplicateDependencies {
                         let dependency_text = dependency_name.inner_string_text().ok()?;
 
                         if let Some(original_member) = deps.get(&dependency_text.to_string()) {
-                            let dupe = Duplicate {
+                            let original = Dependency {
+                                group: dependency_group_text.to_string(),
+                                token: original_member.clone(),
+                            };
+                            let dupe = Dependency {
                                 group: dependency_group_text.to_string(),
                                 token: dependency_name.value_token().ok()?,
                             };
 
-                            return Some((original_member.clone(), dupe));
+                            return Some((original, dupe));
                         } else {
                             deps.insert(
                                 dependency_text.to_string(),
@@ -196,12 +204,16 @@ impl Rule for NoDuplicateDependencies {
 
                 for (dependency_name, original_member) in key_deps? {
                     if let Some(member) = deps?.get(dependency_name) {
-                        let dupe = Duplicate {
+                        let original = Dependency {
+                            group: key.to_string(),
+                            token: original_member.clone(),
+                        };
+                        let dupe = Dependency {
                             group: property.to_string(),
                             token: member.clone(),
                         };
 
-                        return Some((original_member.clone(), dupe));
+                        return Some((original, dupe));
                     }
                 }
             }
@@ -212,20 +224,29 @@ impl Rule for NoDuplicateDependencies {
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let (original, dupe) = state;
-        let name = original.text_trimmed();
-        let mut diagnostic = RuleDiagnostic::new(
-            rule_category!(),
-            original.text_trimmed_range(),
-            markup! {
-                "The dependency "<Emphasis>{name}</Emphasis>" is also listed under "<Emphasis>{dupe.group.to_string()}</Emphasis>"."
-            },
-        );
+        let name = original.token.text_trimmed();
+
+        let mut diagnostic = if original.group == dupe.group {
+            RuleDiagnostic::new(
+                rule_category!(),
+                dupe.token.text_trimmed_range(),
+                markup!("The dependency "<Emphasis>{name}</Emphasis>" is listed twice under "<Emphasis>{dupe.group.to_string()}</Emphasis>"."),
+            )
+        } else {
+            RuleDiagnostic::new(
+                rule_category!(),
+                dupe.token.text_trimmed_range(),
+                markup!("The dependency "<Emphasis>{name}</Emphasis>" is also listed under "<Emphasis>{dupe.group.to_string()}</Emphasis>"."),
+            )
+        };
         diagnostic = diagnostic.detail(
-            dupe.token.text_trimmed_range(),
+            original.token.text_trimmed_range(),
             markup! {
                 "The dependency is also specified here."
             },
         );
-        Some(diagnostic)
+        Some(diagnostic.note(markup! {
+            "This can lead to package manager issues and confusion for other developers. To resolve this, remove one of the listings."
+        }))
     }
 }

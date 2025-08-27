@@ -17,9 +17,18 @@ expression: package.json
 
 # Diagnostics
 ```
-package.json:4:5 lint/nursery/noDuplicateDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+package.json:6:5 lint/nursery/noDuplicateDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The dependency "foo" is also listed under dependencies.
+  i The dependency "foo" is listed twice under dependencies.
+  
+    4 │     "foo": "",
+    5 │     "bar": "",
+  > 6 │     "foo": ""
+      │     ^^^^^
+    7 │   }
+    8 │ }
+  
+  i The dependency is also specified here.
   
     2 │   "name": "invalid-dependencies",
     3 │   "dependencies": {
@@ -28,14 +37,7 @@ package.json:4:5 lint/nursery/noDuplicateDependencies ━━━━━━━━�
     5 │     "bar": "",
     6 │     "foo": ""
   
-  i The dependency is also specified here.
-  
-    4 │     "foo": "",
-    5 │     "bar": "",
-  > 6 │     "foo": ""
-      │     ^^^^^
-    7 │   }
-    8 │ }
+  i This can lead to package manager issues and confusion for other developers. To resolve this, remove one of the listings.
   
 
 ```
