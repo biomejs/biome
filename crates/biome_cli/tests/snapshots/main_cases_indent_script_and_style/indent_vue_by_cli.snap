@@ -2,14 +2,14 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `file.svelte`
+## `file.vue`
 
-```svelte
-<script context="module" lang="ts">
-import Button from "./components/Button.svelte";
-const hello: string = "world";
+```vue
+<script>
+	import { something } from "file.vue";
+	statement();
 </script>
-<div></div>
+<template></template>
 ```
 
 # Emitted Messages

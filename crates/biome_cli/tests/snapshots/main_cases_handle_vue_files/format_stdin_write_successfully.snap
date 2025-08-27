@@ -16,8 +16,8 @@ const hello  :      string      = "world";
 
 ```block
 <script setup lang="ts">
-	import { type something } from "file.vue";
-	const hello: string = "world";
+import { type something } from "file.vue";
+const hello: string = "world";
 </script>
 <template></template>
 ```

@@ -33,8 +33,8 @@ file.vue format ━━━━━━━━━━━━━━━━━━━━━�
     1 1 │   <script setup lang="ts">
     2   │ - import·····{·type·····something·}·from·"file.vue";
     3   │ - const·hello··:······string······=·"world";
-      2 │ + → import·{·type·something·}·from·"file.vue";
-      3 │ + → const·hello:·string·=·"world";
+      2 │ + import·{·type·something·}·from·"file.vue";
+      3 │ + const·hello:·string·=·"world";
     4 4 │   </script>
     5 5 │   <template></template>
   

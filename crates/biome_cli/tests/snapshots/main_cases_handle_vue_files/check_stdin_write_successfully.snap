@@ -18,10 +18,10 @@ delete a.c;
 
 ```block
 <script setup lang="ts">
-	import * as vueUse from "vue-use";
-	import { Button } from "./components/Button.vue";
+import * as vueUse from "vue-use";
+import { Button } from "./components/Button.vue";
 
-	delete a.c;
+delete a.c;
 </script>
 <template></template>
 ```

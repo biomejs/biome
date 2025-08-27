@@ -9,6 +9,7 @@ use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextRange, TextSize};
@@ -142,9 +143,16 @@ fn format(
     settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
+    let html_options =
+        settings.format_options::<HtmlLanguage>(biome_path, &document_file_source.to_htmlish());
+    let indent_amount = if *html_options.indent_script_and_style() {
+        1
+    } else {
+        0
+    };
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
-    match formatted.print_with_indent(1) {
+    match formatted.print_with_indent(indent_amount) {
         Ok(printed) => Ok(printed),
         Err(error) => {
             error!("The file {} couldn't be formatted", biome_path.as_str());

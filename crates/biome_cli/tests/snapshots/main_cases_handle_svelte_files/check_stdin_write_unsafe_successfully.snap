@@ -19,8 +19,8 @@ var foo: string = "";
 
 ```block
 <script context="module" lang="ts">
-	statement();
-	var _foo: string = "";
+statement();
+var _foo: string = "";
 </script>
 <div></div>
 ```
