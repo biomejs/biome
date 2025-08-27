@@ -151,12 +151,7 @@ impl Rule for UseExponentiationOperator {
             make::token_decorated_with_space(T![**]),
             exponent,
         ));
-        let new_node = if let Some((needs_parens, parent)) =
-            does_exponentiation_expression_need_parens(node)
-        {
-            if needs_parens && parent.is_some() {
-                mutation.replace_node(parent.clone()?, make::parenthesized(parent?).into());
-            }
+        let new_node = if let Some(true) = does_exponentiation_expression_need_parens(node) {
             make::parenthesized(new_node).into()
         } else {
             new_node
@@ -178,19 +173,19 @@ impl Rule for UseExponentiationOperator {
 /// Determines whether the given parent node needs parens if used as the exponent in an exponentiation binary expression.
 fn does_exponentiation_expression_need_parens(
     node: &JsCallExpression,
-) -> Option<(bool, Option<AnyJsExpression>)> {
+) -> Option<bool> {
     if let Some(parent) = node.parent::<AnyJsExpression>() {
         if does_expression_need_parens(node, &parent)? {
-            return Some((true, Some(parent)));
+            return Some(true);
         }
     } else if let Some(extends_clause) = node.parent::<JsExtendsClause>() {
         if extends_clause.parent::<JsClassDeclaration>().is_some() {
-            return Some((true, None));
+            return Some(true);
         }
         if let Some(class_expr) = extends_clause.parent::<JsClassExpression>() {
             let class_expr = AnyJsExpression::from(class_expr);
             if does_expression_need_parens(node, &class_expr)? {
-                return Some((true, Some(class_expr)));
+                return Some(true);
             }
         }
     }
