@@ -53,8 +53,8 @@ impl ModuleLoader for JsModuleLoader {
 
         match resolve(&specifier, &base_dir, self.fs.as_ref(), &options) {
             Ok(path) => {
-                if let Some(module) = self.modules.borrow().get(&path) {
-                    finish_load(Ok(module.clone()), context);
+                if let Some(module) = self.modules.borrow().get(&path).cloned() {
+                    finish_load(Ok(module), context);
                     return;
                 }
 
