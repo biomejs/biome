@@ -7,7 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, JsArrowFunctionExpression, JsFunctionBody,
-    JsObjectExpression, JsReturnStatement, JsSequenceExpression,
+    JsReturnStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_consistent_arrow_return::UseConsistentArrowReturnOptions;
@@ -98,9 +98,7 @@ impl Rule for UseConsistentArrowReturn {
         let return_statement = JsReturnStatement::cast(return_statement.into_syntax())?;
         let return_argument = return_statement.argument()?;
 
-        let new_body = if JsObjectExpression::can_cast(return_argument.syntax().kind())
-            || JsSequenceExpression::can_cast(return_argument.syntax().kind())
-        {
+        let new_body = if needs_parens_in_concise_body(&return_argument) {
             AnyJsExpression::from(make::parenthesized(return_argument))
         } else {
             return_argument
@@ -118,4 +116,17 @@ impl Rule for UseConsistentArrowReturn {
             mutation,
         ))
     }
+}
+
+fn needs_parens_in_concise_body(expr: &AnyJsExpression) -> bool {
+    use AnyJsExpression::*;
+    matches!(
+        expr,
+        JsObjectExpression(_)
+            | JsSequenceExpression(_)
+            | JsParenthesizedExpression(_)
+            | TsAsExpression(_)
+            | TsSatisfiesExpression(_)
+            | TsTypeAssertionExpression(_)
+    )
 }
