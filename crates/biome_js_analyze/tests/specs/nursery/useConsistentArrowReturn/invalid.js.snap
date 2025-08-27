@@ -9,13 +9,22 @@ const returnsObjectArrow = () => {
     return { a: 1, b: 2 };
 }
 
+const returnsSequenceArrow = () => {
+    return (a, b);
+}
+
+
+const returnsAwaitArrow = async () => {
+    return await fetchData();
+}
+
 ```
 
 # Diagnostics
 ```
-invalid.js:1:28 lint/nursery/useConsistentArrowReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:28 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This arrow function doesn't need a return statement.
+  ! This arrow function doesn't need a return statement.
   
   > 1 │ const returnsObjectArrow = () => {
       │                            ^^^^^^^
@@ -23,8 +32,75 @@ invalid.js:1:28 lint/nursery/useConsistentArrowReturn ━━━━━━━━�
   > 3 │ }
       │ ^
     4 │ 
+    5 │ const returnsSequenceArrow = () => {
   
   i Consider changing the function body into the returned expression.
+  
+  i Safe fix: Remove the return statement
+  
+     1    │ - const·returnsObjectArrow·=·()·=>·{
+     2    │ - ····return·{·a:·1,·b:·2·};
+     3    │ - }
+        1 │ + const·returnsObjectArrow·=·()·=>·({·a:·1,·b:·2·})
+     4  2 │   
+     5  3 │   const returnsSequenceArrow = () => {
+  
+
+```
+
+```
+invalid.js:5:30 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This arrow function doesn't need a return statement.
+  
+    3 │ }
+    4 │ 
+  > 5 │ const returnsSequenceArrow = () => {
+      │                              ^^^^^^^
+  > 6 │     return (a, b);
+  > 7 │ }
+      │ ^
+    8 │ 
+  
+  i Consider changing the function body into the returned expression.
+  
+  i Safe fix: Remove the return statement
+  
+     3  3 │   }
+     4  4 │   
+     5    │ - const·returnsSequenceArrow·=·()·=>·{
+     6    │ - ····return·(a,·b);
+     7    │ - }
+        5 │ + const·returnsSequenceArrow·=·()·=>·((a,·b))
+     8  6 │   
+     9  7 │   
+  
+
+```
+
+```
+invalid.js:10:27 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This arrow function doesn't need a return statement.
+  
+  > 10 │ const returnsAwaitArrow = async () => {
+       │                           ^^^^^^^^^^^^^
+  > 11 │     return await fetchData();
+  > 12 │ }
+       │ ^
+    13 │ 
+  
+  i Consider changing the function body into the returned expression.
+  
+  i Safe fix: Remove the return statement
+  
+     8  8 │   
+     9  9 │   
+    10    │ - const·returnsAwaitArrow·=·async·()·=>·{
+    11    │ - ····return·await·fetchData();
+    12    │ - }
+       10 │ + const·returnsAwaitArrow·=·async·()·=>·await·fetchData()
+    13 11 │   
   
 
 ```
