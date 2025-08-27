@@ -4,7 +4,9 @@ use std::sync::Arc;
 use boa_engine::builtins::promise::PromiseState;
 use boa_engine::module::ModuleLoader;
 use boa_engine::object::builtins::JsFunction;
-use boa_engine::{Context, JsError, JsResult, JsValue, Module, NativeFunction, Source, js_string};
+use boa_engine::{
+    Context, JsError, JsNativeError, JsResult, JsValue, Module, NativeFunction, Source, js_string,
+};
 use camino::Utf8Path;
 
 use biome_analyze::RuleDiagnostic;
@@ -14,7 +16,7 @@ use crate::JsModuleLoader;
 use crate::plugin_api::JsPluginApi;
 
 pub struct JsExecContext {
-    inner: Context,
+    ctx: Context,
     fs: Arc<dyn FsWithResolverProxy>,
     api: JsPluginApi,
 }
@@ -23,16 +25,16 @@ impl JsExecContext {
     pub fn new(fs: Arc<dyn FsWithResolverProxy>) -> JsResult<Self> {
         let module_loader = Rc::new(JsModuleLoader::new(fs.clone()));
         let api = JsPluginApi::new();
-        let mut inner = Context::builder()
+        let mut ctx = Context::builder()
             .module_loader(Rc::clone(&module_loader))
             .build()?;
 
         module_loader.register_module(
             js_string!("@biomejs/plugin-api"),
-            api.create_module(&mut inner),
+            api.create_module(&mut ctx),
         );
 
-        Ok(Self { inner, fs, api })
+        Ok(Self { ctx, fs, api })
     }
 
     #[inline]
@@ -41,9 +43,12 @@ impl JsExecContext {
     }
 
     pub fn import_module(&mut self, path: impl AsRef<Utf8Path>) -> JsResult<Module> {
-        let ctx = &mut self.inner;
+        let ctx = &mut self.ctx;
         let path = path.as_ref();
-        let source = self.fs.read_file_from_path(path).unwrap();
+        let source = self
+            .fs
+            .read_file_from_path(path)
+            .map_err(|err| JsNativeError::error().with_message(err.to_string()))?;
         let source = Source::from_bytes(source.as_bytes()).with_path(path.as_std_path());
         let module = Module::parse(source, None, ctx)?;
 
@@ -77,24 +82,24 @@ impl JsExecContext {
 
         loop {
             match promise_result.state() {
+                PromiseState::Pending => {
+                    // Drive the job queue until the promise settles.
+                    ctx.run_jobs();
+                }
                 PromiseState::Fulfilled(_) => break Ok(module),
                 PromiseState::Rejected(err) => {
                     let opaque = JsError::from_opaque(err);
                     break match opaque.try_native(ctx) {
-                        Some(native) => Err(native.into()),
-                        None => Err(opaque),
+                        Ok(native) => Err(native.into()),
+                        _ => Err(opaque),
                     };
-                }
-                PromiseState::Pending => {
-                    // Drive the job queue until the promise settles.
-                    ctx.run_jobs();
                 }
             }
         }
     }
 
     pub fn get_default_export(&mut self, module: &Module) -> JsResult<JsValue> {
-        let ctx = &mut self.inner;
+        let ctx = &mut self.ctx;
         let namespace = module.namespace(ctx);
 
         namespace.get(js_string!("default"), ctx)
@@ -106,6 +111,6 @@ impl JsExecContext {
         this: &JsValue,
         args: &[JsValue],
     ) -> JsResult<JsValue> {
-        function.call(this, args, &mut self.inner)
+        function.call(this, args, &mut self.ctx)
     }
 }

@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use boa_engine::module::SyntheticModuleInitializer;
 use boa_engine::object::FunctionObjectBuilder;
-use boa_engine::{Context, JsValue, Module, NativeFunction, js_string};
+use boa_engine::{Context, JsNativeError, JsValue, Module, NativeFunction, js_string};
 
 use biome_analyze::RuleDiagnostic;
 use biome_diagnostics::{Severity, category};
@@ -22,20 +22,29 @@ impl JsPluginApi {
 
     pub(crate) fn create_module(&self, context: &mut Context) -> Module {
         let diagnostics = self.diagnostics.clone();
-        let add_diagnostic = FunctionObjectBuilder::new(context.realm(), unsafe {
+
+        // SAFETY: The closure doesn't capture any GC-managed values.
+        let register_diagnostic = FunctionObjectBuilder::new(context.realm(), unsafe {
             NativeFunction::from_closure(move |_this, args, _context| {
                 let [JsValue::String(severity), JsValue::String(message)] = args else {
-                    todo!()
+                    return Err(JsNativeError::typ()
+                        .with_message("registerDiagnostic() expects two string arguments")
+                        .into());
                 };
 
-                let severity = match severity.to_std_string_lossy().as_str() {
-                    "fatal" => Severity::Fatal,
-                    "error" => Severity::Error,
-                    "warning" => Severity::Warning,
-                    "information" => Severity::Information,
-                    "hint" => Severity::Hint,
-                    _ => todo!(),
-                };
+                let severity =
+                    match severity.to_std_string_lossy().as_str() {
+                        "fatal" => Severity::Fatal,
+                        "error" => Severity::Error,
+                        "warning" => Severity::Warning,
+                        "information" => Severity::Information,
+                        "hint" => Severity::Hint,
+                        _ => return Err(JsNativeError::typ()
+                            .with_message(
+                                "Unexpected severity, expected one of: fatal, error, warning, information, hint",
+                            )
+                            .into()),
+                    };
 
                 let diagnostic = RuleDiagnostic::new(
                     category!("plugin"),
@@ -50,19 +59,19 @@ impl JsPluginApi {
             })
         })
         .length(2)
-        .name("addDiagnostic")
+        .name("registerDiagnostic")
         .build();
 
         // TODO: auto-generate AST classes and insert into the runtime
         // TODO: more runtime APIs?
 
         Module::synthetic(
-            &[js_string!("addDiagnostic")],
+            &[js_string!("registerDiagnostic")],
             SyntheticModuleInitializer::from_copy_closure_with_captures(
                 |module, fns, _| {
-                    module.set_export(&js_string!("addDiagnostic"), fns.0.clone().into())
+                    module.set_export(&js_string!("registerDiagnostic"), fns.0.clone().into())
                 },
-                (add_diagnostic,),
+                (register_diagnostic,),
             ),
             None,
             None,

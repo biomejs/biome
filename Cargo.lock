@@ -1368,6 +1368,7 @@ dependencies = [
  "biome_parser",
  "biome_resolver",
  "biome_rowan",
+ "biome_text_size",
  "boa_engine",
  "camino",
  "grit-pattern-matcher",

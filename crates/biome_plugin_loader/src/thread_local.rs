@@ -99,7 +99,10 @@ pub(crate) struct ThreadLocalCell<T> {
     key: platform::Key<RefCell<T>>,
 }
 
-impl<T> ThreadLocalCell<T> {
+impl<T> ThreadLocalCell<T>
+where
+    T: 'static,
+{
     pub(crate) fn new() -> Self {
         Self {
             key: unsafe { platform::Key::new() },

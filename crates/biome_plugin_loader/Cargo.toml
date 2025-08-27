@@ -23,6 +23,7 @@ biome_json_parser        = { workspace = true }
 biome_parser             = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
+biome_text_size          = { workspace = true }
 camino                   = { workspace = true }
 grit-pattern-matcher     = { workspace = true }
 grit-util                = { workspace = true }

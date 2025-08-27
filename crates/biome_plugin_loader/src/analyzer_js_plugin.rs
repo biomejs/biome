@@ -8,11 +8,11 @@ use camino::{Utf8Path, Utf8PathBuf};
 
 use biome_analyze::{AnalyzerPlugin, RuleDiagnostic};
 use biome_console::markup;
-use biome_deserialize::TextRange;
 use biome_diagnostics::category;
 use biome_js_runtime::JsExecContext;
 use biome_parser::AnyParse;
 use biome_resolver::FsWithResolverProxy;
+use biome_text_size::TextRange;
 
 use crate::PluginDiagnostic;
 use crate::thread_local::ThreadLocalCell;
@@ -59,7 +59,7 @@ impl AnalyzerJsPlugin {
         path: &Utf8Path,
     ) -> Result<Self, PluginDiagnostic> {
         // Load the plugin in the main thread here to catch errors while loading.
-        let _ = load_plugin(fs.clone(), path);
+        load_plugin(fs.clone(), path)?;
 
         Ok(Self {
             fs,
@@ -146,9 +146,9 @@ mod tests {
         fs.insert("/bar.js".into(), "let bar;");
         fs.insert(
             "/plugin.js".into(),
-            r#"import { addDiagnostic } from "@biomejs/plugin-api";
+            r#"import { registerDiagnostic } from "@biomejs/plugin-api";
             export default function useMyPlugin() {
-                addDiagnostic("information", "Hello, world!");
+                registerDiagnostic("information", "Hello, world!");
             }"#,
         );
 

@@ -56,6 +56,14 @@ impl ModuleLoader for JsModuleLoader {
                     Ok(source) => {
                         let source = Source::from_bytes(source.as_bytes());
                         let module = Module::parse(source, None, context);
+
+                        // Insert the parsed module into the cache.
+                        if let Ok(module) = &module {
+                            self.modules
+                                .borrow_mut()
+                                .insert(specifier.into(), module.clone());
+                        }
+
                         finish_load(module, context);
                     }
                     Err(err) => finish_load(
