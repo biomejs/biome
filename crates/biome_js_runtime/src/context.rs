@@ -82,13 +82,13 @@ impl JsExecContext {
                     let opaque = JsError::from_opaque(err);
                     break match opaque.try_native(ctx) {
                         Some(native) => Err(native.into()),
-                        None => Err(opaque)
+                        None => Err(opaque),
                     };
                 }
                 PromiseState::Pending => {
                     // Drive the job queue until the promise settles.
                     ctx.run_jobs();
-                },
+                }
             }
         }
     }
