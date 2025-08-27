@@ -11,6 +11,7 @@
       "@biomejs/cli-darwin-arm64",
       "@biomejs/cli-linux-x64",
       "@biomejs/cli-linux-arm64",
+      "@biomejs/cli-linux-loong64",
       "@biomejs/cli-linux-x64-musl",
       "@biomejs/cli-linux-arm64-musl",
       "@biomejs/wasm-web",

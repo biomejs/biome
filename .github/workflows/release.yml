@@ -110,6 +110,10 @@ jobs:
           - os: depot-macos-14
             target: aarch64-apple-darwin
             code-target: darwin-arm64
+          - os: ubuntu-24.04
+            target: loongarch64-unknown-linux-gnu
+            code-target: linux-loong64
+            cross: true
 
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
@@ -137,9 +141,23 @@ jobs:
         if: matrix.code-target == 'linux-x64-musl'
         run: cargo audit
 
+      - name: Install cross
+        if: matrix.cross == true
+        run: cargo install cross --git https://github.com/cross-rs/cross --rev e281947ca900da425e4ecea7483cfde646c8a1ea
+
       # Build the CLI binary
-      - name: Build binaries
+      - name: Build binaries (native)
+        if: matrix.cross != true
         run: cargo build -p biome_cli --release --target ${{ matrix.target }}
+        env:
+          # Strip all debug symbols from the resulting binaries
+          RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
+          # Inline the version of the npm package in the CLI binary
+          BIOME_VERSION: ${{ needs.version.outputs.cli-version }}
+
+      - name: Build binaries (cross)
+        if: matrix.cross == true
+        run: cross build -p biome_cli --release --target ${{ matrix.target }}
         env:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
