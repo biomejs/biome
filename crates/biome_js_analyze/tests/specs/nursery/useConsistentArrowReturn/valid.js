@@ -59,3 +59,6 @@ const emptyReturnWithComment = () => {
 const withInlineComment = () => { return 1; /* inline */ };
 const withBlockCommentBefore = () => { /* leading */ return 1; };
 const withCommentBetweenReturnAndExpr = () => { return /* comment */ 1; };
+
+const returnsSequenceArrow = () => (a, b)
+const returnsAwaitArrow = async () => await fetchData()
