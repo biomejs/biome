@@ -16,7 +16,13 @@ declare_lint_rule! {
     /// Enforce consistent arrow function bodies.
     ///
     /// This rule enforces the use of arrow functions with no body block when the function body consists of a single return statement.
+    /// This rule does not report when:
+    /// - the function body contains directives (e.g. `"use strict"`), or
+    /// - the body (or its descendants) contain comments, or
+    /// - the single `return` has no argument (`return;`).
     ///
+    /// The fix wraps expressions in parentheses when required for correctness (e.g. object literals and sequence expressions).
+
     /// ## Examples
     ///
     /// ### Invalid
@@ -36,6 +42,9 @@ declare_lint_rule! {
     ///
     /// ```js
     /// const foo = () => 0;
+    /// const bar = () => { "use strict"; return 1 }
+    /// const baz = () => { /* intentional */ return x }
+    /// const qux = () => ({ a: 1 })   // already concise with parens
     /// ```
     ///
     pub UseConsistentArrowReturn {
