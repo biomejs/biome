@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Fixed #6476: Added the new rule `noUselessCatchBinding`. This rule disallows unnecessary catch bindings.
+Added the new nursery rule `noUselessCatchBinding`. This rule disallows unnecessary catch bindings.
 
 ```diff
 try {
