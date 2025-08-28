@@ -19,6 +19,7 @@ use biome_rowan::{
     TextSize, TokenText, declare_node_union,
 };
 use core::iter;
+use std::collections::HashSet;
 
 const GLOBAL_THIS: &str = "globalThis";
 const UNDEFINED: &str = "undefined";
@@ -962,6 +963,14 @@ impl AnyJsExpression {
     /// [article]: https://craftinginterpreters.com/scanning-on-demand.html#tries-and-state-machines
     pub fn contains_a_test_pattern(&self) -> bool {
         let members = CalleeNamesIterator::new(self.clone()).collect::<Vec<_>>();
+
+        let mut set = HashSet::new();
+        let has_duplicates = members.iter().any(|x| !set.insert(x));
+
+        if has_duplicates {
+            return false;
+        }
+
         let mut rev = members.iter().rev();
 
         let first = rev.next().map(|t| t.text());
@@ -985,6 +994,7 @@ impl AnyJsExpression {
             },
             Some("it" | "test") => match second {
                 None => true,
+                Some("step") => third.is_none(),
                 Some(
                     "concurrent" | "sequential" | "only" | "skip" | "todo" | "fails" | "failing",
                 ) => matches!(
@@ -1028,15 +1038,12 @@ impl AnyJsExpression {
     ///
     /// ## Examples
     ///
-    /// Valid patterns:
-    /// ```
-    /// test.each
-    /// describe.each
-    /// it.each
-    /// test.only.each
-    /// describe.skip.each
-    /// it.concurrent.each
-    /// ```
+    /// - `test.each`
+    /// - `describe.each`
+    /// - `it.each`
+    /// - `test.only.each`
+    /// - `describe.skip.each`
+    /// - `it.concurrent.each`
     ///
     /// [`contains_a_test_pattern`]:  crate::AnyJsExpression::contains_a_test_pattern
     ///
@@ -2250,10 +2257,6 @@ mod test {
     fn matches_static_member_expression_deep() {
         let call_expression = extract_call_expression("test.describe.parallel.only();");
         assert!(call_expression.callee().unwrap().contains_a_test_pattern());
-
-        let call_expression =
-            extract_call_expression("test.skip.sequential.only.skip.sequential.only();");
-        assert!(call_expression.callee().unwrap().contains_a_test_pattern());
     }
 
     #[test]
@@ -2263,8 +2266,17 @@ mod test {
     }
 
     #[test]
+    fn doesnt_test_call_expression_with_duplicates() {
+        let call_expression = extract_call_expression("test.only.only.only();");
+        assert!(!call_expression.callee().unwrap().contains_a_test_pattern());
+    }
+
+    #[test]
     fn matches_test_call_expression() {
         let call_expression = extract_call_expression("test.only(name, () => {});");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        let call_expression = extract_call_expression("test.step(name, () => {});");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
 
         let call_expression = extract_call_expression("test.only(Test.name, () => {});");
@@ -2287,14 +2299,12 @@ mod test {
         let call_expression = extract_call_expression("describe.each([])(name, () => {});");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
 
-        let call_expression = extract_call_expression(
-            "test.skip.sequential.only.skip.sequential.only(Test.name, () => {});",
-        );
+        let call_expression =
+            extract_call_expression("test.skip.sequential.only.todo(Test.name, () => {});");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
 
-        let call_expression = extract_call_expression(
-            "test.skip.sequential.only.todo.sequential.only.each([])(name, () => {});",
-        );
+        let call_expression =
+            extract_call_expression("test.skip.sequential.only.todo.each([])(name, () => {});");
         assert_eq!(call_expression.is_test_call_expression(), Ok(true));
     }
 
