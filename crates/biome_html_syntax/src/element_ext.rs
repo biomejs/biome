@@ -1,4 +1,4 @@
-use crate::HtmlSelfClosingElement;
+use crate::{AnyHtmlElement, HtmlElement, HtmlSelfClosingElement};
 use biome_rowan::SyntaxResult;
 
 /// https://html.spec.whatwg.org/#void-elements
@@ -16,5 +16,44 @@ impl HtmlSelfClosingElement {
         Ok(VOID_ELEMENTS
             .binary_search(&name.value_token()?.text_trimmed())
             .is_ok())
+    }
+}
+
+impl AnyHtmlElement {
+    pub fn is_script_tag(&self) -> SyntaxResult<bool> {
+        match self {
+            AnyHtmlElement::AnyHtmlContent(_)
+            | AnyHtmlElement::HtmlBogusElement(_)
+            | AnyHtmlElement::HtmlSelfClosingElement(_)
+            | AnyHtmlElement::HtmlCdataSection(_) => Ok(false),
+            AnyHtmlElement::HtmlElement(element) => element.is_script_tag(),
+        }
+    }
+
+    pub fn is_style_tag(&self) -> SyntaxResult<bool> {
+        match self {
+            AnyHtmlElement::AnyHtmlContent(_)
+            | AnyHtmlElement::HtmlBogusElement(_)
+            | AnyHtmlElement::HtmlSelfClosingElement(_)
+            | AnyHtmlElement::HtmlCdataSection(_) => Ok(false),
+            AnyHtmlElement::HtmlElement(element) => element.is_style_tag(),
+        }
+    }
+}
+
+impl HtmlElement {
+    pub fn is_script_tag(&self) -> SyntaxResult<bool> {
+        let opening_element = self.opening_element()?;
+        let name = opening_element.name()?;
+        let name_text = name.value_token()?;
+
+        Ok(name_text.text_trimmed() == "script")
+    }
+
+    pub fn is_style_tag(&self) -> SyntaxResult<bool> {
+        let opening_element = self.opening_element()?;
+        let name = opening_element.name()?;
+        let name_text = name.value_token()?;
+        Ok(name_text.text_trimmed() == "style")
     }
 }

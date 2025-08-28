@@ -333,6 +333,7 @@ impl ExtensionHandler for CssFileHandler {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
+                format_embedded: None,
             },
             search: SearchCapabilities {
                 search: Some(search),

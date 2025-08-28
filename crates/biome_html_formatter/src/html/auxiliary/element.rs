@@ -16,7 +16,7 @@ use super::{
 
 /// `pre` tags are "preformatted", so we should not format the content inside them. <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/pre>
 /// We ignore the `script` and `style` tags as well, since embedded language parsing/formatting is not yet implemented.
-const HTML_VERBATIM_TAGS: &[&str] = &["script", "style", "pre"];
+const HTML_VERBATIM_TAGS: &[&str] = &["pre"];
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElement;
@@ -112,7 +112,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             f,
         )?;
         if should_be_verbatim {
-            write!(f, [&format_verbatim_skipped(children.syntax())])?;
+            write!(f, [&format_html_verbatim_node(children.syntax())])?;
         } else {
             let format_children = FormatHtmlElementList::default()
                 .with_options(FormatHtmlElementListOptions {

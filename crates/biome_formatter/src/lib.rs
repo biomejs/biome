@@ -43,7 +43,7 @@ pub mod trivia;
 
 use crate::formatter::Formatter;
 use crate::group_id::UniqueGroupIdBuilder;
-use crate::prelude::TagKind;
+use crate::prelude::{Tag, TagKind};
 use std::fmt;
 use std::fmt::{Debug, Display};
 
@@ -888,6 +888,42 @@ impl<Context> Formatted<Context> {
         &self.context
     }
 
+    #[must_use]
+    pub fn format_embedded(
+        &mut self,
+        fn_format_embedded: impl Fn(TextRange) -> Option<Document>,
+    ) -> Document {
+        let document = &mut self.document;
+        let elements = document.elements().iter().enumerate();
+
+        let mut new_elements = vec![];
+        let mut last_seen_index = None;
+        for (index, element) in elements {
+            match element {
+                FormatElement::Tag(Tag::StartEmbedded(range)) => {
+                    if let Some(new_document) = fn_format_embedded(*range) {
+                        new_elements.extend(new_document.into_elements());
+                    };
+                    last_seen_index = Some(index);
+                }
+                FormatElement::Tag(Tag::EndEmbedded) => {
+                    if let Some(last_seen_index) = last_seen_index {
+                        if last_seen_index != index - 1 {
+                            panic!("Embedded tag must be followed by a start tag")
+                        }
+                    }
+                    last_seen_index = None;
+                    // discard this element
+                }
+                element => {
+                    new_elements.push(element.clone());
+                }
+            }
+        }
+
+        Document::from(new_elements)
+    }
+
     /// Returns the formatted document.
     pub fn document(&self) -> &Document {
         &self.document
@@ -896,6 +932,10 @@ impl<Context> Formatted<Context> {
     /// Consumes `self` and returns the formatted document.
     pub fn into_document(self) -> Document {
         self.document
+    }
+
+    pub fn swap_document(&mut self, document: Document) {
+        self.document = document;
     }
 }
 
@@ -969,8 +1009,8 @@ impl Printed {
         }
     }
 
-    /// Range of the input source file covered by this formatted code,
-    /// or None if the entire file is covered in this instance
+    /// [TextRange] of the input source file covered by this formatted code,
+    /// or [None] if the entire file is covered in this instance
     pub fn range(&self) -> Option<TextRange> {
         self.range
     }
@@ -1426,7 +1466,6 @@ pub fn format_node<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
 ) -> FormatResult<Formatted<L::Context>> {
-    let _ = tracing::trace_span!("format_node").entered();
     let (root, source_map) = match language.transform(&root.clone()) {
         Some((transformed, source_map)) => {
             // we don't need to insert the node back if it has the same offset

@@ -132,6 +132,14 @@ impl Document {
         let mut interned = FxHashMap::default();
         propagate_expands(self, &mut enclosing, &mut interned);
     }
+
+    pub(crate) fn elements(&self) -> &[FormatElement] {
+        &self.elements
+    }
+
+    pub(crate) fn into_elements(self) -> Vec<FormatElement> {
+        self.elements
+    }
 }
 
 impl From<Vec<FormatElement>> for Document {
@@ -544,7 +552,9 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         | EndGroup
                         | EndLineSuffix
                         | EndDedent(_)
-                        | EndVerbatim => {
+                        | EndVerbatim
+                        | StartEmbedded(_)
+                        | EndEmbedded => {
                             write!(f, [ContentArrayEnd, text(")")])?;
                         }
                     };

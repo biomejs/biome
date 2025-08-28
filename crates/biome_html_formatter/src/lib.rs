@@ -2,11 +2,12 @@
 
 use crate::prelude::*;
 use biome_formatter::comments::Comments;
+use biome_formatter::prelude::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
 use biome_formatter::{FormatLanguage, FormatResult, Formatted, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
-use biome_rowan::{AstNode, SyntaxToken};
+use biome_rowan::{AstNode, SyntaxToken, TextRange};
 use comments::HtmlCommentStyle;
 use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
@@ -205,8 +206,20 @@ where
 
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        self.fmt_fields(node, f)?;
+        if let Some(range) = self.embedded_node_range(node) {
+            f.write_elements(vec![
+                FormatElement::Tag(StartEmbedded(range)),
+                FormatElement::Tag(EndEmbedded),
+            ])?;
+        } else {
+            self.fmt_fields(node, f)?;
+        }
         Ok(())
+    }
+
+    /// Whether this node contains content that needs to be formatted by an external formatter
+    fn embedded_node_range(&self, _node: &N) -> Option<TextRange> {
+        None
     }
 
     /// Formats the node's fields.

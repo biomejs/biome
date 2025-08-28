@@ -31,16 +31,17 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
+use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
 
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
-use crate::file_handlers::html::{extract_embedded_scripts, parse_embedded_styles};
+use crate::file_handlers::html::{parse_embedded_scripts, parse_embedded_styles};
 use crate::file_handlers::{
-    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
-    ParseResult,
+    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, FormatEmbedNode,
+    LintParams, ParseResult,
 };
 use crate::projects::Projects;
 use crate::scanner::{
@@ -352,8 +353,12 @@ impl WorkspaceServer {
             && let Some(html_root) = biome_html_syntax::HtmlRoot::cast(any_parse.syntax())
         {
             let mut node_cache = NodeCache::default();
-            let scripts = extract_embedded_scripts(&html_root, &mut node_cache);
-            let styles = parse_embedded_styles(&html_root, &mut node_cache);
+            let scripts = parse_embedded_scripts(&html_root, &mut node_cache, |file_source| {
+                self.insert_source(file_source.into())
+            });
+            let styles = parse_embedded_styles(&html_root, &mut node_cache, |file_source| {
+                self.insert_source(file_source.into())
+            });
             (scripts, styles)
         } else {
             (Vec::new(), Vec::new())
@@ -397,8 +402,8 @@ impl WorkspaceServer {
                         version,
                         file_source_index,
                         syntax: syntax.clone(),
-                        _embedded_scripts: embedded_scripts.clone(),
-                        _embedded_styles: embedded_styles.clone(),
+                        embedded_scripts: embedded_scripts.clone(),
+                        embedded_styles: embedded_styles.clone(),
                     }
                 },
                 || Document {
@@ -406,8 +411,8 @@ impl WorkspaceServer {
                     version,
                     file_source_index,
                     syntax: syntax.clone(),
-                    _embedded_scripts: embedded_scripts.clone(),
-                    _embedded_styles: embedded_styles.clone(),
+                    embedded_scripts: embedded_scripts.clone(),
+                    embedded_styles: embedded_styles.clone(),
                 },
             );
 
@@ -443,6 +448,46 @@ impl WorkspaceServer {
             },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
         }
+    }
+
+    fn get_embedded_parse(&self, path: &Utf8Path) -> Vec<FormatEmbedNode> {
+        let documents = self.documents.pin();
+
+        documents
+            .get(path)
+            .map(|doc| {
+                doc.embedded_scripts
+                    .clone()
+                    .iter()
+                    .map(|node| {
+                        let text_range = node.content_range;
+                        let parse = node.parse.clone();
+                        let file_source = self
+                            .get_source(node.file_source_index)
+                            .expect("Document source must exist");
+
+                        FormatEmbedNode {
+                            range: text_range,
+                            source: file_source,
+                            node: parse,
+                        }
+                    })
+                    .chain(doc.embedded_styles.clone().iter().map(|node| {
+                        let text_range = node.content_range;
+                        let parse = node.parse.clone();
+                        let file_source = self
+                            .get_source(node.file_source_index)
+                            .expect("Document source must exist");
+
+                        FormatEmbedNode {
+                            range: text_range,
+                            source: file_source,
+                            node: parse,
+                        }
+                    }))
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default()
     }
 
     fn parse(
@@ -1151,8 +1196,14 @@ impl Workspace for WorkspaceServer {
                 biome_html_syntax::HtmlRoot::cast(parsed.any_parse.syntax().clone())
         {
             let mut embedded_node_cache = NodeCache::default();
-            let scripts = extract_embedded_scripts(&html_root, &mut embedded_node_cache);
-            let styles = parse_embedded_styles(&html_root, &mut embedded_node_cache);
+            let scripts =
+                parse_embedded_scripts(&html_root, &mut embedded_node_cache, |file_source| {
+                    self.insert_source(file_source.into())
+                });
+            let styles =
+                parse_embedded_styles(&html_root, &mut embedded_node_cache, |file_source| {
+                    self.insert_source(file_source.into())
+                });
             (scripts, styles)
         } else {
             (Vec::new(), Vec::new())
@@ -1163,8 +1214,8 @@ impl Workspace for WorkspaceServer {
             version: Some(version),
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
-            _embedded_scripts: embedded_scripts,
-            _embedded_styles: embedded_styles,
+            embedded_scripts: embedded_scripts,
+            embedded_styles: embedded_styles,
         };
 
         if persist_node_cache {
@@ -1364,12 +1415,16 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format
             .ok_or_else(self.build_capability_error(&params.path))?;
+
+        let format_embedded = capabilities.formatter.format_embedded;
+
         let settings = self
             .projects
             .get_settings_based_on_path(params.project_key, &params.path)
             .ok_or_else(WorkspaceError::no_project)?;
 
         let parse = self.get_parse(&params.path)?;
+        let embedded_nodes = self.get_embedded_parse(&params.path);
 
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && parse.has_errors()
@@ -1377,6 +1432,17 @@ impl Workspace for WorkspaceServer {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(&params.path);
+        if embedded_nodes.is_empty() {
+            let format_embedded =
+                format_embedded.ok_or_else(self.build_capability_error(&params.path))?;
+            return format_embedded(
+                &params.path,
+                &document_file_source,
+                parse,
+                &settings,
+                embedded_nodes,
+            );
+        }
         format(&params.path, &document_file_source, parse, &settings)
     }
 

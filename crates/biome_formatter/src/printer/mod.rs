@@ -58,26 +58,24 @@ impl<'a> Printer<'a> {
         document: &'a Document,
         indent: u16,
     ) -> PrintResult<Printed> {
-        tracing::debug_span!("Printer::print").in_scope(move || {
-            let mut stack = PrintCallStack::new(PrintElementArgs::new());
-            let mut queue: PrintQueue<'a> = PrintQueue::new(document.as_ref());
-            let mut indent_stack = PrintIndentStack::new(Indention::Level(indent));
+        let mut stack = PrintCallStack::new(PrintElementArgs::new());
+        let mut queue: PrintQueue<'a> = PrintQueue::new(document.as_ref());
+        let mut indent_stack = PrintIndentStack::new(Indention::Level(indent));
 
-            while let Some(element) = queue.pop() {
-                self.print_element(&mut stack, &mut indent_stack, &mut queue, element)?;
+        while let Some(element) = queue.pop() {
+            self.print_element(&mut stack, &mut indent_stack, &mut queue, element)?;
 
-                if queue.is_empty() {
-                    self.flush_line_suffixes(&mut queue, &mut stack, &mut indent_stack, None);
-                }
+            if queue.is_empty() {
+                self.flush_line_suffixes(&mut queue, &mut stack, &mut indent_stack, None);
             }
+        }
 
-            Ok(Printed::new(
-                self.state.buffer,
-                None,
-                self.state.source_markers,
-                self.state.verbatim_markers,
-            ))
-        })
+        Ok(Printed::new(
+            self.state.buffer,
+            None,
+            self.state.source_markers,
+            self.state.verbatim_markers,
+        ))
     }
 
     /// Prints a single element and push the following elements to queue
@@ -266,7 +264,7 @@ impl<'a> Printer<'a> {
                 stack.push(TagKind::Verbatim, args);
             }
 
-            FormatElement::Tag(tag @ (StartLabelled(_) | StartEntry)) => {
+            FormatElement::Tag(tag @ (StartLabelled(_) | StartEntry | StartEmbedded(_))) => {
                 stack.push(tag.kind(), args);
             }
             FormatElement::Tag(
@@ -275,7 +273,8 @@ impl<'a> Printer<'a> {
                 | EndGroup
                 | EndConditionalContent
                 | EndVerbatim
-                | EndFill),
+                | EndFill
+                | EndEmbedded),
             ) => {
                 stack.pop(tag.kind())?;
             }
@@ -1230,7 +1229,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             }
 
             FormatElement::Tag(
-                tag @ (StartFill | StartVerbatim(_) | StartLabelled(_) | StartEntry),
+                tag @ (StartFill | StartVerbatim(_) | StartLabelled(_) | StartEntry
+                | StartEmbedded(_)),
             ) => {
                 self.stack.push(tag.kind(), args);
             }
@@ -1240,7 +1240,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 | EndGroup
                 | EndConditionalContent
                 | EndVerbatim
-                | EndFill),
+                | EndFill
+                | EndEmbedded),
             ) => {
                 self.stack.pop(tag.kind())?;
             }
@@ -1725,7 +1726,7 @@ two lines`,
                         text("The referenced group breaks."),
                         hard_line_break()
                     ])
-                    .with_group_id(Some(group_id)),
+                        .with_group_id(Some(group_id)),
                     group(&format_args![
                         text("This group breaks because:"),
                         soft_line_break_or_space(),

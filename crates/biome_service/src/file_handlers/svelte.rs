@@ -107,6 +107,7 @@ impl ExtensionHandler for SvelteFileHandler {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
+                format_embedded: None,
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
