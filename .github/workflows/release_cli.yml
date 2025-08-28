@@ -21,7 +21,7 @@ jobs:
         run: echo "nightly=true" >> $GITHUB_ENV
 
       - name: Check version changes
-        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
+        uses: EndBug/version-check@5102328418c0130d66ca712d755c303e93368ce2 # v2.1.7
         id: version
         with:
           diff-search: true
@@ -87,7 +87,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@ad95d4e02e061d4390c4b66ef5ed56c7fee3d2ce # v2.58.17
+        uses: taiki-e/install-action@f63c33fd96cc1e69a29bafd06541cf28588b43a4 # v2.58.21
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit

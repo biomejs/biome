@@ -85,7 +85,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tests
-        run: cargo test --workspace
+        run: cargo test --workspace --features=js_plugin
 
   e2e-tests:
     name: End-to-end tests
