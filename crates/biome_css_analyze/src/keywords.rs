@@ -983,6 +983,7 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 51] = [
 // https://github.com/known-css/known-css-properties/blob/master/source/w3c.json
 pub const KNOWN_PROPERTIES: &[&str] = &[
     "-webkit-line-clamp",
+    "navigation", // https://www.w3.org/TR/css-view-transitions-2/#view-transition-navigation-descriptor
     "accent-color",
     "align-content",
     "align-items",
