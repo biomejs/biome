@@ -80,6 +80,7 @@ web-time                = { workspace = true }
 insta = { workspace = true }
 
 [features]
+js_plugin = ["biome_plugin_loader/js_plugin"]
 schema = [
   "dep:schemars",
   "biome_configuration/schema",

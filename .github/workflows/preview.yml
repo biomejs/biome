@@ -73,7 +73,7 @@ jobs:
 
       # Build the CLI binary
       - name: Build binaries
-        run: cargo build -p biome_cli --release --target ${{ matrix.target }}
+        run: cargo build -p biome_cli --release --target=${{ matrix.target }} --features=js_plugin
         env:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
@@ -129,7 +129,7 @@ jobs:
 
       # Build the CLI binary
       - name: Build binaries
-        run: cargo build -p biome_cli --release --target ${{ matrix.target }}
+        run: cargo build -p biome_cli --release --target=${{ matrix.target }} --features=js_plugin
         env:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"

@@ -136,6 +136,7 @@ biome_js_analyze             = { version = "0.5.7", path = "./crates/biome_js_an
 biome_js_factory             = { version = "0.5.7", path = "./crates/biome_js_factory" }
 biome_js_formatter           = { version = "0.5.7", path = "./crates/biome_js_formatter" }
 biome_js_parser              = { version = "0.5.7", path = "./crates/biome_js_parser" }
+biome_js_runtime             = { version = "0.0.1", path = "./crates/biome_js_runtime" }
 biome_js_semantic            = { version = "0.5.7", path = "./crates/biome_js_semantic" }
 biome_js_syntax              = { version = "0.5.7", path = "./crates/biome_js_syntax" }
 biome_js_type_info           = { version = "0.0.1", path = "./crates/biome_js_type_info" }
@@ -188,6 +189,7 @@ tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
 anyhow               = "1.0.99"
+boa_engine           = "0.20.0"
 bpaf                 = { version = "0.9.20", features = ["derive"] }
 camino               = "1.1.11"
 cfg-if               = "1.0.3"
@@ -204,6 +206,7 @@ hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.23"
 indexmap             = { version = "2.10.0" }
 insta                = "1.43.1"
+libc                 = "0.2.175"
 mimalloc             = "0.1.47"
 papaya               = "0.2.3"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
@@ -237,6 +240,7 @@ ureq                 = "3.0.12"
 url                  = "2.5.4"
 walkdir              = "2.5.0"
 web-time             = "1.1.0"
+windows              = "0.61.3"
 
 [profile.dev.package.biome_wasm]
 debug     = true
