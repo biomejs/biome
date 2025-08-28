@@ -123,6 +123,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Rust toolchain
+        if: matrix.cross != true
         run: rustup target add ${{ matrix.target }}
 
       - name: Install musl toolchain
