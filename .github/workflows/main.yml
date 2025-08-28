@@ -92,7 +92,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tests on ${{ matrix.os }}
-        run: cargo test --workspace
+        run: cargo test --workspace --features=js_plugin
 
   coverage:
     name: Test262 Coverage

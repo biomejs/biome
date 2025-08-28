@@ -17,7 +17,7 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
-use biome_js_syntax::{AnyJsRoot, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
@@ -305,6 +305,22 @@ impl WorkspaceServer {
                 }
                 _ => {}
             }
+            if !js.is_typescript() && !js.is_jsx() {
+                let settings = self
+                    .projects
+                    .get_settings_based_on_path(project_key, &biome_path)
+                    .ok_or_else(WorkspaceError::no_project)?;
+                let jsx_everywhere = settings
+                    .languages
+                    .javascript
+                    .parser
+                    .jsx_everywhere
+                    .unwrap_or_default()
+                    .into();
+                if jsx_everywhere {
+                    js.set_variant(LanguageVariant::Jsx);
+                }
+            }
         }
 
         let (content, version) = match content {
@@ -488,7 +504,7 @@ impl WorkspaceServer {
         for plugin_config in plugins.iter() {
             match plugin_config {
                 PluginConfiguration::Path(plugin_path) => {
-                    match BiomePlugin::load(self.fs.as_ref(), plugin_path, base_path) {
+                    match BiomePlugin::load(self.fs.clone(), plugin_path, base_path) {
                         Ok((plugin, _)) => {
                             plugin_cache.insert_plugin(plugin_path.clone().into(), plugin);
                         }
