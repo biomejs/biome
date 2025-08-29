@@ -78,6 +78,10 @@ jobs:
 
       - name: Install cross
         if: matrix.cross == true
+        # TODO: Update to a tagged release once available.
+        # We are pinning to this specific commit because it was the latest working
+        # version with loongarch64 support when added. The support for loongarch64
+        # is unavailable in the current stable release of cross-rs (v0.2.5).
         run: cargo install cross --git https://github.com/cross-rs/cross --rev e281947ca900da425e4ecea7483cfde646c8a1ea
 
       # Build the CLI binary
