@@ -91,12 +91,9 @@ impl Rule for UseConsistentArrowReturn {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "This arrow function doesn't need a return statement."
+                    "The body of this arrow function contains a single "<Emphasis>"return"</Emphasis> " statement."
                 },
             )
-            .note(markup! {
-                "Consider changing the function body into the returned expression."
-            }),
         )
     }
 
