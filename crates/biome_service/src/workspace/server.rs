@@ -594,10 +594,12 @@ impl WorkspaceServer {
                     return Ok(!scan_kind.is_project());
                 }
 
-                if self
-                    .projects
-                    .is_ignored_by_top_level_config(project_key, &path, ignore_kind)
-                {
+                if self.projects.is_ignored_by_top_level_config(
+                    self.fs.as_ref(),
+                    project_key,
+                    &path,
+                    ignore_kind,
+                ) {
                     return Ok(true); // Nobody cares about ignored paths.
                 }
 
@@ -626,6 +628,7 @@ impl WorkspaceServer {
                         IgnoreKind::Path => !path.is_required_during_scan(),
                         IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
                             self.projects.is_ignored_by_top_level_config(
+                                self.fs.as_ref(),
                                 project_key,
                                 folder_path,
                                 ignore_kind,
@@ -649,6 +652,7 @@ impl WorkspaceServer {
                                 IgnoreKind::Path => false,
                                 IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
                                     self.projects.is_ignored_by_top_level_config(
+                                        self.fs.as_ref(),
                                         project_key,
                                         folder_path,
                                         ignore_kind,
@@ -657,6 +661,7 @@ impl WorkspaceServer {
                             }
                         } else {
                             self.projects.is_ignored_by_top_level_config(
+                                self.fs.as_ref(),
                                 project_key,
                                 &path,
                                 ignore_kind,
@@ -1008,6 +1013,7 @@ impl Workspace for WorkspaceServer {
         let capabilities = self.features.get_capabilities(language);
 
         self.projects.get_file_features(
+            self.fs.as_ref(),
             params.project_key,
             &params.path,
             params.features,
@@ -1029,6 +1035,7 @@ impl Workspace for WorkspaceServer {
         };
 
         Ok(self.projects.is_ignored(
+            self.fs.as_ref(),
             params.project_key,
             &params.path,
             params.features,

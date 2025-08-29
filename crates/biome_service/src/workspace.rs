@@ -1225,7 +1225,7 @@ pub struct PathIsIgnoredParams {
     /// Controls how to ignore check should be done
     pub ignore_kind: IgnoreKind,
 }
-#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum IgnoreKind {
