@@ -136,7 +136,7 @@ fn find_descending_selector(
     }
 
     for selector in rule.selectors() {
-        let Some(casted_selector) = AnyCssSelector::cast(selector.node().clone()) else {
+        let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
             continue;
         };
         let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {

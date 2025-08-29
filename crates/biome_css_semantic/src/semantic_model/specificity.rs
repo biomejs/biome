@@ -3,10 +3,10 @@ use crate::semantic_model::model::Specificity;
 use biome_css_syntax::{
     AnyCssCompoundSelector, AnyCssPseudoClass, AnyCssRelativeSelector, AnyCssSelector,
     AnyCssSimpleSelector, AnyCssSubSelector, CssComplexSelector, CssCompoundSelector,
-    CssPseudoClassSelector,
+    CssPseudoClassSelector, CssQualifiedRule,
 };
 
-use biome_rowan::{AstNodeList, AstSeparatedList};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
 
 const ID_SPECIFICITY: Specificity = Specificity(1, 0, 0);
 const CLASS_SPECIFICITY: Specificity = Specificity(0, 1, 0);
@@ -132,8 +132,6 @@ fn evaluate_any_subselector(selector: &AnyCssSubSelector) -> Specificity {
 }
 
 pub fn evaluate_compound_selector(selector: &CssCompoundSelector) -> Specificity {
-    let nested_specificity = ZERO_SPECIFICITY; // TODO: Implement this
-
     let simple_specificity = selector
         .simple_selector()
         .map_or(ZERO_SPECIFICITY, |s| evaluate_any_simple_selector(&s));
@@ -144,7 +142,35 @@ pub fn evaluate_compound_selector(selector: &CssCompoundSelector) -> Specificity
         .reduce(|acc, e| acc + e)
         .unwrap_or(ZERO_SPECIFICITY);
 
+    let nested_specificity = evaluate_nested_specificity(selector);
+
     nested_specificity + simple_specificity + subselector_specificity
+}
+
+fn evaluate_nested_specificity(selector: &CssCompoundSelector) -> Specificity {
+    let ancestors = selector.nesting_selectors().len();
+    if ancestors == 0 {
+        return ZERO_SPECIFICITY;
+    }
+    for (index, qualified_rule) in selector
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .filter_map(CssQualifiedRule::cast)
+        .enumerate()
+    {
+        if ancestors == index + 1 {
+            return qualified_rule
+                .prelude()
+                .iter()
+                .flatten()
+                .map(|s| evaluate_any_selector(&s))
+                .reduce(|acc, e| acc + e)
+                .unwrap_or(ZERO_SPECIFICITY);
+        }
+    }
+
+    ZERO_SPECIFICITY
 }
 
 fn evaluate_any_compound_selector(selector: &AnyCssCompoundSelector) -> Specificity {
@@ -161,7 +187,6 @@ pub fn evaluate_complex_selector(selector: &CssComplexSelector) -> Specificity {
     let right_specificity = selector
         .right()
         .map_or(ZERO_SPECIFICITY, |s| evaluate_any_selector(&s));
-
     left_specificity + right_specificity
 }
 

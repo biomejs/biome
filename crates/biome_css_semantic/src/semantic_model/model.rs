@@ -1,7 +1,7 @@
 use biome_css_syntax::{
-    CssComposesPropertyValue, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
-    CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssRoot,
-    CssSupportsAtRule, CssSyntaxNode,
+    CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector, CssDashedIdentifier,
+    CssDeclaration, CssGenericComponentValueList, CssIdentifier, CssMediaAtRule,
+    CssNestedQualifiedRule, CssQualifiedRule, CssRoot, CssSupportsAtRule,
 };
 use biome_rowan::{
     AstNode, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText, declare_node_union,
@@ -64,6 +64,15 @@ impl SemanticModel {
                 .find(|&(&range, _)| range.contains_range(target_range))
                 .map(|(_, rule)| rule)
         }
+    }
+
+    /// Returns an iterator over the specificity of all rules
+    pub fn specificity_of_rules(&self) -> impl Iterator<Item = Specificity> {
+        self.data
+            .rules_by_id
+            .values()
+            .flat_map(|rule| rule.selectors())
+            .map(|selector| selector.specificity())
     }
 }
 
@@ -164,6 +173,14 @@ impl Rule {
     pub fn specificity(&self) -> Specificity {
         self.specificity
     }
+
+    pub const fn is_media_rule(&self) -> bool {
+        matches!(self.node, RuleNode::CssMediaAtRule(_))
+    }
+}
+
+declare_node_union! {
+    pub AnyCssSelectorLike = CssCompoundSelector | CssComplexSelector
 }
 
 /// Represents a CSS selector.
@@ -175,22 +192,22 @@ impl Rule {
 /// ```
 #[derive(Debug, Clone)]
 pub struct Selector {
-    pub(crate) node: CssSyntaxNode,
+    pub(crate) node: AnyCssSelectorLike,
     /// The specificity of the selector.
     pub(crate) specificity: Specificity,
 }
 
 impl Selector {
-    pub fn node(&self) -> &CssSyntaxNode {
+    pub fn node(&self) -> &AnyCssSelectorLike {
         &self.node
     }
 
     pub fn text(&self) -> SyntaxNodeText {
-        self.node.text_trimmed()
+        self.node.syntax().text_trimmed()
     }
 
     pub fn range(&self) -> TextRange {
-        self.node.text_trimmed_range()
+        self.node.syntax().text_trimmed_range()
     }
 
     pub fn specificity(&self) -> Specificity {

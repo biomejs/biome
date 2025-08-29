@@ -5,6 +5,7 @@ use biome_css_syntax::{
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
 
+use crate::model::AnyCssSelectorLike;
 use crate::{
     model::{CssProperty, CssPropertyInitialValue},
     semantic_model::model::Specificity,
@@ -18,7 +19,7 @@ pub enum SemanticEvent {
     RuleStart(CssSyntaxNode),
     RuleEnd,
     SelectorDeclaration {
-        node: CssSyntaxNode,
+        node: AnyCssSelectorLike,
         specificity: Specificity,
     },
     PropertyDeclaration {
@@ -226,7 +227,7 @@ impl SemanticEventExtractor {
         });
     }
 
-    fn add_selector_event(&mut self, node: CssSyntaxNode, specificity: Specificity) {
+    fn add_selector_event(&mut self, node: AnyCssSelectorLike, specificity: Specificity) {
         self.stash
             .push_back(SemanticEvent::SelectorDeclaration { node, specificity });
     }
