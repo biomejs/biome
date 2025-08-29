@@ -90,7 +90,6 @@ impl<'a> VueComponent<'a> {
     /// The name of the component, if it can be determined.
     ///
     /// Derived from the file name if the name is not explicitly set in the component definition.
-    #[expect(dead_code)]
     pub fn name(&self) -> Option<VueComponentName<'a>> {
         self.kind()
             .component_name()

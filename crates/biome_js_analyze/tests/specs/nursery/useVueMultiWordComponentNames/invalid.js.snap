@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import { defineComponent, createApp } from "vue";
+
+/* Invalid: single-word name "Header" (not ignored, not builtin) */
+defineComponent({
+	name: "Header"
+});
+
+/* Invalid: single-word name "Widget" */
+export default {
+	name: "Widget"
+};
+
+createApp({ name: "Foo" })
+
+```
+
+# Diagnostics
+```
+invalid.js:1:2 lint/nursery/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "Header" only contains one word.
+  
+  > 1 │ import { defineComponent, createApp } from "vue";
+      │  ^^^^^^
+    2 │ 
+    3 │ /* Invalid: single-word name "Header" (not ignored, not builtin) */
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+
+```
+
+```
+invalid.js:1:2 lint/nursery/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Component's name "Foo" only contains one word.
+  
+  > 1 │ import { defineComponent, createApp } from "vue";
+      │  ^^^
+    2 │ 
+    3 │ /* Invalid: single-word name "Header" (not ignored, not builtin) */
+  
+  i Single-word component names can collide with HTML elements and are less descriptive.
+  
+  i Rename the component to have 2 or more words (e.g. "FooItem", or "BarView").
+  
+
+```
