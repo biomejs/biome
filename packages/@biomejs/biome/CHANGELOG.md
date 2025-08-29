@@ -1,5 +1,67 @@
 # @biomejs/biome
 
+## 2.2.3
+
+### Patch Changes
+
+- [#7316](https://github.com/biomejs/biome/pull/7316) [`f9636d5`](https://github.com/biomejs/biome/commit/f9636d5de1e8aef742d145a886f05a4cd79eca31) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#7289](https://github.com/biomejs/biome/issues/7289). The rule [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/) now inlines `import type` into `import { type }` when the `style` option is set to `inlineType`.
+
+  Example:
+
+  ```ts
+  import type { T } from "mod";
+  // becomes
+  import { type T } from "mod";
+  ```
+
+- [#7350](https://github.com/biomejs/biome/pull/7350) [`bb4d407`](https://github.com/biomejs/biome/commit/bb4d407747dd29df78776f143ad63657f869be11) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#7261](https://github.com/biomejs/biome/issues/7261): two characters `・` (KATAKANA MIDDLE DOT, U+30FB) and `･` (HALFWIDTH KATAKANA MIDDLE DOT, U+FF65) are no longer considered as valid characters in identifiers. Property keys containing these character(s) are now preserved as string literals.
+
+- [#7302](https://github.com/biomejs/biome/pull/7302) [`2af2380`](https://github.com/biomejs/biome/commit/2af2380b8210e74efea467139a8a4cb4747c8af4) Thanks [@unvalley](https://github.com/unvalley)! - Fixed [#7301](https://github.com/biomejs/biome/issues/7301): [`useReadonlyClassProperties`](https://biomejs.dev/linter/rules/use-readonly-class-properties/) now correctly skips JavaScript files.
+
+- [#7288](https://github.com/biomejs/biome/pull/7288) [`94d85f8`](https://github.com/biomejs/biome/commit/94d85f8fe54305e8fa070490bb2f7c86a91c5e92) Thanks [@ThiefMaster](https://github.com/ThiefMaster)! - Fixed [#7286](https://github.com/biomejs/biome/issues/7286). Files are now formatted with JSX behavior when `javascript.parser.jsxEverywhere` is explicitly set.
+
+  Previously, this flag was only used for parsing, but not for formatting, which resulted in incorrect formatting of conditional expressions when JSX syntax is used in `.js` files.
+
+- [#7349](https://github.com/biomejs/biome/pull/7349) [`45c1dfe`](https://github.com/biomejs/biome/commit/45c1dfe32879f4bbb75cbf9b3ee86e304a02aaa1) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#4298](https://github.com/biomejs/biome/issues/4298). Biome now correctly formats CSS declarations when it contains one single value:
+
+  ```diff
+  .bar {
+  -  --123456789012345678901234567890: var(--1234567890123456789012345678901234567);
+  +  --123456789012345678901234567890: var(
+  +    --1234567890123456789012345678901234567
+  +  );
+  }
+  ```
+
+- [#7295](https://github.com/biomejs/biome/pull/7295) [`7638e84`](https://github.com/biomejs/biome/commit/7638e84b026c8b008fa1efdd795b8c0bff0733ab) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7130](https://github.com/biomejs/biome/issues/7130). Removed the emission of a false-positive diagnostic. Biome no longer emits the following diagnostic:
+
+  ```
+  lib/main.ts:1:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    ⚠ Suppression comment has no effect because the tool is not enabled.
+
+    > 1 │ /** biome-ignore-all assist/source/organizeImports: For the lib root file, we don't want to organize exports */
+        │     ^^^^^^^^^^^^^^^^
+
+  ```
+
+- [#7348](https://github.com/biomejs/biome/pull/7348) [`ac27fc5`](https://github.com/biomejs/biome/commit/ac27fc56dbb14c8f8507ffc4b7d6bf27aa3780db) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7079](https://github.com/biomejs/biome/issues/7079). Now the rule [`useSemanticElements`](https://biomejs.dev/linter/rules/use-semantic-elements/) doesn't trigger components and custom elements.
+
+- [#7315](https://github.com/biomejs/biome/pull/7315) [`4a2bd2f`](https://github.com/biomejs/biome/commit/4a2bd2f38d1f449e55f88be351fcc1cf1d561e69) Thanks [@vladimir-ivanov](https://github.com/vladimir-ivanov)! - Fixed [#7310](https://github.com/biomejs/biome/issues/7310): [`useReadonlyClassProperties`](https://biomejs.dev/linter/rules/use-readonly-class-properties/) correctly handles nested assignments, avoiding false positives when a class property is assigned within another assignment expression.
+
+  Example of code that previously triggered a false positive but is now correctly ignored:
+
+  ```ts
+  class test {
+    private thing: number = 0; // incorrectly flagged
+
+    public incrementThing(): void {
+      const temp = { x: 0 };
+      temp.x = this.thing++;
+    }
+  }
+  ```
+
 ## 2.2.2
 
 ### Patch Changes
