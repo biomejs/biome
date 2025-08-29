@@ -86,15 +86,13 @@ impl Rule for UseConsistentArrowReturn {
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "The body of this arrow function contains a single "<Emphasis>"return"</Emphasis> " statement."
-                },
-            )
-        )
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! {
+                "The body of this arrow function contains a single "<Emphasis>"return"</Emphasis> " statement."
+            },
+        ))
     }
 
     fn action(ctx: &RuleContext<Self>, body: &Self::State) -> Option<JsRuleAction> {
