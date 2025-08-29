@@ -1330,6 +1330,7 @@ pub const KNOWN_PROPERTIES: &[&str] = &[
     "nav-left",
     "nav-right",
     "nav-up",
+    "navigation", // https://www.w3.org/TR/css-view-transitions-2/#view-transition-navigation-descriptor
     "object-fit",
     "object-position",
     "offset",

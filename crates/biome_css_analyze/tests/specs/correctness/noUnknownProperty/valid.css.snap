@@ -74,4 +74,9 @@ a {
   color: yellow;
 }
 
+/* View Transition navigation property (should not be flagged) */
+view-transition {
+  navigation: auto;
+}
+
 ```
