@@ -1,5 +1,60 @@
 # @biomejs/biome
 
+## 2.2.2
+
+### Patch Changes
+
+- [#7266](https://github.com/biomejs/biome/pull/7266) [`b270bb5`](https://github.com/biomejs/biome/commit/b270bb59978efafeef48e0b7d834c9b3958bae51) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where Biome got stuck when analyzing some files. This is usually caused by a bug in the inference engine. Now Biome has some guards in place in case the number of types grows too much, and if that happens, a diagnostic is emitted and the inference is halted.
+
+- [#7281](https://github.com/biomejs/biome/pull/7281) [`6436180`](https://github.com/biomejs/biome/commit/6436180f4a3b257e2de018bac45c99a76eff58be) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue where the function `scanProject` wouldn't work as expected.
+
+- [#7285](https://github.com/biomejs/biome/pull/7285) [`1511d0c`](https://github.com/biomejs/biome/commit/1511d0c1fdbab576701f12e9dbfca11141b60e3f) Thanks [@rriski](https://github.com/rriski)! - Partially fixed [#6782](https://github.com/biomejs/biome/issues/6782): JSX node kinds are now supported in GritQL AST nodes.
+
+- [#7249](https://github.com/biomejs/biome/pull/7249) [`dff85c0`](https://github.com/biomejs/biome/commit/dff85c05ec1ecfd252028476828d63d15b0ed60f) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#748](https://github.com/biomejs/biome-vscode/issues/748), where Biome Language Server didn't show the unsafe fixes when requesting the quick fixes. Now all LSP editors will show also opt-in, unsafe fixes.
+
+- [#7266](https://github.com/biomejs/biome/pull/7266) [`b270bb5`](https://github.com/biomejs/biome/commit/b270bb59978efafeef48e0b7d834c9b3958bae51) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7020](https://github.com/biomejs/biome/issues/7020): Resolved an issue with analysing types of static member expressions involving unions. If the object type was a union that referenced nested unions, it would trigger an infinite loop as it tried to keep expanding nested unions, and the set of types would grow indefinitely.
+
+- [#7209](https://github.com/biomejs/biome/pull/7209) [`679b70e`](https://github.com/biomejs/biome/commit/679b70e8a5141250f74a11ce7e615b15fc711914) Thanks [@patrickshipe](https://github.com/patrickshipe)! - Resolved an overcorrection in [`useImportExtensions`](https://biomejs.dev/linter/rules/use-import-extensions/) when importing explicit index files.
+
+  Imports that explicitly reference an index file are now preserved and no longer rewritten to nested index paths.
+
+  #### Example
+
+  ```diff
+  // Before
+  -      import "./sub/index";
+  +      import "./sub/index/index.js";
+
+  // After
+  -      import "./sub/index";
+  +      import "./sub/index.js";
+  ```
+
+- [#7270](https://github.com/biomejs/biome/pull/7270) [`953f9c6`](https://github.com/biomejs/biome/commit/953f9c6f019412caf14f983d5abb4c331605eb57) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#6172](https://github.com/biomejs/biome/issues/6172): Resolved an issue with inferring types for rest parameters. This issue caused rest-parameter types to be incorrect, and in some cases caused extreme performance regressions in files that contained many methods with rest-parameter definitions.
+
+- [#7234](https://github.com/biomejs/biome/pull/7234) [`b7aa111`](https://github.com/biomejs/biome/commit/b7aa111c1c88c33d9c1a35d391b23e79e11dfd43) Thanks [@JeetuSuthar](https://github.com/JeetuSuthar)! - Fixed [#7233](https://github.com/biomejs/biome/issues/7233): The useIndexOf rule now correctly suggests using indexOf() instead of findIndex().
+
+  The diagnostic message was incorrectly recommending Array#findIndex() over Array#indexOf(), when it should recommend the opposite for simple equality checks.
+
+- [#7283](https://github.com/biomejs/biome/pull/7283) [`0b07f45`](https://github.com/biomejs/biome/commit/0b07f4574581d9189c1386c2255caca7338c15e9) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7236](https://github.com/biomejs/biome/issues/7236). Now Biome correctly migrates JSONC configuration files when they are passed using `--config-path`.
+
+- [#7239](https://github.com/biomejs/biome/pull/7239) [`1d643d8`](https://github.com/biomejs/biome/commit/1d643d850120663e16663574ca3457184cdd4c27) Thanks [@minht11](https://github.com/minht11)! - Fixed an issue where Svelte globals ($state and so on) were not properly recognized inside `.svelte.test.ts/js` and `.svelte.spec.ts/js` files.
+
+- [#7264](https://github.com/biomejs/biome/pull/7264) [`62fdbc8`](https://github.com/biomejs/biome/commit/62fdbc80154f5a92d54af861c31dd334f25c16fc) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a regression where when using `--log-kind-pretty` wasn't working anymore as expected.
+
+- [#7244](https://github.com/biomejs/biome/pull/7244) [`660031b`](https://github.com/biomejs/biome/commit/660031b6707ddeae29388f1d0b4089b64c048e40) Thanks [@JeetuSuthar](https://github.com/JeetuSuthar)! - Fixed [#7225](https://github.com/biomejs/biome/issues/7225): The `noExtraBooleanCast` rule now preserves parentheses when removing `Boolean` calls inside negations.
+
+  ```js
+  // Before
+  !Boolean(b0 && b1);
+  // After
+  !(b0 && b1); // instead of !b0 && b1
+  ```
+
+- [#7298](https://github.com/biomejs/biome/pull/7298) [`46a8e93`](https://github.com/biomejs/biome/commit/46a8e93a65310df566526e6b3fb778455aee2d0b) Thanks [@unvalley](https://github.com/unvalley)! - Fixed [#6695](https://github.com/biomejs/biome/issues/6695): [`useNamingConvention`](https://biomejs.dev/linter/rules/use-naming-convention/) now correctly reports TypeScript parameter properties with modifiers.
+
+  Previously, constructor parameter properties with modifiers like `private` or `readonly` were not checked against naming conventions. These properties are now treated consistently with regular class properties.
+
 ## 2.2.0
 
 ### Minor Changes
@@ -158,6 +213,7 @@
 
   ```js
   const VERY_LONG_CONDITION_1234123412341234123412341234 = false;
+
   if (
     VERY_LONG_CONDITION_1234123412341234123412341234 &&
     VERY_LONG_CONDITION_1234123412341234123412341234 &&
@@ -214,8 +270,8 @@
   - Promoted [`noTsIgnore`](https://biomejs.dev/linter/rules/no-ts-ignore) to the `suspicious` group.
   - Promoted [`noUnassignedVariables`](https://biomejs.dev/linter/rules/no-unassigned-variables) to the `suspicious` group.
   - Promoted [`noUselessRegexBackrefs`](https://biomejs.dev/linter/rules/no-useless-regex-backrefs) to the `suspicious` group.
-  - Promoted [`noUselessStringEscapes`](https://biomejs.dev/linter/rules/no-useless-string-escapes) to the `suspicious` group.
-  - Promoted [`useConsistentIterableCallbackReturnValues`](https://biomejs.dev/linter/rules/use-consistent-iterable-callback-return-values) to the `suspicious` group.
+  - Promoted [`noUselessEscapeInString`](https://biomejs.dev/linter/rules/no-useless-escape-in-string/) to the `suspicious` group.
+  - Promoted [`useIterableCallbackReturn`](https://biomejs.dev/linter/rules/use-iterable-callback-return/) to the `suspicious` group.
   - Promoted [`useStaticResponseMethods`](https://biomejs.dev/linter/rules/use-static-response-methods) to the `suspicious` group.
 
   #### Renamed rules

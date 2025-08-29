@@ -556,6 +556,9 @@ pub struct NamedFunctionParameter {
 
     /// Whether the parameter is optional or not.
     pub is_optional: bool,
+
+    /// Whether this is a rest parameter (`...`) or not.
+    pub is_rest: bool,
 }
 
 /// A function parameter that is bound to either one or more positional
@@ -1474,6 +1477,10 @@ pub struct Union(pub(super) Box<[TypeReference]>);
 impl Union {
     pub fn contains(&self, ty: &TypeReference) -> bool {
         self.0.contains(ty)
+    }
+
+    pub fn into_types(self) -> Vec<TypeReference> {
+        self.0.into_vec()
     }
 
     pub fn types(&self) -> &[TypeReference] {

@@ -13,8 +13,9 @@ use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_service::Watcher;
 use biome_service::workspace::{
     FileContent, GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams, OpenProjectResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams, ScanProjectResult,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult, OpenProjectParams,
+    OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams,
+    ScanProjectResult,
 };
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{Sender, channel};
@@ -1495,7 +1496,7 @@ async fn pull_biome_quick_fixes() -> Result<()> {
 }
 
 #[tokio::test]
-async fn pull_quick_fixes_not_include_unsafe() -> Result<()> {
+async fn pull_quick_fixes_include_unsafe() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
@@ -1647,9 +1648,43 @@ async fn pull_quick_fixes_not_include_unsafe() -> Result<()> {
     let expected_toplevel_suppression_action = CodeActionOrCommand::CodeAction(CodeAction {
         title: String::from("Suppress rule lint/suspicious/noDoubleEquals for the whole file."),
         kind: Some(CodeActionKind::new("quickfix.suppressRule.topLevel.biome")),
-        diagnostics: Some(vec![unsafe_fixable]),
+        diagnostics: Some(vec![unsafe_fixable.clone()]),
         edit: Some(WorkspaceEdit {
             changes: Some(top_level_changes),
+            document_changes: None,
+            change_annotations: None,
+        }),
+        command: None,
+        is_preferred: None,
+        disabled: None,
+        data: None,
+    });
+
+    let mut unsafe_action_changes = HashMap::default();
+    unsafe_action_changes.insert(
+        uri!("document.js"),
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: 7,
+                },
+                end: Position {
+                    line: 0,
+                    character: 7,
+                },
+            },
+            new_text: String::from("="),
+        }],
+    );
+    let unsafe_action = CodeActionOrCommand::CodeAction(CodeAction {
+        title: String::from("Use === instead."),
+        kind: Some(CodeActionKind::new(
+            "quickfix.biome.suspicious.noDoubleEquals",
+        )),
+        diagnostics: Some(vec![unsafe_fixable]),
+        edit: Some(WorkspaceEdit {
+            changes: Some(unsafe_action_changes),
             document_changes: None,
             change_annotations: None,
         }),
@@ -1662,6 +1697,7 @@ async fn pull_quick_fixes_not_include_unsafe() -> Result<()> {
     assert_eq!(
         res,
         vec![
+            unsafe_action,
             expected_inline_suppression_action,
             expected_toplevel_suppression_action,
         ]
@@ -3404,7 +3440,7 @@ export function bar() {
         .expect("scan_project returned an error");
     assert_eq!(result.diagnostics.len(), 0);
 
-    let _: () = server
+    let _: OpenFileResult = server
         .request(
             "biome/open_file",
             "open_file",
@@ -3614,7 +3650,7 @@ export function bar() {
         .expect("scan_project returned an error");
     assert_eq!(result.diagnostics.len(), 0);
 
-    let _: () = server
+    let _: OpenFileResult = server
         .request(
             "biome/open_file",
             "open_file",

@@ -1,3 +1,4 @@
+// should not generate diagnostics
 import * as Ns1 from ""
 export type T1 = Ns1;
 

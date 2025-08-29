@@ -125,3 +125,35 @@ fn should_migrate_nested_files() {
         result,
     ));
 }
+
+#[test]
+fn should_migrate_jsonc_with_config_path() {
+    let mut fs = TemporaryFs::new("should_migrate_jsonc_with_config_path");
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"
+    // this is another comment
+    {
+    // this is a comment
+    "organizeImports": {
+        "enabled": true
+    }
+}"#;
+    fs.create_file("base.biome.jsonc", configuration);
+    let path = fs.working_directory.join("base.biome.jsonc");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["migrate", "--config-path", path.as_str(), "--write"].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_migrate_jsonc_with_config_path",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

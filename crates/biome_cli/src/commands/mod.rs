@@ -689,9 +689,11 @@ pub(crate) fn print_diagnostics_from_workspace_result(
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {
     let mut has_errors = false;
+    let mut has_internal = false;
     for diagnostic in diagnostics {
-        if diagnostic.severity() >= Severity::Error {
-            has_errors = true;
+        has_errors = has_errors || diagnostic.severity() >= Severity::Error;
+        has_internal = has_internal || diagnostic.tags().is_internal();
+        if has_internal || has_errors {
             if diagnostic.tags().is_verbose() && verbose {
                 console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
             } else {
