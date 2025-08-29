@@ -5,7 +5,7 @@ use crate::workspace::{
     DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind,
 };
 use biome_fs::ConfigName;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::{Utf8Component, Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
 use serde::{Deserialize, Serialize};
@@ -14,6 +14,22 @@ use std::fmt::Display;
 use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::{debug, instrument};
+
+// List of entries that will be ignored by the scanner regardless of
+// `files.includes`.
+const FORCED_SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
+    b".cache",
+    b".git",
+    b".hg",
+    b".netlify",
+    b".output",
+    b".svn",
+    b".yarn",
+    b".timestamp",
+    b".turbo",
+    b".vercel",
+    b".DS_Store",
+];
 
 /// The information tracked for each project.
 #[derive(Debug, Default)]
@@ -125,17 +141,30 @@ impl Projects {
             .map(|data| data.root_settings.clone())
     }
 
-    /// Returns whether a path is ignored based on the
-    /// `files.experimentalScannerIgnores` setting only.
-    pub fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.0.pin().get(&project_key).is_none_or(|data| {
-            let ignore_entries = &data.root_settings.files.scanner_ignore_entries;
-            path.components().any(|component| {
-                ignore_entries
-                    .iter()
-                    .any(|entry| entry == component.as_os_str().as_encoded_bytes())
-            })
-        })
+    /// Returns whether a path is force-ignored using a forced negation (`!!`)
+    /// as part of `files.includes`.
+    pub fn is_force_ignored(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+        if path.components().any(|component| match component {
+            Utf8Component::Normal(c) => FORCED_SCANNER_IGNORE_ENTRIES.contains(&c.as_bytes()),
+            _ => false,
+        }) {
+            return true;
+        }
+
+        let data = self.0.pin();
+        let Some(project_data) = data.get(&project_key) else {
+            return false;
+        };
+
+        let includes = project_data
+            .nested_settings
+            .iter()
+            .find(|(project_path, _)| path.starts_with(project_path))
+            .map_or(
+                &project_data.root_settings.files.includes,
+                |(_, settings)| &settings.files.includes,
+            );
+        includes.is_force_ignored(path)
     }
 
     pub fn is_ignored_by_top_level_config(

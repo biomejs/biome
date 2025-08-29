@@ -18,4 +18,3 @@ files_extraneous_field.json:3:3 deserialize ━━━━━━━━━━━━
   - maxSize
   - ignoreUnknown
   - includes
-  - experimentalScannerIgnores
