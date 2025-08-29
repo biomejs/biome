@@ -255,6 +255,7 @@ pub mod use_collapsed_else_if;
 pub mod use_collapsed_if;
 pub mod use_component_export_only_modules;
 pub mod use_consistent_array_type;
+pub mod use_consistent_arrow_return;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_member_accessibility;
