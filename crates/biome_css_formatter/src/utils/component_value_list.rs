@@ -251,6 +251,23 @@ where
         .parent::<CssGenericProperty>()
         .and_then(|parent| parent.name().ok())
         .and_then(|name| name.as_css_identifier().map(|name| name.to_trimmed_text()));
+
+    let is_font_family = css_property
+        .as_ref()
+        .is_some_and(|name| name.to_ascii_lowercase_cow() == "font-family");
+
+    let is_first_minus_operator_in_font_family = list.iter().next().is_some_and(|x| {
+        let text = x.syntax().text_trimmed();
+        text.starts_with("-")
+    });
+
+    let minus_prefixed_count = list
+        .iter()
+        .filter(|x| x.syntax().text_trimmed().starts_with("-"))
+        .count();
+
+    let has_multiple_minus_prefixed = minus_prefixed_count >= 2;
+
     let is_grid_property = css_property.as_ref().is_some_and(|name| {
         let name = name.to_ascii_lowercase_cow();
 
@@ -274,6 +291,11 @@ where
     // TODO: Check for comments, check for the types of elements in the list, etc.
     if is_grid_property {
         ValueListLayout::PreserveInline
+    } else if is_comma_separated
+        && is_font_family
+        && (!is_first_minus_operator_in_font_family || has_multiple_minus_prefixed)
+    {
+        ValueListLayout::OneGroupPerLine
     } else if list.len() == 1 {
         ValueListLayout::SingleValue
     } else if use_one_group_per_line(css_property.as_deref(), list) {
