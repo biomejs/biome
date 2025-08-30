@@ -139,6 +139,12 @@ export type Extends = string[] | string;
  */
 export interface FilesConfiguration {
 	/**
+	* **Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: https://biomejs.dev/reference/configuration/#filesincludes
+
+Set of file and folder names that should be unconditionally ignored by Biome's scanner. 
+	 */
+	experimentalScannerIgnores?: string[];
+	/**
 	 * Tells Biome to not emit diagnostics when handling files that doesn't know
 	 */
 	ignoreUnknown?: Bool;

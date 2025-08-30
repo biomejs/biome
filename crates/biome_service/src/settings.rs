@@ -12,11 +12,11 @@ use biome_configuration::max_size::MaxSize;
 use biome_configuration::plugins::Plugins;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
-    BiomeDiagnostic, Configuration, CssConfiguration, FilesConfiguration,
-    FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
-    JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    BiomeDiagnostic, Configuration, CssConfiguration, DEFAULT_SCANNER_IGNORE_ENTRIES,
+    FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration,
+    GritConfiguration, JsConfiguration, JsonConfiguration, LinterConfiguration,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -689,6 +689,10 @@ pub struct FilesSettings {
 
     /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
+
+    /// List of file and folder names that should be unconditionally ignored by
+    /// the scanner.
+    pub scanner_ignore_entries: Vec<Vec<u8>>,
 }
 
 #[derive(Clone, Default, Debug)]
@@ -1018,6 +1022,15 @@ fn to_file_settings(
         max_size: config.max_size,
         includes: Includes::new(working_directory, config.includes),
         ignore_unknown: config.ignore_unknown,
+        scanner_ignore_entries: config.experimental_scanner_ignores.map_or_else(
+            || {
+                DEFAULT_SCANNER_IGNORE_ENTRIES
+                    .iter()
+                    .map(|entry| entry.to_vec())
+                    .collect()
+            },
+            |entries| entries.into_iter().map(String::into_bytes).collect(),
+        ),
     })
 }
 

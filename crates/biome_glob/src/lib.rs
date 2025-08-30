@@ -394,10 +394,10 @@ enum GlobKind {
     #[default]
     Normal,
 
-    /// A negated glob, preceeded by a single exclamation mark (`!`).
+    /// A negated glob, preceded by a single exclamation mark (`!`).
     Negated,
 
-    /// A force-negated glob, preceeded by a double exclamation mark (`!!`).
+    /// A force-negated glob, preceded by a double exclamation mark (`!!`).
     ForceNegated,
 }
 

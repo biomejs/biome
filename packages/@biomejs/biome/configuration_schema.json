@@ -1490,6 +1490,11 @@
 			"description": "The configuration of the filesystem",
 			"type": "object",
 			"properties": {
+				"experimentalScannerIgnores": {
+					"description": "**Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: https://biomejs.dev/reference/configuration/#filesincludes\n\nSet of file and folder names that should be unconditionally ignored by Biome's scanner.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
 				"ignoreUnknown": {
 					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
