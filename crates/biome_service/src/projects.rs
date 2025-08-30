@@ -125,17 +125,33 @@ impl Projects {
             .map(|data| data.root_settings.clone())
     }
 
-    /// Returns whether a path is ignored based on the
-    /// `files.experimentalScannerIgnores` setting only.
-    pub fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.0.pin().get(&project_key).is_none_or(|data| {
-            let ignore_entries = &data.root_settings.files.scanner_ignore_entries;
-            path.components().any(|component| {
-                ignore_entries
-                    .iter()
-                    .any(|entry| entry == component.as_os_str().as_encoded_bytes())
-            })
-        })
+    /// Returns whether a path is force-ignored using a forced negation (`!!`)
+    /// as part of `files.includes`.
+    pub fn is_force_ignored(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+        let data = self.0.pin();
+        let Some(project_data) = data.get(&project_key) else {
+            return false;
+        };
+
+        // Deprecated: Check `experimentalScannerIgnores` too.
+        let ignore_entries = &project_data.root_settings.files.scanner_ignore_entries;
+        if path.components().any(|component| {
+            ignore_entries
+                .iter()
+                .any(|entry| entry == component.as_os_str().as_encoded_bytes())
+        }) {
+            return true;
+        }
+
+        let includes = project_data
+            .nested_settings
+            .iter()
+            .find(|(project_path, _)| path.starts_with(project_path))
+            .map_or(
+                &project_data.root_settings.files.includes,
+                |(_, settings)| &settings.files.includes,
+            );
+        includes.is_force_ignored(path)
     }
 
     pub fn is_ignored_by_top_level_config(

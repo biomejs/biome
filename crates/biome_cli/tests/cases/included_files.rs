@@ -93,6 +93,80 @@ fn does_not_handle_included_files_if_overridden_by_ignore() {
 }
 
 #[test]
+fn does_not_handle_included_files_if_overridden_by_forced_ignore() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{ "files": { "includes": ["*.js", "!!test.js"] } }"#.as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.js");
+    fs.insert(test.into(), UNFORMATTED.as_bytes());
+
+    let test2 = Utf8Path::new("test2.js");
+    fs.insert(test2.into(), UNFORMATTED.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test2, FORMATTED);
+
+    assert_file_contents(&fs, test, UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_handle_included_files_if_overridden_by_forced_ignore",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_not_handle_files_inside_force_ignored_folders() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{ "files": { "includes": ["*.js", "!!test"] } }"#.as_bytes(),
+    );
+
+    let root_a = Utf8Path::new("a.js");
+    fs.insert(root_a.into(), UNFORMATTED.as_bytes());
+
+    let nested_a = Utf8Path::new("test/a.js");
+    fs.insert(nested_a.into(), UNFORMATTED.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", root_a.as_str(), nested_a.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, nested_a, UNFORMATTED);
+
+    assert_file_contents(&fs, root_a, FORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_handle_files_inside_force_ignored_folders",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn does_not_handle_files_in_ignored_folder() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();

@@ -542,7 +542,7 @@ impl WorkspaceServer {
         path: &Utf8Path,
         request_kind: IndexRequestKind,
     ) -> Result<bool, WorkspaceError> {
-        if self.projects.is_ignored_by_scanner(project_key, path) {
+        if self.projects.is_force_ignored(project_key, path) {
             return Ok(true);
         }
 
