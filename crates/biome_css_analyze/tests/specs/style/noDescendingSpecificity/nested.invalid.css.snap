@@ -4,6 +4,7 @@ expression: nested.invalid.css
 ---
 # Input
 ```css
+/* should generate diagnostics */
 a {
     & > b {
         color: red;
@@ -13,28 +14,30 @@ a {
 b {
     color: red;
 }
+
 ```
 
 # Diagnostics
 ```
-nested.invalid.css:7:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+nested.invalid.css:8:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Descending specificity selector found. This selector specificity is (0, 0, 1)
   
-    5 │ }
-    6 │ 
-  > 7 │ b {
-      │ ^
-    8 │     color: red;
-    9 │ }
+     6 │ }
+     7 │ 
+   > 8 │ b {
+       │ ^
+     9 │     color: red;
+    10 │ }
   
   i This selector specificity is (0, 0, 2)
   
-    1 │ a {
-  > 2 │     & > b {
+    1 │ /* should generate diagnostics */
+    2 │ a {
+  > 3 │     & > b {
       │     ^^^^^
-    3 │         color: red;
-    4 │     }
+    4 │         color: red;
+    5 │     }
   
   i Descending specificity selector may not applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
   

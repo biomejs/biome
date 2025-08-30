@@ -96,22 +96,9 @@ impl SemanticModelBuilder {
                 }
             }
             SemanticEvent::SelectorDeclaration { node, specificity } => {
-                let parent_specificity = self
-                    .current_rule_stack
-                    .last()
-                    .and_then(|rule_id| self.rules_by_id.get(rule_id))
-                    .and_then(|rule| rule.parent_id)
-                    .and_then(|parent_id| self.rules_by_id.get(&parent_id))
-                    .map(|parent| parent.specificity)
-                    .unwrap_or_default();
-
                 if let Some(current_rule) = self.current_rule_stack.last() {
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
-                    current_rule.selectors.push(Selector {
-                        node,
-                        specificity: parent_specificity + specificity,
-                    });
-
+                    current_rule.selectors.push(Selector { node, specificity });
                     current_rule.specificity += specificity;
                 }
             }
