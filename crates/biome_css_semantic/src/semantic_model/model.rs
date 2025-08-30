@@ -66,10 +66,10 @@ impl SemanticModel {
         }
     }
 
-    /// Returns an iterator over the specificity of all rules
-    pub fn specificity_of_rules(&self) -> impl Iterator<Item = Specificity> {
+    /// Returns an iterator over the specificity of all rules in source order.
+    pub fn specificity_of_rules(&self) -> impl Iterator<Item = Specificity> + '_ {
         self.data
-            .rules_by_id
+            .range_to_rule
             .values()
             .flat_map(|rule| rule.selectors())
             .map(|selector| selector.specificity())
