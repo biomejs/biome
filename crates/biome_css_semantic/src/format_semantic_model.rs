@@ -65,17 +65,18 @@ impl std::fmt::Display for SemanticModel {
 
 impl Format<FormatSemanticModelContext> for SemanticModel {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
-        let mut builder = f.join_nodes_with_hardline();
-
-        for selector in self
+        let mut selectors: Vec<&Selector> = self
             .data
             .rules_by_id
             .values()
             .flat_map(|rule| rule.selectors())
-        {
-            builder.entry(selector.node().syntax(), selector)
-        }
+            .collect();
+        selectors.sort_by_key(|sel| sel.range().start());
 
+        let mut builder = f.join_nodes_with_hardline();
+        for selector in selectors {
+            builder.entry(selector.node().syntax(), selector);
+        }
         builder.finish()
     }
 }
