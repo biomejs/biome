@@ -387,9 +387,39 @@ JsYieldArgument =
 	'*'?
 	expression: AnyJsExpression
 
+// import('./a', { with: { "type": "json" } })
+//                 ^^^^^^^^^^^^^^^^^^^^^^^^
+JsImportCallAssertion = 
+  'with'
+  ':'
+  '{'
+  assertions: JsImportAssertionEntryList
+  '}'
+
+// import('./a', { with: { "type": "json" } })
+//               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+JsImportCallAssertionBlock = 
+   '{'
+      assertion: JsImportCallAssertion
+   '}'
+
+// import('./a')
+//       ^^^^^^^
+// import('./a', { with: { "type": "json" } })
+//       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+JsImportCallArguments = 
+   '('
+   argument: AnyJsCallArgument
+   (',' JsImportCallAssertionBlock )?
+   ')'
+
+// import('./a')
+// ^^^^^^^^^^^^^
+// import('./a', { with: { "type": "json" } })
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 JsImportCallExpression =
 	'import'
-	arguments: JsCallArguments
+	arguments: JsImportCallArguments
 
 // new target expression
 JsNewTargetExpression = 'new' '.' 'target'

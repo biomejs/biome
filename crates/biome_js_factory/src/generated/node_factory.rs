@@ -2042,9 +2042,87 @@ impl JsImportBareClauseBuilder {
         ))
     }
 }
+pub fn js_import_call_arguments(
+    l_paren_token: SyntaxToken,
+    argument: AnyJsCallArgument,
+    r_paren_token: SyntaxToken,
+) -> JsImportCallArgumentsBuilder {
+    JsImportCallArgumentsBuilder {
+        l_paren_token,
+        argument,
+        r_paren_token,
+        comma_token: None,
+        js_import_call_assertion_block: None,
+    }
+}
+pub struct JsImportCallArgumentsBuilder {
+    l_paren_token: SyntaxToken,
+    argument: AnyJsCallArgument,
+    r_paren_token: SyntaxToken,
+    comma_token: Option<SyntaxToken>,
+    js_import_call_assertion_block: Option<JsImportCallAssertionBlock>,
+}
+impl JsImportCallArgumentsBuilder {
+    pub fn with_comma_token(mut self, comma_token: SyntaxToken) -> Self {
+        self.comma_token = Some(comma_token);
+        self
+    }
+    pub fn with_js_import_call_assertion_block(
+        mut self,
+        js_import_call_assertion_block: JsImportCallAssertionBlock,
+    ) -> Self {
+        self.js_import_call_assertion_block = Some(js_import_call_assertion_block);
+        self
+    }
+    pub fn build(self) -> JsImportCallArguments {
+        JsImportCallArguments::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_IMPORT_CALL_ARGUMENTS,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.argument.into_syntax())),
+                self.comma_token.map(|token| SyntaxElement::Token(token)),
+                self.js_import_call_assertion_block
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn js_import_call_assertion(
+    with_token: SyntaxToken,
+    colon_token: SyntaxToken,
+    l_curly_token: SyntaxToken,
+    assertions: JsImportAssertionEntryList,
+    r_curly_token: SyntaxToken,
+) -> JsImportCallAssertion {
+    JsImportCallAssertion::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_IMPORT_CALL_ASSERTION,
+        [
+            Some(SyntaxElement::Token(with_token)),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(assertions.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn js_import_call_assertion_block(
+    l_curly_token: SyntaxToken,
+    assertion: JsImportCallAssertion,
+    r_curly_token: SyntaxToken,
+) -> JsImportCallAssertionBlock {
+    JsImportCallAssertionBlock::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_IMPORT_CALL_ASSERTION_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(assertion.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn js_import_call_expression(
     import_token: SyntaxToken,
-    arguments: JsCallArguments,
+    arguments: JsImportCallArguments,
 ) -> JsImportCallExpression {
     JsImportCallExpression::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION,

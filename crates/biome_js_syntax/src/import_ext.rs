@@ -301,10 +301,7 @@ impl AnyJsImportLike {
                 }
             }
             Self::JsImportCallExpression(import_call) => {
-                let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
-                else {
-                    return None;
-                };
+                let argument = import_call.arguments().ok()?.argument().ok()?;
                 argument
                     .as_any_js_expression()?
                     .as_any_js_literal_expression()?
@@ -349,10 +346,7 @@ impl AnyJsImportLike {
                 }
             }
             Self::JsImportCallExpression(import_call) => {
-                let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
-                else {
-                    return None;
-                };
+                let argument = import_call.arguments().ok()?.argument().ok()?;
                 argument
                     .as_any_js_expression()?
                     .as_any_js_literal_expression()?

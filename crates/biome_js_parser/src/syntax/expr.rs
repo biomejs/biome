@@ -29,6 +29,7 @@ use crate::syntax::js_parse_error::{
     private_names_only_allowed_on_left_side_of_in_expression,
 };
 use crate::syntax::jsx::parse_jsx_tag_expression;
+use crate::syntax::module::ImportAssertionList;
 use crate::syntax::object::parse_object_expression;
 use crate::syntax::stmt::{STMT_RECOVERY_SET, is_semi};
 use crate::syntax::typescript::ts_parse_error::{expected_ts_type, ts_only_syntax_error};
@@ -197,7 +198,7 @@ pub(crate) fn parse_expression_or_recover_to_next_statement(
 // new-line";
 // /^[يفمئامئ‍ئاسۆند]/i; //regex with unicode
 // /[\p{Control}--[\t\n]]/v;
-// /\’/; // regex with escaped non-ascii chars (issue #1941)
+// /\'; // regex with escaped non-ascii chars (issue #1941)
 // test_err js literals
 // 00, 012, 08, 091, 0789 // parser errors
 // 01n, 0_0, 01.2 // lexer errors
@@ -1365,64 +1366,47 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
                     m.complete(p, JS_BOGUS)
                 }
             } else {
-                // test js import_call
-                // import("foo")
-                // import("foo", { assert: { type: 'json' } })
-                // import("foo", { with: { 'resolution-mode': 'import' } })
-
-                // test_err js import_invalid_args
-                // import()
-                // import(...["foo"])
-                // import("foo", { assert: { type: 'json' } }, "bar")
-                // import("foo", { with: { type: 'json' } }, "bar")
                 let args = p.start();
                 p.bump(T!['(']);
-                let args_list = p.start();
+                let error_range_start = p.cur_range().start();
 
-                let mut progress = ParserProgress::default();
-                let mut error_range_start = p.cur_range().start();
-                let mut args_count = 0;
-
-                while !p.at(EOF) && !p.at(T![')']) {
-                    progress.assert_progressing(p);
-                    args_count += 1;
-
-                    if args_count == 3 {
-                        error_range_start = p.cur_range().start();
-                    }
-
-                    if p.at(T![...]) {
-                        parse_spread_element(p, context)
-                            .add_diagnostic_if_present(p, |p, range| {
-                                p.err_builder("`...` is not allowed in `import()`", range)
-                            })
-                            .map(|mut marker| {
-                                marker.change_to_bogus(p);
-                                marker
-                            });
-                    } else {
-                        parse_assignment_expression_or_higher(p, ExpressionContext::default())
-                            .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
-                    }
-
-                    if p.at(T![,]) {
-                        p.bump_any();
-                    } else {
-                        break;
-                    }
+                if p.at(T![...]) {
+                    parse_spread_element(p, context)
+                        .add_diagnostic_if_present(p, |p, range| {
+                            p.err_builder("`...` is not allowed in `import()`", range)
+                        })
+                        .map(|mut marker| {
+                            marker.change_to_bogus(p);
+                            marker
+                        });
                 }
 
-                args_list.complete(p, JS_CALL_ARGUMENT_LIST);
-                if args_count == 0 || args_count > 2 {
-                    let err = p.err_builder(
+                if p.at(T![')']) {
+                    p.error(p.err_builder(
                         "`import()` requires exactly one or two arguments. ",
                         error_range_start..p.cur_range().end(),
-                    );
-                    p.error(err);
+                    ));
+                } else {
+                    parse_assignment_expression_or_higher(p, ExpressionContext::default())
+                        .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
+                }
+
+                if p.at(T![,]) {
+                    if p.nth_at(1, T![')']) {
+                        p.error(
+                            p.err_builder(
+                                "Import call may not have a trailing comma",
+                                p.cur_range(),
+                            )
+                            .with_detail(p.cur_range(), "Remove the trailing comma here"),
+                        );
+                    }
+                    p.bump(T![,]);
+                    parse_js_import_call_assertion_block(p).ok();
                 }
 
                 p.expect(T![')']);
-                args.complete(p, JS_CALL_ARGUMENTS);
+                args.complete(p, JS_IMPORT_CALL_ARGUMENTS);
                 m.complete(p, JS_IMPORT_CALL_EXPRESSION)
             }
         }
@@ -2169,4 +2153,58 @@ pub(super) fn is_nth_at_name(p: &mut JsParser, offset: usize) -> bool {
 
 pub(super) fn is_nth_at_any_name(p: &mut JsParser, n: usize) -> bool {
     is_nth_at_name(p, n) || p.nth_at(n, T![#])
+}
+
+fn parse_js_import_call_assertion_block(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T!['{']) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    if p.at(T!['{']) {
+        p.bump(T!['{']);
+        if p.at(T!['}']) {
+            p.error(
+                p.err_builder(
+                    "Missing import type assertion keyword 'with'",
+                    p.cur_range(),
+                )
+                .with_detail(p.cur_range(), "'with' expected."),
+            );
+        }
+    }
+
+    parse_js_import_call_assertion(p).ok();
+
+    p.expect(T!['}']);
+    Present(m.complete(p, JS_IMPORT_CALL_ASSERTION_BLOCK))
+}
+
+fn parse_js_import_call_assertion(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T![with]) && !p.at(T![assert]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    match p.cur() {
+        T![assert] => {
+            p.expect(T![assert]);
+        }
+        T![with] => {
+            p.expect(T![with]);
+        }
+        _ => {
+            m.abandon(p);
+            return Absent;
+        }
+    };
+
+    p.expect(T![:]);
+    p.expect(T!['{']);
+    ImportAssertionList::default().parse_list(p);
+
+    p.expect(T!['}']);
+
+    Present(m.complete(p, JS_IMPORT_CALL_ASSERTION))
 }

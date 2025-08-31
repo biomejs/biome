@@ -87,42 +87,64 @@ impl SimpleArgument {
     fn is_simple_call_like_expression(&self, depth: u8) -> SyntaxResult<bool> {
         let result = if let Self::Expression(any_expression) = self {
             if is_call_like_expression(any_expression) {
-                let mut is_import_call_expression = false;
-                let mut is_simple_callee = false;
-                let arguments = match any_expression {
+                match any_expression {
                     AnyJsExpression::JsNewExpression(expr) => {
                         let callee = expr.callee()?;
-                        is_simple_callee = Self::from(callee).is_simple_impl(depth);
-                        expr.arguments()
+
+                        if !Self::from(callee).is_simple_impl(depth) {
+                            return Ok(false);
+                        }
+
+                        if let Some(arguments) = expr.arguments() {
+                            // This is a little awkward, but because we _increment_
+                            // depth, we need to add it to the left and compare to the
+                            // max we allow (2), versus just comparing `len <= depth`.
+                            arguments.args().len() + usize::from(depth) <= 2
+                                && arguments.args().iter().all(|argument| {
+                                    argument.map_or(true, |argument| {
+                                        Self::from(argument).is_simple_impl(depth + 1)
+                                    })
+                                })
+                        } else {
+                            true
+                        }
                     }
                     AnyJsExpression::JsCallExpression(expr) => {
                         let callee = expr.callee()?;
-                        is_simple_callee = Self::from(callee).is_simple_impl(depth);
-                        expr.arguments().ok()
+
+                        if !Self::from(callee).is_simple_impl(depth) {
+                            return Ok(false);
+                        }
+
+                        if let Ok(arguments) = expr.arguments() {
+                            // This is a little awkward, but because we _increment_
+                            // depth, we need to add it to the left and compare to the
+                            // max we allow (2), versus just comparing `len <= depth`.
+                            arguments.args().len() + usize::from(depth) <= 2
+                                && arguments.args().iter().all(|argument| {
+                                    argument.map_or(true, |argument| {
+                                        Self::from(argument).is_simple_impl(depth + 1)
+                                    })
+                                })
+                        } else {
+                            true
+                        }
                     }
                     AnyJsExpression::JsImportCallExpression(expr) => {
-                        is_import_call_expression = true;
-                        expr.arguments().ok()
+                        if let Ok(arguments) = expr.arguments() {
+                            // For import calls, we check if the argument is simple
+                            // Import calls typically have 1 argument (the module path)
+                            // and optionally an assertion object
+                            if let Ok(argument) = arguments.argument() {
+                                Self::from(argument).is_simple_impl(depth + 1)
+                            } else {
+                                false
+                            }
+                        } else {
+                            false
+                        }
                     }
                     _ => unreachable!("The check is done inside `is_call_like_expression`"),
-                };
-
-                if !is_import_call_expression && !is_simple_callee {
-                    return Ok(false);
-                }
-
-                if let Some(arguments) = arguments {
-                    // This is a little awkward, but because we _increment_
-                    // depth, we need to add it to the left and compare to the
-                    // max we allow (2), versus just comparing `len <= depth`.
-                    arguments.args().len() + usize::from(depth) <= 2
-                        && arguments.args().iter().all(|argument| {
-                            argument.map_or(true, |argument| {
-                                Self::from(argument).is_simple_impl(depth + 1)
-                            })
-                        })
-                } else {
-                    true
                 }
             } else {
                 false

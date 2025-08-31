@@ -3626,6 +3626,161 @@ pub struct JsImportBareClauseFields {
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsImportCallArguments {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsImportCallArguments {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsImportCallArgumentsFields {
+        JsImportCallArgumentsFields {
+            l_paren_token: self.l_paren_token(),
+            argument: self.argument(),
+            comma_token: self.comma_token(),
+            js_import_call_assertion_block: self.js_import_call_assertion_block(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn argument(&self) -> SyntaxResult<AnyJsCallArgument> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
+    pub fn js_import_call_assertion_block(&self) -> Option<JsImportCallAssertionBlock> {
+        support::node(&self.syntax, 3usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for JsImportCallArguments {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsImportCallArgumentsFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub argument: SyntaxResult<AnyJsCallArgument>,
+    pub comma_token: Option<SyntaxToken>,
+    pub js_import_call_assertion_block: Option<JsImportCallAssertionBlock>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsImportCallAssertion {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsImportCallAssertion {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsImportCallAssertionFields {
+        JsImportCallAssertionFields {
+            with_token: self.with_token(),
+            colon_token: self.colon_token(),
+            l_curly_token: self.l_curly_token(),
+            assertions: self.assertions(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn with_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn assertions(&self) -> JsImportAssertionEntryList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for JsImportCallAssertion {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsImportCallAssertionFields {
+    pub with_token: SyntaxResult<SyntaxToken>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub assertions: JsImportAssertionEntryList,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsImportCallAssertionBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsImportCallAssertionBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsImportCallAssertionBlockFields {
+        JsImportCallAssertionBlockFields {
+            l_curly_token: self.l_curly_token(),
+            assertion: self.assertion(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn assertion(&self) -> SyntaxResult<JsImportCallAssertion> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for JsImportCallAssertionBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsImportCallAssertionBlockFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub assertion: SyntaxResult<JsImportCallAssertion>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsImportCallExpression {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3648,7 +3803,7 @@ impl JsImportCallExpression {
     pub fn import_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn arguments(&self) -> SyntaxResult<JsCallArguments> {
+    pub fn arguments(&self) -> SyntaxResult<JsImportCallArguments> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -3663,7 +3818,7 @@ impl Serialize for JsImportCallExpression {
 #[derive(Serialize)]
 pub struct JsImportCallExpressionFields {
     pub import_token: SyntaxResult<SyntaxToken>,
-    pub arguments: SyntaxResult<JsCallArguments>,
+    pub arguments: SyntaxResult<JsImportCallArguments>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsImportCombinedClause {
@@ -20583,6 +20738,184 @@ impl From<JsImportBareClause> for SyntaxNode {
 }
 impl From<JsImportBareClause> for SyntaxElement {
     fn from(n: JsImportBareClause) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsImportCallArguments {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_IMPORT_CALL_ARGUMENTS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_IMPORT_CALL_ARGUMENTS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsImportCallArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportCallArguments")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("argument", &support::DebugSyntaxResult(self.argument()))
+                .field(
+                    "comma_token",
+                    &support::DebugOptionalElement(self.comma_token()),
+                )
+                .field(
+                    "js_import_call_assertion_block",
+                    &support::DebugOptionalElement(self.js_import_call_assertion_block()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImportCallArguments").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsImportCallArguments> for SyntaxNode {
+    fn from(n: JsImportCallArguments) -> Self {
+        n.syntax
+    }
+}
+impl From<JsImportCallArguments> for SyntaxElement {
+    fn from(n: JsImportCallArguments) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsImportCallAssertion {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_IMPORT_CALL_ASSERTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_IMPORT_CALL_ASSERTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsImportCallAssertion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportCallAssertion")
+                .field("with_token", &support::DebugSyntaxResult(self.with_token()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("assertions", &self.assertions())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImportCallAssertion").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsImportCallAssertion> for SyntaxNode {
+    fn from(n: JsImportCallAssertion) -> Self {
+        n.syntax
+    }
+}
+impl From<JsImportCallAssertion> for SyntaxElement {
+    fn from(n: JsImportCallAssertion) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsImportCallAssertionBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_IMPORT_CALL_ASSERTION_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_IMPORT_CALL_ASSERTION_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsImportCallAssertionBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportCallAssertionBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("assertion", &support::DebugSyntaxResult(self.assertion()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImportCallAssertionBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsImportCallAssertionBlock> for SyntaxNode {
+    fn from(n: JsImportCallAssertionBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<JsImportCallAssertionBlock> for SyntaxElement {
+    fn from(n: JsImportCallAssertionBlock) -> Self {
         n.syntax.into()
     }
 }
@@ -40682,6 +41015,21 @@ impl std::fmt::Display for JsImportAssertionEntry {
     }
 }
 impl std::fmt::Display for JsImportBareClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsImportCallArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsImportCallAssertion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsImportCallAssertionBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -182,7 +182,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-import source x from "x";
+import("foo", { assert: { type: 'json' } }, "bar")
     "#;
 
     let root = parse(code, JsFileSource::ts(), JsParserOptions::default());

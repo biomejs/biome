@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/babel-plugins/dynamic-import.js
+---
+# Input
+
+```js
+// https://babeljs.io/docs/en/babel-plugin-syntax-dynamic-import
+
+// There is no example code on babel website
+
+import('./prettier.mjs');
+import(prettier);
+import('./prettier.mjs').then(module => console.log(module));
+import(prettier).then(module => console.log(module));
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,7 +2,7 @@
+ 
+ // There is no example code on babel website
+ 
+-import("./prettier.mjs");
++import('./prettier.mjs');
+ import(prettier);
+-import("./prettier.mjs").then((module) => console.log(module));
++import('./prettier.mjs').then((module) => console.log(module));
+ import(prettier).then((module) => console.log(module));
+```
+
+# Output
+
+```js
+// https://babeljs.io/docs/en/babel-plugin-syntax-dynamic-import
+
+// There is no example code on babel website
+
+import('./prettier.mjs');
+import(prettier);
+import('./prettier.mjs').then((module) => console.log(module));
+import(prettier).then((module) => console.log(module));
+```

@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/comments/dynamic_imports.js
+---
+# Input
+
+```js
+import(/* Hello */ 'something')
+
+import('something' /* Hello */)
+
+import(/* Hello */ 'something' /* Hello */)
+
+import('something' /* Hello */ + 'else')
+
+import(
+  /* Hello */
+  'something'
+  /* Hello */
+)
+
+wrap(
+  import(/* Hello */
+    'something'
+  )
+)
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,15 +1,19 @@
+-import(/* Hello */ "something");
++import(/* Hello */ 'something')
+ 
+-import("something" /* Hello */);
++import('something' /* Hello */)
+ 
+-import(/* Hello */ "something" /* Hello */);
++import(/* Hello */ 'something' /* Hello */)
+ 
+-import("something" /* Hello */ + "else");
++import('something' /* Hello */ + 'else')
+ 
+ import(
+   /* Hello */
+-  "something"
++  'something'
+   /* Hello */
+-);
++)
+ 
+-wrap(import(/* Hello */ "something"));
++wrap(
++  import(/* Hello */
++    'something'
++  )
++)
+```
+
+# Output
+
+```js
+import(/* Hello */ 'something')
+
+import('something' /* Hello */)
+
+import(/* Hello */ 'something' /* Hello */)
+
+import('something' /* Hello */ + 'else')
+
+import(
+  /* Hello */
+  'something'
+  /* Hello */
+)
+
+wrap(
+  import(/* Hello */
+    'something'
+  )
+)
+```

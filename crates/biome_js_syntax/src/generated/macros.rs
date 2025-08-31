@@ -327,6 +327,19 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsImportBareClause::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_IMPORT_CALL_ARGUMENTS => {
+                    let $pattern = unsafe { $crate::JsImportCallArguments::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_IMPORT_CALL_ASSERTION => {
+                    let $pattern = unsafe { $crate::JsImportCallAssertion::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_IMPORT_CALL_ASSERTION_BLOCK => {
+                    let $pattern =
+                        unsafe { $crate::JsImportCallAssertionBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION => {
                     let $pattern = unsafe { $crate::JsImportCallExpression::new_unchecked(node) };
                     $body

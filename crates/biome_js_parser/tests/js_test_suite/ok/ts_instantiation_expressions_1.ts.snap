@@ -1605,13 +1605,13 @@ JsModule {
                 operator_token: R_ANGLE@743..745 ">" [] [Whitespace(" ")],
                 right: JsImportCallExpression {
                     import_token: IMPORT_KW@745..751 "import" [] [],
-                    arguments: JsCallArguments {
+                    arguments: JsImportCallArguments {
                         l_paren_token: L_PAREN@751..752 "(" [] [],
-                        args: JsCallArgumentList [
-                            JsStringLiteralExpression {
-                                value_token: JS_STRING_LITERAL@752..757 "\"123\"" [] [],
-                            },
-                        ],
+                        argument: JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@752..757 "\"123\"" [] [],
+                        },
+                        comma_token: missing (optional),
+                        js_import_call_assertion_block: missing (optional),
                         r_paren_token: R_PAREN@757..758 ")" [] [],
                     },
                 },
@@ -2688,12 +2688,13 @@ JsModule {
         1: R_ANGLE@743..745 ">" [] [Whitespace(" ")]
         2: JS_IMPORT_CALL_EXPRESSION@745..758
           0: IMPORT_KW@745..751 "import" [] []
-          1: JS_CALL_ARGUMENTS@751..758
+          1: JS_IMPORT_CALL_ARGUMENTS@751..758
             0: L_PAREN@751..752 "(" [] []
-            1: JS_CALL_ARGUMENT_LIST@752..757
-              0: JS_STRING_LITERAL_EXPRESSION@752..757
-                0: JS_STRING_LITERAL@752..757 "\"123\"" [] []
-            2: R_PAREN@757..758 ")" [] []
+            1: JS_STRING_LITERAL_EXPRESSION@752..757
+              0: JS_STRING_LITERAL@752..757 "\"123\"" [] []
+            2: (empty)
+            3: (empty)
+            4: R_PAREN@757..758 ")" [] []
       1: SEMICOLON@758..759 ";" [] []
     48: JS_EXPRESSION_STATEMENT@759..771
       0: JS_BINARY_EXPRESSION@759..770

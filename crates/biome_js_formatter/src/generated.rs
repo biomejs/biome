@@ -2546,6 +2546,114 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportBareClause {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsImportCallArguments>
+    for crate::js::expressions::import_call_arguments::FormatJsImportCallArguments
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsImportCallArguments,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsImportCallArguments>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportCallArguments {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsImportCallArguments,
+        crate::js::expressions::import_call_arguments::FormatJsImportCallArguments,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::expressions::import_call_arguments::FormatJsImportCallArguments::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportCallArguments {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsImportCallArguments,
+        crate::js::expressions::import_call_arguments::FormatJsImportCallArguments,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::expressions::import_call_arguments::FormatJsImportCallArguments::default(),
+        )
+    }
+}
+impl FormatRule<biome_js_syntax::JsImportCallAssertion>
+    for crate::js::module::import_call_assertion::FormatJsImportCallAssertion
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsImportCallAssertion,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsImportCallAssertion>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportCallAssertion {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsImportCallAssertion,
+        crate::js::module::import_call_assertion::FormatJsImportCallAssertion,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::module::import_call_assertion::FormatJsImportCallAssertion::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportCallAssertion {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsImportCallAssertion,
+        crate::js::module::import_call_assertion::FormatJsImportCallAssertion,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::module::import_call_assertion::FormatJsImportCallAssertion::default(),
+        )
+    }
+}
+impl FormatRule<biome_js_syntax::JsImportCallAssertionBlock>
+    for crate::js::module::import_call_assertion_block::FormatJsImportCallAssertionBlock
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsImportCallAssertionBlock,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsImportCallAssertionBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportCallAssertionBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsImportCallAssertionBlock,
+        crate::js::module::import_call_assertion_block::FormatJsImportCallAssertionBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: js :: module :: import_call_assertion_block :: FormatJsImportCallAssertionBlock :: default ())
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportCallAssertionBlock {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsImportCallAssertionBlock,
+        crate::js::module::import_call_assertion_block::FormatJsImportCallAssertionBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: js :: module :: import_call_assertion_block :: FormatJsImportCallAssertionBlock :: default ())
+    }
+}
 impl FormatRule<biome_js_syntax::JsImportCallExpression>
     for crate::js::expressions::import_call_expression::FormatJsImportCallExpression
 {

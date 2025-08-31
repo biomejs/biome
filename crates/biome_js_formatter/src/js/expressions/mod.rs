@@ -14,6 +14,7 @@ pub(crate) mod computed_member_expression;
 pub(crate) mod conditional_expression;
 pub(crate) mod function_expression;
 pub(crate) mod identifier_expression;
+pub(crate) mod import_call_arguments;
 pub(crate) mod import_call_expression;
 pub(crate) mod import_meta_expression;
 pub(crate) mod in_expression;

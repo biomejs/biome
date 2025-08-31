@@ -1686,13 +1686,13 @@ JsModule {
         JsExpressionStatement {
             expression: JsImportCallExpression {
                 import_token: IMPORT_KW@672..679 "import" [Newline("\n")] [],
-                arguments: JsCallArguments {
+                arguments: JsImportCallArguments {
                     l_paren_token: L_PAREN@679..680 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@680..685 "\"123\"" [] [],
-                        },
-                    ],
+                    argument: JsStringLiteralExpression {
+                        value_token: JS_STRING_LITERAL@680..685 "\"123\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    js_import_call_assertion_block: missing (optional),
                     r_paren_token: R_PAREN@685..686 ")" [] [],
                 },
             },
@@ -2739,12 +2739,13 @@ JsModule {
     64: JS_EXPRESSION_STATEMENT@672..687
       0: JS_IMPORT_CALL_EXPRESSION@672..686
         0: IMPORT_KW@672..679 "import" [Newline("\n")] []
-        1: JS_CALL_ARGUMENTS@679..686
+        1: JS_IMPORT_CALL_ARGUMENTS@679..686
           0: L_PAREN@679..680 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@680..685
-            0: JS_STRING_LITERAL_EXPRESSION@680..685
-              0: JS_STRING_LITERAL@680..685 "\"123\"" [] []
-          2: R_PAREN@685..686 ")" [] []
+          1: JS_STRING_LITERAL_EXPRESSION@680..685
+            0: JS_STRING_LITERAL@680..685 "\"123\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@685..686 ")" [] []
       1: SEMICOLON@686..687 ";" [] []
   4: EOF@687..688 "" [Newline("\n")] []
 
