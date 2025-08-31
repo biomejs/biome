@@ -1,0 +1,5 @@
+{
+	"files": {
+		"experimentalScannerIgnores": ["node_modules", "problematic-file.js", ".git"]
+	}
+}

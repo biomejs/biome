@@ -1,0 +1,21 @@
+---
+source: crates/biome_configuration/tests/spec_tests.rs
+expression: experimental_scanner_ignores.json
+---
+experimental_scanner_ignores.json:3:3 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property experimentalScannerIgnores is deprecated.
+  
+    1 │ {
+    2 │ 	"files": {
+  > 3 │ 		"experimentalScannerIgnores": ["node_modules", "problematic-file.js", ".git"]
+      │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	}
+    5 │ }
+  
+  i You may want to add the following entries to files.includes instead:
+  
+  - "!!**/node_modules"
+  - "!!**/problematic-file.js"
+  
+  i See the files.includes documentation for more information.
