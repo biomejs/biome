@@ -22,6 +22,9 @@ serde             = { workspace = true, features = ["derive"] }
 [dev-dependencies]
 biome_css_parser = { path = "../biome_css_parser" }
 
+[package.metadata.cargo-udeps.ignore]
+normal = ["biome_css_parser"]
+
 [features]
 schema = ["schemars", "biome_rowan/serde"]
 

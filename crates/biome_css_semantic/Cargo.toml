@@ -21,6 +21,3 @@ biome_css_parser = { path = "../biome_css_parser" }
 
 [lints]
 workspace = true
-
-[package.metadata.cargo-udeps]
-ignore = ["biome_css_parser"]
