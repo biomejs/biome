@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<>
+  <div>test</div>
+	<>test</>
+	<>
+		<div>
+			asdjfl
+			test
+			foo
+		</div>
+	</>
+</>
+
+
+class Comp1 extends Component {
+	render() {
+		const varObjectTest = { testKey : (<div>test</div>) };
+		return varObjectTest.testKey;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Incorrect use of string literal detected.
+  
+    1 │ // should generate diagnostics
+    2 │ <>
+  > 3 │   <div>test</div>
+      │        ^^^^
+    4 │ 	<>test</>
+    5 │ 	<>
+  
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
+  
+
+```
+
+```
+invalid.jsx:4:4 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Incorrect use of string literal detected.
+  
+    2 │ <>
+    3 │   <div>test</div>
+  > 4 │ 	<>test</>
+      │ 	  ^^^^
+    5 │ 	<>
+    6 │ 		<div>
+  
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
+  
+
+```
+
+```
+invalid.jsx:6:8 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Incorrect use of string literal detected.
+  
+     4 │ 	<>test</>
+     5 │ 	<>
+   > 6 │ 		<div>
+       │ 		     
+   > 7 │ 			asdjfl
+   > 8 │ 			test
+   > 9 │ 			foo
+  > 10 │ 		</div>
+       │ 		
+    11 │ 	</>
+    12 │ </>
+  
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
+  
+
+```
+
+```
+invalid.jsx:17:43 lint/nursery/noJsxLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Incorrect use of string literal detected.
+  
+    15 │ class Comp1 extends Component {
+    16 │ 	render() {
+  > 17 │ 		const varObjectTest = { testKey : (<div>test</div>) };
+       │ 		                                        ^^^^
+    18 │ 		return varObjectTest.testKey;
+    19 │ 	}
+  
+  i String literals in JSX can make code harder to maintain and internationalize.
+  
+  i Consider avoiding hardcoded strings entirely.
+  
+
+```
