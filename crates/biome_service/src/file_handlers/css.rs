@@ -30,6 +30,7 @@ use biome_css_analyze::analyze;
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::CssParserOptions;
+use biome_css_semantic::semantic_model;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 use biome_diagnostics::Applicability;
 use biome_formatter::{
@@ -321,7 +322,7 @@ impl ExtensionHandler for CssFileHandler {
                 debug_formatter_ir: Some(debug_formatter_ir),
                 debug_type_info: None,
                 debug_registered_types: None,
-                debug_semantic_model: None,
+                debug_semantic_model: Some(debug_semantic_model),
             },
             analyzer: AnalyzerCapabilities {
                 lint: Some(lint),
@@ -421,6 +422,12 @@ fn debug_formatter_ir(
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
+}
+
+fn debug_semantic_model(_path: &BiomePath, parse: AnyParse) -> Result<String, WorkspaceError> {
+    let tree: CssRoot = parse.tree();
+    let model = semantic_model(&tree);
+    Ok(model.to_string())
 }
 
 #[tracing::instrument(level = "debug", skip(parse))]
