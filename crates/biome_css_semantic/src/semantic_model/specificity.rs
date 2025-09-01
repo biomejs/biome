@@ -3,15 +3,15 @@ use crate::semantic_model::model::Specificity;
 use biome_css_syntax::{
     AnyCssCompoundSelector, AnyCssPseudoClass, AnyCssRelativeSelector, AnyCssSelector,
     AnyCssSimpleSelector, AnyCssSubSelector, CssComplexSelector, CssCompoundSelector,
-    CssPseudoClassSelector,
+    CssDeclarationOrRuleBlock, CssPseudoClassSelector, CssQualifiedRule,
 };
 
-use biome_rowan::{AstNodeList, AstSeparatedList};
+use biome_rowan::{AstNodeList, AstSeparatedList, declare_node_union};
 
-const ID_SPECIFICITY: Specificity = Specificity(1, 0, 0);
-const CLASS_SPECIFICITY: Specificity = Specificity(0, 1, 0);
-const TYPE_SPECIFICITY: Specificity = Specificity(0, 0, 1);
-const ZERO_SPECIFICITY: Specificity = Specificity(0, 0, 0);
+pub(crate) const ID_SPECIFICITY: Specificity = Specificity(1, 0, 0);
+pub(crate) const CLASS_SPECIFICITY: Specificity = Specificity(0, 1, 0);
+pub(crate) const TYPE_SPECIFICITY: Specificity = Specificity(0, 0, 1);
+pub(crate) const ZERO_SPECIFICITY: Specificity = Specificity(0, 0, 0);
 
 fn evaluate_any_simple_selector(selector: &AnyCssSimpleSelector) -> Specificity {
     match selector {
@@ -108,7 +108,7 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
         }
         AnyCssPseudoClass::CssPseudoClassFunctionValueList(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassIdentifier(_) => CLASS_SPECIFICITY,
-        &AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(_) => CLASS_SPECIFICITY,
+        AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(_) => CLASS_SPECIFICITY,
     }
 }
 
@@ -132,8 +132,6 @@ fn evaluate_any_subselector(selector: &AnyCssSubSelector) -> Specificity {
 }
 
 pub fn evaluate_compound_selector(selector: &CssCompoundSelector) -> Specificity {
-    let nested_specificity = ZERO_SPECIFICITY; // TODO: Implement this
-
     let simple_specificity = selector
         .simple_selector()
         .map_or(ZERO_SPECIFICITY, |s| evaluate_any_simple_selector(&s));
@@ -144,7 +142,11 @@ pub fn evaluate_compound_selector(selector: &CssCompoundSelector) -> Specificity
         .reduce(|acc, e| acc + e)
         .unwrap_or(ZERO_SPECIFICITY);
 
-    nested_specificity + simple_specificity + subselector_specificity
+    simple_specificity + subselector_specificity
+}
+
+declare_node_union! {
+    pub AnyParentNode = CssDeclarationOrRuleBlock | CssQualifiedRule
 }
 
 fn evaluate_any_compound_selector(selector: &AnyCssCompoundSelector) -> Specificity {
@@ -161,7 +163,6 @@ pub fn evaluate_complex_selector(selector: &CssComplexSelector) -> Specificity {
     let right_specificity = selector
         .right()
         .map_or(ZERO_SPECIFICITY, |s| evaluate_any_selector(&s));
-
     left_specificity + right_specificity
 }
 
