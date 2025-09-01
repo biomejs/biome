@@ -353,5 +353,6 @@ pub mod use_valid_autocomplete;
 pub mod use_valid_for_direction;
 pub mod use_valid_lang;
 pub mod use_valid_typeof;
+pub mod use_vue_define_macros_order;
 pub mod use_while;
 pub mod use_yield;

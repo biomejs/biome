@@ -5068,6 +5068,13 @@
 						{ "$ref": "#/definitions/UseSortedClassesConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueDefineMacrosOrder": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseVueDefineMacrosOrderConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11622,6 +11629,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseVueDefineMacrosOrderOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseVueDefineMacrosOrderOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseWhileOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -14464,6 +14486,16 @@
 			]
 		},
 		"UseValidTypeofOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueDefineMacrosOrderConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueDefineMacrosOrderOptions" }
+			]
+		},
+		"UseVueDefineMacrosOrderOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

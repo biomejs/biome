@@ -1,0 +1,13 @@
+<script lang="ts" setup>
+defineEmits([])
+defineProps()
+defineModel()
+</script>
+
+<template><div /></template>
+
+<!-- @biome-test-case-separator !-->
+
+<script lang="ts" setup>
+import { ref } from 'vue';
+</script>
