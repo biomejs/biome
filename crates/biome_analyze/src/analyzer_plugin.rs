@@ -43,7 +43,7 @@ where
     /// Creates a syntax visitor from the plugin.
     ///
     /// # Safety
-    /// Do not forget to check the plugin is targeted for the language [`L`].
+    /// Do not forget to check the plugin is targeted for the language `L`.
     pub unsafe fn new_unchecked(plugin: Arc<Box<dyn AnalyzerPlugin>>) -> Self {
         let query = plugin.query().into_iter().map(L::Kind::from_raw).collect();
 
@@ -108,7 +108,7 @@ where
                     .unwrap_or_else(|| "anonymous".into());
 
                 SignalEntry {
-                    text_range: diagnostic.span.unwrap_or_default(),
+                    text_range: diagnostic.span().unwrap_or_default(),
                     signal: Box::new(DiagnosticSignal::new(move || diagnostic.clone())),
                     rule: SignalRuleKey::Plugin(name.into()),
                     category: RuleCategory::Lint,

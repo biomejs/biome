@@ -286,22 +286,21 @@ impl RangeSuppressions {
                     .iter_mut()
                     .rev()
                     .filter(|s| !s.is_ended)
-                    .find_map(|s| {
-                        let filters = s
-                            .filters_by_category
-                            .entry(suppression.category)
-                            .or_default();
-                        filters.contains(&filter).then_some(s)
+                    .find(|s| {
+                        s.filters_by_category
+                            .get(&suppression.category)
+                            .is_some_and(|filters| filters.contains(&filter))
                     }),
             };
 
             if let Some(existing_suppression) = range_suppression {
                 // Mark this as ended and expand it by the text range of this comment
-                existing_suppression.suppression_range.cover(text_range);
                 existing_suppression.is_ended = true;
+                existing_suppression.suppression_range =
+                    existing_suppression.suppression_range.cover(text_range);
             } else {
                 let message = markup! {
-                    "Found a "<Emphasis>"biome-range-end"</Emphasis>" suppression without a "<Emphasis>"biome-range-start"</Emphasis>" suppression. This is invalid"
+                    "Found a "<Emphasis>"biome-ignore-end"</Emphasis>" suppression without a "<Emphasis>"biome-ignore-start"</Emphasis>" suppression. This is invalid"
                 };
 
                 // This an error. We found a range end suppression without having a range start
