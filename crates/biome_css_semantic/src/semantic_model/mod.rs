@@ -379,8 +379,7 @@ mod specificity_tests {
 
         assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "div");
         assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "span");
-        // FIXME what's the correct specificity?
-        // assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "& > p");
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 2), "& > p");
     }
 
     #[test]

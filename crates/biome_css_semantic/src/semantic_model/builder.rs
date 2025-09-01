@@ -62,6 +62,8 @@ impl SemanticModelBuilder {
                     } else {
                         return Some(rule);
                     }
+                } else {
+                    return None;
                 }
             } else {
                 return None;
@@ -100,6 +102,8 @@ impl SemanticModelBuilder {
                             .and_then(|rule| rule.parent_id);
                         current_index += 1;
                     }
+                } else {
+                    return None;
                 }
             } else {
                 return None;
@@ -166,11 +170,23 @@ impl SemanticModelBuilder {
                     let parent_specificity = if node.has_nesting_selectors() {
                         let nesting_level = node.nesting_level();
                         self.get_parent_selector_at(nesting_level)
-                            .map(|rule| rule.specificity())
+                            .map(|rule| {
+                                rule.selectors()
+                                    .iter()
+                                    .map(|s| s.specificity())
+                                    .max()
+                                    .unwrap_or_default()
+                            })
                             .unwrap_or_default()
                     } else {
                         self.get_last_parent_selector_rule()
-                            .map(|rule| rule.specificity())
+                            .map(|rule| {
+                                rule.selectors()
+                                    .iter()
+                                    .map(|s| s.specificity())
+                                    .max()
+                                    .unwrap_or_default()
+                            })
                             .unwrap_or_default()
                     };
 
