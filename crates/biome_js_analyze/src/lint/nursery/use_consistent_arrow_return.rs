@@ -128,7 +128,6 @@ fn needs_parens_in_concise_body(expr: &AnyJsExpression) -> bool {
         expr,
         JsObjectExpression(_)
             | JsSequenceExpression(_)
-            | JsParenthesizedExpression(_)
             | TsAsExpression(_)
             | TsSatisfiesExpression(_)
             | TsTypeAssertionExpression(_)
