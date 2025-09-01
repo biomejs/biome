@@ -49,7 +49,7 @@ impl SemanticModelBuilder {
 
         loop {
             if let Some(parent_id) = &current_parent_id {
-                let rule = self.rules_by_id.get(&parent_id);
+                let rule = self.rules_by_id.get(parent_id);
                 if let Some(rule) = rule {
                     if matches!(
                         rule.node(),
@@ -59,7 +59,6 @@ impl SemanticModelBuilder {
                             .next()
                             .and_then(|rule_id| self.rules_by_id.get(rule_id))
                             .and_then(|rule| rule.parent_id);
-                        continue;
                     } else {
                         return Some(rule);
                     }
@@ -80,7 +79,7 @@ impl SemanticModelBuilder {
 
         loop {
             if let Some(parent_id) = &current_parent_id {
-                let rule = self.rules_by_id.get(&parent_id);
+                let rule = self.rules_by_id.get(parent_id);
                 if let Some(rule) = rule {
                     if matches!(
                         rule.node(),
@@ -90,19 +89,16 @@ impl SemanticModelBuilder {
                             .next()
                             .and_then(|rule_id| self.rules_by_id.get(rule_id))
                             .and_then(|rule| rule.parent_id);
-
-                        continue;
                     } else {
                         if current_index == index {
                             return Some(rule);
-                        } else {
-                            current_parent_id = iterator
-                                .next()
-                                .and_then(|rule_id| self.rules_by_id.get(rule_id))
-                                .and_then(|rule| rule.parent_id);
-                            current_index += 1;
-                            continue;
                         }
+
+                        current_parent_id = iterator
+                            .next()
+                            .and_then(|rule_id| self.rules_by_id.get(rule_id))
+                            .and_then(|rule| rule.parent_id);
+                        current_index += 1;
                     }
                 }
             } else {
@@ -180,19 +176,11 @@ impl SemanticModelBuilder {
 
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
 
-                    if node.has_nesting_selectors() {
-                        current_rule.selectors.push(Selector {
-                            node,
-                            specificity: parent_specificity + specificity,
-                        });
-                        current_rule.specificity += parent_specificity + specificity;
-                    } else {
-                        current_rule.selectors.push(Selector {
-                            node,
-                            specificity: parent_specificity + specificity,
-                        });
-                        current_rule.specificity += parent_specificity + specificity;
-                    }
+                    current_rule.selectors.push(Selector {
+                        node,
+                        specificity: parent_specificity + specificity,
+                    });
+                    current_rule.specificity += parent_specificity + specificity;
                 }
             }
             SemanticEvent::PropertyDeclaration {

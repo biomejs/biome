@@ -45,6 +45,6 @@ impl Iterator for CssComplexSelectorIterator {
         let current = self.next.take()?;
 
         self.next = current.left().ok()?.as_css_complex_selector().cloned();
-        Some(current.right().ok()?.as_css_compound_selector().cloned()?)
+        current.right().ok()?.as_css_compound_selector().cloned()
     }
 }
