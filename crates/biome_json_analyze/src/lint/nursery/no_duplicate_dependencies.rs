@@ -107,7 +107,7 @@ impl Rule for NoDuplicateDependencies {
                         return DUPLICATE_PROPERTY_KEYS.contains(&text.text());
                     }
                 }
-                return false;
+                false
             });
 
         // Loop through all the dependency groups to map all dependencies & check for duplicates within the same dependency group
@@ -219,7 +219,7 @@ impl Rule for NoDuplicateDependencies {
             }
         }
 
-        return None;
+        None
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
