@@ -22,7 +22,7 @@ declare_lint_rule! {
     /// - the single `return` has no argument (`return;`).
     ///
     /// The fix wraps expressions in parentheses when required for correctness (e.g. object literals and sequence expressions).
-
+    ///
     /// ## Examples
     ///
     /// ### Invalid
