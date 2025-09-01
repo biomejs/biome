@@ -270,7 +270,7 @@ impl RangeSuppressions {
             let range_suppression = match filter {
                 None => {
                     self.suppressions.pop();
-                    None
+                    return Ok(());
                 }
                 Some(PLUGIN_LINT_RULE_FILTER) => self
                     .suppressions
