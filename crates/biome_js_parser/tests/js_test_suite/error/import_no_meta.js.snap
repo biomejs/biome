@@ -83,7 +83,7 @@ JsModule {
 ```
 import_no_meta.js:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected `meta`, `source`, or `defer` following an import keyword, but found `foo`
+  × Expected `meta`, `source()`, or `defer()` following an import keyword, but found `foo`
   
   > 1 │ import.foo
       │        ^^^
@@ -92,7 +92,7 @@ import_no_meta.js:1:8 parse ━━━━━━━━━━━━━━━━━�
   
 import_no_meta.js:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected `meta`, `source`, or `defer` following an import keyword, but found `metaa`
+  × Expected `meta`, `source()`, or `defer()` following an import keyword, but found `metaa`
   
     1 │ import.foo
   > 2 │ import.metaa
