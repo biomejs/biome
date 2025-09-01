@@ -3642,14 +3642,22 @@ impl JsImportCallExpression {
     pub fn as_fields(&self) -> JsImportCallExpressionFields {
         JsImportCallExpressionFields {
             import_token: self.import_token(),
+            dot_token: self.dot_token(),
+            phase: self.phase(),
             arguments: self.arguments(),
         }
     }
     pub fn import_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
+    pub fn dot_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+    pub fn phase(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
     pub fn arguments(&self) -> SyntaxResult<JsCallArguments> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 3usize)
     }
 }
 impl Serialize for JsImportCallExpression {
@@ -3663,6 +3671,8 @@ impl Serialize for JsImportCallExpression {
 #[derive(Serialize)]
 pub struct JsImportCallExpressionFields {
     pub import_token: SyntaxResult<SyntaxToken>,
+    pub dot_token: Option<SyntaxToken>,
+    pub phase: Option<SyntaxToken>,
     pub arguments: SyntaxResult<JsCallArguments>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -20618,6 +20628,11 @@ impl std::fmt::Debug for JsImportCallExpression {
                     "import_token",
                     &support::DebugSyntaxResult(self.import_token()),
                 )
+                .field(
+                    "dot_token",
+                    &support::DebugOptionalElement(self.dot_token()),
+                )
+                .field("phase", &support::DebugOptionalElement(self.phase()))
                 .field("arguments", &support::DebugSyntaxResult(self.arguments()))
                 .finish()
         } else {

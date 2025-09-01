@@ -389,6 +389,8 @@ JsYieldArgument =
 
 JsImportCallExpression =
 	'import'
+	'.'?
+	phase: ('source' | 'defer')?
 	arguments: JsCallArguments
 
 // new target expression
