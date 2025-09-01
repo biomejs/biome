@@ -6,6 +6,70 @@ expression: result.diagnostics
     Diagnostic {
         category: Some(
             Category {
+                name: "plugin",
+                link: None,
+            },
+        ),
+        severity: Error,
+        description: "Prefer object spread instead of `Object.assign()`",
+        message: "Prefer object spread instead of `Object.assign()`",
+        advices: Advices {
+            advices: [],
+        },
+        verbose_advices: Advices {
+            advices: [],
+        },
+        location: Location {
+            path: Some(
+                File(
+                    "/project/a.ts",
+                ),
+            ),
+            span: None,
+            source_code: None,
+        },
+        tags: DiagnosticTags(
+            BitFlags<DiagnosticTag> {
+                bits: 0b0,
+            },
+        ),
+        source: None,
+    },
+    Diagnostic {
+        category: Some(
+            Category {
+                name: "plugin",
+                link: None,
+            },
+        ),
+        severity: Information,
+        description: "Plugin plugin reported one or more diagnostics, but it didn't specify a valid span. Diagnostics have been shown without context.",
+        message: "Plugin "<Emphasis>"plugin"</Emphasis>" reported one or more diagnostics, but it didn't specify a valid "<Emphasis>"span"</Emphasis>". Diagnostics have been shown without context.",
+        advices: Advices {
+            advices: [],
+        },
+        verbose_advices: Advices {
+            advices: [],
+        },
+        location: Location {
+            path: Some(
+                File(
+                    "/project/a.ts",
+                ),
+            ),
+            span: None,
+            source_code: None,
+        },
+        tags: DiagnosticTags(
+            BitFlags<DiagnosticTag> {
+                bits: 0b0,
+            },
+        ),
+        source: None,
+    },
+    Diagnostic {
+        category: Some(
+            Category {
                 name: "lint/correctness/noUnusedVariables",
                 link: Some(
                     "https://biomejs.dev/linter/rules/no-unused-variables",
@@ -77,70 +141,6 @@ expression: result.diagnostics
             BitFlags<DiagnosticTag> {
                 bits: 0b1,
                 flags: Fixable,
-            },
-        ),
-        source: None,
-    },
-    Diagnostic {
-        category: Some(
-            Category {
-                name: "plugin",
-                link: None,
-            },
-        ),
-        severity: Error,
-        description: "Prefer object spread instead of `Object.assign()`",
-        message: "Prefer object spread instead of `Object.assign()`",
-        advices: Advices {
-            advices: [],
-        },
-        verbose_advices: Advices {
-            advices: [],
-        },
-        location: Location {
-            path: Some(
-                File(
-                    "/project/a.ts",
-                ),
-            ),
-            span: None,
-            source_code: None,
-        },
-        tags: DiagnosticTags(
-            BitFlags<DiagnosticTag> {
-                bits: 0b0,
-            },
-        ),
-        source: None,
-    },
-    Diagnostic {
-        category: Some(
-            Category {
-                name: "plugin",
-                link: None,
-            },
-        ),
-        severity: Information,
-        description: "Plugin plugin reported one or more diagnostics, but it didn't specify a valid span. Diagnostics have been shown without context.",
-        message: "Plugin "<Emphasis>"plugin"</Emphasis>" reported one or more diagnostics, but it didn't specify a valid "<Emphasis>"span"</Emphasis>". Diagnostics have been shown without context.",
-        advices: Advices {
-            advices: [],
-        },
-        verbose_advices: Advices {
-            advices: [],
-        },
-        location: Location {
-            path: Some(
-                File(
-                    "/project/a.ts",
-                ),
-            ),
-            span: None,
-            source_code: None,
-        },
-        tags: DiagnosticTags(
-            BitFlags<DiagnosticTag> {
-                bits: 0b0,
             },
         ),
         source: None,

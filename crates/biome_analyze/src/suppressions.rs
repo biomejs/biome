@@ -94,10 +94,6 @@ impl TopLevelSuppression {
         }
     }
 
-    pub(crate) fn suppresses_category(&self, category: impl Into<RuleCategories>) -> bool {
-        self.suppressed_categories.contains(category.into())
-    }
-
     pub(crate) fn contains_rule_key(&self, rule_category: &RuleCategory, filter: &RuleKey) -> bool {
         self.filters_by_category
             .get(rule_category)
@@ -182,24 +178,22 @@ pub(crate) struct RangeSuppressions {
 pub(crate) struct RangeSuppression {
     /// Whether the current suppression should suppress all signals
     pub(crate) suppressed_categories: RuleCategories,
-
     /// The range of the `biome-ignore-start` suppressions
     pub(crate) start_comment_range: TextRange,
-
     /// A range that indicates how long this suppression has effect
     pub(crate) suppression_range: TextRange,
-
     /// Set to `true` when this line suppresses a signal that was already suppressed by another entity e.g. top-level suppression
     pub(crate) already_suppressed: Option<TextRange>,
-
     /// Whether this suppression has suppressed a signal
     pub(crate) did_suppress_signal: bool,
-
     /// Indicates if this suppression has found its end comment - if false, the suppression_range is not yet complete
     pub(crate) is_ended: bool,
-
-    /// The rules to suppress, grouped by [RuleCategory]
+    /// The rules to suppress, grouped by [`RuleCategory`]
     pub(crate) filters_by_category: FxHashMap<RuleCategory, FxHashSet<RuleFilter<'static>>>,
+    /// List of plugins this comment has started suppressing
+    pub(crate) suppressed_plugins: FxHashSet<String>,
+    /// Set to true if this comment suppress all plugins
+    pub(crate) suppress_all_plugins: bool,
 }
 
 impl Default for RangeSuppression {
@@ -210,8 +204,10 @@ impl Default for RangeSuppression {
             suppression_range: Default::default(),
             already_suppressed: None,
             did_suppress_signal: false,
-            filters_by_category: Default::default(),
             is_ended: false,
+            filters_by_category: Default::default(),
+            suppressed_plugins: Default::default(),
+            suppress_all_plugins: Default::default(),
         }
     }
 }
@@ -230,24 +226,23 @@ impl RangeSuppressions {
         &mut self,
         suppression: &AnalyzerSuppression,
         filter: Option<RuleFilter<'static>>,
+        plugin_name: Option<String>,
         text_range: TextRange,
         already_suppressed: Option<TextRange>,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        if let Some(PLUGIN_LINT_RULE_FILTER) = filter {
-            return Err(AnalyzerSuppressionDiagnostic::new(
-                category!("suppressions/incorrect"),
-                text_range,
-                markup!{"Found a "<Emphasis>"biome-ignore-<range>"</Emphasis>" suppression on plugin. This is not supported. See https://github.com/biomejs/biome/issues/5175"}
-            ).hint(markup!{
-                "Remove this suppression."
-            }.to_owned()));
-        }
         if suppression.is_range_start() {
             let mut range_suppression = RangeSuppression::default();
             match filter {
                 None => range_suppression
                     .suppressed_categories
                     .insert(suppression.category),
+                Some(PLUGIN_LINT_RULE_FILTER) => {
+                    if let Some(plugin_name) = plugin_name {
+                        range_suppression.suppressed_plugins.insert(plugin_name);
+                    } else {
+                        range_suppression.suppress_all_plugins = true;
+                    }
+                }
                 Some(filter) => {
                     let filters = range_suppression
                         .filters_by_category
@@ -272,39 +267,50 @@ impl RangeSuppressions {
                 }.to_owned()));
             }
 
-            match filter {
+            let range_suppression = match filter {
                 None => {
                     self.suppressions.pop();
+                    None
                 }
-                Some(filter) => {
-                    let mut range_suppression: Option<&mut RangeSuppression> = None;
-                    for existing_suppression in self.suppressions.iter_mut().rev() {
-                        if !existing_suppression.is_ended {
-                            let filters = existing_suppression
-                                .filters_by_category
-                                .entry(suppression.category)
-                                .or_default();
-                            if filters.contains(&filter) {
-                                range_suppression = Some(existing_suppression);
-                                break;
-                            }
-                        }
-                    }
-                    if let Some(existing_suppression) = range_suppression {
-                        // Mark this as ended and expand it by the text range of this comment
-                        existing_suppression.suppression_range.cover(text_range);
-                        existing_suppression.is_ended = true;
-                    } else {
-                        // This an error. We found a range end suppression without having a range start
-                        return Err(AnalyzerSuppressionDiagnostic::new(
-                            category!("suppressions/incorrect"),
-                            text_range,
-                            markup!{"Found a "<Emphasis>"biome-range-end"</Emphasis>" suppression without a "<Emphasis>"biome-range-start"</Emphasis>" suppression. This is invalid"}
-                        ).hint(markup!{
-                            "Remove this suppression."
-                        }.to_owned()));
-                    }
-                }
+                Some(PLUGIN_LINT_RULE_FILTER) => self
+                    .suppressions
+                    .iter_mut()
+                    .rev()
+                    .filter(|s| !s.is_ended)
+                    .find(|s| match &plugin_name {
+                        Some(plugin_name) => s.suppressed_plugins.contains(plugin_name),
+                        None => s.suppress_all_plugins,
+                    }),
+                Some(filter) => self
+                    .suppressions
+                    .iter_mut()
+                    .rev()
+                    .filter(|s| !s.is_ended)
+                    .find_map(|s| {
+                        let filters = s
+                            .filters_by_category
+                            .entry(suppression.category)
+                            .or_default();
+                        filters.contains(&filter).then_some(s)
+                    }),
+            };
+
+            if let Some(existing_suppression) = range_suppression {
+                // Mark this as ended and expand it by the text range of this comment
+                existing_suppression.suppression_range.cover(text_range);
+                existing_suppression.is_ended = true;
+            } else {
+                let message = markup! {
+                    "Found a "<Emphasis>"biome-range-end"</Emphasis>" suppression without a "<Emphasis>"biome-range-start"</Emphasis>" suppression. This is invalid"
+                };
+
+                // This an error. We found a range end suppression without having a range start
+                return Err(AnalyzerSuppressionDiagnostic::new(
+                    category!("suppressions/incorrect"),
+                    text_range,
+                    message,
+                )
+                .hint(markup! {"Remove this suppression."}.to_owned()));
             }
         }
         Ok(())
@@ -325,6 +331,22 @@ impl RangeSuppressions {
                     .filters_by_category
                     .get(rule_category)
                     .is_some_and(|filters| filters.iter().any(|f| f == filter))
+            {
+                range_suppression.did_suppress_signal = true;
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Checks if there's suppression that suppresses the current plugin in the range provided
+    pub(crate) fn suppress_plugin(&mut self, plugin_name: &str, position: &TextRange) -> bool {
+        for range_suppression in self.suppressions.iter_mut().rev() {
+            if range_suppression
+                .suppression_range
+                .contains_range(*position)
+                && (range_suppression.suppress_all_plugins
+                    || range_suppression.suppressed_plugins.contains(plugin_name))
             {
                 range_suppression.did_suppress_signal = true;
                 return true;
@@ -423,9 +445,6 @@ impl<'analyzer> Suppressions<'analyzer> {
                 suppression.suppressed_categories.insert(rule_category);
             }
             Some(PLUGIN_LINT_RULE_FILTER) => {
-                // As for now, plugins are part of the "linter" and they always suppress
-                // `RuleCategory::Lint` rules
-                suppression.suppressed_categories.insert(rule_category);
                 if let Some(plugin_name) = plugin_name {
                     suppression.suppressed_plugins.insert(plugin_name);
                 } else {
@@ -530,9 +549,15 @@ impl<'analyzer> Suppressions<'analyzer> {
                 comment_range,
                 is_leading_in_file,
             ),
-            AnalyzerSuppressionVariant::RangeStart | AnalyzerSuppressionVariant::RangeEnd => self
-                .range_suppressions
-                .push_suppression(suppression, filter, comment_range, already_suppressed),
+            AnalyzerSuppressionVariant::RangeStart | AnalyzerSuppressionVariant::RangeEnd => {
+                self.range_suppressions.push_suppression(
+                    suppression,
+                    filter,
+                    plugin_name,
+                    comment_range,
+                    already_suppressed,
+                )
+            }
         }
     }
 

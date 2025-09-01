@@ -2,7 +2,7 @@ use crate::{
     AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleGroup, RuleKey,
     RuleMetadata, ServiceBag, SignalEntry, Visitor,
     context::RuleContext,
-    matcher::{GroupKey, MatchQueryParams},
+    matcher::{GroupKey, MatchQueryParams, SignalRuleKey},
     query::{QueryKey, Queryable},
     signals::RuleSignal,
 };
@@ -438,7 +438,7 @@ impl<L: Language + Default> RegistryRule<L> {
 
                 params.signal_queue.push(SignalEntry {
                     signal,
-                    rule: RuleKey::rule::<R>(),
+                    rule: SignalRuleKey::Rule(RuleKey::rule::<R>()),
                     instances,
                     text_range,
                     category: <R::Group as RuleGroup>::Category::CATEGORY,
