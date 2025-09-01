@@ -388,6 +388,7 @@ dependencies = [
 name = "biome_css_syntax"
 version = "0.5.7"
 dependencies = [
+ "biome_css_factory",
  "biome_css_parser",
  "biome_rowan",
  "biome_string_case",

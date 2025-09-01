@@ -3,23 +3,6 @@ use crate::{CssComplexSelector, CssCompoundSelector};
 impl CssComplexSelector {
     ///
     /// Computes the nesting level
-    ///
-    /// ## Example
-    /// ```
-    /// use biome_css_parser::CssParserOptions;
-    /// use biome_css_syntax::CssComplexSelector;
-    /// use biome_rowan::AstNode;
-    /// use biome_rowan::SyntaxResult;
-    ///
-    /// # fn example() -> Option<()> {
-    /// let source = ".a { .b { & & > p } }";
-    /// let parsed = biome_css_parser::parse_css(source, CssParserOptions::default());
-    /// let complex_selector = parsed.syntax().descendants().find_map(CssComplexSelector::cast)?;
-    /// let nesting_level = complex_selector.nesting_level();
-    /// assert_eq!(nesting_level, 2);
-    /// # Some(())
-    /// # }
-    /// ```
     pub fn nesting_level(&self) -> usize {
         let iterator = CssComplexSelectorIterator::new(self.clone());
         iterator.count()
@@ -52,5 +35,25 @@ impl Iterator for CssComplexSelectorIterator {
             .right()
             .ok()
             .and_then(|r| r.as_css_compound_selector().cloned())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use biome_css_factory::syntax::CssComplexSelector;
+    use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_rowan::AstNode;
+
+    #[test]
+    fn test_nesting_level() {
+        let source = "a { b { & & > p {} } }";
+        let parsed = parse_css(source, CssParserOptions::default());
+        let complex_selector = parsed
+            .syntax()
+            .descendants()
+            .find_map(CssComplexSelector::cast)
+            .unwrap();
+        let nesting_level = complex_selector.nesting_level();
+        assert_eq!(nesting_level, 2);
     }
 }
