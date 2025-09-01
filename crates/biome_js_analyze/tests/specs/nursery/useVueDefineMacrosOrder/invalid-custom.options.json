@@ -1,0 +1,20 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useVueDefineMacrosOrder": {
+					"level": "error",
+					"options": {
+						"order": [
+							"definePage",
+							"defineModel",
+							"defineProps",
+							"defineEmits"
+						]
+					}
+				}
+			}
+		}
+	}
+}

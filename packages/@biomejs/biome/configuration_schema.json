@@ -5259,6 +5259,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueDefineMacrosOrder": {
+					"description": "Enforce specific order of Vue compiler macros.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseVueDefineMacrosOrderConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueMultiWordComponentNames": {
 					"description": "Enforce multi-word component names in Vue components.",
 					"anyOf": [
@@ -12013,6 +12020,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseVueDefineMacrosOrderOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseVueDefineMacrosOrderOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseVueMultiWordComponentNamesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -14948,6 +14974,24 @@
 		},
 		"UseValidTypeofOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueDefineMacrosOrderConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueDefineMacrosOrderOptions" }
+			]
+		},
+		"UseVueDefineMacrosOrderOptions": {
+			"type": "object",
+			"properties": {
+				"order": {
+					"description": "The order of the Vue define macros.",
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseVueMultiWordComponentNamesConfiguration": {
