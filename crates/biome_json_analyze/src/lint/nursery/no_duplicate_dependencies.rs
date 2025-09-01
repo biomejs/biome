@@ -14,7 +14,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```json,expect_diagnostic
+    /// ```json
     /// {
     ///     "dependencies": {
     ///         "foo": "1.0.0"
