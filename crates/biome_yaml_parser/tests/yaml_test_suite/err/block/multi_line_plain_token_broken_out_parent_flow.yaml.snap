@@ -65,12 +65,12 @@ YamlRoot {
                                     },
                                 },
                             ],
-                            mapping_end_token: MAPPING_END@18..20 "" [Newline("\n ")] [],
+                            mapping_end_token: MAPPING_END@18..18 "" [] [],
                         },
                     },
                     YamlBogusBlockMapEntry {
                         items: [
-                            FLOW_START@20..20 "" [] [],
+                            FLOW_START@18..20 "" [Newline("\n"), Whitespace(" ")] [],
                             PLAIN_LITERAL@20..23 "bc]" [] [],
                             FLOW_END@23..23 "" [] [],
                         ],
@@ -98,13 +98,13 @@ YamlRoot {
         0: MAPPING_START@0..0 "" [] []
         1: (empty)
         2: YAML_BLOCK_MAP_ENTRY_LIST@0..23
-          0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..20
+          0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..18
             0: YAML_FLOW_YAML_NODE@0..3
               0: (empty)
               1: YAML_PLAIN_SCALAR@0..3
                 0: PLAIN_LITERAL@0..3 "abc" [] []
             1: COLON@3..4 ":" [] []
-            2: YAML_BLOCK_MAPPING@4..20
+            2: YAML_BLOCK_MAPPING@4..18
               0: MAPPING_START@4..7 "" [Newline("\n"), Whitespace("  ")] []
               1: (empty)
               2: YAML_BLOCK_MAP_ENTRY_LIST@7..18
@@ -127,9 +127,9 @@ YamlRoot {
                               0: PLAIN_LITERAL@17..18 "a" [] []
                         2: (empty)
                     2: FLOW_END@18..18 "" [] []
-              3: MAPPING_END@18..20 "" [Newline("\n ")] []
-          1: YAML_BOGUS_BLOCK_MAP_ENTRY@20..23
-            0: FLOW_START@20..20 "" [] []
+              3: MAPPING_END@18..18 "" [] []
+          1: YAML_BOGUS_BLOCK_MAP_ENTRY@18..23
+            0: FLOW_START@18..20 "" [Newline("\n"), Whitespace(" ")] []
             1: PLAIN_LITERAL@20..23 "bc]" [] []
             2: FLOW_END@23..23 "" [] []
         3: MAPPING_END@23..24 "" [Newline("\n")] []

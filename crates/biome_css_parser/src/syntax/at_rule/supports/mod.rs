@@ -213,10 +213,10 @@ fn parse_any_supports_condition_in_parens(
         // which means that the parser is at unknown syntax.
 
         // If we're inside a chain, we can try to recover over a chain token.
-        if let Some(chain_token) = chain_token {
-            if p.at(chain_token) {
-                return Absent;
-            }
+        if let Some(chain_token) = chain_token
+            && p.at(chain_token)
+        {
+            return Absent;
         }
         parse_any_value(p)
     }

@@ -418,22 +418,22 @@ where
                     message: action.message,
                 });
             };
-            if let Some(text_range) = R::text_range(&ctx, &self.state) {
-                if let Some(suppression_action) = R::inline_suppression(
+            if let Some(text_range) = R::text_range(&ctx, &self.state)
+                && let Some(suppression_action) = R::inline_suppression(
                     &ctx,
                     &text_range,
                     self.suppression_action,
                     self.options.suppression_reason.as_deref(),
-                ) {
-                    let action = AnalyzerAction {
-                        rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
-                        category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
-                        applicability: Applicability::Always,
-                        mutation: suppression_action.mutation,
-                        message: suppression_action.message,
-                    };
-                    actions.push(action);
-                }
+                )
+            {
+                let action = AnalyzerAction {
+                    rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
+                    category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
+                    applicability: Applicability::Always,
+                    mutation: suppression_action.mutation,
+                    message: suppression_action.message,
+                };
+                actions.push(action);
             }
 
             if let Some(suppression_action) =

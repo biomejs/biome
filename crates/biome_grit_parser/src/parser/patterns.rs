@@ -42,10 +42,10 @@ fn parse_pattern_with_precedence(p: &mut GritParser, min_precedence: isize) -> P
             parse_and_continue!(parse_pattern_as(p, left));
         }
 
-        if let Some(math_operator) = MathOperator::from_token(p.cur()) {
-            if math_operator.precedence() > min_precedence {
-                parse_and_continue!(parse_math_pattern(p, left, math_operator));
-            }
+        if let Some(math_operator) = MathOperator::from_token(p.cur())
+            && math_operator.precedence() > min_precedence
+        {
+            parse_and_continue!(parse_math_pattern(p, left, math_operator));
         }
 
         if PRECEDENCE_REWRITE > min_precedence && p.cur() == T![=>] {

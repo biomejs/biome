@@ -20,7 +20,7 @@ invalid.js:1:1 lint/complexity/noUselessStringRaw ━━━━━━━━━━
     2 │ String.raw`abc`;
     3 │ String.raw`a ${x}`;
   
-  i Remove the String.raw call beacause it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
   
 
 ```
@@ -35,7 +35,7 @@ invalid.js:2:1 lint/complexity/noUselessStringRaw ━━━━━━━━━━
       │ ^^^^^^^^^^^^^^^
     3 │ String.raw`a ${x}`;
   
-  i Remove the String.raw call beacause it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
   
 
 ```
@@ -50,7 +50,7 @@ invalid.js:3:1 lint/complexity/noUselessStringRaw ━━━━━━━━━━
   > 3 │ String.raw`a ${x}`;
       │ ^^^^^^^^^^^^^^^^^^
   
-  i Remove the String.raw call beacause it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
+  i Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \n, \t, \r, \\, \", \'.
   
 
 ```

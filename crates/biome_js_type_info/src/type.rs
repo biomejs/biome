@@ -86,18 +86,30 @@ impl Type {
             })
     }
 
+    /// Returns an iterator over the variants of this type, while deduplicating
+    /// variants and flattening nested unions in the process.
+    ///
+    /// Returns an iterator that yields no elements if the type is not a union.
+    pub fn flattened_union_variants(&self) -> impl Iterator<Item = Self> {
+        self.resolved_data()
+            .unwrap_or_else(|| ResolvedTypeData::from((GLOBAL_UNKNOWN_ID, &UNKNOWN_DATA)))
+            .flattened_union_variants(self.resolver.as_ref())
+            .filter_map(|ty| {
+                self.resolver
+                    .resolve_reference(&ty)
+                    .map(|resolved_id| self.with_resolved_id(resolved_id))
+            })
+    }
+
     /// Returns `true` if this type represents a **union type** that has a
     /// variant for which the given `predicate` returns `true`.
     ///
     /// Returns `false` otherwise.
     pub fn has_variant(&self, predicate: impl Fn(Self) -> bool) -> bool {
-        match self.as_raw_data() {
-            Some(TypeData::Union(union)) => union
-                .types()
-                .iter()
-                .filter_map(|ty| self.resolve(ty))
-                .any(predicate),
-            _ => false,
+        if self.is_union() {
+            self.flattened_union_variants().any(predicate)
+        } else {
+            false
         }
     }
 
@@ -208,7 +220,7 @@ impl Type {
     }
 
     #[inline]
-    pub fn resolved_data(&self) -> Option<ResolvedTypeData> {
+    pub fn resolved_data(&self) -> Option<ResolvedTypeData<'_>> {
         self.resolver.get_by_resolved_id(self.id)
     }
 

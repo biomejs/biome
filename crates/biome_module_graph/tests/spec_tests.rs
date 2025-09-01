@@ -13,9 +13,9 @@ use biome_js_type_info::{ScopeId, TypeData, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_value::{JsonObject, JsonString};
-use biome_module_graph::JsExport;
 use biome_module_graph::{
-    ImportSymbol, JsImport, JsReexport, ModuleGraph, ModuleResolver, ResolvedPath,
+    ImportSymbol, JsExport, JsImport, JsImportPath, JsImportPhase, JsReexport, ModuleGraph,
+    ModuleResolver, ResolvedPath,
 };
 use biome_package::{Dependencies, PackageJson};
 use biome_project_layout::ProjectLayout;
@@ -92,7 +92,8 @@ fn create_test_project_layout() -> (MemoryFileSystem, ProjectLayout) {
     }"#,
         JsonParserOptions::default(),
     );
-    project_layout.insert_serialized_tsconfig("/".into(), tsconfig_json.into());
+    project_layout
+        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
 
     project_layout.insert_node_manifest(
         "/node_modules/shared".into(),
@@ -479,7 +480,7 @@ fn test_resolve_exports() {
     );
 
     assert_eq!(
-        data.blanket_reexports.as_ref(),
+        data.blanket_reexports,
         &[JsReexport {
             import: JsImport {
                 specifier: "./reexports".into(),
@@ -1498,7 +1499,8 @@ fn test_resolve_react_types() {
     );
 
     let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
-    project_layout.insert_serialized_tsconfig("/".into(), tsconfig_json.into());
+    project_layout
+        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
 
     let module_graph = Arc::new(ModuleGraph::default());
     module_graph.update_graph_for_js_paths(&fs, &project_layout, &added_paths, &[]);
@@ -1522,6 +1524,51 @@ fn test_resolve_react_types() {
         .expect("promise variable not found");
     let promise_ty = resolver.resolved_type_for_id(promise_id);
     assert!(promise_ty.is_promise_instance());
+}
+
+#[test]
+fn test_resolve_redis_commander_types() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/RedisCommander.d.ts".into(),
+        include_bytes!("../benches/RedisCommander.d.ts"),
+    );
+    fs.insert(
+        "/index.ts".into(),
+        r#"import RedisCommander from "./RedisCommander.d.ts";
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/RedisCommander.d.ts"),
+        BiomePath::new("/index.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    // We previously had an issue with `RedisCommander.d.ts` that caused types
+    // to be duplicated. We should look out in this snapshot that method
+    // signatures are registered only once per signature.
+    let redis_commander_module = module_graph
+        .module_info_for_path(Utf8Path::new("/RedisCommander.d.ts"))
+        .expect("module must exist");
+    let num_registered_signatures = redis_commander_module
+        .types()
+        .iter()
+        .filter(|ty| {
+            matches!(
+                ty,
+                TypeData::Function(function)
+                    if function
+                        .name
+                        .as_ref()
+                        .is_some_and(|name| *name == "zunionstore")
+            )
+        })
+        .count();
+    assert_eq!(num_registered_signatures, 24);
 }
 
 #[test]
@@ -1974,9 +2021,10 @@ fn test_resolve_swr_types() {
         .expect("module must exist");
     assert_eq!(
         index_module.static_import_paths.get("swr"),
-        Some(&ResolvedPath::from_path(format!(
-            "{swr_path}/dist/index/index.d.mts"
-        )))
+        Some(&JsImportPath {
+            resolved_path: ResolvedPath::from_path(format!("{swr_path}/dist/index/index.d.mts")),
+            phase: JsImportPhase::Default,
+        })
     );
 
     let swr_index_module = module_graph
@@ -1986,9 +2034,12 @@ fn test_resolve_swr_types() {
         swr_index_module
             .static_import_paths
             .get("../_internal/index.mjs"),
-        Some(&ResolvedPath::from_path(format!(
-            "{swr_path}/dist/_internal/index.d.mts"
-        )))
+        Some(&JsImportPath {
+            resolved_path: ResolvedPath::from_path(format!(
+                "{swr_path}/dist/_internal/index.d.mts"
+            )),
+            phase: JsImportPhase::Default,
+        })
     );
 
     let resolver = Arc::new(ModuleResolver::for_module(

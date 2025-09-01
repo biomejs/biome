@@ -1,16 +1,17 @@
 use super::{
-    ChangeFileParams, CloseFileParams, FileExitsParams, FixFileParams, FixFileResult,
-    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
-    GetFormatterIRParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
-    OpenFileParams, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
-    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectFolderParams,
-    ScanProjectFolderResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
+    ChangeFileParams, ChangeFileResult, CloseFileParams, FileExitsParams, FixFileParams,
+    FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
+    GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
+    OpenFileResult, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams, ScanProjectResult,
+    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateModuleGraphParams,
     UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
-    GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams, IsPathIgnoredParams,
-    OpenProjectParams, OpenProjectResult, RageParams, RageResult, ServerInfo,
+    GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams, OpenProjectParams,
+    OpenProjectResult, PathIsIgnoredParams, RageParams, RageResult, ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -110,11 +111,8 @@ where
         self.request("biome/open_project", params)
     }
 
-    fn scan_project_folder(
-        &self,
-        params: ScanProjectFolderParams,
-    ) -> Result<ScanProjectFolderResult, WorkspaceError> {
-        self.request("biome/scan_project_folder", params)
+    fn scan_project(&self, params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError> {
+        self.request("biome/scan_project", params)
     }
 
     #[instrument(level = "info", skip_all)]
@@ -129,7 +127,7 @@ where
         self.request("biome/close_project", params)
     }
 
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
+    fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError> {
         self.request("biome/open_file", params)
     }
 
@@ -144,7 +142,7 @@ where
         self.request("biome/file_features", params)
     }
 
-    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
+    fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError> {
         self.request("biome/is_path_ignored", params)
     }
 
@@ -192,7 +190,7 @@ where
         self.request("biome/check_file_size", params)
     }
 
-    fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError> {
+    fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError> {
         self.request("biome/change_file", params)
     }
 
@@ -231,6 +229,10 @@ where
         self.request("biome/close_file", params)
     }
 
+    fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
+        self.request("biome/update_module_graph", params)
+    }
+
     fn fs(&self) -> &dyn FsWithResolverProxy {
         self.fs.as_ref()
     }
@@ -256,5 +258,12 @@ where
 
     fn server_info(&self) -> Option<&ServerInfo> {
         self.server_info.as_ref()
+    }
+
+    fn get_module_graph(
+        &self,
+        params: GetModuleGraphParams,
+    ) -> Result<GetModuleGraphResult, WorkspaceError> {
+        self.request("biome/get_module_graph", params)
     }
 }

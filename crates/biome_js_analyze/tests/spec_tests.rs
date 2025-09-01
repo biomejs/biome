@@ -169,13 +169,12 @@ pub(crate) fn analyze_and_snap(
     let mut code_fixes = Vec::new();
     let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
 
-    if let Some((_, manifest)) = project_layout.find_node_manifest_for_path(input_file) {
-        if manifest.r#type == Some(PackageType::CommonJs) &&
+    if let Some((_, manifest)) = project_layout.find_node_manifest_for_path(input_file)
+        && manifest.r#type == Some(PackageType::CommonJs) &&
             // At the moment we treat JS and JSX at the same way
             (source_type.file_extension() == "js" || source_type.file_extension() == "jsx" )
-        {
-            source_type.set_module_kind(ModuleKind::Script)
-        }
+    {
+        source_type.set_module_kind(ModuleKind::Script)
     }
 
     let parsed = parse(input_code, source_type, parser_options.clone());
@@ -463,7 +462,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     };
 
     // Enable at least 1 rule so that PhaseRunner will be called
-    // which is necessary to parse and store supression comments
+    // which is necessary to parse and store suppression comments
     let rule_filter = RuleFilter::Rule("nursery", "noCommonJs");
     let filter = AnalysisFilter {
         enabled_rules: Some(slice::from_ref(&rule_filter)),

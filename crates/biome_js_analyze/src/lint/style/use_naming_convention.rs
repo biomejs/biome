@@ -755,14 +755,13 @@ impl Rule for UseNamingConvention {
                 return None;
             }
         }
-        if name.starts_with('_') {
-            if let Ok(binding) = &node.try_into() {
-                if is_unused(ctx.model(), binding) {
-                    // Always ignore unused variables prefixed with `_`.
-                    // This notably avoids a conflict with the `noUnusedVariables` lint rule.
-                    return None;
-                }
-            }
+        if name.starts_with('_')
+            && let Ok(binding) = &node.try_into()
+            && is_unused(ctx.model(), binding)
+        {
+            // Always ignore unused variables prefixed with `_`.
+            // This notably avoids a conflict with the `noUnusedVariables` lint rule.
+            return None;
         }
         if options.require_ascii && !name.is_ascii() {
             return Some(State {
@@ -931,20 +930,19 @@ impl Rule for UseNamingConvention {
             .source_type::<JsFileSource>()
             .language()
             .is_definition_file();
-        if is_declaration_file {
-            if let Some(items) = node
+        if is_declaration_file
+            && let Some(items) = node
                 .syntax()
                 .ancestors()
                 .skip(1)
                 .find_map(JsModuleItemList::cast)
-            {
-                // A declaration file without exports and imports is a global declaration file.
-                // All types are available in every files of the project.
-                // Thus, it is ok if types are not used locally.
-                let is_top_level = items.parent::<TsDeclarationModule>().is_some();
-                if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
-                    return None;
-                }
+        {
+            // A declaration file without exports and imports is a global declaration file.
+            // All types are available in every files of the project.
+            // Thus, it is ok if types are not used locally.
+            let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+            if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                return None;
             }
         }
         let model = ctx.model();
@@ -1208,7 +1206,18 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             | AnyJsBindingDeclaration::JsFormalParameter(_)
             | AnyJsBindingDeclaration::JsRestParameter(_) => Some(Kind::FunctionParameter.into()),
             AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(Kind::CatchParameter.into()),
-            AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Kind::ClassProperty.into()),
+            AnyJsBindingDeclaration::TsPropertyParameter(param) => {
+                let modifiers: BitFlags<Modifier> = (&param.modifiers()).into();
+                if modifiers.contains(Modifier::Override) {
+                    // Ignore explicitly overridden members
+                    None
+                } else {
+                    Some(Selector::with_modifiers(
+                        Kind::ClassProperty,
+                        to_restricted_modifiers(modifiers),
+                    ))
+                }
+            },
             AnyJsBindingDeclaration::TsIndexSignatureParameter(member_name) => {
                 if let Some(member) = member_name.parent::<>() {
                     selector_from_class_member(&member)

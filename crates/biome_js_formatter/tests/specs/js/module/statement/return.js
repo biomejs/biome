@@ -7,7 +7,7 @@ function f2() {
 }
 
 function f3() {
-    return /* commment */'1'
+    return /* comment */'1'
 }
 
 function f4() {

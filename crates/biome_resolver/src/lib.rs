@@ -206,21 +206,20 @@ fn resolve_module_with_package_json(
         return resolve_import_alias(specifier, package_path, package_json, fs, options);
     }
 
-    if let Some(package_name) = &package_json.name {
-        if specifier.starts_with(package_name.as_ref())
-            && specifier
-                .as_bytes()
-                .get(package_name.len())
-                .is_some_and(|c| *c == b'/')
-        {
-            return resolve_export(
-                &specifier[package_name.len() + 1..],
-                package_path,
-                package_json,
-                fs,
-                options,
-            );
-        }
+    if let Some(package_name) = &package_json.name
+        && specifier.starts_with(package_name.as_ref())
+        && specifier
+            .as_bytes()
+            .get(package_name.len())
+            .is_some_and(|c| *c == b'/')
+    {
+        return resolve_export(
+            &specifier[package_name.len() + 1..],
+            package_path,
+            package_json,
+            fs,
+            options,
+        );
     }
 
     resolve_dependency(specifier, package_path, fs, options)
@@ -573,17 +572,16 @@ fn resolve_path_info(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<(ResolvedPathInfo, Utf8PathBuf), ResolveError> {
-    if options.resolve_types {
-        if let Some(definition_ext) = path
+    if options.resolve_types
+        && let Some(definition_ext) = path
             .extension()
             .and_then(definition_extension_for_js_extension)
-        {
-            // Try the type definition path first:
-            let definition_result =
-                resolve_path_info(Cow::Owned(path.with_extension(definition_ext)), fs, options);
-            if definition_result.is_ok() {
-                return definition_result;
-            }
+    {
+        // Try the type definition path first:
+        let definition_result =
+            resolve_path_info(Cow::Owned(path.with_extension(definition_ext)), fs, options);
+        if definition_result.is_ok() {
+            return definition_result;
         }
     }
 
@@ -651,13 +649,13 @@ fn normalize_subpath(subpath: &str) -> &str {
 fn parse_package_specifier(specifier: &str) -> Result<(&str, &str), ResolveError> {
     let bytes = specifier.as_bytes();
     let mut separator_index = bytes.iter().position(|b| *b == b'/');
-    if let Some(index) = &separator_index {
-        if bytes[0] == b'@' {
-            separator_index = bytes[*index + 1..]
-                .iter()
-                .position(|b| *b == b'/')
-                .map(|i| i + *index + 1);
-        }
+    if let Some(index) = &separator_index
+        && bytes[0] == b'@'
+    {
+        separator_index = bytes[*index + 1..]
+            .iter()
+            .position(|b| *b == b'/')
+            .map(|i| i + *index + 1);
     }
 
     let package_name =
@@ -762,7 +760,7 @@ pub struct ResolveOptions<'a> {
     ///   extensions for definition files yourself. These extensions will be
     ///   tried automatically with a priority that is higher than the
     ///   corresponding JavaScript extension, but lower than the extension that
-    ///   preceeds it.
+    ///   precedes it.
     pub resolve_types: bool,
 
     /// Defines which `tsconfig.json` file should be used.

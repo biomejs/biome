@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// <a href="https://example.com" target="_blank">External</a>
     /// ```
     pub UseAnchorHref {
-        version: "next",
+        version: "2.1.4",
         name: "useAnchorHref",
         language: "jsx",
         sources: &[RuleSource::EslintQwik("jsx-a").same()],

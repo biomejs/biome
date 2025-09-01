@@ -1,10 +1,31 @@
 use crate::parser::HtmlParser;
+use biome_console::markup;
 use biome_html_syntax::TextRange;
+use biome_parser::Parser;
 use biome_parser::diagnostic::{ParseDiagnostic, expect_one_of, expected_node};
 use biome_parser::prelude::ToDiagnostic;
 
 pub(crate) fn expected_attribute(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("attribute", range, p).into_diagnostic(p)
+}
+
+pub(crate) fn disabled_interpolation(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Text expressions aren't supported.", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.textExpression"</Emphasis>" option."))
+}
+
+pub(crate) fn expected_text_expression(
+    p: &HtmlParser,
+    curr_range: TextRange,
+    opening_range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Found a text expression that doesn't have the closing expression:",
+        curr_range,
+    )
+    .with_detail(
+        opening_range,
+        "This is where the opening expression was found:",
+    )
 }
 
 pub(crate) fn expected_child(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {

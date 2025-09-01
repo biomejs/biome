@@ -64,10 +64,10 @@ impl CommentStyle for HtmlCommentStyle {
         //
         // <!-- This comment gets assigned to the text node, despite it being actually attached to the EOF token. -->
         // ```
-        if let Some(token) = comment.following_token() {
-            if token.kind() == HtmlSyntaxKind::EOF {
-                return CommentPlacement::trailing(comment.enclosing_node().clone(), comment);
-            }
+        if let Some(token) = comment.following_token()
+            && token.kind() == HtmlSyntaxKind::EOF
+        {
+            return CommentPlacement::trailing(comment.enclosing_node().clone(), comment);
         }
 
         // Fix trailing comments that should actually be leading comments for the next node.
@@ -75,10 +75,10 @@ impl CommentStyle for HtmlCommentStyle {
         // 123<!--biome-ignore format: prettier ignore-->456
         // ```
         // This fix will ensure that the ignore comment is assigned to the 456 node instead of the 123 node.
-        if let Some(following_node) = comment.following_node() {
-            if comment.text_position().is_same_line() {
-                return CommentPlacement::leading(following_node.clone(), comment);
-            }
+        if let Some(following_node) = comment.following_node()
+            && comment.text_position().is_same_line()
+        {
+            return CommentPlacement::leading(following_node.clone(), comment);
         }
         // match (comment.preceding_node(), comment.following_node()) {
         //     (Some(preceding_node), Some(following_node)) => {

@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind, chain_trivia_pieces};
-use biome_rule_options::organize_imports::OrganizeImportsOptions;
+use biome_rule_options::{organize_imports::OrganizeImportsOptions, sort_order::SortOrder};
 use import_key::{ImportInfo, ImportKey};
 use rustc_hash::FxHashMap;
 use specifiers_attributes::{
@@ -325,7 +325,7 @@ declare_source_rule! {
     ///
     /// Group matchers can also be glob patterns and list of glob patterns.
     /// Glob patterns select imports and exports with a source that matches the pattern.
-    /// In the following example, we create two groups: one that gathers imports/exports with a source starting with `@my/lib` except `@my/lib/speciaal` and the other that gathers imports/exports starting with `@/`.
+    /// In the following example, we create two groups: one that gathers imports/exports with a source starting with `@my/lib` except `@my/lib/special` and the other that gathers imports/exports starting with `@/`.
     ///
     /// ```json
     /// {
@@ -618,6 +618,34 @@ declare_source_rule! {
     /// }
     /// ```
     ///
+    /// ## Change the sorting of import identifiers to lexicographic sorting
+    /// This only applies to the named import/exports and not the source itself.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "identifierOrder": "lexicographic"
+    ///     }
+    /// }
+    /// ```
+    /// ```js,use_options,expect_diagnostic
+    /// import { var1, var2, var21, var11, var12, var22 } from 'my-package'
+    /// ```
+    ///
+    /// ## Change the sorting of import identifiers to logical sorting
+    /// This is the default behavior incase you do not override. This only applies to the named import/exports and not the source itself.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "identifierOrder": "natural"
+    ///     }
+    /// }
+    /// ```
+    /// ```js,use_options,expect_diagnostic
+    /// import { var1, var2, var21, var11, var12, var22 } from 'my-package'
+    /// ```
+    ///
     pub OrganizeImports {
         version: "1.0.0",
         name: "organizeImports",
@@ -671,18 +699,19 @@ impl Rule for OrganizeImports {
         }
 
         fn report_unsorted_chunk(chunk: Option<ChunkBuilder>, result: &mut Vec<Issue>) {
-            if let Some(chunk) = chunk {
-                if !chunk.slot_indexes.is_empty() {
-                    result.push(Issue::UnsortedChunkPrefix {
-                        slot_indexes: chunk.slot_indexes,
-                    });
-                }
+            if let Some(chunk) = chunk
+                && !chunk.slot_indexes.is_empty()
+            {
+                result.push(Issue::UnsortedChunkPrefix {
+                    slot_indexes: chunk.slot_indexes,
+                });
             }
         }
 
         let root = ctx.query();
         let mut result = Vec::new();
         let options = ctx.options();
+        let sort_order = options.identifier_order;
         let mut chunk: Option<ChunkBuilder> = None;
         let mut prev_kind: Option<JsSyntaxKind> = None;
         let mut prev_group = 0;
@@ -702,10 +731,10 @@ impl Rule for OrganizeImports {
                 let starts_chunk = chunk.is_none();
                 let leading_newline_count = leading_newlines(item.syntax()).count();
                 let are_specifiers_unsorted =
-                    specifiers.is_some_and(|specifiers| !specifiers.are_sorted());
+                    specifiers.is_some_and(|specifiers| !specifiers.are_sorted(sort_order));
                 let are_attributes_unsorted = attributes.is_some_and(|attributes| {
                     // Assume the attributes are sorted if there are any bogus nodes.
-                    !(are_import_attributes_sorted(&attributes).unwrap_or(true))
+                    !(are_import_attributes_sorted(&attributes, sort_order).unwrap_or(true))
                 });
                 let newline_issue = if leading_newline_count == 1
                     // A chunk must start with a blank line (two newlines)
@@ -762,12 +791,12 @@ impl Rule for OrganizeImports {
                 report_unsorted_chunk(chunk.take(), &mut result);
                 prev_group = 0;
                 // A statement must be separated of a chunk with a blank line
-                if let AnyJsModuleItem::AnyJsStatement(statement) = &item {
-                    if leading_newlines(statement.syntax()).count() == 1 {
-                        result.push(Issue::AddLeadingNewline {
-                            slot_index: statement.syntax().index() as u32,
-                        });
-                    }
+                if let AnyJsModuleItem::AnyJsStatement(statement) = &item
+                    && leading_newlines(statement.syntax()).count() == 1
+                {
+                    result.push(Issue::AddLeadingNewline {
+                        slot_index: statement.syntax().index() as u32,
+                    });
                 }
             }
             prev_kind = Some(item.syntax().kind());
@@ -792,6 +821,7 @@ impl Rule for OrganizeImports {
         }
 
         let options = ctx.options();
+        let sort_order = options.identifier_order;
         let root = ctx.query();
         let items = root.items().into_syntax();
         let mut organized_items: FxHashMap<u32, AnyJsModuleItem> = FxHashMap::default();
@@ -826,18 +856,18 @@ impl Rule for OrganizeImports {
                             let mut clause = export.export_clause().ok()?;
                             if *are_specifiers_unsorted {
                                 // Sort named specifiers
-                                if let AnyJsExportClause::JsExportNamedFromClause(cast) = &clause {
-                                    if let Some(sorted_specifiers) =
-                                        sort_export_specifiers(&cast.specifiers())
-                                    {
-                                        clause =
-                                            cast.clone().with_specifiers(sorted_specifiers).into();
-                                    }
+                                if let AnyJsExportClause::JsExportNamedFromClause(cast) = &clause
+                                    && let Some(sorted_specifiers) =
+                                        sort_export_specifiers(&cast.specifiers(), sort_order)
+                                {
+                                    clause = cast.clone().with_specifiers(sorted_specifiers).into();
                                 }
                             }
                             if *are_attributes_unsorted {
                                 // Sort import attributes
-                                let sorted_attrs = clause.attribute().and_then(sort_attributes);
+                                let sorted_attrs = clause
+                                    .attribute()
+                                    .and_then(|attrs| sort_attributes(attrs, sort_order));
                                 clause = clause.with_attribute(sorted_attrs);
                             }
                             export.with_export_clause(clause).into()
@@ -847,14 +877,18 @@ impl Rule for OrganizeImports {
                             if *are_specifiers_unsorted {
                                 // Sort named specifiers
                                 if let Some(sorted_specifiers) =
-                                    clause.named_specifiers().and_then(sort_import_specifiers)
+                                    clause.named_specifiers().and_then(|specifiers| {
+                                        sort_import_specifiers(specifiers, sort_order)
+                                    })
                                 {
                                     clause = clause.with_named_specifiers(sorted_specifiers)
                                 }
                             }
                             if *are_attributes_unsorted {
                                 // Sort import attributes
-                                let sorted_attrs = clause.attribute().and_then(sort_attributes);
+                                let sorted_attrs = clause
+                                    .attribute()
+                                    .and_then(|attrs| sort_attributes(attrs, sort_order));
                                 clause = clause.with_attribute(sorted_attrs);
                             }
                             import.with_import_clause(clause).into()
@@ -905,6 +939,7 @@ impl Rule for OrganizeImports {
                     import_keys.sort_unstable_by(
                         |KeyedItem { key: k1, .. }, KeyedItem { key: k2, .. }| k1.cmp(k2),
                     );
+
                     // Merge imports/exports
                     // We use `while` and indexing to allow both iteration and mutation of `import_keys`.
                     let mut i = import_keys.len() - 1;
@@ -915,12 +950,13 @@ impl Rule for OrganizeImports {
                             ..
                         } = &import_keys[i - 1];
                         let KeyedItem { key, item, .. } = &import_keys[i];
-                        if prev_key.is_mergeable(key) {
-                            if let Some(merged) = merge(prev_item.as_ref(), item.as_ref()) {
-                                import_keys[i - 1].was_merged = true;
-                                import_keys[i - 1].item = Some(merged);
-                                import_keys[i].item = None;
-                            }
+                        if prev_key.is_mergeable(key)
+                            && let Some(merged) =
+                                merge(prev_item.as_ref(), item.as_ref(), sort_order)
+                        {
+                            import_keys[i - 1].was_merged = true;
+                            import_keys[i - 1].item = Some(merged);
+                            import_keys[i].item = None;
                         }
                         i -= 1;
                     }
@@ -1055,6 +1091,7 @@ pub enum NewLineIssue {
 fn merge(
     item1: Option<&AnyJsModuleItem>,
     item2: Option<&AnyJsModuleItem>,
+    sort_order: SortOrder,
 ) -> Option<AnyJsModuleItem> {
     match (item1?, item2?) {
         (AnyJsModuleItem::JsExport(item1), AnyJsModuleItem::JsExport(item2)) => {
@@ -1066,7 +1103,9 @@ fn merge(
             let clause2 = clause2.as_js_export_named_from_clause()?;
             let specifiers1 = clause1.specifiers();
             let specifiers2 = clause2.specifiers();
-            if let Some(meregd_specifiers) = merge_export_specifiers(&specifiers1, &specifiers2) {
+            if let Some(meregd_specifiers) =
+                merge_export_specifiers(&specifiers1, &specifiers2, sort_order)
+            {
                 let meregd_clause = clause1.with_specifiers(meregd_specifiers);
                 let merged_item = item2.clone().with_export_clause(meregd_clause.into());
 
@@ -1132,7 +1171,7 @@ fn merge(
                     };
                     let specifiers2 = clause2.named_specifiers().ok()?;
                     if let Some(meregd_specifiers) =
-                        merge_import_specifiers(specifiers1, &specifiers2)
+                        merge_import_specifiers(specifiers1, &specifiers2, sort_order)
                     {
                         let merged_clause = clause1.with_specifier(meregd_specifiers.into());
                         let merged_item = item2.clone().with_import_clause(merged_clause.into());
@@ -1155,7 +1194,7 @@ fn merge(
                     let specifiers1 = clause1.named_specifiers().ok()?;
                     let specifiers2 = clause2.named_specifiers().ok()?;
                     if let Some(meregd_specifiers) =
-                        merge_import_specifiers(specifiers1, &specifiers2)
+                        merge_import_specifiers(specifiers1, &specifiers2, sort_order)
                     {
                         let merged_clause = clause1.with_named_specifiers(meregd_specifiers);
                         let merged_item = item2.clone().with_import_clause(merged_clause.into());

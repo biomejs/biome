@@ -77,7 +77,7 @@ pub(crate) enum HtmlChild {
 
     /// A comment in a HTML text.
     ///
-    /// This is considered a seperate kind of "word" here because we must preserve whitespace between text and comments.
+    /// This is considered a separate kind of "word" here because we must preserve whitespace between text and comments.
     Comment(HtmlWord),
 
     /// A ` ` whitespace
@@ -331,7 +331,7 @@ where
 
                 // There may be trailing comments that we attached to the content if this is the last child of an Element. They won't show up in the `value_token.text()` because they are actually attached to the leading token of the closing tag. This means we have to format them manually.
                 for comment in trailing_comments_to_format {
-                    // This might not actually be the best way to handle the whitespace before the comment. If there are bugs here involving whitespace preceeding the comment, try this:
+                    // This might not actually be the best way to handle the whitespace before the comment. If there are bugs here involving whitespace preceding the comment, try this:
                     // Instead of the below match on `comment.lines_before()`, try to include the whitespace in the sliced range from the token text. Right now, that preceding whitespace is excluded, and we add it back in via the `lines_before` match below.
                     match comment.lines_before() {
                         0 => {}

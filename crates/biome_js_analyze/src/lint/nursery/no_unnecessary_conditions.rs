@@ -68,7 +68,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnnecessaryConditions {
-        version: "next",
+        version: "2.1.4",
         name: "noUnnecessaryConditions",
         language: "js",
         sources: &[RuleSource::EslintTypeScript("no-unnecessary-condition").same()],
@@ -315,13 +315,13 @@ fn check_condition_necessity(
                 }
             }
             AnyJsLiteralExpression::JsNumberLiteralExpression(num_expr) => {
-                if let Ok(literal) = num_expr.value_token() {
-                    if let Ok(value) = literal.text_trimmed().parse::<f64>() {
-                        if value != 0.0 && !value.is_nan() {
-                            return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
-                        } else if value == 0.0 {
-                            return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
-                        }
+                if let Ok(literal) = num_expr.value_token()
+                    && let Ok(value) = literal.text_trimmed().parse::<f64>()
+                {
+                    if value != 0.0 && !value.is_nan() {
+                        return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
+                    } else if value == 0.0 {
+                        return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
                     }
                 }
             }
@@ -348,10 +348,10 @@ fn check_condition_necessity(
             return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
         }
         AnyJsExpression::JsIdentifierExpression(id_expr) => {
-            if let Ok(name) = id_expr.name() {
-                if name.value_token().ok()?.text_trimmed() == "undefined" {
-                    return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
-                }
+            if let Ok(name) = id_expr.name()
+                && name.value_token().ok()?.text_trimmed() == "undefined"
+            {
+                return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
             }
 
             // Use type inference to check if this identifier always refers to a truthy/falsy value
@@ -486,56 +486,55 @@ fn check_comparison_necessity(
         ) => {
             if let (Ok(left_token), Ok(right_token)) =
                 (left_num.value_token(), right_num.value_token())
-            {
-                if let (Ok(left_val), Ok(right_val)) = (
+                && let (Ok(left_val), Ok(right_val)) = (
                     left_token.text_trimmed().parse::<u64>(),
                     right_token.text_trimmed().parse::<u64>(),
-                ) {
-                    match operator {
-                        JsBinaryOperator::LessThan => {
-                            if left_val < right_val {
-                                return Some(IssueKind::UnnecessaryComparison(TextRange::new(
-                                    left.range().start(),
-                                    right.range().end(),
-                                )));
-                            }
-                        }
-                        JsBinaryOperator::GreaterThan => {
-                            if left_val > right_val {
-                                return Some(IssueKind::UnnecessaryComparison(TextRange::new(
-                                    left.range().start(),
-                                    right.range().end(),
-                                )));
-                            }
-                        }
-                        JsBinaryOperator::GreaterThanOrEqual => {
-                            if left_val >= right_val {
-                                return Some(IssueKind::UnnecessaryComparison(TextRange::new(
-                                    left.range().start(),
-                                    right.range().end(),
-                                )));
-                            }
-                        }
-                        JsBinaryOperator::LessThanOrEqual => {
-                            if left_val <= right_val {
-                                return Some(IssueKind::UnnecessaryComparison(TextRange::new(
-                                    left.range().start(),
-                                    right.range().end(),
-                                )));
-                            }
-                        }
-                        JsBinaryOperator::Equality
-                        | JsBinaryOperator::StrictEquality
-                        | JsBinaryOperator::Inequality
-                        | JsBinaryOperator::StrictInequality => {
-                            // Any comparison between two literal numbers is statically determinable
+                )
+            {
+                match operator {
+                    JsBinaryOperator::LessThan => {
+                        if left_val < right_val {
                             return Some(IssueKind::UnnecessaryComparison(TextRange::new(
                                 left.range().start(),
                                 right.range().end(),
                             )));
                         }
-                        _ => {}
                     }
+                    JsBinaryOperator::GreaterThan => {
+                        if left_val > right_val {
+                            return Some(IssueKind::UnnecessaryComparison(TextRange::new(
+                                left.range().start(),
+                                right.range().end(),
+                            )));
+                        }
+                    }
+                    JsBinaryOperator::GreaterThanOrEqual => {
+                        if left_val >= right_val {
+                            return Some(IssueKind::UnnecessaryComparison(TextRange::new(
+                                left.range().start(),
+                                right.range().end(),
+                            )));
+                        }
+                    }
+                    JsBinaryOperator::LessThanOrEqual => {
+                        if left_val <= right_val {
+                            return Some(IssueKind::UnnecessaryComparison(TextRange::new(
+                                left.range().start(),
+                                right.range().end(),
+                            )));
+                        }
+                    }
+                    JsBinaryOperator::Equality
+                    | JsBinaryOperator::StrictEquality
+                    | JsBinaryOperator::Inequality
+                    | JsBinaryOperator::StrictInequality => {
+                        // Any comparison between two literal numbers is statically determinable
+                        return Some(IssueKind::UnnecessaryComparison(TextRange::new(
+                            left.range().start(),
+                            right.range().end(),
+                        )));
+                    }
+                    _ => {}
                 }
             }
         }

@@ -1149,7 +1149,7 @@ fn parse_parenthesized_expression(p: &mut JsParser) -> ParsedSyntax {
         // ();
         p.error(
             p.err_builder(
-                "Parenthesized expression didnt contain anything",
+                "Parenthesized expression didn't contain anything",
                 p.cur_range(),
             )
             .with_hint("Expected an expression here"),
@@ -2086,14 +2086,14 @@ pub(super) fn parse_unary_expr(p: &mut JsParser, context: ExpressionContext) -> 
             rewrite_events(&mut rewriter, checkpoint, p);
 
             rewriter.result.take().inspect(|_| {
-                if StrictMode.is_supported(p) {
-                    if let Some(range) = rewriter.exited_ident_expr {
-                        kind = JS_BOGUS_EXPRESSION;
-                        p.error(p.err_builder(
-                            "the target for a delete operator cannot be a single identifier",
-                            range,
-                        ));
-                    }
+                if StrictMode.is_supported(p)
+                    && let Some(range) = rewriter.exited_ident_expr
+                {
+                    kind = JS_BOGUS_EXPRESSION;
+                    p.error(p.err_builder(
+                        "the target for a delete operator cannot be a single identifier",
+                        range,
+                    ));
                 }
 
                 if let Some(range) = rewriter.exited_private_member_expr {
@@ -2122,7 +2122,7 @@ struct DeleteExpressionRewriter {
     exited_ident_expr: Option<TextRange>,
     /// Set to true immediately after the rewriter exits a private name
     exited_private_name: bool,
-    /// Set to true immediately after the rewriter exits a member expresison with a private name
+    /// Set to true immediately after the rewriter exits a member expression with a private name
     exited_private_member_expr: Option<TextRange>,
 }
 

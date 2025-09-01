@@ -2,6 +2,7 @@ use crate::parser::TailwindParser;
 use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
+use crate::token_source::TailwindLexContext;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -67,11 +68,13 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 
     VariantList.parse_list(p);
 
-    let candidate = parse_functional_or_static_candidate(p).or_recover_with_token_set(
-        p,
-        &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE, NEWLINE, EOF]),
-        expected_candidate,
-    );
+    let candidate = parse_arbitrary_candidate(p)
+        .or_else(|| parse_functional_or_static_candidate(p))
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE, NEWLINE, EOF]),
+            expected_candidate,
+        );
 
     match candidate {
         Ok(_) => {}
@@ -135,6 +138,50 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
     }
 
     Present(m.complete(p, TW_FUNCTIONAL_CANDIDATE))
+}
+
+fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
+    if !p.at(T!['[']) {
+        return Absent;
+    }
+
+    let checkpoint = p.checkpoint();
+    let m = p.start();
+    if !p.expect_with_context(T!['['], TailwindLexContext::ArbitraryCandidate) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+    if !p.expect_with_context(TW_PROPERTY, TailwindLexContext::ArbitraryCandidate) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+    if !p.expect_with_context(T![:], TailwindLexContext::ArbitraryCandidate) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+    if !p.expect_with_context(TW_VALUE, TailwindLexContext::ArbitraryCandidate) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+    if !p.expect(T![']']) {
+        m.abandon(p);
+        p.rewind(checkpoint);
+        return Absent;
+    }
+
+    if !p.at(T![/]) {
+        return Present(m.complete(p, TW_ARBITRARY_CANDIDATE));
+    }
+
+    if p.at(T![/]) {
+        parse_modifier(p).or_add_diagnostic(p, expected_modifier);
+    }
+
+    Present(m.complete(p, TW_ARBITRARY_CANDIDATE))
 }
 
 fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {

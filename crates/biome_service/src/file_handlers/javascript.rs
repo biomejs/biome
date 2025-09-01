@@ -39,14 +39,15 @@ use biome_js_analyze::{
     ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
 };
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
-use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteProperties, Semicolons};
+use biome_js_formatter::context::{
+    ArrowParentheses, JsFormatOptions, OperatorLinebreak, QuoteProperties, Semicolons,
+};
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsRoot, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
-    JsLanguage, JsSyntaxNode, JsVariableDeclarator, LanguageVariant, TextRange, TextSize,
-    TokenAtOffset,
+    JsLanguage, JsSyntaxNode, JsVariableDeclarator, TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
@@ -77,6 +78,7 @@ pub struct JsFormatterSettings {
     pub enabled: Option<JsFormatterEnabled>,
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
+    pub operator_linebreak: Option<OperatorLinebreak>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -97,6 +99,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             indent_style: value.indent_style,
             line_ending: value.line_ending,
             expand: value.expand,
+            operator_linebreak: value.operator_linebreak,
         }
     }
 }
@@ -238,7 +241,8 @@ impl ServiceLanguage for JsLanguage {
                 .or(global.attribute_position)
                 .unwrap_or_default(),
         )
-        .with_expand(language.expand.or(global.expand).unwrap_or_default());
+        .with_expand(language.expand.or(global.expand).unwrap_or_default())
+        .with_operator_linebreak(language.operator_linebreak.unwrap_or_default());
 
         overrides.override_js_format_options(path, options)
     }
@@ -320,6 +324,10 @@ impl ServiceLanguage for JsLanguage {
             } else if filename.ends_with(".svelte")
                 || filename.ends_with(".svelte.js")
                 || filename.ends_with(".svelte.ts")
+                || filename.ends_with(".svelte.test.ts")
+                || filename.ends_with(".svelte.test.js")
+                || filename.ends_with(".svelte.spec.ts")
+                || filename.ends_with(".svelte.spec.js")
             {
                 // Svelte 5 runes
                 globals.extend(
@@ -512,17 +520,7 @@ fn parse(
         .override_settings
         .apply_override_js_parser_options(biome_path, &mut options);
 
-    let mut file_source = file_source.to_js_file_source().unwrap_or_default();
-    let jsx_everywhere = settings
-        .languages
-        .javascript
-        .parser
-        .jsx_everywhere
-        .unwrap_or_default()
-        .into();
-    if jsx_everywhere && !file_source.is_typescript() {
-        file_source = file_source.with_variant(LanguageVariant::Jsx);
-    }
+    let file_source = file_source.to_js_file_source().unwrap_or_default();
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
     ParseResult {
         any_parse: parse.into(),
@@ -879,10 +877,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             |signal| {
                 let current_diagnostic = signal.diagnostic();
 
-                if let Some(diagnostic) = current_diagnostic.as_ref() {
-                    if is_diagnostic_error(diagnostic, rules.as_deref()) {
-                        errors += 1;
-                    }
+                if let Some(diagnostic) = current_diagnostic.as_ref()
+                    && is_diagnostic_error(diagnostic, rules.as_deref())
+                {
+                    errors += 1;
                 }
 
                 for action in signal.actions() {
@@ -1085,7 +1083,3 @@ fn rename(
         ))
     }
 }
-
-#[cfg(test)]
-#[path = "javascript.tests.rs"]
-mod tests;

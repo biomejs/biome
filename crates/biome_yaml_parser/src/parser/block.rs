@@ -165,7 +165,8 @@ fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
         let m = p.start();
         parse_flow_yaml_node(p);
 
-        p.bump(COLON);
+        // TODO: improve error handling message here
+        p.expect(T![:]);
         // Value can be completely empty according to the spec
         parse_any_block_node(p).ok();
         Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))
@@ -173,7 +174,7 @@ fn parse_block_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
         let m = p.start();
         parse_flow_json_node(p);
 
-        p.bump(COLON);
+        p.expect(T![:]);
         // Value can be completely empty according to the spec
         parse_any_block_node(p).ok();
         Present(m.complete(p, YAML_BLOCK_MAP_IMPLICIT_ENTRY))

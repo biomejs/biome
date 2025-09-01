@@ -1,5 +1,14 @@
 # @biomejs/js-api
 
+## 3.0.0
+
+### Patch Changes
+
+- Updated dependencies [[`527db7f`](https://github.com/biomejs/biome/commit/527db7f7c142f8c95c6d4513603530220a4cc95c)]:
+  - @biomejs/wasm-bundler@2.2.0
+  - @biomejs/wasm-nodejs@2.2.0
+  - @biomejs/wasm-web@2.2.0
+
 ## 2.0.3
 
 ### Patch Changes
@@ -28,13 +37,11 @@
 ### Minor Changes
 
 - [#6535](https://github.com/biomejs/biome/pull/6535) [`d8c08e1`](https://github.com/biomejs/biome/commit/d8c08e1691a1b64cf48e86bd490bfe1485df3fa1) Thanks [@regseb](https://github.com/regseb)! - Biome's JavaScript Bindings now have specific [subpath exports](https://nodejs.org/api/packages.html#subpath-exports) for the three packages:
-
   - `import { Biome } from "@biomejs/js-api/bundler";`
   - `import { Biome } from "@biomejs/js-api/nodejs";`
   - `import { Biome } from "@biomejs/js-api/web";`
 
   These new subpath exports load only TypeScript declarations, whereas the default export loads declarations for all three packages. This was a problem if you checked your code with [`tsc`](https://www.typescriptlang.org/docs/handbook/compiler-options.html).
-
   - Old usage with default export (no subpath):
 
     ```js

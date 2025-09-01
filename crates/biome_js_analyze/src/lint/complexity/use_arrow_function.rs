@@ -330,10 +330,10 @@ impl Visitor for AnyThisScopeVisitor {
                 }
             }
             WalkEvent::Leave(node) => {
-                if AnyThisScope::can_cast(node.kind()) {
-                    if let Some(scope_metadata) = self.stack.pop() {
-                        ctx.match_query(ActualThisScope(scope_metadata));
-                    }
+                if AnyThisScope::can_cast(node.kind())
+                    && let Some(scope_metadata) = self.stack.pop()
+                {
+                    ctx.match_query(ActualThisScope(scope_metadata));
                 }
             }
         }

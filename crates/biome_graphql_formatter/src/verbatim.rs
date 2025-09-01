@@ -21,7 +21,7 @@ use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
 /// These nodes and tokens get tracked as [VerbatimKind::Verbatim], useful to understand
 /// if these nodes still need to have their own implementation.
 #[expect(unused)]
-pub fn format_graphql_verbatim_node(node: &GraphqlSyntaxNode) -> FormatGraphqlVerbatimNode {
+pub fn format_graphql_verbatim_node(node: &GraphqlSyntaxNode) -> FormatGraphqlVerbatimNode<'_> {
     FormatGraphqlVerbatimNode {
         node,
         kind: VerbatimKind::Verbatim {
@@ -151,7 +151,7 @@ impl Format<GraphqlFormatContext> for FormatGraphqlVerbatimNode<'_> {
 
 /// Formats bogus nodes. The difference between this method  and `format_verbatim` is that this method
 /// doesn't track nodes/tokens as [VerbatimKind::Verbatim]. They are just printed as they are.
-pub fn format_bogus_node(node: &GraphqlSyntaxNode) -> FormatGraphqlVerbatimNode {
+pub fn format_bogus_node(node: &GraphqlSyntaxNode) -> FormatGraphqlVerbatimNode<'_> {
     FormatGraphqlVerbatimNode {
         node,
         kind: VerbatimKind::Bogus,
@@ -160,7 +160,7 @@ pub fn format_bogus_node(node: &GraphqlSyntaxNode) -> FormatGraphqlVerbatimNode 
 }
 
 /// Format a node having formatter suppression comment applied to it
-pub fn format_suppressed_node(node: &GraphqlSyntaxNode) -> FormatGraphqlVerbatimNode {
+pub fn format_suppressed_node(node: &GraphqlSyntaxNode) -> FormatGraphqlVerbatimNode<'_> {
     FormatGraphqlVerbatimNode {
         node,
         kind: VerbatimKind::Suppressed,
@@ -174,7 +174,7 @@ pub const fn format_or_verbatim<F>(inner: F) -> FormatNodeOrVerbatim<F> {
     FormatNodeOrVerbatim { inner }
 }
 
-/// Formats a node or falls back to verbatim printing if formating this node fails.
+/// Formats a node or falls back to verbatim printing if formatting this node fails.
 #[derive(Copy, Clone)]
 pub struct FormatNodeOrVerbatim<F> {
     inner: F,

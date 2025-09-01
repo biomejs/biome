@@ -57,7 +57,7 @@ impl VueFileHandler {
         Self::matches_script(input).map(|m| m.start() as u32)
     }
 
-    fn matches_script(input: &str) -> Option<Match> {
+    fn matches_script(input: &str) -> Option<Match<'_>> {
         VUE_FENCE
             .captures(input)
             .and_then(|captures| captures.name("script"))

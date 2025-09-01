@@ -223,7 +223,7 @@ declare_lint_rule! {
     /// hook always have the same identity and should be omitted as such.
     ///
     /// You can configure custom hooks that return stable results in one of
-    /// three ways:
+    /// four ways:
     ///
     /// * `"stableResult": true` -- marks the return value as stable. An example
     ///   of a React hook that would be configured like this is `useRef()`.
@@ -231,6 +231,8 @@ declare_lint_rule! {
     ///   marks the given index or indices to be stable. An example of a React
     ///   hook that would be configured like this is `useState()`.
     /// * `"stableResult": 1` -- shorthand for `"stableResult": [1]`.
+    /// * `"stableResult": ["setValue"]` -- expects the return value to be an
+    ///   object and marks the given property or properties to be stable.
     ///
     /// #### Example
     ///
@@ -313,14 +315,14 @@ impl HookConfigMaps {
     pub fn new(hooks: &UseExhaustiveDependenciesOptions) -> Self {
         let mut result = Self::default();
         for hook in &hooks.hooks {
-            if let Some(stable_result) = &hook.stable_result {
-                if *stable_result != StableHookResult::None {
-                    result.stable_config.insert(StableReactHookConfiguration {
-                        hook_name: hook.name.clone(),
-                        result: stable_result.clone(),
-                        builtin: false,
-                    });
-                }
+            if let Some(stable_result) = &hook.stable_result
+                && *stable_result != StableHookResult::None
+            {
+                result.stable_config.insert(StableReactHookConfiguration {
+                    hook_name: hook.name.clone(),
+                    result: stable_result.clone(),
+                    builtin: false,
+                });
             }
             if let (Some(closure_index), Some(dependencies_index)) =
                 (hook.closure_index, hook.dependencies_index)
@@ -638,7 +640,7 @@ fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> + use<>
         }
     }
 
-    // elemnsts are inserted in reverse, thus we have to reverse the iteration.
+    // elements are inserted in reverse, thus we have to reverse the iteration.
     vec.into_iter().rev()
 }
 

@@ -134,10 +134,10 @@ fn enclosing_function_if_call_is_at_top_level(
                 return Some(enclosing_function);
             }
             Err(node) => {
-                if let Some(prev_node) = prev_node {
-                    if is_conditional_expression(&node, &prev_node) {
-                        return None;
-                    }
+                if let Some(prev_node) = prev_node
+                    && is_conditional_expression(&node, &prev_node)
+                {
+                    return None;
                 }
                 prev_node = Some(node);
             }
@@ -308,10 +308,10 @@ impl Visitor for EarlyReturnDetectionVisitor {
                 if let Some(entry) = self.stack.last_mut() {
                     if JsReturnStatement::can_cast(node.kind()) {
                         entry.early_return = Some(node.text_range_with_trivia());
-                    } else if let Some(call) = JsCallExpression::cast_ref(node) {
-                        if let Some(early_return) = entry.early_return {
-                            self.early_returns.insert(call.clone(), early_return);
-                        }
+                    } else if let Some(call) = JsCallExpression::cast_ref(node)
+                        && let Some(early_return) = entry.early_return
+                    {
+                        self.early_returns.insert(call.clone(), early_return);
                     }
                 }
             }
@@ -485,14 +485,14 @@ impl Rule for UseHookAtTopLevel {
                     });
                 }
 
-                if let AnyJsFunctionOrMethod::AnyJsFunction(function) = enclosing_function {
-                    if let Some(calls_iter) = function.all_calls(model) {
-                        for call in calls_iter {
-                            calls.push(CallPath {
-                                call: call.tree(),
-                                path: path.clone(),
-                            });
-                        }
+                if let AnyJsFunctionOrMethod::AnyJsFunction(function) = enclosing_function
+                    && let Some(calls_iter) = function.all_calls(model)
+                {
+                    for call in calls_iter {
+                        calls.push(CallPath {
+                            call: call.tree(),
+                            path: path.clone(),
+                        });
                     }
                 }
             } else {

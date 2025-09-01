@@ -200,20 +200,19 @@ impl SemanticEventExtractor {
         }) {
             if let Ok(biome_css_syntax::AnyCssProperty::CssGenericProperty(prop)) =
                 declaration.property()
+                && let Ok(prop_name) = prop.name()
             {
-                if let Ok(prop_name) = prop.name() {
-                    match prop_name.to_trimmed_string().as_str() {
-                        "initial-value" => {
-                            initial_value = Some(CssPropertyInitialValue::from(prop.value()));
-                        }
-                        "syntax" => {
-                            syntax = Some(prop.value().to_trimmed_string().to_string());
-                        }
-                        "inherits" => {
-                            inherits = Some(prop.value().to_trimmed_string() == "true");
-                        }
-                        _ => {}
+                match prop_name.to_trimmed_string().as_str() {
+                    "initial-value" => {
+                        initial_value = Some(CssPropertyInitialValue::from(prop.value()));
                     }
+                    "syntax" => {
+                        syntax = Some(prop.value().to_trimmed_string().to_string());
+                    }
+                    "inherits" => {
+                        inherits = Some(prop.value().to_trimmed_string() == "true");
+                    }
+                    _ => {}
                 }
             }
         }

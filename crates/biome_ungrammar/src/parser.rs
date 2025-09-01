@@ -114,7 +114,7 @@ fn node(p: &mut Parser) -> Result<()> {
 /// all of the combinators other than juxtaposition:
 /// 'auto' | Expr | Value
 /// length || color || direction
-/// veritcal && horizontal
+/// vertical && horizontal
 fn rule(p: &mut Parser) -> Result<Rule> {
     if let Some(lexer::Token {
         kind: TokenKind::Pipe | TokenKind::DoubleAmpersand | TokenKind::DoublePipe,

@@ -37,7 +37,7 @@ struct FormatNumberLiteralExponent {
     first_non_zero_index: Option<NonZeroUsize>,
 }
 // Regex-free version of https://github.com/prettier/prettier/blob/ca246afacee8e6d5db508dae01730c9523bbff1d/src/common/util.js#L341-L356
-pub fn format_trimmed_number(text: &str, options: NumberFormatOptions) -> Cow<str> {
+pub fn format_trimmed_number(text: &str, options: NumberFormatOptions) -> Cow<'_, str> {
     use FormatNumberLiteralState::*;
 
     let text = text.to_ascii_lowercase_cow();

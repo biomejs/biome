@@ -106,7 +106,7 @@ JsModule {
 ```
 ts_new_operator.ts:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Parenthesized expression didnt contain anything
+  × Parenthesized expression didn't contain anything
   
   > 1 │ new A<test><test>();
       │                   ^

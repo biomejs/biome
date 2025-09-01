@@ -18,6 +18,9 @@ declare_lint_rule! {
     /// This means that if the package `@org/foo` has a dependency on `lodash`, and then you use
     /// `import "lodash"` somewhere in your project, the rule will trigger a diagnostic for this import.
     ///
+    /// The rule is meant to catch those dependencies that aren't declared inside the closest `package.json`, and
+    /// isn't meant to detect dependencies declared in other manifest files, e.g. the root `package.json` in a monorepo setting.
+    ///
     /// The rule ignores imports that are not valid package names.
     /// This includes internal imports that start with `#` and `@/` and imports with a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
     ///
@@ -40,6 +43,12 @@ declare_lint_rule! {
     ///
     /// ```js,ignore
     /// import assert from "node:assert";
+    /// ```
+    ///
+    /// If you have declared `type-fest` in the `devDependencies` section:
+    ///
+    /// ```js,ignore
+    /// import type { SetRequired } from "type-fest";
     /// ```
     ///
     /// ## Options
@@ -109,7 +118,9 @@ impl Rule for NoUndeclaredDependencies {
         }
 
         let path = ctx.file_path();
-        let is_dev_dependency_available = ctx.options().dev_dependencies.is_available(path);
+        let is_dev_dependency_available =
+            // Type-only imports are always considered as dev dependencies.
+            is_type_import(node) || ctx.options().dev_dependencies.is_available(path);
         let is_peer_dependency_available = ctx.options().peer_dependencies.is_available(path);
         let is_optional_dependency_available =
             ctx.options().optional_dependencies.is_available(path);
@@ -139,12 +150,12 @@ impl Rule for NoUndeclaredDependencies {
         if !package_name.starts_with('@') {
             // Handle DefinitelyTyped imports https://github.com/DefinitelyTyped/DefinitelyTyped
             // e.g. `lodash` can import types from `@types/lodash`.
-            if let Some(import_clause) = node.parent::<AnyJsImportClause>() {
-                if import_clause.type_token().is_some() {
-                    let package_name = format!("@types/{package_name}");
-                    if is_available(&package_name) {
-                        return None;
-                    }
+            if let Some(import_clause) = node.parent::<AnyJsImportClause>()
+                && import_clause.type_token().is_some()
+            {
+                let package_name = format!("@types/{package_name}");
+                if is_available(&package_name) {
+                    return None;
                 }
             }
         }
@@ -256,6 +267,13 @@ fn parse_package_name(path: &str) -> Option<&str> {
     }
     // Handle cases where only the scope is given. e.g. `@scope/`
     (!path.ends_with('/')).then_some(path)
+}
+
+fn is_type_import(import: &AnyJsImportLike) -> bool {
+    match import.parent::<AnyJsImportClause>() {
+        Some(clause) => clause.type_token().is_some(),
+        _ => false,
+    }
 }
 
 #[test]

@@ -278,20 +278,19 @@ impl Rule for NoUnusedVariables {
             .source_type::<JsFileSource>()
             .language()
             .is_definition_file();
-        if is_declaration_file {
-            if let Some(items) = binding
+        if is_declaration_file
+            && let Some(items) = binding
                 .syntax()
                 .ancestors()
                 .skip(1)
                 .find_map(JsModuleItemList::cast)
-            {
-                // A declaration file without top-level exports and imports is a global declaration file.
-                // All top-level types and variables are available in every files of the project.
-                // Thus, it is ok if top-level types are not used locally.
-                let is_top_level = items.parent::<TsDeclarationModule>().is_some();
-                if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
-                    return None;
-                }
+        {
+            // A declaration file without top-level exports and imports is a global declaration file.
+            // All top-level types and variables are available in every files of the project.
+            // Thus, it is ok if top-level types are not used locally.
+            let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+            if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                return None;
             }
         }
 
@@ -337,12 +336,12 @@ impl Rule for NoUnusedVariables {
         );
 
         // Check if this binding is part of an object pattern with a rest element
-        if let Some(decl) = binding.declaration() {
-            if is_rest_spread_sibling(&decl) {
-                diag = diag.note(
+        if let Some(decl) = binding.declaration()
+            && is_rest_spread_sibling(&decl)
+        {
+            diag = diag.note(
                     markup! {"You can use the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables in an object destructuring with a spread."},
                 );
-            }
         }
 
         Some(diag)

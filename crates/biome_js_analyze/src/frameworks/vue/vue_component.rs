@@ -430,14 +430,14 @@ impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
     ) -> Vec<VueDeclaration> {
         let mut result = vec![];
 
-        if filter.contains(VueDeclarationCollectionFilter::Setup) {
-            if let Some(setup_func) = self.setup_func() {
-                result.extend(
-                    iter_func_return_properties(setup_func.syntax())
-                        .map(AnyVueSetupDeclaration::JsPropertyObjectMember)
-                        .map(VueDeclaration::Setup),
-                );
-            }
+        if filter.contains(VueDeclarationCollectionFilter::Setup)
+            && let Some(setup_func) = self.setup_func()
+        {
+            result.extend(
+                iter_func_return_properties(setup_func.syntax())
+                    .map(AnyVueSetupDeclaration::JsPropertyObjectMember)
+                    .map(VueDeclaration::Setup),
+            );
         }
 
         for (name, group_object_member) in self.iter_declaration_groups() {
@@ -739,17 +739,16 @@ fn get_props_declarations_from_call(
     model: &SemanticModel,
 ) -> Vec<VueDeclaration> {
     let mut result = vec![];
-    if let Ok(arguments) = call.arguments() {
-        if let Some(Ok(first_argument)) = arguments.args().first() {
-            if let Some(expression) = first_argument.as_any_js_expression() {
-                result.extend(collect_props_declarations_from_expression(expression));
-            }
-        }
+    if let Ok(arguments) = call.arguments()
+        && let Some(Ok(first_argument)) = arguments.args().first()
+        && let Some(expression) = first_argument.as_any_js_expression()
+    {
+        result.extend(collect_props_declarations_from_expression(expression));
     }
-    if let Some(type_arguments) = call.type_arguments() {
-        if let Some(Ok(props_type)) = type_arguments.ts_type_argument_list().iter().next() {
-            result.extend(collect_props_declarations_from_type(&props_type, model));
-        }
+    if let Some(type_arguments) = call.type_arguments()
+        && let Some(Ok(props_type)) = type_arguments.ts_type_argument_list().iter().next()
+    {
+        result.extend(collect_props_declarations_from_type(&props_type, model));
     }
     result
 }
@@ -886,20 +885,19 @@ fn iter_declaration_group_properties(
 ) -> Box<dyn Iterator<Item = JsPropertyObjectMember>> {
     match container {
         AnyJsObjectMember::JsPropertyObjectMember(property) => {
-            if let Ok(value) = property.value() {
-                if let Some(expression) = value.inner_expression() {
-                    if let AnyJsExpression::JsObjectExpression(object_expression) = expression {
-                        return Box::new(object_expression.members().iter().filter_map(|member| {
-                            if let Ok(AnyJsObjectMember::JsPropertyObjectMember(property)) = member
-                            {
-                                Some(property)
-                            } else {
-                                None
-                            }
-                        }));
-                    } else {
-                        return Box::new(iter_func_return_properties(expression.syntax()));
-                    }
+            if let Ok(value) = property.value()
+                && let Some(expression) = value.inner_expression()
+            {
+                if let AnyJsExpression::JsObjectExpression(object_expression) = expression {
+                    return Box::new(object_expression.members().iter().filter_map(|member| {
+                        if let Ok(AnyJsObjectMember::JsPropertyObjectMember(property)) = member {
+                            Some(property)
+                        } else {
+                            None
+                        }
+                    }));
+                } else {
+                    return Box::new(iter_func_return_properties(expression.syntax()));
                 }
             }
         }

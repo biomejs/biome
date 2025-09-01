@@ -512,30 +512,28 @@ fn generate_aria_roles(aria: &Aria) -> TokenStream {
                 attributes,
                 module,
             } = concept
+                && module.is_html_like()
             {
-                if module.is_html_like() {
-                    html_element_names.insert(elt_name.as_str());
-                    variants.clear();
-                    let mut attribute_instances = Vec::new();
-                    for (attribute_name, value) in attributes {
-                        html_attributes_names.insert(attribute_name.as_str());
-                        let attribute_name =
-                            format_ident!("{}", Case::Pascal.convert(attribute_name));
-                        attribute_instances.push(quote! {
-                            HtmlAttributeInstance {
-                                attribute: HtmlAttribute::#attribute_name,
-                                value: #value,
-                            }
-                        });
-                    }
-                    let elt_name = format_ident!("{}", Case::Pascal.convert(elt_name));
-                    element_instances.push(quote! {
-                        HtmlElementInstance {
-                            element: HtmlElement::#elt_name,
-                            attributes: &[ #( #attribute_instances ),* ],
+                html_element_names.insert(elt_name.as_str());
+                variants.clear();
+                let mut attribute_instances = Vec::new();
+                for (attribute_name, value) in attributes {
+                    html_attributes_names.insert(attribute_name.as_str());
+                    let attribute_name = format_ident!("{}", Case::Pascal.convert(attribute_name));
+                    attribute_instances.push(quote! {
+                        HtmlAttributeInstance {
+                            attribute: HtmlAttribute::#attribute_name,
+                            value: #value,
                         }
                     });
                 }
+                let elt_name = format_ident!("{}", Case::Pascal.convert(elt_name));
+                element_instances.push(quote! {
+                    HtmlElementInstance {
+                        element: HtmlElement::#elt_name,
+                        attributes: &[ #( #attribute_instances ),* ],
+                    }
+                });
             }
         }
         if !element_instances.is_empty() {
@@ -550,30 +548,28 @@ fn generate_aria_roles(aria: &Aria) -> TokenStream {
                 attributes,
                 module,
             } = concept
+                && module.is_html_like()
             {
-                if module.is_html_like() {
-                    html_element_names.insert(elt_name.as_str());
-                    variants.clear();
-                    let mut attribute_instances = Vec::new();
-                    for (attribute_name, value) in attributes {
-                        html_attributes_names.insert(attribute_name.as_str());
-                        let attribute_name =
-                            format_ident!("{}", Case::Pascal.convert(attribute_name));
-                        attribute_instances.push(quote! {
-                            HtmlAttributeInstance {
-                                attribute: HtmlAttribute::#attribute_name,
-                                value: #value,
-                            }
-                        });
-                    }
-                    let elt_name = format_ident!("{}", Case::Pascal.convert(elt_name));
-                    element_instances.push(quote! {
-                        HtmlElementInstance {
-                            element: HtmlElement::#elt_name,
-                            attributes: &[ #( #attribute_instances ),* ],
+                html_element_names.insert(elt_name.as_str());
+                variants.clear();
+                let mut attribute_instances = Vec::new();
+                for (attribute_name, value) in attributes {
+                    html_attributes_names.insert(attribute_name.as_str());
+                    let attribute_name = format_ident!("{}", Case::Pascal.convert(attribute_name));
+                    attribute_instances.push(quote! {
+                        HtmlAttributeInstance {
+                            attribute: HtmlAttribute::#attribute_name,
+                            value: #value,
                         }
                     });
                 }
+                let elt_name = format_ident!("{}", Case::Pascal.convert(elt_name));
+                element_instances.push(quote! {
+                    HtmlElementInstance {
+                        element: HtmlElement::#elt_name,
+                        attributes: &[ #( #attribute_instances ),* ],
+                    }
+                });
             }
         }
         if !element_instances.is_empty() {

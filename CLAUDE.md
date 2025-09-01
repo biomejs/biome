@@ -133,3 +133,7 @@ When adding new syntax nodes or rules:
 - Implements incremental parsing/analysis
 - Zero-copy string handling where possible
 - All formatters use same IR for consistency
+
+### Additional Instructions to know how to work inside the project
+
+- General contribution instructions @CONTRIBUTING.md

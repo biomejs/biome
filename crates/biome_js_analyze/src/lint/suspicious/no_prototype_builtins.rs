@@ -241,10 +241,10 @@ fn has_left_hand_object(member_expr: &AnyJsMemberExpression) -> Option<bool> {
         _ => object,
     };
 
-    if let AnyJsExpression::JsIdentifierExpression(id_expr) = &node {
-        if id_expr.name().ok()?.syntax().text_trimmed() == "Object" {
-            return Some(true);
-        }
+    if let AnyJsExpression::JsIdentifierExpression(id_expr) = &node
+        && id_expr.name().ok()?.syntax().text_trimmed() == "Object"
+    {
+        return Some(true);
     }
 
     Some(false)

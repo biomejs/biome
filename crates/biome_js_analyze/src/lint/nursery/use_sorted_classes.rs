@@ -172,16 +172,16 @@ impl Rule for UseSortedClasses {
         let options = ctx.options();
         let node = ctx.query();
 
-        if node.should_visit(options)? {
-            if let Some(value) = node.value() {
-                let template_ctx = sort::get_template_literal_space_context(node);
-                let sorted_value: String = sort_class_name(&value, &SORT_CONFIG, &template_ctx);
-                if sorted_value.is_empty() {
-                    return None;
-                }
-                if value.text() != sorted_value {
-                    return Some(sorted_value.into());
-                }
+        if node.should_visit(options)?
+            && let Some(value) = node.value()
+        {
+            let template_ctx = sort::get_template_literal_space_context(node);
+            let sorted_value: String = sort_class_name(&value, &SORT_CONFIG, &template_ctx);
+            if sorted_value.is_empty() {
+                return None;
+            }
+            if value.text() != sorted_value {
+                return Some(sorted_value.into());
             }
         }
         None

@@ -44,7 +44,7 @@ impl AstroFileHandler {
         ASTRO_FENCE.find_iter(input).next().map(|m| m.end() as u32)
     }
 
-    fn matches(input: &str) -> Matches {
+    fn matches(input: &str) -> Matches<'_, '_> {
         ASTRO_FENCE.find_iter(input)
     }
 

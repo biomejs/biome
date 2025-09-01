@@ -51,7 +51,7 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_migration_registry(&mut registry);
 
-    let (migration_registry, mut services, diagnostics, visitors, categories) = registry.build();
+    let (migration_registry, mut services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -91,7 +91,6 @@ where
         |_, _| -> Vec<Result<_, Infallible>> { Default::default() },
         Box::new(TestAction),
         &mut emit_signal,
-        categories,
     );
 
     for ((phase, _), visitor) in visitors {

@@ -1,25 +1,30 @@
 mod binding;
 mod collector;
+mod diagnostics;
 mod module_resolver;
 mod scope;
+mod utils;
 mod visitor;
-
-use std::{ops::Deref, sync::Arc};
 
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{BindingId, ImportSymbol, ResolvedTypeId, ScopeId, TypeData};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::ResolvedPath;
 use biome_rowan::{Text, TextRange};
+use camino::Utf8Path;
 use indexmap::IndexMap;
 use rust_lapper::Lapper;
 use rustc_hash::FxHashMap;
+use std::collections::BTreeSet;
+use std::{collections::BTreeMap, ops::Deref, sync::Arc};
 
 use crate::ModuleGraph;
 
 use scope::{JsScope, JsScopeData, TsBindingReference};
 
+use crate::diagnostics::ModuleDiagnostic;
 pub(super) use binding::JsBindingData;
+pub use diagnostics::JsModuleInfoDiagnostic;
 pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
 
@@ -38,11 +43,15 @@ impl Deref for JsModuleInfo {
 impl JsModuleInfo {
     /// Returns an iterator over all the static and dynamic imports in this
     /// module.
-    pub fn all_import_paths(&self) -> impl Iterator<Item = ResolvedPath> + use<> {
+    pub fn all_import_paths(&self) -> impl Iterator<Item = JsImportPath> + use<> {
         ImportPathIterator {
             module_info: self.clone(),
             index: 0,
         }
+    }
+
+    pub fn diagnostics(&self) -> &[ModuleDiagnostic] {
+        self.diagnostics.as_slice()
     }
 
     /// Finds an exported symbol by `name`, using the `module_graph` to
@@ -82,6 +91,44 @@ impl JsModuleInfo {
             id: scope_id_for_range(&self.0.scope_by_range, range),
         }
     }
+
+    /// Returns a serializable representation of this module.
+    pub fn dump(&self) -> SerializedJsModuleInfo {
+        SerializedJsModuleInfo {
+            static_imports: self
+                .static_imports
+                .iter()
+                .map(|(text, static_import)| {
+                    (text.to_string(), static_import.specifier.to_string())
+                })
+                .collect(),
+
+            static_import_paths: self
+                .static_import_paths
+                .iter()
+                .map(|(specifier, JsImportPath { resolved_path, .. })| {
+                    (
+                        specifier.to_string(),
+                        resolved_path
+                            .as_ref()
+                            .map_or_else(|_| specifier.to_string(), ToString::to_string),
+                    )
+                })
+                .collect(),
+
+            exports: self
+                .exports
+                .iter()
+                .map(|(text, _)| text.to_string())
+                .collect::<BTreeSet<_>>(),
+
+            dynamic_imports: self
+                .dynamic_import_paths
+                .iter()
+                .map(|(text, _)| text.to_string())
+                .collect::<BTreeSet<_>>(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -101,11 +148,11 @@ pub struct JsModuleInfoInner {
 
     /// Map of all the paths from static imports in the module.
     ///
-    /// Maps from the source specifier name to a [JsResolvedPath] with the
+    /// Maps from the source specifier name to a [JsImportPath] with the
     /// absolute path it resolves to. The resolved path may be looked up as key
     /// in the [ModuleGraph::data] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
-    pub static_import_paths: IndexMap<Text, ResolvedPath>,
+    pub static_import_paths: IndexMap<Text, JsImportPath>,
 
     /// Map of all dynamic import paths found in the module for which the import
     /// specifier could be statically determined.
@@ -114,14 +161,14 @@ pub struct JsModuleInfoInner {
     /// (for instance, because a template string with variables is used) will be
     /// omitted from this map.
     ///
-    /// Maps from the source specifier name to a [JsResolvedPath] with the
+    /// Maps from the source specifier name to a [JsImportPath] with the
     /// absolute path it resolves to. The resolved path may be looked up as key
     /// in the [ModuleGraph::data] map, although it is not required to exist
     /// (for instance, if the path is outside the project's scope).
     ///
     /// Paths found in `require()` expressions in CommonJS sources are also
     /// included with the dynamic import paths.
-    pub dynamic_import_paths: IndexMap<Text, ResolvedPath>,
+    pub dynamic_import_paths: IndexMap<Text, JsImportPath>,
 
     /// Map of exports from the module.
     ///
@@ -135,10 +182,10 @@ pub struct JsModuleInfoInner {
 
     /// Re-exports that apply to all symbols from another module, without
     /// assigning a name to them.
-    pub blanket_reexports: Box<[JsReexport]>,
+    pub blanket_reexports: Vec<JsReexport>,
 
     /// Collection of all the declarations in the module.
-    pub(crate) bindings: Box<[JsBindingData]>,
+    pub(crate) bindings: Vec<JsBindingData>,
 
     /// Parsed expressions, mapped from their range to their type ID.
     pub(crate) expressions: FxHashMap<TextRange, ResolvedTypeId>,
@@ -146,13 +193,20 @@ pub struct JsModuleInfoInner {
     /// All scopes in this module.
     ///
     /// The first entry is expected to be the global scope.
-    pub(crate) scopes: Box<[JsScopeData]>,
+    pub(crate) scopes: Vec<JsScopeData>,
 
     /// Lookup tree to find scopes by text range.
     pub(crate) scope_by_range: Lapper<u32, ScopeId>,
 
     /// Collection of all types in the module.
-    pub(crate) types: Box<[Arc<TypeData>]>,
+    ///
+    /// We do not store these using our `TypeStore`, because once the module
+    /// info is constructed, no new types can be registered in it, and we have
+    /// no use for a hash table anymore.
+    pub(crate) types: Vec<Arc<TypeData>>,
+
+    /// Diagnostics emitted during the resolution of the module
+    pub(crate) diagnostics: Vec<ModuleDiagnostic>,
 }
 
 #[derive(Debug, Default)]
@@ -174,6 +228,31 @@ impl Deref for Imports {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+pub enum JsImportPhase {
+    #[default]
+    Default,
+    /// https://tc39.es/proposal-defer-import-eval/
+    Defer,
+    /// https://tc39.es/proposal-source-phase-imports/
+    Source,
+    /// Technically this is not an import phase defined in ECMAScript, but type-only imports in
+    /// TypeScript cannot be imported in other phases.
+    Type,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct JsImportPath {
+    pub resolved_path: ResolvedPath,
+    pub phase: JsImportPhase,
+}
+
+impl JsImportPath {
+    pub fn as_path(&self) -> Option<&Utf8Path> {
+        self.resolved_path.as_path()
     }
 }
 
@@ -208,7 +287,7 @@ impl JsModuleInfoInner {
     }
 
     /// Returns the information about a given import by its syntax node.
-    pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&ResolvedPath> {
+    pub fn get_import_path_by_js_node(&self, node: &AnyJsImportLike) -> Option<&JsImportPath> {
         let specifier_text = node.inner_string_text()?;
         let specifier = specifier_text.text();
         if node.is_static_import() {
@@ -313,7 +392,7 @@ struct ImportPathIterator {
 }
 
 impl Iterator for ImportPathIterator {
-    type Item = ResolvedPath;
+    type Item = JsImportPath;
 
     fn next(&mut self) -> Option<Self::Item> {
         let num_static_imports = self.module_info.static_import_paths.len();
@@ -344,4 +423,37 @@ fn scope_id_for_range(scope_by_range: &Lapper<u32, ScopeId>, range: TextRange) -
         .map_or(ScopeId::GLOBAL, |interval| {
             ScopeId::new(interval.val.index())
         })
+}
+
+#[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct SerializedJsModuleInfo {
+    /// Map of all static imports found in the module.
+    ///
+    /// Maps from the local imported name to the absolute path it resolves to.
+    pub static_imports: BTreeMap<String, String>,
+
+    /// Map of all the paths from static imports in the module.
+    ///
+    /// Maps from the source specifier name to the absolute path it resolves to.
+    /// Specifiers that could not be resolved to an absolute will map to the
+    /// specifier itself.
+    ///
+    /// ## Example
+    ///
+    /// ```json
+    /// {
+    ///   "./foo": "/absolute/path/to/foo.js",
+    ///   "react": "react"
+    /// }
+    /// ```
+    pub static_import_paths: BTreeMap<String, String>,
+
+    /// Dynamic imports.
+    pub dynamic_imports: BTreeSet<String>,
+
+    /// Exported symbols.
+    pub exports: BTreeSet<String>,
 }

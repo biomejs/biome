@@ -39,7 +39,7 @@ All members must follow the [Code of Conduct](CODE_OF_CONDUCT.md). Consequences 
 
 ### Lead
 
-Leads are the owners of the organisation.
+Leads are the owners of the organization.
 
 Leads have additional privileges over core contributors. Leads control and maintain sensitive project assets and act as tiebreakers in the event of disagreements. In case of disagreements, only **one** lead must be involved in the resolution.
 
@@ -75,7 +75,7 @@ In the event of a rejection, the nominated person will be privately given the re
 
 ### Core Contributor
 
-Core Contributors are outstanding [maintainers](#maintainer), are ambassadors of Biome organisation and lead by example the community.
+Core Contributors are outstanding [maintainers](#maintainer), are ambassadors of Biome organization and lead by example the community.
 
 - Push access to the [Biome GitHub org][gh-org], this includes all repositories
 - `Core contributor` status on the [Biome Discord server][discord]

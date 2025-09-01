@@ -103,30 +103,29 @@ impl Visitor for UnusedLabelVisitor {
                 } else if let Some(label_stmt) = JsLabeledStatement::cast_ref(node) {
                     // Ignore unbreakable statements.
                     // It is sometimes use to mark debug-only statements.
-                    if is_breakable_labeled_statement(&label_stmt.body()) {
-                        if let Ok(label_tok) = label_stmt.label_token() {
-                            self.insert(label_tok.token_text_trimmed());
-                        }
+                    if is_breakable_labeled_statement(&label_stmt.body())
+                        && let Ok(label_tok) = label_stmt.label_token()
+                    {
+                        self.insert(label_tok.token_text_trimmed());
                     }
                 } else if let Some(break_stmt) = JsBreakStatement::cast_ref(node) {
                     if let Some(label_tok) = break_stmt.label_token() {
                         self.remove(label_tok.token_text_trimmed());
                     }
-                } else if let Some(continue_stmt) = JsContinueStatement::cast_ref(node) {
-                    if let Some(label_tok) = continue_stmt.label_token() {
-                        self.remove(label_tok.token_text_trimmed());
-                    }
+                } else if let Some(continue_stmt) = JsContinueStatement::cast_ref(node)
+                    && let Some(label_tok) = continue_stmt.label_token()
+                {
+                    self.remove(label_tok.token_text_trimmed());
                 }
             }
             WalkEvent::Leave(node) => {
                 if AnyJsControlFlowRoot::can_cast(node.kind()) {
                     self.root_id -= 1;
-                } else if let Some(label_stmt) = JsLabeledStatement::cast_ref(node) {
-                    if let Ok(label_tok) = label_stmt.label_token() {
-                        if self.remove(label_tok.token_text_trimmed()) {
-                            ctx.match_query(UnusedLabel(label_stmt));
-                        }
-                    }
+                } else if let Some(label_stmt) = JsLabeledStatement::cast_ref(node)
+                    && let Ok(label_tok) = label_stmt.label_token()
+                    && self.remove(label_tok.token_text_trimmed())
+                {
+                    ctx.match_query(UnusedLabel(label_stmt));
                 }
             }
         }

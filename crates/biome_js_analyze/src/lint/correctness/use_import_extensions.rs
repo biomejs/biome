@@ -1,5 +1,5 @@
 use biome_diagnostics::Severity;
-use biome_module_graph::ResolvedPath;
+use biome_module_graph::JsImportPath;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
 
@@ -145,7 +145,7 @@ impl Rule for UseImportExtensions {
         let node = ctx.query();
         let resolved_path = module_info
             .get_import_path_by_js_node(node)
-            .and_then(ResolvedPath::as_path)?;
+            .and_then(JsImportPath::as_path)?;
 
         get_extensionless_import(node, resolved_path, force_js_extensions)
     }
@@ -251,8 +251,9 @@ fn get_extensionless_import(
     };
 
     let is_index_file = resolved_stem.is_some_and(|stem| stem == "index");
+    let import_path_ends_with_index = path.file_name().is_some_and(|name| name == "index");
 
-    let new_path = if is_index_file {
+    let new_path = if is_index_file && !import_path_ends_with_index {
         let mut path_parts = path.as_str().split('/');
 
         // Remove trailing slash and useless path segment.

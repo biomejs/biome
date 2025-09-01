@@ -8,8 +8,7 @@ use proc_macro2::Span;
 use quote::*;
 use std::{
     collections::HashMap,
-    ffi::OsStr,
-    path::{Component, Path, PathBuf},
+    path::{Path, PathBuf},
 };
 use syn::parse::ParseStream;
 
@@ -185,6 +184,23 @@ impl Arguments {
         let files = self.get_all_files()?;
         let mut modules = Modules::default();
 
+        // Compute static (non-glob) prefix components from the provided glob pattern.
+        let pattern_value = match &self.pattern.lit {
+            syn::Lit::Str(v) => v.value(),
+            _ => String::new(),
+        };
+        let static_components: Vec<String> = pattern_value
+            .split('/')
+            .take_while(|comp| {
+                // Stop at the first component that contains any glob metacharacters
+                !comp.contains('*')
+                    && !comp.contains('?')
+                    && !comp.contains('[')
+                    && !comp.contains('{')
+            })
+            .map(|s| s.to_string())
+            .collect();
+
         for file in files.flatten() {
             let Variables {
                 test_name,
@@ -195,13 +211,53 @@ impl Arguments {
 
             let test_name = transform_file_name(&test_name);
 
-            let path = Path::new(&test_full_path)
+            // Build module path components based on directories relative to the static (non-glob) prefix.
+            let parent_components: Vec<String> = Path::new(&test_full_path)
                 .parent()
-                .into_iter()
-                .flat_map(|path| path.components())
-                .map(Component::as_os_str)
-                .skip_while(|item| item.as_encoded_bytes() != b"specs")
-                .filter_map(OsStr::to_str);
+                .map(|p| {
+                    p.components()
+                        .filter_map(|c| c.as_os_str().to_str().map(|s| s.to_string()))
+                        .collect::<Vec<String>>()
+                })
+                .unwrap_or_default();
+
+            // Find where the static prefix appears in the file path; include the last static component (e.g. "ok")
+            let mut start_idx: Option<usize> = None;
+            if !static_components.is_empty() && static_components.len() < parent_components.len() {
+                'outer: for i in 0..=parent_components
+                    .len()
+                    .saturating_sub(static_components.len())
+                {
+                    for (j, sc) in static_components.iter().enumerate() {
+                        if parent_components[i + j] != *sc {
+                            continue 'outer;
+                        }
+                    }
+                    start_idx = Some(i + static_components.len() - 1);
+                    break;
+                }
+            }
+            // Fallback: try to align by the last component of the static prefix
+            if start_idx.is_none()
+                && let Some(last_sc) = static_components.last()
+                && let Some(pos) = parent_components.iter().rposition(|c| c == last_sc)
+            {
+                start_idx = Some(pos);
+            }
+            // Fallback: start after a "tests" directory if present
+            if start_idx.is_none()
+                && let Some(pos) = parent_components.iter().position(|c| c == "tests")
+            {
+                start_idx = Some(pos + 1);
+            }
+
+            let path_components: Vec<String> = match start_idx {
+                Some(start) if start < parent_components.len() => {
+                    parent_components[start..].to_vec()
+                }
+                _ => Vec::new(),
+            };
+            let path = path_components.iter().map(|s| s.as_str());
 
             let span = self.pattern.lit.span();
             let test_name = syn::Ident::new(&test_name, span);

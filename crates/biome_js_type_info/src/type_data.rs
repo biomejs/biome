@@ -556,6 +556,9 @@ pub struct NamedFunctionParameter {
 
     /// Whether the parameter is optional or not.
     pub is_optional: bool,
+
+    /// Whether this is a rest parameter (`...`) or not.
+    pub is_rest: bool,
 }
 
 /// A function parameter that is bound to either one or more positional
@@ -1462,7 +1465,7 @@ impl ScopeId {
 
     pub const fn index(self) -> usize {
         // SAFETY: The internal representation ensures that the value is never equal to 0.
-        // Thus, it is safe to substract 1.
+        // Thus, it is safe to subtract 1.
         (unsafe { self.0.get().unchecked_sub(1) }) as usize
     }
 }
@@ -1474,6 +1477,10 @@ pub struct Union(pub(super) Box<[TypeReference]>);
 impl Union {
     pub fn contains(&self, ty: &TypeReference) -> bool {
         self.0.contains(ty)
+    }
+
+    pub fn into_types(self) -> Vec<TypeReference> {
+        self.0.into_vec()
     }
 
     pub fn types(&self) -> &[TypeReference] {

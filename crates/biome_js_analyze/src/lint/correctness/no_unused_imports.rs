@@ -126,7 +126,7 @@ impl DerefMut for JsDocTypeModel {
 }
 
 #[derive(Default)]
-struct JsDocTypeCollectorVisitior {
+struct JsDocTypeCollectorVisitor {
     jsdoc_types: JsDocTypeModel,
 }
 
@@ -134,7 +134,7 @@ declare_node_union! {
     pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
 }
 
-impl Visitor for JsDocTypeCollectorVisitior {
+impl Visitor for JsDocTypeCollectorVisitor {
     type Language = JsLanguage;
     fn visit(
         &mut self,
@@ -247,7 +247,7 @@ impl Queryable for NoUnusedImportsQuery {
         root: &<Self::Language as Language>::Root,
     ) {
         analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
-        analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitior::default);
+        analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitor::default);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -546,10 +546,9 @@ impl Rule for NoUnusedImports {
                 for unused_specifier in unused_named_specifiers {
                     if let Some(NodeOrToken::Token(next_token)) =
                         unused_specifier.syntax().next_sibling_or_token()
+                        && next_token.kind() == T![,]
                     {
-                        if next_token.kind() == T![,] {
-                            mutation.remove_token(next_token);
-                        }
+                        mutation.remove_token(next_token);
                     }
                     mutation.remove_node(unused_specifier.clone());
                 }

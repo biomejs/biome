@@ -98,7 +98,7 @@ impl Rule for NoUselessThisAlias {
             }
             is_this_alias = true;
         }
-        // This cehck is useful when the loop is not executed (no write).
+        // This check is useful when the loop is not executed (no write).
         if !is_this_alias {
             return None;
         }
@@ -155,10 +155,10 @@ impl Rule for NoUselessThisAlias {
         }
         let var_declarator_list = var_decl.declarators();
         if var_declarator_list.len() == 1 {
-            if let Some(statement) = JsVariableStatement::cast(var_decl.syntax().parent()?) {
-                if statement.semicolon_token().is_some() {
-                    mutation.remove_token(statement.semicolon_token()?);
-                }
+            if let Some(statement) = JsVariableStatement::cast(var_decl.syntax().parent()?)
+                && statement.semicolon_token().is_some()
+            {
+                mutation.remove_token(statement.semicolon_token()?);
             }
             mutation.remove_node(var_decl);
         } else {

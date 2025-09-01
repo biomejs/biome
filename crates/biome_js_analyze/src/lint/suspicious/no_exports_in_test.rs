@@ -111,41 +111,41 @@ impl Visitor for AnyExportInTestVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if let Some(maybe_export) = MaybeExport::cast_ref(node) {
-                    if maybe_export.is_export() {
-                        self.exports.push(maybe_export);
-                    }
+                if let Some(maybe_export) = MaybeExport::cast_ref(node)
+                    && maybe_export.is_export()
+                {
+                    self.exports.push(maybe_export);
                 }
 
-                if !self.has_test {
-                    if let Some(call_expr) = JsCallExpression::cast_ref(node) {
-                        self.has_test = call_expr
-                            .is_test_call_expression()
-                            .ok()
-                            .and_then(|is_test_call_expr| {
-                                if is_test_call_expr {
-                                    // Ensure the test call is at the top level to avoid mistakenly identifying files with in-source testing as test files.
-                                    // Example:
-                                    // ```js
-                                    // if (import.meta.vitest) {
-                                    //   const { describe, expect } = import.meta.vitest;
-                                    //   describe("a test", () => {
-                                    //     expect(test).toEqual("");
-                                    //   });
-                                    // }
-                                    // ```
-                                    // The ancestors of the top-level call expression are:
-                                    // [JsScript, JsStatementList, JsExpressionStatement, JsCallExpression]
-                                    // [JsModule, JsModuleItemList, JsExpressionStatement, JsCallExpression]
-                                    //
-                                    // **Note**: The ancestors start with the current node.
-                                    Some(call_expr.syntax().ancestors().count() == 4)
-                                } else {
-                                    None
-                                }
-                            })
-                            .unwrap_or(false);
-                    }
+                if !self.has_test
+                    && let Some(call_expr) = JsCallExpression::cast_ref(node)
+                {
+                    self.has_test = call_expr
+                        .is_test_call_expression()
+                        .ok()
+                        .and_then(|is_test_call_expr| {
+                            if is_test_call_expr {
+                                // Ensure the test call is at the top level to avoid mistakenly identifying files with in-source testing as test files.
+                                // Example:
+                                // ```js
+                                // if (import.meta.vitest) {
+                                //   const { describe, expect } = import.meta.vitest;
+                                //   describe("a test", () => {
+                                //     expect(test).toEqual("");
+                                //   });
+                                // }
+                                // ```
+                                // The ancestors of the top-level call expression are:
+                                // [JsScript, JsStatementList, JsExpressionStatement, JsCallExpression]
+                                // [JsModule, JsModuleItemList, JsExpressionStatement, JsCallExpression]
+                                //
+                                // **Note**: The ancestors start with the current node.
+                                Some(call_expr.syntax().ancestors().count() == 4)
+                            } else {
+                                None
+                            }
+                        })
+                        .unwrap_or(false);
                 }
             }
             WalkEvent::Leave(node) => {

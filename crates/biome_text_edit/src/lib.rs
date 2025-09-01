@@ -105,7 +105,7 @@ impl TextEdit {
         self.into_iter()
     }
 
-    /// Return the text value of range interned in this [TextEdit] dictionnary
+    /// Return the text value of range interned in this [TextEdit] dictionary
     pub fn get_text(&self, range: TextRange) -> &str {
         &self.dictionary[range]
     }
@@ -170,8 +170,8 @@ impl TextEditBuilder {
         self.edit.ops.is_empty()
     }
 
-    /// Add a piece of string to the dictionnary, returning the corresponding
-    /// range in the dictionnary string
+    /// Add a piece of string to the dictionary, returning the corresponding
+    /// range in the dictionary string
     fn intern(&mut self, value: &str) -> TextRange {
         let value_bytes = value.as_bytes();
         let value_len = TextSize::of(value);
@@ -261,7 +261,7 @@ impl TextEditBuilder {
     }
 
     /// A higher level utility function for the text edit builder to generate
-    /// mutiple text edit steps (equal, delete and insert) to represent the
+    /// multiple text edit steps (equal, delete and insert) to represent the
     /// diff from the old string to the new string.
     pub fn with_unicode_words_diff(&mut self, old: &str, new: &str) {
         let diff = TextDiff::configure()

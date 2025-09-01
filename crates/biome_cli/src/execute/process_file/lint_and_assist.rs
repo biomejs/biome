@@ -152,12 +152,11 @@ pub(crate) fn analyze_with_guard<'ctx>(
                 })
                 .map(|diagnostic| {
                     let category = diagnostic.category();
-                    if let Some(category) = category {
-                        if category.name().starts_with("assist/")
-                            && ctx.execution.should_enforce_assist()
-                        {
-                            return diagnostic.with_severity(Severity::Error);
-                        }
+                    if let Some(category) = category
+                        && category.name().starts_with("assist/")
+                        && ctx.execution.should_enforce_assist()
+                    {
+                        return diagnostic.with_severity(Severity::Error);
                     }
                     Error::from(diagnostic)
                 })

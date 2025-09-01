@@ -10,7 +10,8 @@
 	},
 	"devDependencies": {
 		"@testing-library/react": "1.0.0",
-		"@types/lodash": "1.0.0"
+		"@types/lodash": "1.0.0",
+    "type-fest": "1.0.0"
 	},
 	"peerDependencies": {
 		"peer-dep": "1.0.0"

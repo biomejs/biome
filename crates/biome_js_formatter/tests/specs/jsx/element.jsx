@@ -22,7 +22,7 @@ a = <div></div>;
 a = <div> </div>;
 
 // Template
-a = <div>{`A Long Tempalte String That uses ${5 + 4} that will eventually break across multiple lines ${40 / 3 * 45}`}</div>;
+a = <div>{`A Long Template String That uses ${5 + 4} that will eventually break across multiple lines ${40 / 3 * 45}`}</div>;
 
 // Meaningful text after self closing element adds a hard line break
 a = <div><pre className="h-screen overflow-y-scroll" />adefg</div>;

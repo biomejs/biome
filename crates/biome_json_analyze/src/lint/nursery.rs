@@ -4,5 +4,4 @@
 
 use biome_analyze::declare_lint_group;
 pub mod no_duplicate_dependencies;
-pub mod no_quickfix_biome;
-declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_duplicate_dependencies :: NoDuplicateDependencies , self :: no_quickfix_biome :: NoQuickfixBiome ,] } }
+declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_duplicate_dependencies :: NoDuplicateDependencies ,] } }

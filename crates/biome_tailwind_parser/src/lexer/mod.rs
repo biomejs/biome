@@ -6,6 +6,7 @@ use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, 
 use biome_rowan::{SyntaxKind, TextLen};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
+use biome_tailwind_syntax::metadata::BASENAMES_WITH_DASHES;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextSize};
 
 pub(crate) struct TailwindLexer<'src> {
@@ -59,11 +60,11 @@ impl<'src> TailwindLexer<'src> {
             b'/' => self.consume_byte(T![/]),
             _ if current.is_ascii_alphabetic() => self.consume_base(),
             _ => {
-                if self.position == 0 {
-                    if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
-                        self.unicode_bom_length = bom_size;
-                        return bom;
-                    }
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
                 }
                 self.consume_unexpected_character()
             }
@@ -90,6 +91,18 @@ impl<'src> TailwindLexer<'src> {
         }
     }
 
+    /// Consume a token in the arbitrary candidate context
+    fn consume_token_arbitrary_candidate(&mut self, current: u8) -> TailwindSyntaxKind {
+        match current {
+            bracket @ (b'[' | b']' | b'(' | b')') => self.consume_bracket(bracket),
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b':' => self.consume_byte(T![:]),
+            _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_PROPERTY, b':'),
+            _ if self.current_kind == T![:] => self.consume_bracketed_thing(TW_VALUE, b']'),
+            _ => self.consume_named_value(),
+        }
+    }
+
     fn consume_bracket(&mut self, byte: u8) -> TailwindSyntaxKind {
         let kind = match byte {
             b'[' => T!['['],
@@ -103,6 +116,17 @@ impl<'src> TailwindLexer<'src> {
 
     fn consume_base(&mut self) -> TailwindSyntaxKind {
         self.assert_current_char_boundary();
+
+        // Find the longest matching base name
+        let source_from_position = &self.source[self.position..];
+        let base_name = BASENAMES_WITH_DASHES
+            .iter()
+            .rfind(|&name| source_from_position.starts_with(name));
+
+        if let Some(base_name) = base_name {
+            self.advance(base_name.len());
+            return TW_BASE;
+        }
 
         while let Some(byte) = self.current_byte() {
             let char = self.current_char_unchecked();
@@ -231,6 +255,9 @@ impl<'src> Lexer<'src> for TailwindLexer<'src> {
                     TailwindLexContext::Arbitrary => self.consume_token_arbitrary(current),
                     TailwindLexContext::ArbitraryVariant => {
                         self.consume_token_arbitrary_variant(current)
+                    }
+                    TailwindLexContext::ArbitraryCandidate => {
+                        self.consume_token_arbitrary_candidate(current)
                     }
                 },
                 None => EOF,

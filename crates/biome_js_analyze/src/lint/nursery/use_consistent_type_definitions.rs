@@ -66,7 +66,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentTypeDefinitions {
-        version: "next",
+        version: "2.1.4",
         name: "useConsistentTypeDefinitions",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("consistent-type-definitions").same()],
@@ -276,27 +276,25 @@ fn convert_type_alias_to_interface(
                         .syntax()
                         .clone()
                         .replace_child(first_token.clone().into(), new_first_token.into())
+                        && let Some(new_member) = AnyTsTypeMember::cast(new_syntax)
                     {
-                        if let Some(new_member) = AnyTsTypeMember::cast(new_syntax) {
-                            updated_member = new_member;
-                        }
+                        updated_member = new_member;
                     }
                 }
 
                 // For property signature members, clean up the separator token
-                if let AnyTsTypeMember::TsPropertySignatureTypeMember(prop) = &updated_member {
-                    if let Some(sep_token) = prop.separator_token() {
-                        // Remove any trailing whitespace from the separator (semicolon)
-                        let clean_sep = sep_token.with_trailing_trivia([]);
-                        if let Some(new_syntax) = updated_member
-                            .syntax()
-                            .clone()
-                            .replace_child(sep_token.into(), clean_sep.into())
-                        {
-                            if let Some(new_member) = AnyTsTypeMember::cast(new_syntax) {
-                                updated_member = new_member;
-                            }
-                        }
+                if let AnyTsTypeMember::TsPropertySignatureTypeMember(prop) = &updated_member
+                    && let Some(sep_token) = prop.separator_token()
+                {
+                    // Remove any trailing whitespace from the separator (semicolon)
+                    let clean_sep = sep_token.with_trailing_trivia([]);
+                    if let Some(new_syntax) = updated_member
+                        .syntax()
+                        .clone()
+                        .replace_child(sep_token.into(), clean_sep.into())
+                        && let Some(new_member) = AnyTsTypeMember::cast(new_syntax)
+                    {
+                        updated_member = new_member;
                     }
                 }
 

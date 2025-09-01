@@ -78,7 +78,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         // >
         // ```
         //
-        // This formatter is resposible for making the determination of whether or not
+        // This formatter is responsible for making the determination of whether or not
         // to borrow, while the child formatters are responsible for actually printing
         // the tokens. `HtmlElementList` prints them if they are borrowed, otherwise
         // they are printed by their original formatter.

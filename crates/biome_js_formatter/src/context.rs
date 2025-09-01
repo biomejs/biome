@@ -176,6 +176,9 @@ pub struct JsFormatOptions {
 
     /// Whether to expand object and array literals to multiple lines. Defaults to "auto".
     expand: Expand,
+
+    /// When formatting binary expressions, whether to break the line before or after the operator. Defaults to "after".
+    operator_linebreak: OperatorLinebreak,
 }
 
 impl JsFormatOptions {
@@ -196,6 +199,7 @@ impl JsFormatOptions {
             bracket_same_line: BracketSameLine::default(),
             attribute_position: AttributePosition::default(),
             expand: Expand::default(),
+            operator_linebreak: OperatorLinebreak::default(),
         }
     }
 
@@ -269,6 +273,11 @@ impl JsFormatOptions {
         self
     }
 
+    pub fn with_operator_linebreak(mut self, operator_linebreak: OperatorLinebreak) -> Self {
+        self.operator_linebreak = operator_linebreak;
+        self
+    }
+
     pub fn set_arrow_parentheses(&mut self, arrow_parentheses: ArrowParentheses) {
         self.arrow_parentheses = arrow_parentheses;
     }
@@ -325,6 +334,10 @@ impl JsFormatOptions {
         self.semicolons = semicolons;
     }
 
+    pub fn set_operator_linebreak(&mut self, operator_linebreak: OperatorLinebreak) {
+        self.operator_linebreak = operator_linebreak;
+    }
+
     pub fn arrow_parentheses(&self) -> ArrowParentheses {
         self.arrow_parentheses
     }
@@ -372,6 +385,10 @@ impl JsFormatOptions {
     pub fn expand(&self) -> Expand {
         self.expand
     }
+
+    pub fn operator_linebreak(&self) -> OperatorLinebreak {
+        self.operator_linebreak
+    }
 }
 
 impl FormatOptions for JsFormatOptions {
@@ -411,7 +428,8 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
         writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())?;
         writeln!(f, "Attribute Position: {}", self.attribute_position)?;
-        writeln!(f, "Expand lists: {}", self.expand)
+        writeln!(f, "Expand lists: {}", self.expand)?;
+        writeln!(f, "Operator linebreak: {}", self.operator_linebreak)
     }
 }
 
@@ -539,6 +557,54 @@ impl fmt::Display for ArrowParentheses {
         match self {
             Self::AsNeeded => write!(f, "As needed"),
             Self::Always => write!(f, "Always"),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum OperatorLinebreak {
+    /// The operator is placed after the expression
+    #[default]
+    After,
+    /// The operator is placed before the expression
+    Before,
+}
+
+impl OperatorLinebreak {
+    pub const fn is_before(&self) -> bool {
+        matches!(self, Self::Before)
+    }
+
+    pub const fn is_after(&self) -> bool {
+        matches!(self, Self::After)
+    }
+}
+
+impl FromStr for OperatorLinebreak {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "after" => Ok(Self::After),
+            "before" => Ok(Self::Before),
+            _ => Err(
+                "Value not supported for Operator linebreak. Supported values are 'before' and 'after'.",
+            ),
+        }
+    }
+}
+
+impl fmt::Display for OperatorLinebreak {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::After => write!(f, "After"),
+            Self::Before => write!(f, "Before"),
         }
     }
 }

@@ -591,7 +591,7 @@ fn should_ignore_nested_configuration_in_ignored_directory() {
         "biome.jsonc",
         r#"{
     "files": {
-        "includes": ["**/*.js", "!vendor/**"],
+        "includes": ["**/*.js", "!vendor"],
     },
     "linter": {
         "rules": {
@@ -628,6 +628,49 @@ fn should_ignore_nested_configuration_in_ignored_directory() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_ignore_nested_configuration_in_ignored_directory",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_ignore_linter_nested_file() {
+    let mut fs = TemporaryFs::new("should_ignore_linter_nested_file");
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "files": {
+        "includes": ["**"],
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "package/biome.jsonc",
+        r#"{
+    "extends": "//",
+    "linter": {
+        "includes": ["**", "!**/*.test.js"]
+    }
+}"#,
+    );
+
+    fs.create_file("file.js", "let a; debugger");
+
+    fs.create_file("package/file.test.js", "let a; debugger");
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_ignore_linter_nested_file",
         fs.create_mem(),
         console,
         result,

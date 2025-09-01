@@ -88,8 +88,6 @@ pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     suppression_action: Box<dyn SuppressionAction<Language = L>>,
     /// Handles analyzer signals emitted by individual rules
     emit_signal: SignalHandler<'analyzer, L, Break>,
-    /// The rule categories used during the run of the analyzer
-    categories: RuleCategories,
 }
 
 pub struct AnalyzerContext<'a, L: Language> {
@@ -113,7 +111,6 @@ where
         parse_suppression_comment: SuppressionParser<Diag>,
         suppression_action: Box<dyn SuppressionAction<Language = L>>,
         emit_signal: SignalHandler<'analyzer, L, Break>,
-        categories: RuleCategories,
     ) -> Self {
         Self {
             phases: BTreeMap::new(),
@@ -123,7 +120,6 @@ where
             parse_suppression_comment,
             suppression_action,
             emit_signal,
-            categories,
         }
     }
 
@@ -150,7 +146,6 @@ where
             mut emit_signal,
             suppression_action,
             metadata: _,
-            categories,
         } = self;
 
         let mut line_index = 0;
@@ -171,7 +166,6 @@ where
                 suppression_action: suppression_action.as_ref(),
                 options: ctx.options,
                 suppressions: &mut suppressions,
-                categories,
                 deny_top_level_suppressions: false,
             };
 
@@ -329,8 +323,6 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     options: &'phase AnalyzerOptions,
     /// Tracks all suppressions during the analyzer phase
     suppressions: &'phase mut Suppressions<'analyzer>,
-    /// The current categories
-    categories: RuleCategories,
     /// Whether we have already encountered a token that can't precede top level suppressions
     deny_top_level_suppressions: bool,
 }
@@ -455,10 +447,10 @@ where
     fn flush_matches(&mut self, cutoff: Option<TextSize>) -> ControlFlow<Break> {
         while let Some(entry) = self.signal_queue.peek() {
             let start = entry.text_range.start();
-            if let Some(cutoff) = cutoff {
-                if start >= cutoff {
-                    break;
-                }
+            if let Some(cutoff) = cutoff
+                && start >= cutoff
+            {
+                break;
             }
 
             if self
@@ -571,18 +563,6 @@ where
                     )
                 });
                 (self.emit_signal)(&signal)?;
-            }
-
-            if !self.categories.contains(suppression.category) {
-                let signal = DiagnosticSignal::new(|| {
-                    AnalyzerSuppressionDiagnostic::new(
-                        category!("suppressions/unused"),
-                        suppression.ignore_range.unwrap_or(range),
-                        "Suppression comment has no effect because the tool is not enabled.",
-                    )
-                });
-                (self.emit_signal)(&signal)?;
-                continue;
             }
 
             if let Err(diagnostic) = self.suppressions.push_suppression(

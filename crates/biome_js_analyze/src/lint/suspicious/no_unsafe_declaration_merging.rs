@@ -72,16 +72,13 @@ impl Rule for NoUnsafeDeclarationMerging {
                 binding.tree().declaration()
             {
                 // This is not unsafe of merging an interface and an ambient class.
-                if !class.is_ambient() {
-                    if let Ok(id) = class.id() {
-                        if let Some(id) = id.as_js_identifier_binding() {
-                            if let Ok(name) = id.name_token() {
-                                if name.text() == interface_name.text() {
-                                    return Some(name.text_trimmed_range());
-                                }
-                            }
-                        }
-                    }
+                if !class.is_ambient()
+                    && let Ok(id) = class.id()
+                    && let Some(id) = id.as_js_identifier_binding()
+                    && let Ok(name) = id.name_token()
+                    && name.text() == interface_name.text()
+                {
+                    return Some(name.text_trimmed_range());
                 }
             }
         }
