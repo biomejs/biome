@@ -66,9 +66,9 @@ impl SemanticEventExtractor {
                 || kind == CSS_MEDIA_AT_RULE
                 || kind == CSS_SUPPORTS_AT_RULE =>
             {
-                self.stash.push_back(SemanticEvent::RuleStart(
-                    AnyRuleStart::cast(node.clone()).unwrap(),
-                ));
+                if let Some(start) = AnyRuleStart::cast(node.clone()) {
+                    self.stash.push_back(SemanticEvent::RuleStart(start));
+                }
             }
             CSS_SELECTOR_LIST => {
                 if !matches!(

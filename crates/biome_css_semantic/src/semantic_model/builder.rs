@@ -191,12 +191,14 @@ impl SemanticModelBuilder {
                     };
 
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
-
+                    let combined = parent_specificity + specificity;
                     current_rule.selectors.push(Selector {
                         node,
-                        specificity: parent_specificity + specificity,
+                        specificity: combined,
                     });
-                    current_rule.specificity += parent_specificity + specificity;
+                    if combined > current_rule.specificity {
+                        current_rule.specificity = combined;
+                    }
                 }
             }
             SemanticEvent::PropertyDeclaration {
