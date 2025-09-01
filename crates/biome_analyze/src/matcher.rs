@@ -210,8 +210,8 @@ mod tests {
     use super::MatchQueryParams;
     use crate::{
         Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry,
-        Never, Phases, QueryMatcher, RuleCategories, RuleCategory, RuleKey, ServiceBag,
-        SignalEntry, SuppressionAction, SyntaxVisitor, signals::DiagnosticSignal,
+        Never, Phases, QueryMatcher, RuleCategory, RuleKey, ServiceBag, SignalEntry,
+        SuppressionAction, SyntaxVisitor, signals::DiagnosticSignal,
     };
     use crate::{AnalyzerOptions, AnalyzerSuppression};
     use biome_diagnostics::{Diagnostic, Severity};
@@ -425,7 +425,6 @@ mod tests {
             parse_suppression_comment,
             Box::new(TestAction),
             &mut emit_signal,
-            RuleCategories::all(),
         );
 
         analyzer.add_visitor(Phases::Syntax, Box::<SyntaxVisitor<RawLanguage>>::default());

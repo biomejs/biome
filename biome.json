@@ -24,6 +24,7 @@
       "**/packages/@biomejs/**",
       "**/packages/tailwindcss-config-analyzer/**",
       "**/benchmark/**",
+      "plugins/*.js",
       "scripts/**",
       "!**/crates",
       "!**/dist",
