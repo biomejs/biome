@@ -213,7 +213,11 @@ impl SemanticEventExtractor {
                         syntax = Some(prop.value().to_trimmed_string().to_string());
                     }
                     "inherits" => {
-                        inherits = Some(prop.value().to_trimmed_string() == "true");
+                        inherits = Some(
+                            prop.value()
+                                .to_trimmed_string()
+                                .eq_ignore_ascii_case("true"),
+                        );
                     }
                     _ => {}
                 }

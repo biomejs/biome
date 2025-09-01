@@ -322,8 +322,6 @@ mod specificity_tests {
         div {
         }
     }
-
-}
 }"#;
         let model = to_semantic_model(source);
 

@@ -44,7 +44,13 @@ impl Iterator for CssComplexSelectorIterator {
     fn next(&mut self) -> Option<Self::Item> {
         let current = self.next.take()?;
 
-        self.next = current.left().ok()?.as_css_complex_selector().cloned();
-        current.right().ok()?.as_css_compound_selector().cloned()
+        self.next = match current.left() {
+            Ok(left) => left.as_css_complex_selector().cloned(),
+            Err(_) => None,
+        };
+        current
+            .right()
+            .ok()
+            .and_then(|r| r.as_css_compound_selector().cloned())
     }
 }
