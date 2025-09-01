@@ -116,7 +116,7 @@ impl Rule for UseConsistentArrowReturn {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Remove the return statement" }.to_owned(),
+            markup! { "Remove the return statement." }.to_owned(),
             mutation,
         ))
     }
