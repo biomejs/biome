@@ -7,6 +7,7 @@ use biome_formatter::{
 };
 use biome_rowan::{AstNode, TextSize};
 
+#[derive(Debug, Default)]
 struct FormatSemanticModelOptions;
 
 impl FormatOptions for FormatSemanticModelOptions {
@@ -36,13 +37,16 @@ impl FormatOptions for FormatSemanticModelOptions {
     }
 }
 
-struct FormatSemanticModelContext;
+#[derive(Debug, Default)]
+struct FormatSemanticModelContext {
+    options: FormatSemanticModelOptions,
+}
 
 impl FormatContext for FormatSemanticModelContext {
     type Options = FormatSemanticModelOptions;
 
     fn options(&self) -> &Self::Options {
-        &FormatSemanticModelOptions
+        &self.options
     }
 
     fn source_map(&self) -> Option<&TransformSourceMap> {
@@ -52,7 +56,7 @@ impl FormatContext for FormatSemanticModelContext {
 
 impl std::fmt::Display for SemanticModel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let formatted = biome_formatter::format!(FormatSemanticModelContext, [&self])
+        let formatted = biome_formatter::format!(FormatSemanticModelContext::default(), [&self])
             .expect("Formatting not to throw any FormatErrors");
         f.write_str(
             formatted

@@ -4,11 +4,13 @@ use biome_css_syntax::{
     CssNestedQualifiedRule, CssQualifiedRule, CssRoot, CssSupportsAtRule,
 };
 use biome_rowan::{
-    AstNode, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText, declare_node_union,
+    AstNode, AstNodeList, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
+    declare_node_union,
 };
 use rustc_hash::FxHashMap;
 use std::hash::Hash;
 use std::{collections::BTreeMap, rc::Rc};
+
 /// The façade for all semantic information of a CSS document.
 ///
 /// This struct provides access to the root, rules, and individual nodes of the CSS document.
@@ -38,8 +40,8 @@ impl SemanticModel {
         &self.data.global_custom_variables
     }
 
-    pub fn get_rule_by_id(&self, id: RuleId) -> Option<&Rule> {
-        self.data.rules_by_id.get(&id)
+    pub fn get_rule_by_id(&self, id: &RuleId) -> Option<&Rule> {
+        self.data.rules_by_id.get(id)
     }
 
     /// Returns the rule that contains the given range.
@@ -112,7 +114,7 @@ pub(crate) struct SemanticModelData {
 #[derive(Debug, Clone)]
 pub struct Rule {
     pub(crate) id: RuleId,
-    pub(crate) node: RuleNode,
+    pub(crate) node: AnyRuleStart,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
@@ -126,27 +128,12 @@ pub struct Rule {
     pub(crate) specificity: Specificity,
 }
 
-declare_node_union! {
-    pub RuleNode = CssQualifiedRule | CssNestedQualifiedRule | CssMediaAtRule | CssSupportsAtRule
-}
-
-impl RuleNode {
-    pub fn text_trimmed_range(&self) -> TextRange {
-        match self {
-            Self::CssQualifiedRule(node) => node.syntax().text_trimmed_range(),
-            Self::CssNestedQualifiedRule(node) => node.syntax().text_trimmed_range(),
-            Self::CssMediaAtRule(node) => node.syntax().text_trimmed_range(),
-            Self::CssSupportsAtRule(node) => node.syntax().text_trimmed_range(),
-        }
-    }
-}
-
 impl Rule {
     pub fn id(&self) -> RuleId {
         self.id
     }
 
-    pub fn node(&self) -> &RuleNode {
+    pub fn node(&self) -> &AnyRuleStart {
         &self.node
     }
 
@@ -162,8 +149,8 @@ impl Rule {
         &self.declarations
     }
 
-    pub fn parent_id(&self) -> Option<RuleId> {
-        self.parent_id
+    pub fn parent_id(&self) -> Option<&RuleId> {
+        self.parent_id.as_ref()
     }
 
     pub fn child_ids(&self) -> &[RuleId] {
@@ -175,12 +162,43 @@ impl Rule {
     }
 
     pub const fn is_media_rule(&self) -> bool {
-        matches!(self.node, RuleNode::CssMediaAtRule(_))
+        matches!(self.node, AnyRuleStart::CssMediaAtRule(_))
+    }
+}
+
+declare_node_union! {
+    pub AnyRuleStart = CssQualifiedRule | CssNestedQualifiedRule | CssMediaAtRule | CssSupportsAtRule
+}
+
+impl AnyRuleStart {
+    pub fn text_trimmed_range(&self) -> TextRange {
+        match self {
+            Self::CssQualifiedRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssNestedQualifiedRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssMediaAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssSupportsAtRule(node) => node.syntax().text_trimmed_range(),
+        }
     }
 }
 
 declare_node_union! {
     pub AnyCssSelectorLike = CssCompoundSelector | CssComplexSelector
+}
+
+impl AnyCssSelectorLike {
+    pub fn has_nesting_selectors(&self) -> bool {
+        match self {
+            Self::CssCompoundSelector(node) => !node.nesting_selectors().is_empty(),
+            Self::CssComplexSelector(node) => node.nesting_level() > 0,
+        }
+    }
+
+    pub fn nesting_level(&self) -> usize {
+        match self {
+            Self::CssCompoundSelector(node) => node.nesting_selectors().len(),
+            Self::CssComplexSelector(node) => node.nesting_level(),
+        }
+    }
 }
 
 /// Represents a CSS selector.
@@ -248,9 +266,9 @@ impl std::ops::Add for Specificity {
 
 impl std::ops::AddAssign for Specificity {
     fn add_assign(&mut self, rhs: Self) {
-        self.0 = rhs.0;
-        self.1 = rhs.1;
-        self.2 = rhs.2;
+        self.0 += rhs.0;
+        self.1 += rhs.1;
+        self.2 += rhs.2;
     }
 }
 

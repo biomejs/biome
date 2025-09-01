@@ -75,7 +75,7 @@ mod tests {
         assert_eq!(rule.child_ids.len(), 1);
 
         let child_id = rule.child_ids.first().unwrap();
-        let child = model.get_rule_by_id(*child_id).unwrap();
+        let child = model.get_rule_by_id(child_id).unwrap();
 
         assert_eq!(child.selectors.len(), 1);
         assert_eq!(child.declarations.len(), 1);
@@ -103,7 +103,7 @@ mod tests {
         assert_eq!(rule.child_ids.len(), 1);
 
         let child_id = rule.child_ids.first().unwrap();
-        let child = model.get_rule_by_id(*child_id).unwrap();
+        let child = model.get_rule_by_id(child_id).unwrap();
         assert_eq!(child.selectors.len(), 1);
         assert_eq!(child.declarations.len(), 1);
         assert_eq!(child.child_ids.len(), 0);
@@ -130,7 +130,7 @@ mod tests {
         assert_eq!(rule.child_ids.len(), 1);
 
         let child_id = rule.child_ids.first().unwrap();
-        let child = model.get_rule_by_id(*child_id).unwrap();
+        let child = model.get_rule_by_id(child_id).unwrap();
         assert_eq!(child.selectors.len(), 0);
         assert_eq!(child.declarations.len(), 1);
         assert_eq!(child.child_ids.len(), 0);
@@ -245,6 +245,31 @@ mod specificity_tests {
     }
 
     #[test]
+    fn selector_combinations() {
+        let source = "#div .div {} #div .div div {} .div .div {}";
+        let model = to_semantic_model(source);
+
+        let mut specificity = model.specificity_of_rules();
+
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(1, 1, 0),
+            "#div .div"
+        );
+
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(1, 1, 1),
+            "#div .div div"
+        );
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 2, 0),
+            ".div .div"
+        );
+    }
+
+    #[test]
     fn nested_selector() {
         let source = r#"div {
         & > span {}
@@ -290,6 +315,28 @@ mod specificity_tests {
     }
 
     #[test]
+    fn nested_selectors() {
+        let source = r#"
+#div {
+    .div {
+        div {
+        }
+    }
+
+}
+}"#;
+        let model = to_semantic_model(source);
+
+        let specificity = model.specificity_of_rules().collect::<Vec<_>>();
+
+        let mut specificity = specificity.into_iter();
+
+        assert_eq!(specificity.next().unwrap(), Specificity(1, 0, 0), "#div");
+        assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 0), ".div");
+        assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 1), "div");
+    }
+
+    #[test]
     fn nested_selectors_multiple_parents() {
         let source = r#"
 #div {
@@ -300,26 +347,51 @@ mod specificity_tests {
             & & & > p {}
         }
     }
-
-}
 }"#;
         let model = to_semantic_model(source);
 
         let specificity = model.specificity_of_rules().collect::<Vec<_>>();
 
-        assert_eq!(specificity.len(), 6);
-
         let mut specificity = specificity.into_iter();
 
         assert_eq!(specificity.next().unwrap(), Specificity(1, 0, 0), "#div");
-        assert_eq!(specificity.next().unwrap(), Specificity(0, 1, 0), ".div");
-        assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "div");
-        assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 2), "& > p");
-        assert_eq!(specificity.next().unwrap(), Specificity(0, 1, 1), "& & > p");
+        assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 0), ".div");
+        assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 1), "div");
+        assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 2), "& > p");
+        assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 1), "& & > p");
         assert_eq!(
             specificity.next().unwrap(),
             Specificity(1, 0, 1),
             "& & & > p"
         );
+    }
+
+    #[test]
+    fn comma_separated_with_parent() {
+        let source = r#"div, span { & > p {} }}"#;
+        let model = to_semantic_model(source);
+
+        let specificity = model.specificity_of_rules().collect::<Vec<_>>();
+
+        assert_eq!(specificity.len(), 3);
+
+        let mut specificity = specificity.into_iter();
+
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "div");
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "span");
+        // FIXME what's the correct specificity?
+        // assert_eq!(specificity.next().unwrap(), Specificity(0, 0, 1), "& > p");
+    }
+
+    #[test]
+    fn pseudo_selector() {
+        let source = r#":is(#fake#fake#fake#fake#fake#fake, *) g {}"#;
+        let model = to_semantic_model(source);
+
+        let specificity = model.specificity_of_rules().collect::<Vec<_>>();
+
+        let mut specificity = specificity.into_iter();
+
+        assert_eq!(specificity.next().unwrap(), Specificity(6, 0, 1));
     }
 }

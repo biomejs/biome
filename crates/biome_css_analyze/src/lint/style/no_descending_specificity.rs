@@ -136,6 +136,7 @@ fn find_descending_selector(
     }
 
     for selector in rule.selectors() {
+        eprintln!("{}", selector.specificity());
         let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
             continue;
         };
@@ -146,12 +147,21 @@ fn find_descending_selector(
         if let Some((last_text_range, last_specificity)) = visited_selectors.get(&tail_selector_str)
         {
             if last_specificity > &selector.specificity() {
+                eprintln!(
+                    "last range {:?} with specificity {}",
+                    last_text_range, last_specificity
+                );
                 descending_selectors.push(DescendingSelector {
                     high: (*last_text_range, *last_specificity),
                     low: (selector.range(), selector.specificity()),
                 });
             }
         } else {
+            eprintln!(
+                " insert {} with specificity {}",
+                selector.text(),
+                selector.specificity()
+            );
             visited_selectors.insert(
                 tail_selector_str,
                 (selector.range(), selector.specificity()),
@@ -160,7 +170,7 @@ fn find_descending_selector(
     }
 
     for child_id in rule.child_ids() {
-        if let Some(child_rule) = model.get_rule_by_id(*child_id) {
+        if let Some(child_rule) = model.get_rule_by_id(child_id) {
             find_descending_selector(
                 child_rule,
                 model,

@@ -3,15 +3,15 @@ use crate::semantic_model::model::Specificity;
 use biome_css_syntax::{
     AnyCssCompoundSelector, AnyCssPseudoClass, AnyCssRelativeSelector, AnyCssSelector,
     AnyCssSimpleSelector, AnyCssSubSelector, CssComplexSelector, CssCompoundSelector,
-    CssPseudoClassSelector, CssQualifiedRule,
+    CssDeclarationOrRuleBlock, CssPseudoClassSelector, CssQualifiedRule,
 };
 
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
+use biome_rowan::{AstNodeList, AstSeparatedList, declare_node_union};
 
-const ID_SPECIFICITY: Specificity = Specificity(1, 0, 0);
-const CLASS_SPECIFICITY: Specificity = Specificity(0, 1, 0);
-const TYPE_SPECIFICITY: Specificity = Specificity(0, 0, 1);
-const ZERO_SPECIFICITY: Specificity = Specificity(0, 0, 0);
+pub(crate) const ID_SPECIFICITY: Specificity = Specificity(1, 0, 0);
+pub(crate) const CLASS_SPECIFICITY: Specificity = Specificity(0, 1, 0);
+pub(crate) const TYPE_SPECIFICITY: Specificity = Specificity(0, 0, 1);
+pub(crate) const ZERO_SPECIFICITY: Specificity = Specificity(0, 0, 0);
 
 fn evaluate_any_simple_selector(selector: &AnyCssSimpleSelector) -> Specificity {
     match selector {
@@ -142,35 +142,11 @@ pub fn evaluate_compound_selector(selector: &CssCompoundSelector) -> Specificity
         .reduce(|acc, e| acc + e)
         .unwrap_or(ZERO_SPECIFICITY);
 
-    let nested_specificity = evaluate_nested_specificity(selector);
-
-    nested_specificity + simple_specificity + subselector_specificity
+    simple_specificity + subselector_specificity
 }
 
-fn evaluate_nested_specificity(selector: &CssCompoundSelector) -> Specificity {
-    let ancestors = selector.nesting_selectors().len();
-    if ancestors == 0 {
-        return ZERO_SPECIFICITY;
-    }
-    for (index, qualified_rule) in selector
-        .syntax()
-        .ancestors()
-        .skip(1)
-        .filter_map(CssQualifiedRule::cast)
-        .enumerate()
-    {
-        if ancestors == index + 1 {
-            return qualified_rule
-                .prelude()
-                .iter()
-                .flatten()
-                .map(|s| evaluate_any_selector(&s))
-                .reduce(|acc, e| acc + e)
-                .unwrap_or(ZERO_SPECIFICITY);
-        }
-    }
-
-    ZERO_SPECIFICITY
+declare_node_union! {
+    pub AnyParentNode = CssDeclarationOrRuleBlock | CssQualifiedRule
 }
 
 fn evaluate_any_compound_selector(selector: &AnyCssCompoundSelector) -> Specificity {

@@ -9,7 +9,7 @@ use super::model::{
     SemanticModelData, Specificity,
 };
 use crate::events::SemanticEvent;
-use crate::model::RuleNode;
+use crate::model::AnyRuleStart;
 
 pub struct SemanticModelBuilder {
     root: CssRoot,
@@ -40,6 +40,77 @@ impl SemanticModelBuilder {
         }
     }
 
+    pub fn get_last_parent_selector_rule(&self) -> Option<&Rule> {
+        let mut iterator = self.current_rule_stack.iter().rev();
+        let mut current_parent_id = iterator
+            .next()
+            .and_then(|rule_id| self.rules_by_id.get(rule_id))
+            .and_then(|rule| rule.parent_id);
+
+        loop {
+            if let Some(parent_id) = &current_parent_id {
+                let rule = self.rules_by_id.get(&parent_id);
+                if let Some(rule) = rule {
+                    if matches!(
+                        rule.node(),
+                        AnyRuleStart::CssMediaAtRule(_) | AnyRuleStart::CssSupportsAtRule(_)
+                    ) {
+                        current_parent_id = iterator
+                            .next()
+                            .and_then(|rule_id| self.rules_by_id.get(rule_id))
+                            .and_then(|rule| rule.parent_id);
+                        continue;
+                    } else {
+                        return Some(rule);
+                    }
+                }
+            } else {
+                return None;
+            }
+        }
+    }
+
+    pub fn get_parent_selector_at(&self, index: usize) -> Option<&Rule> {
+        let mut iterator = self.current_rule_stack.iter().rev();
+        let mut current_index = 1;
+        let mut current_parent_id = iterator
+            .next()
+            .and_then(|rule_id| self.rules_by_id.get(rule_id))
+            .and_then(|rule| rule.parent_id);
+
+        loop {
+            if let Some(parent_id) = &current_parent_id {
+                let rule = self.rules_by_id.get(&parent_id);
+                if let Some(rule) = rule {
+                    if matches!(
+                        rule.node(),
+                        AnyRuleStart::CssMediaAtRule(_) | AnyRuleStart::CssSupportsAtRule(_)
+                    ) {
+                        current_parent_id = iterator
+                            .next()
+                            .and_then(|rule_id| self.rules_by_id.get(rule_id))
+                            .and_then(|rule| rule.parent_id);
+
+                        continue;
+                    } else {
+                        if current_index == index {
+                            return Some(rule);
+                        } else {
+                            current_parent_id = iterator
+                                .next()
+                                .and_then(|rule_id| self.rules_by_id.get(rule_id))
+                                .and_then(|rule| rule.parent_id);
+                            current_index += 1;
+                            continue;
+                        }
+                    }
+                }
+            } else {
+                return None;
+            }
+        }
+    }
+
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
             root: self.root,
@@ -62,8 +133,7 @@ impl SemanticModelBuilder {
 
                 let new_rule = Rule {
                     id: new_rule_id,
-                    // SAFETY: RuleStart event checks for the node kind
-                    node: RuleNode::cast(node.clone()).unwrap(),
+                    node,
                     selectors: Vec::new(),
                     declarations: Vec::new(),
                     parent_id,
@@ -97,9 +167,32 @@ impl SemanticModelBuilder {
             }
             SemanticEvent::SelectorDeclaration { node, specificity } => {
                 if let Some(current_rule) = self.current_rule_stack.last() {
+                    let parent_specificity = if node.has_nesting_selectors() {
+                        let nesting_level = node.nesting_level();
+                        self.get_parent_selector_at(nesting_level)
+                            .map(|rule| rule.specificity())
+                            .unwrap_or_default()
+                    } else {
+                        self.get_last_parent_selector_rule()
+                            .map(|rule| rule.specificity())
+                            .unwrap_or_default()
+                    };
+
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
-                    current_rule.selectors.push(Selector { node, specificity });
-                    current_rule.specificity += specificity;
+
+                    if node.has_nesting_selectors() {
+                        current_rule.selectors.push(Selector {
+                            node,
+                            specificity: parent_specificity + specificity,
+                        });
+                        current_rule.specificity += parent_specificity + specificity;
+                    } else {
+                        current_rule.selectors.push(Selector {
+                            node,
+                            specificity: parent_specificity + specificity,
+                        });
+                        current_rule.specificity += parent_specificity + specificity;
+                    }
                 }
             }
             SemanticEvent::PropertyDeclaration {

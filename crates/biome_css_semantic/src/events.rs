@@ -1,11 +1,11 @@
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssProperty, AnyCssSelector, CssDeclaration, CssPropertyAtRule,
-    CssRelativeSelector, CssSyntaxKind::*, CssSyntaxNode,
+    CssRelativeSelector, CssSyntaxKind::*,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
 
-use crate::model::AnyCssSelectorLike;
+use crate::model::{AnyCssSelectorLike, AnyRuleStart};
 use crate::{
     model::{CssProperty, CssPropertyInitialValue},
     semantic_model::model::Specificity,
@@ -16,7 +16,7 @@ const ROOT_SELECTOR: &str = ":root";
 
 #[derive(Debug)]
 pub enum SemanticEvent {
-    RuleStart(CssSyntaxNode),
+    RuleStart(AnyRuleStart),
     RuleEnd,
     SelectorDeclaration {
         node: AnyCssSelectorLike,
@@ -66,7 +66,9 @@ impl SemanticEventExtractor {
                 || kind == CSS_MEDIA_AT_RULE
                 || kind == CSS_SUPPORTS_AT_RULE =>
             {
-                self.stash.push_back(SemanticEvent::RuleStart(node.clone()));
+                self.stash.push_back(SemanticEvent::RuleStart(
+                    AnyRuleStart::cast(node.clone()).unwrap(),
+                ));
             }
             CSS_SELECTOR_LIST => {
                 if !matches!(
