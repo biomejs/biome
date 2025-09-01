@@ -209,7 +209,7 @@ impl Rule for NoDuplicateDependencies {
                             token: original_member.clone(),
                         };
                         let dupe = Dependency {
-                            group: property.to_string(),
+                            group: (*property).to_string(),
                             token: member.clone(),
                         };
 
