@@ -1336,16 +1336,7 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
             p.bump_any();
 
             if p.eat(T![.]) {
-                if p.at(T![defer]) || p.at(T![source]) {
-                    // This is an import call expression with phase
-                    let _phase = if p.at(T![defer]) {
-                        p.bump(T![defer]);
-                        Some("defer")
-                    } else {
-                        p.bump(T![source]);
-                        Some("source")
-                    };
-
+                if p.eat(T![defer]) || p.eat(T![source]) {
                     // Parse the call arguments
                     parse_import_call_expression(p, context, m)
                 } else if p.at(T![ident]) && p.text(p.cur_range()) == "meta" {
