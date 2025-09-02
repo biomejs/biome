@@ -289,7 +289,7 @@ impl Projects {
             ProjectData {
                 path: data.path.clone(),
                 root_settings: data.root_settings.clone(),
-                nested_settings: nested_settings.clone(),
+                nested_settings,
             }
         });
     }

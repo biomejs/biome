@@ -3,13 +3,13 @@ use std::sync::Arc;
 use crate::diagnostics::LspError;
 use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
-use biome_configuration::ConfigurationPathHint;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
     GetFileContentParams, IgnoreKind, OpenFileParams, PathIsIgnoredParams,
 };
 use tower_lsp_server::lsp_types;
-use tracing::{debug, error, field, info};
+use tower_lsp_server::lsp_types::MessageType;
+use tracing::{debug, error, field};
 
 /// Handler for `textDocument/didOpen` LSP notification
 #[tracing::instrument(
@@ -30,33 +30,23 @@ pub(crate) async fn did_open(
     let language_hint = DocumentFileSource::from_language_id(&params.text_document.language_id);
 
     let path = session.file_path(&url)?;
-    let project_key = match session.project_for_path(&path) {
-        Some(project_key) => project_key,
-        None => {
-            info!("No open project for path: {path:?}. Opening new project.");
-            let parent_path = path
-                .parent()
-                .map(|parent| parent.to_path_buf())
-                .unwrap_or_default();
-            let status = session
-                .load_biome_configuration_file(ConfigurationPathHint::FromLsp(parent_path))
-                .await;
-            debug!("Configuration status: {status:?}");
-            session.set_configuration_status(status);
 
-            if status.is_loaded() {
-                match session.project_for_path(&path) {
-                    Some(project_key) => project_key,
-                    None => {
-                        error!("Could not find project for {path}");
-                        return Ok(());
-                    }
-                }
-            } else {
-                error!("Configuration could not be loaded for {path}");
+    let status = session.configuration_status();
+
+    let project_key = if status.is_loaded() {
+        match session.project_for_path(&path) {
+            Some(project_key) => project_key,
+            None => {
+                error!("Could not find project for {path}");
                 return Ok(());
             }
         }
+    } else {
+        if status.is_plugin_error() {
+            session.client.show_message(MessageType::WARNING, "The plugin loading has failed. Biome will report only parsing errors until the file is fixed or its usage is disabled.").await;
+        }
+        error!("Configuration could not be loaded for {path}");
+        return Ok(());
     };
 
     let is_ignored = session
