@@ -496,6 +496,8 @@ JsModule {
                             l_curly_token: L_CURLY@266..267 "{" [] [],
                             expression: JsImportCallExpression {
                                 import_token: IMPORT_KW@267..273 "import" [] [],
+                                dot_token: missing (optional),
+                                phase: missing (optional),
                                 arguments: JsCallArguments {
                                     l_paren_token: L_PAREN@273..274 "(" [] [],
                                     args: JsCallArgumentList [
@@ -1267,7 +1269,9 @@ JsModule {
               0: L_CURLY@266..267 "{" [] []
               1: JS_IMPORT_CALL_EXPRESSION@267..281
                 0: IMPORT_KW@267..273 "import" [] []
-                1: JS_CALL_ARGUMENTS@273..281
+                1: (empty)
+                2: (empty)
+                3: JS_CALL_ARGUMENTS@273..281
                   0: L_PAREN@273..274 "(" [] []
                   1: JS_CALL_ARGUMENT_LIST@274..280
                     0: JS_STRING_LITERAL_EXPRESSION@274..280

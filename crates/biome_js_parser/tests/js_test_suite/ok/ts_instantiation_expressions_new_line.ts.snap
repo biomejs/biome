@@ -1686,6 +1686,8 @@ JsModule {
         JsExpressionStatement {
             expression: JsImportCallExpression {
                 import_token: IMPORT_KW@672..679 "import" [Newline("\n")] [],
+                dot_token: missing (optional),
+                phase: missing (optional),
                 arguments: JsCallArguments {
                     l_paren_token: L_PAREN@679..680 "(" [] [],
                     args: JsCallArgumentList [
@@ -2739,7 +2741,9 @@ JsModule {
     64: JS_EXPRESSION_STATEMENT@672..687
       0: JS_IMPORT_CALL_EXPRESSION@672..686
         0: IMPORT_KW@672..679 "import" [Newline("\n")] []
-        1: JS_CALL_ARGUMENTS@679..686
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@679..686
           0: L_PAREN@679..680 "(" [] []
           1: JS_CALL_ARGUMENT_LIST@680..685
             0: JS_STRING_LITERAL_EXPRESSION@680..685

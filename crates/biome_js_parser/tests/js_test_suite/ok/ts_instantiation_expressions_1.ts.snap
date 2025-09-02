@@ -1605,6 +1605,8 @@ JsModule {
                 operator_token: R_ANGLE@743..745 ">" [] [Whitespace(" ")],
                 right: JsImportCallExpression {
                     import_token: IMPORT_KW@745..751 "import" [] [],
+                    dot_token: missing (optional),
+                    phase: missing (optional),
                     arguments: JsCallArguments {
                         l_paren_token: L_PAREN@751..752 "(" [] [],
                         args: JsCallArgumentList [
@@ -2688,7 +2690,9 @@ JsModule {
         1: R_ANGLE@743..745 ">" [] [Whitespace(" ")]
         2: JS_IMPORT_CALL_EXPRESSION@745..758
           0: IMPORT_KW@745..751 "import" [] []
-          1: JS_CALL_ARGUMENTS@751..758
+          1: (empty)
+          2: (empty)
+          3: JS_CALL_ARGUMENTS@751..758
             0: L_PAREN@751..752 "(" [] []
             1: JS_CALL_ARGUMENT_LIST@752..757
               0: JS_STRING_LITERAL_EXPRESSION@752..757

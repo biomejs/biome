@@ -8,6 +8,11 @@ info: js/module/import/import_call.js
 import(x)
 import('x')
 import(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, {assert: {type:'json'}})
+import.defer("foo");
+import.defer("x", { with: { attr: "val" } });
+import.source("foo");
+import.source("x", { with: { attr: "val" } });
+import.source("foo", { type: "bar" });
 
 ```
 
@@ -43,6 +48,11 @@ import(
 	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
 	{ assert: { type: "json" } }
 );
+import.defer("foo");
+import.defer("x", { with: { attr: "val" } });
+import.source("foo");
+import.source("x", { with: { attr: "val" } });
+import.source("foo", { type: "bar" });
 ```
 
 # Lines exceeding max width of 80 characters
