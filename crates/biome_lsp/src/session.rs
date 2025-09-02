@@ -465,7 +465,7 @@ impl Session {
                 .collect()
         };
 
-        tracing::Span::current().record("diagnostic_count", diagnostics.len());
+        info!("Diagnostics sent to the client {}", diagnostics.len());
 
         self.client
             .publish_diagnostics(url, diagnostics, Some(doc.version))
@@ -780,16 +780,23 @@ impl Session {
                 .or_else(|| fs.working_directory())
                 .unwrap_or_default(),
         };
-        let register_result = self.workspace.open_project(OpenProjectParams {
-            path: path.as_path().into(),
-            open_uninitialized: true,
-        });
-        let OpenProjectResult { project_key } = match register_result {
-            Ok(result) => result,
-            Err(error) => {
-                error!("Failed to register the project folder: {error}");
-                self.client.log_message(MessageType::ERROR, &error).await;
-                return ConfigurationStatus::Error;
+
+        let project_key = match self.project_for_path(&path) {
+            Some(project_key) => project_key,
+            None => {
+                let register_result = self.workspace.open_project(OpenProjectParams {
+                    path: path.as_path().into(),
+                    open_uninitialized: true,
+                });
+                let OpenProjectResult { project_key } = match register_result {
+                    Ok(result) => result,
+                    Err(error) => {
+                        error!("Failed to register the project folder: {error}");
+                        self.client.log_message(MessageType::ERROR, &error).await;
+                        return ConfigurationStatus::Error;
+                    }
+                };
+                project_key
             }
         };
 
