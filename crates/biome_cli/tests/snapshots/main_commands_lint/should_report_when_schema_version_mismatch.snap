@@ -26,7 +26,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 biome.json:2:16 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The configuration schema version does not match the CLI version 0.0.0
+  i The configuration schema version does not match the CLI version 0.0.0
   
     1 │ {
   > 2 │     "$schema": "https://biomejs.dev/schemas/0.0.1/schema.json"
@@ -61,5 +61,4 @@ biome.json format ━━━━━━━━━━━━━━━━━━━━�
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
-Found 1 warning.
 ```

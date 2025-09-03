@@ -457,7 +457,7 @@ impl Deserializable for Schema {
                                         markup!(<Warn>"The configuration schema version does not match the CLI version " {VERSION}</Warn>),
                                     )
                                         .with_range(range)
-                                        .with_custom_severity(Severity::Warning)
+                                        .with_custom_severity(Severity::Information)
                                         .with_note(markup!(
                                         {KeyValuePair("Expected", markup!({VERSION}))}
                                         {KeyValuePair("Found", markup!({config_version_str}))}
