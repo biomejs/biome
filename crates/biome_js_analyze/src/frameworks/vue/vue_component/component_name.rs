@@ -41,9 +41,10 @@ impl AnyVueComponent {
                     if let Some(str_lit) = value_expr
                         .as_any_js_literal_expression()
                         .and_then(|e| e.as_js_string_literal_expression())
-                        && let Ok(token_text) = str_lit.inner_string_text() {
-                            return Some((token_text, str_lit.syntax().text_range()));
-                        }
+                        && let Ok(token_text) = str_lit.inner_string_text()
+                    {
+                        return Some((token_text, str_lit.syntax().text_range()));
+                    }
                 }
             }
         }
