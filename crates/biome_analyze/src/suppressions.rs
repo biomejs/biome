@@ -178,20 +178,28 @@ pub(crate) struct RangeSuppressions {
 pub(crate) struct RangeSuppression {
     /// Whether the current suppression should suppress all signals
     pub(crate) suppressed_categories: RuleCategories,
+
     /// The range of the `biome-ignore-start` suppressions
     pub(crate) start_comment_range: TextRange,
+
     /// A range that indicates how long this suppression has effect
     pub(crate) suppression_range: TextRange,
+
     /// Set to `true` when this line suppresses a signal that was already suppressed by another entity e.g. top-level suppression
     pub(crate) already_suppressed: Option<TextRange>,
+
     /// Whether this suppression has suppressed a signal
     pub(crate) did_suppress_signal: bool,
+
     /// Indicates if this suppression has found its end comment - if false, the suppression_range is not yet complete
     pub(crate) is_ended: bool,
+
     /// The rules to suppress, grouped by [`RuleCategory`]
     pub(crate) filters_by_category: FxHashMap<RuleCategory, FxHashSet<RuleFilter<'static>>>,
+
     /// List of plugins this comment has started suppressing
     pub(crate) suppressed_plugins: FxHashSet<String>,
+
     /// Set to true if this comment suppress all plugins
     pub(crate) suppress_all_plugins: bool,
 }
@@ -338,7 +346,10 @@ impl RangeSuppressions {
         false
     }
 
-    /// Checks if there's suppression that suppresses the current plugin in the range provided
+    /// Suppresses the plugin with the given `plugin_name` if there is a suppression comment
+    /// for the given position.
+    ///
+    /// Returns `true` if a matching suppression comment was found, `false` otherwise.
     pub(crate) fn suppress_plugin(&mut self, plugin_name: &str, position: &TextRange) -> bool {
         for range_suppression in self.suppressions.iter_mut().rev() {
             if range_suppression

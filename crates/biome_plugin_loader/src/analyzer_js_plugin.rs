@@ -78,6 +78,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
     }
 
     fn query(&self) -> Vec<RawSyntaxKind> {
+        // TODO: Support granular query defined in the JS plugin.
         AnyJsRoot::KIND_SET
             .iter()
             .map(|kind| kind.to_raw())

@@ -452,9 +452,7 @@ where
                     continue;
                 }
                 let (is_match, is_exhaustive) =
-                    if suppression.suppressed_categories.contains(entry.category)
-                        || suppression.suppress_all_plugins
-                    {
+                    if suppression.suppressed_categories.contains(entry.category) {
                         (true, true)
                     } else {
                         match &entry.rule {
@@ -472,7 +470,8 @@ where
                                 }
                             }
                             SignalRuleKey::Plugin(plugin)
-                                if suppression.suppressed_plugins.contains(plugin.as_ref()) =>
+                                if suppression.suppress_all_plugins
+                                    || suppression.suppressed_plugins.contains(plugin.as_ref()) =>
                             {
                                 (true, true)
                             }

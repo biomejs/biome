@@ -438,7 +438,7 @@ impl<L: Language + Default> RegistryRule<L> {
 
                 params.signal_queue.push(SignalEntry {
                     signal,
-                    rule: SignalRuleKey::Rule(RuleKey::rule::<R>()),
+                    rule: RuleKey::rule::<R>().into(),
                     instances,
                     text_range,
                     category: <R::Group as RuleGroup>::Category::CATEGORY,

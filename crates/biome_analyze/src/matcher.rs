@@ -144,6 +144,12 @@ pub enum SignalRuleKey {
     Plugin(Box<str>),
 }
 
+impl From<RuleKey> for SignalRuleKey {
+    fn from(value: RuleKey) -> Self {
+        Self::Rule(value)
+    }
+}
+
 /// Entry for a pending signal in the `signal_queue`
 pub struct SignalEntry<'phase, L: Language> {
     /// Boxed analyzer signal to be emitted
@@ -249,7 +255,7 @@ mod tests {
             let span = node.text_trimmed_range();
             params.signal_queue.push(SignalEntry {
                 signal: Box::new(DiagnosticSignal::new(move || TestDiagnostic { span })),
-                rule: SignalRuleKey::Rule(RuleKey::new("group", "rule")),
+                rule: RuleKey::new("group", "rule").into(),
                 instances: Default::default(),
                 text_range: span,
                 category: RuleCategory::Lint,
