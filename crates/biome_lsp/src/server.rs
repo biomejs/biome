@@ -354,7 +354,9 @@ impl LanguageServer for LSPServer {
             if let Some(base_path) = base_path {
                 let possible_biome_json = file_path.strip_prefix(&base_path);
                 if let Ok(watched_file) = possible_biome_json
-                    && (ConfigName::file_names().contains(&&*watched_file.display().to_string())
+                    && (ConfigName::file_names()
+                        .iter()
+                        .any(|file_name| watched_file.ends_with(file_name))
                         || watched_file.ends_with(".editorconfig"))
                 {
                     self.session.load_extension_settings().await;

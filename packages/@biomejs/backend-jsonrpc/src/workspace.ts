@@ -1729,6 +1729,10 @@ export interface Nursery {
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
+	/**
+	 * Enforce multi-word component names in Vue components.
+	 */
+	useVueMultiWordComponentNames?: RuleConfiguration_for_UseVueMultiWordComponentNamesOptions;
 }
 /**
  * A list of rules that belong to this group
@@ -3041,6 +3045,9 @@ export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 export type RuleFixConfiguration_for_UseSortedClassesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSortedClassesOptions;
+export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseVueMultiWordComponentNamesOptions;
 export type RuleConfiguration_for_NoAccumulatingSpreadOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAccumulatingSpreadOptions;
@@ -5608,6 +5615,16 @@ export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	 */
 	options: UseSortedClassesOptions;
 }
+export interface RuleWithOptions_for_UseVueMultiWordComponentNamesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueMultiWordComponentNamesOptions;
+}
 export interface RuleWithOptions_for_NoAccumulatingSpreadOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8057,6 +8074,12 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export interface UseVueMultiWordComponentNamesOptions {
+	/**
+	 * Component names to ignore (allowed to be single-word).
+	 */
+	ignores: string[];
+}
 export interface NoAccumulatingSpreadOptions {}
 export interface NoAwaitInLoopsOptions {}
 export interface NoBarrelFileOptions {}
@@ -8770,6 +8793,7 @@ export type Category =
 	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
