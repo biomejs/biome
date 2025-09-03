@@ -30,7 +30,7 @@ pub enum PluginTargetLanguage {
 }
 
 /// A syntax visitor that queries nodes and evaluates in a plugin.
-/// Based on [`biome_analyze::syntax::SyntaxVisitor`].
+/// Based on [`crate::SyntaxVisitor`].
 pub struct PluginVisitor<L: Language> {
     query: FxHashSet<L::Kind>,
     plugin: Arc<Box<dyn AnalyzerPlugin>>,

@@ -219,7 +219,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{MatchQueryParams, SignalRuleKey};
+    use super::MatchQueryParams;
     use crate::{
         Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry,
         Never, Phases, QueryMatcher, RuleCategory, RuleKey, ServiceBag, SignalEntry,

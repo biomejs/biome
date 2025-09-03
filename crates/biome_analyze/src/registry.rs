@@ -2,7 +2,7 @@ use crate::{
     AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleGroup, RuleKey,
     RuleMetadata, ServiceBag, SignalEntry, Visitor,
     context::RuleContext,
-    matcher::{GroupKey, MatchQueryParams, SignalRuleKey},
+    matcher::{GroupKey, MatchQueryParams},
     query::{QueryKey, Queryable},
     signals::RuleSignal,
 };
