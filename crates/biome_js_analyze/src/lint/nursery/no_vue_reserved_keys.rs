@@ -116,9 +116,12 @@ impl Rule for NoVueReservedKeys {
     type Options = NoVueReservedKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(component) =
-            VueComponent::from_potential_component(ctx.query(), ctx.model(), ctx.source_type())
-        else {
+        let Some(component) = VueComponent::from_potential_component(
+            ctx.query(),
+            ctx.model(),
+            ctx.source_type(),
+            ctx.file_path(),
+        ) else {
             return Box::new([]);
         };
         component

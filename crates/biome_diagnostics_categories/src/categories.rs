@@ -195,6 +195,7 @@ define_categories! {
     "lint/nursery/useQwikClasslist": "https://biomejs.dev/linter/rules/use-qwik-classlist",
     "lint/nursery/useReactFunctionComponents": "https://biomejs.dev/linter/rules/use-react-function-components",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
+    "lint/nursery/useVueMultiWordComponentNames": "https://biomejs.dev/linter/rules/use-vue-multi-word-component-names",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noAwaitInLoops": "https://biomejs.dev/linter/rules/no-await-in-loops",
     "lint/performance/noBarrelFile": "https://biomejs.dev/linter/rules/no-barrel-file",
