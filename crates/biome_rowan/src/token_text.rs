@@ -57,11 +57,6 @@ impl TokenText {
         self.range.is_empty()
     }
 
-    /// Returns the range of the text
-    pub fn range(&self) -> TextRange {
-        self.range
-    }
-
     /// Returns a subslice of the text.
     /// `range.end()` must be lower or equal to `self.len()`
     pub fn slice(mut self, range: TextRange) -> Self {

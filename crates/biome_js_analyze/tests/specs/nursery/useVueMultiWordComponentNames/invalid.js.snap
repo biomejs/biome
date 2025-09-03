@@ -22,14 +22,16 @@ createApp({ name: "Foo" })
 
 # Diagnostics
 ```
-invalid.js:1:2 lint/nursery/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:8 lint/nursery/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This Component's name "Header" only contains one word.
   
-  > 1 │ import { defineComponent, createApp } from "vue";
-      │  ^^^^^^
-    2 │ 
     3 │ /* Invalid: single-word name "Header" (not ignored, not builtin) */
+    4 │ defineComponent({
+  > 5 │ 	name: "Header"
+      │ 	      ^^^^^^^^
+    6 │ });
+    7 │ 
   
   i Single-word component names can collide with HTML elements and are less descriptive.
   
@@ -39,14 +41,15 @@ invalid.js:1:2 lint/nursery/useVueMultiWordComponentNames ━━━━━━━�
 ```
 
 ```
-invalid.js:1:2 lint/nursery/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:19 lint/nursery/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This Component's name "Foo" only contains one word.
   
-  > 1 │ import { defineComponent, createApp } from "vue";
-      │  ^^^
-    2 │ 
-    3 │ /* Invalid: single-word name "Header" (not ignored, not builtin) */
+    11 │ };
+    12 │ 
+  > 13 │ createApp({ name: "Foo" })
+       │                   ^^^^^
+    14 │ 
   
   i Single-word component names can collide with HTML elements and are less descriptive.
   

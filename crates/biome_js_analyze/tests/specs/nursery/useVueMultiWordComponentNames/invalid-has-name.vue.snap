@@ -12,14 +12,15 @@ export default {
 
 # Diagnostics
 ```
-invalid-has-name.vue:1:2 lint/nursery/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-has-name.vue:2:8 lint/nursery/useVueMultiWordComponentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This Component's name "invalid" only contains one word.
   
-  > 1 │ export default {
-      │  ^^^^^^^
-    2 │ 	name: "invalid",
+    1 │ export default {
+  > 2 │ 	name: "invalid",
+      │ 	      ^^^^^^^^^
     3 │ }
+    4 │ 
   
   i Single-word component names can collide with HTML elements and are less descriptive.
   

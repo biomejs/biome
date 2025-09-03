@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TokenText};
+use biome_rowan::{AstNode, TextRange, TokenText};
 use biome_rule_options::use_vue_multi_word_component_names::UseVueMultiWordComponentNamesOptions;
 
 declare_lint_rule! {
@@ -116,7 +116,7 @@ declare_lint_rule! {
 
 impl Rule for UseVueMultiWordComponentNames {
     type Query = VueComponentQuery;
-    type State = Option<TokenText>;
+    type State = Option<(TokenText, TextRange)>;
     type Signals = Option<Self::State>;
     type Options = UseVueMultiWordComponentNamesOptions;
 
@@ -143,12 +143,13 @@ impl Rule for UseVueMultiWordComponentNames {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         // If the state is Some, we can point to the precise range of the name token. Otherwise, we have to flag the whole component.
+
         let range = state
             .as_ref()
-            .map_or_else(|| ctx.query().range(), |token_text| token_text.range());
+            .map_or_else(|| ctx.query().range(), |token_text| token_text.1);
         let Some(component_name) = state
             .as_ref()
-            .map(|token_text| token_text.text())
+            .map(|token_text| token_text.0.text())
             .or_else(|| ctx.file_path().file_stem())
         else {
             // Can't determine component name; shouldn't happen since we had a name from the component before
