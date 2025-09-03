@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#6648](https://github.com/biomejs/biome/issues/6648), where Biome's contains inconsistencies with ESLint for fragments only containing text.
+Fixed [#6648](https://github.com/biomejs/biome/issues/6648), where Biome's `noUselessFragments` contained inconsistencies with ESLint for fragments only containing text.
 
 Previously, Biome would report that fragments with only text were unnecessary under the `noUselessFragments` rule. Further analysis of ESLint's behavior towards these cases revealed that text-only fragments (`<>A</a>`, `<React.Fragment>B</React.Fragment>`, `<RenamedFragment>B</RenamedFragment>`) would not have `noUselessFragments` emitted for them.
 
