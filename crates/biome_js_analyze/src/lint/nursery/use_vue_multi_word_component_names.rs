@@ -82,13 +82,10 @@ declare_lint_rule! {
     ///
     /// ```json,options
     /// {
-    ///   "useVueMultiWordComponentNames": {
-    ///     "level": "error",
-    ///     "options": {
-    ///       "ignores": [
-    ///         "Foo"
-    ///       ]
-    ///     }
+    ///   "options": {
+    ///     "ignores": [
+    ///       "Foo"
+    ///     ]
     ///   }
     /// }
     /// ```
