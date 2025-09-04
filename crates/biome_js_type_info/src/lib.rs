@@ -11,6 +11,7 @@ mod r#type;
 mod type_data;
 mod type_store;
 
+pub use conditionals::*;
 pub use flattening::MAX_FLATTEN_DEPTH;
 pub use globals::{GLOBAL_RESOLVER, GLOBAL_UNKNOWN_ID, GlobalsResolver, NUM_PREDEFINED_TYPES};
 pub use resolver::*;
