@@ -320,24 +320,52 @@ impl JsBinaryExpression {
         )
     }
 
-    /// Whether this is a comparison operation similar to the optional chain
+    /// Extract the left or right operand of an optional chain-like expression.
     /// ```js
-    /// foo !== undefined;
-    /// foo != undefined;
-    /// foo !== null;
-    /// foo != null;
+    /// foo !== undefined;  // -> Some(foo)
+    /// foo != undefined;  // -> Some(foo)
+    /// foo !== null;  // -> Some(foo)
+    /// foo != null;  // -> Some(foo)
+    /// undefined !== foo;  // -> Some(foo)
+    /// undefined != foo;  // -> Some(foo)
+    /// null !== foo;  // -> Some(foo)
+    /// null != foo;  // -> Some(foo)
+    /// foo !== bar;  // -> None
+    /// foo != bar;  // -> None
+    /// undefined !== null;  // -> None
+    /// undefined != null;  // -> None
+    /// null !== undefined;  // -> None
+    /// null != undefined;  // -> None
+    /// undefined !== undefined;  // -> None
+    /// undefined != undefined;  // -> None
+    /// null !== null;  // -> None
+    /// null != null;  // -> None
     ///```
-    pub fn is_optional_chain_like(&self) -> SyntaxResult<bool> {
+    pub fn extract_optional_chain_like(&self) -> SyntaxResult<Option<AnyJsExpression>> {
+        fn is_nullish(expression: &AnyJsExpression) -> bool {
+            expression
+                .as_static_value()
+                .is_some_and(|x| x.is_null_or_undefined())
+        }
         if matches!(
             self.operator(),
             Ok(JsBinaryOperator::StrictInequality | JsBinaryOperator::Inequality)
         ) {
-            Ok(self
-                .right()?
-                .as_static_value()
-                .is_some_and(|x| x.is_null_or_undefined()))
+            let left = self.left()?;
+            let right = self.right()?;
+            let left_is_nullish = is_nullish(&left);
+            let right_is_nullish = is_nullish(&right);
+            // right only nullish: `foo !== undefined` -> return foo (left)
+            if !left_is_nullish && right_is_nullish {
+                return Ok(Some(left));
+            }
+            // left only nullish: `undefined !== foo` -> return foo (right)
+            if left_is_nullish && !right_is_nullish {
+                return Ok(Some(right));
+            }
+            Ok(None)
         } else {
-            Ok(false)
+            Ok(None)
         }
     }
 }
