@@ -1625,6 +1625,71 @@ fn test_resolve_single_reexport() {
 }
 
 #[test]
+fn test_resolve_type_of_union_from_imported_module() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/react.d.ts".into(),
+        r#"
+        type BogusType = false;
+
+        export type ReactPortal = BogusType;
+
+        export type ReactElement = BogusType;
+
+        export type ReactNode =
+            | ReactElement
+            | string
+            | number
+            | Iterable<ReactNode>
+            | ReactPortal
+            | boolean
+            | null
+            | undefined;
+        "#,
+    );
+    fs.insert(
+        "/src/reexport.ts".into(),
+        r#"export { type ReactElement, type ReactNode } from "../node_modules/react.d.ts";"#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { type ReactNode } from "./reexport.ts";
+
+        const foo: ReactNode = undefined;
+        const bar = foo && 1;
+        "#,
+    );
+
+    let added_paths = [
+        BiomePath::new("/src/index.ts"),
+        BiomePath::new("/src/reexport.ts"),
+        BiomePath::new("/node_modules/react.d.ts"),
+    ];
+    let added_paths = get_added_paths(&fs, &added_paths);
+
+    let module_graph = Arc::new(ModuleGraph::default());
+    module_graph.update_graph_for_js_paths(&fs, &ProjectLayout::default(), &added_paths, &[]);
+
+    let index_module = module_graph
+        .module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let resolver = Arc::new(ModuleResolver::for_module(
+        index_module,
+        module_graph.clone(),
+    ));
+
+    let result_id = resolver
+        .resolve_type_of(&Text::new_static("bar"), ScopeId::GLOBAL)
+        .expect("bar variable not found");
+    let ty = resolver.resolved_type_for_id(result_id);
+    assert!(ty.has_variant(|ty| ty.is_null()));
+    assert!(ty.has_variant(|ty| ty.is_undefined()));
+    assert!(ty.has_variant(|ty| ty.is_boolean_literal(false)));
+    assert!(ty.has_variant(|ty| ty.is_number_literal(0.)));
+    assert!(ty.has_variant(|ty| ty.is_number_literal(1.)));
+}
+
+#[test]
 fn test_resolve_multiple_reexports() {
     let fs = MemoryFileSystem::default();
     fs.insert(

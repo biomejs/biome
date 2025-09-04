@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+let foo: undefined | null | number = 1;
+
+```
+
+## Result
+
+```
+undefined | Global TypeId(0) | Global TypeId(3)
+```
+
+## Registered types
+
+```
+Global TypeId(0) => null
+
+Global TypeId(1) => undefined | Global TypeId(0) | number
+
+Global TypeId(2) => undefined | Global TypeId(0) | number
+
+Global TypeId(3) => value: 0
+
+Global TypeId(4) => undefined | Global TypeId(0) | Global TypeId(3)
+```

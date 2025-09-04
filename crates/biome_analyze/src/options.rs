@@ -3,7 +3,6 @@ use rustc_hash::FxHashMap;
 
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
-use std::fmt::Debug;
 use std::sync::Arc;
 
 /// A convenient new type data structure to store the options that belong to a rule
