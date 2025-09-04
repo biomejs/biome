@@ -2,9 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{
-    AnyJsExpression, JsxAttribute, JsxAttributeList, JsxElement, jsx_ext::AnyJsxElement,
-};
+use biome_js_syntax::{AnyJsExpression, JsxAttribute, JsxAttributeList, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
 use biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions;
 
@@ -61,6 +59,11 @@ impl Rule for NoJsxPropsBind {
             .parent::<AnyJsxElement>()?;
 
         if options.ignore_dom_components && element.is_element() {
+            return None;
+        }
+
+        let prop_name = ctx.query().name().ok()?.to_trimmed_text();
+        if options.ignore_refs && prop_name == "ref" {
             return None;
         }
 
