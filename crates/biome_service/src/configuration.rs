@@ -761,13 +761,18 @@ impl<'a> ProjectScanComputer<'a> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
-        let selector = RuleSelector::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name).into();
+
         if !self.only.is_empty() {
-            if self.only.contains(&selector) {
-                let domains = R::METADATA.domains;
-                self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            for selector in self.only.iter() {
+                if selector.match_rule::<R>() {
+                    let domains = R::METADATA.domains;
+                    self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+                    break;
+                }
             }
-        } else if !self.skip.contains(&selector) && self.enabled_rules.contains(&filter) {
+        } else if !self.skip.iter().any(|s| s.match_rule::<R>())
+            && self.enabled_rules.contains(&filter)
+        {
             let domains = R::METADATA.domains;
             self.requires_project_scan |= domains.contains(&RuleDomain::Project);
         }
@@ -817,7 +822,7 @@ impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
 mod tests {
     use super::*;
     use biome_configuration::analyzer::{
-        Correctness, RuleDomainValue, RuleDomains, SeverityOrGroup,
+        Correctness, DomainSelector, RuleDomainValue, RuleDomains, SeverityOrGroup,
     };
     use biome_configuration::{
         LinterConfiguration, RuleConfiguration, RulePlainConfiguration, Rules,
@@ -938,6 +943,30 @@ mod tests {
                 )
                 .compute(),
             ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_return_project_if_a_domain_contains_project_rules() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("project").into()])
+                .compute(),
+            ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_not_return_project_if_a_domain_does_not_contain_project_rules() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("test").into()])
+                .compute(),
+            ScanKind::NoScanner
         );
     }
 }

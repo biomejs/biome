@@ -4,7 +4,7 @@ pub mod linter;
 use crate::analyzer::assist::Actions;
 pub use crate::analyzer::linter::*;
 use biome_analyze::options::RuleOptions;
-use biome_analyze::{FixKind, RuleCategory, RuleDomain, RuleFilter};
+use biome_analyze::{FixKind, Rule, RuleCategory, RuleDomain, RuleFilter};
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext, Merge,
 };
@@ -15,6 +15,7 @@ use rustc_hash::FxHashSet;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
+use std::ops::Deref;
 use std::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
@@ -419,6 +420,18 @@ pub enum AnalyzerSelector {
     Domain(DomainSelector),
 }
 
+impl AnalyzerSelector {
+    pub fn match_rule<R>(&self) -> bool
+    where
+        R: Rule,
+    {
+        match self {
+            Self::Rule(rule) => rule.match_rule::<R>(),
+            Self::Domain(domain) => domain.match_rule::<R>(),
+        }
+    }
+}
+
 impl From<RuleSelector> for AnalyzerSelector {
     fn from(value: RuleSelector) -> Self {
         Self::Rule(value)
@@ -552,6 +565,13 @@ impl RuleSelector {
         } else {
             None
         }
+    }
+
+    pub fn match_rule<R>(&self) -> bool
+    where
+        R: Rule,
+    {
+        RuleFilter::from(*self).match_rule::<R>()
     }
 }
 
@@ -698,6 +718,13 @@ impl schemars::JsonSchema for RuleSelector {
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct DomainSelector(pub &'static str);
+
+impl Deref for DomainSelector {
+    type Target = str;
+    fn deref(&self) -> &Self::Target {
+        self.0
+    }
+}
 
 impl Debug for DomainSelector {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
