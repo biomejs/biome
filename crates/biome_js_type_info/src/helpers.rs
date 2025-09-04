@@ -583,6 +583,7 @@ generate_matcher!(is_interface, Interface, _);
 generate_matcher!(is_null, Null);
 generate_matcher!(is_reference, Reference, _);
 generate_matcher!(is_never_keyword, NeverKeyword);
+generate_matcher!(is_undefined, Undefined);
 generate_matcher!(is_union, Union, _);
 generate_matcher!(is_unknown_keyword, UnknownKeyword);
 generate_matcher!(is_void_keyword, VoidKeyword);
