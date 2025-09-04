@@ -837,7 +837,7 @@ export interface Source {
 	 */
 	organizeImports?: RuleAssistConfiguration_for_OrganizeImportsOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -845,7 +845,7 @@ export interface Source {
 	 */
 	useSortedAttributes?: RuleAssistConfiguration_for_UseSortedAttributesOptions;
 	/**
-	 * Sorts the keys of a JSON object in natural order
+	 * Sort the keys of a JSON object in natural order.
 	 */
 	useSortedKeys?: RuleAssistConfiguration_for_UseSortedKeysOptions;
 	/**
@@ -1073,7 +1073,7 @@ export interface A11y {
 	 */
 	noSvgWithoutTitle?: RuleConfiguration_for_NoSvgWithoutTitleOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1294,7 +1294,7 @@ export interface Complexity {
 	 */
 	noVoid?: RuleConfiguration_for_NoVoidOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1555,7 +1555,7 @@ export interface Correctness {
 	 */
 	noVoidTypeReturn?: RuleConfiguration_for_NoVoidTypeReturnOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1676,7 +1676,7 @@ export interface Nursery {
 	 */
 	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1765,7 +1765,7 @@ export interface Performance {
 	 */
 	noUnwantedPolyfillio?: RuleConfiguration_for_NoUnwantedPolyfillioOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1802,7 +1802,7 @@ export interface Security {
 	 */
 	noGlobalEval?: RuleConfiguration_for_NoGlobalEvalOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 }
@@ -1915,7 +1915,7 @@ export interface Style {
 	 */
 	noYodaExpression?: RuleFixConfiguration_for_NoYodaExpressionOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -2424,7 +2424,7 @@ export interface Suspicious {
 	 */
 	noWith?: RuleConfiguration_for_NoWithOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**

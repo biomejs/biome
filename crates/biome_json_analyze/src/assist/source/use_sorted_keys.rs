@@ -13,7 +13,11 @@ use biome_string_case::comparable_token::ComparableToken;
 use std::ops::Not;
 
 declare_source_rule! {
-    /// Sorts the keys of a JSON object in natural order
+    /// Sort the keys of a JSON object in natural order.
+    ///
+    /// [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order) means
+    /// that uppercase letters come before lowercase letters (e.g. `A` < `a` <
+    /// `B` < `b`) and numbers are compared in a human way (e.g. `9` < `10`).
     ///
     /// ## Examples
     ///
