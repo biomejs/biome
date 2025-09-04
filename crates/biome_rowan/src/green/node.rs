@@ -12,8 +12,6 @@ use std::{
 #[cfg(target_pointer_width = "64")]
 use crate::utility_types::static_assert;
 
-use countme::Count;
-
 use crate::{
     GreenToken, NodeOrToken, TextRange, TextSize,
     arc::{Arc, HeaderSlice, ThinArc},
@@ -24,9 +22,11 @@ use crate::{
 pub(super) struct GreenNodeHead {
     kind: RawSyntaxKind,
     text_len: TextSize,
-    _c: Count<GreenNode>,
+    #[cfg(feature = "countme")]
+    _c: countme::Count<GreenNode>,
 }
 
+#[cfg(feature = "countme")]
 pub(crate) fn has_live() -> bool {
     countme::get::<GreenNode>().live > 0
 }
@@ -265,7 +265,8 @@ impl GreenNode {
             GreenNodeHead {
                 kind,
                 text_len: 0.into(),
-                _c: Count::new(),
+                #[cfg(feature = "countme")]
+                _c: countme::Count::new(),
             },
             slots,
         );
@@ -300,7 +301,7 @@ impl GreenNode {
 
 impl Slot {
     #[inline]
-    pub(crate) fn as_ref(&self) -> Option<GreenElementRef> {
+    pub(crate) fn as_ref(&self) -> Option<GreenElementRef<'_>> {
         match self {
             Self::Node { node, .. } => Some(NodeOrToken::Node(node)),
             Self::Token { token, .. } => Some(NodeOrToken::Token(token)),

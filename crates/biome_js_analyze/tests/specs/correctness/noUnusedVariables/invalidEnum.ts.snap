@@ -22,7 +22,7 @@ export {}
 ```
 invalidEnum.ts:1:6 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable Status is unused.
   
   > 1 │ enum Status {
       │      ^^^^^^

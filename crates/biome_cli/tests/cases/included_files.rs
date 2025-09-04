@@ -17,7 +17,7 @@ import { lorem, foom, bar } from "foo";"#;
 #[test]
 fn does_handle_only_included_files() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -58,7 +58,7 @@ fn does_handle_only_included_files() {
 #[test]
 fn does_not_handle_included_files_if_overridden_by_ignore() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -93,9 +93,48 @@ fn does_not_handle_included_files_if_overridden_by_ignore() {
 }
 
 #[test]
+fn does_not_handle_files_in_ignored_folder() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "files": { "includes": ["**/*.js", "!**/folder"] }
+}
+"#
+        .as_bytes(),
+    );
+
+    let test = Utf8Path::new("test.js");
+    fs.insert(test.into(), UNFORMATTED.as_bytes());
+
+    let test2 = Utf8Path::new("folder/test2.js");
+    fs.insert(test2.into(), UNFORMATTED.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, FORMATTED);
+    assert_file_contents(&fs, test2, UNFORMATTED);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_handle_files_in_ignored_folder",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn does_not_handle_included_files_if_overridden_by_ignore_formatter() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -132,7 +171,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_formatter() {
 #[test]
 fn does_not_handle_included_files_if_overridden_by_ignore_linter() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -171,7 +210,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_linter() {
 #[test]
 fn does_not_handle_included_files_if_overridden_by_organize_imports() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),

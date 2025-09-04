@@ -4,8 +4,8 @@
 
 use biome_graphql_factory::GraphqlSyntaxFactory;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
+use biome_parser::AnyParse;
 pub use biome_parser::prelude::*;
-use biome_parser::{AnyParse, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 use parser::{GraphqlParser, parse_root};
 

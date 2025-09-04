@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsSyntaxToken;
 use biome_rowan::{BatchMutationExt, TextRange};
+use biome_rule_options::no_octal_escape::NoOctalEscapeOptions;
 
 use crate::{JsRuleAction, lint::correctness::no_nonoctal_decimal_escape::AnyJsStringLiteral};
 
@@ -33,7 +34,7 @@ declare_lint_rule! {
         version: "1.9.3",
         name: "noOctalEscape",
         language: "js",
-        sources: &[RuleSource::Eslint("no-octal-escape")],
+        sources: &[RuleSource::Eslint("no-octal-escape").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -44,25 +45,24 @@ impl Rule for NoOctalEscape {
     type Query = Ast<AnyJsStringLiteral>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoOctalEscapeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let token = ctx.query().string_literal_token()?;
         let mut it = token.text_trimmed().bytes().enumerate();
         while let Some((index, byte)) = it.next() {
-            if byte == b'\\' {
-                if let Some((_, byte)) = it.next() {
-                    if matches!(byte, b'0'..=b'7') {
-                        let len = 2 + it
-                            .clone()
-                            .take(5)
-                            .take_while(|(_, byte)| matches!(byte, b'0'..=b'7'))
-                            .count();
-                        // Ignore the non-deprecated `\0`
-                        if byte != b'0' || len > 2 {
-                            return Some(RuleState { index, len });
-                        }
-                    }
+            if byte == b'\\'
+                && let Some((_, byte)) = it.next()
+                && matches!(byte, b'0'..=b'7')
+            {
+                let len = 2 + it
+                    .clone()
+                    .take(5)
+                    .take_while(|(_, byte)| matches!(byte, b'0'..=b'7'))
+                    .count();
+                // Ignore the non-deprecated `\0`
+                if byte != b'0' || len > 2 {
+                    return Some(RuleState { index, len });
                 }
             }
         }

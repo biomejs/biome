@@ -1,0 +1,142 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+const mapped = [1, 2, 3].map(async (x) => x + 1);
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => value: 1
+
+Module TypeId(1) => value: 2
+
+Module TypeId(2) => value: 3
+
+Module TypeId(3) => Tuple(
+    [
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(0),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(1),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(2),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+)
+
+Module TypeId(4) => Array.prototype.map
+
+Module TypeId(5) => unknown
+
+Module TypeId(6) => unknown + Module(0) TypeId(0)
+
+Module TypeId(7) => instanceof Promise<Module(0) TypeId(6)>
+
+Module TypeId(8) => async Function {
+  accepts: {
+    params: [
+      required x: unknown
+    ]
+    type_args: []
+  }
+  returns: Module(0) TypeId(7)
+}
+
+Module TypeId(9) => instanceof Array<Module(0) TypeId(7)>
+```
+
+# Module Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => value: 1
+
+Full TypeId(1) => value: 2
+
+Full TypeId(2) => value: 3
+
+Full TypeId(3) => Tuple(
+    [
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(0),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(1),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(2),
+            ),
+            name: None,
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+)
+
+Full TypeId(4) => Array.prototype.map
+
+Full TypeId(5) => unknown
+
+Full TypeId(6) => unknown + Module(0) TypeId(0)
+
+Full TypeId(7) => instanceof Promise<Module(0) TypeId(6)>
+
+Full TypeId(8) => async Function {
+  accepts: {
+    params: [
+      required x: unknown
+    ]
+    type_args: []
+  }
+  returns: Module(0) TypeId(7)
+}
+
+Full TypeId(9) => instanceof Array<Module(0) TypeId(7)>
+```

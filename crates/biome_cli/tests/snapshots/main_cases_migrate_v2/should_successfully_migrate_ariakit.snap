@@ -6,11 +6,12 @@ expression: redactor(content)
 
 ```json
 {
+  "root": false,
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true
+    "useIgnoreFile": false
   },
   "files": {
     "ignoreUnknown": true,
@@ -59,14 +60,7 @@ expression: redactor(content)
         "noParameterAssign": "off",
         "noUnusedTemplateLiteral": "off",
         "noNonNullAssertion": "off",
-        "noUselessElse": "off",
-        "useAsConstAssertion": "error",
-        "useDefaultParameterLast": "error",
-        "useEnumInitializers": "error",
-        "useSelfClosingElements": "error",
-        "useSingleVarDeclarator": "error",
-        "useNumberNamespace": "error",
-        "noInferrableTypes": "error"
+        "noUselessElse": "off"
       }
     }
   }
@@ -76,5 +70,11 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-Your configuration file(s) have been successfully migrated.
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
 ```

@@ -65,10 +65,10 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
         let node = match event {
             WalkEvent::Enter(node) => node,
             WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree {
-                    if skip_subtree == node {
-                        self.skip_subtree = None;
-                    }
+                if let Some(skip_subtree) = &self.skip_subtree
+                    && skip_subtree == node
+                {
+                    self.skip_subtree = None;
                 }
 
                 return;
@@ -79,11 +79,11 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
             return;
         }
 
-        if let Some(range) = ctx.range {
-            if node.text_range_with_trivia().ordering(range).is_ne() {
-                self.skip_subtree = Some(node.clone());
-                return;
-            }
+        if let Some(range) = ctx.range
+            && node.text_range_with_trivia().ordering(range).is_ne()
+        {
+            self.skip_subtree = Some(node.clone());
+            return;
         }
 
         ctx.match_query(node.clone());
@@ -100,8 +100,8 @@ mod tests {
 
     use crate::{
         Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression, ControlFlow,
-        MetadataRegistry, Never, QueryMatcher, RuleCategoriesBuilder, ServiceBag,
-        SuppressionAction, SyntaxVisitor, matcher::MatchQueryParams, registry::Phases,
+        MetadataRegistry, Never, QueryMatcher, ServiceBag, SuppressionAction, SyntaxVisitor,
+        matcher::MatchQueryParams, registry::Phases,
     };
 
     #[derive(Default)]
@@ -191,7 +191,6 @@ mod tests {
             |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
             Box::new(TestAction),
             &mut emit_signal,
-            RuleCategoriesBuilder::default().with_syntax().build(),
         );
 
         analyzer.add_visitor(Phases::Syntax, Box::<SyntaxVisitor<RawLanguage>>::default());

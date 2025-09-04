@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_issue_6229.ts
+---
+# Input
+```ts
+import Used, { NotUsed } from 'foo';
+
+Used();
+
+```
+
+# Diagnostics
+```
+invalid_issue_6229.ts:1:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These imports are unused.
+  
+  > 1 │ import Used, { NotUsed } from 'foo';
+      │              ^^^^^^^^^^^
+    2 │ 
+    3 │ Used();
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·Used,·{·NotUsed·}·from·'foo';
+      │            -------------            
+
+```

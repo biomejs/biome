@@ -10,6 +10,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{Literal, Type, TypeData};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::use_exhaustive_switch_cases::UseExhaustiveSwitchCasesOptions;
 
 use crate::JsRuleAction;
 use crate::services::typed::Typed;
@@ -94,7 +95,7 @@ declare_lint_rule! {
         name: "useExhaustiveSwitchCases",
         language: "js",
         recommended: true,
-        sources: &[RuleSource::EslintTypeScript("switch-exhaustiveness-check")],
+        sources: &[RuleSource::EslintTypeScript("switch-exhaustiveness-check").same()],
         fix_kind: FixKind::Unsafe,
         domains: &[RuleDomain::Project],
     }
@@ -104,7 +105,7 @@ impl Rule for UseExhaustiveSwitchCases {
     type Query = Typed<JsSwitchStatement>;
     type State = Vec<Type>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExhaustiveSwitchCasesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let stmt = ctx.query();
@@ -122,7 +123,7 @@ impl Rule for UseExhaustiveSwitchCases {
             .filter_map(|case| match case {
                 AnyJsSwitchClause::JsCaseClause(case) => {
                     let test = case.test().ok()?;
-                    flatten_type(&ctx.type_for_expression(&test))
+                    flatten_type(&ctx.type_of_expression(&test))
                         .as_deref()
                         .cloned()
                 }
@@ -133,38 +134,23 @@ impl Rule for UseExhaustiveSwitchCases {
         let mut missing_cases = Vec::new();
 
         let discriminant = stmt.discriminant().ok()?;
-        let discriminant_ty = flatten_type(&ctx.type_for_expression(&discriminant))?;
+        let discriminant_ty = flatten_type(&ctx.type_of_expression(&discriminant))?;
 
-        for union_part in match discriminant_ty.deref() {
-            TypeData::Union(union) => union
-                .types()
-                .iter()
-                .filter_map(|r| discriminant_ty.resolve(r))
-                .collect(),
-            _ => vec![discriminant_ty],
+        for intersection_part in match discriminant_ty.is_union() {
+            true => discriminant_ty.flattened_union_variants().collect(),
+            false => vec![discriminant_ty],
         } {
-            let union_part = flatten_type(&union_part)?;
+            let intersection_part = flatten_type(&intersection_part)?;
 
-            for intersection_part in match union_part.deref() {
-                TypeData::Intersection(intersection) => intersection
-                    .types()
-                    .iter()
-                    .filter_map(|r| union_part.resolve(r))
-                    .collect(),
-                _ => vec![union_part],
-            } {
-                let intersection_part = flatten_type(&intersection_part)?;
-
-                if !matches!(
-                    intersection_part.deref(),
-                    TypeData::Literal(_) | TypeData::Null | TypeData::Undefined | TypeData::Symbol
-                ) || found_cases.contains(&intersection_part)
-                {
-                    continue;
-                }
-
-                missing_cases.push(intersection_part);
+            if !matches!(
+                intersection_part.deref(),
+                TypeData::Literal(_) | TypeData::Null | TypeData::Undefined | TypeData::Symbol
+            ) || found_cases.contains(&intersection_part)
+            {
+                continue;
             }
+
+            missing_cases.push(intersection_part);
         }
 
         if missing_cases.is_empty() {
@@ -274,6 +260,7 @@ impl Rule for UseExhaustiveSwitchCases {
 fn flatten_type(ty: &Type) -> Option<Type> {
     match ty.deref() {
         TypeData::InstanceOf(instance) => ty.resolve(&instance.ty),
+        TypeData::Reference(reference) => ty.resolve(reference),
         TypeData::TypeofType(inner) => ty.resolve(inner),
         _ => Some(ty.clone()),
     }
@@ -283,8 +270,7 @@ fn type_to_string(ty: &Type) -> String {
     match ty.deref() {
         TypeData::Literal(lit) => match lit.as_ref() {
             Literal::Boolean(b) => b.as_bool().to_string(),
-            Literal::Null => "null".to_string(),
-            Literal::Number(n) => n.as_f64().to_string(),
+            Literal::Number(n) => n.text().to_string(),
             Literal::String(s) => format!("\"{}\"", s.as_str()),
             _ => "unknown".to_string(),
         },
@@ -304,10 +290,9 @@ fn type_to_expression(ty: &Type) -> Option<AnyJsExpression> {
                 }))
                 .into()
             }
-            Literal::Null => make::js_null_literal_expression(make::token(T![null])).into(),
             Literal::Number(n) => {
-                let text = n.as_f64().to_string();
-                make::js_number_literal_expression(make::js_number_literal(&text)).into()
+                let text = n.text();
+                make::js_number_literal_expression(make::js_number_literal(text)).into()
             }
             Literal::String(s) => {
                 make::js_string_literal_expression(make::js_string_literal(s.as_str())).into()

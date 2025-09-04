@@ -6,7 +6,7 @@ info: js/module/statement/continue_stmt.js
 
 ```js
 for (const f of fs) {
-    if (condition) continue; //commment
+    if (condition) continue; //comment
     else continue; // comment
 }
 ```
@@ -33,12 +33,13 @@ Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
+Operator linebreak: After
 -----
 
 ```js
 for (const f of fs) {
 	if (condition)
-		continue; //commment
+		continue; //comment
 	else continue; // comment
 }
 ```

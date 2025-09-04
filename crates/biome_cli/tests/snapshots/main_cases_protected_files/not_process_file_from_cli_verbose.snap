@@ -40,11 +40,6 @@ package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━�
 ```
 
 ```block
-Scanned project folder in <TIME>.
-Checked 0 files in <TIME>. No fixes applied.
-```
-
-```block
  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Files processed:
@@ -62,4 +57,9 @@ Checked 0 files in <TIME>. No fixes applied.
   ! The list is empty.
   
 
+```
+
+```block
+Scanned project folder in <TIME>.
+Checked 0 files in <TIME>. No fixes applied.
 ```

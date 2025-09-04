@@ -8,6 +8,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsConditionalExpression, JsIfStatement, JsUnaryOperator, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_negation_else::NoNegationElseOptions;
 
 use crate::JsRuleAction;
 
@@ -48,8 +49,8 @@ declare_lint_rule! {
         name: "noNegationElse",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-negated-condition"),
-            RuleSource::Clippy("if_not_else"),
+            RuleSource::Eslint("no-negated-condition").same(),
+            RuleSource::Clippy("if_not_else").same(),
         ],
         recommended: false,
         severity: Severity::Information,
@@ -61,7 +62,7 @@ impl Rule for NoNegationElse {
     type Query = Ast<AnyJsCondition>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNegationElseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
@@ -135,15 +136,15 @@ declare_node_union! {
 }
 
 fn is_negation(node: &AnyJsExpression) -> bool {
-    if let AnyJsExpression::JsUnaryExpression(node) = node {
-        if node.operator() == Ok(JsUnaryOperator::LogicalNot) {
-            if let Ok(AnyJsExpression::JsUnaryExpression(inner_unary)) = node.argument() {
-                // Some users use double exclamation to convert a value to a boolean
-                // e.g. `!!0`
-                return inner_unary.operator() != Ok(JsUnaryOperator::LogicalNot);
-            }
-            return true;
+    if let AnyJsExpression::JsUnaryExpression(node) = node
+        && node.operator() == Ok(JsUnaryOperator::LogicalNot)
+    {
+        if let Ok(AnyJsExpression::JsUnaryExpression(inner_unary)) = node.argument() {
+            // Some users use double exclamation to convert a value to a boolean
+            // e.g. `!!0`
+            return inner_unary.operator() != Ok(JsUnaryOperator::LogicalNot);
         }
+        return true;
     }
     false
 }

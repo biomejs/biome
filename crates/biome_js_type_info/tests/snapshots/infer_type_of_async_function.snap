@@ -19,14 +19,12 @@ async Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: Global TypeId(18)
+  returns: Global TypeId(0)
 }
 ```
 
 ## Registered types
 
 ```
-Global TypeId(17) => string
-
-Global TypeId(18) => instanceof unresolved reference "Promise"<Global TypeId(17)>
+Global TypeId(0) => instanceof unresolved reference "Promise"<string> (scope ID: 0)
 ```

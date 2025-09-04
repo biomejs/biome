@@ -71,7 +71,7 @@ impl GritAstNode for GritNode {
         self.0.prev_sibling().map(Into::into)
     }
 
-    fn text(&self) -> GritResult<Cow<str>> {
+    fn text(&self) -> GritResult<Cow<'_, str>> {
         Ok(Cow::Owned(self.0.text_trimmed().to_string()))
     }
 

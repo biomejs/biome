@@ -27,7 +27,7 @@ let f;
 
 #[test]
 fn reports_diagnostics_github_check_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -63,7 +63,7 @@ fn reports_diagnostics_github_check_command() {
 
 #[test]
 fn reports_diagnostics_github_ci_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -99,7 +99,7 @@ fn reports_diagnostics_github_ci_command() {
 
 #[test]
 fn reports_diagnostics_github_lint_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -135,7 +135,7 @@ fn reports_diagnostics_github_lint_command() {
 
 #[test]
 fn reports_diagnostics_github_format_command() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("main.ts");

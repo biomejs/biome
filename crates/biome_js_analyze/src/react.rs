@@ -1,5 +1,6 @@
 //! A series of AST utilities to work with the React library
 
+pub mod components;
 pub mod hooks;
 
 use biome_js_semantic::{Binding, SemanticModel};

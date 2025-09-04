@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsCallExpression, JsSyntaxKind,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_flat_map_identity::NoFlatMapIdentityOptions;
 
 use crate::JsRuleAction;
 
@@ -41,8 +42,8 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Information,
-        sources: &[RuleSource::Clippy("flat_map_identity")],
-        fix_kind: FixKind::Safe,
+        sources: &[RuleSource::Clippy("flat_map_identity").same()],
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -50,7 +51,7 @@ impl Rule for NoFlatMapIdentity {
     type Query = Ast<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoFlatMapIdentityOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let flat_map_call = ctx.query();

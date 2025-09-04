@@ -32,7 +32,7 @@ file.ts:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     2 2 │   // biome-ignore-start syntax/correctness/noTypeOnlyImportAttributes: bug
     3 3 │   import type { ChalkInstance } from "chalk" with { "resolution-mode": "import" };
@@ -46,7 +46,7 @@ file.ts:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━
 ```block
 file.ts:7:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function sommething is unused.
   
     5 │ // biome-ignore-end syntax/correctness/noTypeOnlyImportAttributes: bug
     6 │ 

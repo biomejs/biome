@@ -2,7 +2,10 @@ use crate::editorconfig::EditorConfigErrorKind;
 use biome_console::fmt::Display;
 use biome_console::{MarkupBuf, markup};
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
+use biome_diagnostics::{
+    Advices, Category, Diagnostic, Error, Location, LogCategory, MessageAndDescription, Severity,
+    Visit, category,
+};
 use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::{SyntaxError, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -38,6 +41,7 @@ pub enum BiomeDiagnostic {
 
     NoConfigurationFileFound(NoConfigurationFileFound),
 
+    /// Thrown when a user attempts to load a configuration file that has `root: false`
     NonRootConfiguration(NonRootConfiguration),
 
     /// Thrown when trying to **create** a new configuration file, but it exists already
@@ -63,6 +67,23 @@ pub enum BiomeDiagnostic {
 
     /// Thrown when a configuration file can't be resolved from `node_modules`
     CantResolve(CantResolve),
+
+    /// Thrown when there's a nested root configuration inside a root configuration
+    ///
+    /// ## Example
+    /// ```text
+    /// - biome.json
+    /// - packages/lib/
+    ///   - biome.json // this has root: true
+    /// ```
+    ///
+    RootInRoot(RootInRoot),
+
+    /// Thrown when the user starts a command/LSP from a nested configuration
+    /// file that needs to extend from a root (AKA it has `extends: "//"`),
+    /// but while looking for it, not configuration file with `root: true` was found.
+    ///
+    NoRootFromNestedExtend(NoRootFromNestedExtend),
 }
 
 impl From<SyntaxError> for BiomeDiagnostic {
@@ -102,10 +123,7 @@ impl BiomeDiagnostic {
         file_path: impl Into<String>,
     ) -> Self {
         Self::InvalidIgnorePattern(InvalidIgnorePattern {
-            message: format!(
-                "Couldn't parse the pattern \"{}\". Reason: {}",
-                pattern, reason,
-            ),
+            message: format!("Couldn't parse the pattern \"{pattern}\". Reason: {reason}",),
             file_path: Some(file_path.into()),
         })
     }
@@ -124,6 +142,17 @@ impl BiomeDiagnostic {
         Self::InvalidConfigurationFile(InvalidConfigurationFile {
             path: path.to_string(),
         })
+    }
+
+    pub fn root_in_root(nested_path: String, root_path: Option<String>) -> Self {
+        Self::RootInRoot(RootInRoot {
+            path: nested_path.to_string(),
+            other_path: root_path,
+        })
+    }
+
+    pub fn no_root_from_nested_extend() -> Self {
+        Self::NoRootFromNestedExtend(NoRootFromNestedExtend)
     }
 
     pub fn no_configuration_file_found(path: &Utf8Path) -> Self {
@@ -250,10 +279,10 @@ impl CantLoadExtendFile {
         }
     }
 
-    pub fn with_verbose_advice(mut self, messsage: impl Display) -> Self {
+    pub fn with_verbose_advice(mut self, message: impl Display) -> Self {
         self.verbose_advice
             .messages
-            .push(markup! {{messsage}}.to_owned());
+            .push(markup! {{message}}.to_owned());
         self
     }
 }
@@ -316,13 +345,68 @@ impl CantResolve {
         }
     }
 
-    pub fn with_verbose_advice(mut self, messsage: impl Display) -> Self {
+    pub fn with_verbose_advice(mut self, message: impl Display) -> Self {
         self.verbose_advice
             .messages
-            .push(markup! {{messsage}}.to_owned());
+            .push(markup! {{message}}.to_owned());
         self
     }
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RootInRoot {
+    path: String,
+    other_path: Option<String>,
+}
+
+impl Diagnostic for RootInRoot {
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup! {
+            "Found a nested root configuration, but there's already a root configuration."
+        })
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
+    }
+
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("configuration"))
+    }
+
+    fn location(&self) -> Location<'_> {
+        Location::builder().resource(&self.path).build()
+    }
+
+    fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        if let Some(other_path) = self.other_path.as_ref() {
+            visitor.record_log(
+                LogCategory::Info,
+                &markup! {
+                    "The other configuration was found in "<Emphasis>{other_path}</Emphasis>"."
+                },
+            )?;
+            visitor.record_log(
+                LogCategory::Info,
+                &markup! {
+                    "Use the migration command "<Emphasis>"from the root of the project"</Emphasis>" to update the configuration."
+                },
+            )?;
+            visitor.record_command("biome migrate --write")?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        message("Biome couldn't find a root configuration to extend from. Remove the "<Emphasis>"extends"</Emphasis>" field or make sure the parent configuration has "<Emphasis>"root: true"</Emphasis>".")
+    )
+)]
+pub struct NoRootFromNestedExtend;
 
 #[derive(Debug, Diagnostic, Deserialize, Serialize)]
 pub enum EditorConfigDiagnostic {

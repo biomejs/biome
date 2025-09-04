@@ -31,15 +31,15 @@ impl ParseNodeList for DefinitionList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         let mut syntax = parse_definition(p);
 
-        if syntax == Absent {
-            if let Present(pattern) = parse_pattern(p) {
-                if self.has_pattern {
-                    p.error(too_many_patterns(p, pattern.range(p)));
-                }
-
-                syntax = Present(pattern);
-                self.has_pattern = true
+        if syntax == Absent
+            && let Present(pattern) = parse_pattern(p)
+        {
+            if self.has_pattern {
+                p.error(too_many_patterns(p, pattern.range(p)));
             }
+
+            syntax = Present(pattern);
+            self.has_pattern = true
         }
 
         syntax

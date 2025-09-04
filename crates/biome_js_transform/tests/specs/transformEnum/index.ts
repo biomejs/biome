@@ -3,8 +3,9 @@ enum StatusA {
 	Disabled
 }
 
-
-enum StatusB {
-	Enabled = "Enabled",
-	Disabled = "Disabled"
-}
+let a = () => {
+	enum StatusB {
+		Enabled = "Enabled",
+		Disabled = "Disabled"
+	}
+};

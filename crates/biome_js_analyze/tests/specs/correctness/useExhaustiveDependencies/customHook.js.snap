@@ -27,7 +27,7 @@ function MyComponent() {
 ```
 customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
     3 │ function MyComponent() {
     4 │     let a = 1;
@@ -36,7 +36,7 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
     6 │         console.log(a);
     7 │     }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
     4 │     let a = 1;
     5 │     useEffect(() => {
@@ -45,9 +45,9 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
     7 │     }, []);
     8 │ 
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     7 │ ····},·[a]);
       │         +   
@@ -57,7 +57,7 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
 ```
 customHook.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
      7 │     }, []);
      8 │ 
@@ -66,7 +66,7 @@ customHook.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
     10 │         console.log(a);
     11 │     }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
      9 │     useMyEffect(() => {
   > 10 │         console.log(a);
@@ -74,9 +74,9 @@ customHook.js:9:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
     11 │     }, []);
     12 │ 
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     11 │ ····},·[a]);
        │         +   

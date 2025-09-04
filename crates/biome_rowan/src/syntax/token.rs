@@ -1,3 +1,4 @@
+use super::trivia::{trim_leading_trivia_pieces, trim_trailing_trivia_pieces};
 use crate::green::{GreenToken, GreenTrivia};
 use crate::syntax::SyntaxTrivia;
 use crate::syntax::element::SyntaxElementKey;
@@ -9,8 +10,6 @@ use crate::{
 use biome_text_size::{TextLen, TextRange, TextSize};
 use std::fmt;
 use std::marker::PhantomData;
-
-use super::trivia::{trim_leading_trivia_pieces, trim_trailing_trivia_pieces};
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct SyntaxToken<L: Language> {
@@ -564,5 +563,30 @@ impl<L: Language> From<cursor::SyntaxToken> for SyntaxToken<L> {
             raw,
             _p: PhantomData,
         }
+    }
+}
+
+/// A syntax token that contains an offset
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct SyntaxTokenWithOffset<L: Language> {
+    pub token: SyntaxToken<L>,
+    pub offset: TextSize,
+}
+
+impl<L: Language> SyntaxTokenWithOffset<L> {
+    pub fn new(token: SyntaxToken<L>, offset: TextSize) -> Self {
+        Self { token, offset }
+    }
+
+    /// Returns the trimmed text range, adjusted for base offset
+    pub fn text_trimmed_range(&self) -> TextRange {
+        let range = self.token.text_trimmed_range();
+        TextRange::new(range.start() + self.offset, range.end() + self.offset)
+    }
+
+    /// Returns the text range including all trivia, adjusted for base offset
+    pub fn text_range(&self) -> TextRange {
+        let range = self.token.text_range();
+        TextRange::new(range.start() + self.offset, range.end() + self.offset)
     }
 }

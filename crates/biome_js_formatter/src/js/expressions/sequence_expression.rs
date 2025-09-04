@@ -31,21 +31,21 @@ impl FormatNodeRule<JsSequenceExpression> for FormatJsSequenceExpression {
         }
 
         let format_inner = format_with(|f| {
-            if let Some(parent) = &first_non_sequence_or_paren_parent {
-                if matches!(
+            if let Some(parent) = &first_non_sequence_or_paren_parent
+                && matches!(
                     parent.kind(),
                     JsSyntaxKind::JS_EXPRESSION_STATEMENT | JsSyntaxKind::JS_FOR_STATEMENT
-                ) {
-                    return write!(
-                        f,
-                        [
-                            left.format(),
-                            comma_token.format(),
-                            line_suffix_boundary(),
-                            indent(&format_args![soft_line_break_or_space(), right.format()])
-                        ]
-                    );
-                }
+                )
+            {
+                return write!(
+                    f,
+                    [
+                        left.format(),
+                        comma_token.format(),
+                        line_suffix_boundary(),
+                        indent(&format_args![soft_line_break_or_space(), right.format()])
+                    ]
+                );
             }
 
             write!(

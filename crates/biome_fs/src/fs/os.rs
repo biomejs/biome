@@ -343,16 +343,18 @@ fn handle_any_file<'scope>(
     }
 
     if file_type.is_dir() {
+        let path_buf = path.to_path_buf();
         scope.spawn(move |scope| {
-            handle_dir(scope, ctx, &path, origin_path);
+            handle_dir(scope, ctx, &path_buf, origin_path);
         });
+        if ctx.should_store_dirs() {
+            ctx.store_path(BiomePath::new(path));
+        }
         return;
     }
 
     if file_type.is_file() {
-        scope.spawn(move |_| {
-            ctx.store_path(BiomePath::new(path));
-        });
+        ctx.store_path(BiomePath::new(path));
         return;
     }
 
@@ -406,6 +408,7 @@ pub struct TemporaryFs {
     /// name passed in the [TemporaryFs::new] function
     pub working_directory: Utf8PathBuf,
     files: Vec<(Utf8PathBuf, String)>,
+    project_directory: Utf8PathBuf,
 }
 
 impl TemporaryFs {
@@ -423,25 +426,31 @@ impl TemporaryFs {
         let path = fs::canonicalize(path).unwrap();
 
         Self {
-            working_directory: Utf8PathBuf::from_path_buf(path).unwrap(),
+            working_directory: Utf8PathBuf::from_path_buf(path.clone()).unwrap(),
             files: Vec::new(),
+            project_directory: Utf8PathBuf::from_path_buf(path).unwrap(),
         }
     }
 
     /// Creates a file under the working directory
-    pub fn create_file(&mut self, name: &str, content: &str) {
+    pub fn create_file(&mut self, name: &str, content: &str) -> Utf8PathBuf {
         let path = self.working_directory.join(name);
         fs::create_dir_all(path.parent().expect("parent dir exists."))
             .expect("Temporary directory to exist and being writable");
         fs::write(path.as_std_path(), content)
             .expect("Temporary directory to exist and being writable");
-        self.files.push((path, content.to_string()));
+        self.files.push((path.clone(), content.to_string()));
+        path
     }
 
     pub fn create_folder(&mut self, name: &str) {
         let path = self.working_directory.join(name);
         fs::create_dir_all(path.parent().expect("parent dir exists."))
             .expect("Temporary directory to exist and being writable");
+    }
+
+    pub fn append_to_working_directory(&mut self, path: &str) {
+        self.working_directory = self.project_directory.join(path);
     }
 
     /// Returns the path to use when running the CLI
@@ -457,11 +466,11 @@ impl TemporaryFs {
     /// Returns an instance of [MemoryFileSystem]. The files saved in the file system
     /// will be stripped of the working directory path, making snapshots predictable.
     pub fn create_mem(&self) -> MemoryFileSystem {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         for (path, content) in self.files.iter() {
             fs.insert(
                 path.clone()
-                    .strip_prefix(self.working_directory.as_str())
+                    .strip_prefix(self.project_directory.as_str())
                     .expect("Working directory")
                     .to_path_buf(),
                 content.as_bytes(),

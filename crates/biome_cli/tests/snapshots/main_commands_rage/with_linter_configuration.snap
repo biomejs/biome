@@ -45,6 +45,7 @@ Environment:
   BIOME_LOG_PATH:               **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:        unset
   BIOME_CONFIG_PATH:            unset
+  BIOME_THREADS:                unset
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
   JS_RUNTIME_VERSION:           unset
@@ -73,6 +74,7 @@ Linter:
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
     complexity/noFlatMapIdentity
+    complexity/noImportantStyles
     complexity/noStaticOnlyClass
     complexity/noThisInStatic
     complexity/noUselessCatch
@@ -93,6 +95,7 @@ Linter:
     complexity/useArrowFunction
     complexity/useDateNow
     complexity/useFlatMap
+    complexity/useIndexOf
     complexity/useLiteralKeys
     complexity/useNumericLiterals
     complexity/useOptionalChain

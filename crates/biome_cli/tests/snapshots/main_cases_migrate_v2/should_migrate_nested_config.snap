@@ -1,0 +1,63 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `foo/biome.json`
+
+```json
+{ "linter": { "rules": { "recommended": true } } }
+```
+
+## `biome.json`
+
+```json
+{ "linter": { "rules": { "recommended": true } } }
+```
+
+## `bar/biome.json`
+
+```json
+{ "linter": { "rules": { "recommended": true } } }
+```
+
+# Emitted Messages
+
+```block
+<TEMP_DIR>/should_migrate_nested_config/bar/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1 │ {·"root":·false,"linter":·{·"rules":·{·"recommended":·true·}·}·}
+      │    ++++++++++++++                                               
+
+```
+
+```block
+Your configuration file is up to date.
+```
+
+```block
+<TEMP_DIR>/should_migrate_nested_config/foo/biome.json migrate ━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1 │ {·"root":·false,"linter":·{·"rules":·{·"recommended":·true·}·}·}
+      │    ++++++++++++++                                               
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - <TEMP_DIR>/should_migrate_nested_config/bar/biome.json: configuration needs migration.
+  - <TEMP_DIR>/should_migrate_nested_config/biome.json: no migration needed.
+  - <TEMP_DIR>/should_migrate_nested_config/foo/biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

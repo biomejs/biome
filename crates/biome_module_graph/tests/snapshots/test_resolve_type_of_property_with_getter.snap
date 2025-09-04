@@ -1,0 +1,70 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts`
+
+## Source
+
+```ts
+class Foo {
+	get foo() {
+		if (!this.initialised) {
+			this.initialise();
+			return "foo";
+		}
+
+		return "foo";
+	}
+}
+
+const fooness = new Foo();
+const foo = fooness.foo;
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Module(0) TypeId(2).initialised
+
+Module TypeId(1) => boolean
+
+Module TypeId(2) => instanceof Module(0) TypeId(10)
+
+Module TypeId(3) => Module(0) TypeId(2).initialise
+
+Module TypeId(4) => Call Module(0) TypeId(3)(No parameters)
+
+Module TypeId(5) => value: foo
+
+Module TypeId(6) => Module(0) TypeId(10)
+
+Module TypeId(7) => instanceof Module(0) TypeId(6)
+
+Module TypeId(8) => Module(0) TypeId(5)
+
+Module TypeId(9) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(5)
+}
+
+Module TypeId(10) => class "Foo" {
+  extends: none
+  implements: []
+  type_args: []
+}
+```

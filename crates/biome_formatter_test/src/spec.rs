@@ -14,7 +14,7 @@ use biome_service::App;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::Settings;
 use biome_service::workspace::{
-    DocumentFileSource, FeaturesBuilder, OpenProjectParams, OpenProjectResult,
+    DocumentFileSource, FeaturesBuilder, FileFeaturesResult, OpenProjectParams, OpenProjectResult,
     SupportsFeatureParams, UpdateSettingsParams,
 };
 use camino::{Utf8Path, Utf8PathBuf};
@@ -50,13 +50,11 @@ impl<'a> SpecTestFile<'a> {
             "The input '{spec_input_file}' must exist and be a file.",
         );
 
-        let OpenProjectResult { project_key, .. } = app
+        let OpenProjectResult { project_key } = app
             .workspace
             .open_project(OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
             })
             .unwrap();
 
@@ -64,7 +62,9 @@ impl<'a> SpecTestFile<'a> {
             app.workspace.update_settings(settings).unwrap();
         }
         let mut input_file = BiomePath::new(file_path);
-        let can_format = app
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = app
             .workspace
             .file_features(SupportsFeatureParams {
                 project_key,
@@ -73,7 +73,7 @@ impl<'a> SpecTestFile<'a> {
             })
             .unwrap();
 
-        if can_format.supports_format() {
+        if file_features.supports_format() {
             let mut input_code = input_file.get_buffer_from_file();
 
             let (_, range_start_index, range_end_index) = strip_rome_placeholders(&mut input_code);
@@ -292,7 +292,7 @@ where
         snapshot_builder.finish(self.test_file.relative_file_name());
     }
 
-    fn test_file(&self) -> &SpecTestFile {
+    fn test_file(&self) -> &SpecTestFile<'_> {
         &self.test_file
     }
 }

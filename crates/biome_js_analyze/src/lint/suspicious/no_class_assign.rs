@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::AnyJsClass;
+use biome_rule_options::no_class_assign::NoClassAssignOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -70,7 +71,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noClassAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-class-assign")],
+        sources: &[RuleSource::Eslint("no-class-assign").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -80,19 +81,19 @@ impl Rule for NoClassAssign {
     type Query = Semantic<AnyJsClass>;
     type State = Reference;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoClassAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
 
-        if let Some(id) = node.id() {
-            if let Some(id_binding) = id.as_js_identifier_binding() {
-                return id_binding
-                    .all_writes(model)
-                    .collect::<Vec<_>>()
-                    .into_boxed_slice();
-            }
+        if let Some(id) = node.id()
+            && let Some(id_binding) = id.as_js_identifier_binding()
+        {
+            return id_binding
+                .all_writes(model)
+                .collect::<Vec<_>>()
+                .into_boxed_slice();
         }
 
         Vec::new().into_boxed_slice()

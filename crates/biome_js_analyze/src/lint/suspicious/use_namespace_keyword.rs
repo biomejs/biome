@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{JsSyntaxToken, T, TsModuleDeclaration};
 use biome_rowan::BatchMutationExt;
+use biome_rule_options::use_namespace_keyword::UseNamespaceKeywordOptions;
 
 use crate::JsRuleAction;
 
@@ -44,7 +45,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useNamespaceKeyword",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("prefer-namespace-keyword")],
+        sources: &[RuleSource::EslintTypeScript("prefer-namespace-keyword").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
@@ -55,7 +56,7 @@ impl Rule for UseNamespaceKeyword {
     type Query = Ast<TsModuleDeclaration>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseNamespaceKeywordOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let ts_module = ctx.query();

@@ -6,6 +6,7 @@ expression: redactor(content)
 
 ```json
 {
+  "root": false,
   "linter": {
     "enabled": true,
     "rules": {
@@ -32,17 +33,7 @@ expression: redactor(content)
             "strictCase": false
           }
         },
-        "noDefaultExport": "error",
-        "noParameterAssign": "error",
-        "useAsConstAssertion": "error",
-        "useDefaultParameterLast": "error",
-        "useEnumInitializers": "error",
-        "useSelfClosingElements": "error",
-        "useSingleVarDeclarator": "error",
-        "noUnusedTemplateLiteral": "error",
-        "useNumberNamespace": "error",
-        "noInferrableTypes": "error",
-        "noUselessElse": "error"
+        "noDefaultExport": "error"
       },
       "correctness": {
         "noConstantCondition": "error",
@@ -62,5 +53,11 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-Your configuration file(s) have been successfully migrated.
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
 ```

@@ -3,8 +3,10 @@
 mod analyzers;
 mod macros;
 mod registry;
+mod services;
 
 use crate::registry::visit_migration_registry;
+use crate::services::IsRoot;
 pub use biome_analyze::ControlFlow;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression,
@@ -36,6 +38,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     root: &LanguageRoot<JsonLanguage>,
     filter: AnalysisFilter,
     configuration_file_path: &'a Utf8Path,
+    is_root: bool,
     inspect_matcher: V,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
@@ -48,12 +51,15 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_migration_registry(&mut registry);
 
-    let (migration_registry, services, diagnostics, visitors, categories) = registry.build();
+    let (migration_registry, mut services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
         return (None, diagnostics);
     }
+
+    services.insert_service(IsRoot(is_root));
+
     struct TestAction;
     impl SuppressionAction for TestAction {
         type Language = JsonLanguage;
@@ -85,7 +91,6 @@ where
         |_, _| -> Vec<Result<_, Infallible>> { Default::default() },
         Box::new(TestAction),
         &mut emit_signal,
-        categories,
     );
 
     for ((phase, _), visitor) in visitors {
@@ -107,13 +112,21 @@ pub fn migrate_configuration<'a, F, B>(
     root: &LanguageRoot<JsonLanguage>,
     filter: AnalysisFilter,
     configuration_file_path: &'a Utf8Path,
+    is_root: bool,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, configuration_file_path, |_| {}, emit_signal)
+    analyze_with_inspect_matcher(
+        root,
+        filter,
+        configuration_file_path,
+        is_root,
+        |_| {},
+        emit_signal,
+    )
 }
 
 pub(crate) type MigrationAction = RuleAction<JsonLanguage>;
@@ -169,6 +182,7 @@ mod test {
             &parsed.tree(),
             AnalysisFilter::default(),
             Utf8Path::new(""),
+            true,
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let error = diag

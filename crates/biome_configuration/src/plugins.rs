@@ -3,7 +3,10 @@ use biome_deserialize::{
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
+use std::{
+    ops::{Deref, DerefMut},
+    str::FromStr,
+};
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -12,7 +15,7 @@ pub struct Plugins(pub Vec<PluginConfiguration>);
 
 impl Plugins {
     pub fn iter(&self) -> impl Iterator<Item = &PluginConfiguration> {
-        self.0.iter()
+        self.deref().iter()
     }
 }
 
@@ -21,6 +24,20 @@ impl FromStr for Plugins {
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(Self::default())
+    }
+}
+
+impl Deref for Plugins {
+    type Target = Vec<PluginConfiguration>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Plugins {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 

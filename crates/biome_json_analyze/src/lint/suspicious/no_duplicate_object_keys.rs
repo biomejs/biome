@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_json_syntax::{JsonMemberName, JsonObjectValue, TextRange};
 use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rule_options::no_duplicate_object_keys::NoDuplicateObjectKeysOptions;
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
@@ -40,7 +41,7 @@ impl Rule for NoDuplicateObjectKeys {
     type Query = Ast<JsonObjectValue>;
     type State = (JsonMemberName, Vec<TextRange>);
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDuplicateObjectKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
@@ -82,7 +83,7 @@ impl Rule for NoDuplicateObjectKeys {
             diagnostic = diagnostic.detail(
                 range,
                 markup! {
-                    "This where a duplicated key was declared again."
+                    "This is where a duplicated key was declared again."
                 },
             );
         }

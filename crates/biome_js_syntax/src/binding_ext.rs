@@ -12,9 +12,9 @@ use crate::{
     JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, TsCallSignatureTypeMember,
     TsConstructSignatureTypeMember, TsConstructorSignatureClassMember, TsConstructorType,
     TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration,
-    TsEnumMember, TsFunctionType, TsIdentifierBinding, TsImportEqualsDeclaration,
-    TsIndexSignatureClassMember, TsIndexSignatureParameter, TsInferType, TsInterfaceDeclaration,
-    TsLiteralEnumMemberName, TsMappedType, TsMethodSignatureClassMember,
+    TsEnumMember, TsExternalModuleDeclaration, TsFunctionType, TsIdentifierBinding,
+    TsImportEqualsDeclaration, TsIndexSignatureClassMember, TsIndexSignatureParameter, TsInferType,
+    TsInterfaceDeclaration, TsLiteralEnumMemberName, TsMappedType, TsMethodSignatureClassMember,
     TsMethodSignatureTypeMember, TsModuleDeclaration, TsPropertyParameter,
     TsSetterSignatureClassMember, TsSetterSignatureTypeMember, TsTypeAliasDeclaration,
     TsTypeParameter, TsTypeParameterName,
@@ -43,7 +43,8 @@ declare_node_union! {
             | TsEnumMember
         // classes, objects, interface, type, enum, module
             | JsClassDeclaration | JsClassExpression
-            | TsInterfaceDeclaration | TsTypeAliasDeclaration | TsEnumDeclaration | TsModuleDeclaration
+            | TsInterfaceDeclaration | TsTypeAliasDeclaration | TsEnumDeclaration
+            | TsExternalModuleDeclaration | TsModuleDeclaration
         // import
             | JsShorthandNamedImportSpecifier
                 | JsNamedImportSpecifier | JsBogusNamedImportSpecifier | JsDefaultImportSpecifier
@@ -214,6 +215,7 @@ impl AnyJsBindingDeclaration {
             | Self::JsClassDeclaration(_)
             | Self::TsTypeAliasDeclaration(_)
             | Self::TsEnumDeclaration(_)
+            | Self::TsExternalModuleDeclaration(_)
             | Self::TsModuleDeclaration(_) => self.syntax().parent(),
             Self::TsInterfaceDeclaration(_) => {
                 // interfaces can be in a default export clause

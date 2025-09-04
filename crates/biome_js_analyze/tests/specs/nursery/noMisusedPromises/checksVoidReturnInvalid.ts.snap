@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: checksVoidReturnInvalid.ts
+---
+# Input
+```ts
+[1, 2, 3].forEach(async value => {
+  await fetch(`/${value}`);
+});
+
+new Promise<void>(async (resolve, reject) => {
+  await fetch('/');
+  resolve();
+});
+
+```
+
+# Diagnostics
+```
+checksVoidReturnInvalid.ts:1:19 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise, but no return value was expected.
+  
+  > 1 │ [1, 2, 3].forEach(async value => {
+      │                   ^^^^^^^^^^^^^^^^
+  > 2 │   await fetch(`/${value}`);
+  > 3 │ });
+      │ ^
+    4 │ 
+    5 │ new Promise<void>(async (resolve, reject) => {
+  
+  i This may not have the desired result if you expect the Promise to be `await`-ed.
+  
+
+```
+
+```
+checksVoidReturnInvalid.ts:5:19 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a Promise, but no return value was expected.
+  
+    3 │ });
+    4 │ 
+  > 5 │ new Promise<void>(async (resolve, reject) => {
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │   await fetch('/');
+  > 7 │   resolve();
+  > 8 │ });
+      │ ^
+    9 │ 
+  
+  i This may not have the desired result if you expect the Promise to be `await`-ed.
+  
+
+```

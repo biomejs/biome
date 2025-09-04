@@ -10,6 +10,7 @@ use biome_js_syntax::{
     static_value::StaticValue,
 };
 use biome_rowan::{AstNode, BatchMutationExt, chain_trivia_pieces};
+use biome_rule_options::no_invalid_builtin_instantiation::NoInvalidBuiltinInstantiationOptions;
 
 use crate::lint::style::use_throw_new_error::convert_call_expression_to_new_expression;
 
@@ -76,8 +77,8 @@ declare_lint_rule! {
         name: "noInvalidBuiltinInstantiation",
         language: "js",
         sources: &[
-            RuleSource::EslintUnicorn("new-for-builtins"),
-            RuleSource::Eslint("no-new-native-nonconstructor"),
+            RuleSource::EslintUnicorn("new-for-builtins").same(),
+            RuleSource::Eslint("no-new-native-nonconstructor").same(),
         ],
         recommended: true,
         severity: Severity::Error,
@@ -89,7 +90,7 @@ impl Rule for NoInvalidBuiltinInstantiation {
     type Query = Semantic<JsNewOrCallExpression>;
     type State = NoInvalidBuiltinInstantiationState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoInvalidBuiltinInstantiationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -20,6 +20,8 @@ biome_js_type_info_macros = { workspace = true }
 biome_resolver            = { workspace = true }
 biome_rowan               = { workspace = true }
 camino                    = { workspace = true }
+hashbrown                 = { workspace = true }
+rustc-hash                = { workspace = true }
 
 [dev-dependencies]
 biome_js_formatter = { workspace = true }

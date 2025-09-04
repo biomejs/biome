@@ -253,7 +253,7 @@ impl Borrow<str> for JsonString {
 
 impl From<&str> for JsonString {
     fn from(value: &str) -> Self {
-        Self(Text::Owned(value.to_string()))
+        Self(value.to_string().into())
     }
 }
 
@@ -261,14 +261,20 @@ impl From<JsonStringValue> for JsonString {
     fn from(value: JsonStringValue) -> Self {
         match value.inner_string_text() {
             Ok(text) => text.into(),
-            Err(_) => Self(Text::Owned(String::new())),
+            Err(_) => Self(Text::default()),
         }
     }
 }
 
 impl From<String> for JsonString {
     fn from(value: String) -> Self {
-        Self(Text::Owned(value))
+        Self(value.into())
+    }
+}
+
+impl From<Text> for JsonString {
+    fn from(text: Text) -> Self {
+        Self(text)
     }
 }
 

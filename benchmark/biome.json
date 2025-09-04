@@ -1,19 +1,12 @@
 {
+  "root": false,
   "$schema": "../packages/@biomejs/biome/configuration_schema.json",
   "formatter": {
-    "includes": [
-      "**/*.js",
-      "**/*.jsx",
-      "**/*.cjs",
-      "**/*.ts",
-      "**/*.tsx"
-    ],
+    "includes": ["**/*.js", "**/*.jsx", "**/*.cjs", "**/*.ts", "**/*.tsx"],
     "indentStyle": "space"
   },
   "linter": {
-    "includes": [
-      "**/*.js"
-    ],
+    "includes": ["**/*.js"],
     "rules": {
       "recommended": false,
       "complexity": {

@@ -5,7 +5,7 @@ use biome_diagnostics::{Category, Diagnostic, category};
 use camino::Utf8PathBuf;
 
 /// List of possible errors that may occur during resolution.
-#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ResolveError {
     /// Couldn't resolve due to a broken symlink.
     BrokenSymlink,

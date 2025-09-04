@@ -1,47 +1,33 @@
 #![deny(clippy::use_self)]
 
+pub mod configuration;
+pub mod diagnostics;
 pub mod documentation;
 pub mod file_handlers;
-
 pub mod projects;
 pub mod settings;
 pub mod workspace;
-mod workspace_watcher;
 
-pub mod configuration;
-pub mod diagnostics;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
-use biome_resolver::FsWithResolverProxy;
+mod scanner;
+
+#[cfg(test)]
+mod test_utils;
+
 use camino::Utf8Path;
-use serde::{Deserialize, Serialize};
 use std::ops::Deref;
+use std::sync::Arc;
 
 use biome_console::Console;
 use biome_fs::OsFileSystem;
+use biome_resolver::FsWithResolverProxy;
 
 pub use diagnostics::{TransportError, WorkspaceError, extension_error};
 pub use file_handlers::JsFormatterSettings;
+pub use scanner::{Watcher, WatcherInstruction};
 pub use workspace::{Workspace, WorkspaceServer};
-pub use workspace_watcher::{WatcherInstruction, WorkspaceWatcher};
-
-/// Path entries that should be ignored in the workspace, even by the scanner.
-///
-/// These cannot (yet) be configured.
-pub const IGNORE_ENTRIES: &[&[u8]] = &[
-    b".cache",
-    b".git",
-    b".hg",
-    b".netlify",
-    b".output",
-    b".svn",
-    b".yarn",
-    b".timestamp",
-    b".turbo",
-    b".vercel",
-    b".DS_Store",
-];
 
 /// This is the main entrypoint of the application.
 pub struct App<'app> {
@@ -54,12 +40,12 @@ pub struct App<'app> {
 
 impl<'app> App<'app> {
     pub fn with_console(console: &'app mut dyn Console) -> Self {
-        Self::with_filesystem_and_console(Box::new(OsFileSystem::default()), console)
+        Self::with_filesystem_and_console(Arc::new(OsFileSystem::default()), console)
     }
 
     /// Create a new instance of the app using the specified [FsWithResolverProxy] and [Console] implementation
     pub fn with_filesystem_and_console(
-        fs: Box<dyn FsWithResolverProxy>,
+        fs: Arc<dyn FsWithResolverProxy>,
         console: &'app mut dyn Console,
     ) -> Self {
         Self::new(console, WorkspaceRef::Owned(workspace::server(fs, None)))

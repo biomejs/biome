@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsTemplateElement, JsTemplateExpression};
 use biome_rowan::{AstNode, AstNodeList};
+use biome_rule_options::no_useless_string_raw::NoUselessStringRawOptions;
 
 declare_lint_rule! {
     /// Disallow unnecessary `String.raw` function in template string literals without any escape sequence.
@@ -43,7 +44,7 @@ impl Rule for NoUselessStringRaw {
     type Query = Ast<JsTemplateExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessStringRawOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -81,7 +82,7 @@ impl Rule for NoUselessStringRaw {
                 },
             )
             .note(markup! {
-                "Remove the String.raw call beacause it's useless here, String.raw can deal with string which contains escape sequence like \\n, \\t, \\r, \\\\, \\\", \\\'."
+                "Remove the String.raw call because it's useless here, String.raw can deal with string which contains escape sequence like \\n, \\t, \\r, \\\\, \\\", \\\'."
             }),
         )
     }

@@ -7,6 +7,7 @@ use biome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
+use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 
 declare_lint_rule! {
     /// Disallow the use of variables and function parameters before their declaration
@@ -63,8 +64,8 @@ declare_lint_rule! {
         name: "noInvalidUseBeforeDeclaration",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-use-before-define"),
-            RuleSource::EslintTypeScript("no-use-before-define"),
+            RuleSource::Eslint("no-use-before-define").same(),
+            RuleSource::EslintTypeScript("no-use-before-define").same(),
         ],
         recommended: true,
         severity: Severity::Error,
@@ -75,7 +76,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
     type Query = SemanticServices;
     type State = InvalidUseBeforeDeclaration;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoInvalidUseBeforeDeclarationOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();
@@ -232,6 +233,7 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
             | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
             | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
             | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+            | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
             | AnyJsBindingDeclaration::TsModuleDeclaration(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)

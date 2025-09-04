@@ -1,0 +1,197 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+type FullConfiguration = InternalConfiguration & PublicConfiguration;
+
+type ScopedMutator<Data = any, T = Data> = (
+	key: Arguments,
+	data?: T | Promise<T> | MutatorCallback<T>,
+	opts?: boolean | MutatorOptions<Data, T>,
+) => Promise<T | undefined>;
+
+interface InternalConfiguration {
+	cache: Cache;
+	mutate: ScopedMutator;
+}
+
+interface PublicConfiguration {
+	errorRetryInterval: number;
+}
+
+declare const useSWRConfig: () => FullConfiguration;
+
+const { mutate } = useSWRConfig();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Module(0) TypeId(9) | Module(0) TypeId(10) | Module(0) TypeId(20)
+
+Module TypeId(1) => boolean
+
+Module TypeId(2) => Module(0) TypeId(1) | Module(0) TypeId(20)
+
+Module TypeId(3) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(5)
+}
+
+Module TypeId(4) => Module(0) TypeId(3)
+
+Module TypeId(5) => interface "(merged)" {
+  extends: []
+  type_args: []
+  members: [
+    "cache": Module(0) TypeId(20),
+    "mutate": Module(0) TypeId(6),
+    "errorRetryInterval": number
+  ]
+}
+
+Module TypeId(6) => instanceof Module(0) TypeId(16)<Module(0) TypeId(18), Module(0) TypeId(19)>
+
+Module TypeId(7) => interface "InternalConfiguration" {
+  extends: []
+  type_args: []
+  members: ["cache": Module(0) TypeId(20), "mutate": Module(0) TypeId(6)]
+}
+
+Module TypeId(8) => interface "PublicConfiguration" {
+  extends: []
+  type_args: []
+  members: ["errorRetryInterval": number]
+}
+
+Module TypeId(9) => instanceof Module(0) TypeId(19)
+
+Module TypeId(10) => instanceof Promise<Module(0) TypeId(9)>
+
+Module TypeId(11) => Module(0) TypeId(9) | Module(0) TypeId(10) | Module(0) TypeId(20)
+
+Module TypeId(12) => instanceof Module(0) TypeId(18)
+
+Module TypeId(13) => undefined
+
+Module TypeId(14) => Module(0) TypeId(9) | Module(0) TypeId(13)
+
+Module TypeId(15) => instanceof Promise<Module(0) TypeId(14)>
+
+Module TypeId(16) => sync Function {
+  accepts: {
+    params: [
+      required key: Module(0) TypeId(20)
+      optional data: Module(0) TypeId(11)
+      optional opts: Module(0) TypeId(2)
+    ]
+    type_args: []
+  }
+  returns: Module(0) TypeId(15)
+}
+
+Module TypeId(17) => any
+
+Module TypeId(18) => Data = unknown
+
+Module TypeId(19) => T = unknown
+
+Module TypeId(20) => unknown
+```
+
+# Module Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => Module(0) TypeId(9) | Module(0) TypeId(10) | Module(0) TypeId(20)
+
+Full TypeId(1) => boolean
+
+Full TypeId(2) => Module(0) TypeId(1) | Module(0) TypeId(20)
+
+Full TypeId(3) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(5)
+}
+
+Full TypeId(4) => Module(0) TypeId(3)
+
+Full TypeId(5) => interface "(merged)" {
+  extends: []
+  type_args: []
+  members: [
+    "cache": Module(0) TypeId(20),
+    "mutate": Module(0) TypeId(6),
+    "errorRetryInterval": number
+  ]
+}
+
+Full TypeId(6) => instanceof Module(0) TypeId(16)<Module(0) TypeId(18), Module(0) TypeId(19)>
+
+Full TypeId(7) => interface "InternalConfiguration" {
+  extends: []
+  type_args: []
+  members: ["cache": Module(0) TypeId(20), "mutate": Module(0) TypeId(6)]
+}
+
+Full TypeId(8) => interface "PublicConfiguration" {
+  extends: []
+  type_args: []
+  members: ["errorRetryInterval": number]
+}
+
+Full TypeId(9) => instanceof Module(0) TypeId(19)
+
+Full TypeId(10) => instanceof Promise<Module(0) TypeId(9)>
+
+Full TypeId(11) => instanceof Module(0) TypeId(18)
+
+Full TypeId(12) => undefined
+
+Full TypeId(13) => Module(0) TypeId(9) | Module(0) TypeId(13)
+
+Full TypeId(14) => instanceof Promise<Module(0) TypeId(14)>
+
+Full TypeId(15) => sync Function {
+  accepts: {
+    params: [
+      required key: Module(0) TypeId(20)
+      optional data: Module(0) TypeId(11)
+      optional opts: Module(0) TypeId(2)
+    ]
+    type_args: []
+  }
+  returns: Module(0) TypeId(15)
+}
+
+Full TypeId(16) => any
+
+Full TypeId(17) => Data = unknown
+
+Full TypeId(18) => T = unknown
+
+Full TypeId(19) => unknown
+```

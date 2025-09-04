@@ -130,6 +130,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "boolean",
         "constructor",
         "declare",
+        "defer",
         "get",
         "infer",
         "is",
@@ -143,6 +144,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "object",
         "set",
         "string",
+        "source",
         "symbol",
         "type",
         "undefined",
@@ -544,7 +546,7 @@ impl AstSrc {
         self.lists.insert(String::from(name), src);
     }
 
-    pub fn lists(&self) -> std::collections::btree_map::Iter<String, AstListSrc> {
+    pub fn lists(&self) -> std::collections::btree_map::Iter<'_, String, AstListSrc> {
         self.lists.iter()
     }
 
@@ -693,10 +695,14 @@ impl Field {
                     ("~=", _) => "whitespace_like",
                     (",", _) => "comma",
                     ("---", LanguageKind::Yaml) => "dashdashdash",
+                    ("---", LanguageKind::Html) => "fence",
                     ("<!--", LanguageKind::Html) => "comment_start",
                     ("-->", LanguageKind::Html) => "comment_end",
                     ("<![CDATA[", LanguageKind::Html) => "cdata_start",
                     ("]]>", LanguageKind::Html) => "cdata_end",
+                    ("{{", LanguageKind::Html) => "l_double_curly",
+                    ("}}", LanguageKind::Html) => "r_double_curly",
+
                     _ => name,
                 };
 

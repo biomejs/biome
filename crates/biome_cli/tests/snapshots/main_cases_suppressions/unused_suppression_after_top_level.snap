@@ -22,7 +22,7 @@ let bar = 33;
 ```block
 file.js:6:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable foo is unused.
   
   > 6 │ let foo = 2;
       │     ^^^
@@ -46,7 +46,7 @@ file.js:6:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
 ```block
 file.js:10:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  ! This variable bar is unused.
   
      8 │ * biome-ignore lint/style/useConst: reason
      9 │ */

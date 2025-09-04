@@ -344,7 +344,7 @@ impl ChangeParserState for EnableStrictMode {
 
     #[inline]
     fn apply(self, state: &mut JsParserState) -> Self::Snapshot {
-        EnableStrictModeSnapshot(std::mem::replace(&mut state.strict, Some(self.0)))
+        EnableStrictModeSnapshot(Option::replace(&mut state.strict, self.0))
     }
 
     #[inline]

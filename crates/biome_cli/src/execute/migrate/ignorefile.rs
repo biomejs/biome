@@ -50,7 +50,7 @@ pub(crate) fn convert_pattern(line: &str) -> String {
     } else {
         ("!", line)
     };
-    let result = if let Some(stripped_line) = line.strip_prefix('/') {
+    if let Some(stripped_line) = line.strip_prefix('/') {
         // Patterns that starts with `/` are relative to the ignore file
         format!("{negation}./{stripped_line}")
     } else if line.find('/').is_some_and(|index| index < (line.len() - 1))
@@ -61,8 +61,7 @@ pub(crate) fn convert_pattern(line: &str) -> String {
         format!("{negation}{line}")
     } else {
         format!("{negation}**/{line}")
-    };
-    result
+    }
 }
 
 #[cfg(test)]
@@ -81,10 +80,10 @@ mod tests {
     fn comments_and_empty_lines() {
         const IGNORE_FILE_CONTENT: &str = r#"
 # Comment 1
-# folloed by a blank line
+# followed by a blank line
 
 # Comment 2
-# folloed by a blank line (trailing space are ignored)
+# followed by a blank line (trailing spaces are ignored)
 
         "#;
         let result = IgnorePatterns::from(IGNORE_FILE_CONTENT);

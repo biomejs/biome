@@ -31,6 +31,9 @@ var obj = {
 	get method(): string {
 		return "test";
 	},
+	set method(val: string) {
+		console.log(val);
+	},
 };
 
 export default (): void => {};
@@ -47,8 +50,6 @@ fn(() => {});
 fn(function () {});
 new Promise(() => {});
 new Foo(1, () => {});
-[function () {}, () => {}];
-[function () {}, () => {}];
 (function () {
 	console.log("This is an IIFE");
 })();
@@ -153,3 +154,48 @@ declare module "foo" {
 
 var X: Type = { prop: () => {} };
 f({ prop: () => {} })
+
+var foo: unknown[] = arr.map((i) => i * i);
+new Promise((resolve) => resolve(1));
+new Promise(resolve => resolve(1));
+
+const x: string | null = someFunc();
+let x: string | null;
+var x: string | null;
+
+const x = "";
+const x = 1;
+const x = null;
+const x = undefined;
+
+let x = "";
+let x = 1;
+
+var x = "";
+var x = 1;
+
+const fn = (x: number): void => {};
+
+var obj = {
+	x: 1,
+	func: (x: number): void => {},
+	meth(x: number): string {},
+}
+let obj = {
+	x: 1,
+	func: (x: number): void => {},
+	meth(x: number): string {},
+}
+const obj = {
+	x: 1,
+	func: (x: number): void => {},
+	meth(x: number): string {},
+}
+
+const obj = { dynamic: someFunc() as string }
+const obj = { dynamic: <string>(someFunc()) }
+
+namespace Ns {
+	export const X = {};
+	export function func(arg: string): void {}
+}

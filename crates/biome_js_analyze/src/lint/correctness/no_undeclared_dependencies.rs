@@ -1,18 +1,15 @@
+use crate::services::manifest::Manifest;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
-};
-use biome_deserialize_macros::Deserializable;
+
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_resolver::is_builtin_node_module;
 use biome_rowan::AstNode;
-use camino::{Utf8Path, Utf8PathBuf};
-
-use crate::services::manifest::Manifest;
+use biome_rule_options::no_undeclared_dependencies::NoUndeclaredDependenciesOptions;
+use camino::Utf8PathBuf;
 
 declare_lint_rule! {
     /// Disallow the use of dependencies that aren't specified in the `package.json`.
@@ -20,6 +17,9 @@ declare_lint_rule! {
     /// Indirect dependencies will trigger the rule because they aren't declared in the `package.json`.
     /// This means that if the package `@org/foo` has a dependency on `lodash`, and then you use
     /// `import "lodash"` somewhere in your project, the rule will trigger a diagnostic for this import.
+    ///
+    /// The rule is meant to catch those dependencies that aren't declared inside the closest `package.json`, and
+    /// isn't meant to detect dependencies declared in other manifest files, e.g. the root `package.json` in a monorepo setting.
     ///
     /// The rule ignores imports that are not valid package names.
     /// This includes internal imports that start with `#` and `@/` and imports with a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
@@ -43,6 +43,12 @@ declare_lint_rule! {
     ///
     /// ```js,ignore
     /// import assert from "node:assert";
+    /// ```
+    ///
+    /// If you have declared `type-fest` in the `devDependencies` section:
+    ///
+    /// ```js,ignore
+    /// import type { SetRequired } from "type-fest";
     /// ```
     ///
     /// ## Options
@@ -84,117 +90,12 @@ declare_lint_rule! {
         name: "noUndeclaredDependencies",
         language: "js",
         sources: &[
-            RuleSource::EslintImport("no-extraneous-dependencies"),
+            RuleSource::EslintImport("no-extraneous-dependencies").same(),
         ],
         recommended: false,
         severity: Severity::Error,
         domains: &[RuleDomain::Project],
     }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
-#[serde(untagged)]
-enum DependencyAvailability {
-    /// Dependencies are always available or unavailable.
-    Bool(bool),
-
-    /// Dependencies are available in files that matches any of the globs.
-    Patterns(Box<[biome_glob::Glob]>),
-}
-
-impl Default for DependencyAvailability {
-    fn default() -> Self {
-        Self::Bool(true)
-    }
-}
-
-impl Deserializable for DependencyAvailability {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
-        name: &str,
-    ) -> Option<Self> {
-        Some(if value.visitable_type()? == DeserializableType::Bool {
-            Self::Bool(bool::deserialize(ctx, value, name)?)
-        } else {
-            Self::Patterns(Deserializable::deserialize(ctx, value, name)?)
-        })
-    }
-}
-
-#[cfg(feature = "schemars")]
-impl schemars::JsonSchema for DependencyAvailability {
-    fn schema_name() -> String {
-        "DependencyAvailability".to_owned()
-    }
-
-    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        use schemars::schema::*;
-
-        Schema::Object(SchemaObject {
-            subschemas: Some(Box::new(SubschemaValidation {
-                one_of: Some(vec![
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Boolean.into()),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("This type of dependency will be always available or unavailable.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    }),
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Array.into()),
-                        array: Some(Box::new(ArrayValidation {
-                            items: Some(SingleOrVec::Single(Box::new(Schema::Object(SchemaObject {
-                                instance_type: Some(InstanceType::String.into()),
-                                ..Default::default()
-                            })))),
-                            min_items: Some(1),
-                            ..Default::default()
-                        })),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("This type of dependency will be available only if the linted file matches any of the globs.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    })
-                ]),
-                ..Default::default()
-            })),
-            ..Default::default()
-        })
-    }
-}
-
-impl DependencyAvailability {
-    fn is_available(&self, path: &Utf8Path) -> bool {
-        match self {
-            Self::Bool(b) => *b,
-            Self::Patterns(globs) => {
-                biome_glob::CandidatePath::new(&path).matches_with_exceptions(globs)
-            }
-        }
-    }
-}
-
-/// Rule's options
-#[derive(
-    Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
-)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NoUndeclaredDependenciesOptions {
-    /// If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
-    #[serde(default)]
-    dev_dependencies: DependencyAvailability,
-
-    /// If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
-    #[serde(default)]
-    peer_dependencies: DependencyAvailability,
-
-    /// If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
-    #[serde(default)]
-    optional_dependencies: DependencyAvailability,
 }
 
 pub struct RuleState {
@@ -217,7 +118,9 @@ impl Rule for NoUndeclaredDependencies {
         }
 
         let path = ctx.file_path();
-        let is_dev_dependency_available = ctx.options().dev_dependencies.is_available(path);
+        let is_dev_dependency_available =
+            // Type-only imports are always considered as dev dependencies.
+            is_type_import(node) || ctx.options().dev_dependencies.is_available(path);
         let is_peer_dependency_available = ctx.options().peer_dependencies.is_available(path);
         let is_optional_dependency_available =
             ctx.options().optional_dependencies.is_available(path);
@@ -247,12 +150,12 @@ impl Rule for NoUndeclaredDependencies {
         if !package_name.starts_with('@') {
             // Handle DefinitelyTyped imports https://github.com/DefinitelyTyped/DefinitelyTyped
             // e.g. `lodash` can import types from `@types/lodash`.
-            if let Some(import_clause) = node.parent::<AnyJsImportClause>() {
-                if import_clause.type_token().is_some() {
-                    let package_name = format!("@types/{package_name}");
-                    if is_available(&package_name) {
-                        return None;
-                    }
+            if let Some(import_clause) = node.parent::<AnyJsImportClause>()
+                && import_clause.type_token().is_some()
+            {
+                let package_name = format!("@types/{package_name}");
+                if is_available(&package_name) {
+                    return None;
                 }
             }
         }
@@ -364,6 +267,13 @@ fn parse_package_name(path: &str) -> Option<&str> {
     }
     // Handle cases where only the scope is given. e.g. `@scope/`
     (!path.ends_with('/')).then_some(path)
+}
+
+fn is_type_import(import: &AnyJsImportLike) -> bool {
+    match import.parent::<AnyJsImportClause>() {
+        Some(clause) => clause.type_token().is_some(),
+        _ => false,
+    }
 }
 
 #[test]

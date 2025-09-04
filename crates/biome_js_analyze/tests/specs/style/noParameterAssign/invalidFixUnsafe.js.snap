@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFixUnsafe.js
+snapshot_kind: text
+---
+# Input
+```js
+let x = 0;
+```
+
+# Diagnostics
+```
+invalidFixUnsafe.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This let declares a variable that is only assigned once.
+  
+  > 1 │ let x = 0;
+      │ ^^^
+  
+  i 'x' is never reassigned.
+  
+  > 1 │ let x = 0;
+      │     ^
+  
+  i Unsafe fix: Use const instead.
+  
+  - let·x·=·0;
+  + const·x·=·0;
+  
+
+```

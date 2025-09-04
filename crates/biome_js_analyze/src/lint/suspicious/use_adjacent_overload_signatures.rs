@@ -9,6 +9,7 @@ use biome_js_syntax::{
     TsTypeMemberList,
 };
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
+use biome_rule_options::use_adjacent_overload_signatures::UseAdjacentOverloadSignaturesOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -93,7 +94,7 @@ declare_lint_rule! {
         name: "useAdjacentOverloadSignatures",
         language: "js",
         sources: &[
-            RuleSource::EslintTypeScript("adjacent-overload-signatures")
+            RuleSource::EslintTypeScript("adjacent-overload-signatures").same(),
         ],
         recommended: true,
         severity: Severity::Warning,
@@ -104,7 +105,7 @@ impl Rule for UseAdjacentOverloadSignatures {
     type Query = Ast<DeclarationOrModuleNode>;
     type State = Box<[(TokenText, TextRange)]>;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAdjacentOverloadSignaturesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let methods = match ctx.query() {
@@ -171,19 +172,18 @@ fn collect_type_member_list(node: &TsTypeMemberList) -> Vec<(TokenText, TextRang
     let mut seen_methods = FxHashSet::default();
     let mut last_method = None;
     for member in node {
-        if let Some(ts_method_signature) = member.as_ts_method_signature_type_member() {
-            if let Ok(method_member) = ts_method_signature.name() {
-                if let Some(text) = method_member.name() {
-                    let range = method_member.range();
-                    check_method(
-                        text,
-                        range,
-                        &mut methods,
-                        &mut seen_methods,
-                        &mut last_method,
-                    );
-                }
-            }
+        if let Some(ts_method_signature) = member.as_ts_method_signature_type_member()
+            && let Ok(method_member) = ts_method_signature.name()
+            && let Some(text) = method_member.name()
+        {
+            let range = method_member.range();
+            check_method(
+                text,
+                range,
+                &mut methods,
+                &mut seen_methods,
+                &mut last_method,
+            );
         }
     }
     methods
@@ -199,31 +199,30 @@ fn collect_class(node: &JsClassDeclaration) -> Vec<(TokenText, TextRange)> {
             .as_js_method_class_member()
             .or_else(|| member.as_js_method_class_member())
         {
-            if let Ok(method_member) = method_class.name() {
-                if let Some(text) = method_member.name() {
-                    let range = method_member.range();
-                    check_method(
-                        text,
-                        range,
-                        &mut methods,
-                        &mut seen_methods,
-                        &mut last_method,
-                    );
-                }
+            if let Ok(method_member) = method_class.name()
+                && let Some(text) = method_member.name()
+            {
+                let range = method_member.range();
+                check_method(
+                    text,
+                    range,
+                    &mut methods,
+                    &mut seen_methods,
+                    &mut last_method,
+                );
             }
-        } else if let Some(method_class) = member.as_ts_method_signature_class_member() {
-            if let Ok(method_member) = method_class.name() {
-                if let Some(text) = method_member.name() {
-                    let range = method_member.range();
-                    check_method(
-                        text,
-                        range,
-                        &mut methods,
-                        &mut seen_methods,
-                        &mut last_method,
-                    );
-                }
-            }
+        } else if let Some(method_class) = member.as_ts_method_signature_class_member()
+            && let Ok(method_member) = method_class.name()
+            && let Some(text) = method_member.name()
+        {
+            let range = method_member.range();
+            check_method(
+                text,
+                range,
+                &mut methods,
+                &mut seen_methods,
+                &mut last_method,
+            );
         }
     }
     methods
@@ -233,31 +232,28 @@ fn collect_function(node: &JsFunctionDeclaration) -> Vec<(TokenText, TextRange)>
     let mut methods: Vec<(TokenText, TextRange)> = Vec::new();
     let mut seen_methods = FxHashSet::default();
     let mut last_method = None;
-    if let Some(return_type_annotation) = node.return_type_annotation() {
-        if let Some(ty) = return_type_annotation
+    if let Some(return_type_annotation) = node.return_type_annotation()
+        && let Some(ty) = return_type_annotation
             .ty()
             .ok()
             .and_then(|ty| ty.as_any_ts_type().cloned())
-        {
-            if let Some(ts_object) = ty.as_ts_object_type() {
-                let members = ts_object.members();
-                for member in members {
-                    if let Some(method_member) = member
-                        .as_ts_method_signature_type_member()
-                        .and_then(|m| m.name().ok())
-                    {
-                        if let Some(text) = method_member.name() {
-                            let range = method_member.range();
-                            check_method(
-                                text,
-                                range,
-                                &mut methods,
-                                &mut seen_methods,
-                                &mut last_method,
-                            );
-                        }
-                    }
-                }
+        && let Some(ts_object) = ty.as_ts_object_type()
+    {
+        let members = ts_object.members();
+        for member in members {
+            if let Some(method_member) = member
+                .as_ts_method_signature_type_member()
+                .and_then(|m| m.name().ok())
+                && let Some(text) = method_member.name()
+            {
+                let range = method_member.range();
+                check_method(
+                    text,
+                    range,
+                    &mut methods,
+                    &mut seen_methods,
+                    &mut last_method,
+                );
             }
         }
     }
@@ -269,29 +265,24 @@ fn collect_exports(items: &JsModuleItemList) -> Vec<(TokenText, TextRange)> {
     let mut seen_methods = FxHashSet::default();
     let mut last_method = None;
     for item in items {
-        if let AnyJsModuleItem::JsExport(node) = item {
-            if let Ok(export) = node.export_clause() {
-                if let Some(declaration_clause) = export.as_any_js_declaration_clause() {
-                    if let Some(ts_declare) =
-                        declaration_clause.as_ts_declare_function_declaration()
-                    {
-                        if let Some(name_token) = ts_declare.id().ok().and_then(|id| {
-                            id.as_js_identifier_binding()
-                                .and_then(|id| id.name_token().ok())
-                        }) {
-                            let text = name_token.token_text_trimmed();
-                            let range = name_token.text_range();
-                            check_method(
-                                text,
-                                range,
-                                &mut methods,
-                                &mut seen_methods,
-                                &mut last_method,
-                            );
-                        }
-                    }
-                }
-            }
+        if let AnyJsModuleItem::JsExport(node) = item
+            && let Ok(export) = node.export_clause()
+            && let Some(declaration_clause) = export.as_any_js_declaration_clause()
+            && let Some(ts_declare) = declaration_clause.as_ts_declare_function_declaration()
+            && let Some(name_token) = ts_declare.id().ok().and_then(|id| {
+                id.as_js_identifier_binding()
+                    .and_then(|id| id.name_token().ok())
+            })
+        {
+            let text = name_token.token_text_trimmed();
+            let range = name_token.text_range();
+            check_method(
+                text,
+                range,
+                &mut methods,
+                &mut seen_methods,
+                &mut last_method,
+            );
         }
     }
     methods

@@ -11,13 +11,15 @@ const fn = function () {
 };
 
 const arrowFn = () => "test";
+const emptyArrowFn = () => {};
 
 class Test {
 	constructor() {}
 	get prop() {
 		return 1;
 	}
-	set prop() {}
+	set prop(val) {
+	}
 	method() {
 		return;
 	}
@@ -37,6 +39,9 @@ const obj = {
 	get method() {
 		return "test";
 	},
+	set method(val) {
+		console.log(val);
+	}
 };
 
 const func = (value: number) => ({ type: "X", value }) as any;
@@ -53,7 +58,7 @@ const arrowFn = () => {
 };
 
 // does not support detecting a return of a function inside other statements like if, switch, etc.
-// we check only the first statment
+// we check only the first statement
 const arrowFn = (a: number) => {
 	if (a === 1) {
 		return (): void => {};
@@ -139,3 +144,15 @@ declare module "foo" {
 
 const x = { prop: () => {} }
 const x = { bar: { prop: () => {} } }
+
+const x = { dynamic: someFunc() }
+
+let x;
+let x = null;
+let x = undefined;
+
+const wrapped = {
+	foo: () => "untyped",
+};
+
+[function () {}, () => {}];

@@ -5,14 +5,15 @@ expression: result.unwrap()
 sync Function "foo" {
   accepts: {
     params: [
-      required name: Global TypeId(17) (bindings: name:string)
-      required age: number (bindings: age:number)
+      required name: string
+      required age: number
     ]
     type_args: []
   }
-  returns: Global TypeId(18)
+  returns: Global TypeId(0)
 }
 class "Person" {
   extends: none
+  implements: []
   type_args: []
 }

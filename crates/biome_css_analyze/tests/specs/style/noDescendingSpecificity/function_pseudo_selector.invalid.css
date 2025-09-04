@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 :is(#a, a) f {
     color: red;
 }

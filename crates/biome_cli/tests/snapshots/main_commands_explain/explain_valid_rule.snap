@@ -11,6 +11,7 @@ Summary
 - Fix: safe
 - Default severity: error
 - Available from version: 1.0.0
+- Diagnostic category: lint/security/noBlankTarget
 - This rule is recommended
 
 Description

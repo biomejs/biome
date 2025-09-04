@@ -1,17 +1,13 @@
+use crate::react::components::ReactComponentInfo;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression, AnyJsModuleItem, AnyJsStatement,
-    JsModule,
-    export_ext::{AnyJsExported, ExportedItem},
-};
+use biome_js_syntax::{AnyJsModuleItem, AnyJsStatement, JsModule, export_ext::AnyJsExported};
 use biome_rowan::{AstNode, TextRange};
-use biome_string_case::Case;
-use serde::{Deserialize, Serialize};
+use biome_rule_options::use_component_export_only_modules::UseComponentExportOnlyModulesOptions;
+use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
     /// Enforce declaring components only within modules that export React Components exclusively.
@@ -104,25 +100,11 @@ declare_lint_rule! {
         version: "1.9.2",
         name: "useComponentExportOnlyModules",
         language: "jsx",
-        sources: &[RuleSource::EslintReactRefresh("only-export-components")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintReactRefresh("only-export-components").inspired()],
         recommended: false,
         severity: Severity::Warning,
     }
 }
-
-#[derive(Debug, Clone, Deserialize, Deserializable, Eq, PartialEq, Serialize, Default)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseComponentExportOnlyModulesOptions {
-    /// Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)
-    #[serde(default)]
-    allow_constant_export: bool,
-    /// A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
-    #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
-    allow_export_names: Box<[Box<str>]>,
-}
-
 enum ErrorType {
     ExportedNonComponentWithComponent,
     UnexportedComponent,
@@ -143,30 +125,39 @@ impl Rule for UseComponentExportOnlyModules {
     type Options = UseComponentExportOnlyModulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if let Some(file_name) = ctx.file_path().file_name() {
-            if !JSX_FILE_EXT.iter().any(|ext| file_name.ends_with(ext)) {
-                return Vec::new().into_boxed_slice();
-            }
+        if let Some(file_name) = ctx.file_path().file_name()
+            && !JSX_FILE_EXT.iter().any(|ext| file_name.ends_with(ext))
+        {
+            return Vec::new().into_boxed_slice();
         }
         let root = ctx.query();
-        let mut local_declaration_ids = Vec::new();
+        let mut local_components: FxHashMap<Box<str>, TextRange> = FxHashMap::default();
         let mut exported_component_ids = Vec::new();
         let mut exported_non_component_ids = Vec::new();
         for item in root.items() {
             if let AnyJsModuleItem::AnyJsStatement(stmt) = item {
                 // Explore unexported component declarations
-                if let AnyJsStatement::JsVariableStatement(vstmt) = stmt {
-                    if let Ok(vdec) = vstmt.declaration() {
-                        for vdeclator in vdec.declarators().into_iter().flatten() {
-                            if let Ok(id) = vdeclator.id() {
-                                local_declaration_ids.push(id)
+                if let AnyJsStatement::JsVariableStatement(var_statement) = stmt {
+                    if let Ok(var_declaration) = var_statement.declaration() {
+                        for var_declarator in var_declaration.declarators().into_iter().flatten() {
+                            if let Some(ReactComponentInfo {
+                                name: Some(name), ..
+                            }) = ReactComponentInfo::from_declaration(var_declarator.syntax())
+                            {
+                                local_components
+                                    .insert(name.text_trimmed().into(), name.text_trimmed_range());
                             }
                         }
                     }
-                } else if let AnyJsStatement::JsFunctionDeclaration(func) = stmt {
-                    if let Ok(id) = func.id() {
-                        local_declaration_ids.push(AnyJsBindingPattern::AnyJsBinding(id));
-                    }
+                } else if matches!(
+                    stmt,
+                    AnyJsStatement::JsFunctionDeclaration(_)
+                        | AnyJsStatement::JsClassDeclaration(_)
+                ) && let Some(ReactComponentInfo {
+                    name: Some(name), ..
+                }) = ReactComponentInfo::from_declaration(stmt.syntax())
+                {
+                    local_components.insert(name.text_trimmed().into(), name.text_trimmed_range());
                 }
             } else if let AnyJsModuleItem::JsExport(export) = item {
                 // Explore exported component declarations
@@ -179,12 +170,11 @@ impl Rule for UseComponentExportOnlyModules {
                         .identifier
                         .as_ref()
                         .and_then(|x| x.name_token())
-                    {
-                        if ctx.options().allow_export_names.iter().any(|export_name| {
+                        && ctx.options().allow_export_names.iter().any(|export_name| {
                             export_name.as_ref() == exported_item_id.text_trimmed()
-                        }) {
-                            continue;
-                        }
+                        })
+                    {
+                        continue;
                     }
                     // Allow exporting constants along with components
                     if ctx.options().allow_constant_export
@@ -200,7 +190,17 @@ impl Rule for UseComponentExportOnlyModules {
                     {
                         continue;
                     }
-                    if is_exported_react_component(&exported_item) {
+
+                    if let Some(AnyJsExported::AnyIdentifier(identifier)) =
+                        exported_item.exported.as_ref()
+                        && let Some(name) = identifier.name_token()
+                        && local_components.contains_key(name.text_trimmed())
+                    {
+                        exported_component_ids.push(exported_item);
+                        continue;
+                    }
+
+                    if ReactComponentInfo::from_exported_item(&exported_item).is_some() {
                         exported_component_ids.push(exported_item);
                     } else {
                         exported_non_component_ids.push(exported_item);
@@ -208,14 +208,6 @@ impl Rule for UseComponentExportOnlyModules {
                 }
             }
         }
-
-        let local_component_ids = local_declaration_ids.iter().filter_map(|id| {
-            if Case::identify(id.to_trimmed_text().text(), false) == Case::Pascal {
-                Some(id.range())
-            } else {
-                None
-            }
-        });
 
         if !exported_component_ids.is_empty() {
             return exported_non_component_ids
@@ -233,7 +225,8 @@ impl Rule for UseComponentExportOnlyModules {
                 .collect();
         }
 
-        local_component_ids
+        local_components
+            .into_values()
             .map(|id| UseComponentExportOnlyModulesState {
                 error: if exported_non_component_ids.is_empty() {
                     ErrorType::UnexportedComponent
@@ -284,47 +277,4 @@ impl Rule for UseComponentExportOnlyModules {
             }),
         )
     }
-}
-
-// Function that returns a standard React component
-const REACT_HOOKS: [&str; 2] = ["memo", "forwardRef"];
-
-fn is_exported_react_component(any_exported_item: &ExportedItem) -> bool {
-    if let Some(AnyJsExported::AnyJsExpression(AnyJsExpression::JsCallExpression(f))) =
-        any_exported_item.exported.clone()
-    {
-        if let Ok(AnyJsExpression::JsIdentifierExpression(fn_name)) = f.callee() {
-            if !REACT_HOOKS.contains(&fn_name.to_trimmed_text().text()) {
-                return false;
-            }
-            let Ok(args) = f.arguments() else {
-                return false;
-            };
-            let itr = args
-                .args()
-                .into_iter()
-                .filter_map(Result::ok)
-                .collect::<Vec<_>>();
-            if itr.len() != 1 {
-                return false;
-            }
-            let AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsIdentifierExpression(arg)) =
-                &itr[0]
-            else {
-                return false;
-            };
-            let Ok(arg_name) = arg.name() else {
-                return false;
-            };
-            return Case::identify(arg_name.to_trimmed_text().text(), false) == Case::Pascal;
-        }
-    }
-    let Some(exported_item_id) = any_exported_item.identifier.clone() else {
-        return false;
-    };
-    Case::identify(exported_item_id.to_trimmed_text().text(), false) == Case::Pascal
-        && match any_exported_item.exported.clone() {
-            Some(exported) => !matches!(exported, AnyJsExported::TsEnumDeclaration(_)),
-            None => true,
-        }
 }

@@ -15,27 +15,21 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
 
   i Configuration file can be updated.
   
-    1    │ - {·"linter":·{·"enabled":·true·}·}
-       1 │ + {·"linter":·{"enabled":·true·,
-       2 │ + ····"rules":·{
-       3 │ + ······"style":·{
-       4 │ + ········"noParameterAssign":·"error",
-       5 │ + ········"useAsConstAssertion":·"error",
-       6 │ + ········"useDefaultParameterLast":·"error",
-       7 │ + ········"useEnumInitializers":·"error",
-       8 │ + ········"useSelfClosingElements":·"error",
-       9 │ + ········"useSingleVarDeclarator":·"error",
-      10 │ + ········"noUnusedTemplateLiteral":·"error",
-      11 │ + ········"useNumberNamespace":·"error",
-      12 │ + ········"noInferrableTypes":·"error",
-      13 │ + ········"noUselessElse":·"error"
-      14 │ + ······}
-      15 │ + ····}
-      16 │ + ··}·}
-  
+    1 │ {·"root":·false,"linter":·{·"enabled":·true·}·}
+      │    ++++++++++++++                              
 
 ```
 
 ```block
-Run the command with the option --write to apply the changes.
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
 ```

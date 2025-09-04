@@ -15,9 +15,9 @@
 //! ## Formatting Macros
 //!
 //! This crate defines two macros to construct the IR. These are inspired by Rust's `fmt` macros
-//! * [`format!`]: Formats a formatable object
+//! * [`format!`]: Formats a formattable object
 //! * [`format_args!`]: Concatenates a sequence of Format objects.
-//! * [`write!`]: Writes a sequence of formatable objects into an output buffer.
+//! * [`write!`]: Writes a sequence of formattable objects into an output buffer.
 
 #![deny(clippy::use_self)]
 #![deny(rustdoc::broken_intra_doc_links)]
@@ -40,7 +40,6 @@ pub mod separated;
 mod source_map;
 pub mod token;
 pub mod trivia;
-mod verbatim;
 
 use crate::formatter::Formatter;
 use crate::group_id::UniqueGroupIdBuilder;
@@ -55,7 +54,6 @@ use crate::format_element::document::Document;
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
-use crate::trivia::{format_skipped_token_trivia, format_trimmed_token};
 pub use arguments::{Argument, Arguments};
 use biome_console::markup;
 use biome_deserialize::{
@@ -76,7 +74,6 @@ pub use builders::BestFitting;
 pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
 pub use group_id::GroupId;
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
-use std::marker::PhantomData;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use token::string::Quote;
@@ -733,7 +730,7 @@ impl FromStr for Expand {
             "auto" => Ok(Self::Auto),
             "always" => Ok(Self::Always),
             "never" => Ok(Self::Never),
-            _ => Err(std::format!("unknown expand literal: {}", s)),
+            _ => Err(std::format!("unknown expand literal: {s}")),
         }
     }
 }
@@ -1130,43 +1127,6 @@ pub trait FormatRule<T> {
     type Context;
 
     fn fmt(&self, item: &T, f: &mut Formatter<Self::Context>) -> FormatResult<()>;
-}
-
-/// Default implementation for formatting a token
-pub struct FormatToken<C> {
-    context: PhantomData<C>,
-}
-
-impl<C> Default for FormatToken<C> {
-    fn default() -> Self {
-        Self {
-            context: PhantomData,
-        }
-    }
-}
-
-impl<C> FormatRule<SyntaxToken<C::Language>> for FormatToken<C>
-where
-    C: CstFormatContext,
-    C::Language: 'static,
-{
-    type Context = C;
-
-    fn fmt(
-        &self,
-        token: &SyntaxToken<C::Language>,
-        f: &mut Formatter<Self::Context>,
-    ) -> FormatResult<()> {
-        f.state_mut().track_token(token);
-
-        crate::write!(
-            f,
-            [
-                format_skipped_token_trivia(token),
-                format_trimmed_token(token),
-            ]
-        )
-    }
 }
 
 /// Rule that supports customizing how it formats an object of type `T`.
@@ -1664,12 +1624,12 @@ pub fn format_range<Language: FormatLanguage>(
 
     // If the range ends before the trimmed start of the token, move the
     // end to the trimmed end of the previous token if it exists
-    if end_token_trimmed_start >= range.end() {
-        if let Some(next_token) = end_token.prev_token() {
-            let next_token_end = text_non_whitespace_range(&next_token).end();
-            if next_token_end >= trimmed_start {
-                end_token = next_token;
-            }
+    if end_token_trimmed_start >= range.end()
+        && let Some(next_token) = end_token.prev_token()
+    {
+        let next_token_end = text_non_whitespace_range(&next_token).end();
+        if next_token_end >= trimmed_start {
+            end_token = next_token;
         }
     }
 

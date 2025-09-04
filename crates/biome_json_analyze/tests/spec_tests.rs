@@ -22,6 +22,11 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
 
+    // We should skip running test for .options.json as input_file
+    if file_name.ends_with(".options.json") || file_name.ends_with(".options.jsonc") {
+        return;
+    }
+
     let parser_options = match input_file.extension() {
         Some("json") => JsonParserOptions::default(),
         Some("jsonc") => JsonParserOptions::default()
@@ -180,16 +185,16 @@ pub(crate) fn analyze_and_snap(
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
     }
-    let langauge = format!("{}", file_source.variant());
+    let language = format!("{}", file_source.variant());
     write_analyzer_snapshot(
         snapshot,
         input_code,
         diagnostics.as_slice(),
         code_fixes.as_slice(),
-        langauge.as_str(),
+        language.as_str(),
     );
 
-    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }
 
 fn check_code_action(

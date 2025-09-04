@@ -13,14 +13,11 @@ pub(crate) fn is_hidden_from_screen_reader(element: &AnyJsxElement) -> bool {
     }
 
     match element.name_value_token().ok() {
-        Some(name) if name.text_trimmed() == "input" => {
-            let is_input_hidden = element
-                .find_attribute_by_name("type")
-                .and_then(|attribute| attribute.as_static_value())
-                .and_then(|value| value.as_string_constant().map(|value| value == "hidden"))
-                .unwrap_or_default();
-            is_input_hidden
-        }
+        Some(name) if name.text_trimmed() == "input" => element
+            .find_attribute_by_name("type")
+            .and_then(|attribute| attribute.as_static_value())
+            .and_then(|value| value.as_string_constant().map(|value| value == "hidden"))
+            .unwrap_or_default(),
         _ => false,
     }
 }

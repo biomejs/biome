@@ -1,0 +1,86 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts`
+
+## Source
+
+```ts
+type A = "a";
+type B = "b";
+type C = "c";
+export type Union = A | B | C;
+
+const A = "a";
+const B = 1;
+const C = true;
+
+export type Union2 = typeof A | typeof B | typeof C;
+
+export { A, B };
+```
+
+## Module Info
+
+```
+Exports {
+  "Union" => {
+    ExportOwnExport => JsOwnExport::Binding(3)
+  }
+  "Union2" => {
+    ExportOwnExport => JsOwnExport::Binding(7)
+  }
+  "A" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(2))
+  }
+  "B" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(10))
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(3) => JsBindingData {
+  Name: Union,
+  Type: Module(0) TypeId(5),
+  Declaration kind: Type
+}
+
+BindingId(7) => JsBindingData {
+  Name: Union2,
+  Type: Module(0) TypeId(9),
+  Declaration kind: Type
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => value: 1
+
+Module TypeId(1) => value: true
+
+Module TypeId(2) => value: a
+
+Module TypeId(3) => value: b
+
+Module TypeId(4) => value: c
+
+Module TypeId(5) => Module(0) TypeId(2) | Module(0) TypeId(3) | Module(0) TypeId(4)
+
+Module TypeId(6) => Module(0) TypeId(2)
+
+Module TypeId(7) => Module(0) TypeId(0)
+
+Module TypeId(8) => Module(0) TypeId(1)
+
+Module TypeId(9) => Module(0) TypeId(6) | Module(0) TypeId(7) | Module(0) TypeId(8)
+
+Module TypeId(10) => (type: Module(0) TypeId(3), value: Module(0) TypeId(0), namespace: )
+```

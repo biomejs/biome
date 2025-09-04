@@ -53,10 +53,7 @@ where
                     if adapter.error.is_err() {
                         adapter.error
                     } else {
-                        Err(io::Error::new(
-                            io::ErrorKind::Other,
-                            "a Display formatter returned an error",
-                        ))
+                        Err(io::Error::other("a Display formatter returned an error"))
                     }
                 }
             }

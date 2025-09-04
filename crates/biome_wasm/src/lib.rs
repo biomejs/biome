@@ -3,15 +3,17 @@
 use js_sys::Error;
 use wasm_bindgen::prelude::*;
 
-use biome_fs::MemoryFileSystem;
 use biome_service::workspace::{
-    self, ChangeFileParams, CloseFileParams, FixFileParams, FormatFileParams, FormatOnTypeParams,
-    FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams, GetFormatterIRParams,
-    GetRegisteredTypesParams, GetSemanticModelParams, GetSyntaxTreeParams, GetTypeInfoParams,
-    OpenProjectParams, PullActionsParams, PullDiagnosticsParams, RenameParams,
-    UpdateSettingsParams,
+    self, ChangeFileParams, CloseFileParams, FileExitsParams, FixFileParams, FormatFileParams,
+    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams,
+    GetFormatterIRParams, GetModuleGraphParams, GetRegisteredTypesParams, GetSemanticModelParams,
+    GetSyntaxTreeParams, GetTypeInfoParams, OpenProjectParams, PathIsIgnoredParams,
+    PullActionsParams, PullDiagnosticsParams, RenameParams, ScanProjectParams,
+    UpdateModuleGraphParams, UpdateSettingsParams,
 };
 use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
+use camino::{Utf8Path, Utf8PathBuf};
+use std::sync::Arc;
 
 mod utils;
 
@@ -25,6 +27,34 @@ pub fn main() {
 
 include!(concat!(env!("OUT_DIR"), "/ts_types.rs"));
 
+#[derive(Default)]
+#[wasm_bindgen]
+pub struct MemoryFileSystem {
+    inner: Arc<biome_fs::MemoryFileSystem>,
+}
+
+#[wasm_bindgen]
+impl MemoryFileSystem {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    #[wasm_bindgen(js_name = insert)]
+    pub fn insert(&self, path: &str, data: &[u8]) {
+        self.inner.insert(Utf8PathBuf::from(path), data);
+    }
+
+    #[wasm_bindgen(js_name = remove)]
+    pub fn remove(&self, path: &str) {
+        self.inner.remove(Utf8Path::new(path));
+    }
+
+    fn as_inner(&self) -> Arc<biome_fs::MemoryFileSystem> {
+        Arc::clone(&self.inner)
+    }
+}
+
 #[wasm_bindgen]
 pub struct Workspace {
     inner: Box<dyn workspace::Workspace>,
@@ -35,7 +65,14 @@ impl Workspace {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Self {
-            inner: workspace::server(Box::new(MemoryFileSystem::default()), None),
+            inner: workspace::server(Arc::new(biome_fs::MemoryFileSystem::default()), None),
+        }
+    }
+
+    #[wasm_bindgen(js_name = withFileSystem)]
+    pub fn new_with_filesystem(fs: &MemoryFileSystem) -> Self {
+        Self {
+            inner: workspace::server(fs.as_inner(), None),
         }
     }
 
@@ -76,11 +113,26 @@ impl Workspace {
             .map_err(into_error)
     }
 
+    #[wasm_bindgen(js_name = scanProject)]
+    pub fn scan_project(&self, params: IScanProjectParams) -> Result<IScanProjectResult, Error> {
+        let params: ScanProjectParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        let result = self.inner.scan_project(params).map_err(into_error)?;
+
+        to_value(&result)
+            .map(IScanProjectResult::from)
+            .map_err(into_error)
+    }
+
     #[wasm_bindgen(js_name = openFile)]
-    pub fn open_file(&self, params: IOpenFileParams) -> Result<(), Error> {
+    pub fn open_file(&self, params: IOpenFileParams) -> Result<IOpenFileResult, Error> {
         let params: OpenFileParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
-        self.inner.open_file(params).map_err(into_error)
+        let result = self.inner.open_file(params).map_err(into_error)?;
+
+        to_value(&result)
+            .map(IOpenFileResult::from)
+            .map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = getFileContent)]
@@ -144,10 +196,14 @@ impl Workspace {
     }
 
     #[wasm_bindgen(js_name = changeFile)]
-    pub fn change_file(&self, params: IChangeFileParams) -> Result<(), Error> {
+    pub fn change_file(&self, params: IChangeFileParams) -> Result<IChangeFileResult, Error> {
         let params: ChangeFileParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
-        self.inner.change_file(params).map_err(into_error)
+        let result = self.inner.change_file(params).map_err(into_error)?;
+
+        to_value(&result)
+            .map(IChangeFileResult::from)
+            .map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = closeFile)]
@@ -155,6 +211,42 @@ impl Workspace {
         let params: CloseFileParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         self.inner.close_file(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = fileExists)]
+    pub fn file_exists(&self, params: IFileExitsParams) -> Result<bool, Error> {
+        let params: FileExitsParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        self.inner.file_exists(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = isPathIgnored)]
+    pub fn is_path_ignored(&self, params: IPathIsIgnoredParams) -> Result<bool, Error> {
+        let params: PathIsIgnoredParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+        self.inner.is_path_ignored(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = updateModuleGraph)]
+    pub fn update_module_graph(&self, params: IUpdateModuleGraphParams) -> Result<(), Error> {
+        let params: UpdateModuleGraphParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+
+        self.inner.update_module_graph(params).map_err(into_error)
+    }
+
+    #[wasm_bindgen(js_name = getModuleGraph)]
+    pub fn get_module_graph(
+        &self,
+        params: IGetModuleGraphParams,
+    ) -> Result<IGetModuleGraphResult, Error> {
+        let params: GetModuleGraphParams =
+            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
+
+        let result = self.inner.get_module_graph(params).map_err(into_error)?;
+        to_value(&result)
+            .map(IGetModuleGraphResult::from)
+            .map_err(into_error)
     }
 
     #[wasm_bindgen(js_name = pullDiagnostics)]
@@ -230,8 +322,12 @@ impl Default for Workspace {
     }
 }
 
+const SERIALIZER: serde_wasm_bindgen::Serializer = serde_wasm_bindgen::Serializer::new()
+    .serialize_missing_as_null(true)
+    .serialize_maps_as_objects(true);
+
 fn to_value<T: serde::ser::Serialize + ?Sized>(
     value: &T,
 ) -> Result<JsValue, serde_wasm_bindgen::Error> {
-    value.serialize(&serde_wasm_bindgen::Serializer::new().serialize_missing_as_null(true))
+    value.serialize(&SERIALIZER)
 }

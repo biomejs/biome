@@ -2,6 +2,4 @@
 source: crates/biome_service/src/workspace.tests.rs
 expression: result.unwrap()
 ---
-TypeId(17) => string
-
-TypeId(18) => instanceof unresolved reference "Person"
+TypeId(0) => instanceof unresolved reference "Person" (scope ID: 0)

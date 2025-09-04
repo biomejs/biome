@@ -7,7 +7,6 @@ alias r := ready
 alias l := lint
 alias qt := test-quick
 
-
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
@@ -29,23 +28,32 @@ gen-all:
 # Generates TypeScript types and JSON schema of the configuration
 gen-bindings:
   cargo codegen-schema
+  just gen-types
+
+gen-types:
   cargo run -p xtask_codegen --features schema -- bindings
+
 
 # Generates code generated files for the linter
 gen-analyzer:
-  cargo run -p xtask_codegen -- analyzer
+  just gen-rules
   just gen-configuration
   just gen-migrate
   just gen-bindings
   just lint-rules
   just format
 
+# Generate and updates the files needed inside the *_analyze crates
+gen-rules:
+    cargo run -p xtask_codegen -- analyzer
+
+
 gen-configuration:
-    cargo run -p xtask_codegen --features configuration -- configuration
+  cargo run -p xtask_codegen --features configuration -- configuration
 
 # Generates code for eslint migration
 gen-migrate:
-   cargo run -p xtask_codegen --features configuration -- migrate-eslint
+  cargo run -p xtask_codegen --features configuration -- migrate-eslint
 
 # Generates the initial files for all formatter crates
 gen-formatter:
@@ -59,7 +67,7 @@ gen-tw:
 
 # Generates the code of the grammars available in Biome
 gen-grammar *args='':
-    cargo run -p xtask_codegen -- grammar {{args}}
+  cargo run -p xtask_codegen -- grammar {{args}}
 
 # Generates the linter documentation and Rust documentation
 documentation:
@@ -80,6 +88,11 @@ new-json-assistrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=json --category=assist --name={{rulename}}
   just gen-analyzer
 
+# Creates a new json lint rule with the given name. Name has to be camel case.
+new-json-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=json --category=lint --name={{rulename}}
+  just gen-analyzer
+
 # Creates a new css lint rule with the given name. Name has to be camel case.
 new-css-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=css --category=lint --name={{rulename}}
@@ -90,15 +103,10 @@ new-graphql-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=lint --name={{rulename}}
   just gen-analyzer
 
-
 # Promotes a rule from the nursery group to a new group
-move-rule group rulename:
-	cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
-	just gen-analyzer
-	just documentation
-	cargo test -- {{snakecase(rulename)}}
-	cargo insta accept
-
+move-rule rulename group:
+  cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
+  cargo run -p xtask_codegen -- analyzer
 
 # Format Rust files and TOML files
 format:
@@ -112,7 +120,6 @@ _touch file:
 [windows]
 _touch file:
   powershell -Command "(Get-Item {{file}}).LastWriteTime = Get-Date"
-
 
 # Run tests of all crates
 test:
@@ -146,7 +153,6 @@ test-transformation name:
 test-quick package:
   cargo test -p {{package}} --test quick_test -- quick_test --nocapture --ignored
 
-
 # Alias for `cargo lint`, it runs clippy on the whole codebase
 lint:
   cargo lint
@@ -168,4 +174,4 @@ ready:
 
 # Creates a new changeset for the final changelog
 new-changeset:
-    pnpm changeset
+  pnpm changeset

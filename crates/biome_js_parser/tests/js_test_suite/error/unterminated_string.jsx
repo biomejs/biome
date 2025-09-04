@@ -4,3 +4,7 @@ const f = () => (
       bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb="b"
     />
   );
+
+
+let a = 'string
+let b = "string

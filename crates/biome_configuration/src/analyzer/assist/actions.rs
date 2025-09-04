@@ -183,20 +183,27 @@ pub struct Source {
     pub recommended: Option<bool>,
     #[doc = "Provides a code action to sort the imports and exports in the file using a built-in or custom order."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub organize_imports:
-        Option<RuleAssistConfiguration<biome_js_analyze::options::OrganizeImports>>,
+    pub organize_imports: Option<
+        RuleAssistConfiguration<biome_rule_options::organize_imports::OrganizeImportsOptions>,
+    >,
     #[doc = "Enforce attribute sorting in JSX elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_sorted_attributes:
-        Option<RuleAssistConfiguration<biome_js_analyze::options::UseSortedAttributes>>,
+    pub use_sorted_attributes: Option<
+        RuleAssistConfiguration<
+            biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions,
+        >,
+    >,
     #[doc = "Sort the keys of a JSON object in natural order."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys:
-        Option<RuleAssistConfiguration<biome_json_analyze::options::UseSortedKeys>>,
+        Option<RuleAssistConfiguration<biome_rule_options::use_sorted_keys::UseSortedKeysOptions>>,
     #[doc = "Enforce ordering of CSS properties and nested rules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_sorted_properties:
-        Option<RuleAssistConfiguration<biome_css_analyze::options::UseSortedProperties>>,
+    pub use_sorted_properties: Option<
+        RuleAssistConfiguration<
+            biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions,
+        >,
+    >,
 }
 impl Source {
     const GROUP_NAME: &'static str = "source";
@@ -220,49 +227,49 @@ impl Source {
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.organize_imports.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
-            }
+        if let Some(rule) = self.organize_imports.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
         }
-        if let Some(rule) = self.use_sorted_attributes.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
-            }
+        if let Some(rule) = self.use_sorted_attributes.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
-            }
+        if let Some(rule) = self.use_sorted_keys.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
-            }
+        if let Some(rule) = self.use_sorted_properties.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.organize_imports.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
-            }
+        if let Some(rule) = self.organize_imports.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
         }
-        if let Some(rule) = self.use_sorted_attributes.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
-            }
+        if let Some(rule) = self.use_sorted_attributes.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
-            }
+        if let Some(rule) = self.use_sorted_keys.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
-            }
+        if let Some(rule) = self.use_sorted_properties.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
         index_set
     }

@@ -14,6 +14,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxError, SyntaxResult, TextRange,
     declare_node_union,
 };
+use biome_rule_options::no_self_assign::NoSelfAssignOptions;
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
 
@@ -69,8 +70,8 @@ declare_lint_rule! {
         name: "noSelfAssign",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-self-assign"),
-            RuleSource::Clippy("self_assignment"),
+            RuleSource::Eslint("no-self-assign").same(),
+            RuleSource::Clippy("self_assignment").same(),
         ],
         recommended: true,
         severity: Severity::Error,
@@ -81,7 +82,7 @@ impl Rule for NoSelfAssign {
     type Query = Ast<JsAssignmentExpression>;
     type State = IdentifiersLike;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoSelfAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -89,20 +90,18 @@ impl Rule for NoSelfAssign {
         let right = node.right().ok();
         let operator = node.operator().ok();
         let mut result = vec![];
-        if let Some(operator) = operator {
-            if matches!(
+        if let Some(operator) = operator
+            && matches!(
                 operator,
                 JsAssignmentOperator::Assign
                     | JsAssignmentOperator::LogicalAndAssign
                     | JsAssignmentOperator::LogicalOrAssign
                     | JsAssignmentOperator::NullishCoalescingAssign
-            ) {
-                if let (Some(left), Some(right)) = (left, right) {
-                    if let Ok(pair) = AnyAssignmentLike::try_from((left, right)) {
-                        compare_assignment_like(pair, &mut result);
-                    }
-                }
-            }
+            )
+            && let (Some(left), Some(right)) = (left, right)
+            && let Ok(pair) = AnyAssignmentLike::try_from((left, right))
+        {
+            compare_assignment_like(pair, &mut result);
         }
         result.into_boxed_slice()
     }
@@ -180,11 +179,11 @@ impl SameIdentifiers {
                 let new_assignment_like = Self::next_array_assignment(left, right);
                 // In case we have nested array/object structures, we save the current
                 // pair and we restore it once this iterator is consumed
-                if let Some(new_assignment_like) = new_assignment_like.as_ref() {
-                    if new_assignment_like.has_sub_structures() {
-                        self.assignment_queue
-                            .push_back(self.current_assignment_like.clone());
-                    }
+                if let Some(new_assignment_like) = new_assignment_like.as_ref()
+                    && new_assignment_like.has_sub_structures()
+                {
+                    self.assignment_queue
+                        .push_back(self.current_assignment_like.clone());
                 }
                 new_assignment_like
             }
@@ -192,11 +191,11 @@ impl SameIdentifiers {
                 let new_assignment_like = Self::next_object_assignment(left, right);
                 // In case we have nested array/object structures, we save the current
                 // pair and we restore it once this iterator is consumed
-                if let Some(new_assignment_like) = new_assignment_like.as_ref() {
-                    if new_assignment_like.has_sub_structures() {
-                        self.assignment_queue
-                            .push_back(self.current_assignment_like.clone());
-                    }
+                if let Some(new_assignment_like) = new_assignment_like.as_ref()
+                    && new_assignment_like.has_sub_structures()
+                {
+                    self.assignment_queue
+                        .push_back(self.current_assignment_like.clone());
                 }
                 new_assignment_like
             }
@@ -329,27 +328,27 @@ impl SameIdentifiers {
             let (left_name, left_reference) = left_item;
             let (right_name, right_reference) = right_item;
 
-            if let Ok(identifier_like) = IdentifiersLike::try_from((left_name, right_name)) {
-                if with_same_identifiers(&identifier_like).is_some() {
-                    if let (Some(left_reference), Some(right_reference)) =
-                        (left_reference, right_reference)
+            if let Ok(identifier_like) = IdentifiersLike::try_from((left_name, right_name))
+                && with_same_identifiers(&identifier_like).is_some()
+            {
+                if let (Some(left_reference), Some(right_reference)) =
+                    (left_reference, right_reference)
+                {
+                    if with_same_identifiers(&IdentifiersLike::References(
+                        left_reference,
+                        right_reference,
+                    ))
+                    .is_some()
                     {
-                        if with_same_identifiers(&IdentifiersLike::References(
-                            left_reference,
-                            right_reference,
+                        let source_identifier = IdentifiersLike::try_from((
+                            left.source_member.clone(),
+                            right.source_member.clone(),
                         ))
-                        .is_some()
-                        {
-                            let source_identifier = IdentifiersLike::try_from((
-                                left.source_member.clone(),
-                                right.source_member.clone(),
-                            ))
-                            .ok()?;
-                            return Some(AnyAssignmentLike::Identifiers(source_identifier));
-                        }
-                    } else {
-                        return Self::next_static_expression(left, right);
+                        .ok()?;
+                        return Some(AnyAssignmentLike::Identifiers(source_identifier));
                     }
+                } else {
+                    return Self::next_static_expression(left, right);
                 }
             }
         }

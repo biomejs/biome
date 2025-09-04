@@ -1,3 +1,8 @@
+use std::fmt::{Debug, Formatter};
+
+use camino::Utf8PathBuf;
+use serde::{Deserialize, Serialize};
+
 use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::DeserializationDiagnostic;
@@ -6,9 +11,6 @@ use biome_fs::FileSystemDiagnostic;
 use biome_grit_patterns::CompileError;
 use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::SyntaxError;
-use camino::Utf8PathBuf;
-use serde::{Deserialize, Serialize};
-use std::fmt::{Debug, Formatter};
 
 /// Series of errors that can be thrown while loading a plugin.
 #[derive(Deserialize, Diagnostic, Serialize)]
@@ -33,13 +35,30 @@ pub enum PluginDiagnostic {
 
     /// When an analyzer rule plugin uses an unsupported file format.
     UnsupportedRuleFormat(UnsupportedRuleFormat),
+
+    /// When plugin is requested but not loaded
+    NotLoaded(NotLoaded),
 }
 
 impl From<CompileError> for PluginDiagnostic {
     fn from(value: CompileError) -> Self {
-        println!("Compile Error: {value:?}");
         Self::Compile(CompileDiagnostic {
+            message: MessageAndDescription::from(
+                markup! {"Failed to compile the Grit plugin"}.to_owned(),
+            ),
             source: Some(Error::from(value)),
+        })
+    }
+}
+
+#[cfg(feature = "js_plugin")]
+impl From<boa_engine::JsError> for PluginDiagnostic {
+    fn from(value: boa_engine::JsError) -> Self {
+        Self::Compile(CompileDiagnostic {
+            message: MessageAndDescription::from(
+                markup! {"Failed to compile the JS plugin: "{value.to_string()}}.to_owned(),
+            ),
+            source: None,
         })
     }
 }
@@ -88,6 +107,18 @@ impl PluginDiagnostic {
             message: MessageAndDescription::from(markup! {{message}}.to_owned()),
         })
     }
+
+    pub fn not_loaded(path: Utf8PathBuf) -> Self {
+        Self::NotLoaded(NotLoaded {
+            message: MessageAndDescription::from(
+                markup! {
+                    "Plugin is requested but not loaded: "
+                    <Emphasis>{path.to_string()}</Emphasis>
+                }
+                .to_owned(),
+            ),
+        })
+    }
 }
 
 impl Debug for PluginDiagnostic {
@@ -111,10 +142,13 @@ impl From<PluginDiagnostic> for biome_diagnostics::serde::Diagnostic {
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "plugin",
-    message = "Error compiling plugin",
     severity = Error,
 )]
 pub struct CompileDiagnostic {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+
     #[serde(skip)]
     #[source]
     source: Option<Error>,
@@ -156,6 +190,17 @@ pub struct CantResolve {
     severity = Error,
 )]
 pub struct UnsupportedRuleFormat {
+    #[message]
+    #[description]
+    pub message: MessageAndDescription,
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "plugin",
+    severity = Error,
+)]
+pub struct NotLoaded {
     #[message]
     #[description]
     pub message: MessageAndDescription,

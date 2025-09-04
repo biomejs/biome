@@ -8,6 +8,7 @@ use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
 
 use biome_rowan::AstNode;
+use biome_rule_options::no_descending_specificity::NoDescendingSpecificityOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -87,7 +88,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Warning,
-        sources: &[RuleSource::Stylelint("no-descending-specificity")],
+        sources: &[RuleSource::Stylelint("no-descending-specificity").same()],
     }
 }
 
@@ -135,7 +136,7 @@ fn find_descending_selector(
     }
 
     for selector in rule.selectors() {
-        let Some(casted_selector) = AnyCssSelector::cast(selector.node().clone()) else {
+        let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
             continue;
         };
         let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {
@@ -159,7 +160,7 @@ fn find_descending_selector(
     }
 
     for child_id in rule.child_ids() {
-        if let Some(child_rule) = model.get_rule_by_id(*child_id) {
+        if let Some(child_rule) = model.get_rule_by_id(child_id) {
             find_descending_selector(
                 child_rule,
                 model,
@@ -175,7 +176,7 @@ impl Rule for NoDescendingSpecificity {
     type Query = Semantic<CssRoot>;
     type State = DescendingSelector;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoDescendingSpecificityOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();

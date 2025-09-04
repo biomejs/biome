@@ -23,10 +23,17 @@ unicode-bom         = { workspace = true }
 
 [dev-dependencies]
 biome_test_utils  = { workspace = true }
+criterion         = { package = "codspeed-criterion-compat", version = "=3.0.3" }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]
@@ -34,3 +41,7 @@ independent = true
 
 [lints]
 workspace = true
+
+[[bench]]
+harness = false
+name    = "json_parser"

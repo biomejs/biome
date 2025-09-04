@@ -41,9 +41,12 @@ impl ResolverFsProxy for ModuleGraphFsProxy<'_> {
             .ok_or(ResolveError::NotFound)
     }
 
-    fn read_package_json(&self, path: &Utf8Path) -> Result<PackageJson, ResolveError> {
+    fn read_package_json_in_directory(
+        &self,
+        dir_path: &Utf8Path,
+    ) -> Result<PackageJson, ResolveError> {
         self.project_layout
-            .get_node_manifest_for_package(path.parent().expect("path should have a parent"))
+            .get_node_manifest_for_package(dir_path)
             .ok_or(ResolveError::ErrorLoadingManifest)
     }
 

@@ -6,6 +6,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsArrayElement, AnyJsExpression, JsArrayExpression, TriviaPieceKind};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_sparse_array::NoSparseArrayOptions;
 
 use crate::JsRuleAction;
 
@@ -15,7 +16,7 @@ declare_lint_rule! {
     /// Sparse arrays may contain empty slots due to the use of multiple commas between two items, like the following:
     ///
     /// ```js,ignore
-    /// const items = [a,,,b];
+    /// const items = [a,,b];
     /// ```
     /// Arrays with holes might yield incorrect information. For example, the previous snippet, `items` has a length of `4`, but did the user
     /// really intended to have an array with four items? Or was it a typo.
@@ -39,7 +40,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noSparseArray",
         language: "js",
-        sources: &[RuleSource::Eslint("no-sparse-arrays")],
+        sources: &[RuleSource::Eslint("no-sparse-arrays").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -50,7 +51,7 @@ impl Rule for NoSparseArray {
     type Query = Ast<JsArrayExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoSparseArrayOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

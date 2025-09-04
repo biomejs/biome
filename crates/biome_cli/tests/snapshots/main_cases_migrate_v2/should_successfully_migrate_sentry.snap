@@ -6,11 +6,12 @@ expression: redactor(content)
 
 ```json
 {
+  "root": false,
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true,
+    "useIgnoreFile": false,
     "defaultBranch": "master"
   },
   "assist": { "actions": { "source": { "organizeImports": "off" } } },
@@ -143,9 +144,9 @@ expression: redactor(content)
   "overrides": [
     {
       "includes": [
-        "**/api-docs/*.ts",
-        "**/build-utils/*.ts",
-        "**/config/*.ts",
+        "**/api-docs/**/*.ts",
+        "**/build-utils/**/*.ts",
+        "**/config/**/*.ts",
         "**/scripts/**",
         "**/tests/js/sentry-test/loadFixtures.ts",
         "**/tests/js/jest-pegjs-transform.js",
@@ -199,5 +200,11 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-Your configuration file(s) have been successfully migrated.
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
 ```

@@ -60,84 +60,41 @@ export * as renamed2 from "./renamed-reexports";
 
 ```
 Exports {
-  "a" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(7)
-      Local name: a
-    )
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
   }
-  "b" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(8)
-      Local name: b
-    )
+  "qux" => {
+    ExportOwnExport => JsOwnExport::Binding(4)
   }
   "bar" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(1)
-      Local name: bar
-      JsDoc(
-        @package
-      )
-    )
+    ExportOwnExport => JsOwnExport::Binding(1)
+  }
+  "quz" => {
+    ExportOwnExport => JsOwnExport::Binding(2)
   }
   "baz" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(4)
-      Local name: baz
-    )
+    ExportOwnExport => JsOwnExport::Binding(3)
+  }
+  "a" => {
+    ExportOwnExport => JsOwnExport::Binding(5)
+  }
+  "b" => {
+    ExportOwnExport => JsOwnExport::Binding(6)
   }
   "d" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(10)
-      Local name: d
-    )
-  }
-  "default" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(23)
-      Local name: Component
-      JsDoc(
-        @public
-        @returns {JSX.Element}
-      )
-    )
+    ExportOwnExport => JsOwnExport::Binding(7)
   }
   "e" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(11)
-      Local name: e
-    )
+    ExportOwnExport => JsOwnExport::Binding(8)
   }
-  "foo" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(0)
-      Local name: foo
-      JsDoc(
-        @returns {string}
-      )
-    )
+  "default" => {
+    ExportOwnExport => JsOwnExport::Binding(11)
   }
   "oh\nno" => {
     ExportReexport => Reexport(
       Specifier: "./renamed-reexports"
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: ohNo
-    )
-  }
-  "qux" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(5)
-      Local name: qux
-    )
-  }
-  "quz" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(2)
-      Local name: quz
-      JsDoc(
-        @private
-      )
     )
   }
   "renamed2" => {
@@ -156,33 +113,164 @@ Imports {
 }
 ```
 
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: foo,
+  Type: Module(0) TypeId(10),
+  JSDoc comment: JsDoc(
+    @returns {string}
+  ),
+  Declaration kind: HoistedValue
+}
+
+BindingId(1) => JsBindingData {
+  Name: bar,
+  Type: Module(0) TypeId(11),
+  JSDoc comment: JsDoc(
+    @package
+  ),
+  Declaration kind: HoistedValue
+}
+
+BindingId(2) => JsBindingData {
+  Name: quz,
+  Type: Module(0) TypeId(0),
+  JSDoc comment: JsDoc(
+    @private
+  ),
+  Declaration kind: Value
+}
+
+BindingId(3) => JsBindingData {
+  Name: baz,
+  Type: Module(0) TypeId(13),
+  Declaration kind: HoistedValue
+}
+
+BindingId(4) => JsBindingData {
+  Name: qux,
+  Type: Module(0) TypeId(1),
+  Declaration kind: HoistedValue
+}
+
+BindingId(5) => JsBindingData {
+  Name: a,
+  Type: Module(0) TypeId(4),
+  Declaration kind: Value
+}
+
+BindingId(6) => JsBindingData {
+  Name: b,
+  Type: Module(0) TypeId(5),
+  Declaration kind: Value
+}
+
+BindingId(7) => JsBindingData {
+  Name: d,
+  Type: Module(0) TypeId(7),
+  Declaration kind: Value
+}
+
+BindingId(8) => JsBindingData {
+  Name: e,
+  Type: Module(0) TypeId(8),
+  Declaration kind: Value
+}
+
+BindingId(11) => JsBindingData {
+  Name: Component,
+  Type: Module(0) TypeId(17),
+  JSDoc comment: JsDoc(
+    @public
+    @returns {JSX.Element}
+  ),
+  Declaration kind: Unknown
+}
+```
+
 ## Registered types
 
 ```
-Module TypeId(0) => sync Function "foo" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: unknown reference
-}
-
-Module TypeId(1) => sync Function "bar" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: unknown reference
-}
-
-Module TypeId(2) => Object {
+Module TypeId(0) => Object {
   prototype: No prototype
   members: []
 }
 
-Module TypeId(3) => instanceof Promise
+Module TypeId(1) => value: 1
 
-Module TypeId(4) => async Function "baz" {
+Module TypeId(2) => Module(0) TypeId(15)
+
+Module TypeId(3) => Object {
+  prototype: No prototype
+  members: ["a": string, "b": Module(0) TypeId(5), "c": Module(0) TypeId(6)]
+}
+
+Module TypeId(4) => string
+
+Module TypeId(5) => instanceof Array<number>
+
+Module TypeId(6) => Tuple(
+    [
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(7),
+            ),
+            name: Some(
+                "first",
+            ),
+            is_optional: false,
+            is_rest: false,
+        },
+        TupleElementType {
+            ty: Resolved(
+                Module(0) TypeId(8),
+            ),
+            name: Some(
+                "last",
+            ),
+            is_optional: false,
+            is_rest: false,
+        },
+    ],
+)
+
+Module TypeId(7) => boolean
+
+Module TypeId(8) => Module(0) TypeId(7) | Module(0) TypeId(14)
+
+Module TypeId(9) => void
+
+Module TypeId(10) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(9)
+}
+
+Module TypeId(11) => sync Function "bar" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(9)
+}
+
+Module TypeId(12) => instanceof Promise<Module(0) TypeId(9)>
+
+Module TypeId(13) => async Function "baz" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(12)
+}
+
+Module TypeId(14) => undefined
+
+Module TypeId(15) => sync Function "getObject" {
   accepts: {
     params: []
     type_args: []
@@ -190,136 +278,15 @@ Module TypeId(4) => async Function "baz" {
   returns: Module(0) TypeId(3)
 }
 
-Module TypeId(5) => value: 1
+Module TypeId(16) => unknown
 
-Module TypeId(6) => Object {
-  prototype: No prototype
-  members: [
-    "a": Module(0) TypeId(12),
-    "b": Module(0) TypeId(14),
-    "c": Module(0) TypeId(18)
-  ]
-}
-
-Module TypeId(7) => string
-
-Module TypeId(8) => instanceof Module(0) TypeId(24)
-
-Module TypeId(9) => Tuple(
-    [
-        TupleElementType {
-            ty: Resolved(
-                Module(0) TypeId(15),
-            ),
-            name: Some(
-                Borrowed(
-                    "first",
-                ),
-            ),
-            is_optional: false,
-            is_rest: false,
-        },
-        TupleElementType {
-            ty: Resolved(
-                Module(0) TypeId(17),
-            ),
-            name: Some(
-                Borrowed(
-                    "last",
-                ),
-            ),
-            is_optional: false,
-            is_rest: false,
-        },
-    ],
-)
-
-Module TypeId(10) => Module(0) TypeId(15)
-
-Module TypeId(11) => Module(0) TypeId(17)
-
-Module TypeId(12) => string
-
-Module TypeId(13) => number
-
-Module TypeId(14) => instanceof Array<T = Module(0) TypeId(13)>
-
-Module TypeId(15) => boolean
-
-Module TypeId(16) => undefined
-
-Module TypeId(17) => Module(0) TypeId(15) | Module(0) TypeId(16)
-
-Module TypeId(18) => Tuple(
-    [
-        TupleElementType {
-            ty: Resolved(
-                Module(0) TypeId(15),
-            ),
-            name: Some(
-                Borrowed(
-                    "first",
-                ),
-            ),
-            is_optional: false,
-            is_rest: false,
-        },
-        TupleElementType {
-            ty: Resolved(
-                Module(0) TypeId(17),
-            ),
-            name: Some(
-                Borrowed(
-                    "last",
-                ),
-            ),
-            is_optional: false,
-            is_rest: false,
-        },
-    ],
-)
-
-Module TypeId(19) => Object {
-  prototype: No prototype
-  members: [
-    "a": Module(0) TypeId(12),
-    "b": Module(0) TypeId(14),
-    "c": Module(0) TypeId(18)
-  ]
-}
-
-Module TypeId(20) => Object {
-  prototype: No prototype
-  members: [
-    "a": Module(0) TypeId(12),
-    "b": Module(0) TypeId(14),
-    "c": Module(0) TypeId(18)
-  ]
-}
-
-Module TypeId(21) => sync Function "getObject" {
+Module TypeId(17) => sync Function "Component" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(20)
+  returns: Module(0) TypeId(16)
 }
-
-Module TypeId(22) => instanceof unresolved reference "JSX.Element"
-
-Module TypeId(23) => sync Function "Component" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(22)
-}
-
-Module TypeId(24) => instanceof Array<T = Module(0) TypeId(13)>
-
-Module TypeId(25) => boolean
-
-Module TypeId(26) => Module(0) TypeId(15) | Module(0) TypeId(16)
 ```
 
 # `/src/renamed-reexports.ts`
@@ -335,10 +302,7 @@ export function ohNo() {}
 ```
 Exports {
   "ohNo" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(0)
-      Local name: ohNo
-    )
+    ExportOwnExport => JsOwnExport::Binding(0)
   }
 }
 Imports {
@@ -346,15 +310,27 @@ Imports {
 }
 ```
 
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: ohNo,
+  Type: Module(0) TypeId(1),
+  Declaration kind: HoistedValue
+}
+```
+
 ## Registered types
 
 ```
-Module TypeId(0) => sync Function "ohNo" {
+Module TypeId(0) => void
+
+Module TypeId(1) => sync Function "ohNo" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(0)
 }
 ```
 

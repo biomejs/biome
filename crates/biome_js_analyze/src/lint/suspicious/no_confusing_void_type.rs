@@ -7,6 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyTsType, JsSyntaxKind, JsSyntaxNode, T, TsConditionalType, TsVoidType};
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_confusing_void_type::NoConfusingVoidTypeOptions;
 
 use crate::JsRuleAction;
 
@@ -21,7 +22,7 @@ declare_lint_rule! {
     /// > If you think you need this then you probably want the `undefined` type instead.
     ///
     /// The code action suggests using `undefined` instead of `void`.
-    /// It is unsafe because a variable with the `void` type cannot be asigned to a variable with the `undefined` type.
+    /// It is unsafe because a variable with the `void` type cannot be assigned to a variable with the `undefined` type.
     ///
     /// ## Examples
     ///
@@ -62,7 +63,7 @@ declare_lint_rule! {
         version: "1.2.0",
         name: "noConfusingVoidType",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-invalid-void-type")],
+        sources: &[RuleSource::EslintTypeScript("no-invalid-void-type").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -79,7 +80,7 @@ impl Rule for NoConfusingVoidType {
     type Query = Ast<TsVoidType>;
     type State = VoidTypeContext;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConfusingVoidTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -16,19 +16,19 @@ returnsPromise();
 ## Result
 
 ```
-instanceof unresolved reference "Promise"<number>
+instanceof unresolved reference "Promise"<number> (scope ID: 0)
 ```
 
 ## Registered types
 
 ```
-Module TypeId(0) => sync Function "returnsPromise" {
+Thin TypeId(0) => sync Function "returnsPromise" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Global TypeId(17)
+  returns: Global TypeId(0)
 }
 
-Global TypeId(17) => instanceof unresolved reference "Promise"<number>
+Global TypeId(0) => instanceof unresolved reference "Promise"<number> (scope ID: 0)
 ```

@@ -1,12 +1,10 @@
-use biome_analyze::RuleMetadata;
-use biome_console::{ConsoleExt, markup};
-use biome_flags::biome_env;
-use biome_service::documentation::Doc;
-
 use crate::commands::daemon::default_biome_log_path;
 use crate::{CliDiagnostic, CliSession};
+use biome_console::{ConsoleExt, markup};
+use biome_flags::biome_env;
+use biome_service::documentation::{Doc, ExplainRule};
 
-fn print_rule(session: CliSession, metadata: &RuleMetadata) {
+fn print_rule(session: CliSession, metadata: &ExplainRule) {
     session.app.console.log(markup! {
         {metadata}
     });
@@ -14,8 +12,8 @@ fn print_rule(session: CliSession, metadata: &RuleMetadata) {
 
 pub(crate) fn explain(session: CliSession, doc: Doc) -> Result<(), CliDiagnostic> {
     match doc {
-        Doc::Rule(metadata) => {
-            print_rule(session, &metadata);
+        Doc::Rule(explain_rule) => {
+            print_rule(session, &explain_rule);
             Ok(())
         }
         Doc::DaemonLogs => {

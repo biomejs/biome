@@ -43,9 +43,10 @@ pub use crate::{
     file_source::FileSourceError,
     green::{NodeCache, RawSyntaxKind},
     syntax::{
-        ChainTriviaPiecesIterator, Language, SendNode, SyntaxElement, SyntaxElementChildren,
-        SyntaxKind, SyntaxList, SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt,
-        SyntaxRewriter, SyntaxSlot, SyntaxSlots, SyntaxToken, SyntaxTriviaPiece,
+        AnySyntaxNode, ChainTriviaPiecesIterator, EmbeddedSendNode, Language, SendNode,
+        SyntaxElement, SyntaxElementChildren, SyntaxKind, SyntaxList, SyntaxNode,
+        SyntaxNodeChildren, SyntaxNodeOptionExt, SyntaxNodeWithOffset, SyntaxRewriter, SyntaxSlot,
+        SyntaxSlots, SyntaxToken, SyntaxTokenWithOffset, SyntaxTriviaPiece,
         SyntaxTriviaPieceComments, TriviaPiece, TriviaPieceKind, VisitNodeSignal,
         chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
     },
@@ -59,6 +60,7 @@ pub use crate::{
 
 pub(crate) use crate::green::{GreenNode, GreenNodeData, GreenToken, GreenTokenData};
 
+#[cfg(feature = "countme")]
 pub fn check_live() -> Option<String> {
     if cursor::has_live() || green::has_live() {
         Some(countme::get_all().to_string())

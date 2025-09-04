@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
+use biome_rule_options::use_iframe_title::UseIframeTitleOptions;
 
 declare_lint_rule! {
     /// Enforces the usage of the attribute `title` for the element `iframe`.
@@ -65,7 +66,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useIframeTitle",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("iframe-has-title")],
+        sources: &[RuleSource::EslintJsxA11y("iframe-has-title").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -75,7 +76,7 @@ impl Rule for UseIframeTitle {
     type Query = Ast<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseIframeTitleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();

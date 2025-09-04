@@ -4,6 +4,7 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsBinaryExpression;
 use biome_rowan::AstNode;
+use biome_rule_options::no_self_compare::NoSelfCompareOptions;
 
 declare_lint_rule! {
     /// Disallow comparisons where both sides are exactly the same.
@@ -30,8 +31,8 @@ declare_lint_rule! {
         name: "noSelfCompare",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-self-compare"),
-            RuleSource::Clippy("eq_op"),
+            RuleSource::Eslint("no-self-compare").same(),
+            RuleSource::Clippy("eq_op").same(),
         ],
         recommended: true,
         severity: Severity::Error,
@@ -42,7 +43,7 @@ impl Rule for NoSelfCompare {
     type Query = Ast<JsBinaryExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoSelfCompareOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

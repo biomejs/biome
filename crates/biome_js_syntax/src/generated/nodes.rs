@@ -3642,14 +3642,22 @@ impl JsImportCallExpression {
     pub fn as_fields(&self) -> JsImportCallExpressionFields {
         JsImportCallExpressionFields {
             import_token: self.import_token(),
+            dot_token: self.dot_token(),
+            phase: self.phase(),
             arguments: self.arguments(),
         }
     }
     pub fn import_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
+    pub fn dot_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+    pub fn phase(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
     pub fn arguments(&self) -> SyntaxResult<JsCallArguments> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 3usize)
     }
 }
 impl Serialize for JsImportCallExpression {
@@ -3663,6 +3671,8 @@ impl Serialize for JsImportCallExpression {
 #[derive(Serialize)]
 pub struct JsImportCallExpressionFields {
     pub import_token: SyntaxResult<SyntaxToken>,
+    pub dot_token: Option<SyntaxToken>,
+    pub phase: Option<SyntaxToken>,
     pub arguments: SyntaxResult<JsCallArguments>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3742,6 +3752,7 @@ impl JsImportDefaultClause {
     pub fn as_fields(&self) -> JsImportDefaultClauseFields {
         JsImportDefaultClauseFields {
             type_token: self.type_token(),
+            phase_token: self.phase_token(),
             default_specifier: self.default_specifier(),
             from_token: self.from_token(),
             source: self.source(),
@@ -3751,17 +3762,20 @@ impl JsImportDefaultClause {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
+    pub fn phase_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
     pub fn default_specifier(&self) -> SyntaxResult<JsDefaultImportSpecifier> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
     pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
-        support::required_node(&self.syntax, 3usize)
+        support::required_node(&self.syntax, 4usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
-        support::node(&self.syntax, 4usize)
+        support::node(&self.syntax, 5usize)
     }
 }
 impl Serialize for JsImportDefaultClause {
@@ -3775,6 +3789,7 @@ impl Serialize for JsImportDefaultClause {
 #[derive(Serialize)]
 pub struct JsImportDefaultClauseFields {
     pub type_token: Option<SyntaxToken>,
+    pub phase_token: Option<SyntaxToken>,
     pub default_specifier: SyntaxResult<JsDefaultImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
     pub source: SyntaxResult<AnyJsModuleSource>,
@@ -3897,6 +3912,7 @@ impl JsImportNamespaceClause {
     pub fn as_fields(&self) -> JsImportNamespaceClauseFields {
         JsImportNamespaceClauseFields {
             type_token: self.type_token(),
+            phase_token: self.phase_token(),
             namespace_specifier: self.namespace_specifier(),
             from_token: self.from_token(),
             source: self.source(),
@@ -3906,17 +3922,20 @@ impl JsImportNamespaceClause {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
+    pub fn phase_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
     pub fn namespace_specifier(&self) -> SyntaxResult<JsNamespaceImportSpecifier> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
     pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
-        support::required_node(&self.syntax, 3usize)
+        support::required_node(&self.syntax, 4usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
-        support::node(&self.syntax, 4usize)
+        support::node(&self.syntax, 5usize)
     }
 }
 impl Serialize for JsImportNamespaceClause {
@@ -3930,6 +3949,7 @@ impl Serialize for JsImportNamespaceClause {
 #[derive(Serialize)]
 pub struct JsImportNamespaceClauseFields {
     pub type_token: Option<SyntaxToken>,
+    pub phase_token: Option<SyntaxToken>,
     pub namespace_specifier: SyntaxResult<JsNamespaceImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
     pub source: SyntaxResult<AnyJsModuleSource>,
@@ -20608,6 +20628,11 @@ impl std::fmt::Debug for JsImportCallExpression {
                     "import_token",
                     &support::DebugSyntaxResult(self.import_token()),
                 )
+                .field(
+                    "dot_token",
+                    &support::DebugOptionalElement(self.dot_token()),
+                )
+                .field("phase", &support::DebugOptionalElement(self.phase()))
                 .field("arguments", &support::DebugSyntaxResult(self.arguments()))
                 .finish()
         } else {
@@ -20719,6 +20744,10 @@ impl std::fmt::Debug for JsImportDefaultClause {
                 .field(
                     "type_token",
                     &support::DebugOptionalElement(self.type_token()),
+                )
+                .field(
+                    "phase_token",
+                    &support::DebugOptionalElement(self.phase_token()),
                 )
                 .field(
                     "default_specifier",
@@ -20891,6 +20920,10 @@ impl std::fmt::Debug for JsImportNamespaceClause {
                 .field(
                     "type_token",
                     &support::DebugOptionalElement(self.type_token()),
+                )
+                .field(
+                    "phase_token",
+                    &support::DebugOptionalElement(self.phase_token()),
                 )
                 .field(
                     "namespace_specifier",

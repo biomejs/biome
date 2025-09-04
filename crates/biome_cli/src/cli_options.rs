@@ -24,7 +24,12 @@ pub struct CliOptions {
 
     /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`.
     /// If used, it disables the default configuration file resolution.
-    #[bpaf(long("config-path"), argument("PATH"), optional)]
+    #[bpaf(
+        long("config-path"),
+        env("BIOME_CONFIG_PATH"),
+        argument("PATH"),
+        optional
+    )]
     pub config_path: Option<String>,
 
     /// Cap the amount of diagnostics displayed. When `none` is provided, the limit is lifted.
@@ -56,15 +61,22 @@ pub struct CliOptions {
     )]
     pub reporter: CliReporter,
 
+    /// Optional path to redirect log messages to.
+    ///
+    /// If omitted, logs are printed to stdout.
+    #[bpaf(long("log-file"))]
+    pub log_file: Option<String>,
+
+    /// The level of logging. In order, from the most verbose to the least
+    /// verbose: debug, info, warn, error.
+    ///
+    /// The value `none` won't show any logging.
     #[bpaf(
         long("log-level"),
         argument("none|debug|info|warn|error"),
         fallback(LoggingLevel::default()),
         display_fallback
     )]
-    /// The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
-    ///
-    /// The value `none` won't show any logging.
     pub log_level: LoggingLevel,
 
     /// How the log should look like.

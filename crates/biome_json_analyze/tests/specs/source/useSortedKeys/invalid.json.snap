@@ -1,7 +1,6 @@
 ---
 source: crates/biome_json_analyze/tests/spec_tests.rs
 expression: invalid.json
-snapshot_kind: text
 ---
 # Input
 ```json
@@ -16,7 +15,7 @@ snapshot_kind: text
 ```
 invalid.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The keys are not sorted.
+  i The members are not sorted by key.
   
   > 1 │ {
       │ ^
@@ -26,7 +25,7 @@ invalid.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━�
       │ ^
     5 │ 
   
-  i Safe fix: They keys of the current object can be sorted.
+  i Safe fix: Sort the members by key.
   
     1 1 │   {
     2   │ - → "zed":·"",

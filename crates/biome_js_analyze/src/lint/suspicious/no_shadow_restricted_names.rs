@@ -6,11 +6,12 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsIdentifierBinding;
 use biome_rowan::AstNode;
+use biome_rule_options::no_shadow_restricted_names::NoShadowRestrictedNamesOptions;
 
 declare_lint_rule! {
     /// Disallow identifiers from shadowing restricted names.
     ///
-    /// See also: [`noShadow`](http://biome.dev/linter/rules/no-shadow)
+    /// See also: [`noShadow`](http://biomejs.dev/linter/rules/no-shadow)
     ///
     /// ## Examples
     ///
@@ -39,7 +40,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noShadowRestrictedNames",
         language: "js",
-        sources: &[RuleSource::Eslint("no-shadow-restricted-names")],
+        sources: &[RuleSource::Eslint("no-shadow-restricted-names").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -53,7 +54,7 @@ impl Rule for NoShadowRestrictedNames {
     type Query = Ast<JsIdentifierBinding>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoShadowRestrictedNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();

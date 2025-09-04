@@ -9,7 +9,7 @@ use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem, OsFileSystem};
 use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
-use biome_js_type_info::{NUM_PREDEFINED_TYPES, TypeResolver, TypeResolverLevel};
+use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
@@ -18,7 +18,7 @@ use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
 use biome_service::projects::Projects;
-use biome_service::settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle};
+use biome_service::settings::{ServiceLanguage, Settings};
 use biome_string_case::StrLikeExtension;
 use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
@@ -26,6 +26,10 @@ use similar::{DiffableStr, TextDiff};
 use std::ffi::c_int;
 use std::fmt::Write;
 use std::sync::{Arc, Once};
+
+mod bench_case;
+
+pub use bench_case::BenchCase;
 
 pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
@@ -154,14 +158,13 @@ where
         Default::default()
     } else {
         let configuration = deserialized.into_deserialized().unwrap_or_default();
-        let mut settings = projects.get_settings(key).unwrap_or_default();
+        let mut settings = projects.get_root_settings(key).unwrap_or_default();
         settings
             .merge_with_configuration(configuration, None)
             .unwrap();
 
-        let handle = WorkspaceSettingsHandle::from(settings);
         let document_file_source = DocumentFileSource::from_path(input_file);
-        handle.format_options::<L>(&input_file.into(), &document_file_source)
+        settings.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
 
@@ -193,15 +196,12 @@ pub fn module_graph_for_test_file(
 pub fn get_added_paths<'a>(
     fs: &dyn FileSystem,
     paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, Option<AnyJsRoot>)> {
+) -> Vec<(&'a BiomePath, AnyJsRoot)> {
     paths
         .iter()
-        .map(|path| {
+        .filter_map(|path| {
             let root = fs.read_file_from_path(path).ok().and_then(|content| {
-                let file_source = path
-                    .extension()
-                    .and_then(|extension| JsFileSource::try_from_extension(extension).ok())
-                    .unwrap_or_default();
+                let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
                 let parsed =
                     biome_js_parser::parse(&content, file_source, JsParserOptions::default());
                 let diagnostics = parsed.diagnostics();
@@ -210,8 +210,8 @@ pub fn get_added_paths<'a>(
                     "Unexpected diagnostics: {diagnostics:?}"
                 );
                 parsed.try_tree()
-            });
-            (path, root)
+            })?;
+            Some((path, root))
         })
         .collect()
 }
@@ -272,11 +272,9 @@ pub fn project_layout_with_node_manifest(
 
 pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {
     let error = diag.with_file_path(name).with_file_source_code(source);
-    let text = markup_to_string(biome_console::markup! {
+    markup_to_string(biome_console::markup! {
         {PrintDiagnostic::verbose(&error)}
-    });
-
-    text
+    })
 }
 
 fn markup_to_string(markup: biome_console::Markup) -> String {
@@ -295,12 +293,7 @@ pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) 
     while let Some(current_resolver) = resolver {
         for (i, ty) in current_resolver.registered_types().iter().enumerate() {
             let level = current_resolver.level();
-            let id = if level == TypeResolverLevel::Global {
-                i + NUM_PREDEFINED_TYPES
-            } else {
-                i
-            };
-            registered_types.push_str(&format!("\n{level:?} TypeId({id}) => {ty}\n"));
+            registered_types.push_str(&format!("\n{level:?} TypeId({i}) => {ty}\n"));
         }
 
         resolver = current_resolver.fallback_resolver();
@@ -313,6 +306,21 @@ pub fn dump_registered_types(content: &mut String, resolver: &dyn TypeResolver) 
         content.push_str(&registered_types);
         content.push_str("```\n");
     }
+}
+
+pub fn dump_registered_module_types(content: &mut String, types: &[&TypeData]) {
+    if types.is_empty() {
+        return;
+    }
+
+    content.push_str("## Registered types\n\n");
+    content.push_str("```");
+
+    for (i, ty) in types.iter().enumerate() {
+        content.push_str(&format!("\nModule TypeId({i}) => {ty}\n"));
+    }
+
+    content.push_str("```\n");
 }
 
 // Check that all red / green nodes have correctly been released on exit
@@ -506,7 +514,8 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
     );
     assert!(
         last_token.token_text_trimmed().is_empty(),
-        "the EOF token may not contain any data except trailing whitespace"
+        "the EOF token may not contain any data except trailing whitespace, but found \"{}\"",
+        last_token.token_text_trimmed()
     );
 }
 
@@ -536,7 +545,7 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
 pub fn assert_diagnostics_expectation_comment<L: Language>(
     file_path: &Utf8Path,
     syntax: &SyntaxNode<L>,
-    diagnostics_quantity: usize,
+    diagnostics: Vec<String>,
 ) {
     let no_diagnostics_comment_text = "should not generate diagnostics";
     let diagnostics_comment_text = "should generate diagnostics";
@@ -574,26 +583,25 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
         None
     });
 
-    let has_diagnostics = diagnostics_quantity > 0;
+    let has_diagnostics = !diagnostics.is_empty();
     match diagnostic_comment {
         Some(Diagnostics::ShouldNotGenerateDiagnostics) => {
             if has_diagnostics {
                 panic!(
-                    "This test should not generate diagnostics\nFile: {}",
-                    file_path
+                    "This test should not generate diagnostics\nFile: {file_path}\n\nDiagnostics: {}",
+                    diagnostics.join("\n")
                 );
             }
         }
         Some(Diagnostics::ShouldGenerateDiagnostics) => {
             if !has_diagnostics {
-                panic!("This test should generate diagnostics\nFile: {}", file_path);
+                panic!("This test should generate diagnostics\nFile: {file_path}",);
             }
         }
         None => {
             if is_valid_test_file {
                 panic!(
-                    "Valid test files should contain comment `{}`\nFile: {}",
-                    no_diagnostics_comment_text, file_path
+                    "Valid test files should contain comment `{no_diagnostics_comment_text}`\nFile: {file_path}",
                 );
             }
         }

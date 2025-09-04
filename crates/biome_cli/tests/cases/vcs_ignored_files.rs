@@ -190,3 +190,112 @@ fn ignores_file_inside_directory() {
         result,
     ));
 }
+
+#[test]
+fn use_root_gitignore_when_running_from_subdirectory() {
+    let mut fs = TemporaryFs::new("use_root_gitignore_when_running_from_subdirectory");
+    let mut console = BufferConsole::default();
+
+    fs.create_file(".gitignore", r#"dist/"#);
+    fs.create_file(
+        "biome.json",
+        r#"{
+            "files": {
+                "includes": ["packages/**"]
+            },
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true
+            }
+        }"#,
+    );
+
+    fs.create_file("packages/lib/dist/out.js", r#"foo.call(); bar.call();"#);
+    fs.create_file("packages/lib/src/in.js", r#"foo.call(); bar.call();"#);
+
+    fs.append_to_working_directory("packages/lib");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_root_gitignore_when_running_from_subdirectory",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_fail_when_ignore_file_is_absent() {
+    let mut fs = TemporaryFs::new("should_fail_when_ignore_file_is_absent");
+    let mut console = BufferConsole::default();
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true
+            }
+        }"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_fail_when_ignore_file_is_absent",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_ignore_absolute_paths_in_ignore_file_with_glob() {
+    let mut fs = TemporaryFs::new("should_ignore_absolute_paths_in_ignore_file_with_glob");
+    let mut console = BufferConsole::default();
+    fs.create_file(".gitignore", r#"dist/"#);
+    fs.create_file(
+        "biome.json",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true
+            }
+        }"#,
+    );
+    fs.create_file("in.js", r#"foo.call(); bar.call();"#);
+    let out_path = fs.create_file("dist/out.js", r#"foo.call(); bar.call();"#);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", out_path.as_str()].as_slice()),
+    );
+
+    // No files processed, which is what we want
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_ignore_absolute_paths_in_ignore_file_with_glob",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

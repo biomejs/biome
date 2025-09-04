@@ -213,7 +213,7 @@ const validTestObject = {
 		this["returnsPromiseMethod"]().catch(() => {});
 	},
 }
-async function testValidObejctMethodCalls(): Promise<string> {
+async function testValidObjectMethodCalls(): Promise<string> {
   await validTestObject.returnsPromiseArrowFunction();
   validTestObject.returnsPromiseFunction().catch(() => { });
   validTestObject.returnsPromiseMethod().then(() => { }, () => { }).finally(() => { });
@@ -247,4 +247,10 @@ async function testDestructuringAndCallingReturnsPromiseFromRest({
   ...rest
 }: Props) {
   rest.returnsPromise().catch(() => {}).finally(() => {});
+}
+
+void [1, 2, 3].map(async (x) => x + 1);
+
+async function floatingArray() {
+  await Promise.all([1, 2, 3].map((x) => Promise.resolve(x + 1)));
 }

@@ -3,10 +3,6 @@ use std::collections::BTreeMap;
 use biome_analyze::{FixKind, RuleSource};
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_deserialize::{
-    DeserializableValidator, DeserializationContext, DeserializationDiagnostic, non_empty,
-};
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{Capture, SemanticModel};
@@ -19,14 +15,14 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
 use rustc_hash::{FxHashMap, FxHashSet};
-use serde::{Deserialize, Serialize};
 
 use crate::JsRuleAction;
 use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
 
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
+use biome_rule_options::use_exhaustive_dependencies::{
+    StableHookResult, UseExhaustiveDependenciesOptions,
+};
 
 declare_lint_rule! {
     /// Enforce all dependencies are correctly specified in a React hook.
@@ -169,7 +165,21 @@ declare_lint_rule! {
     /// ```
     ///
     /// If you wish to ignore multiple dependencies, you can add multiple
-    /// comments and add a reason for each.
+    /// comments and add a reason for each:
+    ///
+    /// ```js
+    /// import { useEffect } from "react";
+    ///
+    /// function component() {
+    ///     let a = 1;
+    ///     let b = 1;
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(a): suppress dependency a
+    ///     // biome-ignore lint/correctness/useExhaustiveDependencies(b): suppress dependency b
+    ///     useEffect(() => {
+    ///         console.log(a, b);
+    ///     }, []);
+    /// }
+    /// ```
     ///
     /// ## Options
     ///
@@ -213,7 +223,7 @@ declare_lint_rule! {
     /// hook always have the same identity and should be omitted as such.
     ///
     /// You can configure custom hooks that return stable results in one of
-    /// three ways:
+    /// four ways:
     ///
     /// * `"stableResult": true` -- marks the return value as stable. An example
     ///   of a React hook that would be configured like this is `useRef()`.
@@ -221,6 +231,8 @@ declare_lint_rule! {
     ///   marks the given index or indices to be stable. An example of a React
     ///   hook that would be configured like this is `useState()`.
     /// * `"stableResult": 1` -- shorthand for `"stableResult": [1]`.
+    /// * `"stableResult": ["setValue"]` -- expects the return value to be an
+    ///   object and marks the given property or properties to be stable.
     ///
     /// #### Example
     ///
@@ -251,7 +263,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
         language: "jsx",
-        sources: &[RuleSource::EslintReactHooks("exhaustive-deps")],
+        sources: &[RuleSource::EslintReactHooks("exhaustive-deps").same()],
         recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Next],
@@ -299,109 +311,18 @@ impl Default for HookConfigMaps {
     }
 }
 
-/// Options for the rule `useExhaustiveDependencies`
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseExhaustiveDependenciesOptions {
-    /// Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
-    #[serde(default = "report_unnecessary_dependencies_default")]
-    pub report_unnecessary_dependencies: bool,
-
-    /// Whether to report an error when a hook has no dependencies array.
-    #[serde(default)]
-    pub report_missing_dependencies_array: bool,
-
-    /// List of hooks of which the dependencies should be validated.
-    #[serde(default)]
-    #[deserializable(validate = "non_empty")]
-    pub hooks: Box<[Hook]>,
-}
-
-impl Default for UseExhaustiveDependenciesOptions {
-    fn default() -> Self {
-        Self {
-            report_unnecessary_dependencies: report_unnecessary_dependencies_default(),
-            report_missing_dependencies_array: false,
-            hooks: Vec::new().into_boxed_slice(),
-        }
-    }
-}
-
-fn report_unnecessary_dependencies_default() -> bool {
-    true
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-#[deserializable(with_validator)]
-pub struct Hook {
-    /// The name of the hook.
-    #[deserializable(validate = "non_empty")]
-    pub name: Box<str>,
-
-    /// The "position" of the closure function, starting from zero.
-    ///
-    /// For example, for React's `useEffect()` hook, the closure index is 0.
-    pub closure_index: Option<u8>,
-
-    /// The "position" of the array of dependencies, starting from zero.
-    ///
-    /// For example, for React's `useEffect()` hook, the dependencies index is 1.
-    pub dependencies_index: Option<u8>,
-
-    /// Whether the result of the hook is stable.
-    ///
-    /// Set to `true` to mark the identity of the hook's return value as stable,
-    /// or use a number/an array of numbers to mark the "positions" in the
-    /// return array as stable.
-    ///
-    /// For example, for React's `useRef()` hook the value would be `true`,
-    /// while for `useState()` it would be `[1]`.
-    pub stable_result: Option<StableHookResult>,
-}
-
-impl DeserializableValidator for Hook {
-    fn validate(
-        &mut self,
-        ctx: &mut impl DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        match (self.closure_index, self.dependencies_index) {
-            (Some(closure_index), Some(dependencies_index))
-                if closure_index == dependencies_index =>
-            {
-                ctx.report(
-                    DeserializationDiagnostic::new(markup! {
-                        <Emphasis>"closureIndex"</Emphasis>" and "<Emphasis>"dependenciesIndex"</Emphasis>" may not be the same"
-                    })
-                    .with_range(range),
-                );
-
-                self.closure_index = None;
-                self.dependencies_index = None;
-            }
-            _ => {}
-        }
-
-        true
-    }
-}
-
 impl HookConfigMaps {
     pub fn new(hooks: &UseExhaustiveDependenciesOptions) -> Self {
         let mut result = Self::default();
         for hook in &hooks.hooks {
-            if let Some(stable_result) = &hook.stable_result {
-                if *stable_result != StableHookResult::None {
-                    result.stable_config.insert(StableReactHookConfiguration {
-                        hook_name: hook.name.clone(),
-                        result: stable_result.clone(),
-                        builtin: false,
-                    });
-                }
+            if let Some(stable_result) = &hook.stable_result
+                && *stable_result != StableHookResult::None
+            {
+                result.stable_config.insert(StableReactHookConfiguration {
+                    hook_name: hook.name.clone(),
+                    result: stable_result.clone(),
+                    builtin: false,
+                });
             }
             if let (Some(closure_index), Some(dependencies_index)) =
                 (hook.closure_index, hook.dependencies_index)
@@ -515,6 +436,7 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
@@ -718,7 +640,7 @@ fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> + use<>
         }
     }
 
-    // elemnsts are inserted in reverse, thus we have to reverse the iteration.
+    // elements are inserted in reverse, thus we have to reverse the iteration.
     vec.into_iter().rev()
 }
 
@@ -747,7 +669,7 @@ impl Rule for UseExhaustiveDependencies {
     type Query = Semantic<JsCallExpression>;
     type State = Fix;
     type Signals = Box<[Self::State]>;
-    type Options = Box<UseExhaustiveDependenciesOptions>;
+    type Options = UseExhaustiveDependenciesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let options = ctx.options();
@@ -856,7 +778,9 @@ impl Rule for UseExhaustiveDependencies {
                         .entry(capture.text_trimmed().into_text().into())
                         .or_default();
 
-                    captures.push(capture.clone());
+                    if !captures.iter().any(|existing| existing == capture) {
+                        captures.push(capture.clone());
+                    }
                 }
             }
 
@@ -971,22 +895,18 @@ impl Rule for UseExhaustiveDependencies {
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
-                    markup! {"This hook does not specify all of its dependencies: "{capture_text.as_ref()}""},
+                    markup! {"This hook does not specify its dependency on "<Emphasis>{capture_text.as_ref()}</Emphasis>"."},
                 );
 
                 for range in captures_range {
                     diag = diag.detail(
                         range.text_trimmed_range(),
-                        "This dependency is not specified in the hook dependency list.",
+                        "This dependency is being used here, but is not specified in the hook dependency list.",
                     );
                 }
 
                 if dependencies_array.elements().len() == 0 {
-                    diag = if captures_range.len() == 1 {
-                        diag.note("Either include it or remove the dependency array")
-                    } else {
-                        diag.note("Either include them or remove the dependency array")
-                    }
+                    diag = diag.note("Either include it or remove the dependency array.");
                 }
 
                 Some(diag)
@@ -1074,19 +994,21 @@ impl Rule for UseExhaustiveDependencies {
 
         let message = match state {
             Fix::AddDependency {
-                captures: (_, nodes),
+                captures: (_, captures),
                 dependencies_array,
                 ..
             } => {
+                let new_elements = captures.first().into_iter().filter_map(|node| {
+                    node.ancestors()
+                        .find_map(|node| node.cast::<AnyJsExpression>()?.trim_trivia())
+                        .map(AnyJsArrayElement::AnyJsExpression)
+                });
+
                 let elements = dependencies_array.elements();
                 let elements = elements
                     .elements()
                     .flat_map(|element| element.into_node())
-                    .chain(nodes.iter().filter_map(|node| {
-                        node.ancestors()
-                            .find_map(|node| node.cast::<AnyJsExpression>()?.trim_trivia())
-                            .map(AnyJsArrayElement::AnyJsExpression)
-                    }))
+                    .chain(new_elements)
                     .collect::<Vec<_>>();
 
                 mutation.replace_node(
@@ -1094,7 +1016,7 @@ impl Rule for UseExhaustiveDependencies {
                     recreate_array(dependencies_array, elements),
                 );
 
-                markup! { "Add the missing dependencies to the list." }
+                markup! { "Add the missing dependency to the list." }
             }
             Fix::RemoveDependency {
                 dependencies,

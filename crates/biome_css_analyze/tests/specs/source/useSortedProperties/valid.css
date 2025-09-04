@@ -76,5 +76,31 @@
   color: black;
   pointer-events:·none;
   border:·1px·solid·black;
-  transition:·opactity·1s·ease;
+  transition:·opacity·1s·ease;
+}
+
+
+/**
+ * https://github.com/biomejs/biome/issues/6105
+ */
+.foo {
+  position-anchor: --position-anchor;
+}
+
+.bar {
+  position-anchor: --position-anchor;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.baz {
+  position: relative;
+  position-anchor: --position-anchor;
+  box-sizing: border-box;
+}
+
+.qux {
+  position: relative;
+  box-sizing: border-box;
+  position-anchor: --position-anchor;
 }

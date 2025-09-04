@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: checksSpreadsValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+const getData = () => fetch('/');
+
+console.log({ foo: 42, ...(await getData()) });
+
+const awaitData = async () => {
+  await fetch('/');
+};
+
+console.log({ foo: 42, ...(await awaitData()) });
+
+```

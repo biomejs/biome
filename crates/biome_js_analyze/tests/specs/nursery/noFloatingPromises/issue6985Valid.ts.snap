@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6985Valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+function doSth() {
+    const innerFn = () => {
+        return Promise.resolve(1);
+    }
+    return 'hah'
+}
+
+doSth()
+
+```

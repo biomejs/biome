@@ -821,10 +821,7 @@ mod tests {
         if !HTML_ALL_TAGS.is_sorted() {
             let mut sorted = HTML_ALL_TAGS.to_vec();
             sorted.sort_unstable();
-            panic!(
-                "All tags array is not sorted. Here it is sorted {:?}",
-                sorted
-            );
+            panic!("All tags array is not sorted. Here it is sorted {sorted:?}",);
         }
     }
 
@@ -834,10 +831,7 @@ mod tests {
         if !HTML_GLOBAL_ATTRIBUTES.is_sorted() {
             let mut sorted = HTML_GLOBAL_ATTRIBUTES.to_vec();
             sorted.sort_unstable();
-            panic!(
-                "Global attributes array is not sorted. Here it is sorted {:?}",
-                sorted
-            );
+            panic!("Global attributes array is not sorted. Here it is sorted {sorted:?}",);
         }
     }
 
@@ -849,8 +843,7 @@ mod tests {
                 let mut sorted = attributes.to_vec();
                 sorted.sort_unstable();
                 panic!(
-                    "Attributes for tag '{tag}' are not sorted. Here they are sorted {:?}",
-                    sorted
+                    "Attributes for tag '{tag}' are not sorted. Here they are sorted {sorted:?}",
                 );
             }
         });

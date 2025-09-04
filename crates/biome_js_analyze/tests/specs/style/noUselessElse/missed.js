@@ -14,7 +14,7 @@ function f (x) {
     if (x > 0 && x < 5) {
         switch (x) {
             case 0:
-                f(); // fallthough
+                f(); // fallthrough
             default:
                 return 0;
         }

@@ -42,6 +42,8 @@ expression: snapshot
 
 @container name not style(color: red) {}
 
+@container style (--responsive: true) {  }
+
 ```
 
 
@@ -436,19 +438,23 @@ CssRoot {
             at_token: AT@511..514 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@514..524 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@524..529 "style" [] [],
-                },
-                query: CssContainerSizeFeatureInParens {
+                name: missing (optional),
+                query: CssContainerStyleQueryInParens {
+                    style_token: STYLE_KW@524..529 "style" [] [],
                     l_paren_token: L_PAREN@529..530 "(" [] [],
-                    feature: CssQueryFeaturePlain {
-                        name: CssIdentifier {
-                            value_token: IDENT@530..542 "--responsive" [] [],
+                    query: CssDeclaration {
+                        property: CssGenericProperty {
+                            name: CssDashedIdentifier {
+                                value_token: IDENT@530..542 "--responsive" [] [],
+                            },
+                            colon_token: COLON@542..544 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    value_token: IDENT@544..548 "true" [] [],
+                                },
+                            ],
                         },
-                        colon_token: COLON@542..544 ":" [] [Whitespace(" ")],
-                        value: CssIdentifier {
-                            value_token: IDENT@544..548 "true" [] [],
-                        },
+                        important: missing (optional),
                     },
                     r_paren_token: R_PAREN@548..550 ")" [] [Whitespace(" ")],
                 },
@@ -493,19 +499,23 @@ CssRoot {
             at_token: AT@597..600 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@600..610 "container" [] [Whitespace(" ")],
-                name: CssCustomIdentifier {
-                    value_token: IDENT@610..615 "style" [] [],
-                },
-                query: CssContainerSizeFeatureInParens {
+                name: missing (optional),
+                query: CssContainerStyleQueryInParens {
+                    style_token: STYLE_KW@610..615 "style" [] [],
                     l_paren_token: L_PAREN@615..616 "(" [] [],
-                    feature: CssQueryFeaturePlain {
-                        name: CssIdentifier {
-                            value_token: IDENT@616..628 "--responsive" [] [],
+                    query: CssDeclaration {
+                        property: CssGenericProperty {
+                            name: CssDashedIdentifier {
+                                value_token: IDENT@616..628 "--responsive" [] [],
+                            },
+                            colon_token: COLON@628..630 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    value_token: IDENT@630..634 "true" [] [],
+                                },
+                            ],
                         },
-                        colon_token: COLON@628..630 ":" [] [Whitespace(" ")],
-                        value: CssIdentifier {
-                            value_token: IDENT@630..634 "true" [] [],
-                        },
+                        important: missing (optional),
                     },
                     r_paren_token: R_PAREN@634..636 ")" [] [Whitespace(" ")],
                 },
@@ -684,17 +694,48 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@847..850 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@850..860 "container" [] [Whitespace(" ")],
+                name: missing (optional),
+                query: CssContainerStyleQueryInParens {
+                    style_token: STYLE_KW@860..866 "style" [] [Whitespace(" ")],
+                    l_paren_token: L_PAREN@866..867 "(" [] [],
+                    query: CssDeclaration {
+                        property: CssGenericProperty {
+                            name: CssDashedIdentifier {
+                                value_token: IDENT@867..879 "--responsive" [] [],
+                            },
+                            colon_token: COLON@879..881 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    value_token: IDENT@881..885 "true" [] [],
+                                },
+                            ],
+                        },
+                        important: missing (optional),
+                    },
+                    r_paren_token: R_PAREN@885..887 ")" [] [Whitespace(" ")],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@887..890 "{" [] [Whitespace("  ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@890..891 "}" [] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@847..848 "" [Newline("\n")] [],
+    eof_token: EOF@891..892 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..848
+0: CSS_ROOT@0..892
   0: (empty)
-  1: CSS_RULE_LIST@0..847
+  1: CSS_RULE_LIST@0..891
     0: CSS_AT_RULE@0..41
       0: AT@0..1 "@" [] []
       1: CSS_CONTAINER_AT_RULE@1..41
@@ -968,17 +1009,20 @@ CssRoot {
       0: AT@511..514 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@514..554
         0: CONTAINER_KW@514..524 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@524..529
-          0: IDENT@524..529 "style" [] []
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@529..550
-          0: L_PAREN@529..530 "(" [] []
-          1: CSS_QUERY_FEATURE_PLAIN@530..548
-            0: CSS_IDENTIFIER@530..542
-              0: IDENT@530..542 "--responsive" [] []
-            1: COLON@542..544 ":" [] [Whitespace(" ")]
-            2: CSS_IDENTIFIER@544..548
-              0: IDENT@544..548 "true" [] []
-          2: R_PAREN@548..550 ")" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@524..550
+          0: STYLE_KW@524..529 "style" [] []
+          1: L_PAREN@529..530 "(" [] []
+          2: CSS_DECLARATION@530..548
+            0: CSS_GENERIC_PROPERTY@530..548
+              0: CSS_DASHED_IDENTIFIER@530..542
+                0: IDENT@530..542 "--responsive" [] []
+              1: COLON@542..544 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@544..548
+                0: CSS_IDENTIFIER@544..548
+                  0: IDENT@544..548 "true" [] []
+            1: (empty)
+          3: R_PAREN@548..550 ")" [] [Whitespace(" ")]
         3: CSS_RULE_BLOCK@550..554
           0: L_CURLY@550..553 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@553..553
@@ -1008,17 +1052,20 @@ CssRoot {
       0: AT@597..600 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@600..640
         0: CONTAINER_KW@600..610 "container" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@610..615
-          0: IDENT@610..615 "style" [] []
-        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@615..636
-          0: L_PAREN@615..616 "(" [] []
-          1: CSS_QUERY_FEATURE_PLAIN@616..634
-            0: CSS_IDENTIFIER@616..628
-              0: IDENT@616..628 "--responsive" [] []
-            1: COLON@628..630 ":" [] [Whitespace(" ")]
-            2: CSS_IDENTIFIER@630..634
-              0: IDENT@630..634 "true" [] []
-          2: R_PAREN@634..636 ")" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@610..636
+          0: STYLE_KW@610..615 "style" [] []
+          1: L_PAREN@615..616 "(" [] []
+          2: CSS_DECLARATION@616..634
+            0: CSS_GENERIC_PROPERTY@616..634
+              0: CSS_DASHED_IDENTIFIER@616..628
+                0: IDENT@616..628 "--responsive" [] []
+              1: COLON@628..630 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@630..634
+                0: CSS_IDENTIFIER@630..634
+                  0: IDENT@630..634 "true" [] []
+            1: (empty)
+          3: R_PAREN@634..636 ")" [] [Whitespace(" ")]
         3: CSS_RULE_BLOCK@636..640
           0: L_CURLY@636..639 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@639..639
@@ -1140,6 +1187,28 @@ CssRoot {
           0: L_CURLY@845..846 "{" [] []
           1: CSS_RULE_LIST@846..846
           2: R_CURLY@846..847 "}" [] []
-  2: EOF@847..848 "" [Newline("\n")] []
+    19: CSS_AT_RULE@847..891
+      0: AT@847..850 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@850..891
+        0: CONTAINER_KW@850..860 "container" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@860..887
+          0: STYLE_KW@860..866 "style" [] [Whitespace(" ")]
+          1: L_PAREN@866..867 "(" [] []
+          2: CSS_DECLARATION@867..885
+            0: CSS_GENERIC_PROPERTY@867..885
+              0: CSS_DASHED_IDENTIFIER@867..879
+                0: IDENT@867..879 "--responsive" [] []
+              1: COLON@879..881 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@881..885
+                0: CSS_IDENTIFIER@881..885
+                  0: IDENT@881..885 "true" [] []
+            1: (empty)
+          3: R_PAREN@885..887 ")" [] [Whitespace(" ")]
+        3: CSS_RULE_BLOCK@887..891
+          0: L_CURLY@887..890 "{" [] [Whitespace("  ")]
+          1: CSS_RULE_LIST@890..890
+          2: R_CURLY@890..891 "}" [] []
+  2: EOF@891..892 "" [Newline("\n")] []
 
 ```

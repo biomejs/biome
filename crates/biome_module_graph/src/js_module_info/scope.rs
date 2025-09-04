@@ -1,13 +1,13 @@
 use std::{collections::VecDeque, iter::FusedIterator, sync::Arc};
 
 use biome_js_syntax::TextRange;
-use biome_js_type_info::ScopeId;
+use biome_js_type_info::{BindingId, ScopeId, TypeReferenceQualifier};
 use biome_rowan::TokenText;
 use rustc_hash::FxHashMap;
 
 use super::{
     JsModuleInfoInner,
-    binding::{BindingId, JsBinding},
+    binding::{JsBinding, JsDeclarationKind},
 };
 
 #[derive(Debug)]
@@ -21,7 +21,315 @@ pub struct JsScopeData {
     // All bindings of this scope (points to SemanticModelData::bindings)
     pub bindings: Vec<BindingId>,
     // Map pointing to the [bindings] vec of each bindings by its name
-    pub bindings_by_name: FxHashMap<TokenText, BindingId>,
+    pub bindings_by_name: FxHashMap<TokenText, TsBindingReference>,
+}
+
+/// Reference to one or two bindings.
+///
+/// Tracks whether the bindings refer to a type or the type of a value.
+/// See [`biome_js_type_info::DualReference`] for why this is necessary.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TsBindingReference {
+    Type(BindingId),
+    ValueType(BindingId),
+    TypeAndValueType(BindingId),
+    NamespaceAndValueType(BindingId),
+    Merged {
+        ty: Option<BindingId>,
+        value_ty: Option<BindingId>,
+        namespace_ty: Option<BindingId>,
+    },
+}
+
+impl TsBindingReference {
+    pub fn from_binding_and_declaration_kind(
+        binding_id: BindingId,
+        declaration_id: JsDeclarationKind,
+    ) -> Self {
+        match (
+            declaration_id.declares_namespace(),
+            declaration_id.declares_type(),
+            declaration_id.declares_value(),
+        ) {
+            (true, _, _) => Self::NamespaceAndValueType(binding_id),
+            (_, true, true) => Self::TypeAndValueType(binding_id),
+            (_, true, false) => Self::Type(binding_id),
+            (_, false, _) => Self::ValueType(binding_id),
+        }
+    }
+
+    pub fn get_binding_id_for_qualifier(
+        self,
+        qualifier: &TypeReferenceQualifier,
+    ) -> Option<BindingId> {
+        if let Some(excluded_binding_id) = qualifier.excluded_binding_id {
+            match self {
+                Self::Type(binding_id)
+                | Self::ValueType(binding_id)
+                | Self::TypeAndValueType(binding_id)
+                | Self::NamespaceAndValueType(binding_id) => {
+                    (binding_id != excluded_binding_id).then_some(binding_id)
+                }
+                Self::Merged {
+                    ty,
+                    value_ty,
+                    namespace_ty,
+                } => match (ty, value_ty, namespace_ty) {
+                    (_, _, Some(namespace_ty)) if namespace_ty != excluded_binding_id => {
+                        Some(namespace_ty)
+                    }
+                    (_, Some(value_ty), _)
+                        if value_ty != excluded_binding_id && !qualifier.type_only =>
+                    {
+                        Some(value_ty)
+                    }
+                    (Some(ty), _, _) if ty != excluded_binding_id => Some(ty),
+                    _ => None,
+                },
+            }
+        } else if qualifier.type_only {
+            self.namespace_ty_or_ty()
+        } else {
+            Some(self.value_ty_or_ty())
+        }
+    }
+
+    /// Returns the namespace binding or type binding, in that order.
+    ///
+    /// Returns `None` if the reference only references a value type.
+    pub fn namespace_ty_or_ty(self) -> Option<BindingId> {
+        match self {
+            Self::Type(binding_id)
+            | Self::TypeAndValueType(binding_id)
+            | Self::NamespaceAndValueType(binding_id) => Some(binding_id),
+            Self::Merged {
+                ty, namespace_ty, ..
+            } => namespace_ty.or(ty),
+            _ => None,
+        }
+    }
+
+    /// Creates a union from this binding reference with another.
+    ///
+    /// If both bindings refer to the same kind of type, the binding ID(s) from
+    /// `other` takes precedence.
+    pub fn union_with(self, other: Self) -> Self {
+        match (self, other) {
+            (Self::Type(own_binding_id), Self::ValueType(other_binding_id)) => {
+                if own_binding_id == other_binding_id {
+                    Self::TypeAndValueType(other_binding_id)
+                } else {
+                    Self::Merged {
+                        ty: Some(own_binding_id),
+                        value_ty: Some(other_binding_id),
+                        namespace_ty: None,
+                    }
+                }
+            }
+            (Self::Type(own_binding_id), Self::NamespaceAndValueType(other_binding_id)) => {
+                Self::Merged {
+                    ty: Some(own_binding_id),
+                    value_ty: Some(other_binding_id),
+                    namespace_ty: Some(other_binding_id),
+                }
+            }
+            (
+                Self::Type(own_binding_ty),
+                Self::Merged {
+                    ty,
+                    value_ty,
+                    namespace_ty,
+                },
+            ) if ty.is_none() => Self::Merged {
+                ty: Some(own_binding_ty),
+                value_ty,
+                namespace_ty,
+            },
+
+            (Self::ValueType(own_binding_id), Self::Type(other_binding_id)) => {
+                if own_binding_id == other_binding_id {
+                    Self::TypeAndValueType(other_binding_id)
+                } else {
+                    Self::Merged {
+                        ty: Some(other_binding_id),
+                        value_ty: Some(own_binding_id),
+                        namespace_ty: None,
+                    }
+                }
+            }
+            (
+                Self::ValueType(own_binding_ty),
+                Self::Merged {
+                    ty,
+                    value_ty,
+                    namespace_ty,
+                },
+            ) if value_ty.is_none() => Self::Merged {
+                ty,
+                value_ty: Some(own_binding_ty),
+                namespace_ty,
+            },
+
+            (Self::TypeAndValueType(own_binding_id), Self::Type(other_binding_id)) => {
+                Self::Merged {
+                    ty: Some(other_binding_id),
+                    value_ty: Some(own_binding_id),
+                    namespace_ty: None,
+                }
+            }
+            (Self::TypeAndValueType(own_binding_id), Self::ValueType(other_binding_id)) => {
+                Self::Merged {
+                    ty: Some(own_binding_id),
+                    value_ty: Some(other_binding_id),
+                    namespace_ty: None,
+                }
+            }
+            (
+                Self::TypeAndValueType(own_binding_id),
+                Self::NamespaceAndValueType(other_binding_id),
+            ) => Self::Merged {
+                ty: Some(own_binding_id),
+                value_ty: Some(other_binding_id),
+                namespace_ty: Some(other_binding_id),
+            },
+            (
+                Self::TypeAndValueType(own_binding_ty),
+                Self::Merged {
+                    ty,
+                    value_ty,
+                    namespace_ty,
+                },
+            ) => Self::Merged {
+                ty: ty.or(Some(own_binding_ty)),
+                value_ty: value_ty.or(Some(own_binding_ty)),
+                namespace_ty,
+            },
+
+            (Self::NamespaceAndValueType(own_binding_id), Self::Type(other_binding_id)) => {
+                Self::Merged {
+                    ty: Some(other_binding_id),
+                    value_ty: Some(own_binding_id),
+                    namespace_ty: Some(own_binding_id),
+                }
+            }
+            (Self::NamespaceAndValueType(own_binding_id), Self::ValueType(other_binding_id)) => {
+                Self::Merged {
+                    ty: None,
+                    value_ty: Some(other_binding_id),
+                    namespace_ty: Some(own_binding_id),
+                }
+            }
+            (
+                Self::NamespaceAndValueType(own_binding_id),
+                Self::TypeAndValueType(other_binding_id),
+            ) => Self::Merged {
+                ty: Some(other_binding_id),
+                value_ty: Some(other_binding_id),
+                namespace_ty: Some(own_binding_id),
+            },
+            (
+                Self::NamespaceAndValueType(own_binding_ty),
+                Self::Merged {
+                    ty,
+                    value_ty,
+                    namespace_ty,
+                },
+            ) => Self::Merged {
+                ty,
+                value_ty: value_ty.or(Some(own_binding_ty)),
+                namespace_ty: namespace_ty.or(Some(own_binding_ty)),
+            },
+
+            (
+                Self::Merged {
+                    value_ty,
+                    namespace_ty,
+                    ..
+                },
+                Self::Type(other_binding_ty),
+            ) => Self::Merged {
+                ty: Some(other_binding_ty),
+                value_ty,
+                namespace_ty,
+            },
+            (
+                Self::Merged {
+                    ty, namespace_ty, ..
+                },
+                Self::ValueType(other_binding_ty),
+            ) => Self::Merged {
+                ty,
+                value_ty: Some(other_binding_ty),
+                namespace_ty,
+            },
+            (Self::Merged { namespace_ty, .. }, Self::TypeAndValueType(other_binding_ty))
+                if namespace_ty.is_some() =>
+            {
+                Self::Merged {
+                    ty: Some(other_binding_ty),
+                    value_ty: Some(other_binding_ty),
+                    namespace_ty,
+                }
+            }
+            (Self::Merged { ty, .. }, Self::NamespaceAndValueType(other_binding_ty))
+                if ty.is_some() =>
+            {
+                Self::Merged {
+                    ty,
+                    value_ty: Some(other_binding_ty),
+                    namespace_ty: Some(other_binding_ty),
+                }
+            }
+            (
+                Self::Merged {
+                    ty: own_ty,
+                    value_ty: own_value_ty,
+                    namespace_ty: own_namespace_ty,
+                },
+                Self::Merged {
+                    ty: other_ty,
+                    value_ty: other_value_ty,
+                    namespace_ty: other_namespace_ty,
+                },
+            ) => Self::Merged {
+                ty: other_ty.or(own_ty),
+                value_ty: other_value_ty.or(own_value_ty),
+                namespace_ty: other_namespace_ty.or(own_namespace_ty),
+            },
+
+            (_, other) => other,
+        }
+    }
+
+    /// Returns the value type binding.
+    pub fn value_ty(self) -> Option<BindingId> {
+        match self {
+            Self::ValueType(binding_id)
+            | Self::TypeAndValueType(binding_id)
+            | Self::NamespaceAndValueType(binding_id) => Some(binding_id),
+            Self::Merged { value_ty, .. } => value_ty,
+            Self::Type(_) => None,
+        }
+    }
+
+    /// Returns the value type binding, or the type binding if the value type
+    /// binding is unknown.
+    pub fn value_ty_or_ty(self) -> BindingId {
+        match self {
+            Self::ValueType(binding_id)
+            | Self::TypeAndValueType(binding_id)
+            | Self::NamespaceAndValueType(binding_id) => binding_id,
+            Self::Merged {
+                ty,
+                value_ty,
+                namespace_ty,
+            } => value_ty
+                .or(namespace_ty)
+                .or(ty)
+                .expect("a merged reference must have at least two fields set to `Some`"),
+            Self::Type(binding_id) => binding_id,
+        }
+    }
 }
 
 /// Provides all information regarding a specific scope.
@@ -83,21 +391,6 @@ impl JsScope {
             scope_id: self.id,
             binding_index: 0,
         }
-    }
-
-    /// Returns a binding by its name, like it appears on code.
-    ///
-    /// It **does not** return bindings of parent scopes.
-    pub fn get_binding(&self, name: impl AsRef<str>) -> Option<JsBinding> {
-        let data = &self.info.scopes[self.id.index()];
-
-        let name = name.as_ref();
-        let id = *data.bindings_by_name.get(name)?;
-
-        Some(JsBinding {
-            data: self.info.clone(),
-            id,
-        })
     }
 
     /// Checks if the current scope is an ancestor of `other`.
@@ -181,3 +474,67 @@ impl ExactSizeIterator for ScopeBindingsIter {
 }
 
 impl FusedIterator for ScopeBindingsIter {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn binding_reference_merging() {
+        assert_eq!(
+            TsBindingReference::Type(BindingId::new(0))
+                .union_with(TsBindingReference::Type(BindingId::new(1))),
+            TsBindingReference::Type(BindingId::new(1))
+        );
+
+        assert_eq!(
+            TsBindingReference::Type(BindingId::new(0))
+                .union_with(TsBindingReference::ValueType(BindingId::new(0))),
+            TsBindingReference::TypeAndValueType(BindingId::new(0))
+        );
+        assert_eq!(
+            TsBindingReference::Type(BindingId::new(0))
+                .union_with(TsBindingReference::ValueType(BindingId::new(1))),
+            TsBindingReference::Merged {
+                ty: Some(BindingId::new(0)),
+                value_ty: Some(BindingId::new(1)),
+                namespace_ty: None
+            }
+        );
+        assert_eq!(
+            TsBindingReference::Type(BindingId::new(0))
+                .union_with(TsBindingReference::NamespaceAndValueType(BindingId::new(0))),
+            TsBindingReference::Merged {
+                ty: Some(BindingId::new(0)),
+                value_ty: Some(BindingId::new(0)),
+                namespace_ty: Some(BindingId::new(0)),
+            }
+        );
+
+        assert_eq!(
+            TsBindingReference::ValueType(BindingId::new(0))
+                .union_with(TsBindingReference::Type(BindingId::new(1))),
+            TsBindingReference::Merged {
+                ty: Some(BindingId::new(1)),
+                value_ty: Some(BindingId::new(0)),
+                namespace_ty: None
+            }
+        );
+
+        assert_eq!(
+            TsBindingReference::ValueType(BindingId::new(0))
+                .union_with(TsBindingReference::ValueType(BindingId::new(0))),
+            TsBindingReference::ValueType(BindingId::new(0))
+        );
+        assert_eq!(
+            TsBindingReference::ValueType(BindingId::new(0))
+                .union_with(TsBindingReference::ValueType(BindingId::new(1))),
+            TsBindingReference::ValueType(BindingId::new(1))
+        );
+        assert_eq!(
+            TsBindingReference::ValueType(BindingId::new(0))
+                .union_with(TsBindingReference::NamespaceAndValueType(BindingId::new(0))),
+            TsBindingReference::NamespaceAndValueType(BindingId::new(0))
+        );
+    }
+}

@@ -13,54 +13,20 @@ use biome_js_syntax::{
     TsConditionalType, TsDeclarationModule, TsInferType,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
-use serde::{Deserialize, Serialize};
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    biome_deserialize_macros::Deserializable,
-    Eq,
-    PartialEq,
-    Serialize,
-    Default,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NoUnusedVariablesOptions {
-    /// Whether to ignore unused variables from an object destructuring with a spread
-    /// (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
-    #[serde(default)]
-    ignore_rest_siblings: bool,
-}
+use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
 
 declare_lint_rule! {
     /// Disallow unused variables.
     ///
-    /// There is an exception to this rule:
-    /// variables that starts with underscore, e.g. `let _something;`.
+    /// There is an exception to this rule: variables that start with underscore, e.g. `let _something;`.
     ///
-    /// The pattern of having an underscore as prefix of a name of variable is a very diffuse
-    /// pattern among programmers, and Biome decided to follow it.
+    /// The pattern of having an underscore as a prefix of a variable is a very diffuse
+    /// pattern among programmers, and Biome follows it.
     ///
     /// This rule won't report unused imports.
     /// If you want to report unused imports,
     /// enable [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/).
     ///
-    ///
-    /// ## Options
-    ///
-    /// The rule supports the following options:
-    ///
-    /// ```json,options
-    /// {
-    ///   "options": {
-    ///     "ignoreRestSiblings": true
-    ///   }
-    /// }
-    /// ```
-    ///
-    /// - `ignoreRestSiblings`: Whether to ignore unused variables from an object destructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule). Defaults to `false`.
     ///
     /// ## Examples
     ///
@@ -92,10 +58,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// // With `ignoreRestSiblings: false`
-    /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
-    /// const { brand, ...other } = car;
-    /// console.log(other);
+    /// const { brand } = car;
     /// ```
     ///
     /// ### Valid
@@ -121,26 +84,41 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
-    /// // With `ignoreRestSiblings: false`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
-    /// const { brand: _brand, ...other } = car;
-    /// console.log(other);
+    /// const { brand, ...rest } = car;
+    /// console.log(brand, rest);
     /// ```
     ///
-    /// ```js,use_options
-    /// // With `ignoreRestSiblings: true`
-    /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
+    /// ## Options
+    ///
+    /// The rule has the following options
+    ///
+    /// ### `ignoreRestSiblings`
+    ///
+    /// Whether to ignore unused variables from an object destructuring with a spread (i.e.: `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
+    ///
+    /// Defaults to `true`.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignoreRestSiblings": false
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
     /// const { brand, ...other } = car;
-    /// console.log(other);
+    /// console.log(brand);
     /// ```
     pub NoUnusedVariables {
         version: "1.0.0",
         name: "noUnusedVariables",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-unused-vars"),
-            RuleSource::EslintTypeScript("no-unused-vars"),
-            RuleSource::EslintUnusedImports("no-unused-vars")
+            RuleSource::Eslint("no-unused-vars").same(),
+            RuleSource::EslintTypeScript("no-unused-vars").same(),
+            RuleSource::EslintUnusedImports("no-unused-vars").same(),
         ],
         recommended: true,
         severity: Severity::Warning,
@@ -231,6 +209,7 @@ fn suggested_fix_if_unused(
         | AnyJsBindingDeclaration::JsClassDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)) => {
             if is_in_ambient_context(node.syntax()) {
                 None
@@ -299,20 +278,19 @@ impl Rule for NoUnusedVariables {
             .source_type::<JsFileSource>()
             .language()
             .is_definition_file();
-        if is_declaration_file {
-            if let Some(items) = binding
+        if is_declaration_file
+            && let Some(items) = binding
                 .syntax()
                 .ancestors()
                 .skip(1)
                 .find_map(JsModuleItemList::cast)
-            {
-                // A declaration file without top-level exports and imports is a global declaration file.
-                // All top-level types and variables are available in every files of the project.
-                // Thus, it is ok if top-level types are not used locally.
-                let is_top_level = items.parent::<TsDeclarationModule>().is_some();
-                if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
-                    return None;
-                }
+        {
+            // A declaration file without top-level exports and imports is a global declaration file.
+            // All top-level types and variables are available in every files of the project.
+            // Thus, it is ok if top-level types are not used locally.
+            let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+            if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                return None;
             }
         }
 
@@ -338,11 +316,18 @@ impl Rule for NoUnusedVariables {
             _ => "variable",
         };
 
+        let binding_name = match binding {
+            AnyJsIdentifierBinding::JsIdentifierBinding(node) => node.name_token().ok()?,
+            AnyJsIdentifierBinding::TsIdentifierBinding(node) => node.name_token().ok()?,
+            AnyJsIdentifierBinding::TsTypeParameterName(node) => node.ident_token().ok()?,
+            AnyJsIdentifierBinding::TsLiteralEnumMemberName(node) => node.value().ok()?,
+        };
+
         let diag = RuleDiagnostic::new(
             rule_category!(),
             binding.syntax().text_trimmed_range(),
             markup! {
-                "This " {symbol_type} " is unused."
+                "This "{symbol_type}" "<Emphasis>{binding_name.text_trimmed()}</Emphasis>" is unused."
             },
         );
 
@@ -351,12 +336,12 @@ impl Rule for NoUnusedVariables {
         );
 
         // Check if this binding is part of an object pattern with a rest element
-        if let Some(decl) = binding.declaration() {
-            if is_rest_spread_sibling(&decl) {
-                diag = diag.note(
-                    markup! {"You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread."},
+        if let Some(decl) = binding.declaration()
+            && is_rest_spread_sibling(&decl)
+        {
+            diag = diag.note(
+                    markup! {"You can use the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables in an object destructuring with a spread."},
                 );
-            }
         }
 
         Some(diag)
@@ -387,7 +372,9 @@ impl Rule for NoUnusedVariables {
                 let new_name = format!("_{name_trimmed}");
 
                 let model = ctx.model();
-                mutation.rename_node_declaration(model, binding, &new_name);
+                if !mutation.rename_node_declaration(model, binding, &new_name) {
+                    return None;
+                }
 
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),

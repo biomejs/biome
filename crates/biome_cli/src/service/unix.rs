@@ -66,7 +66,7 @@ fn spawn_daemon(
         cmd.arg("--stop-on-disconnect");
     }
     if let Some(log_path) = log_path {
-        cmd.arg(format!("--log-path={}", log_path));
+        cmd.arg(format!("--log-path={log_path}",));
     }
 
     if let Some(log_file_name_prefix) = log_file_name_prefix {
@@ -175,12 +175,7 @@ pub(crate) async fn ensure_daemon(
 
     // If the connection couldn't be opened after 10 tries fail with the last
     // error message from the OS, or a generic error message otherwise
-    Err(last_error.unwrap_or_else(|| {
-        io::Error::new(
-            io::ErrorKind::Other,
-            "could not connect to the daemon socket",
-        )
-    }))
+    Err(last_error.unwrap_or_else(|| io::Error::other("could not connect to the daemon socket")))
 }
 
 /// Ensure the server daemon is running and ready to receive connections and

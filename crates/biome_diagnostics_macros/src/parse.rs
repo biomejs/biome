@@ -10,8 +10,8 @@ use syn::{
 };
 
 pub(crate) enum DeriveInput {
-    DeriveStructInput(DeriveStructInput),
-    DeriveEnumInput(DeriveEnumInput),
+    DeriveStructInput(Box<DeriveStructInput>),
+    DeriveEnumInput(Box<DeriveEnumInput>),
 }
 
 pub(crate) struct DeriveStructInput {
@@ -39,18 +39,18 @@ pub(crate) struct DeriveEnumInput {
 impl DeriveInput {
     pub(crate) fn parse(input: syn::DeriveInput) -> Self {
         match input.data {
-            syn::Data::Struct(data) => Self::DeriveStructInput(DeriveStructInput::parse(
+            syn::Data::Struct(data) => Self::DeriveStructInput(Box::new(DeriveStructInput::parse(
                 input.ident,
                 input.generics,
                 input.attrs,
                 data,
-            )),
-            syn::Data::Enum(data) => Self::DeriveEnumInput(DeriveEnumInput::parse(
+            ))),
+            syn::Data::Enum(data) => Self::DeriveEnumInput(Box::new(DeriveEnumInput::parse(
                 input.ident,
                 input.generics,
                 input.attrs,
                 data,
-            )),
+            ))),
             syn::Data::Union(data) => abort!(
                 data.union_token.span(),
                 "unions are not supported by the Diagnostic derive macro"

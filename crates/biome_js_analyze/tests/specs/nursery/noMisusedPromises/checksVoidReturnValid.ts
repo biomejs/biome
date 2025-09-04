@@ -1,0 +1,22 @@
+/* should not generate diagnostics */
+
+// for-of puts `await` in outer context
+for (const value of [1, 2, 3]) {
+  await doSomething(value);
+}
+
+// If outer context is not `async`, handle error explicitly
+Promise.all(
+  [1, 2, 3].map(async value => {
+    await doSomething(value);
+  }),
+).catch(handleError);
+
+// Use an async IIFE wrapper
+new Promise((resolve, reject) => {
+  // combine with `void` keyword to tell `noFloatingPromises` rule to ignore unhandled rejection
+  void (async () => {
+    await doSomething();
+    resolve();
+  })();
+});

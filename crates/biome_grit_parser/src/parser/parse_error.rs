@@ -40,7 +40,7 @@ pub(crate) fn expected_map_element(p: &GritParser, range: TextRange) -> ParseDia
 
 pub(crate) fn expected_node_arg(p: &GritParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Unexpected node argument.", range).with_hint(
-        "Node arguments must be patterns, optionally preceeded by a name and an equal sign.",
+        "Node arguments must be patterns, optionally preceded by a name and an equal sign.",
     )
 }
 
@@ -54,7 +54,7 @@ pub(crate) fn expected_predicate(p: &GritParser, range: TextRange) -> ParseDiagn
 
 pub(crate) fn expected_predicate_call_arg(p: &GritParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Unexpected predicate call argument.", range).with_hint(
-        "Predicate call arguments must be patterns, optionally preceeded by a name and an equal sign.",
+        "Predicate call arguments must be patterns, optionally preceded by a name and an equal sign.",
     )
 }
 

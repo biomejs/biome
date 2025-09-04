@@ -48,7 +48,7 @@ invalid.ts:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      1    │ - //·Header·comment
      2    │ - import·type·A·from·"mod";
@@ -72,7 +72,7 @@ invalid.ts:5:18 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      1  1 │   // Header comment
      2    │ - import·type·A·from·"mod";
@@ -99,7 +99,7 @@ invalid.ts:8:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      3  3 │   
      4  4 │   // Header comment
@@ -127,7 +127,7 @@ invalid.ts:13:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
      6  6 │   
      7  7 │   // Header comment
@@ -160,7 +160,7 @@ invalid.ts:15:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     11 11 │   
     12 12 │   // Header comment
@@ -193,7 +193,7 @@ invalid.ts:17:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     13 13 │   import /*a*/ D /*b*/, /*c*/{ type E }/*d*/ from "mod"; // Import comment
     14 14 │   
@@ -225,7 +225,7 @@ invalid.ts:23:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     19 19 │       type H,
     20 20 │       type I,
@@ -251,7 +251,7 @@ invalid.ts:26:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused imports.
+  i Unsafe fix: Remove the unused imports.
   
     21 21 │   } from "mod";
     22 22 │   

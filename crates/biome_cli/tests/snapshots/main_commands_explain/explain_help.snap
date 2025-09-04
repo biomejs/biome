@@ -6,7 +6,7 @@ expression: content
 
 ```block
 Shows documentation of various aspects of the CLI.
-## Examples
+### Examples
 ```shell biome explain noDebugger ```
 ```shell biome explain daemon-logs ```
 

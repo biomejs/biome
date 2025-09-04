@@ -19,14 +19,7 @@ export default function Component(): JSX.Element {}
 ```
 Exports {
   "default" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(1)
-      Local name: Component
-      JsDoc(
-        @public
-        @returns {JSX.Element}
-      )
-    )
+    ExportOwnExport => JsOwnExport::Binding(0)
   }
 }
 Imports {
@@ -34,10 +27,24 @@ Imports {
 }
 ```
 
+## Exported Bindings
+
+```
+BindingId(0) => JsBindingData {
+  Name: Component,
+  Type: Module(0) TypeId(1),
+  JSDoc comment: JsDoc(
+    @public
+    @returns {JSX.Element}
+  ),
+  Declaration kind: Unknown
+}
+```
+
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof unresolved reference "JSX.Element"
+Module TypeId(0) => unknown
 
 Module TypeId(1) => sync Function "Component" {
   accepts: {

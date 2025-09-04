@@ -41,7 +41,13 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                 // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
                 if bracket_same_line {
                     write!(f, [hard_space()])?;
-                } else if self_close_void_elements.is_always() || attributes.len() >= 1 {
+                } else if attributes.len() >= 1 {
+                    if self_close_void_elements.is_always() {
+                        write!(f, [soft_line_break_or_space()])?;
+                    } else {
+                        write!(f, [soft_line_break()])?;
+                    }
+                } else if self_close_void_elements.is_always() {
                     write!(f, [soft_line_break_or_space()])?;
                 }
 
@@ -55,7 +61,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                         write!(f, [text("/")])?;
                     }
                 }
-                // We remove the slash only to void elements
+                // We remove the slash only from void elements
                 else if node.is_void_element()? && self_close_void_elements.is_never() {
                     if let Some(slash_token) = &slash_token {
                         write!(f, [format_removed(slash_token)])?;

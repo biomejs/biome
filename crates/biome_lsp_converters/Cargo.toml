@@ -14,7 +14,8 @@ version              = "0.1.0"
 
 [dependencies]
 anyhow           = { workspace = true }
-biome_rowan      = { workspace = true }
+biome_line_index = { workspace = true }
+biome_text_size  = { workspace = true }
 rustc-hash       = { workspace = true }
 tower-lsp-server = { workspace = true }
 

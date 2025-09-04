@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -30,15 +29,15 @@ snapshot_kind: text
 ```block
 file.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The keys are not sorted.
+  i The members are not sorted by key.
   
   > 1 │ { "zod": true, "lorem": "ipsum", "foo": "bar" }
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Safe fix: They keys of the current object can be sorted.
+  i Safe fix: Sort the members by key.
   
   - {·"zod":·true,·"lorem":·"ipsum",·"foo":·"bar"·}
-  + {·"foo":·"bar"·,"lorem":·"ipsum","zod":·true·}
+  + {·"foo":·"bar","lorem":·"ipsum",·"zod":·true·}
   
 
 ```

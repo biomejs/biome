@@ -74,20 +74,18 @@ pub(crate) fn parse_container_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![container]);
 
-    if parse_custom_identifier(p, CssLexContext::Regular)
-        .ok()
-        .is_none()
-    {
+    if !is_at_container_style_query_in_parens(p) {
+        let name = parse_custom_identifier(p, CssLexContext::Regular);
         // Because the name is optional, we have to indirectly check if it's
         // a CSS-wide keyword that can't be used. If it was required, we could
         // use `.or_recover` or `.or_add_diagnostic` here instead.
-        if p.cur().is_css_wide_keyword() {
+        if name.is_absent() && p.cur().is_css_wide_keyword() {
             p.err_and_bump(
                 expected_non_css_wide_keyword_identifier(p, p.cur_range()),
                 CSS_BOGUS,
             )
         }
-    };
+    }
 
     parse_any_container_query(p)
         .or_recover(p, &AnyQueryParseRecovery, expected_any_container_query)

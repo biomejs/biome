@@ -12,6 +12,7 @@ use biome_js_syntax::{
     JsComputedMemberName, JsExport,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
+use biome_rule_options::no_then_property::NoThenPropertyOptions;
 
 declare_lint_rule! {
     /// Disallow `then` property.
@@ -87,7 +88,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noThenProperty",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-thenable")],
+        sources: &[RuleSource::EslintUnicorn("no-thenable").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -133,7 +134,7 @@ impl Rule for NoThenProperty {
     type Query = Ast<NoThenPropertyQuery>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoThenPropertyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
@@ -198,13 +199,13 @@ fn process_js_method_object_member(node: &JsMethodObjectMember) -> Option<RuleSt
             }
             AnyJsExpression::JsTemplateExpression(lit) => {
                 for l in lit.elements() {
-                    if let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = l {
-                        if chunk.template_chunk_token().ok()?.text_trimmed() == "then" {
-                            return Some(RuleState {
-                                range: node.name().ok()?.range(),
-                                message: NoThenPropertyMessage::Object,
-                            });
-                        }
+                    if let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = l
+                        && chunk.template_chunk_token().ok()?.text_trimmed() == "then"
+                    {
+                        return Some(RuleState {
+                            range: node.name().ok()?.range(),
+                            message: NoThenPropertyMessage::Object,
+                        });
                     }
                 }
             }
@@ -225,13 +226,13 @@ fn process_js_method_object_member(node: &JsMethodObjectMember) -> Option<RuleSt
 
 fn process_js_class_member(node: &AnyJsClassMember) -> Option<RuleState> {
     let any_class_member_name = node.name().ok()??;
-    if let Some(ClassMemberName::Public(name)) = any_class_member_name.name() {
-        if name == "then" {
-            return Some(RuleState {
-                range: any_class_member_name.range(),
-                message: NoThenPropertyMessage::Class,
-            });
-        }
+    if let Some(ClassMemberName::Public(name)) = any_class_member_name.name()
+        && name == "then"
+    {
+        return Some(RuleState {
+            range: any_class_member_name.range(),
+            message: NoThenPropertyMessage::Class,
+        });
     }
     None
 }
@@ -248,13 +249,13 @@ fn process_js_computed_member_name(node: &JsComputedMemberName) -> Option<RuleSt
         }
         AnyJsExpression::JsTemplateExpression(lit) => {
             for l in lit.elements() {
-                if let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = l {
-                    if chunk.template_chunk_token().ok()?.text_trimmed() == "then" {
-                        return Some(RuleState {
-                            range: chunk.range(),
-                            message: NoThenPropertyMessage::Object,
-                        });
-                    }
+                if let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = l
+                    && chunk.template_chunk_token().ok()?.text_trimmed() == "then"
+                {
+                    return Some(RuleState {
+                        range: chunk.range(),
+                        message: NoThenPropertyMessage::Object,
+                    });
                 }
             }
         }

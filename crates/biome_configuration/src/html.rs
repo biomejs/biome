@@ -30,6 +30,7 @@ pub struct HtmlConfiguration {
 pub type HtmlFormatterEnabled = Bool<false>; // Keep it disabled by default while experimental.
 pub type HtmlLinterEnabled = Bool<false>;
 pub type HtmlAssistEnabled = Bool<false>;
+pub type HtmlParseInterpolation = Bool<false>;
 
 /// Options that changes how the HTML parser behaves
 #[derive(
@@ -37,7 +38,10 @@ pub type HtmlAssistEnabled = Bool<false>;
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct HtmlParserConfiguration;
+pub struct HtmlParserConfiguration {
+    /// Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files
+    pub interpolation: Option<HtmlParseInterpolation>,
+}
 
 /// Options that changes how the HTML formatter behaves
 #[derive(

@@ -1,0 +1,258 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/node_modules/@types/iso-3166-2/index.d.ts`
+
+## Source
+
+```ts
+// Type definitions for iso-3166-2 1.0
+// Project: https://github.com/olahol/iso-3166-2.js
+// Definitions by: Matt Rollins <https://github.com/sicilica>, Emily Klassen <https://github.com/forivall>
+// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+export namespace CountryInfo {
+	interface Partial {
+		name: string;
+		sub: SubdivisionInfo.Map;
+	}
+	interface Full extends Partial {
+		code: string;
+	}
+
+	interface Map {
+		// full data if this country has been retrieved with country() at least once
+		[code: string]: Full | Partial;
+	}
+}
+export type CountryInfo = CountryInfo.Full;
+
+export namespace SubdivisionInfo {
+	interface Partial {
+		type: string;
+		name: string;
+	}
+	interface Full extends Partial {
+		countryName: string;
+		countryCode: string;
+		code: string;
+		regionCode: string;
+	}
+
+	interface Map {
+		// full data if this subdivision has been retrieved with subdivision() at least once
+		[code: string]: Full | Partial;
+	}
+}
+export type SubdivisionInfo = SubdivisionInfo.Full;
+
+export function subdivision(
+	countryCodeOrFullSubdivisionCode: string,
+	subdivisionCodeOrName?: string,
+): SubdivisionInfo | null;
+
+export function country(countryCodeOrName: string): CountryInfo | null;
+
+export const data: CountryInfo.Map;
+
+// map of alpha 3 codes to alpha 3 codes
+export const codes: {
+	[alpha3: string]: string;
+};
+```
+
+## Module Info
+
+```
+Exports {
+  "CountryInfo" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(13))
+  }
+  "SubdivisionInfo" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(14))
+  }
+  "subdivision" => {
+    ExportOwnExport => JsOwnExport::Binding(12)
+  }
+  "country" => {
+    ExportOwnExport => JsOwnExport::Binding(15)
+  }
+  "data" => {
+    ExportOwnExport => JsOwnExport::Binding(17)
+  }
+  "codes" => {
+    ExportOwnExport => JsOwnExport::Binding(18)
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Exported Bindings
+
+```
+BindingId(12) => JsBindingData {
+  Name: subdivision,
+  Type: Module(0) TypeId(9),
+  Declaration kind: HoistedValue
+}
+
+BindingId(15) => JsBindingData {
+  Name: country,
+  Type: Module(0) TypeId(12),
+  Declaration kind: HoistedValue
+}
+
+BindingId(17) => JsBindingData {
+  Name: data,
+  Type: Module(0) TypeId(1),
+  Declaration kind: Value
+}
+
+BindingId(18) => JsBindingData {
+  Name: codes,
+  Type: Module(0) TypeId(0),
+  Declaration kind: Value
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Object {
+  prototype: No prototype
+  members: []
+}
+
+Module TypeId(1) => interface "Map" {
+  extends: []
+  type_args: []
+  members: []
+}
+
+Module TypeId(2) => interface "Partial" {
+  extends: []
+  type_args: []
+  members: ["name": string, "sub": Module(0) TypeId(1)]
+}
+
+Module TypeId(3) => interface "Full" {
+  extends: [Module(0) TypeId(2)]
+  type_args: []
+  members: ["code": string]
+}
+
+Module TypeId(4) => interface "Partial" {
+  extends: []
+  type_args: []
+  members: ["type": string, "name": string]
+}
+
+Module TypeId(5) => interface "Full" {
+  extends: [Module(0) TypeId(4)]
+  type_args: []
+  members: [
+    "countryName": string,
+    "countryCode": string,
+    "code": string,
+    "regionCode": string
+  ]
+}
+
+Module TypeId(6) => Namespace {
+    path: Identifier(
+        "SubdivisionInfo",
+    ),
+    members: [
+        TypeMember {
+            kind: NamedStatic(
+                "Partial",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(4),
+            ),
+        },
+        TypeMember {
+            kind: NamedStatic(
+                "Full",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(5),
+            ),
+        },
+        TypeMember {
+            kind: NamedStatic(
+                "Map",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(1),
+            ),
+        },
+    ],
+}
+
+Module TypeId(7) => null
+
+Module TypeId(8) => Module(0) TypeId(6) | Module(0) TypeId(7)
+
+Module TypeId(9) => sync Function "subdivision" {
+  accepts: {
+    params: [
+      required countryCodeOrFullSubdivisionCode: string
+      optional subdivisionCodeOrName: string
+    ]
+    type_args: []
+  }
+  returns: Module(0) TypeId(8)
+}
+
+Module TypeId(10) => Namespace {
+    path: Identifier(
+        "CountryInfo",
+    ),
+    members: [
+        TypeMember {
+            kind: NamedStatic(
+                "Partial",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(2),
+            ),
+        },
+        TypeMember {
+            kind: NamedStatic(
+                "Full",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(3),
+            ),
+        },
+        TypeMember {
+            kind: NamedStatic(
+                "Map",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(1),
+            ),
+        },
+    ],
+}
+
+Module TypeId(11) => Module(0) TypeId(10) | Module(0) TypeId(7)
+
+Module TypeId(12) => sync Function "country" {
+  accepts: {
+    params: [
+      required countryCodeOrName: string
+    ]
+    type_args: []
+  }
+  returns: Module(0) TypeId(11)
+}
+
+Module TypeId(13) => (type: Module(0) TypeId(3), value: Module(0) TypeId(10), namespace: Module(0) TypeId(10))
+
+Module TypeId(14) => (type: Module(0) TypeId(5), value: Module(0) TypeId(6), namespace: Module(0) TypeId(6))
+```

@@ -564,6 +564,8 @@ enum NodeDialect {
     Grit,
     Graphql,
     Html,
+    Astro,
+    Svelte,
 }
 
 impl NodeDialect {
@@ -594,6 +596,8 @@ impl NodeDialect {
             Self::Grit => "grit",
             Self::Graphql => "graphql",
             Self::Html => "html",
+            Self::Astro => "astro",
+            Self::Svelte => "svelte",
         }
     }
 
@@ -607,6 +611,8 @@ impl NodeDialect {
             "Grit" => Self::Grit,
             "Graphql" => Self::Graphql,
             "Html" => Self::Html,
+            "Astro" => Self::Astro,
+            "Svelte" => Self::Svelte,
             _ => {
                 eprintln!("missing prefix {name}");
                 Self::Js
@@ -831,6 +837,12 @@ fn get_node_concept(
 
             // TODO: implement formatter
             LanguageKind::Yaml => NodeConcept::Auxiliary,
+
+            LanguageKind::Tailwind => match name {
+                _ if name.ends_with("Value") => NodeConcept::Value,
+                "TW_CANDIDATE" => NodeConcept::Expression,
+                _ => NodeConcept::Auxiliary,
+            },
         }
     }
 }
@@ -897,6 +909,7 @@ impl LanguageKind {
             Self::Html => "HtmlFormatter",
             Self::Yaml => "YamlFormatter",
             Self::Markdown => "DemoFormatter",
+            Self::Tailwind => "TailwindFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -912,6 +925,7 @@ impl LanguageKind {
             Self::Html => "HtmlFormatContext",
             Self::Yaml => "YamlFormatContext",
             Self::Markdown => "DemoFormatterContext",
+            Self::Tailwind => "TailwindFormatContext",
         };
 
         Ident::new(name, Span::call_site())

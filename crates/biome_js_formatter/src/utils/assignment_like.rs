@@ -5,6 +5,7 @@ use crate::ts::bindings::type_parameters::FormatTsTypeParametersOptions;
 use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
+use crate::verbatim::format_suppressed_node;
 use biome_formatter::{CstFormatContext, FormatOptions, VecBuffer, format_args, write};
 use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::{
@@ -157,14 +158,12 @@ pub(crate) fn is_complex_type_annotation(
                             return true;
                         }
 
-                        let is_complex_type = argument
+                        argument
                             .as_ts_reference_type()
                             .and_then(|reference_type| reference_type.type_arguments())
                             .is_some_and(|type_arguments| {
                                 type_arguments.ts_type_argument_list().len() > 0
-                            });
-
-                        is_complex_type
+                            })
                     });
                 Some(has_at_least_a_complex_type)
             }
@@ -664,10 +663,10 @@ impl AnyJsAssignmentLike {
 
         let right = self.right()?;
 
-        if let RightAssignmentLike::JsInitializerClause(initializer) = &right {
-            if f.context().comments().is_suppressed(initializer.syntax()) {
-                return Ok(AssignmentLikeLayout::SuppressedInitializer);
-            }
+        if let RightAssignmentLike::JsInitializerClause(initializer) = &right
+            && f.context().comments().is_suppressed(initializer.syntax())
+        {
+            return Ok(AssignmentLikeLayout::SuppressedInitializer);
         }
         let right_expression = right.as_expression();
 
@@ -675,10 +674,10 @@ impl AnyJsAssignmentLike {
             return Ok(layout);
         }
 
-        if let Some(AnyJsExpression::JsCallExpression(call_expression)) = &right_expression {
-            if call_expression.callee()?.syntax().text_with_trivia() == "require" {
-                return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
-            }
+        if let Some(AnyJsExpression::JsCallExpression(call_expression)) = &right_expression
+            && call_expression.callee()?.syntax().text_with_trivia() == "require"
+        {
+            return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
         }
 
         if self.should_break_left_hand_side()? {
@@ -1363,7 +1362,7 @@ pub(crate) struct WithAssignmentLayout<'a> {
 pub(crate) fn with_assignment_layout(
     expression: &AnyJsExpression,
     layout: Option<AssignmentLikeLayout>,
-) -> WithAssignmentLayout {
+) -> WithAssignmentLayout<'_> {
     WithAssignmentLayout { expression, layout }
 }
 

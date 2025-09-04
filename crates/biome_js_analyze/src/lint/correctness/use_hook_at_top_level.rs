@@ -1,4 +1,4 @@
-use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call};
+use crate::react::hooks::{is_react_hook_call, is_react_hook_name};
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey,
@@ -7,26 +7,22 @@ use biome_analyze::{
 };
 use biome_analyze::{RuleDomain, RuleSource};
 use biome_console::markup;
-use biome_deserialize::{
-    Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor, Text,
-};
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsBinding, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction,
     AnyJsObjectMemberName, JsArrayAssignmentPatternElement, JsArrayBindingPatternElement,
-    JsCallExpression, JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression,
-    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPatternShorthandProperty,
-    JsReturnStatement, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
+    JsCallExpression, JsConditionalExpression, JsGetterClassMember, JsGetterObjectMember,
+    JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember,
+    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
+    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
 };
-use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent, declare_node_union};
+use biome_rowan::{AstNode, Language, SyntaxNode, Text, WalkEvent, declare_node_union};
 use rustc_hash::FxHashMap;
-use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
+use crate::react::components::ReactComponentInfo;
 use biome_diagnostics::Severity;
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
+use biome_rule_options::use_hook_at_top_level::UseHookAtTopLevelOptions;
 
 declare_lint_rule! {
     /// Enforce that all React hooks are being called from the Top Level component functions.
@@ -69,7 +65,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useHookAtTopLevel",
         language: "jsx",
-        sources: &[RuleSource::EslintReactHooks("rules-of-hooks")],
+        sources: &[RuleSource::EslintReactHooks("rules-of-hooks").same()],
         recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Next],
@@ -82,10 +78,11 @@ declare_node_union! {
 
 impl AnyJsFunctionOrMethod {
     fn is_react_component_or_hook(&self) -> bool {
+        if ReactComponentInfo::from_function(self.syntax()).is_some() {
+            return true;
+        }
         if let Some(name) = self.name() {
-            if is_react_component(&name) || is_react_hook(&name) {
-                return true;
-            }
+            return is_react_hook_name(&name);
         }
 
         false
@@ -111,13 +108,17 @@ impl AnyJsFunctionOrMethod {
     }
 }
 
-pub enum Suggestion {
-    None {
-        hook_name_range: TextRange,
-        path: Box<[TextRange]>,
-        early_return: Option<TextRange>,
-        is_nested: bool,
-    },
+pub struct Suggestion {
+    hook_name_range: TextRange,
+    path: Vec<TextRange>,
+    kind: SuggestionKind,
+}
+
+pub enum SuggestionKind {
+    Regular,
+    EarlyReturn(TextRange),
+    Nested,
+    Recursive,
 }
 
 /// Verifies whether the call expression is at the top level of the component,
@@ -133,10 +134,10 @@ fn enclosing_function_if_call_is_at_top_level(
                 return Some(enclosing_function);
             }
             Err(node) => {
-                if let Some(prev_node) = prev_node {
-                    if is_conditional_expression(&node, &prev_node) {
-                        return None;
-                    }
+                if let Some(prev_node) = prev_node
+                    && is_conditional_expression(&node, &prev_node)
+                {
+                    return None;
                 }
                 prev_node = Some(node);
             }
@@ -289,13 +290,17 @@ impl Visitor for EarlyReturnDetectionVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if AnyFunctionLike::can_cast(node.kind()) {
+                if AnyFunctionLike::can_cast(node.kind())
+                    || AnyPropertyAccessor::can_cast(node.kind())
+                {
                     self.stack
                         .push(EarlyReturnDetectionVisitorStackEntry::default());
                 }
             }
             WalkEvent::Leave(node) => {
-                if AnyFunctionLike::can_cast(node.kind()) {
+                if AnyFunctionLike::can_cast(node.kind())
+                    || AnyPropertyAccessor::can_cast(node.kind())
+                {
                     self.stack.pop();
                     return;
                 }
@@ -303,10 +308,10 @@ impl Visitor for EarlyReturnDetectionVisitor {
                 if let Some(entry) = self.stack.last_mut() {
                     if JsReturnStatement::can_cast(node.kind()) {
                         entry.early_return = Some(node.text_range_with_trivia());
-                    } else if let Some(call) = JsCallExpression::cast_ref(node) {
-                        if let Some(early_return) = entry.early_return {
-                            self.early_returns.insert(call.clone(), early_return);
-                        }
+                    } else if let Some(call) = JsCallExpression::cast_ref(node)
+                        && let Some(early_return) = entry.early_return
+                    {
+                        self.early_returns.insert(call.clone(), early_return);
                     }
                 }
             }
@@ -316,6 +321,14 @@ impl Visitor for EarlyReturnDetectionVisitor {
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
         ctx.services.insert_service(self.early_returns);
     }
+}
+
+declare_node_union! {
+    AnyPropertyAccessor =
+        JsGetterObjectMember
+        | JsSetterObjectMember
+        | JsGetterClassMember
+        | JsSetterClassMember
 }
 
 #[derive(Default)]
@@ -416,7 +429,7 @@ impl Rule for UseHookAtTopLevel {
     type Query = FunctionCall;
     type State = Suggestion;
     type Signals = Option<Self::State>;
-    type Options = DeprecatedHooksOptions;
+    type Options = UseHookAtTopLevelOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let FunctionCall(call) = ctx.query();
@@ -439,10 +452,17 @@ impl Rule for UseHookAtTopLevel {
         };
         let mut calls = vec![root];
 
-        while let Some(CallPath { call, path }) = calls.pop() {
+        while let Some(CallPath { call, mut path }) = calls.pop() {
             let range = call.syntax().text_range_with_trivia();
 
-            let mut path = path.clone();
+            if path.contains(&range) {
+                return Some(Suggestion {
+                    hook_name_range: get_hook_name_range()?,
+                    path,
+                    kind: SuggestionKind::Recursive,
+                });
+            }
+
             path.push(range);
 
             if let Some(enclosing_function) = enclosing_function_if_call_is_at_top_level(&call) {
@@ -450,39 +470,36 @@ impl Rule for UseHookAtTopLevel {
                     // We cannot allow nested functions inside hooks and
                     // components, since it would break the requirement for
                     // hooks to be called from the top-level.
-                    return Some(Suggestion::None {
+                    return Some(Suggestion {
                         hook_name_range: get_hook_name_range()?,
-                        path: path.into_boxed_slice(),
-                        early_return: None,
-                        is_nested: true,
+                        path,
+                        kind: SuggestionKind::Nested,
                     });
                 }
 
                 if let Some(early_return) = early_returns.get(&call) {
-                    return Some(Suggestion::None {
+                    return Some(Suggestion {
                         hook_name_range: get_hook_name_range()?,
-                        path: path.into_boxed_slice(),
-                        early_return: Some(*early_return),
-                        is_nested: false,
+                        path,
+                        kind: SuggestionKind::EarlyReturn(*early_return),
                     });
                 }
 
-                if let AnyJsFunctionOrMethod::AnyJsFunction(function) = enclosing_function {
-                    if let Some(calls_iter) = function.all_calls(model) {
-                        for call in calls_iter {
-                            calls.push(CallPath {
-                                call: call.tree(),
-                                path: path.clone(),
-                            });
-                        }
+                if let AnyJsFunctionOrMethod::AnyJsFunction(function) = enclosing_function
+                    && let Some(calls_iter) = function.all_calls(model)
+                {
+                    for call in calls_iter {
+                        calls.push(CallPath {
+                            call: call.tree(),
+                            path: path.clone(),
+                        });
                     }
                 }
             } else {
-                return Some(Suggestion::None {
+                return Some(Suggestion {
                     hook_name_range: get_hook_name_range()?,
-                    path: path.into_boxed_slice(),
-                    early_return: None,
-                    is_nested: false,
+                    path,
+                    kind: SuggestionKind::Regular,
                 });
             }
         }
@@ -491,131 +508,61 @@ impl Rule for UseHookAtTopLevel {
     }
 
     fn diagnostic(_: &RuleContext<Self>, suggestion: &Self::State) -> Option<RuleDiagnostic> {
-        match suggestion {
-            Suggestion::None {
-                hook_name_range,
-                path,
-                early_return,
-                is_nested,
-            } => {
-                let call_depth = path.len() - 1;
+        let Suggestion {
+            hook_name_range,
+            path,
+            kind,
+        } = suggestion;
 
-                let mut diag = if *is_nested {
-                    RuleDiagnostic::new(
-                        rule_category!(),
-                        hook_name_range,
-                        markup! {
-                            "This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component."
-                        },
-                    )
-                } else if call_depth == 0 {
-                    RuleDiagnostic::new(
-                        rule_category!(),
-                        hook_name_range,
-                        markup! {
-                            "This hook is being called conditionally, but all hooks must be called in the exact same order in every component render."
-                        },
-                    )
-                } else {
-                    RuleDiagnostic::new(
-                        rule_category!(),
-                        hook_name_range,
-                        markup! {
-                            "This hook is being called indirectly and conditionally, but all hooks must be called in the exact same order in every component render."
-                        },
-                    )
-                };
+        let message = match &kind {
+            SuggestionKind::Nested => markup! {
+                "This hook is being called from a nested function, but all hooks must be called "
+                "unconditionally from the top-level component."
+            },
+            SuggestionKind::Recursive => markup! { "This hook is being called recursively." },
+            _ if path.len() <= 1 => markup! {
+                "This hook is being called conditionally, but all hooks must be called in the "
+                "exact same order in every component render."
+            },
+            _ => markup! {
+                "This hook is being called indirectly and conditionally, but all hooks must be "
+                "called in the exact same order in every component render."
+            },
+        };
 
-                for (i, range) in path.iter().skip(1).enumerate() {
-                    let msg = if i == 0 {
-                        markup! {
-                            "This is the call path until the hook."
-                        }
-                    } else {
-                        markup! {}
-                    };
-
-                    diag = diag.detail(range, msg);
-                }
-
-                if let Some(range) = early_return {
-                    diag = diag.detail(
-                        range,
-                        markup! { "Hooks should not be called after an early return." },
-                    )
-                }
-
-                let diag = diag.note(
-                    markup! {
-                        "For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order."
-                    },
-                ).note(
-                    markup! {
-                        "See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level"
-                    },
-                );
-                Some(diag)
-            }
-        }
-    }
-}
-
-/// Options for the `useHookAtTopLevel` rule have been deprecated, since we now
-/// use the React hook naming convention to determine whether a function is a
-/// hook.
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct DeprecatedHooksOptions {}
-
-impl Deserializable for DeprecatedHooksOptions {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
-        name: &str,
-    ) -> Option<Self> {
-        value.deserialize(ctx, DeprecatedHooksOptionsVisitor, name)
-    }
-}
-
-// TODO: remove in Biome 2.0
-struct DeprecatedHooksOptionsVisitor;
-impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
-    type Output = DeprecatedHooksOptions;
-
-    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
-
-    fn visit_map(
-        self,
-        ctx: &mut impl DeserializationContext,
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
-        _range: TextRange,
-        _name: &str,
-    ) -> Option<Self::Output> {
-        const ALLOWED_KEYS: &[&str] = &["hooks"];
-        for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(ctx, &key, "") else {
-                continue;
+        let mut diag = RuleDiagnostic::new(rule_category!(), hook_name_range, message);
+        for (i, range) in path.iter().skip(1).enumerate() {
+            let msg = if i == 0 {
+                markup! { "This is the call path until the hook." }
+            } else {
+                markup! {}
             };
-            match key_text.text() {
-                "hooks" => {
-                    ctx.report(
-                        DeserializationDiagnostic::new_deprecated(
-                            key_text.text(),
-                            value.range()
-                        ).with_note(
-                            markup! {
-                            <Emphasis>"useHookAtTopLevel"</Emphasis>" now uses the React hook naming convention to determine hook calls."
-                        })
-                    );
-                }
-                text => ctx.report(DeserializationDiagnostic::new_unknown_key(
-                    text,
-                    key.range(),
-                    ALLOWED_KEYS,
-                )),
-            }
+
+            diag = diag.detail(range, msg);
         }
-        Some(Self::Output::default())
+
+        if let SuggestionKind::EarlyReturn(range) = &kind {
+            diag = diag.detail(
+                *range,
+                markup! { "Hooks should not be called after an early return." },
+            )
+        }
+
+        let mut diag = diag.note(markup! {
+            "For React to preserve state between calls, hooks needs to be called "
+            "unconditionally and always in the same order."
+        });
+
+        if matches!(kind, SuggestionKind::Recursive) {
+            diag = diag.note(markup! {
+                "This means recursive calls are not allowed, because they require a condition "
+                "in order to terminate."
+            });
+        }
+
+        let diag = diag.note(markup! {
+            "See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level"
+        });
+        Some(diag)
     }
 }

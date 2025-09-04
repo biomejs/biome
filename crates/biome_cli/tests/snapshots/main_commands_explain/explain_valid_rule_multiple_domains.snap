@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 # Emitted Messages
 
@@ -12,6 +11,7 @@ Summary
 - No fix available.
 - Default severity: error
 - Available from version: 1.0.0
+- Diagnostic category: lint/correctness/useHookAtTopLevel
 
 Domains
 

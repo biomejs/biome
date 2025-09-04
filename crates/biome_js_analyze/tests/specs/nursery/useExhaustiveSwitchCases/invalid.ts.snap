@@ -197,8 +197,8 @@ invalid.ts:29:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
   
   i These cases are missing:
   
-  - 1
-  - true
+  - "b"
+  - "c"
   
   i Unsafe fix: Add the missing cases to the switch statement.
   
@@ -206,8 +206,8 @@ invalid.ts:29:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━�
     30 30 │   		case 'a':
     31    │ - → → → return·1;
        31 │ + → → → return·1;
-       32 │ + → → case·1:·throw·new·Error("TODO:·Not·implemented·yet");
-       33 │ + → → case·true:·throw·new·Error("TODO:·Not·implemented·yet");
+       32 │ + → → case·"b":·throw·new·Error("TODO:·Not·implemented·yet");
+       33 │ + → → case·"c":·throw·new·Error("TODO:·Not·implemented·yet");
     32 34 │   	}
     33 35 │   }
   

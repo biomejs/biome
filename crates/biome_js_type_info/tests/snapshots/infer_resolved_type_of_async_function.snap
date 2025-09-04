@@ -19,16 +19,14 @@ async Function "returnsPromise" {
     params: []
     type_args: []
   }
-  returns: Global TypeId(18)
+  returns: Global TypeId(0)
 }
 ```
 
 ## Registered types
 
 ```
-Global TypeId(17) => string
+Global TypeId(0) => instanceof Global TypeId(1)
 
-Global TypeId(18) => instanceof Global TypeId(19)
-
-Global TypeId(19) => instanceof Promise<T = Global TypeId(17)>
+Global TypeId(1) => instanceof Promise<string>
 ```

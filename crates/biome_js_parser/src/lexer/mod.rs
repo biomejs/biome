@@ -917,10 +917,10 @@ impl<'src> JsLexer<'src> {
             BSL if self.peek_byte() == Some(b'u') => {
                 let start = self.position;
                 self.next_byte();
-                if let Ok(chr) = self.read_unicode_escape_char() {
-                    if is_js_id_start(chr) {
-                        return true;
-                    }
+                if let Ok(chr) = self.read_unicode_escape_char()
+                    && is_js_id_start(chr)
+                {
+                    return true;
                 }
                 self.position = start;
                 false
@@ -969,6 +969,7 @@ impl<'src> JsLexer<'src> {
             b"continue" => CONTINUE_KW,
             b"debugger" => DEBUGGER_KW,
             b"default" => DEFAULT_KW,
+            b"defer" => DEFER_KW,
             b"delete" => DELETE_KW,
             b"do" => DO_KW,
             b"else" => ELSE_KW,
@@ -986,6 +987,7 @@ impl<'src> JsLexer<'src> {
             b"new" => NEW_KW,
             b"null" => NULL_KW,
             b"return" => RETURN_KW,
+            b"source" => SOURCE_KW,
             b"super" => SUPER_KW,
             b"switch" => SWITCH_KW,
             b"this" => THIS_KW,
@@ -1655,13 +1657,15 @@ impl<'src> JsLexer<'src> {
             }
         }
 
+        // If we reach EOF without finding a closing '/', this is a real error
+        // and should be treated as ERROR_TOKEN for proper error recovery
         self.push_diagnostic(
             ParseDiagnostic::new("unterminated regex literal", self.position..self.position)
                 .with_detail(self.position..self.position, "...but the file ends here")
                 .with_detail(start..start + 1, "a regex literal starts there..."),
         );
 
-        JsSyntaxKind::JS_REGEX_LITERAL
+        JsSyntaxKind::ERROR_TOKEN
     }
 
     #[inline]
@@ -1953,11 +1957,11 @@ impl<'src> JsLexer<'src> {
             UNI => {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
                 // perform the check. At any other position, the BOM is just considered plain whitespace.
-                if self.position == 0 {
-                    if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
-                        self.unicode_bom_length = bom_size;
-                        return bom;
-                    }
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
                 }
 
                 if self.options.should_parse_metavariables() && self.is_metavariable_start() {

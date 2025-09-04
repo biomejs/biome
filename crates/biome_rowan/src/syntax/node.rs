@@ -2,13 +2,13 @@ use crate::green::GreenElement;
 use crate::syntax::SyntaxTrivia;
 use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::{
-    Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
+    AstNode, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
     SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent, cursor,
 };
 use biome_text_size::{TextRange, TextSize};
 #[cfg(feature = "serde")]
 use serde::Serialize;
-use std::any::TypeId;
+use std::any::{Any, TypeId, type_name};
 use std::fmt::{Debug, Formatter};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
@@ -360,6 +360,23 @@ impl<L: Language> SyntaxNode<L> {
         self.raw
             .descendants_with_tokens(direction)
             .map(NodeOrToken::from)
+    }
+
+    /// Traverses the subtree rooted at the current node (including the current
+    /// node) in preorder, excluding tokens, as long as `predicate` returns
+    /// `true`.
+    ///
+    /// `predicate` is used to prune subtrees that fail the predicate test. Any
+    /// time `predicate` returns `false`, that node **as well as its children**
+    /// are skipped during the traversal.
+    pub fn pruned_descendents<P: Fn(&Self) -> bool>(
+        &self,
+        predicate: P,
+    ) -> impl Iterator<Item = Self> + use<L, P> {
+        PrunedDescendents {
+            preorder: self.preorder(),
+            predicate,
+        }
     }
 
     /// Traverse the subtree rooted at the current node (including the current
@@ -817,7 +834,7 @@ impl<L: Language> From<cursor::SyntaxNode> for SyntaxNode<L> {
 
 /// Language-agnostic representation of the root node of a syntax tree, can be
 /// sent or shared between threads
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SendNode {
     language: TypeId,
     green: GreenNode,
@@ -836,6 +853,43 @@ impl SendNode {
             Some(SyntaxNode::new_root(self.green))
         } else {
             None
+        }
+    }
+
+    /// Downcasts this node to a language-specific root node.
+    ///
+    /// ## Panics
+    ///
+    /// If the node is not of the right language.
+    pub fn to_language_root<N>(&self) -> N
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        N::unwrap_cast(self.clone().into_node().unwrap_or_else(|| {
+            panic!(
+                "could not downcast root node to language {}",
+                type_name::<N::Language>()
+            )
+        }))
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct EmbeddedSendNode {
+    offset: TextSize,
+    green: GreenNode,
+}
+
+impl EmbeddedSendNode {
+    /// Downcast this handle into a [SyntaxNodeWithOffset]
+    pub fn into_node<L>(self) -> SyntaxNodeWithOffset<L>
+    where
+        L: Language + 'static,
+    {
+        SyntaxNodeWithOffset {
+            node: SyntaxNode::new_root(self.green),
+            offset: self.offset,
         }
     }
 }
@@ -896,6 +950,31 @@ impl<L: Language> Iterator for Preorder<L> {
     type Item = WalkEvent<SyntaxNode<L>>;
     fn next(&mut self) -> Option<Self::Item> {
         self.raw.next().map(|it| it.map(SyntaxNode::from))
+    }
+}
+
+pub struct PrunedDescendents<L: Language, P: Fn(&SyntaxNode<L>) -> bool> {
+    preorder: Preorder<L>,
+    predicate: P,
+}
+
+impl<L: Language, P: Fn(&SyntaxNode<L>) -> bool> Iterator for PrunedDescendents<L, P> {
+    type Item = SyntaxNode<L>;
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.preorder.next() {
+                Some(WalkEvent::Enter(node)) => {
+                    let predicate = &self.predicate;
+                    if predicate(&node) {
+                        break Some(node);
+                    } else {
+                        self.preorder.skip_subtree();
+                    }
+                }
+                Some(WalkEvent::Leave(_)) => {}
+                None => break None,
+            }
+        }
     }
 }
 
@@ -1055,5 +1134,101 @@ impl<L: Language> SyntaxNodeOptionExt<L> for Option<&SyntaxNode<L>> {
 impl<L: Language> SyntaxNodeOptionExt<L> for Option<SyntaxNode<L>> {
     fn kind(&self) -> Option<L::Kind> {
         self.as_ref().kind()
+    }
+}
+
+/// A syntax node that contains an offset
+///
+/// This allows embedded content to maintain correct source positions relative
+/// to the parent document. For example, JavaScript code in an HTML `<script>` tag
+/// starting at position 100 will have all its ranges offset by 100.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct SyntaxNodeWithOffset<L: Language> {
+    pub node: SyntaxNode<L>,
+    pub offset: TextSize,
+}
+
+impl<L: Language> SyntaxNodeWithOffset<L> {
+    pub fn new(node: SyntaxNode<L>, offset: TextSize) -> Self {
+        Self { node, offset }
+    }
+
+    /// Returns the text range including all trivia, adjusted for base offset
+    pub fn text_range_with_trivia(&self) -> TextRange {
+        let range = self.node.text_range_with_trivia();
+        TextRange::new(range.start() + self.offset, range.end() + self.offset)
+    }
+
+    /// Returns the trimmed text range, adjusted for base offset
+    pub fn text_trimmed_range(&self) -> TextRange {
+        let range = self.node.text_trimmed_range();
+        TextRange::new(range.start() + self.offset, range.end() + self.offset)
+    }
+
+    /// Get the base offset applied to this node
+    pub fn base_offset(&self) -> TextSize {
+        self.offset
+    }
+
+    /// Get the underlying syntax node without offset
+    pub fn inner(&self) -> &SyntaxNode<L> {
+        &self.node
+    }
+
+    /// Convert back to the underlying syntax node, discarding offset information
+    pub fn into_inner(self) -> SyntaxNode<L> {
+        self.node
+    }
+
+    // Forward common methods from SyntaxNode
+    pub fn kind(&self) -> L::Kind {
+        self.node.kind()
+    }
+
+    pub fn text_with_trivia(&self) -> crate::SyntaxNodeText {
+        self.node.text_with_trivia()
+    }
+
+    pub fn text_trimmed(&self) -> crate::SyntaxNodeText {
+        self.node.text_trimmed()
+    }
+
+    /// Create a [Send] + [Sync] handle to this node.
+    ///
+    /// ### Panics
+    ///
+    /// It panics if the `base_offset` isn't greater than zero
+    pub fn as_embedded_send(&self) -> EmbeddedSendNode {
+        debug_assert!(self.offset > 0.into(), "range must be greater than 0");
+        EmbeddedSendNode {
+            green: self.node.green_node(),
+            offset: self.offset,
+        }
+    }
+}
+
+/// Marker trait to prevent unrelated types to be contained in the [`crate::ErasedSyntaxNode`] struct.
+pub trait AsSyntaxNode: Any {}
+
+impl<L: Language + 'static> AsSyntaxNode for SyntaxNode<L> {}
+
+/// Opaque struct for [`SyntaxNode`] without the `L: Language` constraint.
+#[derive(Debug)]
+pub struct AnySyntaxNode {
+    raw: Box<dyn Any>,
+}
+
+impl AnySyntaxNode {
+    #[inline]
+    pub fn downcast_ref<T: AsSyntaxNode>(&self) -> Option<&T> {
+        self.raw.downcast_ref()
+    }
+}
+
+impl<L: Language + 'static> From<SyntaxNode<L>> for AnySyntaxNode {
+    fn from(value: SyntaxNode<L>) -> Self {
+        Self {
+            raw: Box::new(value),
+        }
     }
 }

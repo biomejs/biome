@@ -1,19 +1,19 @@
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
-    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsImportLike,
-    AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsIdentifierBinding, AnyTsModuleName,
-    JsExportDefaultExpressionClause, JsExportFromClause, JsExportNamedFromClause,
-    JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, unescape_js_string,
+    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
+    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyTsIdentifierBinding,
+    AnyTsModuleName, JsExportFromClause, JsExportNamedFromClause, JsExportNamedSpecifierList,
+    JsIdentifierBinding, JsVariableDeclaratorList, TsExportAssignmentClause, unescape_js_string,
 };
-use biome_js_type_info::{ImportSymbol, TypeData, TypeResolver};
+use biome_js_type_info::{ImportSymbol, ScopeId, TypeData, TypeReference, TypeResolver};
 use biome_jsdoc_comment::JsdocComment;
 use biome_resolver::{ResolveOptions, resolve};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::Utf8Path;
 
 use crate::{
-    JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport, SUPPORTED_TYPE_EXTENSIONS,
-    module_graph::ModuleGraphFsProxy,
+    JsImport, JsImportPhase, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
+    js_module_info::collector::JsCollectedExport, module_graph::ModuleGraphFsProxy,
 };
 
 use super::{ResolvedPath, collector::JsModuleInfoCollector};
@@ -40,21 +40,19 @@ impl<'a> JsModuleVisitor<'a> {
         for event in iter {
             match event {
                 WalkEvent::Enter(node) => {
-                    collector.push_node(&node);
-
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {
                         self.visit_import(import, &mut collector);
                     } else if let Some(export) = biome_js_syntax::JsExport::cast_ref(&node) {
                         self.visit_export(export, &mut collector);
                     }
+
+                    collector.push_node(&node);
                 }
                 WalkEvent::Leave(node) => {
                     collector.leave_node(&node);
                 }
             }
         }
-
-        collector.finalise();
 
         JsModuleInfo::new(collector)
     }
@@ -67,11 +65,39 @@ impl<'a> JsModuleVisitor<'a> {
         let resolved_path = self.resolved_path_from_specifier(specifier.text());
 
         match node {
-            AnyJsImportLike::JsModuleSource(_) => {
-                collector.register_static_import_path(specifier, resolved_path);
+            AnyJsImportLike::JsModuleSource(source) => {
+                // TODO: support defer or source imports
+                let phase = if let Some(clause) = source.parent::<AnyJsImportClause>() {
+                    match clause {
+                        AnyJsImportClause::JsImportDefaultClause(clause)
+                            if clause.type_token().is_some() =>
+                        {
+                            JsImportPhase::Type
+                        }
+                        AnyJsImportClause::JsImportNamedClause(clause)
+                            if clause.type_token().is_some() =>
+                        {
+                            JsImportPhase::Type
+                        }
+                        AnyJsImportClause::JsImportNamespaceClause(clause)
+                            if clause.type_token().is_some() =>
+                        {
+                            JsImportPhase::Type
+                        }
+                        _ => JsImportPhase::Default,
+                    }
+                } else {
+                    JsImportPhase::Default
+                };
+
+                collector.register_static_import_path(specifier, resolved_path, phase);
             }
             AnyJsImportLike::JsCallExpression(_) | AnyJsImportLike::JsImportCallExpression(_) => {
-                collector.register_dynamic_import_path(specifier, resolved_path);
+                collector.register_dynamic_import_path(
+                    specifier,
+                    resolved_path,
+                    JsImportPhase::Default, // TODO: support defer or source imports
+                );
             }
         }
     }
@@ -89,7 +115,7 @@ impl<'a> JsModuleVisitor<'a> {
                 self.visit_export_default_declaration_clause(&node.declaration().ok()?, collector)
             }
             AnyJsExportClause::JsExportDefaultExpressionClause(node) => {
-                self.visit_export_default_expression_clause(&node, collector)
+                self.visit_export_default_expression(&node.expression().ok()?, collector)
             }
             AnyJsExportClause::JsExportFromClause(node) => {
                 self.visit_export_from_clause(node, collector)
@@ -100,22 +126,35 @@ impl<'a> JsModuleVisitor<'a> {
             AnyJsExportClause::JsExportNamedFromClause(node) => {
                 self.visit_export_named_from_clause(node, collector)
             }
-            AnyJsExportClause::TsExportAsNamespaceClause(node) => {
-                let token = node.name().ok()?.value_token().ok()?;
-                let name = token.token_text_trimmed();
-                collector.register_export_with_name(name, None)
+            AnyJsExportClause::TsExportAsNamespaceClause(_node) => {
+                // FIXME: We may need to implement this if we want to fully
+                //        support global namespace merging.
+                None
             }
-            AnyJsExportClause::TsExportAssignmentClause(_) => {
-                // This is somewhat misleading, since the `export =` syntax is
-                // used for CommonJS exports rather than ES6 `default` exports.
-                // Thankfully, bundlers are responsible for normalising this,
-                // which isn't really Biome's concern.
-                collector.register_export_with_name("default", None)
+            AnyJsExportClause::TsExportAssignmentClause(node) => {
+                self.visit_export_assignment_clause(node, collector)
             }
             AnyJsExportClause::TsExportDeclareClause(node) => {
                 self.visit_export_declaration_clause(node.declaration().ok()?, collector)
             }
         }
+    }
+
+    /// Handles `export =` clauses.
+    ///
+    /// Export assignments create both a `default` export as well as named
+    /// exports for any members of the symbol being exported.
+    fn visit_export_assignment_clause(
+        &self,
+        node: TsExportAssignmentClause,
+        collector: &mut JsModuleInfoCollector,
+    ) -> Option<()> {
+        let type_data =
+            TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, &node.expression().ok()?);
+        let ty = TypeReference::from(collector.register_and_resolve(type_data));
+        collector.register_export(JsCollectedExport::ExportDefaultAssignment { ty });
+
+        Some(())
     }
 
     fn visit_export_declaration_clause(
@@ -155,7 +194,8 @@ impl<'a> JsModuleVisitor<'a> {
             }
         };
 
-        collector.register_export_with_name(name.clone(), Some(name))
+        collector.register_export_with_name(name.clone(), name);
+        Some(())
     }
 
     fn visit_export_default_declaration_clause(
@@ -178,24 +218,20 @@ impl<'a> JsModuleVisitor<'a> {
             }
         };
 
-        collector.register_export_with_name("default", Some(name))
+        collector.register_export_with_name("default", name);
+        Some(())
     }
 
-    fn visit_export_default_expression_clause(
+    fn visit_export_default_expression(
         &self,
-        node: &JsExportDefaultExpressionClause,
+        node: &AnyJsExpression,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
-        let type_data = TypeData::from_any_js_expression(collector, &node.expression().ok()?);
-        let ty = collector.register_and_resolve(type_data).into();
-        collector.register_export(
-            "default",
-            JsExport::Own(JsOwnExport {
-                jsdoc_comment: None,
-                local_name: None,
-                ty,
-            }),
-        )
+        let type_data = TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, node);
+        let ty = TypeReference::from(collector.register_and_resolve(type_data));
+
+        collector.register_export(JsCollectedExport::ExportDefault { ty });
+        Some(())
     }
 
     fn visit_export_from_clause(
@@ -219,18 +255,18 @@ impl<'a> JsModuleVisitor<'a> {
             .and_then(|parent| JsdocComment::try_from(parent).ok());
 
         if let Some(export_as) = node.export_as() {
-            let name = export_as
+            let export_name = export_as
                 .exported_name()
                 .and_then(|name| name.inner_string_text())
                 .map(unescape_js_string)
                 .ok()?;
-            collector.register_export(
-                name,
-                JsExport::Reexport(JsReexport {
+            collector.register_export(JsCollectedExport::Reexport {
+                export_name,
+                reexport: JsReexport {
                     import,
                     jsdoc_comment,
-                }),
-            );
+                },
+            });
         } else {
             collector.register_blanket_reexport(JsReexport {
                 import,
@@ -263,22 +299,22 @@ impl<'a> JsModuleVisitor<'a> {
                 .ok()
                 .and_then(|name| name.inner_string_text().ok())
                 .map(unescape_js_string)?;
-            let exported_name = specifier
+            let export_name = specifier
                 .export_as()
                 .and_then(|export_as| export_as.exported_name().ok())
                 .and_then(|name| name.inner_string_text().ok())
                 .map_or_else(|| imported_name.clone(), unescape_js_string);
-            collector.register_export(
-                exported_name,
-                JsExport::Reexport(JsReexport {
+            collector.register_export(JsCollectedExport::Reexport {
+                export_name,
+                reexport: JsReexport {
                     import: JsImport {
                         specifier: import_specifier.clone().into(),
                         resolved_path: resolved_path.clone(),
                         symbol: ImportSymbol::Named(imported_name),
                     },
                     jsdoc_comment: None,
-                }),
-            );
+                },
+            });
         }
 
         Some(())
@@ -299,7 +335,9 @@ impl<'a> JsModuleVisitor<'a> {
                     .ok()
                     .and_then(|name| name.value_token().ok())
                     .map(|name_token| name_token.token_text_trimmed());
-                collector.register_export_with_name(export_name, local_name);
+                if let Some(local_name) = local_name {
+                    collector.register_export_with_name(export_name, local_name);
+                }
             }
         }
 
@@ -360,26 +398,24 @@ impl<'a> JsModuleVisitor<'a> {
                             }
                         }
                         AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(node) => {
-                            if let Ok(binding) = node.binding() {
-                                if let Some(binding) = binding.as_js_identifier_binding() {
+                            if let Ok(binding) = node.binding()
+                                && let Some(binding) = binding.as_js_identifier_binding() {
                                     self.visit_identifier_binding(
                                         binding,
                                         collector,
                                     );
                                 }
-                            }
                         }
                         AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
                             node,
                         ) => {
-                            if let Ok(binding) = node.identifier() {
-                                if let Some(binding) = binding.as_js_identifier_binding() {
+                            if let Ok(binding) = node.identifier()
+                                && let Some(binding) = binding.as_js_identifier_binding() {
                                     self.visit_identifier_binding(
                                         binding,
                                         collector,
                                     );
                                 }
-                            }
                         }
                         AnyJsObjectBindingPatternMember::JsBogusBinding(_)
                         | AnyJsObjectBindingPatternMember::JsMetavariable(_) => {}
@@ -397,14 +433,15 @@ impl<'a> JsModuleVisitor<'a> {
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
         let name = binding.name_token().ok()?.token_text_trimmed();
-        collector.register_export_with_name(name.clone(), Some(name))
+        collector.register_export_with_name(name.clone(), name);
+        Some(())
     }
 
     fn resolved_path_from_specifier(&self, specifier: &str) -> ResolvedPath {
         let options = ResolveOptions {
-            condition_names: &["types", "default"],
+            condition_names: &["types", "import", "default"],
             default_files: &["index"],
-            extensions: SUPPORTED_TYPE_EXTENSIONS,
+            extensions: SUPPORTED_EXTENSIONS,
             resolve_node_builtins: true,
             resolve_types: true,
             ..Default::default()

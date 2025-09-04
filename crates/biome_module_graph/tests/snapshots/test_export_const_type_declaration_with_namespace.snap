@@ -1,0 +1,72 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.d.ts`
+
+## Source
+
+```ts
+declare namespace shared {
+	type Result = string;
+}
+
+declare const shared: {
+	foo(): shared.Result;
+};
+
+export = shared;
+```
+
+## Module Info
+
+```
+Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(1))
+  }
+  "default" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(3))
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => string
+
+Module TypeId(1) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Module TypeId(2) => Object {
+  prototype: No prototype
+  members: ["foo": Module(0) TypeId(1)]
+}
+
+Module TypeId(3) => Module(0) TypeId(2)
+
+Module TypeId(4) => Namespace {
+    path: Identifier(
+        "shared",
+    ),
+    members: [
+        TypeMember {
+            kind: NamedStatic(
+                "Result",
+            ),
+            ty: Resolved(
+                string,
+            ),
+        },
+    ],
+}
+```

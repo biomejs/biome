@@ -11,6 +11,7 @@ use biome_js_syntax::{
     TsTypeAssertionExpression,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, declare_node_union};
+use biome_rule_options::use_as_const_assertion::UseAsConstAssertionOptions;
 
 declare_lint_rule! {
     /// Enforce the use of `as const` over literal type and type annotation.
@@ -48,7 +49,7 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "useAsConstAssertion",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("prefer-as-const")],
+        sources: &[RuleSource::EslintTypeScript("prefer-as-const").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -70,7 +71,7 @@ impl Rule for UseAsConstAssertion {
     type Query = Ast<Query>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAsConstAssertionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();

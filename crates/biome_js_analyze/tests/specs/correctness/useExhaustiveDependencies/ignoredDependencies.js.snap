@@ -31,7 +31,7 @@ function IgnoredDependencies2() {
 ```
 ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify all of its dependencies: a
+  × This hook does not specify its dependency on a.
   
      6 │     let b = 2;
      7 │     // biome-ignore lint/correctness/useExhaustiveDependencies(b): `b` is ignored, but there should still be a diagnostic for `a`
@@ -40,7 +40,7 @@ ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies  FIXABLE  
      9 │         console.log(a + b);
     10 │     }, []);
   
-  i This dependency is not specified in the hook dependency list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
      7 │     // biome-ignore lint/correctness/useExhaustiveDependencies(b): `b` is ignored, but there should still be a diagnostic for `a`
      8 │     useEffect(() => {
@@ -49,9 +49,9 @@ ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies  FIXABLE  
     10 │     }, []);
     11 │ }
   
-  i Either include it or remove the dependency array
+  i Either include it or remove the dependency array.
   
-  i Unsafe fix: Add the missing dependencies to the list.
+  i Unsafe fix: Add the missing dependency to the list.
   
     10 │ ····},·[a]);
        │         +   

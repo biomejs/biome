@@ -7,6 +7,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
+use biome_rule_options::no_important_in_keyframe::NoImportantInKeyframeOptions;
 
 declare_lint_rule! {
     /// Disallow invalid `!important` within keyframe declarations
@@ -47,7 +48,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources:&[RuleSource::Stylelint("keyframe-declaration-no-important")],
+        sources:&[RuleSource::Stylelint("keyframe-declaration-no-important").same()],
     }
 }
 
@@ -55,7 +56,7 @@ impl Rule for NoImportantInKeyframe {
     type Query = Ast<CssKeyframesBlock>;
     type State = CssDeclarationImportant;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoImportantInKeyframeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
@@ -68,8 +69,12 @@ impl Rule for NoImportantInKeyframe {
             else {
                 return None;
             };
-            for colon_declaration in block_declaration.declarations() {
-                if let Some(important) = colon_declaration.declaration().ok()?.important() {
+
+            for any_colon_declaration in block_declaration.declarations() {
+                if let Some(important) = any_colon_declaration
+                    .as_css_declaration_with_semicolon()
+                    .and_then(|decl| decl.declaration().ok()?.important())
+                {
                     return Some(important);
                 }
             }

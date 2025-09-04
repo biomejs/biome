@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-props-interface.vue
+---
+# Input
+```ts
+; // this is a hack because vue files are still parsed as js/ts files.
+interface Props {
+    ref: string,
+    key: string,
+    foo: string,
+}
+defineProps<Props>();
+
+```
+
+# Diagnostics
+```
+invalid-define-props-interface.vue:3:5 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ref is a reserved attribute and cannot be used as props.
+  
+    1 │ ; // this is a hack because vue files are still parsed as js/ts files.
+    2 │ interface Props {
+  > 3 │     ref: string,
+      │     ^^^
+    4 │     key: string,
+    5 │     foo: string,
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```
+
+```
+invalid-define-props-interface.vue:4:5 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × key is a reserved attribute and cannot be used as props.
+  
+    2 │ interface Props {
+    3 │     ref: string,
+  > 4 │     key: string,
+      │     ^^^
+    5 │     foo: string,
+    6 │ }
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```

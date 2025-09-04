@@ -4,8 +4,8 @@ use crate::{
     services::semantic::Semantic,
 };
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule, options::JsxRuntime,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    options::JsxRuntime,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -22,6 +22,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
     TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
 };
+use biome_rule_options::use_import_type::{Style, UseImportTypeOptions};
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -154,8 +155,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "useImportType",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("consistent-type-imports")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintTypeScript("consistent-type-imports").inspired()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -166,7 +166,7 @@ impl Rule for UseImportType {
     type Query = Semantic<JsImport>;
     type State = ImportTypeFix;
     type Signals = Option<Self::State>;
-    type Options = ImportTypeOptions;
+    type Options = UseImportTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>();
@@ -175,11 +175,12 @@ impl Rule for UseImportType {
         }
         let import = ctx.query();
         let import_clause = import.import_clause().ok()?;
-        let extension = ctx.file_path().extension()?;
-        let extension = extension.as_bytes();
         // Import attributes and type-only imports are not compatible in ESM.
         if import_clause.attribute().is_some()
-            && extension != b"cts"
+            && ctx
+                .file_path()
+                .extension()
+                .is_none_or(|extension| extension != "cts")
             && !matches!(ctx.root(), AnyJsRoot::JsScript(_))
         {
             return None;
@@ -286,10 +287,28 @@ impl Rule for UseImportType {
                 is_only_used_as_type(model, default_binding).then_some(ImportTypeFix::UseImportType)
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
+                let type_token = clause.type_token();
+                if style == Style::InlineType && type_token.is_some() {
+                    // Inline `import type` into `import { type }`
+                    let specifiers = clause
+                        .named_specifiers()
+                        .ok()?
+                        .specifiers()
+                        .iter()
+                        .collect::<Result<Vec<_>, _>>()
+                        .ok()?;
+                    return if specifiers.is_empty() {
+                        None
+                    } else {
+                        Some(ImportTypeFix::AddTypeQualifiers(
+                            specifiers.into_boxed_slice(),
+                        ))
+                    };
+                }
                 match named_import_type_fix(
                     model,
                     &clause.named_specifiers().ok()?,
-                    clause.type_token().is_some(),
+                    type_token.is_some(),
                 )? {
                     NamedImportTypeFix::UseImportType(specifiers) => {
                         if style == Style::InlineType {
@@ -394,16 +413,26 @@ impl Rule for UseImportType {
                 }
             }
             ImportTypeFix::AddTypeQualifiers(named_specifiers) => {
-                let mut diagnostic = RuleDiagnostic::new(
-                    rule_category!(),
-                    import_clause.range(),
-                    "Some named imports are only used as types.",
-                );
-                for specifier in named_specifiers {
-                    diagnostic =
-                        diagnostic.detail(specifier.range(), "This import is only used as a type.")
+                if import_clause.type_token().is_some() {
+                    RuleDiagnostic::new(
+                        rule_category!(),
+                        import_clause.range(),
+                        markup! {
+                            "Use "<Emphasis>"import { type }"</Emphasis>" instead of "<Emphasis>"import type"</Emphasis>"."
+                        },
+                    )
+                } else {
+                    let mut diagnostic = RuleDiagnostic::new(
+                        rule_category!(),
+                        import_clause.range(),
+                        "Some named imports are only used as types.",
+                    );
+                    for specifier in named_specifiers {
+                        diagnostic = diagnostic
+                            .detail(specifier.range(), "This import is only used as a type.")
+                    }
+                    diagnostic
                 }
-                diagnostic
             }
             ImportTypeFix::RemoveTypeQualifiers(type_tokens) => {
                 let mut diagnostic = RuleDiagnostic::new(
@@ -727,6 +756,10 @@ impl Rule for UseImportType {
                 }
             }
             ImportTypeFix::AddTypeQualifiers(specifiers) => {
+                if let Some(type_token) = import_clause.type_token() {
+                    // Inline `import type` into `import { type }`
+                    mutation.remove_token(type_token);
+                }
                 for specifier in specifiers {
                     let new_specifier = specifier
                         .clone()
@@ -775,25 +808,7 @@ impl Rule for UseImportType {
 )]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct ImportTypeOptions {
-    pub style: Style,
-}
-
-/// Rule's options.
-#[derive(
-    Debug, Default, Copy, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
-)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub enum Style {
-    /// Use the best fitting style according to the situation
-    #[default]
-    Auto,
-    /// Always use inline type keywords
-    InlineType,
-    /// Always separate types in a dedicated `import type`
-    SeparatedType,
-}
+pub struct ImportTypeOptions {}
 
 #[derive(Debug)]
 pub enum ImportTypeFix {

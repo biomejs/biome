@@ -39,9 +39,12 @@ SyntaxElement = SyntaxElement
 HtmlBogus = SyntaxElement*
 HtmlBogusElement = SyntaxElement*
 HtmlBogusAttribute = SyntaxElement*
+AstroBogusFrontmatter = SyntaxElement*
+HtmlBogusTextExpression = SyntaxElement*
 
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
+	frontmatter: AnyAstroFrontmatterElement?
 	directive: HtmlDirective?
 	html: HtmlElementList
 	eof: 'EOF'
@@ -67,10 +70,35 @@ HtmlElementList = AnyHtmlElement*
 AnyHtmlElement =
 	HtmlSelfClosingElement
 	| HtmlElement
-	| HtmlContent
-	| HtmlComment
+	| AnyHtmlContent
 	| HtmlCdataSection
 	| HtmlBogusElement
+
+AnyHtmlContent =
+	HtmlContent
+	| AnyHtmlTextExpression
+
+AnyHtmlTextExpression =
+	HtmlDoubleTextExpression
+	| HtmlSingleTextExpression
+	| HtmlBogusTextExpression
+
+
+// {{ expression }}
+// ^^^^^^^^^^^^^^^^
+HtmlDoubleTextExpression =
+	'{{'
+	expression: HtmlTextExpression
+	'}}'
+
+// {expression}
+// ^^^^^^^^^^^^
+HtmlSingleTextExpression =
+	'{'
+	expression: HtmlTextExpression
+	'}'
+
+HtmlTextExpression = 'html_literal'
 
 
 // <a />
@@ -102,18 +130,21 @@ HtmlClosingElement =
 	name: HtmlTagName
 	'>'
 
-// <!-- comment -->
-HtmlComment =
-	'<!--'
-	content: 'html_literal'
-	'-->'
-
 // <![CDATA[example]]>
 // Reference: https://html.spec.whatwg.org/multipage/syntax.html#cdata-sections
 HtmlCdataSection =
 	'<![CDATA['
 	content: 'html_literal'
 	']]>'
+
+AnyAstroFrontmatterElement =
+	AstroFrontmatterElement
+	| AstroBogusFrontmatter
+
+AstroFrontmatterElement =
+	l_fence: '---'
+	content: 'html_literal'?
+	r_fence: '---'
 
 // ==================================
 // Attributes
@@ -123,8 +154,11 @@ HtmlAttributeList = AnyHtmlAttribute*
 
 AnyHtmlAttribute =
 	HtmlAttribute
+	| HtmlDoubleTextExpression
 	| HtmlBogusAttribute
 
+// <a href="">
+//    ^^^^^^^
 HtmlAttribute =
 	name: HtmlAttributeName
 	initializer: HtmlAttributeInitializerClause?
@@ -134,7 +168,13 @@ HtmlAttribute =
 //        ^^^
 HtmlAttributeInitializerClause =
 	'='
-	value: HtmlString
+	value: AnyHtmlAttributeInitializer
+
+
+AnyHtmlAttributeInitializer =
+	HtmlString
+	| HtmlSingleTextExpression
+
 
 
 HtmlString = value: 'html_string_literal'

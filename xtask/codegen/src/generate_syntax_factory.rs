@@ -32,11 +32,9 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
                             let field_predicate = get_field_predicate(field, language_kind);
 
                             quote! {
-                                if let Some(element) = &current_element {
-                                    if #field_predicate {
-                                        slots.mark_present();
-                                        current_element = elements.next();
-                                    }
+                                if let Some(element) = &current_element && #field_predicate {
+                                    slots.mark_present();
+                                    current_element = elements.next();
                                 }
                                 slots.next_slot();
                             }
@@ -94,11 +92,9 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
                 .map(|field| {
                     let field_predicate = get_field_predicate(field, language_kind);
                     quote! {
-                        if let Some(element) = &current_element {
-                            if #field_predicate {
-                                slots.mark_present();
-                                current_element = elements.next();
-                            }
+                        if let Some(element) = &current_element && #field_predicate {
+                            slots.mark_present();
+                            current_element = elements.next();
                         }
                         slots.next_slot();
                     }

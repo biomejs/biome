@@ -3,11 +3,16 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_js_factory::make;
+#[expect(unused_imports)]
 use biome_js_syntax::{
-    AnyJsExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsNewExpression,
-    JsSyntaxNode, JsUnaryOperator, is_in_boolean_context, is_negation,
+    AnyJsExpression, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsConditionalExpression, JsLogicalExpression,
+    JsNewExpression, JsParenthesizedExpression, JsSequenceExpression, JsSyntaxNode,
+    JsUnaryExpression, JsUnaryOperator, T, is_in_boolean_context, is_negation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions;
 
 use crate::JsRuleAction;
 
@@ -58,7 +63,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noExtraBooleanCast",
         language: "js",
-        sources: &[RuleSource::Eslint("no-extra-boolean-cast")],
+        sources: &[RuleSource::Eslint("no-extra-boolean-cast").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -92,7 +97,7 @@ impl Rule for NoExtraBooleanCast {
     type Query = Ast<AnyJsExpression>;
     type State = (AnyJsExpression, ExtraBooleanCastType);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoExtraBooleanCastOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let n = ctx.query();
@@ -187,7 +192,30 @@ impl Rule for NoExtraBooleanCast {
             ExtraBooleanCastType::DoubleNegation => "Remove redundant double-negation",
             ExtraBooleanCastType::BooleanCall => "Remove redundant `Boolean` call",
         };
-        mutation.replace_node(node.clone(), node_to_replace.clone());
+
+        // Check if the Boolean call is inside a unary negation and the argument needs parentheses
+        let mut replacement = node_to_replace.clone();
+
+        // Only wrap in parentheses if this is a Boolean call inside a logical NOT with complex expression
+        if matches!(extra_boolean_cast_type, ExtraBooleanCastType::BooleanCall) {
+            let is_negated_boolean_call = node
+                .syntax()
+                .parent()
+                .and_then(JsUnaryExpression::cast)
+                .and_then(|expr| expr.operator().ok())
+                .is_some_and(|op| op == JsUnaryOperator::LogicalNot);
+
+            if is_negated_boolean_call && needs_parentheses_when_negated(node_to_replace) {
+                replacement =
+                    AnyJsExpression::JsParenthesizedExpression(make::js_parenthesized_expression(
+                        make::token(T!['(']),
+                        replacement,
+                        make::token(T![')']),
+                    ));
+            }
+        }
+
+        mutation.replace_node(node.clone(), replacement);
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -195,6 +223,27 @@ impl Rule for NoExtraBooleanCast {
             markup! { {message} }.to_owned(),
             mutation,
         ))
+    }
+}
+
+/// Determines if an expression needs parentheses when it becomes the operand of a unary negation.
+/// This is needed to preserve operator precedence for expressions like binary expressions.
+fn needs_parentheses_when_negated(expr: &AnyJsExpression) -> bool {
+    match expr {
+        // Binary expressions like `a + b` need parentheses in `!(a + b)` to maintain precedence
+        AnyJsExpression::JsBinaryExpression(_) => true,
+        // Logical expressions like `a && b` need parentheses in `!(a && b)` to maintain precedence
+        AnyJsExpression::JsLogicalExpression(_) => true,
+        // Conditional expressions like `a ? b : c` need parentheses
+        AnyJsExpression::JsConditionalExpression(_) => true,
+        // Assignment expressions need parentheses
+        AnyJsExpression::JsAssignmentExpression(_) => true,
+        // Sequence expressions (comma operator) need parentheses
+        AnyJsExpression::JsSequenceExpression(_) => true,
+        // Logical expressions that are already parenthesized don't need additional ones
+        AnyJsExpression::JsParenthesizedExpression(_) => false,
+        // Simple expressions like identifiers, literals, calls don't need parentheses
+        _ => false,
     }
 }
 

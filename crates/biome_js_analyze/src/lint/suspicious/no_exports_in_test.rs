@@ -1,6 +1,6 @@
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
-    RuleSourceKind, ServiceBag, Visitor, context::RuleContext, declare_lint_rule,
+    ServiceBag, Visitor, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -9,6 +9,7 @@ use biome_js_syntax::{
     assign_ext::AnyJsMemberAssignment,
 };
 use biome_rowan::{AstNode, Language, TextRange, WalkEvent, declare_node_union};
+use biome_rule_options::no_exports_in_test::NoExportsInTestOptions;
 
 declare_lint_rule! {
     /// Disallow using `export` or `module.exports` in files containing tests
@@ -43,8 +44,7 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintJest("no-export")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintJest("no-export").inspired()],
         domains: &[RuleDomain::Test],
     }
 }
@@ -111,41 +111,41 @@ impl Visitor for AnyExportInTestVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if let Some(maybe_export) = MaybeExport::cast_ref(node) {
-                    if maybe_export.is_export() {
-                        self.exports.push(maybe_export);
-                    }
+                if let Some(maybe_export) = MaybeExport::cast_ref(node)
+                    && maybe_export.is_export()
+                {
+                    self.exports.push(maybe_export);
                 }
 
-                if !self.has_test {
-                    if let Some(call_expr) = JsCallExpression::cast_ref(node) {
-                        self.has_test = call_expr
-                            .is_test_call_expression()
-                            .ok()
-                            .and_then(|is_test_call_expr| {
-                                if is_test_call_expr {
-                                    // Ensure the test call is at the top level to avoid mistakenly identifying files with in-source testing as test files.
-                                    // Example:
-                                    // ```js
-                                    // if (import.meta.vitest) {
-                                    //   const { describe, expect } = import.meta.vitest;
-                                    //   describe("a test", () => {
-                                    //     expect(test).toEqual("");
-                                    //   });
-                                    // }
-                                    // ```
-                                    // The ancestors of the top-level call expression are:
-                                    // [JsScript, JsStatementList, JsExpressionStatement, JsCallExpression]
-                                    // [JsModule, JsModuleItemList, JsExpressionStatement, JsCallExpression]
-                                    //
-                                    // **Note**: The ancestors start with the current node.
-                                    Some(call_expr.syntax().ancestors().count() == 4)
-                                } else {
-                                    None
-                                }
-                            })
-                            .unwrap_or(false);
-                    }
+                if !self.has_test
+                    && let Some(call_expr) = JsCallExpression::cast_ref(node)
+                {
+                    self.has_test = call_expr
+                        .is_test_call_expression()
+                        .ok()
+                        .and_then(|is_test_call_expr| {
+                            if is_test_call_expr {
+                                // Ensure the test call is at the top level to avoid mistakenly identifying files with in-source testing as test files.
+                                // Example:
+                                // ```js
+                                // if (import.meta.vitest) {
+                                //   const { describe, expect } = import.meta.vitest;
+                                //   describe("a test", () => {
+                                //     expect(test).toEqual("");
+                                //   });
+                                // }
+                                // ```
+                                // The ancestors of the top-level call expression are:
+                                // [JsScript, JsStatementList, JsExpressionStatement, JsCallExpression]
+                                // [JsModule, JsModuleItemList, JsExpressionStatement, JsCallExpression]
+                                //
+                                // **Note**: The ancestors start with the current node.
+                                Some(call_expr.syntax().ancestors().count() == 4)
+                            } else {
+                                None
+                            }
+                        })
+                        .unwrap_or(false);
                 }
             }
             WalkEvent::Leave(node) => {
@@ -189,7 +189,7 @@ impl Rule for NoExportsInTest {
     type Query = AnyExportInTest;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoExportsInTestOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

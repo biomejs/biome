@@ -27,14 +27,33 @@ biome_rowan              = { workspace = true }
 biome_text_size          = { workspace = true }
 camino                   = { workspace = true }
 indexmap                 = { workspace = true }
-node-semver              = "2.2.0"
 rustc-hash               = { workspace = true }
 serde                    = { workspace = true }
 static_assertions        = { workspace = true }
 
 [dev-dependencies]
+divan        = { package = "codspeed-divan-compat", version = "*" }
 insta        = { workspace = true }
 tests_macros = { path = "../tests_macros" }
 
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
 [lints]
 workspace = true
+
+[[bench]]
+harness = false
+name    = "package_json"
+
+
+[[bench]]
+harness = false
+name    = "tsconfig_json"
+
+[[bench]]
+harness = false
+name    = "semver"

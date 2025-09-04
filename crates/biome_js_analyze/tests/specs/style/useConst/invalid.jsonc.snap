@@ -553,23 +553,6 @@ invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━
 let x; function foo() { bar(x); } x = 0;
 ```
 
-# Diagnostics
-```
-invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This let declares a variable that is only assigned once.
-  
-  > 1 │ let x; function foo() { bar(x); } x = 0;
-      │ ^^^
-  
-  i 'x' is only assigned here.
-  
-  > 1 │ let x; function foo() { bar(x); } x = 0;
-      │                                   ^
-  
-
-```
-
 # Input
 ```cjs
 /*eslint use-x:error*/ let x = 1
@@ -1443,21 +1426,4 @@ invalid.jsonc:1:29 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 # Input
 ```cjs
 let x; function foo() { bar(x); } x = 0;
-```
-
-# Diagnostics
-```
-invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This let declares a variable that is only assigned once.
-  
-  > 1 │ let x; function foo() { bar(x); } x = 0;
-      │ ^^^
-  
-  i 'x' is only assigned here.
-  
-  > 1 │ let x; function foo() { bar(x); } x = 0;
-      │                                   ^
-  
-
 ```

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_configuration/tests/spec_tests.rs
 expression: domains.json
-snapshot_kind: text
 ---
 domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -20,7 +19,10 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   - test
   - solid
   - next
+  - qwik
+  - vue
   - project
+  - tailwind
   
 
 

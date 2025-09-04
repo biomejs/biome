@@ -37,3 +37,6 @@ import "path";
 import "process";
 
 import "dep.js"
+
+// Type-only imports
+import type {} from "type-fest";

@@ -7,6 +7,7 @@ use biome_js_syntax::{
     TsNonNullAssertionExpression,
 };
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
+use biome_rule_options::no_extra_non_null_assertion::NoExtraNonNullAssertionOptions;
 
 use crate::JsRuleAction;
 
@@ -50,7 +51,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noExtraNonNullAssertion",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-extra-non-null-assertion")],
+        sources: &[RuleSource::EslintTypeScript("no-extra-non-null-assertion").same()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -65,7 +66,7 @@ impl Rule for NoExtraNonNullAssertion {
     type Query = Ast<AnyTsNonNullAssertion>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoExtraNonNullAssertionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

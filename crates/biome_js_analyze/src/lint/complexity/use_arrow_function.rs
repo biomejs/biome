@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
     AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind, ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
+    ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -17,6 +17,7 @@ use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language, SyntaxNode, TextRange,
     TriviaPieceKind, WalkEvent, declare_node_union,
 };
+use biome_rule_options::use_arrow_function::UseArrowFunctionOptions;
 
 declare_lint_rule! {
     /// Use arrow functions over function expressions.
@@ -70,8 +71,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useArrowFunction",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-arrow-callback")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("prefer-arrow-callback").inspired()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -82,7 +82,7 @@ impl Rule for UseArrowFunction {
     type Query = ActualThisScope;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseArrowFunctionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let AnyThisScopeMetadata { scope, has_this } = ctx.query();
@@ -330,10 +330,10 @@ impl Visitor for AnyThisScopeVisitor {
                 }
             }
             WalkEvent::Leave(node) => {
-                if AnyThisScope::can_cast(node.kind()) {
-                    if let Some(scope_metadata) = self.stack.pop() {
-                        ctx.match_query(ActualThisScope(scope_metadata));
-                    }
+                if AnyThisScope::can_cast(node.kind())
+                    && let Some(scope_metadata) = self.stack.pop()
+                {
+                    ctx.match_query(ActualThisScope(scope_metadata));
                 }
             }
         }

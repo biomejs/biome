@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -76,7 +75,7 @@ snapshot_kind: text
 }
 
 .example-from-doc-comment {
-  transition: opactity 1s ease;
+  transition: opacity 1s ease;
   border: 1px solid black;
   pointer-events: none;
   color: black;
@@ -412,7 +411,7 @@ invalid.css:71:27 assist/source/useSortedProperties  FIXABLE  ━━━━━━
     70 │ 
   > 71 │ .example-from-doc-comment {
        │                           ^
-  > 72 │   transition: opactity 1s ease;
+  > 72 │   transition: opacity 1s ease;
         ...
   > 77 │   display: block;
   > 78 │   --custom: 100;
@@ -424,7 +423,7 @@ invalid.css:71:27 assist/source/useSortedProperties  FIXABLE  ━━━━━━
   
     70 70 │   
     71 71 │   .example-from-doc-comment {
-    72    │ - ··transition:·opactity·1s·ease;
+    72    │ - ··transition:·opacity·1s·ease;
     73    │ - ··border:·1px·solid·black;
     74    │ - ··pointer-events:·none;
        72 │ + ··--custom:·100;
@@ -436,7 +435,7 @@ invalid.css:71:27 assist/source/useSortedProperties  FIXABLE  ━━━━━━
     78    │ - ··--custom:·100;
        76 │ + ··pointer-events:·none;
        77 │ + ··border:·1px·solid·black;
-       78 │ + ··transition:·opactity·1s·ease;
+       78 │ + ··transition:·opacity·1s·ease;
     79 79 │   }
     80 80 │   
   

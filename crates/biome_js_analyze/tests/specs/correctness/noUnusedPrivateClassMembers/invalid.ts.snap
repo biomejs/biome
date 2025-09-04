@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 146
 expression: invalid.ts
 ---
 # Input
@@ -38,6 +39,17 @@ class TsSelfUpdate {
 class TsAccessor {
 	private get unusedAccessor() { }
 	private set unusedAccessor(value) { }
+}
+
+// github.com/biomejs/biome/issues/6165
+class TsBioo2 {
+	private unusedProperty = 5;
+	private unusedMethod() {}
+
+	private usedProperty = 4;
+	public test() {
+		return this.usedProperty;
+	}
 }
 
 ```
@@ -102,10 +114,15 @@ invalid.ts:10:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     11 │ 
     12 │ 	}
   
-  i Unsafe fix: Remove unused declaration.
+  i Unsafe fix: Remove private modifier
   
-    10 │ → constructor(private·nusedProperty·=·3){
-       │               -------------------------  
+     8  8 │   
+     9  9 │   class TSUnusedPrivateConstructor {
+    10    │ - → constructor(private·nusedProperty·=·3){
+       10 │ + → constructor(_nusedProperty·=·3){
+    11 11 │   
+    12 12 │   	}
+  
 
 ```
 
@@ -194,6 +211,52 @@ invalid.ts:34:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     34    │ - → private·set·unusedAccessor(value)·{·}
     35 34 │   }
     36 35 │   
+  
+
+```
+
+```
+invalid.ts:39:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    37 │ // github.com/biomejs/biome/issues/6165
+    38 │ class TsBioo2 {
+  > 39 │ 	private unusedProperty = 5;
+       │ 	        ^^^^^^^^^^^^^^
+    40 │ 	private unusedMethod() {}
+    41 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    37 37 │   // github.com/biomejs/biome/issues/6165
+    38 38 │   class TsBioo2 {
+    39    │ - → private·unusedProperty·=·5;
+    40 39 │   	private unusedMethod() {}
+    41 40 │   
+  
+
+```
+
+```
+invalid.ts:40:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    38 │ class TsBioo2 {
+    39 │ 	private unusedProperty = 5;
+  > 40 │ 	private unusedMethod() {}
+       │ 	        ^^^^^^^^^^^^
+    41 │ 
+    42 │ 	private usedProperty = 4;
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    38 38 │   class TsBioo2 {
+    39 39 │   	private unusedProperty = 5;
+    40    │ - → private·unusedMethod()·{}
+    41 40 │   
+    42 41 │   	private usedProperty = 4;
   
 
 ```

@@ -1,9 +1,9 @@
-use crate::js_module_info::{Exports, Imports};
+use crate::js_module_info::{Exports, Imports, JsBindingData};
 use crate::{JsExport, JsImport, JsModuleInfo, JsOwnExport, JsReexport};
 use biome_formatter::prelude::*;
 use biome_formatter::{format_args, write};
 use biome_js_type_info::FormatTypeContext;
-use biome_rowan::{Text, TextSize};
+use biome_rowan::TextSize;
 use std::fmt::Formatter;
 use std::ops::Deref;
 
@@ -67,31 +67,14 @@ impl Format<FormatTypeContext> for Exports {
     ) -> FormatResult<()> {
         let mut joiner = f.join();
         for (export_name, export) in self.deref() {
-            let name = format_with(|f| match export_name {
-                Text::Borrowed(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(
-                            &std::format!("{:?}", t.text()),
-                            TextSize::default()
-                        ),]
-                    )
-                }
-                Text::Owned(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(
-                            &std::format!("{:?}", t.as_str()),
-                            TextSize::default()
-                        ),]
-                    )
-                }
-                Text::Static(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(&std::format!("{:?}", t), TextSize::default()),]
-                    )
-                }
+            let name = format_with(|f| {
+                write!(
+                    f,
+                    [dynamic_text(
+                        &std::format!("{:?}", export_name.text()),
+                        TextSize::default()
+                    ),]
+                )
             });
             let arrow = format_with(|f| write!(f, [&format_args![space(), text("=>"), space()]]));
 
@@ -126,31 +109,14 @@ impl Format<FormatTypeContext> for Imports {
         let mut joiner = f.join();
 
         for (import_name, import) in &self.0 {
-            let name = format_with(|f| match import_name {
-                Text::Borrowed(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(
-                            &std::format!("{:?}", t.text()),
-                            TextSize::default()
-                        ),]
-                    )
-                }
-                Text::Owned(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(
-                            &std::format!("{:?}", t.as_str()),
-                            TextSize::default()
-                        ),]
-                    )
-                }
-                Text::Static(t) => {
-                    write!(
-                        f,
-                        [dynamic_text(&std::format!("{:?}", t), TextSize::default()),]
-                    )
-                }
+            let name = format_with(|f| {
+                write!(
+                    f,
+                    [dynamic_text(
+                        &std::format!("{:?}", import_name.text()),
+                        TextSize::default()
+                    ),]
+                )
             });
             let arrow = format_with(|f| {
                 write!(
@@ -209,7 +175,7 @@ impl Format<FormatTypeContext> for JsExport {
                 write!(
                     f,
                     [&format_args![
-                        text("OnwType"),
+                        text("OwnType"),
                         space(),
                         text("=>"),
                         space(),
@@ -242,6 +208,79 @@ impl Format<FormatTypeContext> for JsExport {
                 )
             }
         }
+    }
+}
+
+impl std::fmt::Display for JsBindingData {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let formatted = biome_formatter::format!(FormatTypeContext, [&self])
+            .expect("Formatting not to throw any FormatErrors");
+        f.write_str(
+            formatted
+                .print()
+                .expect("Expected a valid document")
+                .as_code(),
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for JsBindingData {
+    fn fmt(
+        &self,
+        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
+    ) -> FormatResult<()> {
+        let jsdoc_comment = format_with(|f| {
+            if let Some(jsdoc) = &self.jsdoc {
+                write!(
+                    f,
+                    [&format_args![
+                        text("JSDoc comment:"),
+                        space(),
+                        jsdoc,
+                        text(","),
+                        hard_line_break()
+                    ]]
+                )
+            } else {
+                Ok(())
+            }
+        });
+
+        let content = format_with(|f| {
+            write!(
+                f,
+                [&format_args![
+                    text("Name:"),
+                    space(),
+                    dynamic_text(&self.name, TextSize::default()),
+                    text(","),
+                    hard_line_break(),
+                    text("Type:"),
+                    space(),
+                    &self.ty,
+                    text(","),
+                    hard_line_break(),
+                    jsdoc_comment,
+                    text("Declaration kind:"),
+                    space(),
+                    dynamic_text(
+                        &std::format!("{:?}", self.declaration_kind),
+                        TextSize::default()
+                    ),
+                ]]
+            )
+        });
+
+        write!(
+            f,
+            [&format_args![
+                text("JsBindingData {"),
+                block_indent(&content),
+                text("}")
+            ],]
+        )?;
+
+        Ok(())
     }
 }
 
@@ -279,39 +318,24 @@ impl Format<FormatTypeContext> for JsOwnExport {
         &self,
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
-        let content = format_with(|f| {
-            write!(f, [&self.ty])?;
-
-            write!(f, [hard_line_break()])?;
-
-            write!(f, [text("Local name: ")])?;
-            if let Some(name) = &self.local_name {
-                write!(f, [&format_args![dynamic_text(name, TextSize::default())]])?;
-            } else {
-                write!(f, [&format_args![text("None")]])?;
-            }
-
-            write!(f, [hard_line_break()])?;
-
-            if let Some(comment) = &self.jsdoc_comment {
-                write!(f, [&format_args![&comment]])?;
-                write!(f, [&format_args![soft_line_break()]])?;
-            }
-
-            Ok(())
-        });
-
-        write!(
-            f,
-            [&format_args![
-                text("JsOwnExport"),
-                text("("),
-                block_indent(&content),
-                text(")")
-            ],]
-        )?;
-
-        Ok(())
+        match self {
+            Self::Binding(binding_id) => write!(
+                f,
+                [&format_args![
+                    text("JsOwnExport::Binding("),
+                    dynamic_text(&binding_id.index().to_string(), TextSize::default()),
+                    text(")")
+                ]]
+            ),
+            Self::Type(resolved_type_id) => write!(
+                f,
+                [&format_args![
+                    text("JsOwnExport::Type("),
+                    dynamic_text(&std::format!("{resolved_type_id:?}"), TextSize::default()),
+                    text(")")
+                ]]
+            ),
+        }
     }
 }
 

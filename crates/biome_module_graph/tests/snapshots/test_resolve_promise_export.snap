@@ -19,10 +19,7 @@ export const promise = returnsPromise();
 ```
 Exports {
   "promise" => {
-    ExportOwnExport => JsOwnExport(
-      Module(0) TypeId(2)
-      Local name: promise
-    )
+    ExportOwnExport => JsOwnExport::Binding(1)
   }
 }
 Imports {
@@ -30,18 +27,30 @@ Imports {
 }
 ```
 
+## Exported Bindings
+
+```
+BindingId(1) => JsBindingData {
+  Name: promise,
+  Type: Module(0) TypeId(2),
+  Declaration kind: Value
+}
+```
+
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof Promise
+Module TypeId(0) => value: value
 
-Module TypeId(1) => async Function "returnsPromise" {
+Module TypeId(1) => Module(0) TypeId(3)
+
+Module TypeId(2) => instanceof Promise<Module(0) TypeId(0)>
+
+Module TypeId(3) => async Function "returnsPromise" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(0)
+  returns: Module(0) TypeId(2)
 }
-
-Module TypeId(2) => instanceof Promise
 ```

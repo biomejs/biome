@@ -12,16 +12,14 @@ const [a]: Array<string> = [];
 ## Result
 
 ```
-a => Global TypeId(18)[0]
+a => Global TypeId(0)[0]
 
 ```
 
 ## Registered types
 
 ```
-Global TypeId(17) => string
+Global TypeId(0) => instanceof unresolved reference "Array"<string> (scope ID: 0)
 
-Global TypeId(18) => instanceof unresolved reference "Array"<Global TypeId(17)>
-
-Global TypeId(19) => Global TypeId(18)[0]
+Global TypeId(1) => Global TypeId(0)[0]
 ```

@@ -120,7 +120,7 @@ This Codespace comes pre-configured with the required tools and dependencies to 
 
 > [!NOTE]
 > A basic Codespace (32gb of disk space) might run out of disk space when building biome or running the full test suite.
-> The pre-configured Codespace is therefor based on the premium image with 64gb of disk space.
+> The pre-configured Codespace is therefore based on the premium image with 64gb of disk space.
 
 ## Testing
 
@@ -250,7 +250,7 @@ If you're debugging an LSP reproduction, make sure that the client allows to use
 
 ```json
 {
-  "biome.lspBin": "/Users/john/www/biome/target/debug/biome"
+  "biome.lsp.bin": "/Users/john/www/biome/target/debug/biome"
 }
 ```
 
@@ -365,7 +365,12 @@ We are using [action-semantic-pull-request](https://github.com/amannn/action-sem
 When creating a new pull request, it's preferable to use a conventional commit-formatted title, as this title will be used as the default commit message on the squashed commit after merging.
 See the [dedicated section](#commit-messages) about conventional commit format.
 
-Please use the template provided.
+When creating a PR, follow the following instructions:
+- if you fix a bug (code or documentation), send a PR to the maintenance branch `main`.
+- if you add a **new nursery rule**, send a PR to the maintenance branch `main`. Nursery rules don't follow semantic versioning.
+- if you promote a rule from nursery, send a PR to the `next` branch.
+- if you implement a new feature that affects end users, send a PR to the `next` branch.
+- if you implement a new feature that _doesn't affect end users_, send a PR to the maintenance `main` branch.
 
 ### Changelog
 
@@ -384,6 +389,8 @@ just new-changeset
 The command will present a prompt where you need to choose the libraries involved by the PR, the type of change (`major`, `minor` or `patch`) for each library, and a description of the change. The description will be used as name of the file.
 
 The command will create the changeset(s) in the `.changeset` folder. You're free to open the file, and add more information in it.
+
+If you want to add headers, use `####` or `#####`. Other kind of headers will mess up the final CHANGELOG and break upstream tools.
 
 #### Choose the correct packages
 
@@ -406,26 +413,29 @@ We are very strict about `major` changes in the `@biomejs/biome` package. To bet
 - `minor`: new features available to the users.
 - `major`: a change that breaks a user API.
 
+When choosing `minor` or `major`, make sure your PR targets the `next` branch instead of `main`.
+
 #### Writing a changeset
 
 The description of the changeset should follow the these guidelines:
 
+- Our changesets should be about _user-facing_ changes. Internal changes don't
+  need changesets.
 - Use the past tense when describing what you did, e.g. "Added new feature", "Fixed edge case".
 - Use the present tense when describing Biome behavior, e.g. "Biome now supports ...".
-- If you fixed a bug, please add the link to the issue, e.g. "Fixed [#4444](https://github.com/biomejs/biome/issues/4444)".
+- If you fixed a bug, please start with a link to the issue, e.g. "Fixed [#4444](https://github.com/biomejs/biome/issues/4444): ...".
 - If you reference a rule, please add the link to the rule on the website, e.g. "Added the rule [`useAwesomeThing`](https://biomejs.dev/linter/rules/use-awesome-thing/)" (even if the website isn't updated yet, the URL is pretty predictable...).
 - Similarly, if you reference an assist, please add the link to the assist on the website, e.g. "Added the assist [`awesomeAction`](https://biomejs.dev/assist/actions/awesome-action/)".
-- Whenever applicable, add a code block to show your new changes. For example, for a new
-  rule you might want to show an invalid case, for the formatter you might want to show
-  how the new formatting changes, and so on.
-- End each sentence with fullstops.
+- Whenever applicable, add a code block to show your new changes. For example, for a new rule you should show an invalid case, while for the formatter you should show how the new formatting changes, and so on.
+- End every sentence with a full stop (`.`).
 
 If in doubt, take a look at existing or past changesets.
 
 ### Documentation
 
-If your PR requires some update on the website (new features, breaking changes, etc.), you should create a new PR once the previous PR is successfully merged.
-When adding new features, the documentation should be part of a new PR, which will be merged right before the release.
+If your PR involves new features, or changes to existing features, documentation must be updated as well. For rules, assists, and their options, this is done using inline [rustdoc](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html) documentation.
+
+When other documentation updates are required, such as new formatter options, a PR should be created against the `next` branch of [our website](https://github.com/biomejs/website/). When doing so, please link the documentation PR from the PR that introduces the feature.
 
 ### Versioning
 
@@ -444,23 +454,31 @@ Even minor versions are dedicated to official releases, e.g. `*.6.*`.
 
 ### Regular releases
 
-When releasing a new version of a Biome, follow these steps:
+Before starting release:
+
+1. [ ] Make sure that all issues/PRs for the milestone are done: https://github.com/biomejs/biome/milestones
+
+1. [ ] Replace all `version: "next"` to the new version number in the metadata of the rules.
+
+When releasing a new **minor** or **major** version of a Biome, follow these steps:
+
+1. [ ] Create a PR from `next` to `main`. Make sure that code conflicts are fixed and the new features have relative docs PR.
+
+1. [ ] Merge `next` to `main`. **Using merge commit is recommended here**, do not use squash merge as it removes the commit history.
 
 1. [ ] **Update to the same `version` in all crates** if you publish crates, if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
 1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
-   This field is set to `next` for newly created rules.
+   This field is set to `"next"` for newly created rules.
    This field must be updated to the new version.
 
-1. [ ] Merge the PR `ci: release`, and the release workflow will run. Once these workflows finish compiling the final artefact, **they need to be approved manually** by a member of the **Core Contributors**.
-
-1. [ ] In the [website repository](https://github.com/biomejs/website), merge `next` into `main` with a PR. Usually, `next` contains the docs of new rules/actions. As well as the docs of new options.
-
-1. [ ] Open a new PR in the [website repository](https://github.com/biomejs/website) to update the website with the new version number:
-   `BIOME_VERSION=<version> pnpm run codegen:all`.
-   This will also copy the configuration schema in the right place.
+1. [ ] Merge the `ci: release` PR, and the release workflow will run. Once these workflows finish compiling the final artefact, **they need to be approved manually** by a member of the **Core Contributors**.
 
 1. [ ] After releasing a major version number, you may want to update the `update-preview-version.mjs` script to make sure that future previews indicate a version number with a higher patch version than is currently indicated in the `package.json` manifests.
+
+1. [ ] Make sure you create new `next` branches for both the main repository and the website.
+
+**patch** releases only require a merging of the `ci: release` PR, and should leave the `next` branches untouched.
 
 ## Resources
 
@@ -493,6 +511,8 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Justinas Delinda @minht11](https://github.com/minht11)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
+- [Marat Dulin @mdevils](https://github.com/mdevils)
+- [Vladimir Ivanov_@vlad](https://github.com/vladimir-ivanov)
 - [Vo Hoang Long @vohoanglong0107](https://github.com/vohoanglong0107)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Yusuke Abe @chansuke](https://github.com/chansuke)

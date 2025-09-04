@@ -1,7 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: attributes/self-closing.html
-snapshot_kind: text
 ---
 # Input
 
@@ -30,5 +29,5 @@ Self close void elements: never
 -----
 
 ```html
-<meta charset="utf-8" />
+<meta charset="utf-8">
 ```

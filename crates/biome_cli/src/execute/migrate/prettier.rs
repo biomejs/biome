@@ -274,6 +274,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             bracket_spacing: Some(value.bracket_spacing.into()),
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
+            operator_linebreak: None,
         };
         let js_config = biome_configuration::JsConfiguration {
             formatter: Some(js_formatter),

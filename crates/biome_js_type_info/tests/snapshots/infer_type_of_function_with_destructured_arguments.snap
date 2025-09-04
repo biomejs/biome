@@ -18,36 +18,34 @@ function destruct(
 sync Function "destruct" {
   accepts: {
     params: [
-      required (unnamed): Global TypeId(18) (bindings: a:Global TypeId(18).a,
-      b:Global TypeId(18).b)
-      required (unnamed): Global TypeId(22) (bindings: first:Global TypeId(22)[0],
-      rest:[(1 others)...Global TypeId(22)])
+      required (bindings: a: Global TypeId(1),
+      b: Global TypeId(2)): Global TypeId(0)
+      required (bindings: first: Global TypeId(5),
+      rest: Global TypeId(6)): Global TypeId(4)
     ]
     type_args: []
   }
-  returns: unknown reference
+  returns: void
 }
 ```
 
 ## Registered types
 
 ```
-Global TypeId(17) => string
-
-Global TypeId(18) => Object {
+Global TypeId(0) => Object {
   prototype: No prototype
-  members: ["a": number, "b": Global TypeId(17)]
+  members: ["a": number, "b": string]
 }
 
-Global TypeId(19) => Global TypeId(18).a
+Global TypeId(1) => Global TypeId(0).a
 
-Global TypeId(20) => Global TypeId(18).b
+Global TypeId(2) => Global TypeId(0).b
 
-Global TypeId(21) => boolean
+Global TypeId(3) => boolean
 
-Global TypeId(22) => instanceof unresolved reference "Array"<Global TypeId(21)>
+Global TypeId(4) => instanceof unresolved reference "Array"<Global TypeId(3)> (scope ID: 0)
 
-Global TypeId(23) => Global TypeId(22)[0]
+Global TypeId(5) => Global TypeId(4)[0]
 
-Global TypeId(24) => [(1 others)...Global TypeId(22)]
+Global TypeId(6) => [(1 others)...Global TypeId(4)]
 ```

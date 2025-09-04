@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-props-array.vue
+---
+# Input
+```ts
+defineProps([
+    'ref',
+    'key',
+    "foo",
+]);
+
+```
+
+# Diagnostics
+```
+invalid-define-props-array.vue:2:5 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ref is a reserved attribute and cannot be used as props.
+  
+    1 │ defineProps([
+  > 2 │     'ref',
+      │     ^^^^^
+    3 │     'key',
+    4 │     "foo",
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```
+
+```
+invalid-define-props-array.vue:3:5 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × key is a reserved attribute and cannot be used as props.
+  
+    1 │ defineProps([
+    2 │     'ref',
+  > 3 │     'key',
+      │     ^^^^^
+    4 │     "foo",
+    5 │ ]);
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```

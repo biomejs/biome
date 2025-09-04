@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsModuleItem, JsExport, JsModuleItemList, JsSyntaxToken};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rule_options::no_useless_empty_export::NoUselessEmptyExportOptions;
 
 use crate::JsRuleAction;
 
@@ -45,7 +46,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessEmptyExport",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-useless-empty-export")],
+        sources: &[RuleSource::EslintTypeScript("no-useless-empty-export").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -57,7 +58,7 @@ impl Rule for NoUselessEmptyExport {
     /// The first import or export that makes useless the empty export.
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessEmptyExportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

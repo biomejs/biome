@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::JsWithStatement;
 
 use biome_rowan::AstNode;
+use biome_rule_options::no_with::NoWithOptions;
 
 declare_lint_rule! {
     /// Disallow `with` statements in non-strict contexts.
@@ -27,7 +28,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noWith",
         language: "js",
-        sources: &[RuleSource::Eslint("no-with")],
+        sources: &[RuleSource::Eslint("no-with").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -37,7 +38,7 @@ impl Rule for NoWith {
     type Query = Ast<JsWithStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoWithOptions;
 
     fn run(_ctx: &RuleContext<Self>) -> Option<Self::State> {
         Some(())

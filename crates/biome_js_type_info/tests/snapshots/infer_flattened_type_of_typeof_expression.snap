@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+const foo = "foo";
+
+typeof foo;
+
+```
+
+## Result
+
+```
+"string"
+```
+
+## Registered types
+
+```
+Thin TypeId(0) => value: foo
+
+Global TypeId(0) => value: foo
+```

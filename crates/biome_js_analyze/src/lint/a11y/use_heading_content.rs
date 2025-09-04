@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsxElement, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
+use biome_rule_options::use_heading_content::UseHeadingContentOptions;
 
 declare_lint_rule! {
     /// Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.
@@ -60,7 +61,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useHeadingContent",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("heading-has-content")],
+        sources: &[RuleSource::EslintJsxA11y("heading-has-content").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -72,7 +73,7 @@ impl Rule for UseHeadingContent {
     type Query = Ast<AnyJsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseHeadingContentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

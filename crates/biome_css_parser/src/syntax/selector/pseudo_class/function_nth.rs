@@ -4,7 +4,7 @@ use crate::syntax::parse_error::{expected_any_pseudo_class_nth, expected_number}
 use crate::syntax::selector::{
     SelectorList, eat_or_recover_selector_function_close_token, recover_selector_function_parameter,
 };
-use crate::syntax::{parse_number, parse_regular_number};
+use crate::syntax::{parse_number, parse_regular_identifier, parse_regular_number};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::CssSyntaxKind::{
     CSS_NTH_OFFSET, CSS_PSEUDO_CLASS_FUNCTION_NTH, CSS_PSEUDO_CLASS_NTH,
@@ -39,7 +39,7 @@ pub(crate) fn parse_pseudo_class_function_nth(p: &mut CssParser) -> ParsedSyntax
 
     let m = p.start();
 
-    p.bump_ts(PSEUDO_CLASS_FUNCTION_NTH_SET);
+    parse_regular_identifier(p).ok();
     p.bump_with_context(T!['('], CssLexContext::PseudoNthSelector);
 
     let kind = if is_at_pseudo_class_nth_selector(p) {

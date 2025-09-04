@@ -33,7 +33,7 @@ impl FormatNodeRule<TsTypeParameters> for FormatTsTypeParameters {
         if items.is_empty() && self.options.is_type_or_interface_decl {
             write!(f, [l_angle_token.format(), r_angle_token.format()])
         } else if items.is_empty() {
-            return Err(SyntaxError);
+            Err(SyntaxError)
         } else {
             write!(
                 f,

@@ -52,11 +52,11 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-::warning title=lint/correctness/noUnusedVariables,file=index.ts,line=8,endLine=8,col=5,endColumn=6::This variable is unused.
+::warning title=lint/correctness/noUnusedVariables,file=index.ts,line=8,endLine=8,col=5,endColumn=6::This variable f is unused.
 ```
 
 ```block
-::warning title=lint/correctness/noUnusedVariables,file=index.ts,line=9,endLine=9,col=7,endColumn=8::This variable is unused.
+::warning title=lint/correctness/noUnusedVariables,file=index.ts,line=9,endLine=9,col=7,endColumn=8::This variable f is unused.
 ```
 
 ```block
@@ -68,11 +68,11 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-::warning title=lint/correctness/noUnusedVariables,file=main.ts,line=8,endLine=8,col=5,endColumn=6::This variable is unused.
+::warning title=lint/correctness/noUnusedVariables,file=main.ts,line=8,endLine=8,col=5,endColumn=6::This variable f is unused.
 ```
 
 ```block
-::warning title=lint/correctness/noUnusedVariables,file=main.ts,line=9,endLine=9,col=7,endColumn=8::This variable is unused.
+::warning title=lint/correctness/noUnusedVariables,file=main.ts,line=9,endLine=9,col=7,endColumn=8::This variable f is unused.
 ```
 
 ```block

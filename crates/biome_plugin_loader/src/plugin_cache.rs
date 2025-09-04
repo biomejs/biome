@@ -1,9 +1,10 @@
 use biome_analyze::AnalyzerPluginVec;
+use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use camino::Utf8PathBuf;
 use papaya::HashMap;
-use rustc_hash::FxBuildHasher;
+use rustc_hash::{FxBuildHasher, FxHashSet};
 
-use crate::BiomePlugin;
+use crate::{BiomePlugin, PluginDiagnostic};
 
 /// Cache for storing loaded plugins in memory.
 ///
@@ -18,12 +19,41 @@ impl PluginCache {
         self.0.pin().insert(path, plugin);
     }
 
-    /// Returns the loaded analyzer plugins.
-    pub fn get_analyzer_plugins(&self) -> AnalyzerPluginVec {
-        let mut plugins = AnalyzerPluginVec::new();
-        for plugin in self.0.pin().values() {
-            plugins.extend_from_slice(&plugin.analyzer_plugins);
+    /// Returns the loaded and matched analyzer plugins, deduped
+    pub fn get_analyzer_plugins(
+        &self,
+        plugin_configs: &Plugins,
+    ) -> Result<AnalyzerPluginVec, Vec<PluginDiagnostic>> {
+        let mut result = AnalyzerPluginVec::new();
+        let mut seen = FxHashSet::default();
+        let mut diagnostics: Vec<PluginDiagnostic> = Vec::new();
+
+        let map = self.0.pin();
+        for plugin_config in plugin_configs.iter() {
+            match plugin_config {
+                PluginConfiguration::Path(plugin_path) => {
+                    if seen.insert(plugin_path) {
+                        let path_buf = Utf8PathBuf::from(plugin_path);
+                        match map
+                            .iter()
+                            .find(|(path, _)| path.ends_with(path_buf.as_path()))
+                        {
+                            Some((_, plugin)) => {
+                                result.extend_from_slice(&plugin.analyzer_plugins);
+                            }
+                            None => {
+                                diagnostics.push(PluginDiagnostic::not_loaded(path_buf));
+                            }
+                        }
+                    }
+                }
+            }
         }
-        plugins
+
+        if !diagnostics.is_empty() {
+            return Err(diagnostics);
+        }
+
+        Ok(result)
     }
 }

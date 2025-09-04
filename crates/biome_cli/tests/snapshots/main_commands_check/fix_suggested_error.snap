@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `fix.js`
 
@@ -16,7 +16,7 @@ console.log(a);
 ```block
 flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Incompatible arguments --write and --fix
+  × Incompatible arguments --write and --fix. These arguments do the same thing, but --fix is deprecated. Prefer to use --write.
   
 
 

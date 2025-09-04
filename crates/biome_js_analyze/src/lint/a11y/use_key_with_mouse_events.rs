@@ -5,6 +5,7 @@ use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
+use biome_rule_options::use_key_with_mouse_events::UseKeyWithMouseEventsOptions;
 
 declare_lint_rule! {
     /// Enforce `onMouseOver` / `onMouseOut` are accompanied by `onFocus` / `onBlur`.
@@ -44,7 +45,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useKeyWithMouseEvents",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("mouse-events-have-key-events")],
+        sources: &[RuleSource::EslintJsxA11y("mouse-events-have-key-events").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -72,7 +73,7 @@ impl Rule for UseKeyWithMouseEvents {
     type Query = Semantic<AnyJsxElement>;
     type State = UseKeyWithMouseEventsState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseKeyWithMouseEventsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -106,25 +107,25 @@ impl Rule for UseKeyWithMouseEvents {
 }
 
 fn has_valid_focus_attributes(elem: &AnyJsxElement) -> bool {
-    if let Some(on_mouse_over_attribute) = elem.find_attribute_by_name("onMouseOver") {
-        if !elem.has_trailing_spread_prop(&on_mouse_over_attribute) {
-            return elem.find_attribute_by_name("onFocus").is_some_and(|it| {
-                !it.as_static_value()
-                    .is_some_and(|value| value.is_null_or_undefined())
-            });
-        }
+    if let Some(on_mouse_over_attribute) = elem.find_attribute_by_name("onMouseOver")
+        && !elem.has_trailing_spread_prop(&on_mouse_over_attribute)
+    {
+        return elem.find_attribute_by_name("onFocus").is_some_and(|it| {
+            !it.as_static_value()
+                .is_some_and(|value| value.is_null_or_undefined())
+        });
     }
     true
 }
 
 fn has_valid_blur_attributes(elem: &AnyJsxElement) -> bool {
-    if let Some(on_mouse_attribute) = elem.find_attribute_by_name("onMouseOut") {
-        if !elem.has_trailing_spread_prop(&on_mouse_attribute) {
-            return elem.find_attribute_by_name("onBlur").is_some_and(|it| {
-                !it.as_static_value()
-                    .is_some_and(|value| value.is_null_or_undefined())
-            });
-        }
+    if let Some(on_mouse_attribute) = elem.find_attribute_by_name("onMouseOut")
+        && !elem.has_trailing_spread_prop(&on_mouse_attribute)
+    {
+        return elem.find_attribute_by_name("onBlur").is_some_and(|it| {
+            !it.as_static_value()
+                .is_some_and(|value| value.is_null_or_undefined())
+        });
     }
     true
 }

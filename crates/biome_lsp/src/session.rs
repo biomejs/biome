@@ -9,19 +9,22 @@ use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDescription;
 use biome_fs::BiomePath;
-use biome_lsp_converters::{PositionEncoding, WideEncoding, negotiated_encoding};
+use biome_line_index::WideEncoding;
+use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
-use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
+use biome_service::configuration::{
+    LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
+};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
-use biome_service::workspace::ServiceDataNotification;
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
-    SupportsFeatureParams,
+    FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
+    PullDiagnosticsParams, SupportsFeatureParams,
 };
+use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_service::workspace::{ScanKind, ScanProjectFolderParams};
+use biome_service::workspace::{ScanKind, ScanProjectParams};
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use futures::StreamExt;
@@ -43,7 +46,7 @@ use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
 use tower_lsp_server::lsp_types::{MessageType, Registration};
 use tower_lsp_server::lsp_types::{Unregistration, WorkspaceFolder};
 use tower_lsp_server::{Client, UriExt, lsp_types};
-use tracing::{error, info, instrument, warn};
+use tracing::{debug, error, info, instrument, warn};
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -88,11 +91,11 @@ pub(crate) struct Session {
 
     pub(crate) cancellation: Arc<Notify>,
 
-    /// Receiver for service data notifications.
+    /// Receiver for service notifications.
     ///
     /// If we receive a notification here, diagnostics for open documents are
     /// all refreshed.
-    service_data_rx: watch::Receiver<ServiceDataNotification>,
+    service_rx: watch::Receiver<ServiceNotification>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -104,6 +107,7 @@ struct InitializeParams {
     workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 
+#[derive(Clone, Copy, Debug)]
 #[repr(u8)]
 pub(crate) enum ConfigurationStatus {
     /// The configuration file was properly loaded
@@ -188,7 +192,7 @@ impl Session {
         client: Client,
         workspace: Arc<dyn Workspace>,
         cancellation: Arc<Notify>,
-        service_data_rx: watch::Receiver<ServiceDataNotification>,
+        service_rx: watch::Receiver<ServiceNotification>,
     ) -> Self {
         let config = RwLock::new(ExtensionSettings::new());
         Self {
@@ -202,7 +206,7 @@ impl Session {
             extension_settings: config,
             cancellation,
             notified_broken_configuration: AtomicBool::new(false),
-            service_data_rx,
+            service_rx,
         }
     }
 
@@ -228,16 +232,16 @@ impl Session {
 
         let session = self.clone();
         spawn(async move {
-            let mut service_data_rx = session.service_data_rx.clone();
+            let mut service_data_rx = session.service_rx.clone();
             while let Ok(()) = service_data_rx.changed().await {
-                match *session.service_data_rx.borrow() {
-                    ServiceDataNotification::Updated => {
+                match *session.service_rx.borrow() {
+                    ServiceNotification::IndexUpdated => {
                         let session = session.clone();
                         spawn(async move {
                             session.update_all_diagnostics().await;
                         });
                     }
-                    ServiceDataNotification::Stop => {
+                    ServiceNotification::WatcherStopped => {
                         break;
                     }
                 }
@@ -307,7 +311,7 @@ impl Session {
 
     /// Registers an open project with its root path and scans the folder.
     #[tracing::instrument(level = "debug", skip(self))]
-    pub(crate) fn insert_and_scan_project(
+    pub(crate) async fn insert_and_scan_project(
         self: &Arc<Self>,
         project_key: ProjectKey,
         path: BiomePath,
@@ -317,11 +321,9 @@ impl Session {
 
         // Spawn the scan in the background, to avoid timing out the LSP request.
         let session = self.clone();
-        spawn(async move {
-            session
-                .scan_project_folder(project_key, path, scan_kind)
-                .await
-        });
+        spawn(async move { session.scan_project(project_key, scan_kind).await })
+            .await
+            .expect("Scanning task to complete successfully");
     }
 
     /// Get a [`Document`] matching the provided [`Uri`]
@@ -396,7 +398,9 @@ impl Session {
             }
         }
 
-        let file_features = self.workspace.file_features(SupportsFeatureParams {
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = self.workspace.file_features(SupportsFeatureParams {
             project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
@@ -461,7 +465,7 @@ impl Session {
                 .collect()
         };
 
-        tracing::Span::current().record("diagnostic_count", diagnostics.len());
+        info!("Diagnostics sent to the client {}", diagnostics.len());
 
         self.client
             .publish_diagnostics(url, diagnostics, Some(doc.version))
@@ -488,13 +492,88 @@ impl Session {
     }
 
     /// True if the client supports dynamic registration of "workspace/didChangeConfiguration" requests
+    #[instrument(level = "info", skip(self))]
     pub(crate) fn can_register_did_change_configuration(&self) -> bool {
-        self.initialize_params
+        let result = self
+            .initialize_params
             .get()
             .and_then(|c| c.client_capabilities.workspace.as_ref())
             .and_then(|c| c.did_change_configuration)
             .and_then(|c| c.dynamic_registration)
-            == Some(true)
+            == Some(true);
+
+        info!("Can register didChangeConfiguration: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_on_type_formatting(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.on_type_formatting)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register onTypeFormatting: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_formatting(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.formatting)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register formatting: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_range_formatting(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.range_formatting)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register rangeFormatting: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_did_change_watched_files(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.workspace.as_ref())
+            .and_then(|c| c.did_change_watched_files)
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register didChangeWatchedFiles: {result}");
+        result
+    }
+
+    #[instrument(level = "info", skip(self))]
+    pub(crate) fn can_register_code_action(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.code_action.as_ref())
+            .and_then(|c| c.dynamic_registration)
+            == Some(true);
+
+        info!("Can register codeAction: {result}");
+        result
     }
 
     /// Get the current workspace folders
@@ -541,9 +620,9 @@ impl Session {
             self.set_configuration_status(ConfigurationStatus::Loading);
 
             let status = self
-                .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(config_path))
+                .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path))
                 .await;
-
+            debug!("Configuration status: {:?}", status);
             self.set_configuration_status(status);
         } else if let Some(folders) = self.get_workspace_folders() {
             info!("Detected workspace folder.");
@@ -560,6 +639,7 @@ impl Session {
                                 base_path,
                             ))
                             .await;
+                        debug!("Configuration status: {:?}", status);
                         self.set_configuration_status(status);
                     }
                     None => {
@@ -581,23 +661,21 @@ impl Session {
     }
 
     #[instrument(level = "debug", skip(self))]
-    pub(crate) async fn scan_project_folder(
+    pub(crate) async fn scan_project(
         self: &Arc<Self>,
         project_key: ProjectKey,
-        project_path: BiomePath,
         scan_kind: ScanKind,
     ) {
         let session = self.clone();
-        let scan_project = move || {
-            let result = session
-                .workspace
-                .scan_project_folder(ScanProjectFolderParams {
-                    project_key,
-                    path: Some(project_path),
-                    watch: true,
-                    force: false,
-                    scan_kind,
-                });
+
+        spawn_blocking(move || {
+            let result = session.workspace.scan_project(ScanProjectParams {
+                project_key,
+                watch: true,
+                force: false,
+                scan_kind,
+                verbose: false,
+            });
 
             match result {
                 Ok(result) => {
@@ -621,13 +699,13 @@ impl Session {
                     });
                 }
             }
-        };
-
-        let _ = spawn_blocking(scan_project).await;
+        })
+        .await
+        .unwrap();
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
-    async fn load_biome_configuration_file(
+    pub(super) async fn load_biome_configuration_file(
         self: &Arc<Self>,
         base_path: ConfigurationPathHint,
     ) -> ConfigurationStatus {
@@ -659,6 +737,10 @@ impl Session {
             ..
         } = loaded_configuration;
 
+        if configuration_path.is_none() && self.requires_configuration() {
+            return ConfigurationStatus::Missing;
+        }
+
         let fs = self.workspace.fs();
         let should_use_editorconfig = fs_configuration.use_editorconfig();
         let mut configuration = if should_use_editorconfig {
@@ -686,31 +768,47 @@ impl Session {
 
         configuration.merge_with(fs_configuration);
 
-        let path = match (&configuration_path, &base_path) {
-            (Some(configuration_path), _) => configuration_path.as_path(),
-            (
-                None,
-                ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path),
-            ) => path,
-            (None, _) => &fs.working_directory().unwrap_or_default(),
+        // If the configuration from the LSP or the workspace, the directory path is used as
+        // the working directory. Otherwise, the base path of the session is used, then the current
+        // working directory is used as the last resort.
+        let path = match &base_path {
+            ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
+                path.to_path_buf()
+            }
+            _ => self
+                .base_path()
+                .or_else(|| fs.working_directory())
+                .unwrap_or_default(),
         };
-        let register_result = self.workspace.open_project(OpenProjectParams {
-            path: path.into(),
-            open_uninitialized: true,
-            skip_rules: None,
-            only_rules: None,
-        });
-        let project_result = match register_result {
-            Ok(result) => result,
-            Err(error) => {
-                error!("Failed to register the project folder: {error}");
-                self.client.log_message(MessageType::ERROR, &error).await;
-                return ConfigurationStatus::Error;
+
+        let project_key = match self.project_for_path(&path) {
+            Some(project_key) => project_key,
+            None => {
+                let register_result = self.workspace.open_project(OpenProjectParams {
+                    path: path.as_path().into(),
+                    open_uninitialized: true,
+                });
+                let OpenProjectResult { project_key } = match register_result {
+                    Ok(result) => result,
+                    Err(error) => {
+                        error!("Failed to register the project folder: {error}");
+                        self.client.log_message(MessageType::ERROR, &error).await;
+                        return ConfigurationStatus::Error;
+                    }
+                };
+                project_key
             }
         };
 
+        let scan_kind = ProjectScanComputer::new(&configuration).compute();
+        let scan_kind = if scan_kind.is_none() {
+            ScanKind::KnownFiles
+        } else {
+            scan_kind
+        };
+
         let result = self.workspace.update_settings(UpdateSettingsParams {
-            project_key: project_result.project_key,
+            project_key,
             workspace_directory: configuration_path
                 .as_ref()
                 .map(Utf8PathBuf::as_path)
@@ -718,11 +816,8 @@ impl Session {
             configuration,
         });
 
-        self.insert_and_scan_project(
-            project_result.project_key,
-            path.into(),
-            project_result.scan_kind,
-        );
+        self.insert_and_scan_project(project_key, path.into(), scan_kind)
+            .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {error:?}");
@@ -800,7 +895,7 @@ impl Session {
     }
 
     /// Updates the status of the configuration
-    fn set_configuration_status(&self, status: ConfigurationStatus) {
+    pub(super) fn set_configuration_status(&self, status: ConfigurationStatus) {
         self.notified_broken_configuration
             .store(false, Ordering::Relaxed);
         self.configuration_status
@@ -815,7 +910,15 @@ impl Session {
             .store(true, Ordering::Relaxed);
     }
 
+    pub(crate) fn requires_configuration(&self) -> bool {
+        self.extension_settings
+            .read()
+            .unwrap()
+            .requires_configuration()
+    }
+
     pub(crate) fn is_linting_and_formatting_disabled(&self) -> bool {
+        debug!("configuration status {:?}", self.configuration_status());
         match self.configuration_status() {
             ConfigurationStatus::Loaded => false,
             ConfigurationStatus::Missing => self

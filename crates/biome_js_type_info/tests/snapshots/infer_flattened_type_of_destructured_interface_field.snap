@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+interface Foo {
+	foo(): string;
+}
+
+function bar({ foo }: Foo) {}
+
+```
+
+## Result
+
+```
+sync Function "bar" {
+  accepts: {
+    params: [
+      required (bindings: foo: Module(0) TypeId(2)): Module(0) TypeId(1)
+    ]
+    type_args: []
+  }
+  returns: Module(0) TypeId(3)
+}
+```
+
+## Registered types
+
+```
+Thin TypeId(0) => interface "Foo" {
+  extends: []
+  type_args: []
+  members: ["foo": Global TypeId(0)]
+}
+
+Thin TypeId(1) => interface "Foo" {
+  extends: []
+  type_args: []
+  members: ["foo": Global TypeId(0)]
+}
+
+Thin TypeId(2) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+
+Thin TypeId(3) => void
+
+Global TypeId(0) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+```

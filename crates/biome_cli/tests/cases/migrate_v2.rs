@@ -1,15 +1,15 @@
 //! Migrations for Biome v2
 
-use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
 fn should_successfully_migrate_knip() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration_path = Utf8Path::new("biome.json");
@@ -160,7 +160,7 @@ fn should_successfully_migrate_knip() {
 
 #[test]
 fn should_successfully_migrate_ariakit() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration_path = Utf8Path::new("biome.json");
@@ -171,7 +171,7 @@ fn should_successfully_migrate_ariakit() {
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true
+    "useIgnoreFile": false
   },
   "files": {
     "ignoreUnknown": true,
@@ -245,7 +245,7 @@ fn should_successfully_migrate_ariakit() {
 
 #[test]
 fn should_successfully_migrate_sentry() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration_path = Utf8Path::new("biome.json");
@@ -256,7 +256,7 @@ fn should_successfully_migrate_sentry() {
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true,
+    "useIgnoreFile": false,
     "defaultBranch": "master"
   },
   "organizeImports": {
@@ -466,7 +466,7 @@ fn should_successfully_migrate_sentry() {
 
 #[test]
 fn should_migrate_issue_5465() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration_path = Utf8Path::new("biome.json");
@@ -536,7 +536,7 @@ fn should_migrate_issue_5465() {
 }
 #[test]
 fn should_migrate_aws_config() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let configuration_path = Utf8Path::new("biome.json");
@@ -580,7 +580,7 @@ fn should_migrate_aws_config() {
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true
+    "useIgnoreFile": false
   }
 }
 
@@ -600,6 +600,39 @@ fn should_migrate_aws_config() {
         module_path!(),
         "should_migrate_aws_config",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_migrate_nested_config() {
+    let mut fs = TemporaryFs::new("should_migrate_nested_config");
+    let mut console = BufferConsole::default();
+    fs.create_file(
+        "biome.json",
+        r#"{ "linter": { "rules": { "recommended": true } } }"#,
+    );
+    fs.create_file(
+        "foo/biome.json",
+        r#"{ "linter": { "rules": { "recommended": true } } }"#,
+    );
+    fs.create_file(
+        "bar/biome.json",
+        r#"{ "linter": { "rules": { "recommended": true } } }"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["migrate"].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_migrate_nested_config",
+        fs.create_mem(),
         console,
         result,
     ));

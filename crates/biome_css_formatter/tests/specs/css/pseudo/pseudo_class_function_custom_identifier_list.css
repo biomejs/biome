@@ -1,0 +1,42 @@
+html:active-view-transition-type(
+		backwards
+		 		forwards
+		 		 		backwards
+
+
+
+		 		 		forwards) {
+}
+
+
+html:active-view-transition-type(
+		backwards
+		 		forwards
+		 		 		backwards
+
+
+
+		 		 		forwards
+		 		 				backwards
+		 		forwards
+		 		 		backwards
+
+
+
+		 		 		forwards
+		 		 				backwards
+		 		forwards
+		 		 		backwards
+
+
+
+		 		 		forwards
+		 		 				backwards
+		 		forwards
+		 		 		backwards
+
+
+
+		 		 		forwards
+		 		 		) {
+}

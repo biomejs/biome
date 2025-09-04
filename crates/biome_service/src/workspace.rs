@@ -53,53 +53,62 @@
 
 mod client;
 mod document;
-mod scanner;
 mod server;
-mod watcher;
 
-use crate::file_handlers::Capabilities;
-pub use crate::file_handlers::DocumentFileSource;
-use crate::projects::ProjectKey;
-use crate::settings::WorkspaceSettingsHandle;
-pub use crate::workspace::scanner::ScanKind;
-use crate::{Deserialize, Serialize, WorkspaceError};
+use std::{
+    borrow::Cow,
+    fmt::{Debug, Display, Formatter},
+    panic::RefUnwindSafe,
+    str,
+    sync::Arc,
+    time::Duration,
+};
+
 use biome_analyze::{ActionCategory, RuleCategories};
-use biome_configuration::Configuration;
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::{Configuration, analyzer::RuleSelector};
 use biome_console::{Markup, MarkupBuf, markup};
-use biome_diagnostics::CodeSuggestion;
-use biome_diagnostics::serde::Diagnostic;
+use biome_diagnostics::{CodeSuggestion, serde::Diagnostic};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
+use biome_module_graph::SerializedJsModuleInfo;
 use biome_resolver::FsWithResolverProxy;
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
-pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-use core::str;
 use crossbeam::channel::bounded;
 use enumflags2::{BitFlags, bitflags};
-#[cfg(feature = "schema")]
-use schemars::{r#gen::SchemaGenerator, schema::Schema};
+use rustc_hash::FxHashMap;
+use serde::{Deserialize, Serialize};
 pub use server::WorkspaceServer;
 use smallvec::SmallVec;
-use std::collections::HashMap;
-use std::fmt::{Debug, Display, Formatter};
-use std::time::Duration;
-use std::{borrow::Cow, panic::RefUnwindSafe};
 use tokio::sync::watch;
-use tracing::{debug, instrument};
+use tracing::debug;
+
+#[cfg(feature = "schema")]
+use schemars::{r#gen::SchemaGenerator, schema::Schema};
+
+pub use crate::{
+    WorkspaceError,
+    file_handlers::{Capabilities, DocumentFileSource},
+    projects::ProjectKey,
+    scanner::ScanKind,
+    settings::Settings,
+};
+
+pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
+pub use document::{EmbeddedCssContent, EmbeddedJsContent};
+pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.
 #[derive(Clone, Copy, Debug)]
-pub enum ServiceDataNotification {
-    /// Notifies of any kind of update to the service data.
-    Updated,
+pub enum ServiceNotification {
+    /// Notifies that some file or folder's index has been updated.
+    IndexUpdated,
 
     /// Workspace watcher has stopped and no more service data updates are
     /// expected.
-    Stop,
+    WatcherStopped,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -118,20 +127,314 @@ pub struct SupportsFeatureResult {
     pub reason: Option<SupportKind>,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, Default, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub struct FileFeaturesResult {
-    pub features_supported: HashMap<FeatureKind, SupportKind>,
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct FeaturesSupported([SupportKind; NUM_FEATURE_KINDS]);
+
+impl FeaturesSupported {
+    /// By default, all features are not supported by a file.
+    const WORKSPACE_FEATURES: [SupportKind; NUM_FEATURE_KINDS] = [
+        SupportKind::FileNotSupported,
+        SupportKind::FileNotSupported,
+        SupportKind::FileNotSupported,
+        SupportKind::FileNotSupported,
+        SupportKind::FileNotSupported,
+    ];
+
+    #[inline]
+    fn insert(&mut self, feature: FeatureKind, support: SupportKind) {
+        self.0[feature.index()] = support;
+    }
+
+    /// Adds the features that are enabled in `capabilities` to this result.
+    #[inline]
+    pub fn with_capabilities(mut self, capabilities: &Capabilities) -> Self {
+        if capabilities.formatter.format.is_some() {
+            self.insert(FeatureKind::Format, SupportKind::Supported);
+        }
+        if capabilities.analyzer.lint.is_some() {
+            self.insert(FeatureKind::Lint, SupportKind::Supported);
+        }
+        if capabilities.analyzer.code_actions.is_some() {
+            self.insert(FeatureKind::Assist, SupportKind::Supported);
+        }
+        if capabilities.search.search.is_some() {
+            self.insert(FeatureKind::Search, SupportKind::Supported);
+        }
+
+        if capabilities.debug.debug_syntax_tree.is_some()
+            || capabilities.debug.debug_formatter_ir.is_some()
+            || capabilities.debug.debug_control_flow.is_some()
+            || capabilities.debug.debug_type_info.is_some()
+            || capabilities.debug.debug_registered_types.is_some()
+        {
+            self.insert(FeatureKind::Debug, SupportKind::Supported);
+        }
+
+        self
+    }
+
+    /// Checks if a feature is enabled for the current path.
+    ///
+    /// The method checks the configuration enables a certain feature for the given path.
+    #[inline]
+    pub(crate) fn with_settings_and_language(
+        mut self,
+        settings: &Settings,
+        path: &Utf8Path,
+        capabilities: &Capabilities,
+    ) -> Self {
+        // formatter
+        let formatter_enabled = capabilities.enabled_for_path.formatter;
+        if let Some(formatter_enabled) = formatter_enabled {
+            let formatter_enabled = formatter_enabled(path, settings);
+
+            if !formatter_enabled {
+                self.insert(FeatureKind::Format, SupportKind::FeatureNotEnabled);
+            }
+        }
+
+        // linter
+        let linter_enabled = capabilities.enabled_for_path.linter;
+        if let Some(linter_enabled) = linter_enabled {
+            let linter_enabled = linter_enabled(path, settings);
+            if !linter_enabled {
+                self.insert(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
+            }
+        }
+        // assist
+        let assist_enabled = capabilities.enabled_for_path.assist;
+        if let Some(assist_enabled) = assist_enabled {
+            let assist_enabled = assist_enabled(path, settings);
+            if !assist_enabled {
+                self.insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
+            }
+        }
+
+        // search
+        let search_enabled = capabilities.enabled_for_path.search;
+        if let Some(search_enabled) = search_enabled {
+            let search_enabled = search_enabled(path, settings);
+            if !search_enabled {
+                self.insert(FeatureKind::Search, SupportKind::FeatureNotEnabled);
+            }
+        }
+
+        debug!("The file has the following feature sets: {:?}", &self);
+
+        self
+    }
+
+    /// The file will be ignored for all features
+    #[inline]
+    pub fn set_ignored_for_all_features(&mut self) {
+        for support_kind in self.0.iter_mut() {
+            *support_kind = SupportKind::Ignored;
+        }
+    }
+
+    /// The file will be protected for all features
+    #[inline]
+    pub fn set_protected_for_all_features(&mut self) {
+        for support_kind in self.0.iter_mut() {
+            *support_kind = SupportKind::Protected;
+        }
+    }
+
+    #[inline]
+    pub fn set_ignored(&mut self, feature: FeatureKind) {
+        self.insert(feature, SupportKind::Ignored);
+    }
+
+    /// Checks whether the file support the given `feature`
+    #[inline]
+    fn supports(&self, feature: FeatureKind) -> bool {
+        let support_kind = self.0[feature.index()];
+        matches!(support_kind, SupportKind::Supported)
+    }
+
+    pub fn supports_lint(&self) -> bool {
+        self.supports(FeatureKind::Lint)
+    }
+
+    pub fn supports_format(&self) -> bool {
+        self.supports(FeatureKind::Format)
+    }
+
+    pub fn supports_assist(&self) -> bool {
+        self.supports(FeatureKind::Assist)
+    }
+
+    pub fn supports_search(&self) -> bool {
+        self.supports(FeatureKind::Search)
+    }
+
+    /// Returns the [`SupportKind`] for the given `feature`, but only if it is
+    /// not enabled.
+    #[inline(always)]
+    pub fn support_kind_for(&self, feature: FeatureKind) -> SupportKind {
+        self.0[feature.index()]
+    }
+
+    /// Returns the [`SupportKind`] for the given `feature`, but only if it is
+    /// not enabled.
+    pub fn support_kind_if_not_enabled(&self, feature: FeatureKind) -> Option<SupportKind> {
+        let support_kind = self.support_kind_for(feature);
+        if support_kind.is_not_enabled() {
+            Some(support_kind)
+        } else {
+            None
+        }
+    }
+
+    /// Loops through all the features of the current file, and if a feature is [SupportKind::FileNotSupported],
+    /// it gets changed to [SupportKind::Ignored]
+    pub fn ignore_not_supported(&mut self) {
+        for support_kind in self.0.iter_mut() {
+            if matches!(support_kind, SupportKind::FileNotSupported) {
+                *support_kind = SupportKind::Ignored;
+            }
+        }
+    }
+
+    /// If at least one feature is supported, the file is supported
+    pub fn is_supported(&self) -> bool {
+        self.0
+            .iter()
+            .any(|support_kind| support_kind.is_supported())
+    }
+
+    /// The file is ignored only if all the features marked it as ignored
+    pub fn is_ignored(&self) -> bool {
+        self.0.iter().all(|support_kind| support_kind.is_ignored())
+    }
+
+    /// The file is protected only if all the features marked it as protected
+    pub fn is_protected(&self) -> bool {
+        self.0
+            .iter()
+            .all(|support_kind| support_kind.is_protected())
+    }
+
+    /// The file is not supported if all the features are unsupported
+    pub fn is_not_supported(&self) -> bool {
+        self.0
+            .iter()
+            .all(|support_kind| support_kind.is_not_supported())
+    }
+
+    /// The file is not enabled if all the features aren't enabled
+    pub fn is_not_enabled(&self) -> bool {
+        self.0
+            .iter()
+            .all(|support_kind| support_kind.is_not_enabled())
+    }
+
+    /// The file is not processed if for every enabled feature
+    /// the file is either protected, not supported, ignored.
+    #[inline]
+    pub fn is_not_processed(&self) -> bool {
+        self.0.iter().all(|support_kind| {
+            matches!(
+                support_kind,
+                SupportKind::FeatureNotEnabled
+                    | SupportKind::FileNotSupported
+                    | SupportKind::Ignored
+                    | SupportKind::Protected
+            )
+        })
+    }
 }
 
-impl std::fmt::Display for FileFeaturesResult {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (feature, support_kind) in self.features_supported.iter() {
-            write!(f, "{}: {}, ", feature, support_kind)?;
+impl Default for FeaturesSupported {
+    fn default() -> Self {
+        Self(Self::WORKSPACE_FEATURES)
+    }
+}
+
+impl Display for FeaturesSupported {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        for (index, support_kind) in self.0.iter().enumerate() {
+            let feature = FeatureKind::from_index(index);
+            write!(f, "{feature}: {support_kind}")?;
         }
         Ok(())
     }
+}
+
+impl serde::Serialize for FeaturesSupported {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        use serde::ser::SerializeMap;
+
+        let mut map = serializer.serialize_map(Some(NUM_FEATURE_KINDS))?;
+        for (index, support_kind) in self.0.iter().enumerate() {
+            let feature = FeatureKind::from_index(index);
+            map.serialize_entry(&feature, support_kind)?;
+        }
+
+        map.end()
+    }
+}
+
+struct FeaturesSupportedVisitor;
+
+impl<'de> serde::de::Visitor<'de> for FeaturesSupportedVisitor {
+    type Value = FeaturesSupported;
+
+    fn expecting(&self, formatter: &mut Formatter) -> std::fmt::Result {
+        formatter.write_str("a map of supported features")
+    }
+
+    fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::MapAccess<'de>,
+    {
+        let mut features = FeaturesSupported::WORKSPACE_FEATURES;
+        while let Some((key, value)) = map.next_entry::<FeatureKind, SupportKind>()? {
+            features[key.index()] = value;
+        }
+
+        Ok(FeaturesSupported(features))
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for FeaturesSupported {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        deserializer.deserialize_map(FeaturesSupportedVisitor)
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for FeaturesSupported {
+    fn schema_name() -> String {
+        "FeaturesSupported".to_owned()
+    }
+
+    fn json_schema(generator: &mut SchemaGenerator) -> Schema {
+        use schemars::schema::*;
+
+        Schema::Object(SchemaObject {
+            instance_type: Some(InstanceType::Object.into()),
+            object: Some(Box::new(ObjectValidation {
+                property_names: Some(Box::new(generator.subschema_for::<FeatureKind>())),
+                additional_properties: Some(Box::new(generator.subschema_for::<SupportKind>())),
+                ..Default::default()
+            })),
+            ..Default::default()
+        })
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct FileFeaturesResult {
+    pub features_supported: FeaturesSupported,
 }
 
 impl FileFeaturesResult {
@@ -154,216 +457,8 @@ impl FileFeaturesResult {
             .is_some_and(|filename| Self::PROTECTED_FILES.contains(&filename))
     }
 
-    /// By default, all features are not supported by a file.
-    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 5] = [
-        (FeatureKind::Lint, SupportKind::FileNotSupported),
-        (FeatureKind::Format, SupportKind::FileNotSupported),
-        (FeatureKind::Search, SupportKind::FileNotSupported),
-        (FeatureKind::Assist, SupportKind::FileNotSupported),
-        (FeatureKind::Debug, SupportKind::FileNotSupported),
-    ];
-
-    pub fn new() -> Self {
-        Self {
-            features_supported: HashMap::from(Self::WORKSPACE_FEATURES),
-        }
-    }
-
-    /// Adds the features that are enabled in `capabilities` to this result.
-    pub fn with_capabilities(mut self, capabilities: &Capabilities) -> Self {
-        if capabilities.formatter.format.is_some() {
-            self.features_supported
-                .insert(FeatureKind::Format, SupportKind::Supported);
-        }
-        if capabilities.analyzer.lint.is_some() {
-            self.features_supported
-                .insert(FeatureKind::Lint, SupportKind::Supported);
-        }
-
-        if capabilities.analyzer.code_actions.is_some() {
-            self.features_supported
-                .insert(FeatureKind::Assist, SupportKind::Supported);
-        }
-
-        if capabilities.search.search.is_some() {
-            self.features_supported
-                .insert(FeatureKind::Search, SupportKind::Supported);
-        }
-
-        if capabilities.debug.debug_syntax_tree.is_some()
-            || capabilities.debug.debug_formatter_ir.is_some()
-            || capabilities.debug.debug_control_flow.is_some()
-            || capabilities.debug.debug_type_info.is_some()
-            || capabilities.debug.debug_registered_types.is_some()
-        {
-            self.features_supported
-                .insert(FeatureKind::Debug, SupportKind::Supported);
-        }
-
-        self
-    }
-
-    /// Checks if a feature is enabled for the current path.
-    ///
-    /// The method checks the configuration enables a certain feature for the given path.
-    #[instrument(level = "debug", skip(self, handle, capabilities))]
-    pub(crate) fn with_settings_and_language(
-        mut self,
-        handle: &WorkspaceSettingsHandle,
-        path: &Utf8Path,
-        capabilities: &Capabilities,
-    ) -> Self {
-        // formatter
-        let formatter_enabled = capabilities.enabled_for_path.formatter;
-        if let Some(formatter_enabled) = formatter_enabled {
-            let formatter_enabled = formatter_enabled(path, handle);
-
-            if !formatter_enabled {
-                self.features_supported
-                    .insert(FeatureKind::Format, SupportKind::FeatureNotEnabled);
-            }
-        }
-
-        // linter
-        let linter_enabled = capabilities.enabled_for_path.linter;
-        if let Some(linter_enabled) = linter_enabled {
-            let linter_enabled = linter_enabled(path, handle);
-            if !linter_enabled {
-                self.features_supported
-                    .insert(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
-            }
-        }
-        // assist
-        let assist_enabled = capabilities.enabled_for_path.assist;
-        if let Some(assist_enabled) = assist_enabled {
-            let assist_enabled = assist_enabled(path, handle);
-            if !assist_enabled {
-                self.features_supported
-                    .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
-            }
-        }
-
-        // search
-        let search_enabled = capabilities.enabled_for_path.search;
-        if let Some(search_enabled) = search_enabled {
-            let search_enabled = search_enabled(path, handle);
-            if !search_enabled {
-                self.features_supported
-                    .insert(FeatureKind::Search, SupportKind::FeatureNotEnabled);
-            }
-        }
-
-        debug!(
-            "The file has the following feature sets: {:?}",
-            &self.features_supported
-        );
-
-        self
-    }
-
-    /// The file will be ignored for all features
-    pub fn set_ignored_for_all_features(&mut self) {
-        for support_kind in self.features_supported.values_mut() {
-            *support_kind = SupportKind::Ignored;
-        }
-    }
-
-    /// The file will be protected for all features
-    pub fn set_protected_for_all_features(&mut self) {
-        for support_kind in self.features_supported.values_mut() {
-            *support_kind = SupportKind::Protected;
-        }
-    }
-
-    pub fn ignored(&mut self, feature: FeatureKind) {
-        self.features_supported
-            .insert(feature, SupportKind::Ignored);
-    }
-
-    /// Checks whether the file support the given `feature`
-    fn supports_for(&self, feature: &FeatureKind) -> bool {
-        self.features_supported
-            .get(feature)
-            .is_some_and(|support_kind| matches!(support_kind, SupportKind::Supported))
-    }
-
-    pub fn supports_lint(&self) -> bool {
-        self.supports_for(&FeatureKind::Lint)
-    }
-
-    pub fn supports_format(&self) -> bool {
-        self.supports_for(&FeatureKind::Format)
-    }
-
-    pub fn supports_assist(&self) -> bool {
-        self.supports_for(&FeatureKind::Assist)
-    }
-
-    pub fn supports_search(&self) -> bool {
-        self.supports_for(&FeatureKind::Search)
-    }
-
-    /// Loops through all the features of the current file, and if a feature is [SupportKind::FileNotSupported],
-    /// it gets changed to [SupportKind::Ignored]
-    pub fn ignore_not_supported(&mut self) {
-        for support_kind in self.features_supported.values_mut() {
-            if matches!(support_kind, SupportKind::FileNotSupported) {
-                *support_kind = SupportKind::Ignored;
-            }
-        }
-    }
-
-    pub fn support_kind_for(&self, feature: &FeatureKind) -> Option<&SupportKind> {
-        self.features_supported.get(feature)
-    }
-
-    /// If at least one feature is supported, the file is supported
-    pub fn is_supported(&self) -> bool {
-        self.features_supported
-            .values()
-            .any(|support_kind| support_kind.is_supported())
-    }
-
-    /// The file is ignored only if all the features marked it as ignored
-    pub fn is_ignored(&self) -> bool {
-        self.features_supported
-            .values()
-            .all(|support_kind| support_kind.is_ignored())
-    }
-
-    /// The file is protected only if all the features marked it as protected
-    pub fn is_protected(&self) -> bool {
-        self.features_supported
-            .values()
-            .all(|support_kind| support_kind.is_protected())
-    }
-
-    /// The file is not supported if all the features are unsupported
-    pub fn is_not_supported(&self) -> bool {
-        self.features_supported
-            .values()
-            .all(|support_kind| support_kind.is_not_supported())
-    }
-
-    /// The file is not enabled if all the features aren't enabled
-    pub fn is_not_enabled(&self) -> bool {
-        self.features_supported
-            .values()
-            .all(|support_kind| support_kind.is_not_enabled())
-    }
-
-    /// The file is not processed if for every enabled feature
-    /// the file is either protected, not supported, ignored.
-    pub fn is_not_processed(&self) -> bool {
-        self.features_supported.values().all(|support_kind| {
-            matches!(
-                support_kind,
-                SupportKind::FeatureNotEnabled
-                    | SupportKind::FileNotSupported
-                    | SupportKind::Ignored
-                    | SupportKind::Protected
-            )
-        })
+    pub fn new(features_supported: FeaturesSupported) -> Self {
+        Self { features_supported }
     }
 }
 
@@ -384,7 +479,7 @@ impl SupportsFeatureResult {
     }
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, Eq, PartialEq, Clone)]
+#[derive(Clone, Copy, Debug, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum SupportKind {
@@ -443,14 +538,46 @@ pub enum FeatureKind {
     Debug,
 }
 
-impl std::fmt::Display for FeatureKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+pub const NUM_FEATURE_KINDS: usize = 5;
+
+impl Display for FeatureKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Format => write!(f, "Format"),
             Self::Lint => write!(f, "Lint"),
             Self::Search => write!(f, "Search"),
             Self::Assist => write!(f, "Assist"),
             Self::Debug => write!(f, "Debug"),
+        }
+    }
+}
+
+impl FeatureKind {
+    /// Returns the feature kind from its index.
+    ///
+    /// ## Panics
+    ///
+    /// Panics if the index is higher than or equal to [`NUM_FEATURE_KINDS`].
+    fn from_index(index: usize) -> Self {
+        match index {
+            0 => Self::Format,
+            1 => Self::Lint,
+            2 => Self::Search,
+            3 => Self::Assist,
+            4 => Self::Debug,
+            _ => unreachable!("invalid index for FeatureKind"),
+        }
+    }
+
+    /// Returns the index for the feature kind.
+    #[inline]
+    fn index(self) -> usize {
+        match self {
+            Self::Format => 0,
+            Self::Lint => 1,
+            Self::Search => 2,
+            Self::Assist => 3,
+            Self::Debug => 4,
         }
     }
 }
@@ -623,6 +750,12 @@ pub struct OpenFileParams {
     #[serde(default)]
     pub persist_node_cache: bool,
 }
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct OpenFileResult {
+    diagnostics: Vec<Diagnostic>,
+}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -696,6 +829,11 @@ pub struct GetSemanticModelParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct GetModuleGraphParams {}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetFormatterIRParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -744,9 +882,32 @@ pub struct ChangeFileParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct ChangeFileResult {
+    diagnostics: Vec<Diagnostic>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct CloseFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
+}
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateModuleGraphParams {
+    pub path: BiomePath,
+    /// The kind of update to apply to the module graph
+    pub update_kind: UpdateKind,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum UpdateKind {
+    AddOrUpdate,
+    Remove,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -790,6 +951,8 @@ pub struct PullActionsParams {
     pub skip: Vec<RuleSelector>,
     #[serde(default)]
     pub enabled_rules: Vec<RuleSelector>,
+    #[serde(default)]
+    pub categories: RuleCategories,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -915,7 +1078,7 @@ pub struct RenameResult {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct ScanProjectFolderResult {
+pub struct ScanProjectResult {
     /// Diagnostics reported while scanning the project.
     pub diagnostics: Vec<Diagnostic>,
 
@@ -1024,8 +1187,8 @@ pub struct DropPatternParams {
 #[serde(rename_all = "camelCase")]
 pub struct PatternId(String);
 
-impl std::fmt::Display for PatternId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for PatternId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
 }
@@ -1051,10 +1214,28 @@ impl From<&str> for PatternId {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct IsPathIgnoredParams {
+pub struct PathIsIgnoredParams {
     pub project_key: ProjectKey,
+    /// The path to inspect
     pub path: BiomePath,
+    /// Whether the path is ignored for specific features e.g. `formatter.includes`.
+    /// When this field is empty, Biome checks only `files.includes`.
     pub features: FeatureName,
+    #[serde(default)]
+    /// Controls how to ignore check should be done
+    pub ignore_kind: IgnoreKind,
+}
+#[derive(Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum IgnoreKind {
+    /// Checks whether a path itself is explicitly ignored only.
+    #[default]
+    Path,
+
+    /// Checks whether a path itself or one of its ancestors is ignored,
+    /// up to the root path of the current project.
+    Ancestors,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1067,13 +1248,6 @@ pub struct OpenProjectParams {
     /// Whether the folder should be opened as a project, even if no
     /// `biome.json` can be found.
     pub open_uninitialized: bool,
-
-    /// Whether the client wants to run only certain rules. This is needed to compute the kind of [ScanKind].
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub only_rules: Option<Vec<RuleSelector>>,
-    /// Whether the client wants to skip some lint rule. This is needed to compute the kind of [ScanKind].
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub skip_rules: Option<Vec<RuleSelector>>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1082,26 +1256,13 @@ pub struct OpenProjectParams {
 pub struct OpenProjectResult {
     /// A unique identifier for this project
     pub project_key: ProjectKey,
-
-    /// How to scan this project
-    pub scan_kind: ScanKind,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct ScanProjectFolderParams {
+pub struct ScanProjectParams {
     pub project_key: ProjectKey,
-
-    /// Optional path within the project to scan.
-    ///
-    /// If omitted, the project is scanned from its root folder.
-    ///
-    /// This is a potential optimization that allows scanning to be limited to
-    /// a subset of the full project. Clients should specify it to indicate
-    /// which part of the project they are interested in. The server may or may
-    /// not use this to avoid scanning parts that are irrelevant to clients.
-    pub path: Option<BiomePath>,
 
     /// Whether the watcher should watch this path.
     ///
@@ -1112,6 +1273,9 @@ pub struct ScanProjectFolderParams {
     pub force: bool,
 
     pub scan_kind: ScanKind,
+
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub verbose: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1119,6 +1283,26 @@ pub struct ScanProjectFolderParams {
 #[serde(rename_all = "camelCase")]
 pub struct CloseProjectParams {
     pub project_key: ProjectKey,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct FileExitsParams {
+    pub file_path: BiomePath,
+}
+
+impl From<BiomePath> for FileExitsParams {
+    fn from(path: BiomePath) -> Self {
+        Self { file_path: path }
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct GetModuleGraphResult {
+    pub data: FxHashMap<String, SerializedJsModuleInfo>,
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
@@ -1137,7 +1321,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// project will default settings.
     ///
     /// Note: Opening a project does not mean the project is ready for use. You
-    /// probably want to follow it up with a call to `scan_project_folder()` or
+    /// probably want to follow it up with a call to `scan_project()` or
     /// explicitly load settings into the project using `update_settings()`.
     ///
     /// Returns the key of the opened project and the [ScanKind] of this project.
@@ -1148,8 +1332,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// The `scan_kind` can be used to tell the scanner how it should scan the project.
     fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError>;
 
-    /// Scans the given project from a given path, and initializes all settings
-    /// and service data.
+    /// Scans the given project, and initializes all settings and service data.
     ///
     /// The first time you call this method, it may take a long time since it
     /// will traverse the entire project folder recursively, parse all included
@@ -1158,17 +1341,14 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ///
     /// Follow-up calls may be much faster as they can reuse cached data.
     ///
-    /// This method also registers file watchers to make sure the cache remains
-    /// up-to-date, if indicated in the `params`.
-    fn scan_project_folder(
-        &self,
-        params: ScanProjectFolderParams,
-    ) -> Result<ScanProjectFolderResult, WorkspaceError>;
+    /// If [`ScanProjectParams::watch`] is `true`, this method also
+    /// registers file watchers to make sure the cache remains up-to-date.
+    fn scan_project(&self, params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError>;
 
     /// Updates the global settings for the given project.
     ///
     /// TODO: This method should not be used in combination with
-    /// `scan_project_folder()`. When scanning is enabled, the server should
+    /// `scan_project()`. When scanning is enabled, the server should
     /// manage project settings on its own.
     fn update_settings(
         &self,
@@ -1187,7 +1367,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// they'll probably just kill the daemon anyway.)
     ///
     /// If a file watcher was registered as a result of a call to
-    /// `scan_project_folder()`, it will also be unregistered.
+    /// `scan_project()`, it will also be unregistered.
     fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError>;
 
     // #endregion
@@ -1198,7 +1378,16 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ///
     /// If the file path is under a folder that belongs to an opened project
     /// other than the current one, the current project is changed accordingly.
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
+    fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
+
+    /// Checks if `file_path` exists in the workspace.
+    ///
+    /// This method is useful to avoid unexpected errors before using the file method and avoid errors.
+    ///
+    /// ### Error
+    ///
+    /// It throws an error only if there's an issue with the client transport.
+    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError>;
 
     /// Checks whether a certain feature is supported for the given file path.
     ///
@@ -1216,37 +1405,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ///
     /// If the file path matches, `true` is returned, and it should be
     /// considered ignored.
-    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the syntax tree for a given
-    /// document.
-    fn get_syntax_tree(
-        &self,
-        params: GetSyntaxTreeParams,
-    ) -> Result<GetSyntaxTreeResult, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the control flow graph at a
-    /// given position in the document.
-    fn get_control_flow_graph(
-        &self,
-        params: GetControlFlowGraphParams,
-    ) -> Result<String, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the formatter IR for a given
-    /// document.
-    fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
-
-    /// Returns an IR of the type information of the document
-    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
-
-    /// Returns the registered types of the document
-    fn get_registered_types(
-        &self,
-        params: GetRegisteredTypesParams,
-    ) -> Result<String, WorkspaceError>;
-
-    /// Returns a textual, debug representation of the semantic model for the document.
-    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
+    fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
 
     /// Returns the content of a given file.
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
@@ -1259,7 +1418,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ) -> Result<CheckFileSizeResult, WorkspaceError>;
 
     /// Changes the content of an open file.
-    fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError>;
+    fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
 
     /// Retrieves the list of diagnostics associated with a file.
     fn pull_diagnostics(
@@ -1295,6 +1454,14 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// may still be required for multi-file analysis.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError>;
 
+    /// Updates the internal module graph using the provided path.
+    ///
+    /// ## Errors
+    ///
+    /// An error is emitted if the path doesn't exist inside the workspace. Use
+    /// the method [Workspace::open_file] before updating the module graph.
+    fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError>;
+
     /// Returns the filesystem implementation to open files with.
     ///
     /// This may be an in-memory file system.
@@ -1322,7 +1489,43 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     // #endregion
 
-    // #region MISC METHODS
+    // #region DEBUGGING METHODS
+
+    /// Returns a textual, debug representation of the syntax tree for a given
+    /// document.
+    fn get_syntax_tree(
+        &self,
+        params: GetSyntaxTreeParams,
+    ) -> Result<GetSyntaxTreeResult, WorkspaceError>;
+
+    /// Returns a textual, debug representation of the control flow graph at a
+    /// given position in the document.
+    fn get_control_flow_graph(
+        &self,
+        params: GetControlFlowGraphParams,
+    ) -> Result<String, WorkspaceError>;
+
+    /// Returns a textual, debug representation of the formatter IR for a given
+    /// document.
+    fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
+
+    /// Returns an IR of the type information of the document
+    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError>;
+
+    /// Returns the registered types of the document
+    fn get_registered_types(
+        &self,
+        params: GetRegisteredTypesParams,
+    ) -> Result<String, WorkspaceError>;
+
+    /// Returns a textual, debug representation of the semantic model for the document.
+    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
+
+    /// Returns a serializable version of the module graph
+    fn get_module_graph(
+        &self,
+        params: GetModuleGraphParams,
+    ) -> Result<GetModuleGraphResult, WorkspaceError>;
 
     /// Returns debug information about this workspace.
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;
@@ -1335,15 +1538,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
-pub fn server(fs: Box<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
+pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<dyn Workspace> {
     let (watcher_tx, _) = bounded(0);
-    let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
-    Box::new(WorkspaceServer::new(
-        fs,
-        watcher_tx,
-        service_data_tx,
-        threads,
-    ))
+    let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
+    Box::new(WorkspaceServer::new(fs, watcher_tx, service_tx, threads))
 }
 
 /// Convenience function for constructing a client instance of [Workspace]
@@ -1415,7 +1613,11 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn change_file(&self, version: i32, content: String) -> Result<(), WorkspaceError> {
+    pub fn change_file(
+        &self,
+        version: i32,
+        content: String,
+    ) -> Result<ChangeFileResult, WorkspaceError> {
         self.workspace.change_file(ChangeFileParams {
             project_key: self.project_key,
             path: self.path.clone(),
@@ -1456,6 +1658,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         skip: Vec<RuleSelector>,
         suppression_reason: Option<String>,
         enabled_rules: Vec<RuleSelector>,
+        categories: RuleCategories,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             project_key: self.project_key,
@@ -1465,6 +1668,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             skip,
             suppression_reason,
             enabled_rules,
+            categories,
         })
     }
 

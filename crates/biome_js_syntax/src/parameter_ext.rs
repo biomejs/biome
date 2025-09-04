@@ -469,6 +469,14 @@ impl AnyParameter {
             },
         }
     }
+
+    /// Returns type annotation of the parameter if any.
+    pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
+        match self {
+            Self::AnyJsConstructorParameter(parameter) => parameter.type_annotation(),
+            Self::AnyJsParameter(parameter) => parameter.type_annotation(),
+        }
+    }
 }
 
 declare_node_union! {
@@ -520,6 +528,15 @@ impl AnyJsParameter {
     pub fn has_any_decorator(&self) -> bool {
         self.decorators()
             .is_some_and(|decorators| !decorators.is_empty())
+    }
+
+    /// Returns the type annotation of the parameter if any.
+    pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
+        match self {
+            Self::AnyJsFormalParameter(parameter) => parameter.type_annotation(),
+            Self::JsRestParameter(parameter) => parameter.type_annotation(),
+            Self::TsThisParameter(parameter) => parameter.type_annotation(),
+        }
     }
 }
 

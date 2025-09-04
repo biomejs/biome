@@ -22,7 +22,7 @@ biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true }
 camino                   = { workspace = true }
 cfg-if                   = { workspace = true }
-countme                  = { workspace = true }
+countme                  = { workspace = true, optional = true }
 drop_bomb                = "0.1.5"
 indexmap                 = { workspace = true }
 rustc-hash               = { workspace = true }
@@ -37,8 +37,9 @@ biome_js_syntax = { path = "../biome_js_syntax" }
 insta           = { workspace = true }
 
 [features]
-schema = ["dep:schemars", "serde"]
-serde  = ["dep:serde", "biome_deserialize/serde", "biome_rowan/serde"]
+countme = ["dep:countme"]
+schema  = ["dep:schemars", "serde"]
+serde   = ["dep:serde", "biome_deserialize/serde", "biome_rowan/serde"]
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]

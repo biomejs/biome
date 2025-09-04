@@ -34,6 +34,7 @@ use crate::ts::types::undefined_type::FormatTsUndefinedType;
 use crate::ts::types::union_type::FormatTsUnionType;
 use crate::ts::types::unknown_type::FormatTsUnknownType;
 use crate::ts::types::void_type::FormatTsVoidType;
+use crate::verbatim::format_suppressed_node_skip_comments;
 use crate::{js::auxiliary::metavariable::FormatJsMetavariable, prelude::*};
 use biome_formatter::{FormatRuleWithOptions, comments::CommentStyle, write};
 use biome_js_syntax::{AnyTsType, JsLanguage, TsUnionType, TsUnionTypeVariantList};
@@ -92,7 +93,7 @@ impl Format<JsFormatContext> for FormatTypeVariant<'_> {
         // This is a hack: It by passes the regular format node to only format the node without its comments.
         let format_node = format_with(|f: &mut JsFormatter| {
             if is_suppressed {
-                write!(f, [format_suppressed_node(node.syntax()).skip_comments()])
+                write!(f, [format_suppressed_node_skip_comments(node.syntax())])
             } else {
                 match node {
                     AnyTsType::TsAnyType(ty) => FormatTsAnyType.fmt_node(ty, f),

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 423
-expression: content
+expression: redactor(content)
 ---
 ## `check.js`
 
@@ -15,7 +14,7 @@ statement();
 ```block
 flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Incompatible arguments --suppress and --write
+  × Incompatible arguments --suppress and --write. --write is used to write fixes, and --suppress is used to suppress diagnostics. Remove one of these arguments depending on what you want to do.
   
 
 

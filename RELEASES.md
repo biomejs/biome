@@ -11,7 +11,7 @@ We publish pre-releases of the main `@biomejs/biome` package twice a week. These
 These releases are published to `pkg.pr.new`, and an automated message is sent on [Discord](https://biomejs.dev/chat), in the `#release` channel.
 
 > [!WARNING]
-> **Don't** use prerelease in **production**. Artefacts in `pkg.pr.new` are purged after roughly 30 days.
+> **Don't** use prerelease in **production**. Artifacts in `pkg.pr.new` are purged after roughly 30 days.
 
 ## Beta release
 

@@ -1,11 +1,11 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFileSource, JsImport};
 use biome_rowan::AstNode;
+use biome_rule_options::no_head_import_in_document::NoHeadImportInDocumentOptions;
 use std::path::MAIN_SEPARATOR;
 
 declare_lint_rule! {
@@ -48,8 +48,7 @@ declare_lint_rule! {
         version: "1.9.4",
         name: "noHeadImportInDocument",
         language: "jsx",
-        sources: &[RuleSource::EslintNext("no-head-import-in-document")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintNext("no-head-import-in-document").same()],
         recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Next],
@@ -60,7 +59,7 @@ impl Rule for NoHeadImportInDocument {
     type Query = Ast<JsImport>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoHeadImportInDocumentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         if !ctx.source_type::<JsFileSource>().is_jsx() {

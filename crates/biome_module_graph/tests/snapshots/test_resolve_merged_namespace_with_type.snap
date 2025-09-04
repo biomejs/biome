@@ -1,0 +1,56 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts`
+
+## Source
+
+```ts
+export namespace Foo {
+	interface Bar {}
+}
+
+export type Foo = Foo.Bar;
+```
+
+## Module Info
+
+```
+Exports {
+  "Foo" => {
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(2))
+  }
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => Namespace {
+    path: Identifier(
+        "Foo",
+    ),
+    members: [
+        TypeMember {
+            kind: NamedStatic(
+                "Bar",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(1),
+            ),
+        },
+    ],
+}
+
+Module TypeId(1) => interface "Bar" {
+  extends: []
+  type_args: []
+  members: []
+}
+
+Module TypeId(2) => (type: Module(0) TypeId(1), value: Module(0) TypeId(0), namespace: Module(0) TypeId(0))
+```

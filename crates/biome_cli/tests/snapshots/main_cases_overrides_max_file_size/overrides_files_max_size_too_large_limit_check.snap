@@ -1,6 +1,5 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 432
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -49,7 +48,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 test.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The size of the file is 13 B, which exceeds the configured maximum of 1 B for this project.
-    Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file.
+    Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.includes` to ignore the file.
   
 
 ```

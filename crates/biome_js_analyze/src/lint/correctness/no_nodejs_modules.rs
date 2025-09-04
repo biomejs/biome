@@ -6,6 +6,7 @@ use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, inner_string_text};
 use biome_resolver::is_builtin_node_module;
 use biome_rowan::AstNode;
 use biome_rowan::TextRange;
+use biome_rule_options::no_nodejs_modules::NoNodejsModulesOptions;
 
 declare_lint_rule! {
     /// Forbid the use of Node.js builtin modules.
@@ -42,7 +43,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noNodejsModules",
         language: "js",
-        sources: &[RuleSource::EslintImport("no-nodejs-modules")],
+        sources: &[RuleSource::EslintImport("no-nodejs-modules").same()],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -52,20 +53,19 @@ impl Rule for NoNodejsModules {
     type Query = Manifest<AnyJsImportLike>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNodejsModulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         if node.is_in_ts_module_declaration() {
             return None;
         }
-        if let AnyJsImportLike::JsModuleSource(module_source) = &node {
-            if let Some(import_clause) = module_source.parent::<AnyJsImportClause>() {
-                if import_clause.type_token().is_some() {
-                    // Ignore type-only imports
-                    return None;
-                }
-            }
+        if let AnyJsImportLike::JsModuleSource(module_source) = &node
+            && let Some(import_clause) = module_source.parent::<AnyJsImportClause>()
+            && import_clause.type_token().is_some()
+        {
+            // Ignore type-only imports
+            return None;
         }
         let module_name = node.module_name_token()?;
         let module_name_text = inner_string_text(&module_name);

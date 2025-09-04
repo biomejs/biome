@@ -28,10 +28,11 @@ div {
 -    "Helvetica Neue",
 -    Helvetica,
 -    Arial,
+-    sans-serif;
 +  border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
 +  $
-+  fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial,
-     sans-serif;
++  fontFamily:
++    "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
  }
 ```
 
@@ -41,8 +42,8 @@ div {
 div {
   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
   $
-  fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial,
-    sans-serif;
+  fontFamily:
+    "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 ```
 

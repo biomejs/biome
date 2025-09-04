@@ -3,7 +3,6 @@ use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::{js_directive_list, js_function_body, js_statement_list, token};
 use biome_js_syntax::{
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     global_identifier,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_console::NoConsoleOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `console`.
@@ -50,7 +50,7 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "noConsole",
         language: "js",
-        sources: &[RuleSource::Eslint("no-console")],
+        sources: &[RuleSource::Eslint("no-console").same()],
         recommended: false,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -61,7 +61,7 @@ impl Rule for NoConsole {
     type Query = Semantic<AnyJsMemberExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = Box<NoConsoleOptions>;
+    type Options = NoConsoleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let member_expression = ctx.query();
@@ -128,14 +128,4 @@ impl Rule for NoConsole {
             mutation,
         ))
     }
-}
-
-#[derive(
-    Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
-)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(deny_unknown_fields)]
-pub struct NoConsoleOptions {
-    /// Allowed calls on the console object.
-    pub allow: Box<[Box<str>]>,
 }

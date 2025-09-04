@@ -1,59 +1,119 @@
-export type WasmBundler = typeof import("@biomejs/wasm-bundler");
-export type WasmNodejs = typeof import("@biomejs/wasm-nodejs");
-export type WasmWeb = typeof import("@biomejs/wasm-web");
+export type BiomePath = string;
+export type ProjectKey = number;
 
-export type WasmModule = WasmBundler | WasmNodejs | WasmWeb;
-
-/**
- * What kind of client Biome should use to communicate with the binary
- */
-export enum Distribution {
-	/**
-	 * Use this if you want to communicate with the WebAssembly client built for bundlers
-	 */
-	BUNDLER = 0,
-	/**
-	 * Use this if you want to communicate with the WebAssembly client built for Node.JS
-	 */
-	NODE = 1,
-	/**
-	 * Use this if you want to communicate with the WebAssembly client built for the Web
-	 */
-	WEB = 2,
+interface UpdateSettingsParams<Configuration> {
+	configuration: Configuration;
+	projectKey: ProjectKey;
+	workspaceDirectory?: BiomePath;
 }
 
-const isInitialized = {
-	[Distribution.BUNDLER]: false,
-	[Distribution.NODE]: false,
-	[Distribution.WEB]: false,
-};
+type TextRange = [TextSize, TextSize];
 
-export async function loadModule(dist: Distribution): Promise<WasmModule> {
-	let modulePromise: Promise<WasmModule>;
+type TextSize = number;
 
-	switch (dist) {
-		case Distribution.BUNDLER: {
-			modulePromise = import("@biomejs/wasm-bundler");
-			break;
-		}
-		case Distribution.NODE: {
-			modulePromise = import("@biomejs/wasm-nodejs");
-			break;
-		}
-		case Distribution.WEB: {
-			modulePromise = import("@biomejs/wasm-web");
-			break;
-		}
-	}
+interface OpenProjectParams {
+	openUninitialized: boolean;
+	path: BiomePath;
+}
+export interface OpenProjectResult {
+	/**
+	 * A unique identifier for this project
+	 */
+	projectKey: ProjectKey;
+}
+interface OpenFileParams {
+	content: FileContent;
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+type FileContent = { content: string; type: "fromClient"; version: number };
 
-	const module = await modulePromise;
+interface CloseFileParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
 
-	if (!isInitialized[dist]) {
-		isInitialized[dist] = true;
-		module.main();
-	}
+interface GetFormatterIRParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
 
-	return module;
+interface PullDiagnosticsParams {
+	categories: RuleCategories;
+	path: BiomePath;
+	projectKey: ProjectKey;
+	/**
+	 * When `false` the diagnostics, don't have code frames of the code actions
+	 * (fixes, suppressions, etc.)
+	 */
+	pullCodeActions: boolean;
+}
+type RuleCategories = RuleCategory[];
+type RuleCategory = "syntax" | "lint" | "action" | "transformation";
+interface PullDiagnosticsResult<Diagnostic> {
+	diagnostics: Diagnostic[];
+	errors: number;
+}
+
+interface FormatFileParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+
+interface FormatRangeParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+	range: TextRange;
+}
+
+interface FixFileParams {
+	fixFileMode: FixFileMode;
+	path: BiomePath;
+	projectKey: ProjectKey;
+	ruleCategories: RuleCategories;
+	shouldFormat: boolean;
+}
+export type FixFileMode =
+	| "safeFixes"
+	| "safeAndUnsafeFixes"
+	| "applySuppressions";
+interface FixFileResult {
+	/**
+	 * New source code for the file with all fixes applied
+	 */
+	code: string;
+}
+
+export interface DiagnosticPrinter<Diagnostic> {
+	free(): void;
+	print_simple(diagnostic: Diagnostic): void;
+	print_verbose(diagnostic: Diagnostic): void;
+	finish(): string;
+}
+export interface Workspace<Configuration, Diagnostic> {
+	free(): void;
+	updateSettings(params: UpdateSettingsParams<Configuration>): void;
+	openProject(params: OpenProjectParams): OpenProjectResult;
+	openFile(params: OpenFileParams): void;
+	closeFile(params: CloseFileParams): void;
+	pullDiagnostics(
+		params: PullDiagnosticsParams,
+	): PullDiagnosticsResult<Diagnostic>;
+	// biome-ignore lint: code generation is broken
+	formatRange(params: FormatRangeParams): any;
+	// biome-ignore lint: code generation is broken
+	formatFile(params: FormatFileParams): any;
+	getFormatterIr(params: GetFormatterIRParams): string;
+	fixFile(params: FixFileParams): FixFileResult;
+}
+
+export interface Module<Configuration, Diagnostic> {
+	main: () => void;
+	DiagnosticPrinter: new (
+		fileName: string,
+		fileSource: string,
+	) => DiagnosticPrinter<Diagnostic>;
+	Workspace: new () => Workspace<Configuration, Diagnostic>;
 }
 
 /**
@@ -63,24 +123,25 @@ class WasmError extends Error {
 	/**
 	 * The stack trace of the error.
 	 *
-	 * It might be useful, but the first like of the stack trace contains the error
+	 * It might be useful, but the first like of the stack trace contains the
+	 * error
 	 */
 	stackTrace: string;
-	private constructor(stackTrace: string) {
+	constructor(stackTrace: string) {
 		super();
 		this.stackTrace = stackTrace;
-	}
-
-	static fromError(e: unknown): WasmError {
-		return new WasmError(e as string);
 	}
 }
 
 /**
- * Creates wrap a WebAssembly error into a native JS Error
+ * Catch a WebAssembly error and wrap into a native JS Error
  *
- * @param e
+ * @param func The function to execute
  */
-export function wrapError(e: unknown): WasmError {
-	return WasmError.fromError(e);
+export function tryCatchWrapper<T>(func: () => T): T {
+	try {
+		return func();
+	} catch (err) {
+		throw new WasmError(err as string);
+	}
 }

@@ -1,9 +1,14 @@
 #![allow(unused)]
 
+use std::borrow::Cow;
+use std::sync::Arc;
+
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsVariableDeclaration;
+use biome_js_syntax::{
+    AnyJsExpression, JsVariableDeclaration, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+};
 use biome_js_syntax::{
     AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFileSource, JsFunctionDeclaration,
 };
@@ -16,7 +21,7 @@ use biome_test_utils::dump_registered_types;
 
 pub fn assert_type_data_snapshot(
     source_code: &str,
-    ty: TypeData,
+    ty: &TypeData,
     resolver: &dyn TypeResolver,
     test_name: &str,
 ) {
@@ -51,7 +56,7 @@ pub fn assert_type_data_snapshot(
 
 pub fn assert_typed_bindings_snapshot(
     source_code: &str,
-    typed_bindings: &[(Text, TypeData)],
+    typed_bindings: &[(Text, TypeReference)],
     resolver: &dyn TypeResolver,
     test_name: &str,
 ) {
@@ -72,6 +77,10 @@ pub fn assert_typed_bindings_snapshot(
     content.push_str("## Result\n\n");
     content.push_str("```\n");
     for (name, ty) in typed_bindings {
+        let ty = resolver
+            .resolve_and_get(ty)
+            .expect("must resolve")
+            .to_data();
         content.push_str(&format!("{name} => {ty}\n"));
     }
     content.push_str("\n```\n\n");
@@ -113,7 +122,7 @@ impl HardcodedSymbolResolver {
         while i < self.types.len() {
             // First take the type to satisfy the borrow checker:
             let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.resolved(self);
+            self.types[i] = ty.resolved(self).unwrap_or(ty);
             i += 1;
         }
     }
@@ -123,7 +132,7 @@ impl HardcodedSymbolResolver {
         while i < self.types.len() {
             // First take the type to satisfy the borrow checker:
             let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.flattened(self);
+            self.types[i] = ty.flattened(self).unwrap_or(ty);
             i += 1;
         }
     }
@@ -131,7 +140,7 @@ impl HardcodedSymbolResolver {
 
 impl TypeResolver for HardcodedSymbolResolver {
     fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Module
+        TypeResolverLevel::Thin
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
@@ -145,12 +154,12 @@ impl TypeResolver for HardcodedSymbolResolver {
         &self.types[id.index()]
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
         match id.level() {
-            TypeResolverLevel::Scope => {
+            TypeResolverLevel::Full => {
                 panic!("Ad-hoc references unsupported by resolver")
             }
-            TypeResolverLevel::Module => Some((id, self.get_by_id(id.id())).into()),
+            TypeResolverLevel::Thin => Some((id, self.get_by_id(id.id())).into()),
             TypeResolverLevel::Import => {
                 panic!("Import references unsupported by resolver")
             }
@@ -158,12 +167,16 @@ impl TypeResolver for HardcodedSymbolResolver {
         }
     }
 
-    fn register_type(&mut self, type_data: TypeData) -> TypeId {
-        match self.types.iter().position(|data| data == &type_data) {
+    fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        match self
+            .types
+            .iter()
+            .position(|data| data == type_data.as_ref())
+        {
             Some(index) => TypeId::new(index),
             None => {
                 let id = TypeId::new(self.types.len());
-                self.types.push(type_data);
+                self.types.push(type_data.into_owned());
                 id
             }
         }
@@ -176,12 +189,11 @@ impl TypeResolver for HardcodedSymbolResolver {
             TypeReference::Import(_import) => {
                 panic!("Project-level references unsupported by resolver")
             }
-            TypeReference::Unknown => None,
         }
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() == 1 && qualifier.path[0] == self.name {
+        if qualifier.path.is_identifier(self.name) {
             Some(ResolvedTypeId::new(self.level(), TypeId::new(0)))
         } else {
             self.globals.resolve_qualifier(qualifier)
@@ -192,13 +204,37 @@ impl TypeResolver for HardcodedSymbolResolver {
         self.globals.resolve_type_of(identifier, scope_id)
     }
 
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expr: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
+        Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
+    }
+
     fn fallback_resolver(&self) -> Option<&dyn TypeResolver> {
         Some(&self.globals)
     }
 
-    fn registered_types(&self) -> &[TypeData] {
-        &self.types
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.types.iter().collect()
     }
+}
+
+pub fn get_expression(root: &AnyJsRoot) -> AnyJsExpression {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::JsExpressionStatement(expr) => expr.expression().ok(),
+            _ => None,
+        })
+        .expect("cannot find expression")
 }
 
 pub fn get_function_declaration(root: &AnyJsRoot) -> JsFunctionDeclaration {
@@ -215,6 +251,22 @@ pub fn get_function_declaration(root: &AnyJsRoot) -> JsFunctionDeclaration {
             _ => None,
         })
         .expect("cannot find function declaration")
+}
+
+pub fn get_interface_declaration(root: &AnyJsRoot) -> TsInterfaceDeclaration {
+    let module = root.as_js_module().unwrap();
+    module
+        .items()
+        .into_iter()
+        .filter_map(|item| match item {
+            AnyJsModuleItem::AnyJsStatement(statement) => Some(statement),
+            _ => None,
+        })
+        .find_map(|statement| match statement {
+            AnyJsStatement::TsInterfaceDeclaration(decl) => Some(decl),
+            _ => None,
+        })
+        .expect("cannot find interface declaration")
 }
 
 pub fn get_variable_declaration(root: &AnyJsRoot) -> JsVariableDeclaration {

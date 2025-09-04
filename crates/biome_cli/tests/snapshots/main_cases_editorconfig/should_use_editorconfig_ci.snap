@@ -37,7 +37,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 test.js:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  ! This function setName is unused.
   
   > 1 │ function setName(name) {
       │          ^^^^^^^

@@ -14,7 +14,7 @@ function f2() {
 }
 
 function f3() {
-    return /* commment */'1'
+    return /* comment */'1'
 }
 
 function f4() {
@@ -55,6 +55,7 @@ Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
+Operator linebreak: After
 -----
 
 ```js
@@ -67,7 +68,7 @@ function f2() {
 }
 
 function f3() {
-	return /* commment */ "1";
+	return /* comment */ "1";
 }
 
 function f4() {

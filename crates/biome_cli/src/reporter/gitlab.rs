@@ -17,11 +17,17 @@ pub struct GitLabReporter {
     pub(crate) execution: Execution,
     pub(crate) diagnostics: DiagnosticsPayload,
     pub(crate) verbose: bool,
+    pub(crate) working_directory: Option<Utf8PathBuf>,
 }
 
 impl Reporter for GitLabReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
-        visitor.report_diagnostics(&self.execution, self.diagnostics, self.verbose)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics,
+            self.verbose,
+            self.working_directory.as_deref(),
+        )?;
         Ok(())
     }
 }
@@ -74,6 +80,7 @@ impl ReporterVisitor for GitLabReporterVisitor<'_> {
         _execution: &Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
+        _working_directory: Option<&Utf8Path>,
     ) -> std::io::Result<()> {
         let hasher = RwLock::default();
         let diagnostics = GitLabDiagnostics {
