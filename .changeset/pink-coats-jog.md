@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
 Added the new nursery rule `noUselessCatchBinding`. This rule disallows unnecessary catch bindings.
