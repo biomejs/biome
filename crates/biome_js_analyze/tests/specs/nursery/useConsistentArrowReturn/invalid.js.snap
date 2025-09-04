@@ -34,7 +34,7 @@ invalid.js:1:28 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━�
     4 │ 
     5 │ const returnsSequenceArrow = () => {
   
-  i Safe fix: Remove the return statement
+  i Safe fix: Remove the return statement.
   
      1    │ - const·returnsObjectArrow·=·()·=>·{
      2    │ - ····return·{·a:·1,·b:·2·};
@@ -60,14 +60,14 @@ invalid.js:5:30 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━�
       │ ^
     8 │ 
   
-  i Safe fix: Remove the return statement
+  i Safe fix: Remove the return statement.
   
      3  3 │   }
      4  4 │   
      5    │ - const·returnsSequenceArrow·=·()·=>·{
      6    │ - ····return·(a,·b);
      7    │ - }
-        5 │ + const·returnsSequenceArrow·=·()·=>·((a,·b))
+        5 │ + const·returnsSequenceArrow·=·()·=>·(a,·b)
      8  6 │   
      9  7 │   
   
@@ -86,7 +86,7 @@ invalid.js:10:27 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━
        │ ^
     13 │ 
   
-  i Safe fix: Remove the return statement
+  i Safe fix: Remove the return statement.
   
      8  8 │   
      9  9 │   
