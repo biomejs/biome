@@ -263,10 +263,10 @@ impl Rule for UseOptionalChain {
 /// Normalize optional chain like.
 /// E.g. `foo != null` is normalized to `foo`
 fn normalized_optional_chain_like(expression: AnyJsExpression) -> SyntaxResult<AnyJsExpression> {
-    if let AnyJsExpression::JsBinaryExpression(binary_expression) = &expression {
-        if let Some(expr) = binary_expression.extract_optional_chain_like()? {
-            return Ok(expr);
-        }
+    if let AnyJsExpression::JsBinaryExpression(binary_expression) = &expression
+        && let Some(expr) = binary_expression.extract_optional_chain_like()?
+    {
+        return Ok(expr);
     }
     Ok(expression)
 }
