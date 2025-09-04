@@ -6,6 +6,7 @@ use biome_analyze::declare_lint_group;
 pub mod no_floating_promises;
 pub mod no_import_cycles;
 pub mod no_jsx_literals;
+pub mod no_jsx_props_bind;
 pub mod no_misused_promises;
 pub mod no_next_async_client_component;
 pub mod no_non_null_asserted_optional_chain;

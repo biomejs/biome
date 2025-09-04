@@ -200,6 +200,7 @@ pub enum RuleName {
     NoInvalidUseBeforeDeclaration,
     NoIrregularWhitespace,
     NoJsxLiterals,
+    NoJsxPropsBind,
     NoLabelVar,
     NoLabelWithoutControl,
     NoMagicNumbers,
@@ -560,6 +561,7 @@ impl RuleName {
             Self::NoInvalidUseBeforeDeclaration => "noInvalidUseBeforeDeclaration",
             Self::NoIrregularWhitespace => "noIrregularWhitespace",
             Self::NoJsxLiterals => "noJsxLiterals",
+            Self::NoJsxPropsBind => "noJsxPropsBind",
             Self::NoLabelVar => "noLabelVar",
             Self::NoLabelWithoutControl => "noLabelWithoutControl",
             Self::NoMagicNumbers => "noMagicNumbers",
@@ -920,6 +922,7 @@ impl RuleName {
             Self::NoInvalidUseBeforeDeclaration => RuleGroup::Correctness,
             Self::NoIrregularWhitespace => RuleGroup::Suspicious,
             Self::NoJsxLiterals => RuleGroup::Nursery,
+            Self::NoJsxPropsBind => RuleGroup::Nursery,
             Self::NoLabelVar => RuleGroup::Suspicious,
             Self::NoLabelWithoutControl => RuleGroup::A11y,
             Self::NoMagicNumbers => RuleGroup::Style,
@@ -1285,6 +1288,7 @@ impl std::str::FromStr for RuleName {
             "noInvalidUseBeforeDeclaration" => Ok(Self::NoInvalidUseBeforeDeclaration),
             "noIrregularWhitespace" => Ok(Self::NoIrregularWhitespace),
             "noJsxLiterals" => Ok(Self::NoJsxLiterals),
+            "noJsxPropsBind" => Ok(Self::NoJsxPropsBind),
             "noLabelVar" => Ok(Self::NoLabelVar),
             "noLabelWithoutControl" => Ok(Self::NoLabelWithoutControl),
             "noMagicNumbers" => Ok(Self::NoMagicNumbers),
@@ -4622,6 +4626,7 @@ impl Nursery {
         "noFloatingPromises",
         "noImportCycles",
         "noJsxLiterals",
+        "noJsxPropsBind",
         "noMisusedPromises",
         "noNextAsyncClientComponent",
         "noNonNullAssertedOptionalChain",
@@ -5019,6 +5024,10 @@ impl RuleGroupExt for Nursery {
                 .no_jsx_literals
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "noJsxPropsBind" => self
+                .no_jsx_props_bind
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noMisusedPromises" => self
                 .no_misused_promises
                 .as_ref()
@@ -5127,6 +5136,7 @@ impl From<GroupPlainConfiguration> for Nursery {
             no_floating_promises: Some(value.into()),
             no_import_cycles: Some(value.into()),
             no_jsx_literals: Some(value.into()),
+            no_jsx_props_bind: Some(value.into()),
             no_misused_promises: Some(value.into()),
             no_next_async_client_component: Some(value.into()),
             no_non_null_asserted_optional_chain: Some(value.into()),
