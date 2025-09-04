@@ -1694,6 +1694,10 @@ export interface Nursery {
 	 */
 	useAnchorHref?: RuleConfiguration_for_UseAnchorHrefOptions;
 	/**
+	 * Enforce consistent arrow function bodies.
+	 */
+	useConsistentArrowReturn?: RuleFixConfiguration_for_UseConsistentArrowReturnOptions;
+	/**
 	 * Enforce type definitions to consistently use either interface or type.
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
@@ -3014,6 +3018,9 @@ export type RuleConfiguration_for_NoVueReservedPropsOptions =
 export type RuleConfiguration_for_UseAnchorHrefOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAnchorHrefOptions;
+export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseConsistentArrowReturnOptions;
 export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
@@ -5505,6 +5512,20 @@ export interface RuleWithOptions_for_UseAnchorHrefOptions {
 	 * Rule's options
 	 */
 	options: UseAnchorHrefOptions;
+}
+export interface RuleWithFixOptions_for_UseConsistentArrowReturnOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentArrowReturnOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	/**
@@ -8032,6 +8053,7 @@ export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export type UseAnchorHrefOptions = null;
+export interface UseConsistentArrowReturnOptions {}
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
 }
@@ -8763,6 +8785,7 @@ export type Category =
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useExhaustiveSwitchCases"
