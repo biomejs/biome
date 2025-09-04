@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": minor
+"@biomejs/biome": patch
 ---
 
 Added the new lint rule `useConsistentArrowReturn`.
