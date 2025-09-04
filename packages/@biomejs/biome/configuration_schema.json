@@ -5093,6 +5093,15 @@
 						{ "$ref": "#/definitions/UseSortedClassesConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueMultiWordComponentNames": {
+					"description": "Enforce multi-word component names in Vue components.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseVueMultiWordComponentNamesConfiguration"
+						},
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -11685,6 +11694,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseVueMultiWordComponentNamesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseVueMultiWordComponentNamesOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseWhileOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -14538,6 +14564,23 @@
 		},
 		"UseValidTypeofOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueMultiWordComponentNamesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueMultiWordComponentNamesOptions" }
+			]
+		},
+		"UseVueMultiWordComponentNamesOptions": {
+			"type": "object",
+			"properties": {
+				"ignores": {
+					"description": "Component names to ignore (allowed to be single-word).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseWhileConfiguration": {
