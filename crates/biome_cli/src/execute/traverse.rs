@@ -541,7 +541,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
                     project_key: self.project_key,
                     path: biome_path.clone(),
                     features: self.execution.to_feature(),
-                    ignore_kind: IgnoreKind::Path,
+                    ignore_kind: IgnoreKind::Ancestors,
                 })
                 .unwrap_or_else(|err| {
                     self.push_diagnostic(err.into());

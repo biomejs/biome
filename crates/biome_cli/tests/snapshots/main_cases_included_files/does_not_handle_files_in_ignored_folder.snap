@@ -6,7 +6,7 @@ expression: redactor(content)
 
 ```json
 {
-  "files": { "includes": ["test.js", "!**/folder"] }
+  "files": { "includes": ["**/*.js", "!**/folder"] }
 }
 ```
 

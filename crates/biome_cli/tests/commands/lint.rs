@@ -1215,7 +1215,7 @@ fn include_files_in_symlinked_subdir() {
 
     #[cfg(target_os = "windows")]
     {
-        check_windows_symlink!(symlink_file(
+        check_windows_symlink!(symlink_dir(
             root_path.join("symlinked"),
             subroot_path.join("symlink")
         ));
@@ -1273,7 +1273,7 @@ fn ignore_file_in_subdir_in_symlinked_dir() {
 
     #[cfg(target_os = "windows")]
     {
-        check_windows_symlink!(symlink_file(
+        check_windows_symlink!(symlink_dir(
             root_path.join("symlinked"),
             subroot_path.join("symlink")
         ));
