@@ -4,7 +4,7 @@ pub mod linter;
 use crate::analyzer::assist::Actions;
 pub use crate::analyzer::linter::*;
 use biome_analyze::options::RuleOptions;
-use biome_analyze::{FixKind, RuleCategory, RuleFilter};
+use biome_analyze::{FixKind, RuleCategory, RuleDomain, RuleFilter};
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext, Merge,
 };
@@ -414,6 +414,88 @@ impl<T: Default> Merge for RuleWithFixOptions<T> {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
+pub enum AnalyzerSelector {
+    Rule(RuleSelector),
+    Domain(DomainSelector),
+}
+
+impl From<RuleSelector> for AnalyzerSelector {
+    fn from(value: RuleSelector) -> Self {
+        Self::Rule(value)
+    }
+}
+
+impl From<DomainSelector> for AnalyzerSelector {
+    fn from(value: DomainSelector) -> Self {
+        Self::Domain(value)
+    }
+}
+
+impl Debug for AnalyzerSelector {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl Display for AnalyzerSelector {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Rule(group) => Display::fmt(group, f),
+            Self::Domain(domain) => Display::fmt(domain, f),
+        }
+    }
+}
+
+impl FromStr for AnalyzerSelector {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        RuleSelector::from_str(s)
+            .map(Self::Rule)
+            .or(DomainSelector::from_str(s).map(Self::Domain))
+            .or(Err("The rule, group or domain doesn't exist."))
+    }
+}
+
+impl serde::Serialize for AnalyzerSelector {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        match self {
+            Self::Rule(rule) => rule.serialize(serializer),
+            Self::Domain(domain) => domain.serialize(serializer),
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for AnalyzerSelector {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor;
+        impl serde::de::Visitor<'_> for Visitor {
+            type Value = AnalyzerSelector;
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("<group>/<rule_name> or <domain>")
+            }
+            fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+                match AnalyzerSelector::from_str(v) {
+                    Ok(result) => Ok(result),
+                    Err(error) => Err(serde::de::Error::custom(error)),
+                }
+            }
+        }
+        deserializer.deserialize_str(Visitor)
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for AnalyzerSelector {
+    fn schema_name() -> String {
+        "Selector".to_string()
+    }
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(generator)
+    }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub enum RuleSelector {
     Group(&'static str),
     Rule(&'static str, &'static str),
@@ -445,17 +527,17 @@ impl RuleSelector {
     /// - `quickfix.biome.a11y.useAltText`
     ///
     /// ```
-    /// use biome_configuration::analyzer::RuleSelector;
+    /// use biome_configuration::analyzer::AnalyzerSelector;
     ///
     /// let filter = "source.biome.useSortedKeys";
-    /// let selector = RuleSelector::from_lsp_filter(filter).unwrap();
-    /// assert_eq!(selector, RuleSelector::Rule("source", "useSortedKeys"));
+    /// let selector = AnalyzerSelector::from_lsp_filter(filter).unwrap();
+    /// assert_eq!(selector, AnalyzerSelector::Rule("source", "useSortedKeys"));
     /// let filter = "quickfix.biome.style.useConst";
-    /// let selector = RuleSelector::from_lsp_filter(filter).unwrap();
-    /// assert_eq!(selector, RuleSelector::Rule("style", "useConst"));
+    /// let selector = AnalyzerSelector::from_lsp_filter(filter).unwrap();
+    /// assert_eq!(selector, AnalyzerSelector::Rule("style", "useConst"));
     /// let filter = "quickfix.biome.a11y.useAltText";
-    /// let selector = RuleSelector::from_lsp_filter(filter).unwrap();
-    /// assert_eq!(selector, RuleSelector::Rule("a11y", "useAltText"));
+    /// let selector = AnalyzerSelector::from_lsp_filter(filter).unwrap();
+    /// assert_eq!(selector, AnalyzerSelector::Rule("a11y", "useAltText"));
     /// ```
     pub fn from_lsp_filter(filter: &str) -> Option<Self> {
         if let Some(filter) = filter.strip_prefix("source.biome.") {
@@ -518,20 +600,8 @@ impl FromStr for RuleSelector {
             // once we have promoted the GraphQL `useNamingConvention` rule.
             //
             // See https://github.com/biomejs/biome/issues/6018
-            if optional_group_name.is_none_or(|name| name == static_group_name)
-                || (rule_or_group_name == "useNamingConvention"
-                    && optional_group_name == Some("style"))
-            {
+            if optional_group_name.is_none_or(|name| name == static_group_name) {
                 if matches!(selector_kind, None | Some(RuleCategory::Lint)) {
-                    // TODO: remove the `style/useNamingConvention` exception,
-                    // once we have promoted the GraphQL `useNamingConvention` rule.
-                    let static_group_name = if rule_or_group_name == "useNamingConvention"
-                        && optional_group_name == Some("style")
-                    {
-                        "style"
-                    } else {
-                        static_group_name
-                    };
                     Ok(Self::Rule(static_group_name, rule_name.as_str()))
                 } else {
                     Err(
@@ -623,6 +693,57 @@ impl schemars::JsonSchema for RuleSelector {
     }
     fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
         String::json_schema(generator)
+    }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+pub struct DomainSelector(pub &'static str);
+
+impl Debug for DomainSelector {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl Display for DomainSelector {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl FromStr for DomainSelector {
+    type Err = &'static str;
+    fn from_str(domain: &str) -> Result<Self, Self::Err> {
+        if let Ok(domain) = RuleDomain::from_str(domain) {
+            Ok(Self(domain.as_str()))
+        } else {
+            Err("This domain doesn't exist.")
+        }
+    }
+}
+
+impl serde::Serialize for DomainSelector {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(&format!("{self}"))
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for DomainSelector {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor;
+        impl serde::de::Visitor<'_> for Visitor {
+            type Value = DomainSelector;
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("<domain>")
+            }
+            fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+                match DomainSelector::from_str(v) {
+                    Ok(result) => Ok(result),
+                    Err(error) => Err(serde::de::Error::custom(error)),
+                }
+            }
+        }
+        deserializer.deserialize_str(Visitor)
     }
 }
 

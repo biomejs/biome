@@ -4,7 +4,7 @@ use crate::workspace::ScanKind;
 use biome_analyze::{
     AnalyzerRules, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
-use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
+use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue, RuleSelector};
 use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
@@ -699,8 +699,8 @@ pub struct ProjectScanComputer<'a> {
     requires_project_scan: bool,
     enabled_rules: FxHashSet<RuleFilter<'a>>,
     configuration: &'a Configuration,
-    skip: &'a [RuleSelector],
-    only: &'a [RuleSelector],
+    skip: &'a [AnalyzerSelector],
+    only: &'a [AnalyzerSelector],
 }
 
 impl<'a> ProjectScanComputer<'a> {
@@ -717,8 +717,8 @@ impl<'a> ProjectScanComputer<'a> {
 
     pub fn with_rule_selectors(
         mut self,
-        skip: &'a [RuleSelector],
-        only: &'a [RuleSelector],
+        skip: &'a [AnalyzerSelector],
+        only: &'a [AnalyzerSelector],
     ) -> Self {
         self.skip = skip;
         self.only = only;
@@ -761,7 +761,7 @@ impl<'a> ProjectScanComputer<'a> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
-        let selector = RuleSelector::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+        let selector = RuleSelector::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name).into();
         if !self.only.is_empty() {
             if self.only.contains(&selector) {
                 let domains = R::METADATA.domains;
@@ -904,7 +904,7 @@ mod tests {
         assert_eq!(
             ProjectScanComputer::new(&configuration)
                 .with_rule_selectors(
-                    &[RuleSelector::Rule("correctness", "noPrivateImports")],
+                    &[RuleSelector::Rule("correctness", "noPrivateImports").into()],
                     &[]
                 )
                 .compute(),
@@ -934,7 +934,7 @@ mod tests {
             ProjectScanComputer::new(&configuration)
                 .with_rule_selectors(
                     &[],
-                    &[RuleSelector::Rule("correctness", "noPrivateImports")]
+                    &[RuleSelector::Rule("correctness", "noPrivateImports").into()]
                 )
                 .compute(),
             ScanKind::Project
