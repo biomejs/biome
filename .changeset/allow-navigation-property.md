@@ -1,5 +1,5 @@
 ---
-"biome_css_analyze": patch
+"@biomejs/biome": patch
 ---
 
 Fixed [#7340](https://github.com/biomejs/biome/issues/7340): The linter now allows the `navigation` property for view-transition in CSS.
