@@ -18,16 +18,28 @@ use biome_string_case::comparable_token::ComparableToken;
 use crate::JsRuleAction;
 
 declare_source_rule! {
-    /// Enforce ordering of a JS object properties.
+    /// Sort properties of a JS object in natural order.
     ///
-    /// This rule checks if keys of the object are sorted in a consistent way.
-    /// Keys are sorted in a [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order).
-    /// This rule will consider spread/calculated keys e.g [k]: 1 as non-sortable.
-    /// Instead, whenever it encounters a non-sortable key, it will sort all the
-    /// previous sortable keys up until the nearest non-sortable key, if one
-    /// exist.
-    /// This prevents breaking the override of certain keys using spread
-    /// keys.
+    /// [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order) means
+    /// that uppercase letters come before lowercase letters (e.g. `A` < `a` <
+    /// `B` < `b`) and numbers are compared in a human way (e.g. `9` < `10`).
+    ///
+    /// This rule will consider spread/calculated keys e.g [k]: 1 as
+    /// non-sortable. Instead, whenever it encounters a non-sortable key, it
+    /// will sort all the previous sortable keys up until the nearest
+    /// non-sortable key, if one exist. This prevents breaking the override of
+    /// certain keys using spread keys.
+    ///
+    /// Sorting the keys of an object technically changes the semantics of the
+    /// program. It affects the result of operations like
+    /// `Object.getOwnPropertyNames`. Since ES2020, operations like `for-in`
+    /// loops, `Object.keys`, and `JSON.stringify` are guaranteed to process
+    /// string keys in insertion order.
+    ///
+    /// In cases where the order of such operations is important, you can
+    /// disable the assist action using a suppression comment:
+    ///
+    /// `// biome-ignore assist/source/useSortedKeys`
     ///
     /// ## Examples
     ///
