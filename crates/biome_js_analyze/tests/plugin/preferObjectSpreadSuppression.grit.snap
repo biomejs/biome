@@ -23,49 +23,6 @@ Object.assign({ foo: 'bar'}, baz);
 
 # Diagnostics
 ```
-preferObjectSpreadSuppression.grit:2:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Prefer object spread instead of `Object.assign()`
-  
-    1 │ // biome-ignore lint/plugin/preferObjectSpreadSuppression: reason
-  > 2 │ Object.assign({ foo: 'bar'}, baz);
-      │               ^^^^^^^^^^^^^^^^^^
-    3 │ 
-    4 │ // biome-ignore-start lint/plugin/preferObjectSpreadSuppression: reason
-  
-
-```
-
-```
-preferObjectSpreadSuppression.grit:5:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Prefer object spread instead of `Object.assign()`
-  
-    4 │ // biome-ignore-start lint/plugin/preferObjectSpreadSuppression: reason
-  > 5 │ Object.assign({}, {foo: 'bar'});
-      │               ^^^^^^^^^^^^^^^^
-    6 │ // biome-ignore-end lint/plugin/preferObjectSpreadSuppression: reason
-    7 │ 
-  
-
-```
-
-```
-preferObjectSpreadSuppression.grit:10:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Prefer object spread instead of `Object.assign()`
-  
-     8 │ // if no name is specified, should suppress all plugins
-     9 │ // biome-ignore lint/plugin: reason
-  > 10 │ Object.assign({}, foo);
-       │               ^^^^^^^
-    11 │ 
-    12 │ // only suppress specified plugin
-  
-
-```
-
-```
 preferObjectSpreadSuppression.grit:14:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Prefer object spread instead of `Object.assign()`
@@ -74,6 +31,20 @@ preferObjectSpreadSuppression.grit:14:15 plugin ━━━━━━━━━━�
     13 │ // biome-ignore lint/plugin/anotherPlugin: reason
   > 14 │ Object.assign({ foo: 'bar'}, baz);
        │               ^^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+
+```
+
+```
+preferObjectSpreadSuppression.grit:13:1 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    12 │ // only suppress specified plugin
+  > 13 │ // biome-ignore lint/plugin/anotherPlugin: reason
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ Object.assign({ foo: 'bar'}, baz);
     15 │ 
   
 
