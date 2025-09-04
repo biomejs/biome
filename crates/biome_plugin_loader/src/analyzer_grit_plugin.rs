@@ -1,20 +1,21 @@
-use biome_analyze::RuleDiagnostic;
+use crate::{AnalyzerPlugin, PluginDiagnostic};
+use biome_analyze::{PluginTargetLanguage, RuleDiagnostic};
 use biome_console::markup;
+use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_diagnostics::{Severity, category};
 use biome_fs::FileSystem;
 use biome_grit_patterns::{
     BuiltInFunction, CompilePatternOptions, GritBinding, GritExecContext, GritPattern, GritQuery,
-    GritQueryContext, GritQueryState, GritResolvedPattern, GritTargetFile,
+    GritQueryContext, GritQueryState, GritResolvedPattern, GritTargetFile, GritTargetLanguage,
     compile_pattern_with_options,
 };
+use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
 use biome_parser::AnyParse;
-use biome_rowan::TextRange;
+use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind, TextRange};
 use camino::{Utf8Path, Utf8PathBuf};
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
 use grit_util::{AnalysisLogs, error::GritPatternError};
 use std::{borrow::Cow, fmt::Debug, str::FromStr, sync::Arc};
-
-use crate::{AnalyzerPlugin, PluginDiagnostic};
 
 /// Definition of an analyzer plugin.
 #[derive(Debug)]
@@ -42,10 +43,40 @@ impl AnalyzerGritPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerGritPlugin {
-    fn evaluate(&self, root: AnyParse, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
+    fn language(&self) -> PluginTargetLanguage {
+        match &self.grit_query.language {
+            GritTargetLanguage::JsTargetLanguage(_) => PluginTargetLanguage::JavaScript,
+            GritTargetLanguage::CssTargetLanguage(_) => PluginTargetLanguage::Css,
+        }
+    }
+
+    fn query(&self) -> Vec<RawSyntaxKind> {
+        match self.language() {
+            PluginTargetLanguage::JavaScript => AnyJsRoot::KIND_SET
+                .iter()
+                .map(|kind| kind.to_raw())
+                .collect(),
+            PluginTargetLanguage::Css => {
+                CssRoot::KIND_SET.iter().map(|kind| kind.to_raw()).collect()
+            }
+        }
+    }
+
+    fn evaluate(&self, node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
         let name: &str = self.grit_query.name.as_deref().unwrap_or("anonymous");
 
-        let file = GritTargetFile { parse: root, path };
+        let root = match self.language() {
+            PluginTargetLanguage::JavaScript => node
+                .downcast_ref::<JsSyntaxNode>()
+                .and_then(|node| node.as_send()),
+            PluginTargetLanguage::Css => node
+                .downcast_ref::<CssSyntaxNode>()
+                .and_then(|node| node.as_send()),
+        };
+
+        let parse = AnyParse::new(root.unwrap(), vec![]);
+        let file = GritTargetFile { parse, path };
+
         match self.grit_query.execute(file) {
             Ok(result) => {
                 let mut diagnostics: Vec<_> = result
@@ -86,14 +117,6 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                 markup!(<Emphasis>{name}</Emphasis>" errored: "<Error>{error.to_string()}</Error>),
             )],
         }
-    }
-
-    fn supports_css(&self) -> bool {
-        self.grit_query.supports_css()
-    }
-
-    fn supports_js(&self) -> bool {
-        self.grit_query.supports_js()
     }
 }
 
