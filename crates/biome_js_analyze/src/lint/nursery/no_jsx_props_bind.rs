@@ -47,7 +47,7 @@ declare_lint_rule! {
 
 impl Rule for NoJsxPropsBind {
     type Query = Ast<JsxAttribute>;
-    type State = ();
+    type State = &'static str;
     type Signals = Option<Self::State>;
     type Options = NoJsxPropsBindOptions;
 
@@ -77,30 +77,45 @@ impl Rule for NoJsxPropsBind {
             .ok()?;
 
         match expression {
-            AnyJsExpression::JsArrowFunctionExpression(_) => Some(()),
-            AnyJsExpression::JsFunctionExpression(_) => Some(()),
-            AnyJsExpression::JsCallExpression(_) => Some(()),
+            AnyJsExpression::JsArrowFunctionExpression(_) => {
+                if options.allow_arrow_functions {
+                    None
+                } else {
+                    Some("JSX props should not use arrow functions")
+                }
+            }
+
+            AnyJsExpression::JsFunctionExpression(_) => {
+                if options.allow_functions {
+                    None
+                } else {
+                    Some("JSX props should not use functions")
+                }
+            }
+            AnyJsExpression::JsCallExpression(_) => {
+                // TODO: Check this
+                if options.allow_bind {
+                    None
+                } else {
+                    Some("JSX props should not use .bind()")
+                }
+            }
             _ => None,
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         //
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
         let node = ctx.query();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "Variable is read here."
-                },
-            )
-            .note(markup! {
-                "This note will give you more information."
-            }),
-        )
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            node.range(),
+            markup! {
+                {state}
+            },
+        ))
     }
 }
