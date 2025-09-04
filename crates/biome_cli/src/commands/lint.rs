@@ -2,7 +2,7 @@ use super::{FixFileModeOptions, determine_fix_file_mode};
 use crate::cli_options::CliOptions;
 use crate::commands::{CommandRunner, get_files_to_process_with_cli_options};
 use crate::{CliDiagnostic, Execution, TraversalMode};
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::AnalyzerSelector;
 use biome_configuration::css::CssLinterConfiguration;
 use biome_configuration::graphql::GraphqlLinterConfiguration;
 use biome_configuration::javascript::JsLinterConfiguration;
@@ -26,8 +26,8 @@ pub(crate) struct LintCommandPayload {
     pub(crate) vcs_configuration: Option<VcsConfiguration>,
     pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: Vec<AnalyzerSelector>,
+    pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) staged: bool,
     pub(crate) changed: bool,

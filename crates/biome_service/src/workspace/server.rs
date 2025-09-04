@@ -1308,7 +1308,7 @@ impl Workspace for WorkspaceServer {
                 module_graph: self.module_graph.clone(),
                 project_layout: self.project_layout.clone(),
                 suppression_reason: None,
-                enabled_rules,
+                enabled_selectors: enabled_rules,
                 pull_code_actions,
                 plugins: if categories.is_lint() {
                     plugins

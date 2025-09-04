@@ -9313,18 +9313,17 @@ export interface PullDiagnosticsParams {
 	/**
 	 * Rules to apply on top of the configuration
 	 */
-	enabledRules?: RuleCode[];
-	only?: RuleCode[];
+	enabledRules?: Selector[];
+	only?: Selector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	/**
 	 * When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
 	 */
 	pullCodeActions: boolean;
-	skip?: RuleCode[];
+	skip?: Selector[];
 }
 export type RuleCategories = RuleCategory[];
-export type RuleCode = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -9333,12 +9332,12 @@ export interface PullDiagnosticsResult {
 }
 export interface PullActionsParams {
 	categories?: RuleCategories;
-	enabledRules?: RuleCode[];
-	only?: RuleCode[];
+	enabledRules?: Selector[];
+	only?: Selector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	range?: TextRange;
-	skip?: RuleCode[];
+	skip?: Selector[];
 	suppressionReason?: string;
 }
 export interface PullActionsResult {
@@ -9433,14 +9432,14 @@ export interface FixFileParams {
 	/**
 	 * Rules to apply to the file
 	 */
-	enabledRules?: RuleCode[];
+	enabledRules?: Selector[];
 	fixFileMode: FixFileMode;
-	only?: RuleCode[];
+	only?: Selector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	ruleCategories: RuleCategories;
 	shouldFormat: boolean;
-	skip?: RuleCode[];
+	skip?: Selector[];
 	suppressionReason?: string;
 }
 /**

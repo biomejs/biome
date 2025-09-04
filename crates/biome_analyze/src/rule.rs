@@ -16,6 +16,7 @@ use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange}
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
+use std::str::FromStr;
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -510,6 +511,38 @@ impl RuleDomain {
             Self::Vue => &[],
             Self::Project => &[],
             Self::Tailwind => &[],
+        }
+    }
+
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            Self::React => "react",
+            Self::Test => "test",
+            Self::Solid => "solid",
+            Self::Next => "next",
+            Self::Qwik => "qwik",
+            Self::Vue => "vue",
+            Self::Project => "project",
+            Self::Tailwind => "tailwind",
+        }
+    }
+}
+
+impl FromStr for RuleDomain {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "react" => Ok(Self::React),
+            "test" => Ok(Self::Test),
+            "solid" => Ok(Self::Solid),
+            "next" => Ok(Self::Next),
+            "qwik" => Ok(Self::Qwik),
+            "vue" => Ok(Self::Vue),
+            "project" => Ok(Self::Project),
+            "tailwind" => Ok(Self::Tailwind),
+
+            _ => Err("Invalid rule domain"),
         }
     }
 }

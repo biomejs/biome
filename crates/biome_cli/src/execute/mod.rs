@@ -18,7 +18,7 @@ use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{
     CliDiagnostic, CliSession, DiagnosticsPayload, Reporter, TEMPORARY_INTERNAL_REPORTER_FILE,
 };
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::AnalyzerSelector;
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Category, category};
 use biome_diagnostics::{Resource, SerdeJsonError};
@@ -126,10 +126,10 @@ pub enum TraversalMode {
         /// Run only the given rule or group of rules.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
-        only: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
         /// Skip the given rule or group of rules by setting the severity level of the rules to `off`.
         /// This option takes precedence over `--only`.
-        skip: Vec<RuleSelector>,
+        skip: Vec<AnalyzerSelector>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
         vcs_targeted: VcsTargeted,
         /// Suppress existing diagnostics with a `// biome-ignore` comment

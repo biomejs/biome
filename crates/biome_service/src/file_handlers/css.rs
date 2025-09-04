@@ -521,7 +521,7 @@ fn lint(params: LintParams) -> LintResults {
             .with_only(&params.only)
             .with_skip(&params.skip)
             .with_path(params.path.as_path())
-            .with_enabled_rules(&params.enabled_rules)
+            .with_enabled_selectors(&params.enabled_selectors)
             .with_project_layout(params.project_layout.clone())
             .finish();
 
@@ -580,7 +580,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_only(&only)
             .with_skip(&skip)
             .with_path(path.as_path())
-            .with_enabled_rules(&rules)
+            .with_enabled_selectors(&rules)
             .with_project_layout(project_layout)
             .finish();
 
@@ -626,7 +626,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             .with_only(&params.only)
             .with_skip(&params.skip)
             .with_path(params.biome_path.as_path())
-            .with_enabled_rules(&params.enabled_rules)
+            .with_enabled_selectors(&params.enabled_rules)
             .with_project_layout(params.project_layout)
             .finish();
 
