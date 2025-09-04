@@ -2,7 +2,9 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsxAttribute};
+use biome_js_syntax::{
+    AnyJsExpression, JsxAttribute, JsxAttributeList, JsxElement, jsx_ext::AnyJsxElement,
+};
 use biome_rowan::AstNode;
 use biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions;
 
@@ -33,6 +35,8 @@ declare_lint_rule! {
     /// <Foo onClick={this._handleClick}></Foo>
     /// ```
     ///
+    ///
+
     pub NoJsxPropsBind {
         version: "next",
         name: "noJsxPropsBind",
@@ -50,6 +54,16 @@ impl Rule for NoJsxPropsBind {
     type Options = NoJsxPropsBindOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let options = ctx.options();
+        let element = ctx
+            .query()
+            .parent::<JsxAttributeList>()?
+            .parent::<AnyJsxElement>()?;
+
+        if options.ignore_dom_components && element.is_element() {
+            return None;
+        }
+
         let expression = ctx
             .query()
             .initializer()?
@@ -58,6 +72,7 @@ impl Rule for NoJsxPropsBind {
             .as_jsx_expression_attribute_value()?
             .expression()
             .ok()?;
+
         match expression {
             AnyJsExpression::JsArrowFunctionExpression(_) => Some(()),
             AnyJsExpression::JsFunctionExpression(_) => Some(()),
