@@ -822,7 +822,7 @@ impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
 mod tests {
     use super::*;
     use biome_configuration::analyzer::{
-        Correctness, DomainSelector, RuleDomainValue, RuleDomains, SeverityOrGroup,
+        Correctness, DomainSelector, RuleDomainValue, RuleDomains, RuleSelector, SeverityOrGroup,
     };
     use biome_configuration::{
         LinterConfiguration, RuleConfiguration, RulePlainConfiguration, Rules,
