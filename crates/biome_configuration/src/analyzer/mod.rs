@@ -543,14 +543,14 @@ impl RuleSelector {
     /// use biome_configuration::analyzer::{AnalyzerSelector, RuleSelector};
     ///
     /// let filter = "source.biome.useSortedKeys";
-    /// let selector = AnalyzerSelector::from_lsp_filter(filter).unwrap();
-    /// assert_eq!(selector, RuleSelector::Rule("source", "useSortedKeys").into());
+    /// let selector = RuleSelector::from_lsp_filter(filter).unwrap();
+    /// assert_eq!(selector, RuleSelector::Rule("source", "useSortedKeys"));
     /// let filter = "quickfix.biome.style.useConst";
-    /// let selector = AnalyzerSelector::from_lsp_filter(filter).unwrap();
-    /// assert_eq!(selector, RuleSelector::Rule("style", "useConst").into());
+    /// let selector = RuleSelector::from_lsp_filter(filter).unwrap();
+    /// assert_eq!(selector, RuleSelector::Rule("style", "useConst"));
     /// let filter = "quickfix.biome.a11y.useAltText";
-    /// let selector = AnalyzerSelector::from_lsp_filter(filter).unwrap();
-    /// assert_eq!(selector, RuleSelector::Rule("a11y", "useAltText").into());
+    /// let selector = RuleSelector::from_lsp_filter(filter).unwrap();
+    /// assert_eq!(selector, RuleSelector::Rule("a11y", "useAltText"));
     /// ```
     pub fn from_lsp_filter(filter: &str) -> Option<Self> {
         if let Some(filter) = filter.strip_prefix("source.biome.") {
