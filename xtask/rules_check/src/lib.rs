@@ -220,14 +220,12 @@ impl FromStr for CodeBlockTest {
         for token in tokens {
             // Handle file=path attribute to create multi-file test scenarios
             if let Some(file) = token.strip_prefix("file=") {
-
                 if file.is_empty() {
                     bail!("The 'file' attribute must be followed by a file path");
                 }
 
                 // Normalize to absolute paths for consistent module resolution
                 let path = file
-                    .trim_start_matches('/')
                     .trim_start_matches("./")
                     .trim_start_matches("../")
                     .trim();
