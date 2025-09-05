@@ -18,7 +18,7 @@ use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
 use biome_json_factory::make;
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
 use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
@@ -229,7 +229,7 @@ impl FromStr for CodeBlockTest {
                     .trim_start_matches("./")
                     .trim_start_matches("../")
                     .trim();
-                test.file_path = Some(format!("/{}", path));
+                test.file_path = Some(format!("/{path}"));
 
                 continue;
             }
@@ -447,13 +447,7 @@ fn assert_lint(
                     test,
                 );
 
-                let module_graph = get_test_module_graph(test_files);
-
-                let services = JsAnalyzerServices::from((
-                    Arc::new(module_graph),
-                    Default::default(),
-                    file_source,
-                ));
+                let services = get_test_services(file_source, test_files);
 
                 biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -626,7 +620,7 @@ fn assert_lint(
         // Fail the test if the analysis didn't emit any diagnostic
         ensure!(
             diagnostics.diagnostic_count == 1,
-            "Analysis of '{group}/{rule}' on the following code block returned no diagnostics.\n\n{code}",
+            "Analysis of '{group}/{rule}' on the following code block with path '{file_path}' returned no diagnostics.\n\n{code}",
         );
     }
 
@@ -970,11 +964,12 @@ impl TestRunner {
 
 /// Creates an in-memory module graph for the given files.
 /// Returns an empty module graph if no files are provided.
-fn get_test_module_graph(files: &HashMap<String, String>) -> ModuleGraph {
-    let module_graph = ModuleGraph::default();
-
+fn get_test_services(
+    file_source: JsFileSource,
+    files: &HashMap<String, String>,
+) -> JsAnalyzerServices {
     if files.is_empty() {
-        return module_graph;
+        return JsAnalyzerServices::from((Default::default(), Default::default(), file_source));
     }
 
     let fs = MemoryFileSystem::default();
@@ -984,12 +979,40 @@ fn get_test_module_graph(files: &HashMap<String, String>) -> ModuleGraph {
 
     for (path, src) in files.iter() {
         let path_buf = Utf8PathBuf::from(path);
-        added_paths.push(BiomePath::new(&path_buf));
+        let biome_path = BiomePath::new(&path_buf);
+        if biome_path.is_manifest() {
+            match biome_path.file_name() {
+                Some("package.json") => {
+                    let parsed = parse_json(src, JsonParserOptions::default());
+                    layout.insert_serialized_node_manifest(
+                        path_buf.parent().unwrap().into(),
+                        &parsed.syntax().as_send().unwrap(),
+                    );
+                }
+                Some("tsconfig.json") => {
+                    let parsed = parse_json(
+                        src,
+                        JsonParserOptions::default()
+                            .with_allow_comments()
+                            .with_allow_trailing_commas(),
+                    );
+                    layout.insert_serialized_tsconfig(
+                        path_buf.parent().unwrap().into(),
+                        &parsed.syntax().as_send().unwrap(),
+                    );
+                }
+                _ => unimplemented!("Unhandled manifest: {biome_path}"),
+            }
+        } else {
+            added_paths.push(biome_path);
+        }
+
         fs.insert(path_buf, src.as_bytes().to_vec());
     }
 
+    let module_graph = ModuleGraph::default();
     let added_paths = get_added_paths(&fs, &added_paths);
     module_graph.update_graph_for_js_paths(&fs, &layout, &added_paths, &[]);
 
-    module_graph
+    JsAnalyzerServices::from((Arc::new(module_graph), Arc::new(layout), file_source))
 }
