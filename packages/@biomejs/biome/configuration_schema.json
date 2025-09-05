@@ -184,10 +184,7 @@
         },
         "recommended": {
           "description": "Enables the recommended rules for this group",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         },
         "useAltText": {
           "anyOf": [
@@ -424,11 +421,7 @@
       "type": "object"
     },
     "Accessibility": {
-      "enum": [
-        "noPublic",
-        "explicit",
-        "none"
-      ],
+      "enum": ["noPublic", "explicit", "none"],
       "type": "string"
     },
     "Actions": {
@@ -436,10 +429,7 @@
       "properties": {
         "recommended": {
           "description": "It enables the assist actions recommended by Biome. `true` by default.",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         },
         "source": {
           "anyOf": [
@@ -455,10 +445,7 @@
       "type": "object"
     },
     "ArrowParentheses": {
-      "enum": [
-        "always",
-        "asNeeded"
-      ],
+      "enum": ["always", "asNeeded"],
       "type": "string"
     },
     "AssistConfiguration": {
@@ -491,19 +478,13 @@
           "items": {
             "$ref": "#/definitions/NormalizedGlob"
           },
-          "type": [
-            "array",
-            "null"
-          ]
+          "type": ["array", "null"]
         }
       },
       "type": "object"
     },
     "AttributePosition": {
-      "enum": [
-        "auto",
-        "multiline"
-      ],
+      "enum": ["auto", "multiline"],
       "type": "string"
     },
     "Bool": {
@@ -874,10 +855,7 @@
         },
         "recommended": {
           "description": "Enables the recommended rules for this group",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         },
         "useArrowFunction": {
           "anyOf": [
@@ -1007,16 +985,12 @@
       "oneOf": [
         {
           "description": "`ItemType[]`",
-          "enum": [
-            "shorthand"
-          ],
+          "enum": ["shorthand"],
           "type": "string"
         },
         {
           "description": "`Array<ItemType>`",
-          "enum": [
-            "generic"
-          ],
+          "enum": ["generic"],
           "type": "string"
         }
       ]
@@ -1025,16 +999,12 @@
       "oneOf": [
         {
           "description": "Prefer using `interface` for object type definitions",
-          "enum": [
-            "interface"
-          ],
+          "enum": ["interface"],
           "type": "string"
         },
         {
           "description": "Prefer using `type` for object type definitions",
-          "enum": [
-            "type"
-          ],
+          "enum": ["type"],
           "type": "string"
         }
       ]
@@ -1650,10 +1620,7 @@
         },
         "recommended": {
           "description": "Enables the recommended rules for this group",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         },
         "useExhaustiveDependencies": {
           "anyOf": [
@@ -1852,10 +1819,7 @@
           "items": {
             "type": "string"
           },
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": ["array", "null"],
           "uniqueItems": true
         },
         "linter": {
@@ -2033,10 +1997,7 @@
         },
         "use": {
           "default": null,
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         }
       },
       "type": "object"
@@ -2061,23 +2022,17 @@
       "oneOf": [
         {
           "description": "Objects are expanded when the first property has a leading newline. Arrays are always expanded if they are shorter than the line width.",
-          "enum": [
-            "auto"
-          ],
+          "enum": ["auto"],
           "type": "string"
         },
         {
           "description": "Objects and arrays are always expanded.",
-          "enum": [
-            "always"
-          ],
+          "enum": ["always"],
           "type": "string"
         },
         {
           "description": "Objects and arrays are never expanded, if they are shorter than the line width.",
-          "enum": [
-            "never"
-          ],
+          "enum": ["never"],
           "type": "string"
         }
       ]
@@ -2100,37 +2055,27 @@
       "oneOf": [
         {
           "description": "camelCase",
-          "enum": [
-            "camelCase"
-          ],
+          "enum": ["camelCase"],
           "type": "string"
         },
         {
           "description": "Match an export name",
-          "enum": [
-            "export"
-          ],
+          "enum": ["export"],
           "type": "string"
         },
         {
           "description": "kebab-case",
-          "enum": [
-            "kebab-case"
-          ],
+          "enum": ["kebab-case"],
           "type": "string"
         },
         {
           "description": "PascalCase",
-          "enum": [
-            "PascalCase"
-          ],
+          "enum": ["PascalCase"],
           "type": "string"
         },
         {
           "description": "snake_case",
-          "enum": [
-            "snake_case"
-          ],
+          "enum": ["snake_case"],
           "type": "string"
         }
       ]
@@ -2151,10 +2096,7 @@
           "items": {
             "type": "string"
           },
-          "type": [
-            "array",
-            "null"
-          ]
+          "type": ["array", "null"]
         },
         "ignoreUnknown": {
           "anyOf": [
@@ -2172,10 +2114,7 @@
           "items": {
             "$ref": "#/definitions/NormalizedGlob"
           },
-          "type": [
-            "array",
-            "null"
-          ]
+          "type": ["array", "null"]
         },
         "maxSize": {
           "anyOf": [
@@ -2196,35 +2135,24 @@
       "oneOf": [
         {
           "description": "The rule doesn't emit code actions.",
-          "enum": [
-            "none"
-          ],
+          "enum": ["none"],
           "type": "string"
         },
         {
           "description": "The rule emits a code action that is safe to apply. Usually these fixes don't change the semantic of the program.",
-          "enum": [
-            "safe"
-          ],
+          "enum": ["safe"],
           "type": "string"
         },
         {
           "description": "The rule emits a code action that is _unsafe_ to apply. Usually these fixes remove comments, or change the semantic of the program.",
-          "enum": [
-            "unsafe"
-          ],
+          "enum": ["unsafe"],
           "type": "string"
         }
       ]
     },
     "Format": {
       "description": "Supported cases.",
-      "enum": [
-        "camelCase",
-        "CONSTANT_CASE",
-        "PascalCase",
-        "snake_case"
-      ],
+      "enum": ["camelCase", "CONSTANT_CASE", "PascalCase", "snake_case"],
       "type": "string"
     },
     "Formats": {
@@ -2308,10 +2236,7 @@
           "items": {
             "$ref": "#/definitions/NormalizedGlob"
           },
-          "type": [
-            "array",
-            "null"
-          ]
+          "type": ["array", "null"]
         },
         "indentStyle": {
           "anyOf": [
@@ -2691,37 +2616,27 @@
       "oneOf": [
         {
           "description": "It disables all the rules of this group",
-          "enum": [
-            "off"
-          ],
+          "enum": ["off"],
           "type": "string"
         },
         {
           "description": "It enables all the rules of this group, with their default severity",
-          "enum": [
-            "on"
-          ],
+          "enum": ["on"],
           "type": "string"
         },
         {
           "description": "It enables all the rules of this group, and set their severity to \"info\"",
-          "enum": [
-            "info"
-          ],
+          "enum": ["info"],
           "type": "string"
         },
         {
           "description": "It enables all the rules of this group, and set their severity to \"warn\"",
-          "enum": [
-            "warn"
-          ],
+          "enum": ["warn"],
           "type": "string"
         },
         {
           "description": "It enables all the rules of this group, and set their severity to \"error+\"",
-          "enum": [
-            "error"
-          ],
+          "enum": ["error"],
           "type": "string"
         }
       ]
@@ -2734,20 +2649,14 @@
           "description": "The \"position\" of the closure function, starting from zero.\n\nFor example, for React's `useEffect()` hook, the closure index is 0.",
           "format": "uint8",
           "minimum": 0,
-          "type": [
-            "integer",
-            "null"
-          ]
+          "type": ["integer", "null"]
         },
         "dependenciesIndex": {
           "default": null,
           "description": "The \"position\" of the array of dependencies, starting from zero.\n\nFor example, for React's `useEffect()` hook, the dependencies index is 1.",
           "format": "uint8",
           "minimum": 0,
-          "type": [
-            "integer",
-            "null"
-          ]
+          "type": ["integer", "null"]
         },
         "name": {
           "default": "",
@@ -2968,10 +2877,7 @@
           ]
         },
         "type": {
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         }
       },
       "type": "object"
@@ -2992,16 +2898,12 @@
       "oneOf": [
         {
           "description": "Tab",
-          "enum": [
-            "tab"
-          ],
+          "enum": ["tab"],
           "type": "string"
         },
         {
           "description": "Space",
-          "enum": [
-            "space"
-          ],
+          "enum": ["space"],
           "type": "string"
         }
       ]
@@ -3060,10 +2962,7 @@
           "items": {
             "type": "string"
           },
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": ["array", "null"],
           "uniqueItems": true
         },
         "jsxRuntime": {
@@ -3558,16 +3457,12 @@
       "oneOf": [
         {
           "description": "Indicates a modern or native JSX environment, that doesn't require special handling by Biome.",
-          "enum": [
-            "transparent"
-          ],
+          "enum": ["transparent"],
           "type": "string"
         },
         {
           "description": "Indicates a classic React environment that requires the `React` import.\n\nCorresponds to the `react` value for the `jsx` option in TypeScript's `tsconfig.json`.\n\nThis option should only be necessary if you cannot upgrade to a React version that supports the new JSX runtime. For more information about the old vs. new JSX runtime, please see: <https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html>",
-          "enum": [
-            "reactClassic"
-          ],
+          "enum": ["reactClassic"],
           "type": "string"
         }
       ]
@@ -3604,107 +3499,77 @@
         },
         {
           "description": "All kinds",
-          "enum": [
-            "any"
-          ],
+          "enum": ["any"],
           "type": "string"
         },
         {
           "description": "All type definitions: classes, enums, interfaces, and type aliases",
-          "enum": [
-            "typeLike"
-          ],
+          "enum": ["typeLike"],
           "type": "string"
         },
         {
           "description": "Named function declarations and expressions",
-          "enum": [
-            "function"
-          ],
+          "enum": ["function"],
           "type": "string"
         },
         {
           "description": "TypeScript namespaces, import and export namespaces",
-          "enum": [
-            "namespaceLike"
-          ],
+          "enum": ["namespaceLike"],
           "type": "string"
         },
         {
           "description": "TypeScript mamespaces",
-          "enum": [
-            "namespace"
-          ],
+          "enum": ["namespace"],
           "type": "string"
         },
         {
           "description": "All function parameters, but parameter properties",
-          "enum": [
-            "functionParameter"
-          ],
+          "enum": ["functionParameter"],
           "type": "string"
         },
         {
           "description": "All generic type parameters",
-          "enum": [
-            "typeParameter"
-          ],
+          "enum": ["typeParameter"],
           "type": "string"
         },
         {
           "description": "All class members: properties, methods, getters, and setters",
-          "enum": [
-            "classMember"
-          ],
+          "enum": ["classMember"],
           "type": "string"
         },
         {
           "description": "All class properties, including parameter properties",
-          "enum": [
-            "classProperty"
-          ],
+          "enum": ["classProperty"],
           "type": "string"
         },
         {
           "description": "All object literal members: properties, methods, getters, and setters",
-          "enum": [
-            "objectLiteralMember"
-          ],
+          "enum": ["objectLiteralMember"],
           "type": "string"
         },
         {
           "description": "All members defined in type alaises and interfaces",
-          "enum": [
-            "typeMember"
-          ],
+          "enum": ["typeMember"],
           "type": "string"
         },
         {
           "description": "All getters defined in type alaises and interfaces",
-          "enum": [
-            "typeGetter"
-          ],
+          "enum": ["typeGetter"],
           "type": "string"
         },
         {
           "description": "All properties defined in type alaises and interfaces",
-          "enum": [
-            "typeProperty"
-          ],
+          "enum": ["typeProperty"],
           "type": "string"
         },
         {
           "description": "All setters defined in type alaises and interfaces",
-          "enum": [
-            "typeSetter"
-          ],
+          "enum": ["typeSetter"],
           "type": "string"
         },
         {
           "description": "All methods defined in type alaises and interfaces",
-          "enum": [
-            "typeMethod"
-          ],
+          "enum": ["typeMethod"],
           "type": "string"
         }
       ]
@@ -3713,23 +3578,17 @@
       "oneOf": [
         {
           "description": "Line Feed only (\\n), common on Linux and macOS as well as inside git repos",
-          "enum": [
-            "lf"
-          ],
+          "enum": ["lf"],
           "type": "string"
         },
         {
           "description": "Carriage Return + Line Feed characters (\\r\\n), common on Windows",
-          "enum": [
-            "crlf"
-          ],
+          "enum": ["crlf"],
           "type": "string"
         },
         {
           "description": "Carriage Return character only (\\r), used very rarely",
-          "enum": [
-            "cr"
-          ],
+          "enum": ["cr"],
           "type": "string"
         }
       ]
@@ -3770,10 +3629,7 @@
           "items": {
             "$ref": "#/definitions/NormalizedGlob"
           },
-          "type": [
-            "array",
-            "null"
-          ]
+          "type": ["array", "null"]
         },
         "rules": {
           "anyOf": [
@@ -6204,10 +6060,7 @@
           "items": {
             "$ref": "#/definitions/Patterns"
           },
-          "type": [
-            "array",
-            "null"
-          ]
+          "type": ["array", "null"]
         }
       },
       "type": "object"
@@ -6253,10 +6106,7 @@
           "description": "Set entropy threshold (default is 41).",
           "format": "uint16",
           "minimum": 0,
-          "type": [
-            "integer",
-            "null"
-          ]
+          "type": ["integer", "null"]
         }
       },
       "type": "object"
@@ -7608,10 +7458,7 @@
         },
         "recommended": {
           "description": "Enables the recommended rules for this group",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         },
         "useAnchorHref": {
           "anyOf": [
@@ -7741,16 +7588,12 @@
       "oneOf": [
         {
           "description": "`{foo: foo}`",
-          "enum": [
-            "explicit"
-          ],
+          "enum": ["explicit"],
           "type": "string"
         },
         {
           "description": "`{foo}`",
-          "enum": [
-            "shorthand"
-          ],
+          "enum": ["shorthand"],
           "type": "string"
         }
       ]
@@ -7759,16 +7602,12 @@
       "oneOf": [
         {
           "description": "The operator is placed after the expression",
-          "enum": [
-            "after"
-          ],
+          "enum": ["after"],
           "type": "string"
         },
         {
           "description": "The operator is placed before the expression",
-          "enum": [
-            "before"
-          ],
+          "enum": ["before"],
           "type": "string"
         }
       ]
@@ -8227,10 +8066,7 @@
         },
         "message": {
           "description": "A custom message for diagnostics related to this pattern.",
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         }
       },
       "type": "object"
@@ -8347,10 +8183,7 @@
         },
         "recommended": {
           "description": "Enables the recommended rules for this group",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         },
         "useGoogleFontPreconnect": {
           "anyOf": [
@@ -8406,45 +8239,29 @@
       "oneOf": [
         {
           "description": "Allows property assignments on function parameters. This is the default behavior, enabling flexibility in parameter usage.",
-          "enum": [
-            "allow"
-          ],
+          "enum": ["allow"],
           "type": "string"
         },
         {
           "description": "Disallows property assignments on function parameters. Enforces stricter immutability to prevent unintended side effects.",
-          "enum": [
-            "deny"
-          ],
+          "enum": ["deny"],
           "type": "string"
         }
       ]
     },
     "QuoteProperties": {
-      "enum": [
-        "asNeeded",
-        "preserve"
-      ],
+      "enum": ["asNeeded", "preserve"],
       "type": "string"
     },
     "QuoteStyle": {
-      "enum": [
-        "double",
-        "single"
-      ],
+      "enum": ["double", "single"],
       "type": "string"
     },
     "Regex": {
       "type": "string"
     },
     "RestrictedModifier": {
-      "enum": [
-        "abstract",
-        "private",
-        "protected",
-        "readonly",
-        "static"
-      ],
+      "enum": ["abstract", "private", "protected", "readonly", "static"],
       "type": "string"
     },
     "RuleAssistConfiguration_for_OrganizeImportsOptions": {
@@ -8488,10 +8305,7 @@
       ]
     },
     "RuleAssistPlainConfiguration": {
-      "enum": [
-        "off",
-        "on"
-      ],
+      "enum": ["off", "on"],
       "type": "string"
     },
     "RuleAssistWithOptions_for_OrganizeImportsOptions": {
@@ -8514,10 +8328,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level",
-        "options"
-      ],
+      "required": ["level", "options"],
       "type": "object"
     },
     "RuleAssistWithOptions_for_UseSortedAttributesOptions": {
@@ -8540,10 +8351,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level",
-        "options"
-      ],
+      "required": ["level", "options"],
       "type": "object"
     },
     "RuleAssistWithOptions_for_UseSortedKeysOptions": {
@@ -8566,10 +8374,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level",
-        "options"
-      ],
+      "required": ["level", "options"],
       "type": "object"
     },
     "RuleAssistWithOptions_for_UseSortedPropertiesOptions": {
@@ -8592,10 +8397,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level",
-        "options"
-      ],
+      "required": ["level", "options"],
       "type": "object"
     },
     "RuleDomain": {
@@ -8603,58 +8405,42 @@
       "oneOf": [
         {
           "description": "React library rules",
-          "enum": [
-            "react"
-          ],
+          "enum": ["react"],
           "type": "string"
         },
         {
           "description": "Testing rules",
-          "enum": [
-            "test"
-          ],
+          "enum": ["test"],
           "type": "string"
         },
         {
           "description": "Solid.js framework rules",
-          "enum": [
-            "solid"
-          ],
+          "enum": ["solid"],
           "type": "string"
         },
         {
           "description": "Next.js framework rules",
-          "enum": [
-            "next"
-          ],
+          "enum": ["next"],
           "type": "string"
         },
         {
           "description": "Qwik framework rules",
-          "enum": [
-            "qwik"
-          ],
+          "enum": ["qwik"],
           "type": "string"
         },
         {
           "description": "Vue.js framework rules",
-          "enum": [
-            "vue"
-          ],
+          "enum": ["vue"],
           "type": "string"
         },
         {
           "description": "For rules that require querying multiple files inside a project",
-          "enum": [
-            "project"
-          ],
+          "enum": ["project"],
           "type": "string"
         },
         {
           "description": "Tailwind CSS rules",
-          "enum": [
-            "tailwind"
-          ],
+          "enum": ["tailwind"],
           "type": "string"
         }
       ]
@@ -8663,23 +8449,17 @@
       "oneOf": [
         {
           "description": "Enables all the rules that belong to this domain",
-          "enum": [
-            "all"
-          ],
+          "enum": ["all"],
           "type": "string"
         },
         {
           "description": "Disables all the rules that belong to this domain",
-          "enum": [
-            "none"
-          ],
+          "enum": ["none"],
           "type": "string"
         },
         {
           "description": "Enables only the recommended rules for this domain",
-          "enum": [
-            "recommended"
-          ],
+          "enum": ["recommended"],
           "type": "string"
         }
       ]
@@ -8696,37 +8476,27 @@
     "RulePlainConfiguration": {
       "oneOf": [
         {
-          "enum": [
-            "off"
-          ],
+          "enum": ["off"],
           "type": "string"
         },
         {
           "description": "Enables the rule using the default severity of the rule",
-          "enum": [
-            "on"
-          ],
+          "enum": ["on"],
           "type": "string"
         },
         {
           "description": "Enables the rule, and it will emit a diagnostic with information severity",
-          "enum": [
-            "info"
-          ],
+          "enum": ["info"],
           "type": "string"
         },
         {
           "description": "Enables the rule, and it will emit a diagnostic with warning severity",
-          "enum": [
-            "warn"
-          ],
+          "enum": ["warn"],
           "type": "string"
         },
         {
           "description": "Enables the rule, and it will emit a diagnostic with error severity",
-          "enum": [
-            "error"
-          ],
+          "enum": ["error"],
           "type": "string"
         }
       ]
@@ -8762,9 +8532,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoAccumulatingSpreadOptions": {
@@ -8787,9 +8555,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoAdjacentSpacesInRegexOptions": {
@@ -8823,9 +8589,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoAlertOptions": {
@@ -8848,9 +8612,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoApproximativeNumericConstantOptions": {
@@ -8884,9 +8646,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoArgumentsOptions": {
@@ -8909,9 +8669,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoAriaHiddenOnFocusableOptions": {
@@ -8945,9 +8703,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoAriaUnsupportedElementsOptions": {
@@ -8981,9 +8737,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoArrayIndexKeyOptions": {
@@ -9006,9 +8760,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoAssignInExpressionsOptions": {
@@ -9031,9 +8783,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoAsyncPromiseExecutorOptions": {
@@ -9056,9 +8806,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoAutofocusOptions": {
@@ -9092,9 +8840,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoAwaitInLoopsOptions": {
@@ -9117,9 +8863,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoBannedTypesOptions": {
@@ -9153,9 +8897,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoBarrelFileOptions": {
@@ -9178,9 +8920,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoBiomeFirstExceptionOptions": {
@@ -9214,9 +8954,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoBitwiseOperatorsOptions": {
@@ -9239,9 +8977,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoBlankTargetOptions": {
@@ -9275,9 +9011,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoCatchAssignOptions": {
@@ -9300,9 +9034,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoChildrenPropOptions": {
@@ -9325,9 +9057,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoClassAssignOptions": {
@@ -9350,9 +9080,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoCommaOperatorOptions": {
@@ -9375,9 +9103,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoCommentTextOptions": {
@@ -9411,9 +9137,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoCommonJsOptions": {
@@ -9436,9 +9160,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoCompareNegZeroOptions": {
@@ -9472,9 +9194,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoConfusingLabelsOptions": {
@@ -9497,9 +9217,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoConfusingVoidTypeOptions": {
@@ -9533,9 +9251,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoConsoleOptions": {
@@ -9569,9 +9285,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoConstAssignOptions": {
@@ -9605,9 +9319,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoConstEnumOptions": {
@@ -9641,9 +9353,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoConstantBinaryExpressionsOptions": {
@@ -9666,9 +9376,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoConstantConditionOptions": {
@@ -9691,9 +9399,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoConstantMathMinMaxClampOptions": {
@@ -9727,9 +9433,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoConstructorReturnOptions": {
@@ -9752,9 +9456,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoControlCharactersInRegexOptions": {
@@ -9777,9 +9479,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDangerouslySetInnerHtmlOptions": {
@@ -9802,9 +9502,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDangerouslySetInnerHtmlWithChildrenOptions": {
@@ -9827,9 +9525,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDebuggerOptions": {
@@ -9863,9 +9559,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDefaultExportOptions": {
@@ -9888,9 +9582,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDeleteOptions": {
@@ -9924,9 +9616,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDescendingSpecificityOptions": {
@@ -9949,9 +9639,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDistractingElementsOptions": {
@@ -9985,9 +9673,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDocumentCookieOptions": {
@@ -10010,9 +9696,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDocumentImportInPageOptions": {
@@ -10035,9 +9719,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDoneCallbackOptions": {
@@ -10060,9 +9742,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDoubleEqualsOptions": {
@@ -10096,9 +9776,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateAtImportRulesOptions": {
@@ -10121,9 +9799,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateCaseOptions": {
@@ -10146,9 +9822,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateClassMembersOptions": {
@@ -10171,9 +9845,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateCustomPropertiesOptions": {
@@ -10196,9 +9868,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateDependenciesOptions": {
@@ -10221,9 +9891,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateElseIfOptions": {
@@ -10246,9 +9914,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateFieldsOptions": {
@@ -10271,9 +9937,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateFontNamesOptions": {
@@ -10296,9 +9960,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateJsxPropsOptions": {
@@ -10321,9 +9983,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateObjectKeysOptions": {
@@ -10346,9 +10006,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateParametersOptions": {
@@ -10371,9 +10029,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicatePropertiesOptions": {
@@ -10396,9 +10052,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateSelectorsKeyframeBlockOptions": {
@@ -10421,9 +10075,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDuplicateTestHooksOptions": {
@@ -10446,9 +10098,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoDynamicNamespaceImportAccessOptions": {
@@ -10471,9 +10121,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoEmptyBlockOptions": {
@@ -10496,9 +10144,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoEmptyBlockStatementsOptions": {
@@ -10521,9 +10167,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoEmptyCharacterClassInRegexOptions": {
@@ -10546,9 +10190,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoEmptyInterfaceOptions": {
@@ -10582,9 +10224,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoEmptyPatternOptions": {
@@ -10607,9 +10247,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoEmptyTypeParametersOptions": {
@@ -10632,9 +10270,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoEnumOptions": {
@@ -10657,9 +10293,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoEvolvingTypesOptions": {
@@ -10682,9 +10316,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoExcessiveCognitiveComplexityOptions": {
@@ -10707,9 +10339,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoExcessiveLinesPerFunctionOptions": {
@@ -10732,9 +10362,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoExcessiveNestedTestSuitesOptions": {
@@ -10757,9 +10385,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoExplicitAnyOptions": {
@@ -10782,9 +10408,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoExportedImportsOptions": {
@@ -10807,9 +10431,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoExportsInTestOptions": {
@@ -10832,9 +10454,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoExtraBooleanCastOptions": {
@@ -10868,9 +10488,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoExtraNonNullAssertionOptions": {
@@ -10904,9 +10522,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoFallthroughSwitchClauseOptions": {
@@ -10929,9 +10545,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoFlatMapIdentityOptions": {
@@ -10965,9 +10579,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoFloatingPromisesOptions": {
@@ -11001,9 +10613,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoFocusedTestsOptions": {
@@ -11037,9 +10647,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoForEachOptions": {
@@ -11062,9 +10670,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoFunctionAssignOptions": {
@@ -11087,9 +10693,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoGlobalAssignOptions": {
@@ -11112,9 +10716,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoGlobalDirnameFilenameOptions": {
@@ -11148,9 +10750,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoGlobalEvalOptions": {
@@ -11173,9 +10773,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoGlobalIsFiniteOptions": {
@@ -11209,9 +10807,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoGlobalIsNanOptions": {
@@ -11245,9 +10841,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoGlobalObjectCallsOptions": {
@@ -11270,9 +10864,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoHeadElementOptions": {
@@ -11295,9 +10887,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoHeadImportInDocumentOptions": {
@@ -11320,9 +10910,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoHeaderScopeOptions": {
@@ -11356,9 +10944,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoImgElementOptions": {
@@ -11381,9 +10967,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoImplicitAnyLetOptions": {
@@ -11406,9 +10990,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoImplicitBooleanOptions": {
@@ -11442,9 +11024,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoImplicitCoercionsOptions": {
@@ -11478,9 +11058,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoImportAssignOptions": {
@@ -11503,9 +11081,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoImportCyclesOptions": {
@@ -11528,9 +11104,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoImportantInKeyframeOptions": {
@@ -11553,9 +11127,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoImportantStylesOptions": {
@@ -11589,9 +11161,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoInferrableTypesOptions": {
@@ -11625,9 +11195,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoInnerDeclarationsOptions": {
@@ -11650,9 +11218,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoInteractiveElementToNoninteractiveRoleOptions": {
@@ -11686,9 +11252,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoInvalidBuiltinInstantiationOptions": {
@@ -11722,9 +11286,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoInvalidConstructorSuperOptions": {
@@ -11747,9 +11309,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoInvalidDirectionInLinearGradientOptions": {
@@ -11772,9 +11332,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoInvalidGridAreasOptions": {
@@ -11797,9 +11355,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoInvalidPositionAtImportRuleOptions": {
@@ -11822,9 +11378,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoInvalidUseBeforeDeclarationOptions": {
@@ -11847,9 +11401,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoIrregularWhitespaceOptions": {
@@ -11872,9 +11424,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoLabelVarOptions": {
@@ -11897,9 +11447,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoLabelWithoutControlOptions": {
@@ -11922,9 +11470,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoMagicNumbersOptions": {
@@ -11947,9 +11493,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoMisleadingCharacterClassOptions": {
@@ -11983,9 +11527,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoMisleadingInstantiatorOptions": {
@@ -12008,9 +11550,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoMisplacedAssertionOptions": {
@@ -12033,9 +11573,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoMisrefactoredShorthandAssignOptions": {
@@ -12069,9 +11607,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoMissingVarFunctionOptions": {
@@ -12094,9 +11630,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoMisusedPromisesOptions": {
@@ -12130,9 +11664,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNamespaceImportOptions": {
@@ -12155,9 +11687,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNamespaceOptions": {
@@ -12180,9 +11710,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNegationElseOptions": {
@@ -12216,9 +11744,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNestedComponentDefinitionsOptions": {
@@ -12241,9 +11767,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNestedTernaryOptions": {
@@ -12266,9 +11790,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNextAsyncClientComponentOptions": {
@@ -12291,9 +11813,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNodejsModulesOptions": {
@@ -12316,9 +11836,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNonNullAssertedOptionalChainOptions": {
@@ -12341,9 +11859,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNonNullAssertionOptions": {
@@ -12377,9 +11893,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNoninteractiveElementInteractionsOptions": {
@@ -12402,9 +11916,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNoninteractiveElementToInteractiveRoleOptions": {
@@ -12438,9 +11950,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNoninteractiveTabindexOptions": {
@@ -12474,9 +11984,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoNonoctalDecimalEscapeOptions": {
@@ -12510,9 +12018,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoOctalEscapeOptions": {
@@ -12546,9 +12052,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoParameterAssignOptions": {
@@ -12571,9 +12075,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoParameterPropertiesOptions": {
@@ -12596,9 +12098,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoPositiveTabindexOptions": {
@@ -12632,9 +12132,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoPrecisionLossOptions": {
@@ -12657,9 +12155,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoPrivateImportsOptions": {
@@ -12682,9 +12178,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoProcessEnvOptions": {
@@ -12707,9 +12201,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoProcessGlobalOptions": {
@@ -12743,9 +12235,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoPrototypeBuiltinsOptions": {
@@ -12779,9 +12269,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoQuickfixBiomeOptions": {
@@ -12815,9 +12303,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoQwikUseVisibleTaskOptions": {
@@ -12840,9 +12326,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoReExportAllOptions": {
@@ -12865,9 +12349,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoReactPropAssignmentsOptions": {
@@ -12890,9 +12372,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoReactSpecificPropsOptions": {
@@ -12926,9 +12406,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoRedeclareOptions": {
@@ -12951,9 +12429,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoRedundantAltOptions": {
@@ -12976,9 +12452,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoRedundantRolesOptions": {
@@ -13012,9 +12486,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoRedundantUseStrictOptions": {
@@ -13048,9 +12520,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoRenderReturnValueOptions": {
@@ -13073,9 +12543,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoRestrictedElementsOptions": {
@@ -13098,9 +12566,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoRestrictedGlobalsOptions": {
@@ -13123,9 +12589,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoRestrictedImportsOptions": {
@@ -13148,9 +12612,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoRestrictedTypesOptions": {
@@ -13184,9 +12646,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSecretsOptions": {
@@ -13209,9 +12669,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSelfAssignOptions": {
@@ -13234,9 +12692,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSelfCompareOptions": {
@@ -13259,9 +12715,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSetterReturnOptions": {
@@ -13284,9 +12738,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoShadowOptions": {
@@ -13309,9 +12761,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoShadowRestrictedNamesOptions": {
@@ -13334,9 +12784,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoShorthandPropertyOverridesOptions": {
@@ -13359,9 +12807,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoShoutyConstantsOptions": {
@@ -13395,9 +12841,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSkippedTestsOptions": {
@@ -13431,9 +12875,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSolidDestructuredPropsOptions": {
@@ -13456,9 +12898,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSparseArrayOptions": {
@@ -13492,9 +12932,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoStaticElementInteractionsOptions": {
@@ -13517,9 +12955,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoStaticOnlyClassOptions": {
@@ -13542,9 +12978,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoStringCaseMismatchOptions": {
@@ -13578,9 +13012,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSubstrOptions": {
@@ -13614,9 +13046,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSuspiciousSemicolonInJsxOptions": {
@@ -13639,9 +13069,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSvgWithoutTitleOptions": {
@@ -13664,9 +13092,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoSwitchDeclarationsOptions": {
@@ -13700,9 +13126,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoTemplateCurlyInStringOptions": {
@@ -13725,9 +13149,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoThenPropertyOptions": {
@@ -13750,9 +13172,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoThisInStaticOptions": {
@@ -13786,9 +13206,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoTsIgnoreOptions": {
@@ -13822,9 +13240,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnassignedVariablesOptions": {
@@ -13847,9 +13263,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUndeclaredDependenciesOptions": {
@@ -13872,9 +13286,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUndeclaredVariablesOptions": {
@@ -13897,9 +13309,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnknownAtRulesOptions": {
@@ -13922,9 +13332,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnknownFunctionOptions": {
@@ -13947,9 +13355,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnknownMediaFeatureNameOptions": {
@@ -13972,9 +13378,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnknownPropertyOptions": {
@@ -13997,9 +13401,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnknownPseudoClassOptions": {
@@ -14022,9 +13424,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnknownPseudoElementOptions": {
@@ -14047,9 +13447,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnknownTypeSelectorOptions": {
@@ -14072,9 +13470,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnknownUnitOptions": {
@@ -14097,9 +13493,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnmatchableAnbSelectorOptions": {
@@ -14122,9 +13516,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnnecessaryConditionsOptions": {
@@ -14147,9 +13539,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnreachableOptions": {
@@ -14172,9 +13562,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnreachableSuperOptions": {
@@ -14197,9 +13585,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnresolvedImportsOptions": {
@@ -14222,9 +13608,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnsafeDeclarationMergingOptions": {
@@ -14247,9 +13631,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnsafeFinallyOptions": {
@@ -14272,9 +13654,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnsafeNegationOptions": {
@@ -14308,9 +13688,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnsafeOptionalChainingOptions": {
@@ -14333,9 +13711,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnusedFunctionParametersOptions": {
@@ -14369,9 +13745,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnusedImportsOptions": {
@@ -14405,9 +13779,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnusedLabelsOptions": {
@@ -14441,9 +13813,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnusedPrivateClassMembersOptions": {
@@ -14477,9 +13847,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnusedTemplateLiteralOptions": {
@@ -14513,9 +13881,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnusedVariablesOptions": {
@@ -14549,9 +13915,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUnwantedPolyfillioOptions": {
@@ -14574,9 +13938,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessCatchBindingOptions": {
@@ -14610,9 +13972,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessCatchOptions": {
@@ -14646,9 +14006,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessConstructorOptions": {
@@ -14682,9 +14040,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessContinueOptions": {
@@ -14718,9 +14074,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessElseOptions": {
@@ -14754,9 +14108,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessEmptyExportOptions": {
@@ -14790,9 +14142,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessEscapeInRegexOptions": {
@@ -14826,9 +14176,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessEscapeInStringOptions": {
@@ -14862,9 +14210,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessFragmentsOptions": {
@@ -14898,9 +14244,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessLabelOptions": {
@@ -14934,9 +14278,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessLoneBlockStatementsOptions": {
@@ -14970,9 +14312,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessRegexBackrefsOptions": {
@@ -14995,9 +14335,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessRenameOptions": {
@@ -15031,9 +14369,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessStringConcatOptions": {
@@ -15067,9 +14403,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessStringRawOptions": {
@@ -15092,9 +14426,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessSwitchCaseOptions": {
@@ -15128,9 +14460,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessTernaryOptions": {
@@ -15164,9 +14494,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessThisAliasOptions": {
@@ -15200,9 +14528,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessTypeConstraintOptions": {
@@ -15236,9 +14562,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessUndefinedInitializationOptions": {
@@ -15272,9 +14596,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoUselessUndefinedOptions": {
@@ -15308,9 +14630,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoValueAtRuleOptions": {
@@ -15333,9 +14653,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoVarOptions": {
@@ -15369,9 +14687,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoVoidElementsWithChildrenOptions": {
@@ -15405,9 +14721,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoVoidOptions": {
@@ -15430,9 +14744,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoVoidTypeReturnOptions": {
@@ -15455,9 +14767,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoVueDataObjectDeclarationOptions": {
@@ -15491,9 +14801,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoVueReservedKeysOptions": {
@@ -15516,9 +14824,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoVueReservedPropsOptions": {
@@ -15541,9 +14847,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoWithOptions": {
@@ -15566,9 +14870,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithNoYodaExpressionOptions": {
@@ -15602,9 +14904,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseAdjacentOverloadSignaturesOptions": {
@@ -15627,9 +14927,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseAltTextOptions": {
@@ -15652,9 +14950,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseAnchorContentOptions": {
@@ -15688,9 +14984,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseAnchorHrefOptions": {
@@ -15713,9 +15007,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseAriaActivedescendantWithTabindexOptions": {
@@ -15749,9 +15041,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseAriaPropsForRoleOptions": {
@@ -15774,9 +15064,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseAriaPropsSupportedByRoleOptions": {
@@ -15799,9 +15087,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseArrayLiteralsOptions": {
@@ -15835,9 +15121,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseArrowFunctionOptions": {
@@ -15871,9 +15155,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseAsConstAssertionOptions": {
@@ -15907,9 +15189,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseAtIndexOptions": {
@@ -15943,9 +15223,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseAwaitOptions": {
@@ -15968,9 +15246,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseBiomeIgnoreFolderOptions": {
@@ -16004,9 +15280,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseBlockStatementsOptions": {
@@ -16040,9 +15314,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseButtonTypeOptions": {
@@ -16065,9 +15337,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseCollapsedElseIfOptions": {
@@ -16101,9 +15371,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseCollapsedIfOptions": {
@@ -16137,9 +15405,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseComponentExportOnlyModulesOptions": {
@@ -16162,9 +15428,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseConsistentArrayTypeOptions": {
@@ -16198,9 +15462,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseConsistentArrowReturnOptions": {
@@ -16234,9 +15496,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseConsistentBuiltinInstantiationOptions": {
@@ -16270,9 +15530,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseConsistentCurlyBracesOptions": {
@@ -16306,9 +15564,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseConsistentMemberAccessibilityOptions": {
@@ -16331,9 +15587,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseConsistentObjectDefinitionsOptions": {
@@ -16367,9 +15621,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseConsistentTypeDefinitionsOptions": {
@@ -16403,9 +15655,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseConstOptions": {
@@ -16439,9 +15689,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseDateNowOptions": {
@@ -16475,9 +15723,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseDefaultParameterLastOptions": {
@@ -16511,9 +15757,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseDefaultSwitchClauseLastOptions": {
@@ -16536,9 +15780,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseDefaultSwitchClauseOptions": {
@@ -16561,9 +15803,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseDeprecatedReasonOptions": {
@@ -16586,9 +15826,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseEnumInitializersOptions": {
@@ -16622,9 +15860,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseErrorMessageOptions": {
@@ -16647,9 +15883,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseExhaustiveDependenciesOptions": {
@@ -16683,9 +15917,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseExhaustiveSwitchCasesOptions": {
@@ -16719,9 +15951,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseExplicitLengthCheckOptions": {
@@ -16755,9 +15985,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseExplicitTypeOptions": {
@@ -16780,9 +16008,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseExponentiationOperatorOptions": {
@@ -16816,9 +16042,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseExportTypeOptions": {
@@ -16852,9 +16076,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseExportsLastOptions": {
@@ -16877,9 +16099,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseFilenamingConventionOptions": {
@@ -16902,9 +16122,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseFlatMapOptions": {
@@ -16938,9 +16156,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseFocusableInteractiveOptions": {
@@ -16963,9 +16179,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseForOfOptions": {
@@ -16988,9 +16202,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseFragmentSyntaxOptions": {
@@ -17024,9 +16236,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseGenericFontNamesOptions": {
@@ -17049,9 +16259,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseGetterReturnOptions": {
@@ -17074,9 +16282,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseGoogleFontDisplayOptions": {
@@ -17099,9 +16305,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseGoogleFontPreconnectOptions": {
@@ -17135,9 +16339,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseGraphqlNamedOperationsOptions": {
@@ -17171,9 +16373,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseGraphqlNamingConventionOptions": {
@@ -17196,9 +16396,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseGroupedAccessorPairsOptions": {
@@ -17221,9 +16419,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseGuardForInOptions": {
@@ -17246,9 +16442,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseHeadingContentOptions": {
@@ -17271,9 +16465,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseHookAtTopLevelOptions": {
@@ -17296,9 +16488,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseHtmlLangOptions": {
@@ -17321,9 +16511,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseIframeTitleOptions": {
@@ -17346,9 +16534,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseImageSizeOptions": {
@@ -17371,9 +16557,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseImportExtensionsOptions": {
@@ -17407,9 +16591,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseImportTypeOptions": {
@@ -17443,9 +16625,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseIndexOfOptions": {
@@ -17479,9 +16659,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseIsArrayOptions": {
@@ -17515,9 +16693,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseIsNanOptions": {
@@ -17551,9 +16727,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseIterableCallbackReturnOptions": {
@@ -17576,9 +16750,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseJsonImportAttributesOptions": {
@@ -17612,9 +16784,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseJsxKeyInIterableOptions": {
@@ -17637,9 +16807,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseKeyWithClickEventsOptions": {
@@ -17662,9 +16830,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseKeyWithMouseEventsOptions": {
@@ -17687,9 +16853,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseLiteralEnumMembersOptions": {
@@ -17712,9 +16876,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseLiteralKeysOptions": {
@@ -17748,9 +16910,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseMaxParamsOptions": {
@@ -17773,9 +16933,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseMediaCaptionOptions": {
@@ -17798,9 +16956,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseNamespaceKeywordOptions": {
@@ -17834,9 +16990,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseNamingConventionOptions": {
@@ -17870,9 +17024,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseNodeAssertStrictOptions": {
@@ -17906,9 +17058,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseNodejsImportProtocolOptions": {
@@ -17942,9 +17092,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseNumberNamespaceOptions": {
@@ -17978,9 +17126,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseNumberToFixedDigitsArgumentOptions": {
@@ -18014,9 +17160,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseNumericLiteralsOptions": {
@@ -18050,9 +17194,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseNumericSeparatorsOptions": {
@@ -18086,9 +17228,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseObjectSpreadOptions": {
@@ -18122,9 +17262,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseOptionalChainOptions": {
@@ -18158,9 +17296,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseParseIntRadixOptions": {
@@ -18194,9 +17330,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseQwikClasslistOptions": {
@@ -18219,9 +17353,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseReactFunctionComponentsOptions": {
@@ -18244,9 +17376,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseReadonlyClassPropertiesOptions": {
@@ -18280,9 +17410,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseRegexLiteralsOptions": {
@@ -18316,9 +17444,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseSelfClosingElementsOptions": {
@@ -18352,9 +17478,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseSemanticElementsOptions": {
@@ -18377,9 +17501,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseShorthandAssignOptions": {
@@ -18413,9 +17535,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseShorthandFunctionTypeOptions": {
@@ -18449,9 +17569,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseSimpleNumberKeysOptions": {
@@ -18485,9 +17603,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseSimplifiedLogicExpressionOptions": {
@@ -18521,9 +17637,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseSingleJsDocAsteriskOptions": {
@@ -18557,9 +17671,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseSingleVarDeclaratorOptions": {
@@ -18593,9 +17705,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseSolidForComponentOptions": {
@@ -18618,9 +17728,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseSortedClassesOptions": {
@@ -18654,9 +17762,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseStaticResponseMethodsOptions": {
@@ -18690,9 +17796,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseStrictModeOptions": {
@@ -18726,9 +17830,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseSymbolDescriptionOptions": {
@@ -18751,9 +17853,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseTemplateOptions": {
@@ -18787,9 +17887,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseThrowNewErrorOptions": {
@@ -18823,9 +17921,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseThrowOnlyErrorOptions": {
@@ -18848,9 +17944,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseTopLevelRegexOptions": {
@@ -18873,9 +17967,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseTrimStartEndOptions": {
@@ -18909,9 +18001,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseUnifiedTypeSignaturesOptions": {
@@ -18945,9 +18035,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseUniqueElementIdsOptions": {
@@ -18970,9 +18058,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseValidAnchorOptions": {
@@ -18995,9 +18081,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseValidAriaPropsOptions": {
@@ -19031,9 +18115,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseValidAriaRoleOptions": {
@@ -19067,9 +18149,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseValidAriaValuesOptions": {
@@ -19092,9 +18172,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseValidAutocompleteOptions": {
@@ -19117,9 +18195,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseValidForDirectionOptions": {
@@ -19142,9 +18218,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseValidLangOptions": {
@@ -19167,9 +18241,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseValidTypeofOptions": {
@@ -19203,9 +18275,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseVueMultiWordComponentNamesOptions": {
@@ -19228,9 +18298,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseWhileOptions": {
@@ -19264,9 +18332,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "RuleWithUseYieldOptions": {
@@ -19289,9 +18355,7 @@
           "description": "Rule's options"
         }
       },
-      "required": [
-        "level"
-      ],
+      "required": ["level"],
       "type": "object"
     },
     "Rules": {
@@ -19349,10 +18413,7 @@
         },
         "recommended": {
           "description": "It enables the lint rules recommended by Biome. `true` by default.",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         },
         "security": {
           "anyOf": [
@@ -19391,10 +18452,7 @@
       "type": "string"
     },
     "Scope": {
-      "enum": [
-        "any",
-        "global"
-      ],
+      "enum": ["any", "global"],
       "type": "string"
     },
     "Security": {
@@ -19447,10 +18505,7 @@
         },
         "recommended": {
           "description": "Enables the recommended rules for this group",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         }
       },
       "type": "object"
@@ -19490,25 +18545,18 @@
       "oneOf": [
         {
           "description": "The `/` inside void elements is removed by the formatter",
-          "enum": [
-            "never"
-          ],
+          "enum": ["never"],
           "type": "string"
         },
         {
           "description": "The `/` inside void elements is always added",
-          "enum": [
-            "always"
-          ],
+          "enum": ["always"],
           "type": "string"
         }
       ]
     },
     "Semicolons": {
-      "enum": [
-        "always",
-        "asNeeded"
-      ],
+      "enum": ["always", "asNeeded"],
       "type": "string"
     },
     "SeverityOrGroup_for_A11y": {
@@ -19592,10 +18640,7 @@
       ]
     },
     "SortOrder": {
-      "enum": [
-        "natural",
-        "lexicographic"
-      ],
+      "enum": ["natural", "lexicographic"],
       "type": "string"
     },
     "Source": {
@@ -19615,10 +18660,7 @@
         },
         "recommended": {
           "description": "Enables the recommended rules for this group",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         },
         "useSortedAttributes": {
           "anyOf": [
@@ -19998,10 +19040,7 @@
         },
         "recommended": {
           "description": "Enables the recommended rules for this group",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         },
         "useArrayLiterals": {
           "anyOf": [
@@ -20506,23 +19545,17 @@
       "oneOf": [
         {
           "description": "Use the best fitting style according to the situation",
-          "enum": [
-            "auto"
-          ],
+          "enum": ["auto"],
           "type": "string"
         },
         {
           "description": "Always use inline type keywords",
-          "enum": [
-            "inlineType"
-          ],
+          "enum": ["inlineType"],
           "type": "string"
         },
         {
           "description": "Always separate types in a dedicated `import type`",
-          "enum": [
-            "separatedType"
-          ],
+          "enum": ["separatedType"],
           "type": "string"
         }
       ]
@@ -21413,10 +20446,7 @@
         },
         "recommended": {
           "description": "Enables the recommended rules for this group",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": ["boolean", "null"]
         },
         "useAdjacentOverloadSignatures": {
           "anyOf": [
@@ -21580,23 +20610,17 @@
       "oneOf": [
         {
           "description": "Trailing commas wherever possible (including function parameters and calls).",
-          "enum": [
-            "all"
-          ],
+          "enum": ["all"],
           "type": "string"
         },
         {
           "description": "Trailing commas where valid in ES5 (objects, arrays, etc.). No trailing commas in type parameters in TypeScript.",
-          "enum": [
-            "es5"
-          ],
+          "enum": ["es5"],
           "type": "string"
         },
         {
           "description": "No trailing commas.",
-          "enum": [
-            "none"
-          ],
+          "enum": ["none"],
           "type": "string"
         }
       ]
@@ -21605,16 +20629,12 @@
       "oneOf": [
         {
           "description": "The formatter will remove the trailing commas.",
-          "enum": [
-            "none"
-          ],
+          "enum": ["none"],
           "type": "string"
         },
         {
           "description": "The trailing commas are allowed and advised in JSON and JSONC files.",
-          "enum": [
-            "all"
-          ],
+          "enum": ["all"],
           "type": "string"
         }
       ]
@@ -23162,20 +22182,14 @@
           "items": {
             "type": "string"
           },
-          "type": [
-            "array",
-            "null"
-          ]
+          "type": ["array", "null"]
         },
         "functions": {
           "description": "Names of the functions or tagged templates that will be sorted.",
           "items": {
             "type": "string"
           },
-          "type": [
-            "array",
-            "null"
-          ]
+          "type": ["array", "null"]
         }
       },
       "type": "object"
@@ -23541,9 +22555,7 @@
       "oneOf": [
         {
           "description": "Integration with the git client as VCS",
-          "enum": [
-            "git"
-          ],
+          "enum": ["git"],
           "type": "string"
         }
       ]
@@ -23565,10 +22577,7 @@
         },
         "defaultBranch": {
           "description": "The main branch of the project",
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         },
         "enabled": {
           "anyOf": [
@@ -23583,10 +22592,7 @@
         },
         "root": {
           "description": "The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.\n\nIf Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted",
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": ["string", "null"]
         },
         "useIgnoreFile": {
           "anyOf": [
@@ -23603,11 +22609,7 @@
       "type": "object"
     },
     "Visibility": {
-      "enum": [
-        "public",
-        "package",
-        "private"
-      ],
+      "enum": ["public", "package", "private"],
       "type": "string"
     },
     "WhitespaceSensitivity": {
@@ -23615,23 +22617,17 @@
       "oneOf": [
         {
           "description": "The formatter considers whitespace significant for elements that have an \"inline\" display style by default in browser's user agent style sheets.",
-          "enum": [
-            "css"
-          ],
+          "enum": ["css"],
           "type": "string"
         },
         {
           "description": "Leading and trailing whitespace in content is considered significant for all elements.\n\nThe formatter should leave at least one whitespace character if whitespace is present. Otherwise, if there is no whitespace, it should not add any after `>` or before `<`. In other words, if there's no whitespace, the text content should hug the tags.\n\nExample of text hugging the tags: ```html <b >content</b > ```",
-          "enum": [
-            "strict"
-          ],
+          "enum": ["strict"],
           "type": "string"
         },
         {
           "description": "Whitespace is considered insignificant. The formatter is free to remove or add whitespace as it sees fit.",
-          "enum": [
-            "ignore"
-          ],
+          "enum": ["ignore"],
           "type": "string"
         }
       ]
