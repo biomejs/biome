@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessCatchBinding {
-        version: "next",
+        version: "2.2.3",
         name: "noUselessCatchBinding",
         language: "js",
         recommended: false,

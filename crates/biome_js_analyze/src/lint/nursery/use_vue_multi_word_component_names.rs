@@ -101,7 +101,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueMultiWordComponentNames {
-        version: "next",
+        version: "2.2.3",
         name: "useVueMultiWordComponentNames",
         language: "js",
         recommended: true,
