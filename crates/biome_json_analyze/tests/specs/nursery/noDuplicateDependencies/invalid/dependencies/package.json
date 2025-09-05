@@ -1,0 +1,8 @@
+{
+  "name": "invalid-dependencies",
+  "dependencies": {
+    "foo": "",
+    "bar": "",
+    "foo": ""
+  }
+}

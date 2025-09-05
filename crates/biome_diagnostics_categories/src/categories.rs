@@ -311,6 +311,7 @@ define_categories! {
     "lint/suspicious/noDuplicateCase": "https://biomejs.dev/linter/rules/no-duplicate-case",
     "lint/suspicious/noDuplicateClassMembers": "https://biomejs.dev/linter/rules/no-duplicate-class-members",
     "lint/suspicious/noDuplicateCustomProperties": "https://biomejs.dev/linter/rules/no-duplicate-custom-properties",
+    "lint/nursery/noDuplicateDependencies": "https://biomejs.dev/linter/rules/no-duplicate-dependencies",
     "lint/suspicious/noDuplicateElseIf": "https://biomejs.dev/linter/rules/no-duplicate-else-if",
     "lint/suspicious/noDuplicateFields": "https://biomejs.dev/linter/rules/no-duplicate-fields",
     "lint/suspicious/noDuplicateFontNames": "https://biomejs.dev/linter/rules/no-font-family-duplicate-names",

@@ -1616,6 +1616,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Disallow any dependency from being specified more than once (e.g. in dependencies and devDependencies)
+	 */
+	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
+	/**
 	 * Require Promise-like statements to be handled appropriately.
 	 */
 	noFloatingPromises?: RuleFixConfiguration_for_NoFloatingPromisesOptions;
@@ -2960,6 +2964,9 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
 export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoFloatingPromisesOptions;
@@ -5322,6 +5329,16 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 * Rule's options
 	 */
 	options: UseYieldOptions;
+}
+export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDuplicateDependenciesOptions;
 }
 export interface RuleWithFixOptions_for_NoFloatingPromisesOptions {
 	/**
@@ -8014,6 +8031,7 @@ export interface UseUniqueElementIdsOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoDuplicateDependenciesOptions {}
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
 	/**
@@ -8903,6 +8921,7 @@ export type Category =
 	| "lint/suspicious/noDuplicateCase"
 	| "lint/suspicious/noDuplicateClassMembers"
 	| "lint/suspicious/noDuplicateCustomProperties"
+	| "lint/nursery/noDuplicateDependencies"
 	| "lint/suspicious/noDuplicateElseIf"
 	| "lint/suspicious/noDuplicateFields"
 	| "lint/suspicious/noDuplicateFontNames"

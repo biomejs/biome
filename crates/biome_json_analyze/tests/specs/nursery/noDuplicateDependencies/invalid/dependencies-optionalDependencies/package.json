@@ -1,0 +1,11 @@
+{
+  "name": "invalid-dependencies-optional-dependencies",
+  "dependencies": {
+    "foo": "",
+    "bar": ""
+  },
+  "optionalDependencies": {
+    "foo": "",
+    "baz": ""
+  }
+}

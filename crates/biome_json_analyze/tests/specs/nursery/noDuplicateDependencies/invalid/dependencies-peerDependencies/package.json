@@ -1,0 +1,11 @@
+{
+  "name": "invalid-dependencies-peer-dependencies",
+  "dependencies": {
+    "foo": "",
+    "bar": ""
+  },
+  "peerDependencies": {
+    "foo": "",
+    "baz": ""
+  }
+}
