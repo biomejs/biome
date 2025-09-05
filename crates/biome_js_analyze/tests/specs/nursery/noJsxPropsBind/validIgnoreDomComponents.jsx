@@ -6,7 +6,7 @@
 			console.log("Hello");
 		}}
 	></div>
-	<span onClick={() => console.log("Hello!")} />; (
+	<span onClick={() => console.log("Hello!")} />;
 	<button
 		type="button"
 		onClick={function () {
