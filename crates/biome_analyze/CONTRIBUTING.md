@@ -1211,6 +1211,8 @@ The documentation needs to adhere to the following rules:
 
   For rules that analyze relationships between multiple files (e.g., import cycles, cross-file dependencies), you can use the `file=<path>` property to create an in-memory file system for testing.
 
+  This is also useful to trigger type inference even for examples that only consist of individual files.
+
   Files are organized by documentation section (Markdown headings), where all files in a section are collected before any tests run. This ensures each test has access to the complete file system regardless of definition order.
 
   ````rust
