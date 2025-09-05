@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentArrowReturn {
-        version: "next",
+        version: "2.2.3",
         name: "useConsistentArrowReturn",
         language: "js",
         sources: &[RuleSource::Eslint("arrow-body-style").same()],
