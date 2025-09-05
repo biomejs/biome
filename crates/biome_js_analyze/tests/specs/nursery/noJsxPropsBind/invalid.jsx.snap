@@ -14,6 +14,7 @@ expression: invalid.jsx
 			alert("1337");
 		}}
 	/>
+	<Foo onClick={handleClick.bind(this)} />
 	<Foo onClick={this._handleClick.bind(this)} />
 	<Foo onClick={() => console.log("Hello!")} />
 </>;
@@ -34,7 +35,7 @@ invalid.jsx:6:3 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━
    > 8 │ 		}}
        │ 		^^
      9 │ 	/>
-    10 │ 	<Foo onClick={this._handleClick.bind(this)} />
+    10 │ 	<Foo onClick={handleClick.bind(this)} />
   
 
 ```
@@ -46,10 +47,10 @@ invalid.jsx:10:7 lint/nursery/noJsxPropsBind ━━━━━━━━━━━�
   
      8 │ 		}}
      9 │ 	/>
-  > 10 │ 	<Foo onClick={this._handleClick.bind(this)} />
-       │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ 	<Foo onClick={() => console.log("Hello!")} />
-    12 │ </>;
+  > 10 │ 	<Foo onClick={handleClick.bind(this)} />
+       │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	<Foo onClick={this._handleClick.bind(this)} />
+    12 │ 	<Foo onClick={() => console.log("Hello!")} />
   
 
 ```
@@ -57,14 +58,29 @@ invalid.jsx:10:7 lint/nursery/noJsxPropsBind ━━━━━━━━━━━�
 ```
 invalid.jsx:11:7 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i JSX props should not use arrow functions
+  i JSX props should not use .bind()
   
      9 │ 	/>
-    10 │ 	<Foo onClick={this._handleClick.bind(this)} />
-  > 11 │ 	<Foo onClick={() => console.log("Hello!")} />
+    10 │ 	<Foo onClick={handleClick.bind(this)} />
+  > 11 │ 	<Foo onClick={this._handleClick.bind(this)} />
+       │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	<Foo onClick={() => console.log("Hello!")} />
+    13 │ </>;
+  
+
+```
+
+```
+invalid.jsx:12:7 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JSX props should not use arrow functions
+  
+    10 │ 	<Foo onClick={handleClick.bind(this)} />
+    11 │ 	<Foo onClick={this._handleClick.bind(this)} />
+  > 12 │ 	<Foo onClick={() => console.log("Hello!")} />
        │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ </>;
-    13 │ 
+    13 │ </>;
+    14 │ 
   
 
 ```

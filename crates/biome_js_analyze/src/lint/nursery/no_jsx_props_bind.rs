@@ -92,12 +92,23 @@ impl Rule for NoJsxPropsBind {
                     Some("JSX props should not use functions")
                 }
             }
-            AnyJsExpression::JsCallExpression(_) => {
-                // TODO: Check this
+            AnyJsExpression::JsCallExpression(call) => {
                 if options.allow_bind {
-                    None
-                } else {
+                    return None;
+                }
+                // This will still throw a false positive on e.g. window.bind()
+                let is_bind = call
+                    .callee()
+                    .ok()
+                    .and_then(|c| c.as_js_static_member_expression().cloned())
+                    .and_then(|m| m.member().ok())
+                    .and_then(|n| n.value_token().ok())
+                    .map(|t| t.text() == "bind")
+                    .unwrap_or(false);
+                if is_bind {
                     Some("JSX props should not use .bind()")
+                } else {
+                    None
                 }
             }
             _ => None,
