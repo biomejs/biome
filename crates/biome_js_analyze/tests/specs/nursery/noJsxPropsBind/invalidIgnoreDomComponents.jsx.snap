@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: invalidIgnoreDomComponents.jsx
+---
+# Input
+```jsx
+<Foo
+	onClick={() => {
+		console.log("Hello");
+	}}
+></Foo>;
+
+```
+
+# Diagnostics
+```
+invalidIgnoreDomComponents.jsx:2:2 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JSX props should not use arrow functions
+  
+    1 │ <Foo
+  > 2 │ 	onClick={() => {
+      │ 	^^^^^^^^^^^^^^^^
+  > 3 │ 		console.log("Hello");
+  > 4 │ 	}}
+      │ 	^^
+    5 │ ></Foo>;
+    6 │ 
+  
+
+```
