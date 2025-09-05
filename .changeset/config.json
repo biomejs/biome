@@ -23,8 +23,9 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@biomejs/benchmark",
     "@biomejs/aria-data",
+    "@biomejs/benchmark",
+    "@biomejs/plugin-api",
     "tailwindcss-config-analyzer"
   ]
 }
