@@ -94,8 +94,7 @@ declare_lint_rule! {
     ///
     /// **`qux.ts`**
     /// ```ts,file=qux.ts
-    /// // import type { Foo } from "./types.ts";
-    /// import { Foo } from "./types.ts";
+    /// import type { Foo } from "./types.ts";
     ///
     /// export function bar(foo: Foo) {
     ///     console.log(foo);
