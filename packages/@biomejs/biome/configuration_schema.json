@@ -226,7 +226,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAltText": {
@@ -666,7 +666,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useArrowFunction": {
@@ -1180,7 +1180,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useExhaustiveDependencies": {
@@ -5036,13 +5036,20 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAnchorHref": {
 					"description": "Enforces href attribute for \\<a> elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentArrowReturn": {
+					"description": "Enforce consistent arrow function bodies.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConsistentArrowReturnConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5478,7 +5485,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useGoogleFontPreconnect": {
@@ -5679,7 +5686,7 @@
 					"enum": ["none"]
 				},
 				{
-					"description": "It enables only the recommended rules for this domain",
+					"description": "Enables only the recommended rules for this domain",
 					"type": "string",
 					"enum": ["recommended"]
 				}
@@ -10031,6 +10038,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseConsistentArrowReturnOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseConsistentArrowReturnOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseConsistentBuiltinInstantiationOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -11846,7 +11872,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				}
 			},
@@ -11949,7 +11975,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useSortedAttributes": {
@@ -11962,7 +11988,7 @@
 					]
 				},
 				"useSortedKeys": {
-					"description": "Sorts the keys of a JSON object in natural order",
+					"description": "Sort the keys of a JSON object in natural order.",
 					"anyOf": [
 						{
 							"$ref": "#/definitions/RuleAssistConfiguration_for_UseSortedKeysOptions"
@@ -12206,7 +12232,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useArrayLiterals": {
@@ -13132,7 +13158,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAdjacentOverloadSignatures": {
@@ -13467,6 +13493,16 @@
 					"allOf": [{ "$ref": "#/definitions/ConsistentArrayType" }]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseConsistentArrowReturnConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseConsistentArrowReturnOptions" }
+			]
+		},
+		"UseConsistentArrowReturnOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseConsistentBuiltinInstantiationConfiguration": {

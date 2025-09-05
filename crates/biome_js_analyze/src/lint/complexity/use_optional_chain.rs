@@ -263,10 +263,10 @@ impl Rule for UseOptionalChain {
 /// Normalize optional chain like.
 /// E.g. `foo != null` is normalized to `foo`
 fn normalized_optional_chain_like(expression: AnyJsExpression) -> SyntaxResult<AnyJsExpression> {
-    if let AnyJsExpression::JsBinaryExpression(expression) = &expression
-        && expression.is_optional_chain_like()?
+    if let AnyJsExpression::JsBinaryExpression(binary_expression) = &expression
+        && let Some(expr) = binary_expression.extract_optional_chain_like()?
     {
-        return expression.left();
+        return Ok(expr);
     }
     Ok(expression)
 }
@@ -561,10 +561,9 @@ impl LogicalAndChain {
                 // ```js
                 // foo && foo.bar;
                 // ```
-                AnyJsExpression::JsBinaryExpression(expression) => expression
-                    .is_optional_chain_like()
-                    .ok()?
-                    .then_some(expression.left().ok()?)?,
+                AnyJsExpression::JsBinaryExpression(expression) => {
+                    expression.extract_optional_chain_like().ok()??
+                }
                 expression => expression,
             };
             let head = match expression {

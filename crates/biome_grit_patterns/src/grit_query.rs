@@ -53,11 +53,11 @@ pub struct GritQuery {
     /// The name of the snippet being executed.
     pub name: Option<String>,
 
+    /// Target language for the query.
+    pub language: GritTargetLanguage,
+
     /// Built-in functions available to the query.
     built_ins: BuiltIns,
-
-    /// Target language for the query.
-    language: GritTargetLanguage,
 
     /// All variables discovered during query compilation.
     variable_locations: VariableLocations,
@@ -195,14 +195,6 @@ impl GritQuery {
             diagnostics,
             variable_locations,
         })
-    }
-
-    pub fn supports_css(&self) -> bool {
-        matches!(self.language, GritTargetLanguage::CssTargetLanguage(_))
-    }
-
-    pub fn supports_js(&self) -> bool {
-        matches!(self.language, GritTargetLanguage::JsTargetLanguage(_))
     }
 }
 

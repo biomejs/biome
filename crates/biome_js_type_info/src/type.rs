@@ -129,6 +129,17 @@ impl Type {
         }
     }
 
+    /// Returns whether this type is a boolean with the given `value`.
+    pub fn is_boolean_literal(&self, value: bool) -> bool {
+        self.as_raw_data().is_some_and(|ty| match ty {
+            TypeData::Literal(literal) => match literal.as_ref() {
+                Literal::Boolean(literal) => literal.as_bool() == value,
+                _ => false,
+            },
+            _ => false,
+        })
+    }
+
     /// Returns whether `self` is a function with a return type matching the
     /// given `predicate`.
     pub fn is_function_with_return_type(&self, predicate: impl Fn(Self) -> bool) -> bool {
@@ -174,6 +185,19 @@ impl Type {
                 TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::Number(_)),
                 _ => false,
             })
+    }
+
+    /// Returns whether this type is a number with the given `value`.
+    pub fn is_number_literal(&self, value: f64) -> bool {
+        self.as_raw_data().is_some_and(|ty| match ty {
+            TypeData::Literal(literal) => match literal.as_ref() {
+                Literal::Number(literal) => literal
+                    .to_f64()
+                    .is_some_and(|literal_value| literal_value == value),
+                _ => false,
+            },
+            _ => false,
+        })
     }
 
     /// Returns whether this type is the `Promise` class.

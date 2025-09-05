@@ -847,7 +847,7 @@ export interface Source {
 	 */
 	organizeImports?: RuleAssistConfiguration_for_OrganizeImportsOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -855,7 +855,7 @@ export interface Source {
 	 */
 	useSortedAttributes?: RuleAssistConfiguration_for_UseSortedAttributesOptions;
 	/**
-	 * Sorts the keys of a JSON object in natural order
+	 * Sort the keys of a JSON object in natural order.
 	 */
 	useSortedKeys?: RuleAssistConfiguration_for_UseSortedKeysOptions;
 	/**
@@ -1083,7 +1083,7 @@ export interface A11y {
 	 */
 	noSvgWithoutTitle?: RuleConfiguration_for_NoSvgWithoutTitleOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1304,7 +1304,7 @@ export interface Complexity {
 	 */
 	noVoid?: RuleConfiguration_for_NoVoidOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1565,7 +1565,7 @@ export interface Correctness {
 	 */
 	noVoidTypeReturn?: RuleConfiguration_for_NoVoidTypeReturnOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1690,13 +1690,17 @@ export interface Nursery {
 	 */
 	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
 	 * Enforces href attribute for \<a> elements.
 	 */
 	useAnchorHref?: RuleConfiguration_for_UseAnchorHrefOptions;
+	/**
+	 * Enforce consistent arrow function bodies.
+	 */
+	useConsistentArrowReturn?: RuleFixConfiguration_for_UseConsistentArrowReturnOptions;
 	/**
 	 * Enforce type definitions to consistently use either interface or type.
 	 */
@@ -1775,7 +1779,7 @@ export interface Performance {
 	 */
 	noUnwantedPolyfillio?: RuleConfiguration_for_NoUnwantedPolyfillioOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1812,7 +1816,7 @@ export interface Security {
 	 */
 	noGlobalEval?: RuleConfiguration_for_NoGlobalEvalOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 }
@@ -1925,7 +1929,7 @@ export interface Style {
 	 */
 	noYodaExpression?: RuleFixConfiguration_for_NoYodaExpressionOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -2434,7 +2438,7 @@ export interface Suspicious {
 	 */
 	noWith?: RuleConfiguration_for_NoWithOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -3021,6 +3025,9 @@ export type RuleConfiguration_for_NoVueReservedPropsOptions =
 export type RuleConfiguration_for_UseAnchorHrefOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAnchorHrefOptions;
+export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseConsistentArrowReturnOptions;
 export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
@@ -5522,6 +5529,20 @@ export interface RuleWithOptions_for_UseAnchorHrefOptions {
 	 * Rule's options
 	 */
 	options: UseAnchorHrefOptions;
+}
+export interface RuleWithFixOptions_for_UseConsistentArrowReturnOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentArrowReturnOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	/**
@@ -8050,6 +8071,7 @@ export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export type UseAnchorHrefOptions = null;
+export interface UseConsistentArrowReturnOptions {}
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
 }
@@ -8781,6 +8803,7 @@ export type Category =
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useExhaustiveSwitchCases"

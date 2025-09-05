@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validInterfaceOverload.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+export {}
+declare global {
+    interface HTMLElement {}
+}
+
+```

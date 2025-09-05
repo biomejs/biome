@@ -1,13 +1,11 @@
 #![deny(clippy::use_self, rustdoc::broken_intra_doc_links)]
 
 use biome_console::markup;
-use biome_parser::AnyParse;
 use rustc_hash::FxHashSet;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
 use std::str::FromStr;
-use std::sync::Arc;
 
 mod analyzer_plugin;
 mod categories;
@@ -29,13 +27,16 @@ mod visitor;
 // Re-exported for use in the `declare_group` macro
 pub use biome_diagnostics::category_concat;
 
-pub use crate::analyzer_plugin::{AnalyzerPlugin, AnalyzerPluginSlice, AnalyzerPluginVec};
+pub use crate::analyzer_plugin::{
+    AnalyzerPlugin, AnalyzerPluginSlice, AnalyzerPluginVec, PluginTargetLanguage, PluginVisitor,
+};
 pub use crate::categories::{
     ActionCategory, OtherActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder,
     RuleCategory, SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
     SourceActionKind,
 };
 pub use crate::diagnostics::{AnalyzerDiagnostic, AnalyzerSuppressionDiagnostic, RuleError};
+use crate::matcher::SignalRuleKey;
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
 pub use crate::options::{AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
 pub use crate::query::{AddVisitor, QueryKey, QueryMatch, Queryable};
@@ -76,8 +77,6 @@ pub use suppression_action::{ApplySuppression, SuppressionAction};
 pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     /// List of visitors being run by this instance of the analyzer for each phase
     phases: BTreeMap<Phases, Vec<Box<dyn Visitor<Language = L> + 'analyzer>>>,
-    /// Plugins to be run after the phases for built-in rules.
-    plugins: AnalyzerPluginVec,
     /// Holds the metadata for all the rules statically known to the analyzer
     metadata: &'analyzer MetadataRegistry,
     /// Executor for the query matches emitted by the visitors
@@ -114,7 +113,6 @@ where
     ) -> Self {
         Self {
             phases: BTreeMap::new(),
-            plugins: Vec::new(),
             metadata,
             query_matcher,
             parse_suppression_comment,
@@ -132,15 +130,9 @@ where
         self.phases.entry(phase).or_default().push(visitor);
     }
 
-    /// Registers an [AnalyzerPlugin] to be executed after the regular phases.
-    pub fn add_plugin(&mut self, plugin: Arc<Box<dyn AnalyzerPlugin>>) {
-        self.plugins.push(plugin);
-    }
-
     pub fn run(self, mut ctx: AnalyzerContext<L>) -> Option<Break> {
         let Self {
             phases,
-            plugins,
             mut query_matcher,
             parse_suppression_comment,
             mut emit_signal,
@@ -193,54 +185,6 @@ where
             }
         }
 
-        for plugin in plugins {
-            let root: AnyParse = ctx.root.syntax().as_send().expect("not a root node").into();
-            let diagnostics = plugin.evaluate(root, ctx.options.file_path.clone());
-            for diagnostic in diagnostics {
-                let name = diagnostic
-                    .subcategory
-                    .clone()
-                    .unwrap_or_else(|| "anonymous".into());
-
-                // 1. Check for top level suppression:
-                if suppressions.top_level_suppression.suppressed_plugin(&name)
-                    || suppressions
-                        .top_level_suppression
-                        .suppresses_category(RuleCategory::Lint)
-                {
-                    break;
-                }
-
-                let suppression = diagnostic.span.and_then(|text_range| {
-                    // 2. Check for range suppression is not supported because
-                    //    plugins are handled separately after the basic analyze
-                    //    phases. At this point, we have read to the end of the
-                    //    file, all `// biome-ignore-end` comments are
-                    //    processed, thus all range suppressions are cleared.
-
-                    // 3. Check for line suppression:
-                    suppressions
-                        .overlapping_line_suppressions(&text_range)
-                        .iter_mut()
-                        .find(|s| {
-                            s.text_range.contains(text_range.start())
-                                && (s.suppressed_categories.contains(RuleCategory::Lint)
-                                    || s.suppress_all_plugins
-                                    || s.suppressed_plugins.contains(&name))
-                        })
-                });
-
-                if let Some(suppression) = suppression {
-                    suppression.did_suppress_signal = true;
-                } else {
-                    let signal = DiagnosticSignal::new(|| diagnostic.clone());
-                    if let ControlFlow::Break(br) = (emit_signal)(&signal) {
-                        return Some(br);
-                    }
-                }
-            }
-        }
-
         for range_suppression in suppressions.range_suppressions.suppressions {
             if range_suppression.did_suppress_signal {
                 continue;
@@ -252,8 +196,8 @@ where
                         range_suppression.start_comment_range,
                         "Suppression comment has no effect because another suppression comment suppresses the same rule.",
                     ).note(
-                        markup!{"This is the suppression comment that was used."}.to_owned(),
-                        range
+                        markup! {"This is the suppression comment that was used."}.to_owned(),
+                        range,
                     )
                 });
                 if let ControlFlow::Break(br) = (emit_signal)(&signal) {
@@ -274,8 +218,8 @@ where
                         suppression.comment_span,
                         "Suppression comment has no effect because another suppression comment suppresses the same rule.",
                     ).note(
-                        markup!{"This is the suppression comment that was used."}.to_owned(),
-                        range
+                        markup! {"This is the suppression comment that was used."}.to_owned(),
+                        range,
                     )
                 } else {
                     AnalyzerSuppressionDiagnostic::new(
@@ -456,22 +400,35 @@ where
             if self
                 .suppressions
                 .top_level_suppression
-                .contains_rule_key(&entry.category, &entry.rule)
-                || self
-                    .suppressions
-                    .top_level_suppression
-                    .suppressed_categories
-                    .contains(entry.category)
+                .suppressed_categories
+                .contains(entry.category)
             {
                 self.signal_queue.pop();
                 continue;
             }
 
-            if self.suppressions.range_suppressions.suppress_rule(
-                &entry.category,
-                &entry.rule,
-                &entry.text_range,
-            ) {
+            let is_suppressed = match &entry.rule {
+                SignalRuleKey::Rule(rule) => {
+                    self.suppressions
+                        .top_level_suppression
+                        .contains_rule_key(&entry.category, rule)
+                        || self.suppressions.range_suppressions.suppress_rule(
+                            &entry.category,
+                            rule,
+                            &entry.text_range,
+                        )
+                }
+                SignalRuleKey::Plugin(plugin) => {
+                    self.suppressions
+                        .top_level_suppression
+                        .suppressed_plugin(plugin)
+                        || self
+                            .suppressions
+                            .range_suppressions
+                            .suppress_plugin(plugin.as_ref(), &entry.text_range)
+                }
+            };
+            if is_suppressed {
                 self.signal_queue.pop();
                 continue;
             }
@@ -497,17 +454,28 @@ where
                 let (is_match, is_exhaustive) =
                     if suppression.suppressed_categories.contains(entry.category) {
                         (true, true)
-                    } else if !suppression.matches_rule(&entry.category, &entry.rule) {
-                        (false, false)
                     } else {
-                        match suppression.suppressed_instance.as_ref() {
-                            None => (true, true),
-                            Some(v) => {
-                                let matches_instance = instances
-                                    .get_or_insert_with(|| entry.instances.iter().collect())
-                                    .remove(v);
-                                (matches_instance, false)
+                        match &entry.rule {
+                            SignalRuleKey::Rule(rule)
+                                if suppression.matches_rule(&entry.category, rule) =>
+                            {
+                                match suppression.suppressed_instance.as_ref() {
+                                    None => (true, true),
+                                    Some(v) => {
+                                        let matches_instance = instances
+                                            .get_or_insert_with(|| entry.instances.iter().collect())
+                                            .remove(v);
+                                        (matches_instance, false)
+                                    }
+                                }
                             }
+                            SignalRuleKey::Plugin(plugin)
+                                if suppression.suppress_all_plugins
+                                    || suppression.suppressed_plugins.contains(plugin.as_ref()) =>
+                            {
+                                (true, true)
+                            }
+                            _ => (false, false),
                         }
                     };
                 if is_match {

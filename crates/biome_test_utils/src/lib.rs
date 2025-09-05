@@ -207,7 +207,7 @@ pub fn get_added_paths<'a>(
                 let diagnostics = parsed.diagnostics();
                 assert!(
                     diagnostics.is_empty(),
-                    "Unexpected diagnostics: {diagnostics:?}"
+                    "Unexpected diagnostics: {diagnostics:?}\nWhile parsing:\n{content}"
                 );
                 parsed.try_tree()
             })?;
