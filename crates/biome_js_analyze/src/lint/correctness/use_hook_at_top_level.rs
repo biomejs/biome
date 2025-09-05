@@ -492,7 +492,7 @@ impl Rule for UseHookAtTopLevel {
                     });
                 }
 
-                let is_enclosed_in_component_or_hook = is_enclosed_in_component_or_hook
+                let enclosed = is_enclosed_in_component_or_hook
                     || enclosing_function.is_react_component_or_hook();
 
                 if let AnyJsFunctionOrMethod::AnyJsFunction(function) = enclosing_function
@@ -502,15 +502,14 @@ impl Rule for UseHookAtTopLevel {
                         calls.push(CallPath {
                             call: call.tree(),
                             path: path.clone(),
-                            is_enclosed_in_component_or_hook,
+                            is_enclosed_in_component_or_hook: enclosed,
                         });
                     }
                 }
             } else {
-                // We should not report problems which are already reported for different
-                // components or hooks. At the same time, those calls should still be tracked
-                // to detect recursive calls, so we keep those call paths but mark
-                // them with "is_enclosed_in_component_or_hook".
+                // Avoid duplicate diagnostics if this path already passed through
+                // a component/hook. We still keep previously enqueued paths to
+                // allow recursion detection elsewhere.
                 if is_enclosed_in_component_or_hook {
                     continue;
                 }
