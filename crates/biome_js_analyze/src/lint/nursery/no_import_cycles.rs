@@ -35,8 +35,8 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// **`foobar.js`**
-    /// ```js,file=foobar.js,expect_diagnostic
-    /// import { baz } from "./baz.js";
+    /// ```js,expect_diagnostic,file=foobar.js
+    ///  import { baz } from "./baz.js";
     ///
     /// export function foo() {
     ///     baz();
@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// **`baz.js`**
-    /// ```js,file=baz.js,expect_diagnostic
+    /// ```js,expect_diagnostic,file=baz.js
     /// import { bar } from "./foobar.js";
     ///
     /// export function baz() {
@@ -85,7 +85,8 @@ declare_lint_rule! {
     ///
     /// **`types.ts`**
     /// ```ts,file=types.ts
-    /// import type { bar } from "./qux.ts";
+    /// // import type { bar } from "./qux.ts";
+    /// import { bar } from "./qux.ts";
     ///
     /// export type Foo = {
     ///   bar: typeof bar;
@@ -94,7 +95,8 @@ declare_lint_rule! {
     ///
     /// **`qux.ts`**
     /// ```ts,file=qux.ts
-    /// import type { Foo } from "./types.ts";
+    /// // import type { Foo } from "./types.ts";
+    /// import { Foo } from "./types.ts";
     ///
     /// export function bar(foo: Foo) {
     ///     console.log(foo);

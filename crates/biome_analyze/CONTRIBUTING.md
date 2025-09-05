@@ -1209,7 +1209,7 @@ The documentation needs to adhere to the following rules:
 
 - **Multi-file snippets**
 
-  For rules that analyze relationships between multiple files (e.g., import cycles, cross-file dependencies), you can use the `file=path` property to create an in-memory file system for testing.
+  For rules that analyze relationships between multiple files (e.g., import cycles, cross-file dependencies), you can use the `file=<path>` property to create an in-memory file system for testing.
 
   Files are organized by documentation section (markdown headings), where all files in a section are collected before any tests run. This ensures each test has access to the complete file system regardless of definition order.
 
@@ -1217,7 +1217,7 @@ The documentation needs to adhere to the following rules:
   /// ### Invalid
   ///
   /// **`foo.js`**
-  /// ```js,file=foo.js,expect_diagnostic
+  /// ```js,expect_diagnostic,file=foo.js
   /// import { bar } from "./bar.js";
   /// export function foo() {
   ///     return bar();
@@ -1225,7 +1225,7 @@ The documentation needs to adhere to the following rules:
   /// ```
   ///
   /// **`bar.js`**
-  /// ```js,file=bar.js,expect_diagnostic
+  /// ```js,expect_diagnostic,file=bar.js
   /// import { foo } from "./foo.js";
   /// export function bar() {
   ///     return foo();
@@ -1235,19 +1235,19 @@ The documentation needs to adhere to the following rules:
 
 - **Ordering of code block properties**
 
-  In addition to the language, a code block can be tagged with a few additional properties like `file=path`, `expect_diagnostic`, `options`, `full_options`, `use_options` and/or `ignore`.
+  In addition to the language, a code block can be tagged with a few additional properties like `expect_diagnostic`, `options`, `full_options`, `use_options`, `ignore` and/or `file=<path>`.
 
   The parser does not care about the order, but for consistency, modifiers should always be ordered as follows:
 
   ````rust
-  /// ```<language>[,file=path][,expect_diagnostic][,(options|full_options|use_options)][,ignore]
+  /// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore][,file=path]
   /// ```
   ````
 
   e.g.
 
   ````rust
-  /// ```tsx,file=types.ts,expect_diagnostic,use_options,ignore
+  /// ```tsx,expect_diagnostic,use_options,ignore,file=foobar.tsx
   /// ```
   ````
 
