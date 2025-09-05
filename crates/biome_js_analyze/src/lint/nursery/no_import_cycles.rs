@@ -85,8 +85,7 @@ declare_lint_rule! {
     ///
     /// **`types.ts`**
     /// ```ts,file=types.ts
-    /// // import type { bar } from "./qux.ts";
-    /// import { bar } from "./qux.ts";
+    /// import type { bar } from "./qux.ts";
     ///
     /// export type Foo = {
     ///   bar: typeof bar;
