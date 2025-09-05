@@ -1,5 +1,46 @@
 # @biomejs/biome
 
+## 2.2.4
+
+### Patch Changes
+
+- [#7142](https://github.com/biomejs/biome/pull/7142) [`53ff5ae`](https://github.com/biomejs/biome/commit/53ff5ae34428f042bb5b80c19862c9cf69fc6359) Thanks [@Netail](https://github.com/Netail)! - Added the new nursery rule [`noDuplicateDependencies`](https://next.biomejs.dev/linter/rules/no-duplicate-dependencies/), which verifies that no dependencies are duplicated between the `bundledDependencies`, `bundleDependencies`, `dependencies`, `devDependencies`, `overrides`, `optionalDependencies`, and `peerDependencies` sections.
+
+  For example, the following snippets will trigger the rule:
+
+  ```json
+  {
+    "dependencies": {
+      "foo": ""
+    },
+    "devDependencies": {
+      "foo": ""
+    }
+  }
+  ```
+
+  ```json
+  {
+    "dependencies": {
+      "foo": ""
+    },
+    "optionalDependencies": {
+      "foo": ""
+    }
+  }
+  ```
+
+  ```json
+  {
+    "dependencies": {
+      "foo": ""
+    },
+    "peerDependencies": {
+      "foo": ""
+    }
+  }
+  ```
+
 ## 2.2.3
 
 ### Patch Changes
