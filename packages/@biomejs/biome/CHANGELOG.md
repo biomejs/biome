@@ -1,5 +1,153 @@
 # @biomejs/biome
 
+## 2.2.3
+
+### Patch Changes
+
+- [#7353](https://github.com/biomejs/biome/pull/7353) [`4d2b719`](https://github.com/biomejs/biome/commit/4d2b7190f855a88bdae467a2efc00b81721bee62) Thanks [@JeetuSuthar](https://github.com/JeetuSuthar)! - Fixed [#7340](https://github.com/biomejs/biome/issues/7340): The linter now allows the `navigation` property for view-transition in CSS.
+
+  Previously, the linter incorrectly flagged `navigation: auto` as an unknown property. This fix adds `navigation` to the list of known CSS properties, following the [CSS View Transitions spec](https://www.w3.org/TR/css-view-transitions-2/#view-transition-navigation-descriptor).
+
+- [#7275](https://github.com/biomejs/biome/pull/7275) [`560de1b`](https://github.com/biomejs/biome/commit/560de1bf3f22f4a8a5cdc224256a34dbb9d78481) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#7268](https://github.com/biomejs/biome/issues/7268): Files that are explicitly passed as CLI arguments are now correctly ignored if they reside in an ignored folder.
+
+- [#7358](https://github.com/biomejs/biome/pull/7358) [`963a246`](https://github.com/biomejs/biome/commit/963a24643cbf4d91cca81569b33a8b7e21b4dd0b) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7085](https://github.com/biomejs/biome/issues/7085), now the rule `noDescendingSpecificity` correctly calculates the specificity of selectors when they are included inside a media query.
+
+- [#7387](https://github.com/biomejs/biome/pull/7387) [`923674d`](https://github.com/biomejs/biome/commit/923674dbf8cc4c23ab569cd00ae0a0cf2a3ab791) Thanks [@qraqras](https://github.com/qraqras)! - Fixed [#7381](https://github.com/biomejs/biome/issues/7381), now the [`useOptionalChain`](https://biomejs.dev/ja/linter/rules/use-optional-chain/) rule recognizes optional chaining using Yoda expressions (e.g., `undefined !== foo && foo.bar`).
+
+- [#7316](https://github.com/biomejs/biome/pull/7316) [`f9636d5`](https://github.com/biomejs/biome/commit/f9636d5de1e8aef742d145a886f05a4cd79eca31) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#7289](https://github.com/biomejs/biome/issues/7289). The rule [`useImportType`](https://biomejs.dev/linter/rules/use-import-type/) now inlines `import type` into `import { type }` when the `style` option is set to `inlineType`.
+
+  Example:
+
+  ```ts
+  import type { T } from "mod";
+  // becomes
+  import { type T } from "mod";
+  ```
+
+- [#7350](https://github.com/biomejs/biome/pull/7350) [`bb4d407`](https://github.com/biomejs/biome/commit/bb4d407747dd29df78776f143ad63657f869be11) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#7261](https://github.com/biomejs/biome/issues/7261): two characters `・` (KATAKANA MIDDLE DOT, U+30FB) and `･` (HALFWIDTH KATAKANA MIDDLE DOT, U+FF65) are no longer considered as valid characters in identifiers. Property keys containing these character(s) are now preserved as string literals.
+
+- [#7377](https://github.com/biomejs/biome/pull/7377) [`811f47b`](https://github.com/biomejs/biome/commit/811f47b35163e70dce106f62d0aea4ef9e6b91bb) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where the Biome Language Server didn't correctly compute the diagnostics of a monorepo setting, caused by an incorrect handling of the project status.
+
+- [#7245](https://github.com/biomejs/biome/pull/7245) [`fad34b9`](https://github.com/biomejs/biome/commit/fad34b9db9778fe964ff7dbc489de0bfad2d3ece) Thanks [@kedevked](https://github.com/kedevked)! - Added the new lint rule `useConsistentArrowReturn`.
+
+  This rule enforces a consistent return style for arrow functions.
+
+  ### Invalid
+
+  ```js
+  const f = () => {
+    return 1;
+  };
+  ```
+
+  This rule is a port of ESLint's [arrow-body-style](https://eslint.org/docs/latest/rules/arrow-body-style) rule.
+
+- [#7370](https://github.com/biomejs/biome/pull/7370) [`e8032dd`](https://github.com/biomejs/biome/commit/e8032ddfdd734a1441335d82b49db478248e6992) Thanks [@fireairforce](https://github.com/fireairforce)! - Support dynamic `import defer` and `import source`. The syntax looks like:
+
+  ```ts
+  import.source("foo");
+  import.source("x", { with: { attr: "val" } });
+  import.defer("foo");
+  import.defer("x", { with: { attr: "val" } });
+  ```
+
+- [#7369](https://github.com/biomejs/biome/pull/7369) [`b1f8cbd`](https://github.com/biomejs/biome/commit/b1f8cbd88619deb269b2028eb0578657987848c5) Thanks [@siketyan](https://github.com/siketyan)! - Range suppressions are now supported for Grit plugins.
+
+  For JavaScript, you can suppress a plugin as follows:
+
+  ```js
+  // biome-ignore-start lint/plugin/preferObjectSpread: reason
+  Object.assign({ foo: "bar" }, baz);
+  // biome-ignore-end lint/plugin/preferObjectSpread: reason
+  ```
+
+  For CSS, you can suppress a plugin as follows:
+
+  ```css
+  body {
+    /* biome-ignore-start lint/plugin/useLowercaseColors: reason */
+    color: #fff;
+    /* biome-ignore-end lint/plugin/useLowercaseColors: reason */
+  }
+  ```
+
+- [#7384](https://github.com/biomejs/biome/pull/7384) [`099507e`](https://github.com/biomejs/biome/commit/099507eb07f14f7d383f848fb6c659b5a6ccfd92) Thanks [@ematipico](https://github.com/ematipico)! - Reduced the severity of certain diagnostics emitted when Biome deserializes the configuration files.
+  Now these diagnostics are emitted as `Information` severity, which means that they won't interfere when running commands with `--error-on-warnings`
+
+- [#7302](https://github.com/biomejs/biome/pull/7302) [`2af2380`](https://github.com/biomejs/biome/commit/2af2380b8210e74efea467139a8a4cb4747c8af4) Thanks [@unvalley](https://github.com/unvalley)! - Fixed [#7301](https://github.com/biomejs/biome/issues/7301): [`useReadonlyClassProperties`](https://biomejs.dev/linter/rules/use-readonly-class-properties/) now correctly skips JavaScript files.
+
+- [#7288](https://github.com/biomejs/biome/pull/7288) [`94d85f8`](https://github.com/biomejs/biome/commit/94d85f8fe54305e8fa070490bb2f7c86a91c5e92) Thanks [@ThiefMaster](https://github.com/ThiefMaster)! - Fixed [#7286](https://github.com/biomejs/biome/issues/7286). Files are now formatted with JSX behavior when `javascript.parser.jsxEverywhere` is explicitly set.
+
+  Previously, this flag was only used for parsing, but not for formatting, which resulted in incorrect formatting of conditional expressions when JSX syntax is used in `.js` files.
+
+- [#7311](https://github.com/biomejs/biome/pull/7311) [`62154b9`](https://github.com/biomejs/biome/commit/62154b93e0aa1609afb3d2b1f5468b63ab79374a) Thanks [@qraqras](https://github.com/qraqras)! - Added the new nursery rule `noUselessCatchBinding`. This rule disallows unnecessary catch bindings.
+
+  ```diff
+  try {
+      // Do something
+  - } catch (unused) {}
+  + } catch {}
+  ```
+
+- [#7349](https://github.com/biomejs/biome/pull/7349) [`45c1dfe`](https://github.com/biomejs/biome/commit/45c1dfe32879f4bbb75cbf9b3ee86e304a02aaa1) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#4298](https://github.com/biomejs/biome/issues/4298). Biome now correctly formats CSS declarations when it contains one single value:
+
+  ```diff
+  .bar {
+  -  --123456789012345678901234567890: var(--1234567890123456789012345678901234567);
+  +  --123456789012345678901234567890: var(
+  +    --1234567890123456789012345678901234567
+  +  );
+  }
+  ```
+
+- [#7295](https://github.com/biomejs/biome/pull/7295) [`7638e84`](https://github.com/biomejs/biome/commit/7638e84b026c8b008fa1efdd795b8c0bff0733ab) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7130](https://github.com/biomejs/biome/issues/7130). Removed the emission of a false-positive diagnostic. Biome no longer emits the following diagnostic:
+
+  ```
+  lib/main.ts:1:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    ⚠ Suppression comment has no effect because the tool is not enabled.
+
+    > 1 │ /** biome-ignore-all assist/source/organizeImports: For the lib root file, we don't want to organize exports */
+        │     ^^^^^^^^^^^^^^^^
+
+  ```
+
+- [#7377](https://github.com/biomejs/biome/pull/7377) [`811f47b`](https://github.com/biomejs/biome/commit/811f47b35163e70dce106f62d0aea4ef9e6b91bb) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7371](https://github.com/biomejs/biome/issues/7371) where the Biome Language Server didn't correctly recompute the diagnostics when updating a nested configuration file.
+
+- [#7348](https://github.com/biomejs/biome/pull/7348) [`ac27fc5`](https://github.com/biomejs/biome/commit/ac27fc56dbb14c8f8507ffc4b7d6bf27aa3780db) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7079](https://github.com/biomejs/biome/issues/7079). Now the rule [`useSemanticElements`](https://biomejs.dev/linter/rules/use-semantic-elements/) doesn't trigger components and custom elements.
+
+- [#7389](https://github.com/biomejs/biome/pull/7389) [`ab06a7e`](https://github.com/biomejs/biome/commit/ab06a7ea9523ecb39ebf74a14600a02332e9d4e1) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#7344](https://github.com/biomejs/biome/issues/7344). [`useNamingConvention`](https://biomejs.dev/linter/rules/use-naming-convention/) no longer reports interfaces defined in global declarations.
+
+  Interfaces declared in global declarations augment existing interfaces.
+  Thus, they must be ignored.
+
+  In the following example, `useNamingConvention` reported `HTMLElement`.
+  It is now ignored.
+
+  ```ts
+  export {};
+  declare global {
+    interface HTMLElement {
+      foo(): void;
+    }
+  }
+  ```
+
+- [#7315](https://github.com/biomejs/biome/pull/7315) [`4a2bd2f`](https://github.com/biomejs/biome/commit/4a2bd2f38d1f449e55f88be351fcc1cf1d561e69) Thanks [@vladimir-ivanov](https://github.com/vladimir-ivanov)! - Fixed [#7310](https://github.com/biomejs/biome/issues/7310): [`useReadonlyClassProperties`](https://biomejs.dev/linter/rules/use-readonly-class-properties/) correctly handles nested assignments, avoiding false positives when a class property is assigned within another assignment expression.
+
+  Example of code that previously triggered a false positive but is now correctly ignored:
+
+  ```ts
+  class test {
+    private thing: number = 0; // incorrectly flagged
+
+    public incrementThing(): void {
+      const temp = { x: 0 };
+      temp.x = this.thing++;
+    }
+  }
+  ```
+
 ## 2.2.2
 
 ### Patch Changes
