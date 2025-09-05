@@ -4033,8 +4033,11 @@ dependencies = [
  "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_module_graph",
+ "biome_project_layout",
  "biome_rowan",
  "biome_service",
+ "biome_test_utils",
  "camino",
  "pulldown-cmark",
 ]
