@@ -3594,6 +3594,33 @@
 		},
 		"NoJsxPropsBindOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreDOMComponents": {
+					"description": "Ignores DOM components",
+					"default": false,
+					"type": "boolean"
+				},
+				"ignoreRefs": {
+					"description": "Ignores ref properties",
+					"default": false,
+					"type": "boolean"
+				},
+				"allowArrowFunctions": {
+					"description": "Allow arrow functions",
+					"default": false,
+					"type": "boolean"
+				},
+				"allowFunctions": {
+					"description": "Allow functions",
+					"default": false,
+					"type": "boolean"
+				},
+				"allowBind": {
+					"description": "Allow Bind",
+					"default": false,
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoLabelVarConfiguration": {
@@ -4953,7 +4980,7 @@
 					]
 				},
 				"noJsxPropsBind": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow .bind() or arrow function in JSX props.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoJsxPropsBindConfiguration" },
 						{ "type": "null" }
