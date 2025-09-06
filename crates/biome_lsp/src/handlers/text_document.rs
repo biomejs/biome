@@ -43,28 +43,24 @@ pub(crate) async fn did_open(
                 .map(|parent| parent.to_path_buf())
                 .unwrap_or_default();
 
-            // We first check if the current file belongs to one of the folders that we registered.
-            // Ifo so, we return the project folder, otherwise we use the folder provided by the function did_open
+            // First check if the current file belongs to any registered workspace folder.
+            // If so, return that folder; otherwise, use the folder computed by did_open.
             let project_path = if let Some(workspace_folders) = session.get_workspace_folders() {
-                workspace_folders
+                if let Some(ws_root) = workspace_folders
                     .iter()
-                    .find_map(|folder| {
-                        folder
-                            .uri
-                            .to_file_path()
-                            .map(|p| {
-                                Utf8PathBuf::from_path_buf(p.to_path_buf())
-                                    .expect("To have a valid UTF-8 path")
-                            })
-                            .map(|folder| {
-                                if project_path.starts_with(&folder) {
-                                    folder
-                                } else {
-                                    project_path.clone()
-                                }
-                            })
+                    .filter_map(|folder| {
+                        folder.uri.to_file_path().map(|p| {
+                            Utf8PathBuf::from_path_buf(p.to_path_buf())
+                                .expect("To have a valid UTF-8 path")
+                        })
                     })
-                    .unwrap_or(project_path.clone())
+                    .find(|ws| project_path.starts_with(ws))
+                {
+                    ws_root
+                } else {
+                    project_path.clone()
+                }
+            } else if let Some(base_path) = session.base_path() {
             } else if let Some(base_path) = session.base_path() {
                 if project_path.starts_with(&base_path) {
                     base_path
