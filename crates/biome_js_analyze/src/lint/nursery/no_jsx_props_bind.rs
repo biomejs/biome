@@ -72,13 +72,10 @@ impl Rule for NoJsxPropsBind {
             .ok()?;
 
         match &expression {
-            AnyJsExpression::JsArrowFunctionExpression(_) => {
-                // Some("JSX props should not use arrow functions")
-                Some(NoJsxPropsBindState {
-                    invalid_kind: InvalidKind::ArrowFunction,
-                    attribute_range: expression.range(),
-                })
-            }
+            AnyJsExpression::JsArrowFunctionExpression(_) => Some(NoJsxPropsBindState {
+                invalid_kind: InvalidKind::ArrowFunction,
+                attribute_range: expression.range(),
+            }),
 
             AnyJsExpression::JsFunctionExpression(_) => Some(NoJsxPropsBindState {
                 invalid_kind: InvalidKind::Function,
@@ -99,7 +96,6 @@ impl Rule for NoJsxPropsBind {
                         invalid_kind: InvalidKind::Bind,
                         attribute_range: expression.range(),
                     })
-                    // Some("JSX props should not use .bind()")
                 } else {
                     None
                 }
