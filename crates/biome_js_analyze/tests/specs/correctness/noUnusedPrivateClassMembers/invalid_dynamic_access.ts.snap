@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_dynamic_access.ts
+---
+# Input
+```ts
+export class Sample {
+  #prop;
+
+  constructor() {
+    this.#prop = 0;
+  }
+
+  on(action) {
+    this[action]()
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid_dynamic_access.ts:2:3 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    1 │ export class Sample {
+  > 2 │   #prop;
+      │   ^^^^^
+    3 │ 
+    4 │   constructor() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     1  1 │   export class Sample {
+     2    │ - ··#prop;
+     3  2 │   
+     4  3 │     constructor() {
+  
+
+```
