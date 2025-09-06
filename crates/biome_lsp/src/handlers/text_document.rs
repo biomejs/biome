@@ -61,7 +61,6 @@ pub(crate) async fn did_open(
                     project_path.clone()
                 }
             } else if let Some(base_path) = session.base_path() {
-            } else if let Some(base_path) = session.base_path() {
                 if project_path.starts_with(&base_path) {
                     base_path
                 } else {
