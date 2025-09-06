@@ -605,7 +605,7 @@ pub struct ConfigurationPayload {
     pub external_resolution_base_path: Utf8PathBuf,
 }
 
-#[derive(Debug, Default, PartialEq, Clone)]
+#[derive(Debug, Default, PartialEq, Clone, Eq, Hash)]
 pub enum ConfigurationPathHint {
     /// The default mode, not having a configuration file is not an error.
     /// The path will be filled with the working directory if it is not filled at the time of usage.
