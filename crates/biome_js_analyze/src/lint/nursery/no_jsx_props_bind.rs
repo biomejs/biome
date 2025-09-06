@@ -6,11 +6,11 @@ use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions;
 
 declare_lint_rule! {
-    /// Disallow .bind() or function declaration in JSX props
+    /// Disallow .bind(), arrow functions, or function expressions in JSX props
     ///
-    /// Using `.bind()` on a function or declaring a function directly in props
-    /// creates a new function on every render, which is treated as a completely different function.
-    /// This may cause unnecessary rerenders.
+    /// Using `.bind()` or creating a function inline in props creates a new function
+    /// on every render, changing identity and defeating memoisation,
+    /// which may cause unnecessary rerenders.
     ///
     /// ### Invalid
     ///
@@ -107,13 +107,13 @@ impl Rule for NoJsxPropsBind {
         let note = match state.invalid_kind {
             InvalidKind::ArrowFunction => "JSX props should not use arrow functions",
             InvalidKind::Bind => "JSX props should not use .bind()",
-            InvalidKind::Function => "JSX props should not use functions",
+            InvalidKind::Function => "JSX props should not use function expressions",
         };
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 state.attribute_range,
-                "Pass stable functions as props to avoid unnecessary rerenders.",
+                "Pass stable function references as props to avoid unnecessary rerenders.",
             )
             .note(note)
             .note("Consider extracting the function or wrapping it in useCallback"),
