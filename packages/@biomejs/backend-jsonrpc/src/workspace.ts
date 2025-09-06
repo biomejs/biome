@@ -1638,11 +1638,7 @@ export interface Nursery {
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
 	/**
-	 * Disallow string literals inside JSX elements.
-	 */
-	noJsxLiterals?: RuleConfiguration_for_NoJsxLiteralsOptions;
-	/**
-	 * Disallow string literals inside JSX elements.
+	 * Disallow .bind() or function declaration in JSX props
 	 */
 	noJsxPropsBind?: RuleConfiguration_for_NoJsxPropsBindOptions;
 	/**

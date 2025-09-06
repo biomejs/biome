@@ -27770,7 +27770,7 @@
 					]
 				},
 				"noJsxPropsBind": {
-					"description": "Disallow .bind() or function declaration in JSX props",
+					"description": "Disallow .bind(), arrow functions, or function expressions in JSX props",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoJsxPropsBindConfiguration" },
 						{ "type": "null" }
