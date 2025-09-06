@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_synamic_access.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export class Sample {
+  private add;
+  private remove;
+
+  constructor() {
+    this.add = () => {}
+    this.remove = () => {}
+  }
+
+  on(action: "add" | "remove") {
+    this[action]()
+  }
+}
+
+```
