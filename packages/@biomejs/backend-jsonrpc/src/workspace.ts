@@ -1638,7 +1638,7 @@ export interface Nursery {
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
 	/**
-	 * Disallow .bind() or function declaration in JSX props
+	 * Disallow .bind(), arrow functions, or function expressions in JSX props
 	 */
 	noJsxPropsBind?: RuleConfiguration_for_NoJsxPropsBindOptions;
 	/**
