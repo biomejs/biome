@@ -1638,7 +1638,7 @@ export interface Nursery {
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow .bind() or function declaration in JSX props
 	 */
 	noJsxPropsBind?: RuleConfiguration_for_NoJsxPropsBindOptions;
 	/**
@@ -8066,7 +8066,13 @@ export interface NoImportCyclesOptions {
 	 */
 	ignoreTypes?: boolean;
 }
-export interface NoJsxPropsBindOptions {}
+export interface NoJsxPropsBindOptions {
+	allowArrowFunctions?: boolean;
+	allowBind?: boolean;
+	allowFunctions?: boolean;
+	ignoreDomComponents?: boolean;
+	ignoreRefs?: boolean;
+}
 export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
