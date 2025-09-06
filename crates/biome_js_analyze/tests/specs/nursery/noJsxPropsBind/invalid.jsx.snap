@@ -25,7 +25,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:6:12 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Pass stable functions as props to avoid unnecessary rerenders.
+  i Pass stable function references as props to avoid unnecessary rerenders.
   
      4 │ 	<Foo onClick={onClick} /> */}
      5 │ 	<Foo
@@ -37,7 +37,7 @@ invalid.jsx:6:12 lint/nursery/noJsxPropsBind ━━━━━━━━━━━�
      9 │ 	/>
     10 │ 	<Foo onClick={handleClick.bind(this)} />
   
-  i JSX props should not use functions
+  i JSX props should not use function expressions
   
   i Consider extracting the function or wrapping it in useCallback
   
@@ -47,7 +47,7 @@ invalid.jsx:6:12 lint/nursery/noJsxPropsBind ━━━━━━━━━━━�
 ```
 invalid.jsx:10:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Pass stable functions as props to avoid unnecessary rerenders.
+  i Pass stable function references as props to avoid unnecessary rerenders.
   
      8 │ 		}}
      9 │ 	/>
@@ -66,7 +66,7 @@ invalid.jsx:10:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━�
 ```
 invalid.jsx:11:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Pass stable functions as props to avoid unnecessary rerenders.
+  i Pass stable function references as props to avoid unnecessary rerenders.
   
      9 │ 	/>
     10 │ 	<Foo onClick={handleClick.bind(this)} />
@@ -85,7 +85,7 @@ invalid.jsx:11:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━�
 ```
 invalid.jsx:12:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Pass stable functions as props to avoid unnecessary rerenders.
+  i Pass stable function references as props to avoid unnecessary rerenders.
   
     10 │ 	<Foo onClick={handleClick.bind(this)} />
     11 │ 	<Foo onClick={this._handleClick.bind(this)} />
