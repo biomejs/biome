@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsxAttribute, JsxAttributeList, jsx_ext::AnyJsxElement};
+use biome_js_syntax::{AnyJsExpression, JsxAttribute};
 use biome_rowan::AstNode;
 use biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions;
 
@@ -52,21 +52,6 @@ impl Rule for NoJsxPropsBind {
     type Options = NoJsxPropsBindOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let options = ctx.options();
-        let element = ctx
-            .query()
-            .parent::<JsxAttributeList>()?
-            .parent::<AnyJsxElement>()?;
-
-        if options.ignore_dom_components && element.is_element() {
-            return None;
-        }
-
-        let prop_name = ctx.query().name().ok()?.to_trimmed_text();
-        if options.ignore_refs && prop_name == "ref" {
-            return None;
-        }
-
         let expression = ctx
             .query()
             .initializer()?
@@ -78,24 +63,11 @@ impl Rule for NoJsxPropsBind {
 
         match expression {
             AnyJsExpression::JsArrowFunctionExpression(_) => {
-                if options.allow_arrow_functions {
-                    None
-                } else {
-                    Some("JSX props should not use arrow functions")
-                }
+                Some("JSX props should not use arrow functions")
             }
 
-            AnyJsExpression::JsFunctionExpression(_) => {
-                if options.allow_functions {
-                    None
-                } else {
-                    Some("JSX props should not use functions")
-                }
-            }
+            AnyJsExpression::JsFunctionExpression(_) => Some("JSX props should not use functions"),
             AnyJsExpression::JsCallExpression(call) => {
-                if options.allow_bind {
-                    return None;
-                }
                 // This will still throw a false positive on e.g. window.bind()
                 let is_bind = call
                     .callee()
