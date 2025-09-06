@@ -1,9 +1,11 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_js_syntax::{AnyJsExpression, JsxAttribute};
+use biome_js_syntax::{AnyJsExpression, JsxAttribute, binding_ext::AnyJsBindingDeclaration};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions;
+
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Disallow .bind(), arrow functions, or function expressions in JSX props
@@ -32,8 +34,6 @@ declare_lint_rule! {
     /// <Foo onClick={this._handleClick}></Foo>
     /// ```
 
-
-
     pub NoJsxPropsBind {
         version: "next",
         name: "noJsxPropsBind",
@@ -56,7 +56,7 @@ pub struct NoJsxPropsBindState {
 }
 
 impl Rule for NoJsxPropsBind {
-    type Query = Ast<JsxAttribute>;
+    type Query = Semantic<JsxAttribute>;
     type State = NoJsxPropsBindState;
     type Signals = Option<Self::State>;
     type Options = NoJsxPropsBindOptions;
@@ -97,6 +97,28 @@ impl Rule for NoJsxPropsBind {
                     })
                 } else {
                     None
+                }
+            }
+            // e.g. this.handleClick
+            AnyJsExpression::JsStaticMemberExpression(_) => None,
+            AnyJsExpression::JsIdentifierExpression(identifier) => {
+                let model = ctx.model();
+                let binding = model.binding(&identifier.name().ok()?)?;
+
+                let declaration = binding.tree().declaration()?;
+
+                match declaration {
+                    AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+                    | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                    | AnyJsBindingDeclaration::JsFunctionExpression(_) => {
+                        dbg!("It's a function!");
+                        // TODO: But is is stable? I.e. global or wrapped in useCallback()
+                        return Some(NoJsxPropsBindState {
+                            invalid_kind: InvalidKind::Function,
+                            attribute_range: expression.range(),
+                        });
+                    }
+                    _ => None,
                 }
             }
             _ => None,
