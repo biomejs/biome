@@ -29,6 +29,7 @@ SyntaxElement = SyntaxElement
 YamlBogus = SyntaxElement*
 YamlBogusBlockNode = SyntaxElement*
 YamlBogusBlockMapEntry = SyntaxElement*
+YamlBogusBlockHeader = SyntaxElement*
 YamlBogusFlowNode = SyntaxElement*
 
 // https://yaml.org/spec/1.2.2/#92-streams
@@ -157,7 +158,8 @@ YamlFlowMapImplicitEntry =
 AnyYamlBlockInBlockNode =
 	YamlBlockSequence
 	| YamlBlockMapping
-	| YamlBlockScalar
+	| YamlFoldedScalar
+	| YamlLiteralScalar
 
 // a:
 //  - b
@@ -185,14 +187,25 @@ YamlBlockMapping =
 	// Dedent block, that is, go back to parent block's scope
 	'mapping_end'
 
-// https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
-YamlBlockScalar =
+// x: |
+//  123
+//  456
+// https://yaml.org/spec/1.2.2/#rule-c-l+literal
+YamlLiteralScalar =
 	properties: AnyYamlPropertiesCombination?
-	content: AnyYamlBlockScalarContent
+	'|'
+	headers: YamlBlockHeaderList
+	content: YamlBlockContent
 
-AnyYamlBlockScalarContent =
-	YamlLiteralScalar
-	| YamlFoldedScalar
+// x: >
+//  123
+//  456
+// https://yaml.org/spec/1.2.2/#rule-c-l+folded
+YamlFoldedScalar =
+	properties: AnyYamlPropertiesCombination?
+	'>'
+	headers: YamlBlockHeaderList
+	content: YamlBlockContent
 
 YamlBlockSequenceEntryList = AnyYamlBlockSequenceEntry*
 
@@ -231,6 +244,41 @@ AnyYamlMappingImplicitKey =
 	YamlFlowJsonNode
 	| YamlFlowYamlNode
 
+// Block header
+// |+9
+//  ^^
+// https://yaml.org/spec/1.2.2/#rule-c-b-block-header
+YamlBlockHeaderList = AnyYamlBlockHeader*
+
+AnyYamlBlockHeader =
+	YamlBlockStripIndicator
+	| YamlBlockKeepIndicator
+	| YamlIndentationIndicator
+	| YamlBogusBlockHeader
+
+// x: >-
+//     ^
+// https://yaml.org/spec/1.2.2/#rule-c-chomping-indicator
+YamlBlockStripIndicator = '-'
+
+// x: >+
+//     ^
+// https://yaml.org/spec/1.2.2/#rule-c-chomping-indicator
+YamlBlockKeepIndicator = '+'
+
+// x: >9
+//     ^
+// https://yaml.org/spec/1.2.2/#rule-c-indentation-indicator
+YamlIndentationIndicator = 'indentation_indicator'
+
+// x: >
+//  123
+//  456
+//  ^^^
+// https://yaml.org/spec/1.2.2/#rule-l-literal-content
+// https://yaml.org/spec/1.2.2/#rule-l-folded-content
+YamlBlockContent = value: 'block_content_literal'
+
 // https://yaml.org/spec/1.2.2/#rule-c-ns-properties
 AnyYamlPropertiesCombination =
 	YamlPropertiesTagFirst
@@ -264,17 +312,3 @@ YamlSingleQuotedScalar = value: 'single_quoted_literal'
 // abc
 // https://yaml.org/spec/1.2.2/#rule-ns-plain
 YamlPlainScalar = value: 'plain_literal'
-
-// Block scalars
-// Since block scalars can be parsed differently based on the block header,
-// they must be parsed as a single token
-// x: |
-//  123
-//  456
-// https://yaml.org/spec/1.2.2/#rule-c-l+literal
-YamlLiteralScalar = value: 'literal_block_literal'
-// x: >
-//  123
-//  456
-// https://yaml.org/spec/1.2.2/#rule-c-l+folded
-YamlFoldedScalar = value: 'folded_block_literal'
