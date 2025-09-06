@@ -1,9 +1,8 @@
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsxAttribute};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions;
 
 declare_lint_rule! {
@@ -11,7 +10,7 @@ declare_lint_rule! {
     ///
     /// Using `.bind()` on a function or declaring a function directly in props
     /// creates a new function on every render, which is treated as a completely different function.
-    ///
+    /// This may cause unnecessary rerenders.
     ///
     /// ### Invalid
     ///
@@ -32,8 +31,8 @@ declare_lint_rule! {
     /// ```js
     /// <Foo onClick={this._handleClick}></Foo>
     /// ```
-    ///
-    ///
+
+
 
     pub NoJsxPropsBind {
         version: "next",
@@ -45,9 +44,20 @@ declare_lint_rule! {
     }
 }
 
+enum InvalidKind {
+    ArrowFunction,
+    Function,
+    Bind,
+}
+
+pub struct NoJsxPropsBindState {
+    invalid_kind: InvalidKind,
+    attribute_range: TextRange,
+}
+
 impl Rule for NoJsxPropsBind {
     type Query = Ast<JsxAttribute>;
-    type State = &'static str;
+    type State = NoJsxPropsBindState;
     type Signals = Option<Self::State>;
     type Options = NoJsxPropsBindOptions;
 
@@ -61,12 +71,19 @@ impl Rule for NoJsxPropsBind {
             .expression()
             .ok()?;
 
-        match expression {
+        match &expression {
             AnyJsExpression::JsArrowFunctionExpression(_) => {
-                Some("JSX props should not use arrow functions")
+                // Some("JSX props should not use arrow functions")
+                Some(NoJsxPropsBindState {
+                    invalid_kind: InvalidKind::ArrowFunction,
+                    attribute_range: expression.range(),
+                })
             }
 
-            AnyJsExpression::JsFunctionExpression(_) => Some("JSX props should not use functions"),
+            AnyJsExpression::JsFunctionExpression(_) => Some(NoJsxPropsBindState {
+                invalid_kind: InvalidKind::Function,
+                attribute_range: expression.range(),
+            }),
             AnyJsExpression::JsCallExpression(call) => {
                 // This will still throw a false positive on e.g. window.bind()
                 let is_bind = call
@@ -78,7 +95,11 @@ impl Rule for NoJsxPropsBind {
                     .map(|t| t.text() == "bind")
                     .unwrap_or(false);
                 if is_bind {
-                    Some("JSX props should not use .bind()")
+                    Some(NoJsxPropsBindState {
+                        invalid_kind: InvalidKind::Bind,
+                        attribute_range: expression.range(),
+                    })
+                    // Some("JSX props should not use .bind()")
                 } else {
                     None
                 }
@@ -87,18 +108,20 @@ impl Rule for NoJsxPropsBind {
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
-        let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                {state}
-            },
-        ))
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let note = match state.invalid_kind {
+            InvalidKind::ArrowFunction => "JSX props should not use arrow functions",
+            InvalidKind::Bind => "JSX props should not use .bind()",
+            InvalidKind::Function => "JSX props should not use functions",
+        };
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.attribute_range,
+                "Pass stable functions as props to avoid unnecessary rerenders.",
+            )
+            .note(note)
+            .note("Consider extracting the function or wrapping it in useCallback"),
+        )
     }
 }

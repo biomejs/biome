@@ -23,64 +23,80 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:6:3 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:12 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i JSX props should not use functions
+  i Pass stable functions as props to avoid unnecessary rerenders.
   
      4 │ 	<Foo onClick={onClick} /> */}
      5 │ 	<Foo
    > 6 │ 		onClick={function () {
-       │ 		^^^^^^^^^^^^^^^^^^^^^^
+       │ 		         ^^^^^^^^^^^^^
    > 7 │ 			alert("1337");
    > 8 │ 		}}
-       │ 		^^
+       │ 		^
      9 │ 	/>
     10 │ 	<Foo onClick={handleClick.bind(this)} />
+  
+  i JSX props should not use functions
+  
+  i Consider extracting the function or wrapping it in useCallback
   
 
 ```
 
 ```
-invalid.jsx:10:7 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i JSX props should not use .bind()
+  i Pass stable functions as props to avoid unnecessary rerenders.
   
      8 │ 		}}
      9 │ 	/>
   > 10 │ 	<Foo onClick={handleClick.bind(this)} />
-       │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^
     11 │ 	<Foo onClick={this._handleClick.bind(this)} />
     12 │ 	<Foo onClick={() => console.log("Hello!")} />
+  
+  i JSX props should not use .bind()
+  
+  i Consider extracting the function or wrapping it in useCallback
   
 
 ```
 
 ```
-invalid.jsx:11:7 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i JSX props should not use .bind()
+  i Pass stable functions as props to avoid unnecessary rerenders.
   
      9 │ 	/>
     10 │ 	<Foo onClick={handleClick.bind(this)} />
   > 11 │ 	<Foo onClick={this._handleClick.bind(this)} />
-       │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ 	<Foo onClick={() => console.log("Hello!")} />
     13 │ </>;
+  
+  i JSX props should not use .bind()
+  
+  i Consider extracting the function or wrapping it in useCallback
   
 
 ```
 
 ```
-invalid.jsx:12:7 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:12:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i JSX props should not use arrow functions
+  i Pass stable functions as props to avoid unnecessary rerenders.
   
     10 │ 	<Foo onClick={handleClick.bind(this)} />
     11 │ 	<Foo onClick={this._handleClick.bind(this)} />
   > 12 │ 	<Foo onClick={() => console.log("Hello!")} />
-       │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ </>;
     14 │ 
+  
+  i JSX props should not use arrow functions
+  
+  i Consider extracting the function or wrapping it in useCallback
   
 
 ```
