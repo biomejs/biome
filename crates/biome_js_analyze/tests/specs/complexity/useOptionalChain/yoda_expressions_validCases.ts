@@ -43,5 +43,8 @@ foo[/\w+/] && foo[/ab+c/].baz;
 
 (foo || {})().bar;
 
+undefined !== typeof foo && foo.bar;
+undefined != typeof foo && foo.bar;
+
 // FIXME: This should not generate a diagnostic
 // (new foo() || {}).bar;
