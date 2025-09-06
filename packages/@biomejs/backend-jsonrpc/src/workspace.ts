@@ -1642,7 +1642,7 @@ export interface Nursery {
 	 */
 	noJsxLiterals?: RuleConfiguration_for_NoJsxLiteralsOptions;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow string literals inside JSX elements.
 	 */
 	noJsxPropsBind?: RuleConfiguration_for_NoJsxPropsBindOptions;
 	/**
@@ -8082,20 +8082,6 @@ export interface NoImportCyclesOptions {
 	 * Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
 	 */
 	ignoreTypes?: boolean;
-}
-export interface NoJsxLiteralsOptions {
-	/**
-	 * An array of strings that won't trigger the rule. Whitespaces are taken into consideration
-	 */
-	allowedStrings?: string[];
-	/**
-	 * When enabled, strings inside props are always ignored
-	 */
-	ignoreProps?: boolean;
-	/**
-	 * When enabled, also flag string literals inside JSX expressions and attributes
-	 */
-	noStrings?: boolean;
 }
 export interface NoJsxPropsBindOptions { }
 export interface NoMisusedPromisesOptions { }
