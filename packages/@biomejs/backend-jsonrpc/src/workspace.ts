@@ -1638,6 +1638,10 @@ export interface Nursery {
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
 	/**
+	 * Disallow .bind(), arrow functions, or function expressions in JSX props
+	 */
+	noJsxPropsBind?: RuleConfiguration_for_NoJsxPropsBindOptions;
+	/**
 	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 */
 	noMisusedPromises?: RuleFixConfiguration_for_NoMisusedPromisesOptions;
@@ -2983,6 +2987,9 @@ export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 export type RuleConfiguration_for_NoImportCyclesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoImportCyclesOptions;
+export type RuleConfiguration_for_NoJsxPropsBindOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoJsxPropsBindOptions;
 export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoMisusedPromisesOptions;
@@ -5373,6 +5380,16 @@ export interface RuleWithOptions_for_NoImportCyclesOptions {
 	 * Rule's options
 	 */
 	options: NoImportCyclesOptions;
+}
+export interface RuleWithOptions_for_NoJsxPropsBindOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoJsxPropsBindOptions;
 }
 export interface RuleWithFixOptions_for_NoMisusedPromisesOptions {
 	/**
@@ -8049,6 +8066,7 @@ export interface NoImportCyclesOptions {
 	 */
 	ignoreTypes?: boolean;
 }
+export interface NoJsxPropsBindOptions {}
 export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
@@ -8785,6 +8803,7 @@ export type Category =
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
+	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
