@@ -89,8 +89,7 @@ impl Rule for NoJsxPropsBind {
                     .and_then(|c| c.as_js_static_member_expression().cloned())
                     .and_then(|m| m.member().ok())
                     .and_then(|n| n.value_token().ok())
-                    .map(|t| t.text() == "bind")
-                    .unwrap_or(false);
+                    .map_or(false, |t| t.text() == "bind");
                 if is_bind {
                     Some(NoJsxPropsBindState {
                         invalid_kind: InvalidKind::Bind,
