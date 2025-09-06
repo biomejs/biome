@@ -322,6 +322,32 @@ impl JsBinaryExpression {
 
     /// Extract the left or right operand of an optional chain-like expression.
     /// ```js
+    /// foo !== undefined;
+    /// typeof foo !== 'undefined';
+    ///```
+    pub fn extract_optional_chain_like(&self) -> SyntaxResult<Option<AnyJsExpression>> {
+        if matches!(
+            self.operator(),
+            Ok(JsBinaryOperator::StrictInequality | JsBinaryOperator::Inequality)
+        ) {
+            let left = self.left()?;
+            let right = self.right()?;
+            // nullish check: `foo !== undefined` -> return foo
+            if let Some(expr) = Self::extract_optional_chain_like_nullish(&left, &right)? {
+                return Ok(Some(expr));
+            }
+            // typeof check: `typeof foo !== 'undefined'` -> return foo
+            if let Some(expr) = Self::extract_optional_chain_like_typeof(&left, &right)? {
+                return Ok(Some(expr));
+            }
+            Ok(None)
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// Extract the left or right operand of an optional chain-like expression comparing nullish.
+    /// ```js
     /// foo !== undefined;  // -> Some(foo)
     /// foo != undefined;  // -> Some(foo)
     /// foo !== null;  // -> Some(foo)
@@ -341,32 +367,70 @@ impl JsBinaryExpression {
     /// null !== null;  // -> None
     /// null != null;  // -> None
     ///```
-    pub fn extract_optional_chain_like(&self) -> SyntaxResult<Option<AnyJsExpression>> {
+    fn extract_optional_chain_like_nullish(
+        left: &AnyJsExpression,
+        right: &AnyJsExpression,
+    ) -> SyntaxResult<Option<AnyJsExpression>> {
         fn is_nullish(expression: &AnyJsExpression) -> bool {
             expression
                 .as_static_value()
                 .is_some_and(|x| x.is_null_or_undefined())
         }
-        if matches!(
-            self.operator(),
-            Ok(JsBinaryOperator::StrictInequality | JsBinaryOperator::Inequality)
-        ) {
-            let left = self.left()?;
-            let right = self.right()?;
-            let left_is_nullish = is_nullish(&left);
-            let right_is_nullish = is_nullish(&right);
-            // right only nullish: `foo !== undefined` -> return foo (left)
-            if !left_is_nullish && right_is_nullish {
-                return Ok(Some(left));
+        let left_is_nullish = is_nullish(left);
+        let right_is_nullish = is_nullish(right);
+        // right only nullish: `foo !== undefined` -> return foo (left)
+        if !left_is_nullish && right_is_nullish {
+            return Ok(Some(left.clone()));
+        }
+        // left only nullish: `undefined !== foo` -> return foo (right)
+        if left_is_nullish && !right_is_nullish {
+            return Ok(Some(right.clone()));
+        }
+        Ok(None)
+    }
+
+    /// Extract the left or right operand of an optional chain-like expression using `typeof`.
+    /// ```js
+    /// typeof foo !== 'undefined';  // -> Some(foo)
+    /// typeof foo != 'undefined';  // -> Some(foo)
+    /// 'undefined' !== typeof foo;  // -> Some(foo)
+    /// 'undefined' != typeof foo;  // -> Some(foo)
+    /// ”undefined” != typeof foo;  // -> Some(foo)
+    /// `undefined` != typeof foo;  // -> Some(foo)
+    /// typeof foo !== undefined;  // -> None
+    /// typeof foo != undefined;  // -> None
+    /// undefined !== typeof foo;  // -> None
+    /// undefined != typeof foo;  // -> None
+    ///```
+    fn extract_optional_chain_like_typeof(
+        left: &AnyJsExpression,
+        right: &AnyJsExpression,
+    ) -> SyntaxResult<Option<AnyJsExpression>> {
+        fn is_string_literal_undefined(expression: &AnyJsExpression) -> bool {
+            expression
+                .as_static_value()
+                .is_some_and(|x| matches!(x.as_string_constant(), Some(s) if s == "undefined"))
+        }
+        fn typeof_argument(expression: &AnyJsExpression) -> SyntaxResult<Option<AnyJsExpression>> {
+            if let Some(unary) = expression.as_js_unary_expression() {
+                return Ok(match unary.operator()? {
+                    JsUnaryOperator::Typeof => Some(unary.argument()?),
+                    _ => None,
+                });
             }
-            // left only nullish: `undefined !== foo` -> return foo (right)
-            if left_is_nullish && !right_is_nullish {
-                return Ok(Some(right));
-            }
-            Ok(None)
-        } else {
             Ok(None)
         }
+        let left_is_string_undefined = is_string_literal_undefined(left);
+        let right_is_string_undefined = is_string_literal_undefined(right);
+        // `typeof foo !== "undefined"` -> return foo
+        if !left_is_string_undefined && right_is_string_undefined {
+            return typeof_argument(left);
+        }
+        // `"undefined" !== typeof foo` -> return foo
+        if left_is_string_undefined && !right_is_string_undefined {
+            return typeof_argument(right);
+        }
+        Ok(None)
     }
 }
 
