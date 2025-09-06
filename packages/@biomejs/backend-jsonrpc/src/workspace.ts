@@ -8083,7 +8083,13 @@ export interface NoImportCyclesOptions {
 	 */
 	ignoreTypes?: boolean;
 }
-export interface NoJsxPropsBindOptions { }
+export interface NoJsxPropsBindOptions {
+	allowArrowFunctions?: boolean;
+	allowBind?: boolean;
+	allowFunctions?: boolean;
+	ignoreDomComponents?: boolean;
+	ignoreRefs?: boolean;
+}
 export interface NoMisusedPromisesOptions { }
 export interface NoNextAsyncClientComponentOptions { }
 export interface NoNonNullAssertedOptionalChainOptions { }
