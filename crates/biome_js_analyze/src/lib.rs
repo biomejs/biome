@@ -14,14 +14,13 @@ use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_module_graph::{ModuleGraph, ModuleResolver};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
 mod a11y;
 pub mod assist;
 mod ast_utils;
-mod class_member_references;
 mod frameworks;
 pub mod globals;
 pub mod lint;
