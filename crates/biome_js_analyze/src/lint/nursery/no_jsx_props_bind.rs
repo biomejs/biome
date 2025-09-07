@@ -107,12 +107,19 @@ impl Rule for NoJsxPropsBind {
 
                 let declaration = binding.tree().declaration()?;
 
+                dbg!(declaration.syntax().kind());
                 match declaration {
-                    AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
-                    | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
-                    | AnyJsBindingDeclaration::JsFunctionExpression(_) => {
-                        dbg!("It's a function!");
-                        // TODO: But is is stable? I.e. global or wrapped in useCallback()
+                    AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
+                        // Global functions are fine.
+                        // This is probably overly simplistic
+                        // Also I don't understand why I need to skip the first ancestor
+                        // It seems like the first ancestor of a function declaration is itself a
+                        // function declaration??
+                        if !declaration.syntax().ancestors().skip(1).any(|anc| {
+                            anc.kind() == biome_js_syntax::JsSyntaxKind::JS_FUNCTION_DECLARATION
+                        }) {
+                            return None;
+                        }
                         return Some(NoJsxPropsBindState {
                             invalid_kind: InvalidKind::Function,
                             attribute_range: expression.range(),

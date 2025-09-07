@@ -6,9 +6,6 @@ expression: invalid.jsx
 # Input
 ```jsx
 <>
-	{/* TODO */}
-	{/* function onClick() {console.log("Hello!")};
-	<Foo onClick={onClick} /> */}
 	<Foo
 		onClick={function () {
 			alert("1337");
@@ -19,23 +16,28 @@ expression: invalid.jsx
 	<Foo onClick={() => console.log("Hello!")} />
 </>;
 
+function Foo() {
+	function onClick() {}
+	return <Bar onClick={onClick}></Bar>;
+}
+
 ```
 
 # Diagnostics
 ```
-invalid.jsx:6:12 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:12 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Pass stable function references as props to avoid unnecessary rerenders.
   
-     4 │ 	<Foo onClick={onClick} /> */}
-     5 │ 	<Foo
-   > 6 │ 		onClick={function () {
-       │ 		         ^^^^^^^^^^^^^
-   > 7 │ 			alert("1337");
-   > 8 │ 		}}
-       │ 		^
-     9 │ 	/>
-    10 │ 	<Foo onClick={handleClick.bind(this)} />
+    1 │ <>
+    2 │ 	<Foo
+  > 3 │ 		onClick={function () {
+      │ 		         ^^^^^^^^^^^^^
+  > 4 │ 			alert("1337");
+  > 5 │ 		}}
+      │ 		^
+    6 │ 	/>
+    7 │ 	<Foo onClick={handleClick.bind(this)} />
   
   i JSX props should not use function expressions
   
@@ -45,16 +47,16 @@ invalid.jsx:6:12 lint/nursery/noJsxPropsBind ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:10:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Pass stable function references as props to avoid unnecessary rerenders.
   
-     8 │ 		}}
-     9 │ 	/>
-  > 10 │ 	<Foo onClick={handleClick.bind(this)} />
-       │ 	              ^^^^^^^^^^^^^^^^^^^^^^
-    11 │ 	<Foo onClick={this._handleClick.bind(this)} />
-    12 │ 	<Foo onClick={() => console.log("Hello!")} />
+    5 │ 		}}
+    6 │ 	/>
+  > 7 │ 	<Foo onClick={handleClick.bind(this)} />
+      │ 	              ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	<Foo onClick={this._handleClick.bind(this)} />
+    9 │ 	<Foo onClick={() => console.log("Hello!")} />
   
   i JSX props should not use .bind()
   
@@ -64,16 +66,16 @@ invalid.jsx:10:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:11:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Pass stable function references as props to avoid unnecessary rerenders.
   
-     9 │ 	/>
-    10 │ 	<Foo onClick={handleClick.bind(this)} />
-  > 11 │ 	<Foo onClick={this._handleClick.bind(this)} />
+     6 │ 	/>
+     7 │ 	<Foo onClick={handleClick.bind(this)} />
+   > 8 │ 	<Foo onClick={this._handleClick.bind(this)} />
        │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ 	<Foo onClick={() => console.log("Hello!")} />
-    13 │ </>;
+     9 │ 	<Foo onClick={() => console.log("Hello!")} />
+    10 │ </>;
   
   i JSX props should not use .bind()
   
@@ -83,18 +85,37 @@ invalid.jsx:11:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:12:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:16 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Pass stable function references as props to avoid unnecessary rerenders.
   
-    10 │ 	<Foo onClick={handleClick.bind(this)} />
-    11 │ 	<Foo onClick={this._handleClick.bind(this)} />
-  > 12 │ 	<Foo onClick={() => console.log("Hello!")} />
+     7 │ 	<Foo onClick={handleClick.bind(this)} />
+     8 │ 	<Foo onClick={this._handleClick.bind(this)} />
+   > 9 │ 	<Foo onClick={() => console.log("Hello!")} />
        │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ </>;
-    14 │ 
+    10 │ </>;
+    11 │ 
   
   i JSX props should not use arrow functions
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+
+```
+
+```
+invalid.jsx:14:23 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Pass stable function references as props to avoid unnecessary rerenders.
+  
+    12 │ function Foo() {
+    13 │ 	function onClick() {}
+  > 14 │ 	return <Bar onClick={onClick}></Bar>;
+       │ 	                     ^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i JSX props should not use function expressions
   
   i Consider extracting the function or wrapping it in useCallback
   
