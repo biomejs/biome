@@ -65,7 +65,7 @@ use std::{
 };
 
 use biome_analyze::{ActionCategory, RuleCategories};
-use biome_configuration::{Configuration, analyzer::RuleSelector};
+use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
 use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::{CodeSuggestion, serde::Diagnostic};
 use biome_formatter::Printed;
@@ -918,12 +918,12 @@ pub struct PullDiagnosticsParams {
     pub path: BiomePath,
     pub categories: RuleCategories,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     /// Rules to apply on top of the configuration
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
     pub pull_code_actions: bool,
 }
@@ -946,11 +946,11 @@ pub struct PullActionsParams {
     pub range: Option<TextRange>,
     pub suppression_reason: Option<String>,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     #[serde(default)]
     pub categories: RuleCategories,
 }
@@ -1019,12 +1019,12 @@ pub struct FixFileParams {
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     /// Rules to apply to the file
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     pub rule_categories: RuleCategories,
     #[serde(default)]
     pub suppression_reason: Option<String>,
@@ -1636,8 +1636,8 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_diagnostics(
         &self,
         categories: RuleCategories,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         pull_code_actions: bool,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
@@ -1654,10 +1654,10 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_actions(
         &self,
         range: Option<TextRange>,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         suppression_reason: Option<String>,
-        enabled_rules: Vec<RuleSelector>,
+        enabled_rules: Vec<AnalyzerSelector>,
         categories: RuleCategories,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
@@ -1707,8 +1707,8 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         fix_file_mode: FixFileMode,
         should_format: bool,
         rule_categories: RuleCategories,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         suppression_reason: Option<String>,
     ) -> Result<FixFileResult, WorkspaceError> {
         self.workspace.fix_file(FixFileParams {
