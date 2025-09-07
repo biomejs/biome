@@ -1,4 +1,4 @@
-name: autofix.ci  # needed to securely identify the workflow
+name: autofix.ci # needed to securely identify the workflow
 
 on:
   pull_request:
@@ -13,6 +13,8 @@ on:
       - "Cargo.lock"
       - "rust-toolchain.toml"
       - "rustfmt.toml"
+      # Needed for auto fixing rule versions
+      - "packages/@biomejs/biome/package.json"
 permissions:
   contents: read
 
@@ -51,5 +53,21 @@ jobs:
         run: |
           cargo fmt --all
           taplo format
+
+      - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
+  autofix-rule-versions:
+    runs-on: depot-ubuntu-24.04-arm-4
+    if: "github.event.pull_request.title == 'ci: release'"
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - run: |
+          sudo apt-get update
+          sudo apt-get install ripgrep
+
+      - name: Update rule versions
+        run: |
+          scripts/update-next-version.sh --replace "$(jq --raw-output .version packages/@biomejs/biome/package.json)"
 
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27

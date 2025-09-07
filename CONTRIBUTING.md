@@ -458,7 +458,7 @@ Before starting release:
 
 1. [ ] Make sure that all issues/PRs for the milestone are done: https://github.com/biomejs/biome/milestones
 
-1. [ ] Replace all `version: "next"` to the new version number in the metadata of the rules.
+1. [ ] Replace all `version: "next"` with the new version number in the metadata of the rules. This should be automated , but you can use `scripts/update-next-version.sh` if you need to do it manually.
 
 When releasing a new **minor** or **major** version of a Biome, follow these steps:
 
