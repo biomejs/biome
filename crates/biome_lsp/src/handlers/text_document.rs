@@ -1,15 +1,16 @@
-use std::sync::Arc;
-
 use crate::diagnostics::LspError;
+use crate::session::ConfigurationStatus;
 use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
+use biome_configuration::ConfigurationPathHint;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
     GetFileContentParams, IgnoreKind, OpenFileParams, PathIsIgnoredParams,
 };
-use tower_lsp_server::lsp_types;
-use tower_lsp_server::lsp_types::MessageType;
-use tracing::{debug, error, field};
+use camino::Utf8PathBuf;
+use std::sync::Arc;
+use tower_lsp_server::{UriExt, lsp_types};
+use tracing::{debug, error, field, info};
 
 /// Handler for `textDocument/didOpen` LSP notification
 #[tracing::instrument(
@@ -31,22 +32,71 @@ pub(crate) async fn did_open(
 
     let path = session.file_path(&url)?;
 
-    let status = session.configuration_status();
+    eprintln!("Session id {:?}", session.key);
+    let project_key = match session.project_for_path(&path) {
+        Some(project_key) => project_key,
+        None => {
+            info!("No open project for path: {path:?}. Opening new project.");
 
-    let project_key = if status.is_loaded() {
-        match session.project_for_path(&path) {
-            Some(project_key) => project_key,
-            None => {
-                error!("Could not find project for {path}");
+            let project_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .unwrap_or_default();
+
+            // First check if the current file belongs to any registered workspace folder.
+            // If so, return that folder; otherwise, use the folder computed by did_open.
+            let project_path = if let Some(workspace_folders) = session.get_workspace_folders() {
+                if let Some(ws_root) = workspace_folders
+                    .iter()
+                    .filter_map(|folder| {
+                        folder.uri.to_file_path().map(|p| {
+                            Utf8PathBuf::from_path_buf(p.to_path_buf())
+                                .expect("To have a valid UTF-8 path")
+                        })
+                    })
+                    .find(|ws| project_path.starts_with(ws))
+                {
+                    ws_root
+                } else {
+                    project_path.clone()
+                }
+            } else if let Some(base_path) = session.base_path() {
+                if project_path.starts_with(&base_path) {
+                    base_path
+                } else {
+                    project_path.clone()
+                }
+            } else {
+                project_path
+            };
+
+            session.set_configuration_status(ConfigurationStatus::Loading);
+            eprintln!(
+                "Loading configuration from text_document {:?}",
+                &project_path
+            );
+            let status = session
+                .load_biome_configuration_file(ConfigurationPathHint::FromLsp(project_path), false)
+                .await;
+
+            session.set_configuration_status(status);
+
+            if status.is_loaded() {
+                match session.project_for_path(&path) {
+                    Some(project_key) => project_key,
+
+                    None => {
+                        error!("Could not find project for {path}");
+
+                        return Ok(());
+                    }
+                }
+            } else {
+                error!("Configuration could not be loaded for {path}");
+
                 return Ok(());
             }
         }
-    } else {
-        if status.is_plugin_error() {
-            session.client.show_message(MessageType::WARNING, "The plugin loading has failed. Biome will report only parsing errors until the file is fixed or its usage is disabled.").await;
-        }
-        error!("Configuration could not be loaded for {path}");
-        return Ok(());
     };
 
     let is_ignored = session
