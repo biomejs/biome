@@ -1,18 +1,9 @@
 use crate::JsRuleAction;
-use crate::class_member_references::{
-    AnyPropertyMember, ClassMemberReference, ClassMemberReferences, class_member_references,
-};
-use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use crate::services::class_member_references::{AnyPropertyMember, ClassMemberReference, ClassMemberReferences, class_member_references, SemanticClass, SemanticClassServices};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{
-    AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsPropertyModifier,
-    AnyTsPropertyParameterModifier, JsClassDeclaration, JsClassMemberList, JsFileSource,
-    JsSyntaxKind, JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter,
-    TsReadonlyModifier,
-};
+use biome_js_syntax::{AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsClassDeclaration, JsClassMemberList, JsFileSource, JsSyntaxKind, JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter, TsReadonlyModifier};
 use biome_rowan::{
     AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TriviaPiece,
 };
@@ -20,7 +11,7 @@ use biome_rule_options::use_readonly_class_properties::UseReadonlyClassPropertie
 use std::iter::once;
 
 declare_lint_rule! {
-    /// Enforce marking members as `readonly` if they are never modified outside the constructor.
+    /// Enforce marking members as `readonly` if they are never modified outside the constructor#[derive(Debug)]
     ///
     /// This rule ensures that class properties, especially private ones, are marked as `readonly` if their values
     /// remain constant after being initialized. This helps improve code readability, maintainability, and ensures
@@ -124,12 +115,20 @@ declare_lint_rule! {
 }
 
 impl Rule for UseReadonlyClassProperties {
-    type Query = Ast<JsClassDeclaration>;
+    type Query = SemanticClass<JsClassDeclaration>;
     type State = AnyPropertyMember;
     type Signals = Box<[Self::State]>;
     type Options = UseReadonlyClassPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        // let refs = ctx.model();
+        println!("run is called now:");
+        // let members = ctx.query().members();
+
+        if let Some(service) = ctx.get_service::<SemanticClassServices>() {
+            println!("refs from service: {:?}", service.references());
+        }
+
         let source_type = ctx.source_type::<JsFileSource>().language();
         if !source_type.is_typescript() {
             return Box::default();
@@ -141,7 +140,7 @@ impl Rule for UseReadonlyClassProperties {
         let ClassMemberReferences { writes, .. } = class_member_references(&members);
 
         let constructor_params: Vec<_> =
-            collect_non_readonly_constructor_parameters(root, private_only);
+            collect_non_readonly_constructor_parameters(&members, private_only);
         let non_readonly_class_property_members =
             collect_non_readonly_class_member_properties(&members, private_only);
 
@@ -325,15 +324,14 @@ fn collect_non_readonly_class_member_properties(
     })
 }
 
-/// Collects all all mutable (non-readonly) constructor parameters from a given class declaration. If private_only is true, it only includes parameters with private visibility.
+/// Collects all all mutable (non-readonly) constructor parameters from a given class member list. If private_only is true, it only includes parameters with private visibility.
 /// It returns a Vec<PropOrParam> representing these parameters, which are candidates for being marked as readonly.
 /// e.g. constructor(private paramOne: string, public paramTwo: number) {} makes both paramOne and paramTwo class member properties.
 fn collect_non_readonly_constructor_parameters(
-    class_declaration: &JsClassDeclaration,
+    class_members: &JsClassMemberList,
     private_only: bool,
 ) -> Vec<AnyPropertyMember> {
-    class_declaration
-        .members()
+    class_members
         .iter()
         .find_map(|member| match member {
             AnyJsClassMember::JsConstructorClassMember(member) => Some(member),
