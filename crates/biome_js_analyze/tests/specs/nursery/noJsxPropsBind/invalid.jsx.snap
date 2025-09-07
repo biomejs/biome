@@ -21,6 +21,16 @@ function Foo() {
 	return <Bar onClick={onClick}></Bar>;
 }
 
+function Foo() {
+	const onClick = () => {};
+	return <Bar onClick={onClick}></Bar>;
+}
+
+function Foo() {
+	const onClick = function () {};
+	return <Bar onClick={onClick}></Bar>;
+}
+
 ```
 
 # Diagnostics
@@ -114,6 +124,44 @@ invalid.jsx:14:23 lint/nursery/noJsxPropsBind ━━━━━━━━━━━�
        │ 	                     ^^^^^^^
     15 │ }
     16 │ 
+  
+  i JSX props should not use function expressions
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+
+```
+
+```
+invalid.jsx:19:23 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Pass stable function references as props to avoid unnecessary rerenders.
+  
+    17 │ function Foo() {
+    18 │ 	const onClick = () => {};
+  > 19 │ 	return <Bar onClick={onClick}></Bar>;
+       │ 	                     ^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i JSX props should not use function expressions
+  
+  i Consider extracting the function or wrapping it in useCallback
+  
+
+```
+
+```
+invalid.jsx:24:23 lint/nursery/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Pass stable function references as props to avoid unnecessary rerenders.
+  
+    22 │ function Foo() {
+    23 │ 	const onClick = function () {};
+  > 24 │ 	return <Bar onClick={onClick}></Bar>;
+       │ 	                     ^^^^^^^
+    25 │ }
+    26 │ 
   
   i JSX props should not use function expressions
   

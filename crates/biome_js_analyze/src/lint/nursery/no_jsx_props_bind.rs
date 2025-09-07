@@ -1,6 +1,7 @@
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
+use biome_js_semantic::Binding;
 use biome_js_syntax::{AnyJsExpression, JsxAttribute, binding_ext::AnyJsBindingDeclaration};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_jsx_props_bind::NoJsxPropsBindOptions;
@@ -62,7 +63,7 @@ impl Rule for NoJsxPropsBind {
     type Options = NoJsxPropsBindOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let expression = ctx
+        let expression: AnyJsExpression = ctx
             .query()
             .initializer()?
             .value()
@@ -99,16 +100,17 @@ impl Rule for NoJsxPropsBind {
                     None
                 }
             }
-            // e.g. this.handleClick
-            AnyJsExpression::JsStaticMemberExpression(_) => None,
             AnyJsExpression::JsIdentifierExpression(identifier) => {
                 let model = ctx.model();
-                let binding = model.binding(&identifier.name().ok()?)?;
+                let binding: Binding = model.binding(&identifier.name().ok()?)?;
 
                 let declaration = binding.tree().declaration()?;
 
-                dbg!(declaration.syntax().kind());
-                match declaration {
+                // dbg!(binding.syntax().kind());
+                // dbg!(identifier.syntax().kind());
+                // dbg!(declaration.syntax().kind());
+
+                match &declaration {
                     AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
                         // Global functions are fine.
                         // This is probably overly simplistic
@@ -124,6 +126,23 @@ impl Rule for NoJsxPropsBind {
                             invalid_kind: InvalidKind::Function,
                             attribute_range: expression.range(),
                         });
+                    }
+                    AnyJsBindingDeclaration::JsVariableDeclarator(variable_declarator) => {
+                        // dbg!("It's some kind of variable!");
+                        // dbg!(&variable_declarator);
+                        match variable_declarator.initializer()?.expression().ok()? {
+                            AnyJsExpression::JsFunctionExpression(_)
+                            | AnyJsExpression::JsArrowFunctionExpression(_) => {
+                                if !declaration.syntax().ancestors().any(|anc| anc.kind() == biome_js_syntax::JsSyntaxKind::JS_FUNCTION_DECLARATION) {
+                                    return None
+                                }
+                                return Some(NoJsxPropsBindState {
+                                    invalid_kind: InvalidKind::Function,
+                                    attribute_range: expression.range(),
+                                });
+                            }
+                            _ => None,
+                        }
                     }
                     _ => None,
                 }
