@@ -651,4 +651,13 @@ impl ConfigurationPathHint {
     pub const fn is_from_lsp(&self) -> bool {
         matches!(self, Self::FromLsp(_))
     }
+
+    pub fn to_path_buf(&self) -> Option<Utf8PathBuf> {
+        match self {
+            Self::None => None,
+            Self::FromWorkspace(path) | Self::FromLsp(path) | Self::FromUser(path) => {
+                Some(path.to_path_buf())
+            }
+        }
+    }
 }

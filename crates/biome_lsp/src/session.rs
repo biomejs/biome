@@ -103,7 +103,7 @@ pub(crate) struct Session {
 
     /// Lock used to synchronize multiple atomic operations to load the configuration file
     loading_operations:
-        TokioRwLock<FxHashMap<SessionKey, tokio::sync::broadcast::Sender<ConfigurationStatus>>>,
+        TokioRwLock<FxHashMap<Utf8PathBuf, tokio::sync::broadcast::Sender<ConfigurationStatus>>>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -734,10 +734,11 @@ impl Session {
             return current_status;
         }
         // Check if there's already an ongoing operation for this path
+        let path_to_index = base_path.to_path_buf().unwrap_or_default();
         {
             let operations = self.loading_operations.read().await;
 
-            if let Some(sender) = operations.get(&self.key).cloned() {
+            if let Some(sender) = operations.get(&path_to_index).cloned() {
                 drop(operations); // Release read lock
 
                 // Wait for the ongoing operation to complete
@@ -767,7 +768,7 @@ impl Session {
         // Store the receiver for other tasks to subscribe to
         {
             let mut operations = self.loading_operations.write().await;
-            operations.insert(self.key, tx.clone());
+            operations.insert(path_to_index.clone(), tx.clone());
         }
 
         // Perform the actual loading
@@ -781,7 +782,7 @@ impl Session {
         // Clean up the operation
         {
             let mut operations = self.loading_operations.write().await;
-            operations.remove(&self.key);
+            operations.remove(&path_to_index);
         }
 
         status
