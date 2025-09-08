@@ -26,7 +26,7 @@ use biome_rowan::AstNode;
 use biome_service::projects::{ProjectKey, Projects};
 use biome_service::settings::ServiceLanguage;
 use biome_service::workspace::DocumentFileSource;
-use biome_test_utils::get_added_paths;
+use biome_test_utils::{get_added_paths, get_test_services};
 use camino::Utf8PathBuf;
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
 use std::collections::{BTreeMap, HashMap};
@@ -960,59 +960,4 @@ impl TestRunner {
 
         Ok(())
     }
-}
-
-/// Creates an in-memory module graph for the given files.
-/// Returns an empty module graph if no files are provided.
-fn get_test_services(
-    file_source: JsFileSource,
-    files: &HashMap<String, String>,
-) -> JsAnalyzerServices {
-    if files.is_empty() {
-        return JsAnalyzerServices::from((Default::default(), Default::default(), file_source));
-    }
-
-    let fs = MemoryFileSystem::default();
-    let layout = ProjectLayout::default();
-
-    let mut added_paths = Vec::with_capacity(files.len());
-
-    for (path, src) in files.iter() {
-        let path_buf = Utf8PathBuf::from(path);
-        let biome_path = BiomePath::new(&path_buf);
-        if biome_path.is_manifest() {
-            match biome_path.file_name() {
-                Some("package.json") => {
-                    let parsed = parse_json(src, JsonParserOptions::default());
-                    layout.insert_serialized_node_manifest(
-                        path_buf.parent().unwrap().into(),
-                        &parsed.syntax().as_send().unwrap(),
-                    );
-                }
-                Some("tsconfig.json") => {
-                    let parsed = parse_json(
-                        src,
-                        JsonParserOptions::default()
-                            .with_allow_comments()
-                            .with_allow_trailing_commas(),
-                    );
-                    layout.insert_serialized_tsconfig(
-                        path_buf.parent().unwrap().into(),
-                        &parsed.syntax().as_send().unwrap(),
-                    );
-                }
-                _ => unimplemented!("Unhandled manifest: {biome_path}"),
-            }
-        } else {
-            added_paths.push(biome_path);
-        }
-
-        fs.insert(path_buf, src.as_bytes().to_vec());
-    }
-
-    let module_graph = ModuleGraph::default();
-    let added_paths = get_added_paths(&fs, &added_paths);
-    module_graph.update_graph_for_js_paths(&fs, &layout, &added_paths, &[]);
-
-    JsAnalyzerServices::from((Arc::new(module_graph), Arc::new(layout), file_source))
 }

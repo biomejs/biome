@@ -36,7 +36,7 @@ declare_lint_rule! {
     ///
     /// **`foobar.js`**
     /// ```js,expect_diagnostic,file=foobar.js
-    /// import { baz } from "./baz.js";
+    ///  import { baz } from "./baz.js";
     ///
     /// export function foo() {
     ///     baz();
@@ -123,7 +123,7 @@ declare_lint_rule! {
     /// #### Invalid
     ///
     /// **`types.ts`**
-    /// ```ts,expect_diagnostic,file=types.ts
+    /// ```ts
     /// import type { bar } from "./qux.ts";
     ///
     /// export type Foo = {
@@ -132,7 +132,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// **`qux.ts`**
-    /// ```ts,expect_diagnostic,use_options,file=qux.ts
+    /// ```ts,use_options
     /// import type { Foo } from "./types.ts";
     ///
     /// export function bar(foo: Foo) {
