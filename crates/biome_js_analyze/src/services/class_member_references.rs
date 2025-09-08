@@ -24,6 +24,7 @@ pub struct SemanticClassServices {
 
 impl SemanticClassServices {
     pub fn references(&self) -> &ClassMemberReferences {
+        println!("vlads references {:?}", self.references);
         &self.references
     }
 }
@@ -101,6 +102,7 @@ impl Visitor for SemanticClassVisitor {
     fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
         if let WalkEvent::Enter(node) = event {
             if let Some(_class_decl) = JsClassDeclaration::cast_ref(node) {
+                println!("vlad SemanticClassVisitor.visit() {:?}", node);
                 ctx.match_query(SemanticClassEvent(node.text_range_with_trivia()));
             }
         }
@@ -118,6 +120,7 @@ where
     type Services = SemanticClassServices;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
+        println!("vlad root {:?}", root);
         analyzer.add_visitor(Phases::Syntax, || ClassMemberReferencesVisitor::new(root));
         analyzer.add_visitor(Phases::Semantic, || SemanticClassVisitor);
     }
@@ -126,7 +129,9 @@ where
         QueryKey::Syntax(N::KIND_SET)
     }
 
-    fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
+    fn unwrap_match(service_bag: &ServiceBag, node: &Self::Input) -> Self::Output {
+        println!("vlad node {:?}", node);
+        println!("vlad service_bag {:?}", service_bag);
         N::unwrap_cast(node.clone())
     }
 }
