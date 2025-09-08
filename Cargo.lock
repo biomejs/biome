@@ -214,7 +214,7 @@ dependencies = [
  "serde",
  "serde_json",
  "smallvec",
- "terminal_size 0.4.2",
+ "terminal_size 0.4.3",
  "tikv-jemallocator",
  "tokio",
  "tracing",
@@ -445,7 +445,7 @@ dependencies = [
  "serde",
  "serde_json",
  "termcolor",
- "terminal_size 0.4.2",
+ "terminal_size 0.4.3",
  "trybuild",
  "unicode-width 0.1.12",
 ]
@@ -4517,12 +4517,12 @@ dependencies = [
 
 [[package]]
 name = "terminal_size"
-version = "0.4.2"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45c6481c4829e4cc63825e62c49186a34538b7b2750b73b266581ffb612fb5ed"
+checksum = "60b8cb979cb11c32ce1603f8137b22262a9d131aaa5c37b5678025f22b8becd0"
 dependencies = [
  "rustix 1.0.1",
- "windows-sys 0.59.0",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
