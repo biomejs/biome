@@ -612,7 +612,8 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
 }
 
 /// Creates an in-memory module graph for the given files.
-/// Returns an empty module graph if no files are provided.
+/// Returns the services for analyzing a single code snippet, including module graph and project layout.
+/// The module graph will be empty if no `files` are provided.
 ///
 /// # Arguments
 ///
