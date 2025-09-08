@@ -89,6 +89,11 @@ pub(super) fn parse_object_expression(p: &mut JsParser) -> ParsedSyntax {
 /// An individual object property such as `"a": b` or `5: 6 + 6`.
 fn parse_object_member(p: &mut JsParser) -> ParsedSyntax {
     match p.cur() {
+        // let a = { key: 1, $... }
+        // `$...` acts as a spread metavariable (matches zero or more remaining members).
+        // A metavariable followed by `:` continues to be parsed as a property key.
+        t if t.is_metavariable() && !p.nth_at(1, T![:]) => parse_metavariable(p),
+
         // test js getter_object_member
         // let a = {
         //   get foo() {

@@ -1817,7 +1817,7 @@ impl AnyJsObjectMember {
             Self::JsShorthandPropertyObjectMember(member) => {
                 return Some(member.name().ok()?.value_token().ok()?.token_text_trimmed());
             }
-            Self::JsBogusMember(_) | Self::JsSpread(_) => {
+            Self::JsBogusMember(_) | Self::JsSpread(_) | Self::JsMetavariable(_) => {
                 return None;
             }
         };

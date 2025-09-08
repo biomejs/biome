@@ -1324,7 +1324,9 @@ fn selector_from_variable_declarator(var: &JsVariableDeclarator, scope: Scope) -
 
 fn selector_from_object_member(member: &AnyJsObjectMember) -> Option<Selector> {
     match member {
-        AnyJsObjectMember::JsBogusMember(_) | AnyJsObjectMember::JsSpread(_) => None,
+        AnyJsObjectMember::JsBogusMember(_)
+        | AnyJsObjectMember::JsSpread(_)
+        | AnyJsObjectMember::JsMetavariable(_) => None,
         AnyJsObjectMember::JsGetterObjectMember(_) => Some(Kind::ObjectLiteralGetter.into()),
         AnyJsObjectMember::JsMethodObjectMember(_) => Some(Kind::ObjectLiteralMethod.into()),
         AnyJsObjectMember::JsPropertyObjectMember(_)
