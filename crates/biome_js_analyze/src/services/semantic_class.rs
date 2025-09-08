@@ -69,13 +69,13 @@ impl Visitor for ClassMemberReferencesVisitor {
     type Language = JsLanguage;
 
     fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, _ctx: VisitorContext<JsLanguage>) {
-        if let WalkEvent::Enter(node) = event {
-            if let Some(js_class_declaration) = JsClassDeclaration::cast_ref(node) {
-                let class_member_list = js_class_declaration.members();
-                let refs = class_member_references(&class_member_list);
-                self.references.reads.extend(refs.reads);
-                self.references.writes.extend(refs.writes);
-            }
+        if let WalkEvent::Enter(node) = event
+            && let Some(js_class_declaration) = JsClassDeclaration::cast_ref(node)
+        {
+            let class_member_list = js_class_declaration.members();
+            let refs = class_member_references(&class_member_list);
+            self.references.reads.extend(refs.reads);
+            self.references.writes.extend(refs.writes);
         }
     }
 
@@ -108,7 +108,7 @@ impl Visitor for SemanticClassVisitor {
                     ctx.match_query(node.clone());
                 }
             }
-            WalkEvent::Leave(_) => return,
+            WalkEvent::Leave(_) => (),
         };
     }
 }
@@ -143,19 +143,10 @@ pub struct ClassMemberReference {
     pub range: TextRange,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct ClassMemberReferences {
     pub reads: HashSet<ClassMemberReference>,
     pub writes: HashSet<ClassMemberReference>,
-}
-
-impl Default for ClassMemberReferences {
-    fn default() -> Self {
-        Self {
-            reads: HashSet::new(),
-            writes: HashSet::new(),
-        }
-    }
 }
 
 declare_node_union! {
