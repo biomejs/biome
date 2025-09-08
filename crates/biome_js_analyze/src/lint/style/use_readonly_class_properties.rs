@@ -1,9 +1,18 @@
 use crate::JsRuleAction;
-use crate::services::semantic_class::{AnyPropertyMember, ClassMemberReference, ClassMemberReferences, SemanticClass};
-use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use crate::services::semantic_class::{
+    AnyPropertyMember, ClassMemberReference, ClassMemberReferences, SemanticClass,
+};
+use biome_analyze::{
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsClassDeclaration, JsClassMemberList, JsFileSource, JsSyntaxKind, JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter, TsReadonlyModifier};
+use biome_js_syntax::{
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsPropertyModifier,
+    AnyTsPropertyParameterModifier, JsClassDeclaration, JsClassMemberList, JsFileSource,
+    JsSyntaxKind, JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter,
+    TsReadonlyModifier,
+};
 use biome_rowan::{
     AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TriviaPiece,
 };
