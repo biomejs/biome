@@ -6,7 +6,7 @@ Deprecated the option `files.experimentalScannerIgnores` in favour of **force-ig
 
 `files.includes` supports ignoring files by prefixing globs with an exclamation mark (`!`). With this change, it also supports _force_-ignoring globs by prefixing them with a double exclamation mark (`!!`).
 
-The effect of force-ignoring is that the scanner will not index files matching the glob, even in project mode, and even if those files are imported by other files.
+The effect of force-ignoring is that the scanner will not index files matching the glob, even in project mode, even if those files are imported by other files, and even if they are files that receive special treatment by Biome, such as nested `biome.json` files.
 
 #### Example
 
