@@ -205,7 +205,7 @@ grit-util            = "0.5.1"
 hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.23"
 indexmap             = { version = "2.10.0" }
-insta                = "1.43.1"
+insta                = "1.43.2"
 libc                 = "0.2.175"
 mimalloc             = "0.1.47"
 papaya               = "0.2.3"
