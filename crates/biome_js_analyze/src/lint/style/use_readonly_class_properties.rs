@@ -11,7 +11,7 @@ use biome_rule_options::use_readonly_class_properties::UseReadonlyClassPropertie
 use std::iter::once;
 
 declare_lint_rule! {
-    /// Enforce marking members as `readonly` if they are never modified outside the constructor#[derive(Debug)]
+    /// Enforce marking members as `readonly` if they are never modified outside the constructor.
     ///
     /// This rule ensures that class properties, especially private ones, are marked as `readonly` if their values
     /// remain constant after being initialized. This helps improve code readability, maintainability, and ensures
