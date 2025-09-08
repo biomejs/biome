@@ -14,7 +14,7 @@ use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_module_graph::{ModuleGraph, ModuleResolver};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
-use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
+use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
