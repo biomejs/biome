@@ -38,19 +38,19 @@ impl Phase for () {
 
 pub trait RegistryVisitor<L: Language> {
     /// Record the category `C` to this visitor
-    fn record_category<C: GroupCategory<Language = L>>(&mut self) {
+    fn record_category<C: GroupCategory<Language=L>>(&mut self) {
         C::record_groups(self);
     }
 
     /// Record the group `G` to this visitor
-    fn record_group<G: RuleGroup<Language = L>>(&mut self) {
+    fn record_group<G: RuleGroup<Language=L>>(&mut self) {
         G::record_rules(self);
     }
 
     /// Record the rule `R` to this visitor
     fn record_rule<R>(&mut self)
     where
-        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static;
+        R: Rule<Query: Queryable<Language=L, Output: Clone>> + 'static;
 }
 
 /// Stores metadata information for all the rules in the registry, sorted
@@ -83,7 +83,7 @@ impl MetadataRegistry {
 impl<L: Language> RegistryVisitor<L> for MetadataRegistry {
     fn record_rule<R>(&mut self)
     where
-        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
+        R: Rule<Query: Queryable<Language=L, Output: Clone>> + 'static,
     {
         self.insert_rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
     }
@@ -139,20 +139,20 @@ pub struct RuleRegistryBuilder<'a, L: Language> {
     // Rule Registry
     registry: RuleRegistry<L>,
     // Analyzer Visitors
-    visitors: BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>>,
+    visitors: BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language=L>>>,
     // Service Bag
     services: ServiceBag,
     diagnostics: Vec<Error>,
 }
 
 impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder<'_, L> {
-    fn record_category<C: GroupCategory<Language = L>>(&mut self) {
+    fn record_category<C: GroupCategory<Language=L>>(&mut self) {
         if self.filter.match_category::<C>() {
             C::record_groups(self);
         }
     }
 
-    fn record_group<G: RuleGroup<Language = L>>(&mut self) {
+    fn record_group<G: RuleGroup<Language=L>>(&mut self) {
         if self.filter.match_group::<G>() {
             G::record_rules(self);
         }
@@ -161,7 +161,7 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
     /// Add the rule `R` to the list of rules stores in this registry instance
     fn record_rule<R>(&mut self)
     where
-        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+        R: Rule<Options: Default, Query: Queryable<Language=L, Output: Clone>> + 'static,
     {
         if !self.filter.match_rule::<R>() {
             return;
@@ -224,11 +224,11 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
     }
 }
 
-impl<L: Language> AddVisitor<L> for BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>> {
+impl<L: Language> AddVisitor<L> for BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language=L>>> {
     fn add_visitor<F, V>(&mut self, phase: Phases, visitor: F)
     where
         F: FnOnce() -> V,
-        V: Visitor<Language = L> + 'static,
+        V: Visitor<Language=L> + 'static,
     {
         self.entry((phase, TypeId::of::<V>()))
             .or_insert_with(move || Box::new((visitor)()));
@@ -239,7 +239,7 @@ type BuilderResult<L> = (
     RuleRegistry<L>,
     ServiceBag,
     Vec<Error>,
-    BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>>,
+    BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language=L>>>,
 );
 
 impl<L: Language> RuleRegistryBuilder<'_, L> {
@@ -418,7 +418,15 @@ impl<L: Language + Default> RegistryRule<L> {
                 preferred_jsx_quote,
                 jsx_runtime,
                 css_modules,
-            )?;
+            );
+
+            let ctx = match ctx {
+                Ok(ctx) => ctx,
+                Err(e) => {
+                    println!("RuleContext::new failed with error: {:?}", e);
+                    return Err(e);
+                }
+            };
 
             for result in R::run(&ctx) {
                 let text_range =
