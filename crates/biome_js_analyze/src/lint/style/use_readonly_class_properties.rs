@@ -1,5 +1,5 @@
 use crate::JsRuleAction;
-use crate::services::class_member_references::{AnyPropertyMember, ClassMemberReference, ClassMemberReferences, class_member_references, SemanticClass, SemanticClassServices};
+use crate::services::class_member_references::{AnyPropertyMember, ClassMemberReference, ClassMemberReferences, class_member_references, SemanticClass};
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make;
@@ -121,13 +121,7 @@ impl Rule for UseReadonlyClassProperties {
     type Options = UseReadonlyClassPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        // let refs = ctx.model();
-        println!("run is called now:");
-        // let members = ctx.query().members();
-
-        if let Some(service) = ctx.get_service::<SemanticClassServices>() {
-            println!("refs from service: {:?}", service.references());
-        }
+        println!("run references: {:?}", ctx.references());
 
         let source_type = ctx.source_type::<JsFileSource>().language();
         if !source_type.is_typescript() {
