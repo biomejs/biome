@@ -557,7 +557,6 @@ fn collect_references_from_body(
     member: &JsSyntaxNode,
     body: &JsFunctionBody,
 ) -> Option<ClassMemberReferences> {
-    // println!("collect_references_from_body {:?} {:?}", member, body);
     let scoped_this_references = ThisScopeReferences::new(body).collect_function_this_references();
 
     let mut reads = HashSet::new();
