@@ -1,5 +1,5 @@
 use crate::JsRuleAction;
-use crate::services::class_member_references::{AnyPropertyMember, ClassMemberReference, ClassMemberReferences, class_member_references, SemanticClass};
+use crate::services::class_member_references::{AnyPropertyMember, ClassMemberReference, ClassMemberReferences, SemanticClass};
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make;
@@ -121,18 +121,16 @@ impl Rule for UseReadonlyClassProperties {
     type Options = UseReadonlyClassPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        println!("run references: {:?}", ctx.references());
-
         let source_type = ctx.source_type::<JsFileSource>().language();
         if !source_type.is_typescript() {
             return Box::default();
         }
 
+        let ClassMemberReferences { writes, .. } = ctx.class_member_references();
+
         let root = ctx.query();
         let members = root.members();
         let private_only = !ctx.options().check_all_properties;
-        let ClassMemberReferences { writes, .. } = class_member_references(&members);
-
         let constructor_params: Vec<_> =
             collect_non_readonly_constructor_parameters(&members, private_only);
         let non_readonly_class_property_members =

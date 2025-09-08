@@ -9,8 +9,7 @@ use biome_js_syntax::{
 
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
-    RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext,
-    VisitorFinishContext,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, WalkEvent, declare_node_union,
@@ -19,14 +18,18 @@ use std::collections::HashSet;
 
 #[derive(Clone)]
 pub struct SemanticClassServices {
-    references: ClassMemberReferences,
+    class_member_references: ClassMemberReferences,
 }
 
 impl SemanticClassServices {
-    pub fn references(&self) -> &ClassMemberReferences {
-        println!("vlads references {:?}", self.references);
-        &self.references
+    pub fn class_member_references(&self) -> &ClassMemberReferences {
+        &self.class_member_references
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct ClassMemberReferencesService {
+    pub references: ClassMemberReferences,
 }
 
 impl FromServices for SemanticClassServices {
@@ -35,11 +38,11 @@ impl FromServices for SemanticClassServices {
         _rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> biome_diagnostics::Result<Self, ServicesDiagnostic> {
-        let references: &ClassMemberReferences = services.get_service().ok_or_else(|| {
-            ServicesDiagnostic::new(rule_key.rule_name(), &["ClassMemberReferences"])
+        let service: &ClassMemberReferencesService = services.get_service().ok_or_else(|| {
+            ServicesDiagnostic::new(rule_key.rule_name(), &["ClassMemberReferencesService"])
         })?;
         Ok(Self {
-            references: references.clone(),
+            class_member_references: service.references.clone(),
         })
     }
 }
@@ -77,8 +80,7 @@ impl Visitor for ClassMemberReferencesVisitor {
     }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        println!("Collected references: {:?}", self.references);
-        ctx.services.insert_service(SemanticClassServices {
+        ctx.services.insert_service(ClassMemberReferencesService {
             references: self.references,
         });
     }
@@ -100,12 +102,14 @@ impl Visitor for SemanticClassVisitor {
     type Language = JsLanguage;
 
     fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
-        if let WalkEvent::Enter(node) = event {
-            if let Some(_class_decl) = JsClassDeclaration::cast_ref(node) {
-                println!("vlad SemanticClassVisitor.visit() {:?}", node);
-                ctx.match_query(SemanticClassEvent(node.text_range_with_trivia()));
+        match event {
+            WalkEvent::Enter(node) => {
+                if let Some(_class_decl) = JsClassDeclaration::cast_ref(node) {
+                    ctx.match_query(node.clone());
+                }
             }
-        }
+            WalkEvent::Leave(_) => return,
+        };
     }
 }
 
@@ -120,7 +124,6 @@ where
     type Services = SemanticClassServices;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        println!("vlad root {:?}", root);
         analyzer.add_visitor(Phases::Syntax, || ClassMemberReferencesVisitor::new(root));
         analyzer.add_visitor(Phases::Semantic, || SemanticClassVisitor);
     }
@@ -129,9 +132,7 @@ where
         QueryKey::Syntax(N::KIND_SET)
     }
 
-    fn unwrap_match(service_bag: &ServiceBag, node: &Self::Input) -> Self::Output {
-        println!("vlad node {:?}", node);
-        println!("vlad service_bag {:?}", service_bag);
+    fn unwrap_match(_service_bag: &ServiceBag, node: &Self::Input) -> Self::Output {
         N::unwrap_cast(node.clone())
     }
 }
@@ -157,14 +158,6 @@ impl Default for ClassMemberReferences {
     }
 }
 
-pub struct SemanticClassEvent(TextRange);
-
-impl QueryMatch for SemanticClassEvent {
-    fn text_range(&self) -> TextRange {
-        self.0
-    }
-}
-
 declare_node_union! {
     pub AnyPropertyMember = JsPropertyClassMember | TsPropertyParameter
 }
@@ -176,7 +169,7 @@ declare_node_union! {
 /// read and write references to `this` properties across all supported member types.
 ///
 /// Returns a `ClassMemberReferences` struct containing the combined set of read and write references.
-pub fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
+fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
     let all_references: Vec<ClassMemberReferences> = list
         .iter()
         .filter_map(|member| match member {
@@ -333,7 +326,7 @@ struct ThisScopeReferences {
 }
 
 impl ThisScopeReferences {
-    pub fn new(body: &JsFunctionBody) -> Self {
+    fn new(body: &JsFunctionBody) -> Self {
         Self {
             body: body.clone(),
             local_this_references: Self::collect_local_this_references(body),
@@ -343,7 +336,7 @@ impl ThisScopeReferences {
     /// Collects all `this` scope references in the function body and nested
     /// functions using `ThisScopeVisitor`, combining local and inherited ones
     /// into a list of `FunctionThisReferences`.
-    pub fn collect_function_this_references(&self) -> Vec<FunctionThisReferences> {
+    fn collect_function_this_references(&self) -> Vec<FunctionThisReferences> {
         let mut visitor = ThisScopeVisitor {
             skipped_ranges: vec![],
             current_this_scopes: vec![],
