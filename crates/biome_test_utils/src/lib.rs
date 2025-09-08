@@ -616,7 +616,7 @@ pub fn assert_diagnostics_expectation_comment<L: Language>(
 ///
 /// # Arguments
 ///
-/// * `file_source` - The file source to use for the module graph.
+/// * `file_source` - The file source to use for the returned analyzer services.
 /// * `files` - A map of file paths to their contents.
 pub fn get_test_services<S: BuildHasher>(
     file_source: JsFileSource,
