@@ -850,6 +850,7 @@ pub(crate) trait CommandRunner: Sized {
             cli_options.log_file.as_deref(),
             cli_options.log_level,
             cli_options.log_kind,
+            cli_options.colors.as_ref(),
         );
         let console = &mut *session.app.console;
         let workspace = &*session.app.workspace;
