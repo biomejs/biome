@@ -1,7 +1,7 @@
-use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
+use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::Utf8Path;
 
@@ -161,6 +161,78 @@ fn does_not_handle_files_inside_force_ignored_folders() {
         module_path!(),
         "does_not_handle_files_inside_force_ignored_folders",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn errors_on_ignored_nested_biome_json() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("errors_on_ignored_nested_biome_json");
+    fs.create_file(
+        "biome.json",
+        r#"{ "files": { "includes": ["**/*.js", "!nested/biome.json"] } }"#,
+    );
+    fs.create_file(
+        "nested/biome.json",
+        r#"{ "formatter": { "enabled": false } }"#,
+    );
+
+    let root_a = "a.js";
+    fs.create_file(root_a, UNFORMATTED);
+
+    let nested_a = "nested/a.js";
+    fs.create_file(nested_a, UNFORMATTED);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "errors_on_ignored_nested_biome_json",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn can_force_ignore_biome_json() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("can_force_ignore_biome_json");
+    fs.create_file(
+        "biome.json",
+        r#"{ "files": { "includes": ["**/*.js", "!!nested/biome.json"] } }"#,
+    );
+    fs.create_file(
+        "nested/biome.json",
+        r#"{ "formatter": { "enabled": false } }"#,
+    );
+
+    let root_a = "a.js";
+    fs.create_file(root_a, UNFORMATTED);
+
+    let nested_a = "nested/a.js";
+    fs.create_file(nested_a, UNFORMATTED);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "can_force_ignore_biome_json",
+        fs.create_mem(),
         console,
         result,
     ));
