@@ -216,7 +216,7 @@ quickcheck           = "1.0.3"
 quickcheck_macros    = "1.1.0"
 quote                = "1.0.40"
 rayon                = "1.10.0"
-regex                = "1.11.1"
+regex                = "1.11.2"
 rust-lapper          = "1.2.0"
 rustc-hash           = "2.1.1"
 schemars             = { version = "0.8.22", features = ["indexmap2", "smallvec"] }
