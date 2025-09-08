@@ -31,17 +31,13 @@ Imports {
 
 ```
 Module TypeId(0) => Namespace {
-    path: [
-        Borrowed(
-            "Foo",
-        ),
-    ],
+    path: Identifier(
+        "Foo",
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Bar",
-                ),
+                "Bar",
             ),
             ty: Resolved(
                 Module(0) TypeId(1),

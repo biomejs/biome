@@ -1,0 +1,212 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: whitespace.jsx
+---
+# Input
+```jsx
+<>
+  {/* Test cases for whitespace handling */}
+  <p className="text-sm font-bold            ">hello world</p>
+  <p className="            text-sm font-bold">hello world</p>  
+  <p className="text-sm font-bold            other-class">hello world</p>
+  <p className="   ">empty with spaces</p>
+  <p className="">empty without spaces</p>
+  <p className="text-sm    font-bold">multiple spaces between</p>
+  <p className="  text-sm  font-bold  ">spaces everywhere</p>
+  
+  {/* Template literal cases */}
+  <p className={`text-sm font-bold            `}>template literal trailing</p>
+  <p className={`            text-sm font-bold`}>template literal leading</p>
+  <p className={`  text-sm  font-bold  `}>template literal both</p>
+</>
+```
+
+# Diagnostics
+```
+whitespace.jsx:3:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    1 │ <>
+    2 │   {/* Test cases for whitespace handling */}
+  > 3 │   <p className="text-sm font-bold            ">hello world</p>
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   <p className="            text-sm font-bold">hello world</p>··
+    5 │   <p className="text-sm font-bold            other-class">hello world</p>
+  
+  i Unsafe fix: Sort the classes.
+  
+     1  1 │   <>
+     2  2 │     {/* Test cases for whitespace handling */}
+     3    │ - ··<p·className="text-sm·font-bold············">hello·world</p>
+        3 │ + ··<p·className="font-bold·text-sm">hello·world</p>
+     4  4 │     <p className="            text-sm font-bold">hello world</p>··
+     5  5 │     <p className="text-sm font-bold            other-class">hello world</p>
+  
+
+```
+
+```
+whitespace.jsx:4:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    2 │   {/* Test cases for whitespace handling */}
+    3 │   <p className="text-sm font-bold            ">hello world</p>
+  > 4 │   <p className="            text-sm font-bold">hello world</p>··
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │   <p className="text-sm font-bold            other-class">hello world</p>
+    6 │   <p className="   ">empty with spaces</p>
+  
+  i Unsafe fix: Sort the classes.
+  
+     2  2 │     {/* Test cases for whitespace handling */}
+     3  3 │     <p className="text-sm font-bold            ">hello world</p>
+     4    │ - ··<p·className="············text-sm·font-bold">hello·world</p>··
+        4 │ + ··<p·className="font-bold·text-sm">hello·world</p>··
+     5  5 │     <p className="text-sm font-bold            other-class">hello world</p>
+     6  6 │     <p className="   ">empty with spaces</p>
+  
+
+```
+
+```
+whitespace.jsx:5:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    3 │   <p className="text-sm font-bold            ">hello world</p>
+    4 │   <p className="            text-sm font-bold">hello world</p>··
+  > 5 │   <p className="text-sm font-bold            other-class">hello world</p>
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <p className="   ">empty with spaces</p>
+    7 │   <p className="">empty without spaces</p>
+  
+  i Unsafe fix: Sort the classes.
+  
+     3  3 │     <p className="text-sm font-bold            ">hello world</p>
+     4  4 │     <p className="            text-sm font-bold">hello world</p>··
+     5    │ - ··<p·className="text-sm·font-bold············other-class">hello·world</p>
+        5 │ + ··<p·className="other-class·font-bold·text-sm">hello·world</p>
+     6  6 │     <p className="   ">empty with spaces</p>
+     7  7 │     <p className="">empty without spaces</p>
+  
+
+```
+
+```
+whitespace.jsx:8:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+     6 │   <p className="   ">empty with spaces</p>
+     7 │   <p className="">empty without spaces</p>
+   > 8 │   <p className="text-sm    font-bold">multiple spaces between</p>
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+     9 │   <p className="  text-sm  font-bold  ">spaces everywhere</p>
+    10 │   
+  
+  i Unsafe fix: Sort the classes.
+  
+     6  6 │     <p className="   ">empty with spaces</p>
+     7  7 │     <p className="">empty without spaces</p>
+     8    │ - ··<p·className="text-sm····font-bold">multiple·spaces·between</p>
+        8 │ + ··<p·className="font-bold·text-sm">multiple·spaces·between</p>
+     9  9 │     <p className="  text-sm  font-bold  ">spaces everywhere</p>
+    10 10 │     
+  
+
+```
+
+```
+whitespace.jsx:9:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+     7 │   <p className="">empty without spaces</p>
+     8 │   <p className="text-sm    font-bold">multiple spaces between</p>
+   > 9 │   <p className="  text-sm  font-bold  ">spaces everywhere</p>
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   
+    11 │   {/* Template literal cases */}
+  
+  i Unsafe fix: Sort the classes.
+  
+     7  7 │     <p className="">empty without spaces</p>
+     8  8 │     <p className="text-sm    font-bold">multiple spaces between</p>
+     9    │ - ··<p·className="··text-sm··font-bold··">spaces·everywhere</p>
+        9 │ + ··<p·className="font-bold·text-sm">spaces·everywhere</p>
+    10 10 │     
+    11 11 │     {/* Template literal cases */}
+  
+
+```
+
+```
+whitespace.jsx:12:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    11 │   {/* Template literal cases */}
+  > 12 │   <p className={`text-sm font-bold            `}>template literal trailing</p>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │   <p className={`            text-sm font-bold`}>template literal leading</p>
+    14 │   <p className={`  text-sm  font-bold  `}>template literal both</p>
+  
+  i Unsafe fix: Sort the classes.
+  
+    10 10 │     
+    11 11 │     {/* Template literal cases */}
+    12    │ - ··<p·className={`text-sm·font-bold············`}>template·literal·trailing</p>
+       12 │ + ··<p·className={`font-bold·text-sm`}>template·literal·trailing</p>
+    13 13 │     <p className={`            text-sm font-bold`}>template literal leading</p>
+    14 14 │     <p className={`  text-sm  font-bold  `}>template literal both</p>
+  
+
+```
+
+```
+whitespace.jsx:13:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    11 │   {/* Template literal cases */}
+    12 │   <p className={`text-sm font-bold            `}>template literal trailing</p>
+  > 13 │   <p className={`            text-sm font-bold`}>template literal leading</p>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │   <p className={`  text-sm  font-bold  `}>template literal both</p>
+    15 │ </>
+  
+  i Unsafe fix: Sort the classes.
+  
+    11 11 │     {/* Template literal cases */}
+    12 12 │     <p className={`text-sm font-bold            `}>template literal trailing</p>
+    13    │ - ··<p·className={`············text-sm·font-bold`}>template·literal·leading</p>
+       13 │ + ··<p·className={`font-bold·text-sm`}>template·literal·leading</p>
+    14 14 │     <p className={`  text-sm  font-bold  `}>template literal both</p>
+    15 15 │   </>
+  
+
+```
+
+```
+whitespace.jsx:14:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    12 │   <p className={`text-sm font-bold            `}>template literal trailing</p>
+    13 │   <p className={`            text-sm font-bold`}>template literal leading</p>
+  > 14 │   <p className={`  text-sm  font-bold  `}>template literal both</p>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^
+    15 │ </>
+  
+  i Unsafe fix: Sort the classes.
+  
+    12 12 │     <p className={`text-sm font-bold            `}>template literal trailing</p>
+    13 13 │     <p className={`            text-sm font-bold`}>template literal leading</p>
+    14    │ - ··<p·className={`··text-sm··font-bold··`}>template·literal·both</p>
+       14 │ + ··<p·className={`font-bold·text-sm`}>template·literal·both</p>
+    15 15 │   </>
+  
+
+```

@@ -8,7 +8,7 @@
 
 mod fs_proxy;
 
-use std::collections::BTreeSet;
+use std::{collections::BTreeSet, ops::Deref};
 
 use biome_fs::BiomePath;
 use biome_js_syntax::AnyJsRoot;
@@ -18,9 +18,11 @@ use biome_project_layout::ProjectLayout;
 use biome_resolver::{FsWithResolverProxy, PathInfo};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::{HashMap, HashMapRef, LocalGuard};
-use rustc_hash::FxBuildHasher;
+use rustc_hash::{FxBuildHasher, FxHashSet};
 
-use crate::{JsExport, JsModuleInfo, JsOwnExport, js_module_info::JsModuleVisitor};
+use crate::{
+    JsExport, JsModuleInfo, JsOwnExport, ModuleDiagnostic, js_module_info::JsModuleVisitor,
+};
 
 pub(crate) use fs_proxy::ModuleGraphFsProxy;
 
@@ -50,6 +52,11 @@ pub struct ModuleGraph {
 }
 
 impl ModuleGraph {
+    /// Returns whether the given `path` is indexed in the module graph.
+    pub fn contains(&self, path: &Utf8Path) -> bool {
+        self.data.pin().contains_key(path)
+    }
+
     /// Returns the module info, such as imports and exports and their types,
     /// for the given `path`.
     pub fn module_info_for_path(&self, path: &Utf8Path) -> Option<JsModuleInfo> {
@@ -57,7 +64,7 @@ impl ModuleGraph {
     }
 
     /// Returns the data of the module graph in test
-    pub fn data(&self) -> HashMapRef<Utf8PathBuf, JsModuleInfo, FxBuildHasher, LocalGuard> {
+    pub fn data(&self) -> HashMapRef<'_, Utf8PathBuf, JsModuleInfo, FxBuildHasher, LocalGuard<'_>> {
         self.data.pin()
     }
 
@@ -67,13 +74,15 @@ impl ModuleGraph {
     /// `added_or_updated_paths` and `removed_paths`. Manifests are expected to
     /// be resolved through the `project_layout`. As such, the `project_layout`
     /// must have been updated before calling this method.
+    ///
+    /// Returns the dependencies of all the paths that were added or updated.
     pub fn update_graph_for_js_paths(
         &self,
         fs: &dyn FsWithResolverProxy,
         project_layout: &ProjectLayout,
         added_or_updated_paths: &[(&BiomePath, AnyJsRoot)],
         removed_paths: &[&BiomePath],
-    ) {
+    ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
         for (path, _) in added_or_updated_paths {
@@ -92,21 +101,37 @@ impl ModuleGraph {
         }
 
         let fs_proxy = ModuleGraphFsProxy::new(fs, self, project_layout);
+        let mut dependencies = ModuleDependencies::default();
+        let mut diagnostics = Vec::new();
 
         // Traverse all the added and updated paths and insert their module
         // info.
-        let imports = self.data.pin();
+        let modules = self.data.pin();
         for (path, root) in added_or_updated_paths {
             let directory = path.parent().unwrap_or(path);
             let visitor = JsModuleVisitor::new(root.clone(), directory, &fs_proxy);
-            imports.insert(path.to_path_buf(), visitor.collect_info());
+
+            let module_info = visitor.collect_info();
+            for import_path in module_info.all_import_paths() {
+                if let Some(path) = import_path.as_path() {
+                    dependencies.insert(path.to_path_buf());
+                }
+            }
+
+            for diagnostic in module_info.diagnostics() {
+                diagnostics.push(diagnostic.clone());
+            }
+
+            modules.insert(path.to_path_buf(), module_info);
         }
 
         // Clean up removed paths.
         for removed_path in removed_paths {
-            imports.remove(removed_path.as_path());
+            modules.remove(removed_path.as_path());
             path_info.remove(removed_path.as_path());
         }
+
+        (dependencies, diagnostics)
     }
 
     pub fn get_or_insert_path_info(
@@ -118,6 +143,19 @@ impl ModuleGraph {
             .pin()
             .get_or_insert_with(path.to_path_buf(), || fs.path_info(path).ok())
             .clone()
+    }
+
+    /// Unloads all paths from the graph within the given `path`.
+    ///
+    /// This method works both for unloading folders as well as individual
+    /// files.
+    pub fn unload_path(&self, path: &Utf8Path) {
+        let data = self.data.pin();
+        for indexed_path in data.keys() {
+            if indexed_path.starts_with(path) {
+                data.remove(indexed_path);
+            }
+        }
     }
 
     /// Finds an exported symbol by `symbol_name` as exported by `module`.
@@ -188,5 +226,52 @@ fn find_exported_symbol_with_seen_paths<'a>(
                 _ => None,
             }
         }),
+    }
+}
+
+/// Represents all the files that are imported/depended on by a module.
+#[derive(Debug, Default)]
+pub struct ModuleDependencies(FxHashSet<Utf8PathBuf>);
+
+impl ModuleDependencies {
+    /// Adds a dependency to the module dependencies, if it wasn't added yet.
+    pub fn insert(&mut self, dependency_path: Utf8PathBuf) {
+        self.0.insert(dependency_path);
+    }
+}
+
+impl AsRef<FxHashSet<Utf8PathBuf>> for ModuleDependencies {
+    fn as_ref(&self) -> &FxHashSet<Utf8PathBuf> {
+        &self.0
+    }
+}
+
+impl Deref for ModuleDependencies {
+    type Target = FxHashSet<Utf8PathBuf>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<FxHashSet<Utf8PathBuf>> for ModuleDependencies {
+    fn from(dependencies: FxHashSet<Utf8PathBuf>) -> Self {
+        Self(dependencies)
+    }
+}
+
+impl FromIterator<Utf8PathBuf> for ModuleDependencies {
+    fn from_iter<T: IntoIterator<Item = Utf8PathBuf>>(iter: T) -> Self {
+        Self(iter.into_iter().collect())
+    }
+}
+
+impl IntoIterator for ModuleDependencies {
+    type Item = Utf8PathBuf;
+
+    type IntoIter = <FxHashSet<Utf8PathBuf> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }

@@ -1,0 +1,379 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+html:active-view-transition-type() {
+}
+
+
+html:active-view-transition-type(first 123213) {
+}
+
+html:active-view-transition-type(first 123213 second) {
+}
+
+html:active-view-transition-type(first "string??" second) {
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..4 "html" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@4..5 ":" [] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@5..32 "active-view-transition-type" [] [],
+                                    },
+                                    L_PAREN@32..33 "(" [] [],
+                                    CssCustomIdentifierList [],
+                                    R_PAREN@33..35 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@35..36 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@36..38 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@38..45 "html" [Newline("\n"), Newline("\n"), Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@45..46 ":" [] [],
+                            class: CssPseudoClassFunctionCustomIdentifierList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@46..73 "active-view-transition-type" [] [],
+                                },
+                                l_paren_token: L_PAREN@73..74 "(" [] [],
+                                items: CssCustomIdentifierList [
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@74..80 "first" [] [Whitespace(" ")],
+                                    },
+                                    CssBogusCustomIdentifier {
+                                        items: [
+                                            CSS_NUMBER_LITERAL@80..86 "123213" [] [],
+                                        ],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@86..88 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@88..89 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@89..91 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@91..97 "html" [Newline("\n"), Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@97..98 ":" [] [],
+                            class: CssPseudoClassFunctionCustomIdentifierList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@98..125 "active-view-transition-type" [] [],
+                                },
+                                l_paren_token: L_PAREN@125..126 "(" [] [],
+                                items: CssCustomIdentifierList [
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@126..132 "first" [] [Whitespace(" ")],
+                                    },
+                                    CssBogusCustomIdentifier {
+                                        items: [
+                                            CSS_NUMBER_LITERAL@132..139 "123213" [] [Whitespace(" ")],
+                                        ],
+                                    },
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@139..145 "second" [] [],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@145..147 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@147..148 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@148..150 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@150..156 "html" [Newline("\n"), Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@156..157 ":" [] [],
+                            class: CssPseudoClassFunctionCustomIdentifierList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@157..184 "active-view-transition-type" [] [],
+                                },
+                                l_paren_token: L_PAREN@184..185 "(" [] [],
+                                items: CssCustomIdentifierList [
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@185..191 "first" [] [Whitespace(" ")],
+                                    },
+                                    CssBogusCustomIdentifier {
+                                        items: [
+                                            CSS_STRING_LITERAL@191..202 "\"string??\"" [] [Whitespace(" ")],
+                                        ],
+                                    },
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@202..208 "second" [] [],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@208..210 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@210..211 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@211..213 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@213..214 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..214
+  0: (empty)
+  1: CSS_RULE_LIST@0..213
+    0: CSS_QUALIFIED_RULE@0..38
+      0: CSS_SELECTOR_LIST@0..35
+        0: CSS_COMPOUND_SELECTOR@0..35
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..4
+            0: (empty)
+            1: CSS_IDENTIFIER@0..4
+              0: IDENT@0..4 "html" [] []
+          2: CSS_SUB_SELECTOR_LIST@4..35
+            0: CSS_PSEUDO_CLASS_SELECTOR@4..35
+              0: COLON@4..5 ":" [] []
+              1: CSS_BOGUS_PSEUDO_CLASS@5..35
+                0: CSS_IDENTIFIER@5..32
+                  0: IDENT@5..32 "active-view-transition-type" [] []
+                1: L_PAREN@32..33 "(" [] []
+                2: CSS_CUSTOM_IDENTIFIER_LIST@33..33
+                3: R_PAREN@33..35 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@35..38
+        0: L_CURLY@35..36 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@36..36
+        2: R_CURLY@36..38 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@38..91
+      0: CSS_SELECTOR_LIST@38..88
+        0: CSS_COMPOUND_SELECTOR@38..88
+          0: CSS_NESTED_SELECTOR_LIST@38..38
+          1: CSS_TYPE_SELECTOR@38..45
+            0: (empty)
+            1: CSS_IDENTIFIER@38..45
+              0: IDENT@38..45 "html" [Newline("\n"), Newline("\n"), Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@45..88
+            0: CSS_PSEUDO_CLASS_SELECTOR@45..88
+              0: COLON@45..46 ":" [] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@46..88
+                0: CSS_IDENTIFIER@46..73
+                  0: IDENT@46..73 "active-view-transition-type" [] []
+                1: L_PAREN@73..74 "(" [] []
+                2: CSS_CUSTOM_IDENTIFIER_LIST@74..86
+                  0: CSS_CUSTOM_IDENTIFIER@74..80
+                    0: IDENT@74..80 "first" [] [Whitespace(" ")]
+                  1: CSS_BOGUS_CUSTOM_IDENTIFIER@80..86
+                    0: CSS_NUMBER_LITERAL@80..86 "123213" [] []
+                3: R_PAREN@86..88 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@88..91
+        0: L_CURLY@88..89 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@89..89
+        2: R_CURLY@89..91 "}" [Newline("\n")] []
+    2: CSS_QUALIFIED_RULE@91..150
+      0: CSS_SELECTOR_LIST@91..147
+        0: CSS_COMPOUND_SELECTOR@91..147
+          0: CSS_NESTED_SELECTOR_LIST@91..91
+          1: CSS_TYPE_SELECTOR@91..97
+            0: (empty)
+            1: CSS_IDENTIFIER@91..97
+              0: IDENT@91..97 "html" [Newline("\n"), Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@97..147
+            0: CSS_PSEUDO_CLASS_SELECTOR@97..147
+              0: COLON@97..98 ":" [] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@98..147
+                0: CSS_IDENTIFIER@98..125
+                  0: IDENT@98..125 "active-view-transition-type" [] []
+                1: L_PAREN@125..126 "(" [] []
+                2: CSS_CUSTOM_IDENTIFIER_LIST@126..145
+                  0: CSS_CUSTOM_IDENTIFIER@126..132
+                    0: IDENT@126..132 "first" [] [Whitespace(" ")]
+                  1: CSS_BOGUS_CUSTOM_IDENTIFIER@132..139
+                    0: CSS_NUMBER_LITERAL@132..139 "123213" [] [Whitespace(" ")]
+                  2: CSS_CUSTOM_IDENTIFIER@139..145
+                    0: IDENT@139..145 "second" [] []
+                3: R_PAREN@145..147 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@147..150
+        0: L_CURLY@147..148 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@148..148
+        2: R_CURLY@148..150 "}" [Newline("\n")] []
+    3: CSS_QUALIFIED_RULE@150..213
+      0: CSS_SELECTOR_LIST@150..210
+        0: CSS_COMPOUND_SELECTOR@150..210
+          0: CSS_NESTED_SELECTOR_LIST@150..150
+          1: CSS_TYPE_SELECTOR@150..156
+            0: (empty)
+            1: CSS_IDENTIFIER@150..156
+              0: IDENT@150..156 "html" [Newline("\n"), Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@156..210
+            0: CSS_PSEUDO_CLASS_SELECTOR@156..210
+              0: COLON@156..157 ":" [] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@157..210
+                0: CSS_IDENTIFIER@157..184
+                  0: IDENT@157..184 "active-view-transition-type" [] []
+                1: L_PAREN@184..185 "(" [] []
+                2: CSS_CUSTOM_IDENTIFIER_LIST@185..208
+                  0: CSS_CUSTOM_IDENTIFIER@185..191
+                    0: IDENT@185..191 "first" [] [Whitespace(" ")]
+                  1: CSS_BOGUS_CUSTOM_IDENTIFIER@191..202
+                    0: CSS_STRING_LITERAL@191..202 "\"string??\"" [] [Whitespace(" ")]
+                  2: CSS_CUSTOM_IDENTIFIER@202..208
+                    0: IDENT@202..208 "second" [] []
+                3: R_PAREN@208..210 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@210..213
+        0: L_CURLY@210..211 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@211..211
+        2: R_CURLY@211..213 "}" [Newline("\n")] []
+  2: EOF@213..214 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+pseudo_class_function_custom_identifier_list_error.css:1:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ''.
+  
+  > 1 │ html:active-view-transition-type() {
+      │                                  
+    2 │ }
+    3 │ 
+  
+  i Expected an identifier here.
+  
+  > 1 │ html:active-view-transition-type() {
+      │                                  
+    2 │ }
+    3 │ 
+  
+pseudo_class_function_custom_identifier_list_error.css:5:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '123213'.
+  
+  > 5 │ html:active-view-transition-type(first 123213) {
+      │                                        ^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Expected an identifier here.
+  
+  > 5 │ html:active-view-transition-type(first 123213) {
+      │                                        ^^^^^^
+    6 │ }
+    7 │ 
+  
+pseudo_class_function_custom_identifier_list_error.css:8:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '123213'.
+  
+     6 │ }
+     7 │ 
+   > 8 │ html:active-view-transition-type(first 123213 second) {
+       │                                        ^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Expected an identifier here.
+  
+     6 │ }
+     7 │ 
+   > 8 │ html:active-view-transition-type(first 123213 second) {
+       │                                        ^^^^^^
+     9 │ }
+    10 │ 
+  
+pseudo_class_function_custom_identifier_list_error.css:11:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '"string??"'.
+  
+     9 │ }
+    10 │ 
+  > 11 │ html:active-view-transition-type(first "string??" second) {
+       │                                        ^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Expected an identifier here.
+  
+     9 │ }
+    10 │ 
+  > 11 │ html:active-view-transition-type(first "string??" second) {
+       │                                        ^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+```

@@ -3,8 +3,7 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsBinding, AnyJsClass, AnyJsClassMemberName, AnyJsExpression,
-    AnyJsFunction, AnyJsObjectMemberName, AnyJsRoot, JsLanguage, JsObjectExpression, JsSyntaxNode,
+    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsLanguage, JsSyntaxNode,
 };
 use biome_js_type_info::Type;
 use biome_module_graph::ModuleResolver;
@@ -12,19 +11,24 @@ use biome_rowan::{AstNode, TextRange};
 use std::sync::Arc;
 
 /// Service for use with type inference rules.
-#[derive(Clone, Debug)]
+///
+/// This service is used for retrieving [`Type`] instances for arbitrary
+/// expressions or function definitions from the module graph.
+#[derive(Clone)]
 pub struct TypedService {
     resolver: Option<Arc<ModuleResolver>>,
 }
 
 impl TypedService {
-    pub fn type_of_expression(&self, expr: &AnyJsExpression) -> Type {
+    /// Returns the [`Type`] for the given `expression`.
+    pub fn type_of_expression(&self, expression: &AnyJsExpression) -> Type {
         self.resolver
             .as_ref()
-            .map(|resolver| resolver.resolved_type_of_expression(expr))
+            .map(|resolver| resolver.resolved_type_of_expression(expression))
             .unwrap_or_default()
     }
 
+    /// Returns the [`Type`] for the given `function`.
     pub fn type_of_function(&self, function: &AnyJsFunction) -> Type {
         match function {
             AnyJsFunction::JsArrowFunctionExpression(expr) => {
@@ -51,85 +55,6 @@ impl TypedService {
                 self.type_of_expression(&AnyJsExpression::JsFunctionExpression(expr.clone()))
             }
         }
-    }
-
-    pub fn type_of_function_like(&self, function: &AnyFunctionLike) -> Option<Type> {
-        match function {
-            AnyFunctionLike::AnyJsFunction(function) => Some(self.type_of_function(function)),
-            AnyFunctionLike::JsConstructorClassMember(member) => {
-                let class_ty = self.get_type_of_enclosing_class(member.syntax())?;
-                let constructor = class_ty.own_members().find(|member| {
-                    // TODO: Accurately handle overloads
-                    member.is_constructor()
-                })?;
-                self.resolver
-                    .as_ref()
-                    .map(|resolver| resolver.resolved_type_for_reference(&constructor.ty))
-            }
-            AnyFunctionLike::JsMethodObjectMember(member) => {
-                let name = member
-                    .name()
-                    .ok()
-                    .as_ref()
-                    .and_then(AnyJsObjectMemberName::as_js_literal_member_name)
-                    .and_then(|name| name.value().ok())?;
-                let name = name.text_trimmed();
-
-                let object = member
-                    .syntax()
-                    .ancestors()
-                    .skip(1)
-                    .find_map(JsObjectExpression::cast)?;
-
-                let object_ty =
-                    self.type_of_expression(&AnyJsExpression::JsObjectExpression(object));
-                let member = object_ty.own_members().find(|member| {
-                    // TODO: Accurately handle overloads
-                    member.has_name(name)
-                })?;
-                self.resolver
-                    .as_ref()
-                    .map(|resolver| resolver.resolved_type_for_reference(&member.ty))
-            }
-            AnyFunctionLike::JsMethodClassMember(member) => {
-                let name = member
-                    .name()
-                    .ok()
-                    .as_ref()
-                    .and_then(AnyJsClassMemberName::as_js_literal_member_name)
-                    .and_then(|name| name.value().ok())?;
-                let name = name.text_trimmed();
-
-                let class_ty = self.get_type_of_enclosing_class(member.syntax())?;
-                let member = class_ty
-                    .own_members()
-                    .find(|member| member.has_name(name))?;
-                self.resolver
-                    .as_ref()
-                    .map(|resolver| resolver.resolved_type_for_reference(&member.ty))
-            }
-        }
-    }
-
-    fn get_type_of_enclosing_class(&self, node: &JsSyntaxNode) -> Option<Type> {
-        let class = node.ancestors().skip(1).find_map(AnyJsClass::cast)?;
-        let class_ty = match class {
-            AnyJsClass::JsClassDeclaration(decl) => {
-                let binding = decl.id().ok()?;
-                let name = binding.as_js_identifier_binding()?.name_token().ok()?;
-                self.resolver.as_ref().map(|resolver| {
-                    resolver.resolved_type_of_named_value(node.text_trimmed_range(), name.text())
-                })?
-            }
-            AnyJsClass::JsClassExportDefaultDeclaration(_decl) => self
-                .resolver
-                .as_ref()
-                .and_then(|resolver| resolver.resolved_type_of_default_export())?,
-            AnyJsClass::JsClassExpression(expr) => {
-                self.type_of_expression(&AnyJsExpression::JsClassExpression(expr))
-            }
-        };
-        Some(class_ty)
     }
 }
 

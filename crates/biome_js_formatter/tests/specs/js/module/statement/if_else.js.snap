@@ -45,7 +45,7 @@ if (
 	let x= 10;
 }
 
-if (aVeryLongVeriableNameSoThatTheConditionBreaksAcrossMultipleLinesAndIDontKnow) {
+if (aVeryLongVariableNameSoThatTheConditionBreaksAcrossMultipleLinesAndIDontKnow) {
 
 
 
@@ -99,6 +99,7 @@ Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
+Operator linebreak: After
 -----
 
 ```js
@@ -141,7 +142,7 @@ if (true) {
 }
 
 if (
-	aVeryLongVeriableNameSoThatTheConditionBreaksAcrossMultipleLinesAndIDontKnow
+	aVeryLongVariableNameSoThatTheConditionBreaksAcrossMultipleLinesAndIDontKnow
 ) {
 } else {
 }

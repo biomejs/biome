@@ -75,7 +75,7 @@ class ExtendTypeAssertion extends (A as A) {
 	}
 }
 
-class ExtendStatisfiesExpression extends (A satisfies A) {
+class ExtendSatisfiesExpression extends (A satisfies A) {
     constructor() {
 		super();
 	}

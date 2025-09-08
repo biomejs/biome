@@ -510,19 +510,18 @@ mod tests {
     #[test]
     fn test_calculate_entropy_with_case_and_classes() {
         let entropy = calculate_entropy_with_case_and_classes("aaaaaaaaaaaaaaaa");
-        assert!(entropy < 4.0, "Expected low entropy, got {}", entropy);
+        assert!(entropy < 4.0, "Expected low entropy, got {entropy}");
 
         let entropy = calculate_entropy_with_case_and_classes("AbCdEfGhIjK");
-        assert!(entropy > 5.0, "Expected moderate entropy, got {}", entropy);
+        assert!(entropy > 5.0, "Expected moderate entropy, got {entropy}");
 
         let entropy = calculate_entropy_with_case_and_classes("AKIaSyD9mP+e2KqZ2S");
-        assert!(entropy > 6.5, "Expected high entropy, got {}", entropy);
+        assert!(entropy > 6.5, "Expected high entropy, got {entropy}");
 
         let entropy = calculate_entropy_with_case_and_classes("1234567890");
         assert!(
             entropy > 3.0,
-            "Expected some entropy for digits, got {}",
-            entropy
+            "Expected some entropy for digits, got {entropy}"
         );
     }
 }

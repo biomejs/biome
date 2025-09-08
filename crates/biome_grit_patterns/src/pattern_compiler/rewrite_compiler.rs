@@ -25,16 +25,15 @@ impl RewriteCompiler {
 
         if let (Pattern::CodeSnippet(left_snippet), Pattern::CodeSnippet(right_snippet)) =
             (&left, &right)
+            && left_snippet.source == right_snippet.source
         {
-            if left_snippet.source == right_snippet.source {
-                context.log(CompilerDiagnostic::new_warning(
-                    format!(
-                        "This is rewriting `{}` into the identical string `{}`, will have no effect.",
-                        left_snippet.source, right_snippet.source
-                    ),
-                    node.syntax().text_trimmed_range()
-                ));
-            }
+            context.log(CompilerDiagnostic::new_warning(
+                format!(
+                    "This is rewriting `{}` into the identical string `{}`, will have no effect.",
+                    left_snippet.source, right_snippet.source
+                ),
+                node.syntax().text_trimmed_range(),
+            ));
         }
 
         let right = to_dynamic_pattern(right, right_syntax_kind)?;

@@ -11,10 +11,12 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
         // These tokens, when parsed to proc_macro2::TokenStream, generates a stream of bytes
         // that can't be recognized by [quote].
         // Hence, they need to be thread differently
-        if "{}[]()`".contains(token) {
+        if "{}[]()` ".contains(token) {
+            // should be wrapped in single quotes
             let c = token.chars().next().unwrap();
             quote! { #c }
         } else if should_token_be_quoted(token) {
+            // should be wrapped in double quotes
             let token = Literal::string(token);
             quote! { #token }
         } else {
@@ -204,6 +206,21 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                         MAPPING_END => "end of a block mapping",
                         SEQUENCE_START => "start of a block sequence",
                         SEQUENCE_END => "end of a block sequence",
+                        _ => return None,
+                    };
+                    Some(tok)
+                }
+            }
+        }
+        LanguageKind::Tailwind => {
+            quote! {
+                pub const fn to_string(&self) -> Option<&'static str> {
+                    let tok = match self {
+                        #(#punctuation => #punctuation_strings,)*
+                        TW_BASE => "base",
+                        TW_VALUE => "value",
+                        TW_SELECTOR => "selector",
+                        TW_PROPERTY => "property",
                         _ => return None,
                     };
                     Some(tok)

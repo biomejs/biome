@@ -266,11 +266,25 @@ impl JsonFileSource {
         if Self::is_well_known_json_allow_comments_file(file_name) {
             return Ok(Self::json_allow_comments(extension));
         }
-        if let Some(camino::Utf8Component::Normal(parent_dir)) = path.components().rev().nth(1) {
-            if Self::is_well_known_json_allow_comments_directory(parent_dir)
-                && file_name.ends_with(".json")
-            {
-                return Ok(Self::json_allow_comments(extension));
+        if let Some(camino::Utf8Component::Normal(parent_dir)) = path.components().rev().nth(1)
+            && Self::is_well_known_json_allow_comments_directory(parent_dir)
+            && file_name.ends_with(".json")
+        {
+            return Ok(Self::json_allow_comments(extension));
+        }
+        // edge case: check if this is the global vscode or zed configuration file
+        // we do this check first because it doesn't require any allocations
+        if path.ends_with("zed/settings.json") || path.ends_with("Code/User/settings.json") {
+            // then we do a more robust check to see if its actually the global config file.
+            if let Some(config_dir) = dirs::config_dir() {
+                let zed_full_path = config_dir.join("zed/settings.json");
+                if path == zed_full_path {
+                    return Ok(Self::json_allow_comments("json"));
+                }
+                let vscode_full_path = config_dir.join("Code/User/settings.json");
+                if path == vscode_full_path {
+                    return Ok(Self::json_allow_comments("json"));
+                }
             }
         }
         if Self::is_well_known_json_file(file_name) {
@@ -342,19 +356,36 @@ impl TryFrom<&Utf8Path> for JsonFileSource {
     }
 }
 
-#[test]
-fn test_order() {
-    for items in JsonFileSource::WELL_KNOWN_JSON_ALLOW_COMMENTS_AND_TRAILING_COMMAS_FILES.windows(2)
-    {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_order() {
+        for items in
+            JsonFileSource::WELL_KNOWN_JSON_ALLOW_COMMENTS_AND_TRAILING_COMMAS_FILES.windows(2)
+        {
+            assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        }
+        for items in JsonFileSource::WELL_KNOWN_JSON_ALLOW_COMMENTS_FILES.windows(2) {
+            assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        }
+        for items in JsonFileSource::WELL_KNOWN_JSON_FILES.windows(2) {
+            assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        }
+        for items in JsonFileSource::WELL_KNOWN_JSON_ALLOW_COMMENTS_DIRECTORIES.windows(2) {
+            assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        }
     }
-    for items in JsonFileSource::WELL_KNOWN_JSON_ALLOW_COMMENTS_FILES.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
-    for items in JsonFileSource::WELL_KNOWN_JSON_FILES.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
-    for items in JsonFileSource::WELL_KNOWN_JSON_ALLOW_COMMENTS_DIRECTORIES.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+
+    #[test]
+    fn test_global_zed_settings() {
+        let path = dirs::config_dir()
+            .expect("Failed to get config directory")
+            .join("zed/settings.json");
+        let path = Utf8Path::from_path(path.as_path()).expect("Failed to create Utf8Path");
+        let file_source =
+            JsonFileSource::try_from_well_known(path).expect("Failed to create JsonFileSource");
+        assert!(file_source.allow_comments());
     }
 }

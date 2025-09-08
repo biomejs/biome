@@ -179,13 +179,15 @@ pub mod context;
 mod parentheses;
 pub(crate) mod separated;
 mod syntax_rewriter;
+pub(crate) mod trivia;
+mod verbatim;
 
 use biome_formatter::format_element::tag::Label;
 use biome_formatter::prelude::*;
+use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
 use biome_formatter::{
-    CstFormatContext, Format, FormatLanguage, FormatToken, TransformSourceMap, comments::Comments,
-    write,
+    CstFormatContext, Format, FormatLanguage, TransformSourceMap, comments::Comments, write,
 };
 use biome_js_syntax::{
     AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
@@ -197,6 +199,8 @@ use crate::comments::JsCommentStyle;
 use crate::context::{JsFormatContext, JsFormatOptions};
 use crate::cst::FormatJsSyntaxNode;
 use crate::syntax_rewriter::transform;
+use crate::trivia::*;
+use crate::verbatim::{format_bogus_node, format_or_verbatim, format_suppressed_node};
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
@@ -435,13 +439,37 @@ where
 }
 
 /// Format implementation specific to JavaScript tokens.
-pub(crate) type FormatJsSyntaxToken = FormatToken<JsFormatContext>;
+#[derive(Debug, Default)]
+pub(crate) struct FormatJsSyntaxToken;
+
+impl FormatRule<JsSyntaxToken> for FormatJsSyntaxToken {
+    type Context = JsFormatContext;
+
+    fn fmt(&self, token: &JsSyntaxToken, f: &mut Formatter<Self::Context>) -> FormatResult<()> {
+        f.state_mut().track_token(token);
+
+        self.format_skipped_token_trivia(token, f)?;
+        self.format_trimmed_token_trivia(token, f)?;
+
+        Ok(())
+    }
+}
+
+impl FormatToken<JsLanguage, JsFormatContext> for FormatJsSyntaxToken {
+    fn format_skipped_token_trivia(
+        &self,
+        token: &JsSyntaxToken,
+        f: &mut Formatter<JsFormatContext>,
+    ) -> FormatResult<()> {
+        format_skipped_token_trivia(token).fmt(f)
+    }
+}
 
 impl AsFormat<JsFormatContext> for JsSyntaxToken {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatJsSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, FormatJsSyntaxToken::default())
+        FormatRefWithRule::new(self, FormatJsSyntaxToken)
     }
 }
 
@@ -449,7 +477,7 @@ impl IntoFormat<JsFormatContext> for JsSyntaxToken {
     type Format = FormatOwnedWithRule<Self, FormatJsSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, FormatJsSyntaxToken::default())
+        FormatOwnedWithRule::new(self, FormatJsSyntaxToken)
     }
 }
 

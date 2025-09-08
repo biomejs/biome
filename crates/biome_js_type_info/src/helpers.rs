@@ -163,7 +163,7 @@ impl TypeData {
         index: usize,
     ) -> Option<ResolvedTypeData<'a>> {
         match self {
-            Self::Tuple(tuple) => Some(tuple.get_ty(resolver, index)),
+            Self::Tuple(tuple) => tuple.get_ty(resolver, index),
             _ => {
                 let resolved = ResolvedTypeData::from((resolver_id, self));
                 if resolved.is_instance_of(resolver, GLOBAL_ARRAY_ID) {
@@ -242,7 +242,7 @@ impl TypeData {
     /// This iterator does not return members of [`TypeData::InstanceOf`] or
     /// [`TypeData::Reference`] variants. If that's what you want, you will need
     /// to dereference them first.
-    pub fn own_members(&self) -> OwnTypeMemberIterator {
+    pub fn own_members(&self) -> OwnTypeMemberIterator<'_> {
         OwnTypeMemberIterator {
             owner: TypeMemberOwner::from_type_data(self),
             index: 0,
@@ -255,7 +255,7 @@ impl TypeData {
     /// remains, an instance of `Self::Reference` is returned instead of
     /// `Self::Union`.
     pub fn union_of(resolver: &dyn TypeResolver, types: Box<[TypeReference]>) -> Self {
-        // We use a hash table separately of a vector to quickly check for
+        // We use a hash table in addition to a vector to quickly check for
         // duplicates, without messing with the original order.
         let mut table: HashTable<usize> = HashTable::with_capacity(types.len());
         let mut vec = Vec::with_capacity(types.len());
@@ -270,18 +270,17 @@ impl TypeData {
                         // No point in adding `never` to the union.
                         continue;
                     }
-                    Self::Union(union) => {
+                    Self::Union(_) => {
                         // Flatten existing union into the new one:
-                        for ty in union.types() {
-                            let ty = resolved.apply_module_id_to_reference(ty);
+                        for ty in resolved.flattened_union_variants(resolver) {
                             let entry = table.entry(
                                 hash_reference(&ty),
-                                |i| &vec[*i] == ty.as_ref(),
+                                |i| vec[*i] == ty,
                                 |i| hash_reference(&vec[*i]),
                             );
                             if let Entry::Vacant(entry) = entry {
                                 let index = vec.len();
-                                vec.push(ty.into_owned());
+                                vec.push(ty);
                                 entry.insert(index);
                             }
                         }
@@ -584,5 +583,7 @@ generate_matcher!(is_interface, Interface, _);
 generate_matcher!(is_null, Null);
 generate_matcher!(is_reference, Reference, _);
 generate_matcher!(is_never_keyword, NeverKeyword);
+generate_matcher!(is_undefined, Undefined);
+generate_matcher!(is_union, Union, _);
 generate_matcher!(is_unknown_keyword, UnknownKeyword);
 generate_matcher!(is_void_keyword, VoidKeyword);

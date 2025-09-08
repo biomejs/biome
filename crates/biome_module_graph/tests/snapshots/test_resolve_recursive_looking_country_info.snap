@@ -72,8 +72,8 @@ Exports {
   "SubdivisionInfo" => {
     ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(14))
   }
-  "codes" => {
-    ExportOwnExport => JsOwnExport::Binding(18)
+  "subdivision" => {
+    ExportOwnExport => JsOwnExport::Binding(12)
   }
   "country" => {
     ExportOwnExport => JsOwnExport::Binding(15)
@@ -81,8 +81,8 @@ Exports {
   "data" => {
     ExportOwnExport => JsOwnExport::Binding(17)
   }
-  "subdivision" => {
-    ExportOwnExport => JsOwnExport::Binding(12)
+  "codes" => {
+    ExportOwnExport => JsOwnExport::Binding(18)
   }
 }
 Imports {
@@ -162,17 +162,13 @@ Module TypeId(5) => interface "Full" {
 }
 
 Module TypeId(6) => Namespace {
-    path: [
-        Borrowed(
-            "SubdivisionInfo",
-        ),
-    ],
+    path: Identifier(
+        "SubdivisionInfo",
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Partial",
-                ),
+                "Partial",
             ),
             ty: Resolved(
                 Module(0) TypeId(4),
@@ -180,9 +176,7 @@ Module TypeId(6) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Full",
-                ),
+                "Full",
             ),
             ty: Resolved(
                 Module(0) TypeId(5),
@@ -190,9 +184,7 @@ Module TypeId(6) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Map",
-                ),
+                "Map",
             ),
             ty: Resolved(
                 Module(0) TypeId(1),
@@ -208,8 +200,8 @@ Module TypeId(8) => Module(0) TypeId(6) | Module(0) TypeId(7)
 Module TypeId(9) => sync Function "subdivision" {
   accepts: {
     params: [
-      required countryCodeOrFullSubdivisionCode: string (bindings: countryCodeOrFullSubdivisionCode:string)
-      optional subdivisionCodeOrName: string (bindings: subdivisionCodeOrName:string)
+      required countryCodeOrFullSubdivisionCode: string
+      optional subdivisionCodeOrName: string
     ]
     type_args: []
   }
@@ -217,17 +209,13 @@ Module TypeId(9) => sync Function "subdivision" {
 }
 
 Module TypeId(10) => Namespace {
-    path: [
-        Borrowed(
-            "CountryInfo",
-        ),
-    ],
+    path: Identifier(
+        "CountryInfo",
+    ),
     members: [
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Partial",
-                ),
+                "Partial",
             ),
             ty: Resolved(
                 Module(0) TypeId(2),
@@ -235,9 +223,7 @@ Module TypeId(10) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Full",
-                ),
+                "Full",
             ),
             ty: Resolved(
                 Module(0) TypeId(3),
@@ -245,9 +231,7 @@ Module TypeId(10) => Namespace {
         },
         TypeMember {
             kind: NamedStatic(
-                Borrowed(
-                    "Map",
-                ),
+                "Map",
             ),
             ty: Resolved(
                 Module(0) TypeId(1),
@@ -261,7 +245,7 @@ Module TypeId(11) => Module(0) TypeId(10) | Module(0) TypeId(7)
 Module TypeId(12) => sync Function "country" {
   accepts: {
     params: [
-      required countryCodeOrName: string (bindings: countryCodeOrName:string)
+      required countryCodeOrName: string
     ]
     type_args: []
   }

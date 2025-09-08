@@ -1,0 +1,1 @@
+text-[ text-sm bg-red-500

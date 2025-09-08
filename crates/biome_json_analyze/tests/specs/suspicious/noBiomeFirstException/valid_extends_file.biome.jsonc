@@ -1,0 +1,9 @@
+// should not generate diagnostics
+{
+	"extends": ["valid_extends.biome.jsonc"],
+	"files": {
+		"includes": [
+			"!**/dist"
+		]
+	}
+}

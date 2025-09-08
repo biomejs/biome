@@ -70,13 +70,12 @@ impl Rule for NoDuplicateElseIf {
         let mut conditions_to_check: Vec<AnyJsExpression> = vec![];
         conditions_to_check.push(expr.clone());
 
-        if let Some(logical_expression) = expr.as_js_logical_expression() {
-            if let Ok(operator_token) = logical_expression.operator() {
-                if operator_token == JsLogicalOperator::LogicalAnd {
-                    conditions_to_check
-                        .append(&mut split_by_logical_operator_wrapper(operator_token, expr));
-                }
-            }
+        if let Some(logical_expression) = expr.as_js_logical_expression()
+            && let Ok(operator_token) = logical_expression.operator()
+            && operator_token == JsLogicalOperator::LogicalAnd
+        {
+            conditions_to_check
+                .append(&mut split_by_logical_operator_wrapper(operator_token, expr));
         }
 
         let mut list_to_check: Vec<Vec<Vec<AnyJsExpression>>> = conditions_to_check
@@ -155,11 +154,11 @@ fn split_by_logical_operator(
     let node = node.omit_parentheses();
     match &node {
         AnyJsExpression::JsLogicalExpression(logic_expression) => {
-            if let Ok(operator_token) = logic_expression.operator() {
-                if operator_token != operator {
-                    result.push(node);
-                    return;
-                }
+            if let Ok(operator_token) = logic_expression.operator()
+                && operator_token != operator
+            {
+                result.push(node);
+                return;
             }
             if let (Ok(left_node), Ok(right_node)) =
                 (logic_expression.left(), logic_expression.right())

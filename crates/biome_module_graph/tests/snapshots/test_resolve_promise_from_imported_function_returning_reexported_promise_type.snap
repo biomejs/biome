@@ -155,7 +155,7 @@ BindingId(1) => JsBindingData {
 ```
 Module TypeId(0) => Promise
 
-Module TypeId(1) => Module(0) TypeId(8)
+Module TypeId(1) => Module(0) TypeId(7)
 
 Module TypeId(2) => value: true
 
@@ -169,7 +169,7 @@ Module TypeId(4) => instanceof Import Symbol: PromisedResult from "/src/reexport
 Module TypeId(5) => sync Function {
   accepts: {
     params: [
-      required resolve: unknown reference (bindings: resolve:unknown reference)
+      required resolve: unknown
     ]
     type_args: []
   }
@@ -179,14 +179,6 @@ Module TypeId(5) => sync Function {
 Module TypeId(6) => instanceof Module(0) TypeId(0)
 
 Module TypeId(7) => sync Function "returnPromiseResult" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(4)
-}
-
-Module TypeId(8) => sync Function "returnPromiseResult" {
   accepts: {
     params: []
     type_args: []

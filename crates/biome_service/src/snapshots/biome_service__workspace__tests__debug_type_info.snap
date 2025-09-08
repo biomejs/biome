@@ -5,8 +5,8 @@ expression: result.unwrap()
 sync Function "foo" {
   accepts: {
     params: [
-      required name: string (bindings: name:string)
-      required age: number (bindings: age:number)
+      required name: string
+      required age: number
     ]
     type_args: []
   }

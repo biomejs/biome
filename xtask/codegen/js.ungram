@@ -389,6 +389,8 @@ JsYieldArgument =
 
 JsImportCallExpression =
 	'import'
+	'.'?
+	phase: ('source' | 'defer')?
 	arguments: JsCallArguments
 
 // new target expression
@@ -1248,8 +1250,10 @@ JsImportBareClause =
 
 // import foo from "mod"
 // import type foo from "mod"
+// import source foo from "mod"
 JsImportDefaultClause =
 	'type'?
+	phase: 'source'?
 	default_specifier: JsDefaultImportSpecifier
 	'from'
 	source: AnyJsModuleSource
@@ -1257,8 +1261,10 @@ JsImportDefaultClause =
 
 // import * as foo from "mod";
 // import type * as foo from "mod";
+// import defer * as foo from "mod";
 JsImportNamespaceClause =
 	'type'?
+	phase: 'defer'?
 	namespace_specifier: JsNamespaceImportSpecifier
 	'from'
 	source: AnyJsModuleSource

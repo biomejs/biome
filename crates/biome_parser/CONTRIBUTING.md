@@ -163,7 +163,7 @@ pub(crate) struct BetaParser<'source> {
     options: BetaParserOptions,
 }
 ```
-___
+---
 
 ## Authoring Parse Rules
 
@@ -257,9 +257,9 @@ fn parse_if_statement(p: &mut Parser) -> ParsedSyntax {
 
  p.expect(T![if]);
  p.expect(T!['(']);
- parse_any_expression(p).or_add_diagnostic(p, js_parse_errors::expeced_if_statement);
+ parse_any_expression(p).or_add_diagnostic(p, js_parse_error::expected_if_statement);
  p.expect(T![')']);
- parse_block_statement(p).or_add_diagnostic(p, js_parse_errors::expected_block_statement);
+ parse_block_statement(p).or_add_diagnostic(p, js_parse_error::expected_block_statement);
 // the else block is optional, handle the marker by using `ok`
  parse_else_clause(p).ok();
 
@@ -413,4 +413,3 @@ What if there's no `BOGUS` node matching the node of your parse rule? You must t
 * It returns `Absent` otherwise and must not progress parsing nor add any errors.
 * Lists must perform error recovery to avoid infinite loops.
 * Consult the grammar to identify the `BOGUS` node that is valid in the context of your rule.
-

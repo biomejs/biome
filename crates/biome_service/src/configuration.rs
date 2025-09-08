@@ -114,7 +114,7 @@ impl LoadedConfiguration {
     }
 
     /// It returns an iterator over the diagnostics emitted during the resolution of the configuration file
-    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
+    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter<'_> {
         ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
     }
 }
@@ -424,7 +424,7 @@ pub fn create_config(
 
     config_file
         .set_content(formatted.as_code().as_bytes())
-        .map_err(|_| WorkspaceError::cant_read_file(format!("{}", path)))?;
+        .map_err(|_| WorkspaceError::cant_read_file(format!("{path}")))?;
 
     Ok(())
 }
@@ -468,12 +468,20 @@ pub trait ConfigurationExt {
 }
 
 impl ConfigurationExt for Configuration {
-    /// Mutates the configuration so that any fields that have not been configured explicitly are
-    /// filled in with their values from configs listed in the `extends` field.
+    /// Mutates the configuration so that any fields that have not been
+    /// configured explicitly are filled in with their values from configs
+    /// listed in the `extends` field.
     ///
     /// The `extends` configs are applied from left to right.
     ///
-    /// If a configuration can't be resolved from the file system, the operation will fail.
+    /// If a configuration can't be resolved from the file system, the operation
+    /// will fail.
+    ///
+    /// `file_path` is the path to the configuration file and is used for
+    /// resolving relative paths in the `extends` field.
+    ///
+    /// `external_resolution_base_path` is used for resolving non-relative
+    /// `extends` entries.
     fn apply_extends(
         &mut self,
         fs: &dyn FsWithResolverProxy,
@@ -696,19 +704,25 @@ pub struct ProjectScanComputer<'a> {
 }
 
 impl<'a> ProjectScanComputer<'a> {
-    pub fn new(
-        configuration: &'a Configuration,
-        skip: &'a [RuleSelector],
-        only: &'a [RuleSelector],
-    ) -> Self {
+    pub fn new(configuration: &'a Configuration) -> Self {
         let enabled_rules = configuration.get_linter_rules().as_enabled_rules();
         Self {
             enabled_rules,
             requires_project_scan: false,
-            skip,
-            only,
             configuration,
+            skip: &[],
+            only: &[],
         }
+    }
+
+    pub fn with_rule_selectors(
+        mut self,
+        skip: &'a [RuleSelector],
+        only: &'a [RuleSelector],
+    ) -> Self {
+        self.skip = skip;
+        self.only = only;
+        self
     }
 
     /// Computes and return the [ScanKind] required by this project
@@ -821,7 +835,7 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ProjectScanComputer::new(&configuration).compute(),
             ScanKind::NoScanner
         );
     }
@@ -840,7 +854,7 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ProjectScanComputer::new(&configuration).compute(),
             ScanKind::Project
         );
     }
@@ -864,7 +878,7 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ProjectScanComputer::new(&configuration).compute(),
             ScanKind::Project
         );
     }
@@ -888,12 +902,12 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(
-                &configuration,
-                &[RuleSelector::Rule("correctness", "noPrivateImports")],
-                &[]
-            )
-            .compute(),
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(
+                    &[RuleSelector::Rule("correctness", "noPrivateImports")],
+                    &[]
+                )
+                .compute(),
             ScanKind::NoScanner
         );
     }
@@ -917,12 +931,12 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(
-                &configuration,
-                &[],
-                &[RuleSelector::Rule("correctness", "noPrivateImports")]
-            )
-            .compute(),
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(
+                    &[],
+                    &[RuleSelector::Rule("correctness", "noPrivateImports")]
+                )
+                .compute(),
             ScanKind::Project
         );
     }

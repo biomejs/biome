@@ -68,13 +68,13 @@ export default function Component5() {
     }
 };
 
-const Component6 = () => {
+const useHook6 = () => {
     useEffect();
 };
 
 const Component7 = () => {
     if (a == 1) {
-        Component6();
+        useHook6();
     }
 };
 
@@ -181,4 +181,12 @@ class DemoProperty {
             return useMemo(() => "string", []);
         }
     }
+}
+
+function useRecursiveHookA() {
+    useRecursiveHookB();
+}
+
+function useRecursiveHookB() {
+    useRecursiveHookA();
 }

@@ -857,3 +857,270 @@ fn overrides_grit_formatting_options() {
         result,
     ));
 }
+
+#[test]
+fn overrides_javascript_formatting_options() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "formatter": {
+                "includes": [
+                    "**/*.js"
+                ]
+            },
+            "javascript": {
+                "formatter": {
+                    "enabled": true,
+                    "arrowParentheses": "asNeeded",
+                    "attributePosition": "auto",
+                    "bracketSameLine": true,
+                    "bracketSpacing": false,
+                    "expand": "never",
+                    "indentStyle": "tab",
+                    "indentWidth": 4,
+                    "jsxQuoteStyle": "single",
+                    "lineEnding": "lf",
+                    "lineWidth": 100,
+                    "quoteProperties": "preserve",
+                    "quoteStyle": "single",
+                    "semicolons": "asNeeded",
+                    "trailingCommas": "es5"
+                }
+            },
+            "overrides": [
+                {
+                    "includes": [
+                        "overrides.js"
+                    ],
+                    "javascript": {
+                        "formatter": {
+                            "enabled": true,
+                            "arrowParentheses": "always",
+                            "attributePosition": "multiline",
+                            "bracketSameLine": false,
+                            "bracketSpacing": true,
+                            "expand": "always",
+                            "indentStyle": "space",
+                            "indentWidth": 2,
+                            "jsxQuoteStyle": "double",
+                            "lineEnding": "lf",
+                            "lineWidth": 20,
+                            "quoteProperties": "asNeeded",
+                            "quoteStyle": "double",
+                            "semicolons": "always",
+                            "trailingCommas": "all"
+                        }
+                    }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let file_contents: &str = r#"
+import React from 'react'
+
+const arrowParentheses = a => {return `${a} => ${b}`};
+
+const testObject = {'must-stay-wrapped': 'This is a test', 𐊧: 'no key quote wrap needed'}
+
+function MyComponent() {return <><div autoFocus data-attribute="test">no self closing element</div><input type='text' autoComplete='off' defaultValue='field value' /></>}
+    "#;
+
+    let base_js_fle = Utf8Path::new("base.js");
+    fs.insert(base_js_fle.into(), file_contents);
+
+    let overrides_js_file = Utf8Path::new("overrides.js");
+    fs.insert(overrides_js_file.into(), file_contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                base_js_fle.as_str(),
+                overrides_js_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_file_contents(
+        &fs,
+        base_js_fle,
+        r#"import React from 'react'
+
+const arrowParentheses = a => {
+	return `${a} => ${b}`
+}
+
+const testObject = {'must-stay-wrapped': 'This is a test', 𐊧: 'no key quote wrap needed'}
+
+function MyComponent() {
+	return (
+		<>
+			<div autoFocus data-attribute='test'>
+				no self closing element
+			</div>
+			<input type='text' autoComplete='off' defaultValue='field value' />
+		</>
+	)
+}
+"#,
+    );
+
+    assert_file_contents(
+        &fs,
+        overrides_js_file,
+        r#"import React from "react";
+
+const arrowParentheses =
+  (a) => {
+    return `${a} => ${b}`;
+  };
+
+const testObject = {
+  "must-stay-wrapped":
+    "This is a test",
+  𐊧: "no key quote wrap needed",
+};
+
+function MyComponent() {
+  return (
+    <>
+      <div
+        autoFocus
+        data-attribute="test"
+      >
+        no self
+        closing
+        element
+      </div>
+      <input
+        type="text"
+        autoComplete="off"
+        defaultValue="field value"
+      />
+    </>
+  );
+}
+"#,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "overrides_javascript_formatting_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn overrides_json_formatting_options() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "formatter": {
+                "includes": [
+                    "*.json"
+                ]
+            },
+            "json": {
+                "formatter": {
+                    "enabled": true,
+                    "bracketSpacing": true,
+                    "expand": "never",
+                    "indentStyle": "tab",
+                    "indentWidth": 4,
+                    "lineEnding": "lf",
+                    "lineWidth": 240,
+                    "trailingCommas": "none"
+                }
+            },
+            "overrides": [
+                {
+                    "includes": [
+                        "overrides.json"
+                    ],
+                    "json": {
+                        "formatter": {
+                            "enabled": true,
+                            "bracketSpacing": false,
+                            "expand": "always",
+                            "indentStyle": "space",
+                            "indentWidth": 2,
+                            "lineEnding": "lf",
+                            "lineWidth": 20,
+                            "trailingCommas": "all"
+                        }
+                    }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let file_contents: &str = r#"{"asta": ["lorem", "ipsum", {"key1":"value1 that has a way longer line width but it shouldn't break anything here", "key2":"value2"}]}"#;
+
+    let base_json_file = Utf8Path::new("base.json");
+    fs.insert(base_json_file.into(), file_contents);
+
+    let overrides_json_file = Utf8Path::new("overrides.json");
+    fs.insert(overrides_json_file.into(), file_contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                base_json_file.as_str(),
+                overrides_json_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_file_contents(
+        &fs,
+        base_json_file,
+        r#"{ "asta": ["lorem", "ipsum", { "key1": "value1 that has a way longer line width but it shouldn't break anything here", "key2": "value2" }] }
+"#,
+    );
+
+    assert_file_contents(
+        &fs,
+        overrides_json_file,
+        r#"{
+  "asta": [
+    "lorem",
+    "ipsum",
+    {
+      "key1": "value1 that has a way longer line width but it shouldn't break anything here",
+      "key2": "value2",
+    },
+  ],
+}
+"#,
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "overrides_json_formatting_options",
+        fs,
+        console,
+        result,
+    ));
+}

@@ -26,20 +26,33 @@ declare_migration! {
 /// Linter rules that have been renamed.
 /// The first element of every pair is the old name of the rule.
 #[rustfmt::skip]
-const RULE_RENAMINGS: &[(&str, RuleName)] = &[
+const RULE_RENAMING: &[(&str, RuleName)] = &[
     ("noConsoleLog", RuleName::NoConsole),
     ("noInvalidNewBuiltin", RuleName::NoInvalidBuiltinInstantiation),
     ("noMultipleSpacesInRegularExpressionLiterals", RuleName::NoAdjacentSpacesInRegex),
     ("noNewSymbol", RuleName::NoInvalidBuiltinInstantiation),
     ("noUnnecessaryContinue", RuleName::NoUselessContinue),
+    ("useNamedOperation", RuleName::UseGraphqlNamedOperations),
     ("useShorthandArrayType", RuleName::UseConsistentArrayType),
     ("useSingleCaseStatement", RuleName::NoSwitchDeclarations),
+    ("noReactPropAssign", RuleName::NoReactPropAssignments),
+    ("noGlobalDirnameFilename", RuleName::NoGlobalDirnameFilename),
+    ("noConstantBinaryExpression", RuleName::NoConstantBinaryExpressions),
+    ("noDestructuredProps", RuleName::NoSolidDestructuredProps),
+    ("noImplicitCoercion", RuleName::NoImplicitCoercions),
+    ("noUnknownAtRule", RuleName::NoUnknownAtRules),
+    ("useAdjacentGetterSetter", RuleName::UseGroupedAccessorPairs),
+    ("useConsistentObjectDefinition", RuleName::UseConsistentObjectDefinitions),
+    ("useConsistentResponse", RuleName::UseStaticResponseMethods),
+    ("useForComponent", RuleName::UseSolidForComponent),
+    ("useJsonImportAttribute", RuleName::UseJsonImportAttributes),
+    ("useUnifiedTypeSignature", RuleName::UseUnifiedTypeSignatures),
 ];
 
 /// Assist actions that have been renamed.
 /// The first element of every pair is the old name of the action.
 #[rustfmt::skip]
-const ACTION_RENAMINGS: &[(&str, ActionName)] = &[];
+const ACTION_RENAMING: &[(&str, ActionName)] = &[];
 
 impl Rule for RuleMover {
     type Query = Ast<JsonMember>;
@@ -47,7 +60,7 @@ impl Rule for RuleMover {
     type Signals = Box<[Self::State]>;
     type Options = ();
 
-    fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let member_name = node.name().and_then(|name| name.inner_string_text());
         let is_linter_rules = member_name
@@ -91,7 +104,7 @@ impl Rule for RuleMover {
                                 old_rule_name: None,
                             });
                         }
-                    } else if let Some((old_rule_name, new_rule)) = RULE_RENAMINGS
+                    } else if let Some((old_rule_name, new_rule)) = RULE_RENAMING
                         .iter()
                         .find(|(old_name, _)| old_name == &rule_name)
                         .copied()
@@ -124,7 +137,7 @@ impl Rule for RuleMover {
                                 old_rule_name: None,
                             });
                         }
-                    } else if let Some((old_rule_name, new_rule)) = ACTION_RENAMINGS
+                    } else if let Some((old_rule_name, new_rule)) = ACTION_RENAMING
                         .iter()
                         .find(|(old_name, _)| old_name == &rule_name)
                         .copied()
@@ -266,17 +279,17 @@ impl Rule for RuleMover {
             }
             let last_has_separator = new_elements.last().is_some_and(|(_, sep)| sep.is_some());
             let mut indent = Vec::new();
-            if let Some((last_node, _)) = new_elements.last() {
-                if let Some(first_token) = last_node.syntax().first_token() {
-                    indent.extend(first_token.indentation_trivia_pieces());
-                }
+            if let Some((last_node, _)) = new_elements.last()
+                && let Some(first_token) = last_node.syntax().first_token()
+            {
+                indent.extend(first_token.indentation_trivia_pieces());
             }
             // Add the new group and rule
             let mut indent = Vec::new();
-            if let Some(Ok(last_group_node)) = old_rules_list.last() {
-                if let Some(first_token) = last_group_node.syntax().first_token() {
-                    indent.extend(first_token.indentation_trivia_pieces());
-                }
+            if let Some(Ok(last_group_node)) = old_rules_list.last()
+                && let Some(first_token) = last_group_node.syntax().first_token()
+            {
+                indent.extend(first_token.indentation_trivia_pieces());
             }
             let new_group_node = make::json_member(
                 make::json_member_name(

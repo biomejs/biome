@@ -218,11 +218,11 @@ impl Write for MarkupBuf {
             Ok(())
         })?;
 
-        if let Some(last) = self.0.last_mut() {
-            if last.elements == styles {
-                last.content.push_str(content);
-                return Ok(());
-            }
+        if let Some(last) = self.0.last_mut()
+            && last.elements == styles
+        {
+            last.content.push_str(content);
+            return Ok(());
         }
 
         self.0.push(MarkupNodeBuf {
@@ -240,11 +240,11 @@ impl Write for MarkupBuf {
             Ok(())
         })?;
 
-        if let Some(last) = self.0.last_mut() {
-            if last.elements == styles {
-                last.content.push_str(&content.to_string());
-                return Ok(());
-            }
+        if let Some(last) = self.0.last_mut()
+            && last.elements == styles
+        {
+            last.content.push_str(&content.to_string());
+            return Ok(());
         }
 
         self.0.push(MarkupNodeBuf {

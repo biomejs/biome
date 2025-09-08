@@ -29,6 +29,7 @@ SyntaxElement = SyntaxElement
 YamlBogus = SyntaxElement*
 YamlBogusBlockNode = SyntaxElement*
 YamlBogusBlockMapEntry = SyntaxElement*
+YamlBogusFlowNode = SyntaxElement*
 
 // https://yaml.org/spec/1.2.2/#92-streams
 YamlRoot =
@@ -79,6 +80,7 @@ AnyYamlFlowNode =
 	YamlFlowJsonNode
 	| YamlFlowYamlNode
 	| YamlAliasNode
+	| YamlBogusFlowNode
 
 // *abc
 // https://yaml.org/spec/1.2.2/#rule-c-ns-alias-node
@@ -140,18 +142,16 @@ AnyYamlFlowMapEntry =
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-map-explicit-entry
 YamlFlowMapExplicitEntry =
 	'?'
-	entry: YamlFlowMapImplicitEntry?
+	key: AnyYamlMappingImplicitKey?
+	':'?
+	value: AnyYamlFlowNode?
 
 // a: b
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-map-implicit-entry
 YamlFlowMapImplicitEntry =
-	key: AnyYamlFlowMapImplicitKey?
-	':'
-	value: AnyYamlFlowNode
-
-AnyYamlFlowMapImplicitKey =
-	YamlFlowYamlNode
-	| YamlFlowJsonNode
+	key: AnyYamlMappingImplicitKey?
+	':'?
+	value: AnyYamlFlowNode?
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-in-block
 AnyYamlBlockInBlockNode =
@@ -194,11 +194,14 @@ AnyYamlBlockScalarContent =
 	YamlLiteralScalar
 	| YamlFoldedScalar
 
-YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
+YamlBlockSequenceEntryList = AnyYamlBlockSequenceEntry*
+
+AnyYamlBlockSequenceEntry = YamlBlockSequenceEntry
+	| YamlBogus
 
 YamlBlockSequenceEntry =
 	'-'
-	value: AnyYamlBlockIndented?
+	value: AnyYamlBlockNode?
 
 YamlBlockMapEntryList = AnyYamlBlockMapEntry*
 
@@ -212,60 +215,21 @@ AnyYamlBlockMapEntry =
 // : 10
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-entry
 YamlBlockMapExplicitEntry =
-	key: YamlBlockMapExplicitKey
-	value: YamlBlockMapExplicitValue?
-
-// ? y
-// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
-YamlBlockMapExplicitKey =
 	'?'
-	key: AnyYamlBlockIndented?
-
-// : 10
-// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
-YamlBlockMapExplicitValue =
-	':'
-	value: AnyYamlBlockIndented?
-
-// https://yaml.org/spec/1.2.2/#rule-s-l+block-indented
-// In the specification, this node can be completely empty.
-// Instead of modeling an empty node, we can just make this node optional
-// wherever we refer it.
-AnyYamlBlockIndented =
-	YamlCompactSequence
-	| YamlCompactMapping
-	| AnyYamlBlockNode
-
-// a: - b <-
-//    - c <-
-//    - d <-
-//    ^^^
-// https://yaml.org/spec/1.2.2/#rule-ns-l-compact-sequence
-YamlCompactSequence =
-	entries: YamlBlockSequenceEntryList
-
-// a: b: x <-
-//    c: y <-
-//    d: z <-
-//    ^^^
-// https://yaml.org/spec/1.2.2/#rule-ns-l-compact-mapping
-YamlCompactMapping =
-	entries: YamlBlockMapEntryList
+	key: AnyYamlBlockNode?
+	':'?
+	value: AnyYamlBlockNode?
 
 // https://yaml.org/spec/1.2.2/#rule-ns-l-block-map-implicit-entry
 YamlBlockMapImplicitEntry =
-	key: AnyYamlBlockMapImplicitKey?
-	value: YamlBlockMapImplicitValue
-
-// https://yaml.org/spec/1.2.2/#rule-ns-s-block-map-implicit-key
-AnyYamlBlockMapImplicitKey =
-	YamlFlowJsonNode
-	| YamlFlowYamlNode
-
-// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-implicit-value
-YamlBlockMapImplicitValue =
+	key: AnyYamlMappingImplicitKey?
 	':'
 	value: AnyYamlBlockNode?
+
+// https://yaml.org/spec/1.2.2/#rule-ns-s-block-map-implicit-key
+AnyYamlMappingImplicitKey =
+	YamlFlowJsonNode
+	| YamlFlowYamlNode
 
 // https://yaml.org/spec/1.2.2/#rule-c-ns-properties
 AnyYamlPropertiesCombination =

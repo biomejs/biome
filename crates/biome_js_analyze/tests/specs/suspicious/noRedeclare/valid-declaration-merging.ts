@@ -30,10 +30,10 @@ export function Organization(name: string): Organization {
 }
 
 // Interface merging
-export interface Splitted {
+export interface Split {
 	f(): void;
 }
-export interface Splitted {
+export interface Split {
 	g(): void;
 }
 

@@ -30,7 +30,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssPseudoClassFunctionIdentifier {
-                                name_token: DIR_KW@1..4 "dir" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@1..4 "dir" [] [],
+                                },
                                 l_paren_token: L_PAREN@4..5 "(" [] [],
                                 ident: CssIdentifier {
                                     value_token: IDENT@5..8 "ltr" [] [],
@@ -56,7 +58,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@12..14 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionIdentifier {
-                                name_token: DIR_KW@14..17 "dir" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@14..17 "dir" [] [],
+                                },
                                 l_paren_token: L_PAREN@17..21 "(" [] [Whitespace("   ")],
                                 ident: CssIdentifier {
                                     value_token: IDENT@21..27 "ltr" [] [Whitespace("   ")],
@@ -82,7 +86,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@31..33 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionIdentifier {
-                                name_token: DIR_KW@33..36 "dir" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@33..36 "dir" [] [],
+                                },
                                 l_paren_token: L_PAREN@36..37 "(" [] [],
                                 ident: CssIdentifier {
                                     value_token: IDENT@37..40 "rtl" [] [],
@@ -108,7 +114,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@44..46 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionIdentifier {
-                                name_token: DIR_KW@46..49 "dir" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@46..49 "dir" [] [],
+                                },
                                 l_paren_token: L_PAREN@49..53 "(" [] [Whitespace("   ")],
                                 ident: CssIdentifier {
                                     value_token: IDENT@53..59 "rtl" [] [Whitespace("   ")],
@@ -134,7 +142,9 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@63..65 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionIdentifier {
-                                name_token: DIR_KW@65..68 "dir" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@65..68 "dir" [] [],
+                                },
                                 l_paren_token: L_PAREN@68..72 "(" [] [Whitespace("   ")],
                                 ident: CssIdentifier {
                                     value_token: IDENT@72..78 "RTL" [] [Whitespace("   ")],
@@ -161,7 +171,9 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@82..84 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionIdentifier {
-                                    name_token: DIR_KW@84..87 "dir" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@84..87 "dir" [] [],
+                                    },
                                     l_paren_token: L_PAREN@87..88 "(" [] [],
                                     ident: CssIdentifier {
                                         value_token: IDENT@88..91 "ltr" [] [],
@@ -212,7 +224,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..10
               0: COLON@0..1 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER@1..10
-                0: DIR_KW@1..4 "dir" [] []
+                0: CSS_IDENTIFIER@1..4
+                  0: IDENT@1..4 "dir" [] []
                 1: L_PAREN@4..5 "(" [] []
                 2: CSS_IDENTIFIER@5..8
                   0: IDENT@5..8 "ltr" [] []
@@ -230,7 +243,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@12..29
               0: COLON@12..14 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER@14..29
-                0: DIR_KW@14..17 "dir" [] []
+                0: CSS_IDENTIFIER@14..17
+                  0: IDENT@14..17 "dir" [] []
                 1: L_PAREN@17..21 "(" [] [Whitespace("   ")]
                 2: CSS_IDENTIFIER@21..27
                   0: IDENT@21..27 "ltr" [] [Whitespace("   ")]
@@ -248,7 +262,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@31..42
               0: COLON@31..33 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER@33..42
-                0: DIR_KW@33..36 "dir" [] []
+                0: CSS_IDENTIFIER@33..36
+                  0: IDENT@33..36 "dir" [] []
                 1: L_PAREN@36..37 "(" [] []
                 2: CSS_IDENTIFIER@37..40
                   0: IDENT@37..40 "rtl" [] []
@@ -266,7 +281,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@44..61
               0: COLON@44..46 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER@46..61
-                0: DIR_KW@46..49 "dir" [] []
+                0: CSS_IDENTIFIER@46..49
+                  0: IDENT@46..49 "dir" [] []
                 1: L_PAREN@49..53 "(" [] [Whitespace("   ")]
                 2: CSS_IDENTIFIER@53..59
                   0: IDENT@53..59 "rtl" [] [Whitespace("   ")]
@@ -284,7 +300,8 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@63..80
               0: COLON@63..65 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER@65..80
-                0: DIR_KW@65..68 "dir" [] []
+                0: CSS_IDENTIFIER@65..68
+                  0: IDENT@65..68 "dir" [] []
                 1: L_PAREN@68..72 "(" [] [Whitespace("   ")]
                 2: CSS_IDENTIFIER@72..78
                   0: IDENT@72..78 "RTL" [] [Whitespace("   ")]
@@ -303,7 +320,8 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@82..92
                 0: COLON@82..84 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER@84..92
-                  0: DIR_KW@84..87 "dir" [] []
+                  0: CSS_IDENTIFIER@84..87
+                    0: IDENT@84..87 "dir" [] []
                   1: L_PAREN@87..88 "(" [] []
                   2: CSS_IDENTIFIER@88..91
                     0: IDENT@88..91 "ltr" [] []

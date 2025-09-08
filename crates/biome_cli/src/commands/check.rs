@@ -86,6 +86,13 @@ impl CommandRunner for CheckCommandPayload {
                 // configuration.
                 linter.rules = None;
             }
+            if let Some(assist) = conf.assist.as_mut() {
+                // Don't overwrite actions from the CLI configuration.
+                // Otherwise, actions that are disabled in the config file might
+                // become re-enabled due to the defaults included in the CLI
+                // configuration.
+                assist.actions = None
+            }
             configuration.merge_with(conf);
         }
 

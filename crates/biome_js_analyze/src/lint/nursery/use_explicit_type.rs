@@ -363,7 +363,7 @@ pub enum ViolationKind {
 }
 
 impl ViolationKind {
-    fn as_message(&self) -> Markup {
+    fn as_message(&self) -> Markup<'_> {
         match self {
             Self::UntypedParameter => markup! {
                 "The parameter doesn't have a type defined."
@@ -386,7 +386,7 @@ impl ViolationKind {
         }
     }
 
-    fn as_advice(&self) -> Markup {
+    fn as_advice(&self) -> Markup<'_> {
         match self {
             Self::UntypedParameter => markup! {
                 "Add a type to the parameter."
@@ -663,10 +663,10 @@ fn can_inline_function(func: &AnyJsFunction) -> bool {
     };
 
     for ancestor in object_expression.syntax().ancestors() {
-        if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor) {
-            if declarator.variable_annotation().is_some() {
-                return true;
-            }
+        if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor)
+            && declarator.variable_annotation().is_some()
+        {
+            return true;
         }
 
         if JsCallExpression::can_cast(ancestor.kind()) {
@@ -707,16 +707,16 @@ fn is_function_inside_typed_return(func: &AnyJsFunction) -> bool {
     };
 
     for ancestor in return_statement.syntax().ancestors() {
-        if let Some(function_declaration) = JsFunctionDeclaration::cast_ref(&ancestor) {
-            if function_declaration.return_type_annotation().is_some() {
-                return true;
-            }
+        if let Some(function_declaration) = JsFunctionDeclaration::cast_ref(&ancestor)
+            && function_declaration.return_type_annotation().is_some()
+        {
+            return true;
         }
 
-        if let Some(function_expression) = JsArrowFunctionExpression::cast_ref(&ancestor) {
-            if function_expression.return_type_annotation().is_some() {
-                return true;
-            }
+        if let Some(function_expression) = JsArrowFunctionExpression::cast_ref(&ancestor)
+            && function_expression.return_type_annotation().is_some()
+        {
+            return true;
         }
     }
 

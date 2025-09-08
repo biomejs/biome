@@ -7,8 +7,9 @@ mod trivia;
 use crate::{AstNode, RawSyntaxKind};
 pub use element::{SyntaxElement, SyntaxElementKey};
 pub use node::{
-    EmbeddedSendNode, Preorder, PreorderWithTokens, SendNode, SyntaxElementChildren, SyntaxNode,
-    SyntaxNodeChildren, SyntaxNodeOptionExt, SyntaxNodeWithOffset, SyntaxSlot, SyntaxSlots,
+    AnySyntaxNode, EmbeddedSendNode, Preorder, PreorderWithTokens, SendNode, SyntaxElementChildren,
+    SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt, SyntaxNodeWithOffset, SyntaxSlot,
+    SyntaxSlots,
 };
 pub use rewriter::{SyntaxRewriter, VisitNodeSignal};
 use std::fmt;
@@ -50,6 +51,11 @@ pub trait SyntaxKind: fmt::Debug + PartialEq + Copy {
     /// Returns a string for keywords, punctuation tokens, and the `EOL` token,
     /// or `None` otherwise.
     fn to_string(&self) -> Option<&'static str>;
+
+    /// Returns `true` if this kind is allowed to precede file suppression comments,
+    fn is_allowed_before_suppressions(&self) -> bool {
+        false
+    }
 }
 
 pub trait Language: Sized + Clone + Copy + fmt::Debug + Eq + Ord + std::hash::Hash {

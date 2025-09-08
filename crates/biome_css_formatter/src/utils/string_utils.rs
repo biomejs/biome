@@ -10,7 +10,6 @@ use biome_formatter::token::string::normalize_string;
 use biome_formatter::{
     Format, FormatResult,
     prelude::{dynamic_text, write},
-    trivia::format_replaced,
 };
 use biome_rowan::SyntaxToken;
 use biome_string_case::StrLikeExtension;
@@ -45,7 +44,7 @@ impl Format<CssFormatContext> for FormatTokenAsLowercase {
 
 #[derive(Eq, PartialEq, Debug)]
 pub(crate) enum StringLiteralParentKind {
-    /// Variants to track tokens that are inside a CssCharasetRule
+    /// Variants to track tokens that are inside a CssCharsetRule
     /// @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding
     CharsetAtRule,
     /// other types, will add more later
@@ -72,7 +71,7 @@ impl<'token> FormatLiteralStringToken<'token> {
         self.token
     }
 
-    pub fn clean_text(&self, options: &CssFormatOptions) -> CleanedStringLiteralText {
+    pub fn clean_text(&self, options: &CssFormatOptions) -> CleanedStringLiteralText<'_> {
         let token = self.token();
         debug_assert!(
             matches!(

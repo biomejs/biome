@@ -1,6 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
-use crate::commands::scan_kind::get_forced_scan_kind;
+use crate::commands::scan_kind::derive_best_scan_kind;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -31,11 +31,13 @@ use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
 use biome_resolver::FsWithResolverProxy;
-use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
+use biome_service::configuration::{
+    LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
+};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FixFileMode, OpenProjectParams, ScanKind, ScanProjectFolderParams, UpdateSettingsParams,
+    FixFileMode, OpenProjectParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
 use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
@@ -687,9 +689,11 @@ pub(crate) fn print_diagnostics_from_workspace_result(
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {
     let mut has_errors = false;
+    let mut has_internal = false;
     for diagnostic in diagnostics {
-        if diagnostic.severity() >= Severity::Error {
-            has_errors = true;
+        has_errors = has_errors || diagnostic.severity() >= Severity::Error;
+        has_internal = has_internal || diagnostic.tags().is_internal();
+        if has_internal || has_errors {
             if diagnostic.tags().is_verbose() && verbose {
                 console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
             } else {
@@ -719,16 +723,28 @@ fn get_files_to_process_with_cli_options(
 ) -> Result<Option<Vec<OsString>>, CliDiagnostic> {
     if since.is_some() {
         if !changed {
-            return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--since",
+                "--changed",
+                "In order to use --since, you must also use --changed.",
+            ));
         }
         if staged {
-            return Err(CliDiagnostic::incompatible_arguments("since", "staged"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--since",
+                "--staged",
+                "--staged selects files that you have staged in version control. --since can't be used in this context.",
+            ));
         }
     }
 
     if changed {
         if staged {
-            return Err(CliDiagnostic::incompatible_arguments("changed", "staged"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--changed",
+                "--staged",
+                "--staged selects files that you have staged in version control. --changed selects files that have been committed since your default branch. You must either use --changed or --staged, but not both.",
+            ));
         }
         Ok(Some(get_changed_files(fs, configuration, since)?))
     } else if staged {
@@ -787,14 +803,23 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         ..
     } = options;
     if write && fix {
-        return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
+        return Err(CliDiagnostic::incompatible_arguments(
+            "--write",
+            "--fix",
+            "These arguments do the same thing, but --fix is deprecated. Prefer to use --write.",
+        ));
     } else if suppress && write {
         return Err(CliDiagnostic::incompatible_arguments(
             "--suppress",
             "--write",
+            "--write is used to write fixes, and --suppress is used to suppress diagnostics. Remove one of these arguments depending on what you want to do.",
         ));
     } else if suppress && fix {
-        return Err(CliDiagnostic::incompatible_arguments("--suppress", "--fix"));
+        return Err(CliDiagnostic::incompatible_arguments(
+            "--suppress",
+            "--fix",
+            "--fix is used to write fixes, and --suppress is used to suppress diagnostics. Remove one of these arguments depending on what you want to do. Also, --fix is deprecated. Prefer to use --write.",
+        ));
     } else if !suppress && suppression_reason.is_some() {
         return Err(CliDiagnostic::unexpected_argument(
             "--reason",
@@ -861,6 +886,7 @@ pub(crate) trait CommandRunner: Sized {
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
     ) -> Result<ConfiguredWorkspace, CliDiagnostic> {
+        // Load configuration
         let configuration_path_hint = cli_options.as_configuration_path_hint();
         let loaded_configuration = load_configuration(fs, configuration_path_hint)?;
         if self.should_validate_configuration_diagnostics() {
@@ -876,6 +902,8 @@ pub(crate) trait CommandRunner: Sized {
             loaded_configuration.diagnostics.len(),
         );
         let configuration_dir_path = loaded_configuration.directory_path.clone();
+
+        // Merge the FS configuration with the CLI arguments
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
 
         let execution = self.get_execution(cli_options, console, workspace)?;
@@ -897,39 +925,41 @@ pub(crate) trait CommandRunner: Sized {
         let paths = self.get_files_to_process(fs, &configuration)?;
         let paths = validated_paths_for_execution(paths, &execution, &working_dir)?;
 
-        let params = if let TraversalMode::Lint { only, skip, .. } = execution.traversal_mode() {
-            OpenProjectParams {
-                path: BiomePath::new(project_dir),
-                open_uninitialized: true,
-                only_rules: Some(only.clone()),
-                skip_rules: Some(skip.clone()),
-            }
-        } else {
-            OpenProjectParams {
-                path: BiomePath::new(project_dir),
-                open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
-            }
-        };
+        // Open the project
+        let open_project_result = workspace.open_project(OpenProjectParams {
+            path: BiomePath::new(project_dir),
+            open_uninitialized: true,
+        })?;
 
-        let open_project_result = workspace.open_project(params)?;
+        let scan_kind_computer =
+            if let TraversalMode::Lint { only, skip, .. } = execution.traversal_mode() {
+                ProjectScanComputer::new(&configuration).with_rule_selectors(skip, only)
+            } else {
+                ProjectScanComputer::new(&configuration)
+            };
+        let scan_kind = derive_best_scan_kind(
+            scan_kind_computer.compute(),
+            &execution,
+            &root_configuration_dir,
+            &working_dir,
+            &configuration,
+        );
 
-        let scan_kind = get_forced_scan_kind(&execution, &root_configuration_dir, &working_dir)
-            .unwrap_or({
-                if open_project_result.scan_kind == ScanKind::NoScanner {
-                    // If we're here, it means we're executing `check`, `lint` or `ci`
-                    // and the linter is disabled or no projects rules have been enabled.
-                    // We scan known files if the configuration is a root or if the VCS integration is enabled
-                    if configuration.is_root() || configuration.use_ignore_file() {
-                        ScanKind::KnownFiles
-                    } else {
-                        ScanKind::NoScanner
-                    }
-                } else {
-                    open_project_result.scan_kind
-                }
-            });
+        // Update the settings of the project
+        let result = workspace.update_settings(UpdateSettingsParams {
+            project_key: open_project_result.project_key,
+            workspace_directory: Some(BiomePath::new(project_dir)),
+            configuration,
+        })?;
+        if self.should_validate_configuration_diagnostics() {
+            print_diagnostics_from_workspace_result(
+                result.diagnostics.as_slice(),
+                console,
+                cli_options.verbose,
+            )?;
+        }
+
+        // Scan the project
         let scan_kind = match (scan_kind, execution.traversal_mode()) {
             (scan_kind, TraversalMode::Migrate { .. }) => scan_kind,
             (ScanKind::KnownFiles, _) => {
@@ -944,26 +974,12 @@ pub(crate) trait CommandRunner: Sized {
             }
             (scan_kind, _) => scan_kind,
         };
-
-        let result = workspace.update_settings(UpdateSettingsParams {
+        let result = workspace.scan_project(ScanProjectParams {
             project_key: open_project_result.project_key,
-            workspace_directory: Some(BiomePath::new(project_dir)),
-            configuration,
-        })?;
-        if self.should_validate_configuration_diagnostics() {
-            print_diagnostics_from_workspace_result(
-                result.diagnostics.as_slice(),
-                console,
-                cli_options.verbose,
-            )?;
-        }
-
-        let result = workspace.scan_project_folder(ScanProjectFolderParams {
-            project_key: open_project_result.project_key,
-            path: None,
             watch: cli_options.use_server,
             force: false, // TODO: Maybe we'll want a CLI flag for this.
             scan_kind,
+            verbose: cli_options.verbose,
         })?;
 
         if self.should_validate_configuration_diagnostics() {

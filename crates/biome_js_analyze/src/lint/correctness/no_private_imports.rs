@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
 };
 use biome_jsdoc_comment::JsdocComment;
-use biome_module_graph::{JsModuleInfo, ModuleGraph, ResolvedPath};
+use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph};
 use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
 use biome_rule_options::no_private_imports::{NoPrivateImportsOptions, Visibility};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -180,7 +180,7 @@ impl Rule for NoPrivateImports {
             .then(|| node.inner_string_text())
             .flatten()
             .and_then(|specifier| module_info.static_import_paths.get(specifier.text()))
-            .and_then(ResolvedPath::as_path)
+            .and_then(JsImportPath::as_path)
             .filter(|path| !BiomePath::new(path).is_dependency())
         else {
             return Vec::new();
@@ -281,7 +281,7 @@ fn get_restricted_imports_from_module_source(
     let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
         Some(AnyJsImportClause::JsImportCombinedClause(node)) => {
             let range = node.default_specifier()?.range();
-            get_restricted_import_visibility(&Text::Static("default"), options)
+            get_restricted_import_visibility(&Text::new_static("default"), options)
                 .map(|visibility| NoPrivateImportsState {
                     range,
                     path: path.clone(),
@@ -298,7 +298,7 @@ fn get_restricted_imports_from_module_source(
                         .filter_map(get_named_specifier_import_name)
                         .filter_map(|name| {
                             get_restricted_import_visibility(
-                                &Text::Borrowed(name.token_text_trimmed()),
+                                &Text::from(name.token_text_trimmed()),
                                 options,
                             )
                             .map(|visibility| NoPrivateImportsState {
@@ -312,7 +312,7 @@ fn get_restricted_imports_from_module_source(
         }
         Some(AnyJsImportClause::JsImportDefaultClause(node)) => {
             let range = node.default_specifier()?.range();
-            get_restricted_import_visibility(&Text::Static("default"), options)
+            get_restricted_import_visibility(&Text::new_static("default"), options)
                 .map(|visibility| NoPrivateImportsState {
                     range,
                     path,
@@ -328,15 +328,12 @@ fn get_restricted_imports_from_module_source(
             .flatten()
             .filter_map(get_named_specifier_import_name)
             .filter_map(|name| {
-                get_restricted_import_visibility(
-                    &Text::Borrowed(name.token_text_trimmed()),
-                    options,
-                )
-                .map(|visibility| NoPrivateImportsState {
-                    range: name.text_trimmed_range(),
-                    path: path.clone(),
-                    visibility,
-                })
+                get_restricted_import_visibility(&Text::from(name.token_text_trimmed()), options)
+                    .map(|visibility| NoPrivateImportsState {
+                        range: name.text_trimmed_range(),
+                        path: path.clone(),
+                        visibility,
+                    })
             })
             .collect(),
         Some(

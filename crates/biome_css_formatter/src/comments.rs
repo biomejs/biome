@@ -144,10 +144,10 @@ fn handle_function_comment(
 fn handle_complex_selector_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    if let Some(complex) = CssComplexSelector::cast_ref(comment.enclosing_node()) {
-        if let Ok(right) = complex.right() {
-            return CommentPlacement::leading(right.into_syntax(), comment);
-        }
+    if let Some(complex) = CssComplexSelector::cast_ref(comment.enclosing_node())
+        && let Ok(right) = complex.right()
+    {
+        return CommentPlacement::leading(right.into_syntax(), comment);
     }
     CommentPlacement::Default(comment)
 }

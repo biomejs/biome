@@ -47,7 +47,7 @@ GritRoot {
 ```
 incorrect_string_prefix.grit:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unxpected string prefix
+  × Unexpected string prefix
   
   > 1 │ unknown"console.log()"
       │ ^^^^^^^

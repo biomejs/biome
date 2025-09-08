@@ -195,42 +195,42 @@ impl Settings {
     }
 
     /// Returns linter rules taking overrides into account.
-    pub fn as_linter_rules(&self, path: &Utf8Path) -> Option<Cow<Rules>> {
+    pub fn as_linter_rules(&self, path: &Utf8Path) -> Option<Cow<'_, Rules>> {
         let mut result = self.linter.rules.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.rules.as_ref();
-            if let Some(pattern_rules) = pattern_rules {
-                if pattern.is_file_included(path) {
-                    result = if let Some(mut result) = result.take() {
-                        // Override rules
-                        result.to_mut().merge_with(pattern_rules.clone());
-                        Some(result)
-                    } else {
-                        Some(Cow::Borrowed(pattern_rules))
-                    };
-                }
+            if let Some(pattern_rules) = pattern_rules
+                && pattern.is_file_included(path)
+            {
+                result = if let Some(mut result) = result.take() {
+                    // Override rules
+                    result.to_mut().merge_with(pattern_rules.clone());
+                    Some(result)
+                } else {
+                    Some(Cow::Borrowed(pattern_rules))
+                };
             }
         }
         result
     }
 
     /// Extract the domains applied to the given `path`, by looking that the base `domains`, and the once applied by `overrides`
-    pub fn as_linter_domains(&self, path: &Utf8Path) -> Option<Cow<RuleDomains>> {
+    pub fn as_linter_domains(&self, path: &Utf8Path) -> Option<Cow<'_, RuleDomains>> {
         let mut result = self.linter.domains.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.domains.as_ref();
-            if let Some(pattern_rules) = pattern_rules {
-                if pattern.is_file_included(path) {
-                    result = if let Some(mut result) = result.take() {
-                        // Override rules
-                        result.to_mut().merge_with(pattern_rules.clone());
-                        Some(result)
-                    } else {
-                        Some(Cow::Borrowed(pattern_rules))
-                    };
-                }
+            if let Some(pattern_rules) = pattern_rules
+                && pattern.is_file_included(path)
+            {
+                result = if let Some(mut result) = result.take() {
+                    // Override rules
+                    result.to_mut().merge_with(pattern_rules.clone());
+                    Some(result)
+                } else {
+                    Some(Cow::Borrowed(pattern_rules))
+                };
             }
         }
 
@@ -238,28 +238,28 @@ impl Settings {
     }
 
     /// Returns assists rules taking overrides into account.
-    pub fn as_assist_actions(&self, path: &Utf8Path) -> Option<Cow<Actions>> {
+    pub fn as_assist_actions(&self, path: &Utf8Path) -> Option<Cow<'_, Actions>> {
         let mut result = self.assist.actions.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.assist.actions.as_ref();
-            if let Some(pattern_rules) = pattern_rules {
-                if pattern.is_file_included(path) {
-                    result = if let Some(mut result) = result.take() {
-                        // Override rules
-                        result.to_mut().merge_with(pattern_rules.clone());
-                        Some(result)
-                    } else {
-                        Some(Cow::Borrowed(pattern_rules))
-                    };
-                }
+            if let Some(pattern_rules) = pattern_rules
+                && pattern.is_file_included(path)
+            {
+                result = if let Some(mut result) = result.take() {
+                    // Override rules
+                    result.to_mut().merge_with(pattern_rules.clone());
+                    Some(result)
+                } else {
+                    Some(Cow::Borrowed(pattern_rules))
+                };
             }
         }
         result
     }
 
     /// Returns the plugins that should be enabled for the given `path`, taking overrides into account.
-    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<Plugins> {
+    pub fn get_plugins_for_path(&self, path: &Utf8Path) -> Cow<'_, Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         for pattern in &self.override_settings.patterns {
@@ -272,7 +272,7 @@ impl Settings {
     }
 
     /// Return all plugins configured in setting
-    pub fn as_all_plugins(&self) -> Cow<Plugins> {
+    pub fn as_all_plugins(&self) -> Cow<'_, Plugins> {
         let mut result = Cow::Borrowed(&self.plugins);
 
         let all_override_plugins = self
@@ -311,6 +311,8 @@ impl Settings {
 
     /// Returns whether the given `path` is ignored for the given `feature`,
     /// based on the current settings.
+    ///
+    /// `path` is expected to point to a file and not a directory.
     #[inline]
     pub fn is_path_ignored_for_feature(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
         let feature_includes_files = match feature {
@@ -321,7 +323,11 @@ impl Settings {
             FeatureKind::Debug => return false,
         };
 
-        !feature_includes_files.is_included(path)
+        if is_dir(path) {
+            !feature_includes_files.is_dir_included(path)
+        } else {
+            !feature_includes_files.is_file_included(path)
+        }
     }
 }
 
@@ -600,6 +606,10 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
             language_setting.formatter = formatter.into();
         }
 
+        if let Some(parser) = html.parser {
+            language_setting.parser = parser.into();
+        }
+
         // NOTE: uncomment once ready
         // if let Some(linter) = html.linter {
         //     language_setting.linter = linter.into();
@@ -724,12 +734,11 @@ impl VcsSettings {
 
     /// Returns whether the given `path` should be ignored per the VCS settings.
     #[inline]
-    pub fn is_ignored(&self, path: &Utf8Path) -> bool {
+    pub fn is_ignored(&self, path: &Utf8Path, root_path: Option<&Utf8Path>) -> bool {
         self.should_use_ignore_file()
-            && self
-                .ignore_matches
-                .as_ref()
-                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
+            && self.ignore_matches.as_ref().is_some_and(|ignored_matches| {
+                ignored_matches.is_ignored(path, is_dir(path), root_path)
+            })
     }
 
     #[inline]
@@ -754,8 +763,28 @@ impl VcsSettings {
         })
     }
 
-    /// Stores the contents found in the ignore file.
-    pub fn store_ignore_patterns(
+    /// Stores the patterns of the root ignore file
+    pub fn store_root_ignore_patterns(
+        &mut self,
+        path: &Utf8Path,
+        patterns: &[&str],
+    ) -> Result<(), WorkspaceError> {
+        match self.client_kind {
+            Some(VcsClientKind::Git) => {
+                let git_ignore = VcsIgnoredPatterns::git_ignore(path, patterns)?;
+                self.ignore_matches = Some(VcsIgnoredPatterns::Git {
+                    root: git_ignore,
+                    nested: vec![],
+                });
+            }
+            None => {}
+        };
+
+        Ok(())
+    }
+
+    /// Stores a list of patterns inside as a nested ignore file
+    pub fn store_nested_ignore_patterns(
         &mut self,
         path: &Utf8Path,
         patterns: &[&str],
@@ -765,11 +794,6 @@ impl VcsSettings {
                 let git_ignore = VcsIgnoredPatterns::git_ignore(path, patterns)?;
                 if let Some(ignore_matches) = self.ignore_matches.as_mut() {
                     ignore_matches.insert_git_match(git_ignore);
-                } else {
-                    self.ignore_matches = Some(VcsIgnoredPatterns::Git {
-                        root: git_ignore,
-                        nested: vec![],
-                    });
                 }
             }
             None => {}
@@ -782,33 +806,76 @@ impl VcsSettings {
 #[derive(Clone, Debug)]
 pub enum VcsIgnoredPatterns {
     Git {
-        // Represents the `.gitignore` file at the root of the project
+        /// Represents the `.gitignore` file at the root of the project
         root: Gitignore,
-        // The list of nested `.gitignore` files found inside the project
+        /// The list of nested `.gitignore` files found inside the project
         nested: Vec<Gitignore>,
     },
 }
 
 impl VcsIgnoredPatterns {
-    pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
+    /// Checks whether the path ignored by any ignore file found inside the project
+    ///
+    /// The `root_path` represents the root of the project, as we want to match all ignore files untile the root.
+    pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool, root_path: Option<&Utf8Path>) -> bool {
         match self {
-            Self::Git { root, nested } => {
-                root.matched(path, is_dir).is_ignore()
-                    || nested.iter().any(|gitignore| {
-                        let ignore_directory = if gitignore.path().is_file() {
-                            // SAFETY: if it's a file, it always has a parent
-                            gitignore.path().parent().unwrap()
-                        } else {
-                            gitignore.path()
-                        };
-                        if let Ok(stripped_path) = path.strip_prefix(ignore_directory) {
-                            gitignore.matched(stripped_path, is_dir).is_ignore()
-                        } else {
-                            false
+            Self::Git { root, nested, .. } => {
+                match root_path {
+                    None => Self::is_git_ignore(root, nested.as_slice(), path, is_dir),
+                    Some(root_path) => {
+                        // NOTE: this could be a bug of the library, need to explore. Let's assume it isn't
+                        // When crawling the file system with the CLI, we correctly exclude ignored folders
+                        // such as `dist/` or `build/`, in case the path to match is `/Users/foo/project/dist`
+                        //
+                        // However, the LSP sends absolute file paths, e.g. `/Users/foo/project/dist/a.min.js`,
+                        // and they **don't** match globs such as `dist/`.
+                        // To work around this limitation, we crawl upwards the parents of the path, until
+                        // we arrive at the `root_path`.
+                        let mut current_path = path;
+                        loop {
+                            if current_path == root_path {
+                                break false;
+                            }
+                            if Self::is_git_ignore(
+                                root,
+                                nested.as_slice(),
+                                current_path,
+                                current_path.is_dir(),
+                            ) {
+                                break true;
+                            }
+                            if let Some(parent) = current_path.parent() {
+                                current_path = parent;
+                            } else {
+                                break false;
+                            }
                         }
-                    })
+                    }
+                }
             }
         }
+    }
+
+    fn is_git_ignore(
+        root: &Gitignore,
+        nested: &[Gitignore],
+        path: &Utf8Path,
+        is_dir: bool,
+    ) -> bool {
+        let root_ignored = {
+            let path = path.strip_prefix(root.path()).unwrap_or(path);
+            root.matched(path, is_dir).is_ignore()
+        };
+
+        let nested_ignored = nested.iter().any(|gitignore| {
+            if let Ok(stripped_path) = path.strip_prefix(gitignore.path()) {
+                gitignore.matched(stripped_path, is_dir).is_ignore()
+            } else {
+                false
+            }
+        });
+
+        root_ignored || nested_ignored
     }
 
     pub fn insert_git_match(&mut self, git_ignore: Gitignore) {
@@ -872,15 +939,22 @@ impl Includes {
         current_globs.extend(globs.into());
     }
 
-    /// Returns whether the given `path` is included.
+    /// Returns whether the given `file_path` is included.
+    ///
+    /// `file_path` must point to an ordinary file. If it is a directory, you
+    /// should use [Self::is_dir_included()] instead.
     #[inline]
-    pub fn is_included(&self, path: &Utf8Path) -> bool {
-        self.is_unset()
-            || if is_dir(path) {
-                self.matches_directory_with_exceptions(path)
-            } else {
-                self.matches_with_exceptions(path)
-            }
+    pub fn is_file_included(&self, file_path: &Utf8Path) -> bool {
+        self.is_unset() || self.matches_with_exceptions(file_path)
+    }
+
+    /// Returns whether the given `dir_path` is included.
+    ///
+    /// `file_path` must point to a directory. If it is a file, you should use
+    /// [Self::is_file_included()] instead.
+    #[inline]
+    pub fn is_dir_included(&self, dir_path: &Utf8Path) -> bool {
+        self.is_unset() || self.matches_directory_with_exceptions(dir_path)
     }
 
     /// Returns `true` is no globs are set.
@@ -1054,10 +1128,10 @@ impl Settings {
             .iter()
             .rev()
             .find_map(|pattern| {
-                if let Some(enabled) = pattern.formatter.format_with_errors {
-                    if pattern.is_file_included(path) {
-                        return Some(enabled);
-                    }
+                if let Some(enabled) = pattern.formatter.format_with_errors
+                    && pattern.is_file_included(path)
+                {
+                    return Some(enabled);
                 }
                 None
             })
@@ -1356,11 +1430,17 @@ impl OverrideSettingPattern {
         if let Some(bracket_same_line) = js_formatter.bracket_same_line {
             options.set_bracket_same_line(bracket_same_line);
         }
+        if let Some(expand) = js_formatter.expand.or(formatter.expand) {
+            options.set_expand(expand);
+        }
         if let Some(attribute_position) = js_formatter
             .attribute_position
             .or(formatter.attribute_position)
         {
             options.set_attribute_position(attribute_position);
+        }
+        if let Some(operator_line_break) = js_formatter.operator_linebreak {
+            options.set_operator_linebreak(operator_line_break);
         }
     }
 
@@ -1383,8 +1463,12 @@ impl OverrideSettingPattern {
         if let Some(trailing_commas) = json_formatter.trailing_commas {
             options.set_trailing_commas(trailing_commas);
         }
-        if let Some(expand_lists) = json_formatter.expand {
+        if let Some(expand_lists) = json_formatter.expand.or(formatter.expand) {
             options.set_expand(expand_lists);
+        }
+        if let Some(bracket_spacing) = json_formatter.bracket_spacing.or(formatter.bracket_spacing)
+        {
+            options.set_bracket_spacing(bracket_spacing);
         }
     }
 

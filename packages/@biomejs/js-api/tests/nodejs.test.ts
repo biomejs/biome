@@ -23,7 +23,7 @@ describe("Biome for Node.js", () => {
 		expect(result.diagnostics).toEqual([]);
 	});
 
-	it("should emit diagnotics", () => {
+	it("should emit diagnostics", () => {
 		const result = biome.lintContent(projectKey, "a { font-color: red }", {
 			filePath: "example.css",
 		});

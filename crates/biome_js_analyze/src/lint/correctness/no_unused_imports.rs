@@ -90,6 +90,12 @@ declare_lint_rule! {
     ///     return new A(arg);
     /// }
     /// ```
+    ///
+    /// One notable exception is when the import is intended to be used for type augmentation.
+    ///
+    /// ```ts
+    /// import type {} from '@mui/lab/themeAugmentation';
+    /// ```
     pub NoUnusedImports {
         version: "1.3.0",
         name: "noUnusedImports",
@@ -120,7 +126,7 @@ impl DerefMut for JsDocTypeModel {
 }
 
 #[derive(Default)]
-struct JsDocTypeCollectorVisitior {
+struct JsDocTypeCollectorVisitor {
     jsdoc_types: JsDocTypeModel,
 }
 
@@ -128,7 +134,7 @@ declare_node_union! {
     pub AnyJsWithTypeReferencingJsDoc = AnyJsDeclaration | AnyJsClassMember | AnyTsTypeMember | TsEnumMember | JsExport | JsStaticMemberAssignment
 }
 
-impl Visitor for JsDocTypeCollectorVisitior {
+impl Visitor for JsDocTypeCollectorVisitor {
     type Language = JsLanguage;
     fn visit(
         &mut self,
@@ -241,7 +247,7 @@ impl Queryable for NoUnusedImportsQuery {
         root: &<Self::Language as Language>::Root,
     ) {
         analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
-        analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitior::default);
+        analyzer.add_visitor(Phases::Syntax, JsDocTypeCollectorVisitor::default);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -308,6 +314,15 @@ impl Rule for NoUnusedImports {
                 is_unused(ctx, &local_name).then_some(Unused::AllImports(local_name.range()))
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
+                // exception: allow type augmentation imports
+                // eg. `import type {} from ...`
+                // https://github.com/biomejs/biome/issues/6669
+                if clause.type_token().is_some()
+                    && clause.named_specifiers().ok()?.specifiers().is_empty()
+                {
+                    return None;
+                }
+
                 unused_named_specifiers(ctx, &clause.named_specifiers().ok()?)
             }
             AnyJsImportClause::JsImportNamespaceClause(clause) => {
@@ -531,10 +546,9 @@ impl Rule for NoUnusedImports {
                 for unused_specifier in unused_named_specifiers {
                     if let Some(NodeOrToken::Token(next_token)) =
                         unused_specifier.syntax().next_sibling_or_token()
+                        && next_token.kind() == T![,]
                     {
-                        if next_token.kind() == T![,] {
-                            mutation.remove_token(next_token);
-                        }
+                        mutation.remove_token(next_token);
                     }
                     mutation.remove_node(unused_specifier.clone());
                 }

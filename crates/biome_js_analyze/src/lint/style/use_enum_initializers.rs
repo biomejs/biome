@@ -177,7 +177,7 @@ impl Rule for UseEnumInitializers {
                     has_mutations = true;
 
                     // When creating the replacement node we first need to remove the trailing trivia.
-                    // Otherwise nodes without a trailing comma will add [JsSyntacKind::EQ] and [EnumInitializer]
+                    // Otherwise nodes without a trailing comma will add [JsSyntaxKind::EQ] and [EnumInitializer]
                     // after it.
                     let new_enum_member = enum_member
                         .clone()

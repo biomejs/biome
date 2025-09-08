@@ -1215,7 +1215,7 @@ fn include_files_in_symlinked_subdir() {
 
     #[cfg(target_os = "windows")]
     {
-        check_windows_symlink!(symlink_file(
+        check_windows_symlink!(symlink_dir(
             root_path.join("symlinked"),
             subroot_path.join("symlink")
         ));
@@ -1273,7 +1273,7 @@ fn ignore_file_in_subdir_in_symlinked_dir() {
 
     #[cfg(target_os = "windows")]
     {
-        check_windows_symlink!(symlink_file(
+        check_windows_symlink!(symlink_dir(
             root_path.join("symlinked"),
             subroot_path.join("symlink")
         ));
@@ -4080,6 +4080,64 @@ bar();"#
 }
 
 #[test]
+fn linter_enables_project_domain_based_on_extended_config() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{ "extends": ["biome.base.json"] }"#.as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.base.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noFloatingPromises": "on"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/foo.ts");
+    fs.insert(
+        file.into(),
+        r#"export function foo(): Foo {}
+
+export async function bar() {}"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("src/index.ts");
+    fs.insert(
+        file.into(),
+        r#"import { foo, bar } from "./foo.ts";
+
+fn(foo());
+
+bar();"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_enables_project_domain_based_on_extended_config",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_apply_root_settings_with_stdin_file_path() {
     let mut fs = TemporaryFs::new("should_apply_root_settings_with_stdin_file_path");
 
@@ -4231,6 +4289,51 @@ fn should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config(
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_apply_root_settings_with_stdin_file_path_and_extended_non_root_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_choke_on_recursive_function_call() {
+    let mut fs = TemporaryFs::new("should_not_choke_on_recursive_function_call");
+
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+    "linter": {
+        "rules": {
+            "recommended": true,
+        },
+        "domains": {
+            "next": "all",
+            "project": "all",
+            "react": "all",
+            "solid": "all",
+        }
+    }
+}"#,
+    );
+
+    // Use a hook name to catch https://github.com/biomejs/biome/issues/6915.
+    fs.create_file(
+        "src/hooks/useHook.ts",
+        r#"function useHook() {
+    useHook();
+}"#,
+    );
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_choke_on_recursive_function_call",
         fs.create_mem(),
         console,
         result,

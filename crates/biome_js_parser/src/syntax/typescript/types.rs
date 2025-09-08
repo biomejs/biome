@@ -497,16 +497,16 @@ fn parse_ts_type_parameter_modifiers(p: &mut JsParser, context: TypeContext) -> 
         }
 
         // check for modifier precedence
-        if let Some(ts_out_modifier) = modifiers.find(&TypeParameterModifierKind::Out) {
-            if modifier_kind == TypeParameterModifierKind::In {
-                p.error(modifier_must_precede_modifier(
-                    p,
-                    text_range,
-                    ts_out_modifier.range,
-                ));
-                m.abandon(p);
-                continue;
-            }
+        if let Some(ts_out_modifier) = modifiers.find(&TypeParameterModifierKind::Out)
+            && modifier_kind == TypeParameterModifierKind::In
+        {
+            p.error(modifier_must_precede_modifier(
+                p,
+                text_range,
+                ts_out_modifier.range,
+            ));
+            m.abandon(p);
+            continue;
         }
 
         let modifier = TypeParameterModifier {

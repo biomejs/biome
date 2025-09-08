@@ -6,10 +6,11 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, FileSourceError};
+use biome_service::file_handlers::VueFileHandler;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
@@ -22,9 +23,9 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_suppression_test, "module"}
-tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_multi_rule_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
@@ -112,12 +113,28 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             );
         }
     } else {
-        let Ok(source_type) = input_file.try_into() else {
+        let Ok(source_type): Result<JsFileSource, FileSourceError> = input_file.try_into() else {
             return;
         };
+
+        // TODO: Remove once we have full support of vue files
+        // This is needed to set the language to TypeScript for Vue files
+        // because we can't do it in <script> definition in the current implementation.
+        let source_type = if source_type.as_embedding_kind().is_vue() {
+            JsFileSource::ts().with_embedding_kind(EmbeddingKind::Vue)
+        } else {
+            source_type
+        };
+        let input_code = if source_type.as_embedding_kind().is_vue() {
+            VueFileHandler::input(&input_code)
+        } else {
+            input_code.as_str()
+        };
+
+        // if source_type.
         analyze_and_snap(
             &mut snapshot,
-            &input_code,
+            input_code,
             source_type,
             filter,
             file_name,
@@ -152,13 +169,12 @@ pub(crate) fn analyze_and_snap(
     let mut code_fixes = Vec::new();
     let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
 
-    if let Some((_, manifest)) = project_layout.find_node_manifest_for_path(input_file) {
-        if manifest.r#type == Some(PackageType::CommonJs) &&
+    if let Some((_, manifest)) = project_layout.find_node_manifest_for_path(input_file)
+        && manifest.r#type == Some(PackageType::CommonJs) &&
             // At the moment we treat JS and JSX at the same way
             (source_type.file_extension() == "js" || source_type.file_extension() == "jsx" )
-        {
-            source_type.set_module_kind(ModuleKind::Script)
-        }
+    {
+        source_type.set_module_kind(ModuleKind::Script)
     }
 
     let parsed = parse(input_code, source_type, parser_options.clone());
@@ -258,7 +274,7 @@ pub(crate) fn analyze_and_snap(
         *snapshot = snapshot.replace('\\', "/");
     }
 
-    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }
 
 fn check_code_action(
@@ -269,6 +285,8 @@ fn check_code_action(
     options: JsParserOptions,
     root: &AnyJsRoot,
 ) {
+    assert!(!action.mutation.is_empty(), "Mutation must not be empty");
+
     let (new_tree, text_edit) = match action
         .mutation
         .clone()
@@ -444,7 +462,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     };
 
     // Enable at least 1 rule so that PhaseRunner will be called
-    // which is necessary to parse and store supression comments
+    // which is necessary to parse and store suppression comments
     let rule_filter = RuleFilter::Rule("nursery", "noCommonJs");
     let filter = AnalysisFilter {
         enabled_rules: Some(slice::from_ref(&rule_filter)),

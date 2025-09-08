@@ -1,7 +1,7 @@
 use biome_rowan::Text;
 
 use crate::{
-    Class, Function, Interface, Intersection, Literal, Namespace, Object, ResolvedTypeData,
+    Class, Function, Interface, Intersection, Literal, Namespace, Object, Path, ResolvedTypeData,
     ReturnType, TypeData, TypeMember, TypeMemberKind, TypeResolver,
 };
 
@@ -29,12 +29,12 @@ pub(super) fn flattened_intersection(
                     .resolve_and_get(other)
                     .map_or_else(TypeData::unknown, ResolvedTypeData::to_data);
                 let other_ty = MergedType::from_type(other_ty, resolver);
-                if let Some(other_primitve) = other_ty.as_primitive() {
+                if let Some(other_primitive) = other_ty.as_primitive() {
                     if primitive.is_some() {
                         return TypeData::NeverKeyword;
                     }
 
-                    primitive = Some(other_primitve.clone());
+                    primitive = Some(other_primitive.clone());
                 } else {
                     merged_ty = merged_ty.intersection_with(other_ty, resolver);
                 }
@@ -269,12 +269,12 @@ impl MergedType {
             Self::Interface(members) => TypeData::from(Interface {
                 extends: [].into(),
                 members: members.into_iter().collect(),
-                name: Text::Static("(merged)"),
+                name: Text::new_static("(merged)"),
                 type_parameters: [].into(),
             }),
             Self::Namespace(members) => TypeData::from(Namespace {
                 members: members.into_iter().collect(),
-                path: [].into(),
+                path: Path::from(Text::new_static("")),
             }),
             Self::Never => TypeData::NeverKeyword,
             Self::Object(members) => TypeData::from(Object {

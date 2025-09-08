@@ -320,25 +320,117 @@ impl JsBinaryExpression {
         )
     }
 
-    /// Whether this is a comparison operation similar to the optional chain
+    /// Extract the left or right operand of an optional chain-like expression.
     /// ```js
     /// foo !== undefined;
-    /// foo != undefined;
-    /// foo !== null;
-    /// foo != null;
+    /// typeof foo !== 'undefined';
     ///```
-    pub fn is_optional_chain_like(&self) -> SyntaxResult<bool> {
+    pub fn extract_optional_chain_like(&self) -> SyntaxResult<Option<AnyJsExpression>> {
         if matches!(
             self.operator(),
             Ok(JsBinaryOperator::StrictInequality | JsBinaryOperator::Inequality)
         ) {
-            Ok(self
-                .right()?
-                .as_static_value()
-                .is_some_and(|x| x.is_null_or_undefined()))
+            let left = self.left()?;
+            let right = self.right()?;
+            // nullish check: `foo !== undefined` -> return foo
+            if let Some(expr) = Self::extract_optional_chain_like_nullish(&left, &right)? {
+                return Ok(Some(expr));
+            }
+            // typeof check: `typeof foo !== 'undefined'` -> return foo
+            if let Some(expr) = Self::extract_optional_chain_like_typeof(&left, &right)? {
+                return Ok(Some(expr));
+            }
+            Ok(None)
         } else {
-            Ok(false)
+            Ok(None)
         }
+    }
+
+    /// Extract the left or right operand of an optional chain-like expression comparing nullish.
+    /// ```js
+    /// foo !== undefined;  // -> Some(foo)
+    /// foo != undefined;  // -> Some(foo)
+    /// foo !== null;  // -> Some(foo)
+    /// foo != null;  // -> Some(foo)
+    /// undefined !== foo;  // -> Some(foo)
+    /// undefined != foo;  // -> Some(foo)
+    /// null !== foo;  // -> Some(foo)
+    /// null != foo;  // -> Some(foo)
+    /// foo !== bar;  // -> None
+    /// foo != bar;  // -> None
+    /// undefined !== null;  // -> None
+    /// undefined != null;  // -> None
+    /// null !== undefined;  // -> None
+    /// null != undefined;  // -> None
+    /// undefined !== undefined;  // -> None
+    /// undefined != undefined;  // -> None
+    /// null !== null;  // -> None
+    /// null != null;  // -> None
+    ///```
+    fn extract_optional_chain_like_nullish(
+        left: &AnyJsExpression,
+        right: &AnyJsExpression,
+    ) -> SyntaxResult<Option<AnyJsExpression>> {
+        fn is_nullish(expression: &AnyJsExpression) -> bool {
+            expression
+                .as_static_value()
+                .is_some_and(|x| x.is_null_or_undefined())
+        }
+        let left_is_nullish = is_nullish(left);
+        let right_is_nullish = is_nullish(right);
+        // right only nullish: `foo !== undefined` -> return foo (left)
+        if !left_is_nullish && right_is_nullish {
+            return Ok(Some(left.clone()));
+        }
+        // left only nullish: `undefined !== foo` -> return foo (right)
+        if left_is_nullish && !right_is_nullish {
+            return Ok(Some(right.clone()));
+        }
+        Ok(None)
+    }
+
+    /// Extract the left or right operand of an optional chain-like expression using `typeof`.
+    /// ```js
+    /// typeof foo !== 'undefined';  // -> Some(foo)
+    /// typeof foo != 'undefined';  // -> Some(foo)
+    /// 'undefined' !== typeof foo;  // -> Some(foo)
+    /// 'undefined' != typeof foo;  // -> Some(foo)
+    /// ”undefined” != typeof foo;  // -> Some(foo)
+    /// `undefined` != typeof foo;  // -> Some(foo)
+    /// typeof foo !== undefined;  // -> None
+    /// typeof foo != undefined;  // -> None
+    /// undefined !== typeof foo;  // -> None
+    /// undefined != typeof foo;  // -> None
+    ///```
+    fn extract_optional_chain_like_typeof(
+        left: &AnyJsExpression,
+        right: &AnyJsExpression,
+    ) -> SyntaxResult<Option<AnyJsExpression>> {
+        fn is_string_literal_undefined(expression: &AnyJsExpression) -> bool {
+            expression
+                .as_static_value()
+                .is_some_and(|x| matches!(x.as_string_constant(), Some(s) if s == "undefined"))
+        }
+        fn typeof_argument(expression: &AnyJsExpression) -> SyntaxResult<Option<AnyJsExpression>> {
+            if let Some(unary) = expression.as_js_unary_expression() {
+                return Ok(match unary.operator()? {
+                    JsUnaryOperator::Typeof => Some(unary.argument()?),
+                    _ => None,
+                });
+            }
+            Ok(None)
+        }
+        let left_is_string_undefined = is_string_literal_undefined(left);
+        let right_is_string_undefined = is_string_literal_undefined(right);
+        // `typeof foo !== "undefined"` -> return foo
+        if !left_is_string_undefined && right_is_string_undefined {
+            return typeof_argument(left);
+        }
+        // `"undefined" !== typeof foo` -> return foo
+        if left_is_string_undefined && !right_is_string_undefined {
+            return typeof_argument(right);
+        }
+        Ok(None)
     }
 }
 
@@ -815,12 +907,11 @@ impl JsTemplateExpression {
         // Guarding against skipped token trivia on elements that we remove.
         // Because that would result in the skipped token trivia being emitted before the template.
         for element in self.elements() {
-            if let AnyJsTemplateElement::JsTemplateChunkElement(element) = element {
-                if let Some(leading_trivia) = element.syntax().first_leading_trivia() {
-                    if leading_trivia.has_skipped() {
-                        return false;
-                    }
-                }
+            if let AnyJsTemplateElement::JsTemplateChunkElement(element) = element
+                && let Some(leading_trivia) = element.syntax().first_leading_trivia()
+                && leading_trivia.has_skipped()
+            {
+                return false;
             }
         }
 
@@ -1161,17 +1252,18 @@ impl AnyJsExpression {
         let mut members = CalleeNamesIterator::new(self.clone());
 
         let first = members.next();
+        let second = members.next();
 
         // Jasmine / Angular focused test patterns (f prepended)
         if let Some(token) = &first {
             let name = token.text();
-            if matches!(name, "fdescribe" | "fit" | "ftest") {
+            if matches!(name, "fdescribe" | "fit" | "ftest") && second.is_none() {
                 return Ok(true);
             }
         }
 
         // Handle cases with .only
-        if let (Some(first_token), Some(second_token)) = (&first, &members.next()) {
+        if let (Some(first_token), Some(second_token)) = (&first, &second) {
             // Check for direct .only pattern: test.only, it.only, describe.only
             if first_token.text() == "only"
                 && matches!(second_token.text(), "test" | "it" | "describe")
@@ -1180,12 +1272,12 @@ impl AnyJsExpression {
             }
 
             // Check for concurrent.only pattern: test.concurrent.only
-            if first_token.text() == "only" && second_token.text() == "concurrent" {
-                if let Some(third_token) = members.next() {
-                    if matches!(third_token.text(), "test" | "it") {
-                        return Ok(true);
-                    }
-                }
+            if first_token.text() == "only"
+                && second_token.text() == "concurrent"
+                && let Some(third_token) = members.next()
+                && matches!(third_token.text(), "test" | "it")
+            {
+                return Ok(true);
             }
         }
 
@@ -1243,15 +1335,14 @@ impl AnyJsExpression {
             }
 
             // Check for "test.concurrent.only.each" pattern
-            if third_token.text() == "concurrent" {
-                if let Some(fourth_token) = members.next() {
-                    if matches!(
-                        fourth_token.text(),
-                        "test" | "it" | "xtest" | "xit" | "ftest" | "fit"
-                    ) {
-                        return Ok(true);
-                    }
-                }
+            if third_token.text() == "concurrent"
+                && let Some(fourth_token) = members.next()
+                && matches!(
+                    fourth_token.text(),
+                    "test" | "it" | "xtest" | "xit" | "ftest" | "fit"
+                )
+            {
+                return Ok(true);
             }
         }
 
@@ -1389,6 +1480,21 @@ impl AnyJsExpression {
             }
             _ => false,
         }
+    }
+
+    /// Returns the innermost expression, ignoring any parenthesized expressions or type assertions.
+    pub fn inner_expression(&self) -> Option<Self> {
+        (match self {
+            Self::JsParenthesizedExpression(expression) => expression.expression().ok(),
+            Self::TsAsExpression(expression) => expression.expression().ok(),
+            Self::TsSatisfiesExpression(expression) => expression.expression().ok(),
+            Self::TsNonNullAssertionExpression(expression) => expression.expression().ok(),
+            Self::TsTypeAssertionExpression(expression) => expression.expression().ok(),
+            Self::TsInstantiationExpression(expression) => expression.expression().ok(),
+            _ => return Some(self.clone()),
+        })
+        .as_ref()
+        .and_then(Self::inner_expression)
     }
 }
 
@@ -1947,10 +2053,10 @@ pub fn global_identifier(expr: &AnyJsExpression) -> Option<(JsReferenceIdentifie
         }
         expr = member_expr.object().ok()?.omit_parentheses();
     }
-    if let Some(reference) = expr.as_js_reference_identifier() {
-        if matches!(reference.name().ok()?.text(), GLOBAL_THIS | WINDOW) {
-            return Some((reference, name));
-        }
+    if let Some(reference) = expr.as_js_reference_identifier()
+        && matches!(reference.name().ok()?.text(), GLOBAL_THIS | WINDOW)
+    {
+        return Some((reference, name));
     }
     None
 }
@@ -2496,182 +2602,79 @@ mod test {
 
     #[test]
     fn matches_focused_test() {
-        let call_expression = extract_call_expression("fit('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("fdescribe('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("fit('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("describe.only('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("it.only('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("test.only('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(true)
-        );
-
-        // Negative tests
-        let call_expression = extract_call_expression("test('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("describe('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("it('name', () => {});");
-        assert_eq!(
-            call_expression.callee().unwrap().contains_focused_test(),
-            Ok(false)
-        );
+        const VALID: &[&str] = &[
+            "fit('name', () => {});",
+            "fdescribe('name', () => {});",
+            "fit('name', () => {});",
+            "describe.only('name', () => {});",
+            "it.only('name', () => {});",
+            "test.only('name', () => {});",
+        ];
+        const INVALID: &[&str] = &[
+            "test('name', () => {});",
+            "describe('name', () => {});",
+            "it('name', () => {});",
+            "foo.fit()",
+        ];
+        for valid_case in VALID {
+            let call_expression = extract_call_expression(valid_case);
+            assert_eq!(
+                call_expression.callee().unwrap().contains_focused_test(),
+                Ok(true),
+                "Expected this case to be valid: {valid_case}"
+            );
+        }
+        for invalid_case in INVALID {
+            let call_expression = extract_call_expression(invalid_case);
+            assert_eq!(
+                call_expression.callee().unwrap().contains_focused_test(),
+                Ok(false),
+                "Expected this case to be invalid: {invalid_case}"
+            );
+        }
     }
 
     #[test]
     fn contains_only_each_pattern() {
-        let call_expression = extract_call_expression("test.only.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("describe.only.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("it.only.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(true)
-        );
-
-        // Test with concurrent
-        let call_expression = extract_call_expression("test.concurrent.only.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(true)
-        );
-
-        let call_expression = extract_call_expression("it.concurrent.only.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(true)
-        );
-
-        // Negative tests - should return false (these are loops, but not focused / skipping other in the suite)
-        let call_expression = extract_call_expression("test.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("describe.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("it.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("test.skip.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("describe.skip.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("it.skip.each();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("test.only();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
-
-        let call_expression = extract_call_expression("describe.only();");
-        assert_eq!(
-            call_expression
-                .callee()
-                .unwrap()
-                .contains_only_each_pattern(),
-            Ok(false)
-        );
+        const VALID: &[&str] = &[
+            "test.only.each();",
+            "describe.only.each();",
+            "it.only.each();",
+            "test.concurrent.only.each();",
+            "it.concurrent.only.each();",
+        ];
+        const INVALID: &[&str] = &[
+            "test.each();",
+            "describe.each();",
+            "it.each();",
+            "test.skip.each();",
+            "describe.skip.each();",
+            "it.skip.each();",
+            "test.only();",
+            "describe.only();",
+        ];
+        for valid_case in VALID {
+            let call_expression = extract_call_expression(valid_case);
+            assert_eq!(
+                call_expression
+                    .callee()
+                    .unwrap()
+                    .contains_only_each_pattern(),
+                Ok(true),
+                "Expected this case to be valid: {valid_case}"
+            );
+        }
+        for invalid_case in INVALID {
+            let call_expression = extract_call_expression(invalid_case);
+            assert_eq!(
+                call_expression
+                    .callee()
+                    .unwrap()
+                    .contains_only_each_pattern(),
+                Ok(false),
+                "Expected this case to be invalid: {invalid_case}"
+            );
+        }
     }
 }
 

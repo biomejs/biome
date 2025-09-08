@@ -154,7 +154,7 @@ impl TypeResolver for HardcodedSymbolResolver {
         &self.types[id.index()]
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
         match id.level() {
             TypeResolverLevel::Full => {
                 panic!("Ad-hoc references unsupported by resolver")
@@ -189,12 +189,11 @@ impl TypeResolver for HardcodedSymbolResolver {
             TypeReference::Import(_import) => {
                 panic!("Project-level references unsupported by resolver")
             }
-            TypeReference::Unknown => None,
         }
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() == 1 && qualifier.path[0] == self.name {
+        if qualifier.path.is_identifier(self.name) {
             Some(ResolvedTypeId::new(self.level(), TypeId::new(0)))
         } else {
             self.globals.resolve_qualifier(qualifier)
@@ -205,7 +204,11 @@ impl TypeResolver for HardcodedSymbolResolver {
         self.globals.resolve_type_of(identifier, scope_id)
     }
 
-    fn resolve_expression(&mut self, scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expr: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
         Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
     }
 

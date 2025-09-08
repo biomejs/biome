@@ -28,16 +28,25 @@ gen-all:
 # Generates TypeScript types and JSON schema of the configuration
 gen-bindings:
   cargo codegen-schema
+  just gen-types
+
+gen-types:
   cargo run -p xtask_codegen --features schema -- bindings
+
 
 # Generates code generated files for the linter
 gen-analyzer:
-  cargo run -p xtask_codegen -- analyzer
+  just gen-rules
   just gen-configuration
   just gen-migrate
   just gen-bindings
   just lint-rules
   just format
+
+# Generate and updates the files needed inside the *_analyze crates
+gen-rules:
+    cargo run -p xtask_codegen -- analyzer
+
 
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration
@@ -79,6 +88,11 @@ new-json-assistrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=json --category=assist --name={{rulename}}
   just gen-analyzer
 
+# Creates a new json lint rule with the given name. Name has to be camel case.
+new-json-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=json --category=lint --name={{rulename}}
+  just gen-analyzer
+
 # Creates a new css lint rule with the given name. Name has to be camel case.
 new-css-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=css --category=lint --name={{rulename}}
@@ -90,12 +104,9 @@ new-graphql-lintrule rulename:
   just gen-analyzer
 
 # Promotes a rule from the nursery group to a new group
-move-rule group rulename:
-	cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
-	just gen-analyzer
-	just documentation
-	cargo test -- {{snakecase(rulename)}}
-	cargo insta accept
+move-rule rulename group:
+  cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
+  cargo run -p xtask_codegen -- analyzer
 
 # Format Rust files and TOML files
 format:

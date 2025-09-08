@@ -132,7 +132,7 @@ pub enum TraversalMode {
         skip: Vec<RuleSelector>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
         vcs_targeted: VcsTargeted,
-        /// Supress existing diagnostics with a `// biome-ignore` comment
+        /// Suppress existing diagnostics with a `// biome-ignore` comment
         suppress: bool,
         /// Explanation for suppressing diagnostics with `--suppress` and `--reason`
         suppression_reason: Option<String>,
@@ -637,6 +637,7 @@ pub fn execute_mode(
                 diagnostics: diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
             };
             let mut buffer = JsonReporterVisitor::new(summary);
             reporter.write(&mut buffer)?;
@@ -676,6 +677,7 @@ pub fn execute_mode(
                 diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
             };
             reporter.write(&mut GithubReporterVisitor(console))?;
         }
@@ -684,6 +686,7 @@ pub fn execute_mode(
                 diagnostics: diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
             };
             reporter.write(&mut GitLabReporterVisitor::new(
                 console,
@@ -696,6 +699,7 @@ pub fn execute_mode(
                 diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;
         }

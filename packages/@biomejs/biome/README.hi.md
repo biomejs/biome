@@ -38,7 +38,7 @@
 
 **Biome** *JavaScript*, *TypeScript*, *JSX* और *JSON* के लिए **एक [तेज़ स्वरूपक](./benchmark#formatting)[^5]** है जो **[*Prettier* के साथ ९७% अनुकूलता](https://console.algora.io/challenges/prettier)[^6]** स्कोर[^7] करता है।
 
-**Biome *JavaScript*, *TypeScript* और *JSX* के लिए एक [प्रदर्शनकारी लिंटर](https://github.com/biomejs/biome/tree/main/benchmark#linting)[^8]** है जिसमें ESLint, typescript-eslint और [अन्य स्रोतों](https://github.com/biomejs/biome/discussions/3) से **[२७० से अधिक नियम](https://biomejs.dev/linter/rules/)** शामिल हैं। यह **विस्तृत[^9] और संदर्भिकृत[^10] निदान[^11]** आउटपुट[^12] करता है जो आपको अपना कोड[^13] बेहतर बनाने और एक बेहतर प्रोग्रामर[^14] बनने में मदद करता है!
+**Biome *JavaScript*, *TypeScript* और *JSX* के लिए एक [प्रदर्शनकारी लिंटर](https://github.com/biomejs/biome/tree/main/benchmark#linting)[^8]** है जिसमें ESLint, typescript-eslint और [अन्य स्रोतों](https://github.com/biomejs/biome/discussions/3) से **[३४० से अधिक नियम](https://biomejs.dev/linter/javascript/rules/)** शामिल हैं। यह **विस्तृत[^9] और संदर्भिकृत[^10] निदान[^11]** आउटपुट[^12] करता है जो आपको अपना कोड[^13] बेहतर बनाने और एक बेहतर प्रोग्रामर[^14] बनने में मदद करता है!
 
 **Biome** को शुरू से ही [संपादक](https://biomejs.dev/guides/integrate-in-editor/)[^15] [के भीतर अंतरक्रियात्मक](https://biomejs.dev/guides/integrate-in-editor/)[^16] [रूप से](https://biomejs.dev/guides/editors/first-party-extensions/) उपयोग करने के लिए डिज़ाइन[^17] किया गया है। यह आपके द्वारा लिखे जा रहे विकृत[^18] कोड[^13] को स्वरूप[^5] और लिंट[^8] कर सकता है।
 
@@ -114,24 +114,6 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
 
 ## प्रायोजक[^37]
 
-### Platinum Sponsors
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://vercel.com/?utm_source=biome&utm_medium=readme" target="_blank">
-          <picture>
-            <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" />
-            <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" />
-            <img src="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" width="500" alt="Vercel" />
-          </picture>
-        </a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 ### स्वर्ण प्रायोजक[^42]
 
 <table>
@@ -143,6 +125,17 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
             <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
             <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
             <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot" />
+          </picture>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://vercel.com/?utm_source=biome&utm_medium=readme" target="_blank">
+          <picture>
+            <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" />
+            <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-light.png" />
+            <img src="https://raw.githubusercontent.com/biomejs/resources/refs/heads/main/sponsors/vercel-dark.png" width="400" alt="Vercel" />
           </picture>
         </a>
       </td>
@@ -193,6 +186,9 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
       </td>
       <td align="center" valign="middle">
         <a href="https://jetbrains.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png" width="100" alt="JetBrains logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.egstock.co.jp/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/egstock/b18c836/logo/256.png?height=256" width="80" alt="EGSTOCK, Inc. logo"></a>
       </td>
     </tr>
   </tbody>

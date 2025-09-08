@@ -29,7 +29,7 @@ a = <div></div>;
 a = <div> </div>;
 
 // Template
-a = <div>{`A Long Tempalte String That uses ${5 + 4} that will eventually break across multiple lines ${40 / 3 * 45}`}</div>;
+a = <div>{`A Long Template String That uses ${5 + 4} that will eventually break across multiple lines ${40 / 3 * 45}`}</div>;
 
 // Meaningful text after self closing element adds a hard line break
 a = <div><pre className="h-screen overflow-y-scroll" />adefg</div>;
@@ -360,6 +360,7 @@ Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
 Expand lists: Auto
+Operator linebreak: After
 -----
 
 ```jsx
@@ -398,7 +399,7 @@ a = <div> </div>;
 
 // Template
 a = (
-	<div>{`A Long Tempalte String That uses ${5 + 4} that will eventually break across multiple lines ${(40 / 3) * 45}`}</div>
+	<div>{`A Long Template String That uses ${5 + 4} that will eventually break across multiple lines ${(40 / 3) * 45}`}</div>
 );
 
 // Meaningful text after self closing element adds a hard line break
@@ -765,7 +766,7 @@ function Component() {
     2: <div tooltip="A very long tooltip text that would otherwise make the attribute break onto the same line but it is not because of the single string layout"></div>;
     7: 		tooltip="A very long tooltip text that would otherwise make the attribute break
    14: 	<ASuperLongComponentNameThatWouldBreakButDoesntSinceTheComponent></ASuperLongComponentNameThatWouldBreakButDoesntSinceTheComponent>
-   36: 	<div>{`A Long Tempalte String That uses ${5 + 4} that will eventually break across multiple lines ${(40 / 3) * 45}`}</div>
+   36: 	<div>{`A Long Template String That uses ${5 + 4} that will eventually break across multiple lines ${(40 / 3) * 45}`}</div>
   177: 							"ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
   198: 							"ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
   211: 							"ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",

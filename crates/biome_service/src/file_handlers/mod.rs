@@ -20,7 +20,6 @@ use biome_analyze::{
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_console::fmt::Formatter;
-use biome_console::markup;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, category};
@@ -359,37 +358,43 @@ impl DocumentFileSource {
     }
 }
 
-impl biome_console::fmt::Display for DocumentFileSource {
-    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+impl std::fmt::Display for DocumentFileSource {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Self::Js(js) => {
                 let is_jsx = js.is_jsx();
                 if js.is_typescript() {
                     if is_jsx {
-                        fmt.write_markup(markup! { "TSX" })
+                        write!(fmt, "TSX")
                     } else {
-                        fmt.write_markup(markup! { "TypeScript" })
+                        write!(fmt, "TypeScript")
                     }
                 } else if is_jsx {
-                    fmt.write_markup(markup! { "JSX" })
+                    write!(fmt, "JSX")
                 } else {
-                    fmt.write_markup(markup! { "JavaScript" })
+                    write!(fmt, "JavaScript")
                 }
             }
             Self::Json(json) => {
                 if json.allow_comments() {
-                    fmt.write_markup(markup! { "JSONC" })
+                    write!(fmt, "JSONC")
                 } else {
-                    fmt.write_markup(markup! { "JSON" })
+                    write!(fmt, "JSON")
                 }
             }
-            Self::Css(_) => fmt.write_markup(markup! { "CSS" }),
-            Self::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
-            Self::Html(_) => fmt.write_markup(markup! { "HTML" }),
-            Self::Grit(_) => fmt.write_markup(markup! { "Grit" }),
-            Self::Ignore => fmt.write_markup(markup! { "Ignore" }),
-            Self::Unknown => fmt.write_markup(markup! { "Unknown" }),
+            Self::Css(_) => write!(fmt, "CSS"),
+            Self::Graphql(_) => write!(fmt, "GraphQL"),
+            Self::Html(_) => write!(fmt, "HTML"),
+            Self::Grit(_) => write!(fmt, "Grit"),
+            Self::Ignore => write!(fmt, "Ignore"),
+            Self::Unknown => write!(fmt, "Unknown"),
         }
+    }
+}
+
+impl biome_console::fmt::Display for DocumentFileSource {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        fmt.write_fmt(format_args!("{self}"))
     }
 }
 
@@ -1126,13 +1131,13 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         L: biome_rowan::Language,
     {
-        if let Some(rule_filter) = rule_filter {
-            if rule_filter.match_rule::<R>() {
-                // first we want to register rules via "magic default"
-                self.record_rule_from_manifest::<R, L>(rule_filter);
-                // then we want to register rules
-                self.record_rule_from_domains::<R, L>(rule_filter);
-            }
+        if let Some(rule_filter) = rule_filter
+            && rule_filter.match_rule::<R>()
+        {
+            // first we want to register rules via "magic default"
+            self.record_rule_from_manifest::<R, L>(rule_filter);
+            // then we want to register rules
+            self.record_rule_from_domains::<R, L>(rule_filter);
         };
 
         // Do not report unused suppression comment diagnostics if:

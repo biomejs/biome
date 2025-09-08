@@ -162,10 +162,10 @@ impl NativeBacktrace {
             })
         });
 
-        if let Some(top_frame) = top_frame {
-            if let Some(bottom_frames) = frames.get(top_frame + 1..) {
-                frames = bottom_frames;
-            }
+        if let Some(top_frame) = top_frame
+            && let Some(bottom_frames) = frames.get(top_frame + 1..)
+        {
+            frames = bottom_frames;
         }
 
         let bottom_frame = frames.iter().position(|frame| {
@@ -176,10 +176,10 @@ impl NativeBacktrace {
             })
         });
 
-        if let Some(bottom_frame) = bottom_frame {
-            if let Some(top_frames) = frames.get(..bottom_frame + 1) {
-                frames = top_frames;
-            }
+        if let Some(bottom_frame) = bottom_frame
+            && let Some(top_frames) = frames.get(..bottom_frame + 1)
+        {
+            frames = top_frames;
         }
 
         frames

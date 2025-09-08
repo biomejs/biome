@@ -121,6 +121,8 @@ pub enum RuleSource {
     EslintReactRefresh(&'static str),
     /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactXyz(&'static str),
+    /// Rules from [Eslint Plugin React Prefer Function Component](https://github.com/tatethurston/eslint-plugin-react-prefer-function-component)
+    ReactPreferFunctionComponent(&'static str),
     /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
     EslintSolid(&'static str),
     /// Rules from [Eslint Plugin Sonar](https://github.com/SonarSource/eslint-plugin-sonarjs)
@@ -141,6 +143,8 @@ pub enum RuleSource {
     EslintN(&'static str),
     /// Rules from [Eslint Plugin Next](https://github.com/vercel/next.js/tree/canary/packages/eslint-plugin-next)
     EslintNext(&'static str),
+    /// Rules from [Eslint Plugin Qwik](https://github.com/BuilderIO/eslint-plugin-qwik)
+    EslintQwik(&'static str),
     /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
     Stylelint(&'static str),
     /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
@@ -151,6 +155,12 @@ pub enum RuleSource {
     DenoLint(&'static str),
     /// Rules from [Eslint Plugin Vitest](https://github.com/vitest-dev/eslint-plugin-vitest)
     EslintVitest(&'static str),
+    /// Rules from [Eslint Plugin Vue.js](https://eslint.vuejs.org/)
+    EslintVueJs(&'static str),
+    /// Rules from [Eslint Plugin Package.json](https://github.com/JoshuaKGoldberg/eslint-plugin-package-json)
+    EslintPackageJson(&'static str),
+    /// Rules from [Eslint Plugin Package.json Dependencies](https://github.com/idan-at/eslint-plugin-package-json-dependencies)
+    EslintPackageJsonDependencies(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -176,6 +186,9 @@ impl std::fmt::Display for RuleSource {
             Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
             Self::EslintReactRefresh(_) => write!(f, "eslint-plugin-react-refresh"),
             Self::EslintReactXyz(_) => write!(f, "@eslint-react/eslint-plugin"),
+            Self::ReactPreferFunctionComponent(_) => {
+                write!(f, "eslint-plugin-react-prefer-function-component")
+            }
             Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
             Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
             Self::EslintStylistic(_) => write!(f, "eslint-plugin-stylistic"),
@@ -186,11 +199,17 @@ impl std::fmt::Display for RuleSource {
             Self::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
             Self::EslintN(_) => write!(f, "eslint-plugin-n"),
             Self::EslintNext(_) => write!(f, "@next/eslint-plugin-next"),
+            Self::EslintQwik(_) => write!(f, "eslint-plugin-qwik"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
             Self::EslintNoSecrets(_) => write!(f, "eslint-plugin-no-secrets"),
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
             Self::DenoLint(_) => write!(f, "deno-lint"),
             Self::EslintVitest(_) => write!(f, "@vitest/eslint-plugin"),
+            Self::EslintVueJs(_) => write!(f, "eslint-plugin-vue"),
+            Self::EslintPackageJson(_) => write!(f, "eslint-plugin-package-json"),
+            Self::EslintPackageJsonDependencies(_) => {
+                write!(f, "eslint-plugin-package-json-dependencies")
+            }
         }
     }
 }
@@ -250,6 +269,7 @@ impl RuleSource {
             | Self::EslintReactHooks(rule_name)
             | Self::EslintReactRefresh(rule_name)
             | Self::EslintReactXyz(rule_name)
+            | Self::ReactPreferFunctionComponent(rule_name)
             | Self::EslintTypeScript(rule_name)
             | Self::EslintSolid(rule_name)
             | Self::EslintSonarJs(rule_name)
@@ -260,11 +280,15 @@ impl RuleSource {
             | Self::EslintBarrelFiles(rule_name)
             | Self::EslintN(rule_name)
             | Self::EslintNext(rule_name)
+            | Self::EslintQwik(rule_name)
             | Self::EslintNoSecrets(rule_name)
             | Self::EslintRegexp(rule_name)
             | Self::Stylelint(rule_name)
             | Self::DenoLint(rule_name)
-            | Self::EslintVitest(rule_name) => rule_name,
+            | Self::EslintVitest(rule_name)
+            | Self::EslintVueJs(rule_name)
+            | Self::EslintPackageJson(rule_name)
+            | Self::EslintPackageJsonDependencies(rule_name) => rule_name,
         }
     }
 
@@ -283,6 +307,9 @@ impl RuleSource {
             Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
             Self::EslintReactRefresh(rule_name) => format!("react-refresh/{rule_name}"),
             Self::EslintReactXyz(rule_name) => format!("@eslint-react/{rule_name}"),
+            Self::ReactPreferFunctionComponent(rule_name) => {
+                format!("react-prefer-function-component/{rule_name}")
+            }
             Self::EslintTypeScript(rule_name) => format!("@typescript-eslint/{rule_name}"),
             Self::EslintSolid(rule_name) => format!("solidjs/{rule_name}"),
             Self::EslintSonarJs(rule_name) => format!("sonarjs/{rule_name}"),
@@ -293,11 +320,17 @@ impl RuleSource {
             Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
             Self::EslintN(rule_name) => format!("n/{rule_name}"),
             Self::EslintNext(rule_name) => format!("@next/{rule_name}"),
+            Self::EslintQwik(rule_name) => format!("qwik/{rule_name}"),
             Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
             Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
             Self::EslintRegexp(rule_name) => format!("regexp/{rule_name}"),
             Self::DenoLint(rule_name) => format!("deno-lint/{rule_name}"),
             Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
+            Self::EslintVueJs(rule_name) => format!("vue/{rule_name}"),
+            Self::EslintPackageJson(rule_name) => format!("package-json/{rule_name}"),
+            Self::EslintPackageJsonDependencies(rule_name) => {
+                format!("package-json-dependencies/{rule_name}")
+            }
         }
     }
 
@@ -312,11 +345,12 @@ impl RuleSource {
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJsxA11y(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJsDoc(rule_name) => format!("https://github.com/gajus/eslint-plugin-jsdoc/blob/main/docs/rules/{rule_name}.md"),
-            Self::EslintPerfectionist(rule_name) => format!("https://perfectionist.dev/rules/{rule_name}.md"),
+            Self::EslintPerfectionist(rule_name) => format!("https://perfectionist.dev/rules/{rule_name}"),
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
             Self::EslintReactRefresh(_) => "https://github.com/ArnaudBarre/eslint-plugin-react-refresh".to_string(),
             Self::EslintReactXyz(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
+            Self::ReactPreferFunctionComponent(_) => "https://github.com/tatethurston/eslint-plugin-react-prefer-function-component".to_string(),
             Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
             Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/packages/eslint-plugin-solid/docs/{rule_name}.md"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
@@ -327,11 +361,15 @@ impl RuleSource {
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
+            Self::EslintQwik(rule_name) => format!("https://github.com/BuilderIO/eslint-plugin-qwik/blob/main/docs/rules/{rule_name}.md"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
-            Self::EslintVitest(rule_name) => format!("https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rule/{rule_name}.md"),
+            Self::EslintVitest(rule_name) => format!("https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
+            Self::EslintPackageJson(rule_name) => format!("https://github.com/JoshuaKGoldberg/eslint-plugin-package-json/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintPackageJsonDependencies(rule_name) => format!("https://github.com/idan-at/eslint-plugin-package-json-dependencies/blob/master/docs/rules/{rule_name}.md"),
         }
     }
 
@@ -402,10 +440,14 @@ pub enum RuleDomain {
     Solid,
     /// Next.js framework rules
     Next,
+    /// Qwik framework rules
+    Qwik,
     /// Vue.js framework rules
     Vue,
     /// For rules that require querying multiple files inside a project
     Project,
+    /// Tailwind CSS rules
+    Tailwind,
 }
 
 impl Display for RuleDomain {
@@ -416,8 +458,10 @@ impl Display for RuleDomain {
             Self::Test => fmt.write_str("test"),
             Self::Solid => fmt.write_str("solid"),
             Self::Next => fmt.write_str("next"),
+            Self::Qwik => fmt.write_str("qwik"),
             Self::Vue => fmt.write_str("vue"),
             Self::Project => fmt.write_str("project"),
+            Self::Tailwind => fmt.write_str("tailwind"),
         }
     }
 }
@@ -450,8 +494,13 @@ impl RuleDomain {
             ],
             Self::Solid => &[&("solid", ">=1.0.0")],
             Self::Next => &[&("next", ">=14.0.0")],
+            Self::Qwik => &[
+                &("@builder.io/qwik", ">=1.0.0"),
+                &("@qwik.dev/core", ">=2.0.0"),
+            ],
             Self::Vue => &[&("vue", ">=3.0.0")],
             Self::Project => &[],
+            Self::Tailwind => &[&("tailwindcss", ">=3.0.0")],
         }
     }
 
@@ -473,8 +522,10 @@ impl RuleDomain {
             ],
             Self::Solid => &[],
             Self::Next => &[],
+            Self::Qwik => &[],
             Self::Vue => &[],
             Self::Project => &[],
+            Self::Tailwind => &[],
         }
     }
 }
@@ -931,7 +982,9 @@ impl_group_language!(
     T19, T20, T21, T22, T23, T24, T25, T26, T27, T28, T29, T30, T31, T32, T33, T34, T35, T36, T37,
     T38, T39, T40, T41, T42, T43, T44, T45, T46, T47, T48, T49, T50, T51, T52, T53, T54, T55, T56,
     T57, T58, T59, T60, T61, T62, T63, T64, T65, T66, T67, T68, T69, T70, T71, T72, T73, T74, T75,
-    T76, T77, T78, T79, T80, T81, T82, T83, T84, T85, T86, T87, T88, T89
+    T76, T77, T78, T79, T80, T81, T82, T83, T84, T85, T86, T87, T88, T89, T90, T91, T92, T93, T94,
+    T95, T96, T97, T98, T99, T100, T101, T102, T103, T104, T105, T106, T107, T108, T109, T110,
+    T111, T112, T113, T114, T115
 );
 
 /// Trait implemented by all analysis rules: declares interest to a certain AstNode type,

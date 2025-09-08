@@ -66,7 +66,7 @@ fn spawn_daemon(
         cmd.arg("--stop-on-disconnect");
     }
     if let Some(log_path) = log_path {
-        cmd.arg(format!("--log-path={}", log_path));
+        cmd.arg(format!("--log-path={log_path}",));
     }
 
     if let Some(log_file_name_prefix) = log_file_name_prefix {

@@ -50,13 +50,11 @@ impl<'a> SpecTestFile<'a> {
             "The input '{spec_input_file}' must exist and be a file.",
         );
 
-        let OpenProjectResult { project_key, .. } = app
+        let OpenProjectResult { project_key } = app
             .workspace
             .open_project(OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
             })
             .unwrap();
 
@@ -294,7 +292,7 @@ where
         snapshot_builder.finish(self.test_file.relative_file_name());
     }
 
-    fn test_file(&self) -> &SpecTestFile {
+    fn test_file(&self) -> &SpecTestFile<'_> {
         &self.test_file
     }
 }

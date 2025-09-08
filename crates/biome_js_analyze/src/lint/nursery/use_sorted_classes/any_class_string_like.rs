@@ -103,10 +103,9 @@ impl AnyClassStringLike {
                         }
                         if let Some(AnyJsExpression::JsStaticMemberExpression(tag)) =
                             template_expression.tag()
+                            && options.match_function(tag.to_string().as_ref())
                         {
-                            if options.match_function(tag.to_string().as_ref()) {
-                                return Some(true);
-                            }
+                            return Some(true);
                         }
                     } else if let Some(jsx_attribute) = JsxAttribute::cast_ref(&ancestor) {
                         let attribute_name = get_attribute_name(&jsx_attribute)?;

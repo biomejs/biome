@@ -31,8 +31,6 @@ pub enum FileKinds {
     Manifest,
     /// An ignore file, like `.gitignore`
     Ignore,
-    /// The path is a directory
-    Directory,
     /// A file to handle has the lowest priority. It's usually a traversed file, or a file opened by the LSP
     #[default]
     Handleable,
@@ -54,11 +52,7 @@ pub struct BiomePath {
 impl BiomePath {
     pub fn new(path_to_file: impl Into<Utf8PathBuf>) -> Self {
         let path = path_to_file.into();
-        let kind = if path.is_dir() {
-            FileKinds::Directory
-        } else {
-            path.file_name().map(Self::priority).unwrap_or_default()
-        };
+        let kind = path.file_name().map(Self::priority).unwrap_or_default();
         Self {
             path,
             kind,
@@ -146,11 +140,6 @@ impl BiomePath {
     }
 
     #[inline(always)]
-    pub fn is_dir(&self) -> bool {
-        matches!(self.kind, FileKinds::Directory)
-    }
-
-    #[inline(always)]
     pub fn is_handleable(&self) -> bool {
         matches!(self.kind, FileKinds::Handleable)
     }
@@ -170,7 +159,7 @@ impl BiomePath {
     pub fn is_dependency(&self) -> bool {
         self.path
             .components()
-            .any(|component| component.as_str() == "node_modules")
+            .any(|component| component.as_str().as_bytes() == b"node_modules")
     }
 
     /// Whether this is a file named `package.json`

@@ -351,11 +351,11 @@ impl<'src> CssLexer<'src> {
             UNI => {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
                 // perform the check. At any other position, the BOM is just considered plain whitespace.
-                if self.position == 0 {
-                    if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
-                        self.unicode_bom_length = bom_size;
-                        return bom;
-                    }
+                if self.position == 0
+                    && let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM)
+                {
+                    self.unicode_bom_length = bom_size;
+                    return bom;
                 }
                 self.consume_unexpected_character()
             }
@@ -716,7 +716,7 @@ impl<'src> CssLexer<'src> {
 
         // Note to keep the buffer large enough to fit every possible keyword that
         // the lexer can return
-        let mut buf = [0u8; 22];
+        let mut buf = [0u8; 27];
         let (count, only_ascii_used) = self.consume_ident_sequence(&mut buf);
 
         if !only_ascii_used {
@@ -766,6 +766,7 @@ impl<'src> CssLexer<'src> {
             b"nth-last-of-type" => NTH_LAST_OF_TYPE_KW,
             b"nth-col" => NTH_COL_KW,
             b"nth-last-col" => NTH_LAST_COL_KW,
+            b"active-view-transition-type" => ACTIVE_VIEW_TRANSITION_TYPE_KW,
             b"ltr" => LTR_KW,
             b"rtl" => RTL_KW,
             b"charset" => CHARSET_KW,

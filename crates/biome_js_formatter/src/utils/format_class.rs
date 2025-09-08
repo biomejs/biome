@@ -8,22 +8,22 @@ pub struct FormatClass<'a> {
 
 impl FormatClass<'_> {
     fn should_group(&self, comments: &JsComments) -> FormatResult<bool> {
-        if let Some(id) = self.class.id() {
-            if comments.has_trailing_comments(id.syntax()) {
-                return Ok(true);
-            }
+        if let Some(id) = self.class.id()
+            && comments.has_trailing_comments(id.syntax())
+        {
+            return Ok(true);
         }
 
-        if let Some(type_parameters) = self.class.type_parameters() {
-            if comments.has_trailing_comments(type_parameters.syntax()) {
-                return Ok(true);
-            }
+        if let Some(type_parameters) = self.class.type_parameters()
+            && comments.has_trailing_comments(type_parameters.syntax())
+        {
+            return Ok(true);
         }
 
-        if let Some(extends) = self.class.extends_clause() {
-            if comments.has_trailing_comments(extends.syntax()) {
-                return Ok(true);
-            }
+        if let Some(extends) = self.class.extends_clause()
+            && comments.has_trailing_comments(extends.syntax())
+        {
+            return Ok(true);
         }
 
         if self.class.implements_clause().is_some() {

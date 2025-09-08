@@ -18,6 +18,9 @@ declare_lint_rule! {
     /// This means that if the package `@org/foo` has a dependency on `lodash`, and then you use
     /// `import "lodash"` somewhere in your project, the rule will trigger a diagnostic for this import.
     ///
+    /// The rule is meant to catch those dependencies that aren't declared inside the closest `package.json`, and
+    /// isn't meant to detect dependencies declared in other manifest files, e.g. the root `package.json` in a monorepo setting.
+    ///
     /// The rule ignores imports that are not valid package names.
     /// This includes internal imports that start with `#` and `@/` and imports with a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
     ///
@@ -28,18 +31,33 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,ignore
+    /// ```json,file=package.json
+    /// {
+    ///   "dependencies": {}
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,file=index.js
     /// import "vite";
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js,ignore
-    /// import { A } from "./local.js";
+    /// ```json,file=package.json
+    /// {
+    ///   "dependencies": {
+    ///     "vite": "*"
+    ///   }
+    /// }
     /// ```
     ///
-    /// ```js,ignore
-    /// import assert from "node:assert";
+    /// ```js,file=index.js
+    /// import "vite"; // package is correctly declared
+    ///
+    /// import assert from "node:assert"; // Node imports don't need declaration
+    ///
+    /// import { A } from "./local.js"; // relative imports don't trigger the rule
+    /// import { B } from "#alias"; // same goes for aliases
     /// ```
     ///
     /// ## Options
@@ -66,15 +84,39 @@ declare_lint_rule! {
     /// if the name of the file being linted (i.e. not the imported file/module) matches a single glob
     /// in the array, and `false` otherwise.
     ///
-    /// In the following example, only test files can use dependencies in `devDependencies` section.
-    /// `dependencies`, `peerDependencies`, and `optionalDependencies` are always available.
+    /// ### Example using the `devDependencies` option
     ///
-    /// ```json
+    /// In this example, only test files can use dependencies in the
+    /// `devDependencies` section. `dependencies`, `peerDependencies`, and
+    /// `optionalDependencies` are always available.
+    ///
+    /// ```json,options
     /// {
     ///   "options": {
-    ///     "devDependencies": ["tests/*.test.js", "tests/*.spec.js"]
+    ///     "devDependencies": ["**/tests/*.test.js", "**/tests/*.spec.js"]
     ///   }
     /// }
+    /// ```
+    ///
+    /// **`package.json`**
+    /// ```json,file=package.json
+    /// {
+    ///   "devDependencies": {
+    ///     "vite": "*"
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// **`src/index.js`**
+    /// ```js,expect_diagnostic,use_options,file=src/index.js
+    /// // cannot import from a non-test file
+    /// import "vite";
+    /// ```
+    ///
+    /// **`tests/foo.test.js`**
+    /// ```js,use_options,file=tests/foo.test.js
+    /// // this works, because the file matches a glob from the options
+    /// import "vite";
     /// ```
     pub NoUndeclaredDependencies {
         version: "1.6.0",
@@ -109,7 +151,9 @@ impl Rule for NoUndeclaredDependencies {
         }
 
         let path = ctx.file_path();
-        let is_dev_dependency_available = ctx.options().dev_dependencies.is_available(path);
+        let is_dev_dependency_available =
+            // Type-only imports are always considered as dev dependencies.
+            is_type_import(node) || ctx.options().dev_dependencies.is_available(path);
         let is_peer_dependency_available = ctx.options().peer_dependencies.is_available(path);
         let is_optional_dependency_available =
             ctx.options().optional_dependencies.is_available(path);
@@ -139,12 +183,12 @@ impl Rule for NoUndeclaredDependencies {
         if !package_name.starts_with('@') {
             // Handle DefinitelyTyped imports https://github.com/DefinitelyTyped/DefinitelyTyped
             // e.g. `lodash` can import types from `@types/lodash`.
-            if let Some(import_clause) = node.parent::<AnyJsImportClause>() {
-                if import_clause.type_token().is_some() {
-                    let package_name = format!("@types/{package_name}");
-                    if is_available(&package_name) {
-                        return None;
-                    }
+            if let Some(import_clause) = node.parent::<AnyJsImportClause>()
+                && import_clause.type_token().is_some()
+            {
+                let package_name = format!("@types/{package_name}");
+                if is_available(&package_name) {
+                    return None;
                 }
             }
         }
@@ -256,6 +300,13 @@ fn parse_package_name(path: &str) -> Option<&str> {
     }
     // Handle cases where only the scope is given. e.g. `@scope/`
     (!path.ends_with('/')).then_some(path)
+}
+
+fn is_type_import(import: &AnyJsImportLike) -> bool {
+    match import.parent::<AnyJsImportClause>() {
+        Some(clause) => clause.type_token().is_some(),
+        _ => false,
+    }
 }
 
 #[test]

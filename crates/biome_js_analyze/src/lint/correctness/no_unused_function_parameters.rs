@@ -146,8 +146,7 @@ impl Rule for NoUnusedFunctionParameters {
             // e.g. `{ a, ...rest }`
             if let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_) = &declaration
-            {
-                if declaration
+                && declaration
                     .syntax()
                     .siblings(Direction::Next)
                     .last()
@@ -157,9 +156,8 @@ impl Rule for NoUnusedFunctionParameters {
                             JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
                         )
                     })
-                {
-                    return None;
-                }
+            {
+                return None;
             }
         }
 
@@ -216,7 +214,9 @@ impl Rule for NoUnusedFunctionParameters {
                 let new_name = format!("_{name_trimmed}");
 
                 let model = ctx.model();
-                mutation.rename_node_declaration(model, binding, &new_name);
+                if !mutation.rename_node_declaration(model, binding, &new_name) {
+                    return None;
+                }
 
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),

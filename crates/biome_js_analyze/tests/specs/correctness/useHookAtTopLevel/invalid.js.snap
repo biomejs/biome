@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
 expression: invalid.js
 ---
 # Input
@@ -74,13 +75,13 @@ export default function Component5() {
     }
 };
 
-const Component6 = () => {
+const useHook6 = () => {
     useEffect();
 };
 
 const Component7 = () => {
     if (a == 1) {
-        Component6();
+        useHook6();
     }
 };
 
@@ -187,6 +188,14 @@ class DemoProperty {
             return useMemo(() => "string", []);
         }
     }
+}
+
+function useRecursiveHookA() {
+    useRecursiveHookB();
+}
+
+function useRecursiveHookB() {
+    useRecursiveHookA();
 }
 
 ```
@@ -456,23 +465,14 @@ invalid.js:67:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
 ```
 
 ```
-invalid.js:72:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:77:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook is being called indirectly and conditionally, but all hooks must be called in the exact same order in every component render.
-  
-    71 │ const Component6 = () => {
-  > 72 │     useEffect();
-       │     ^^^^^^^^^
-    73 │ };
-    74 │ 
-  
-  i This is the call path until the hook.
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
   
     75 │ const Component7 = () => {
-  > 76 │     if (a == 1) {
-       │                  
-  > 77 │         Component6();
-       │         ^^^^^^^^^^^^
+    76 │     if (a == 1) {
+  > 77 │         useHook6();
+       │         ^^^^^^^^
     78 │     }
     79 │ };
   
@@ -848,6 +848,68 @@ invalid.js:181:20 lint/correctness/useHookAtTopLevel ━━━━━━━━━
     183 │     }
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:187:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook is being called recursively.
+  
+    186 │ function useRecursiveHookA() {
+  > 187 │     useRecursiveHookB();
+        │     ^^^^^^^^^^^^^^^^^
+    188 │ }
+    189 │ 
+  
+  i This is the call path until the hook.
+  
+    188 │ }
+    189 │ 
+  > 190 │ function useRecursiveHookB() {
+        │                               
+  > 191 │     useRecursiveHookA();
+        │     ^^^^^^^^^^^^^^^^^^^
+    192 │ }
+    193 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i This means recursive calls are not allowed, because they require a condition in order to terminate.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:191:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook is being called recursively.
+  
+    190 │ function useRecursiveHookB() {
+  > 191 │     useRecursiveHookA();
+        │     ^^^^^^^^^^^^^^^^^
+    192 │ }
+    193 │ 
+  
+  i This is the call path until the hook.
+  
+    184 │ }
+    185 │ 
+  > 186 │ function useRecursiveHookA() {
+        │                               
+  > 187 │     useRecursiveHookB();
+        │     ^^^^^^^^^^^^^^^^^^^
+    188 │ }
+    189 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i This means recursive calls are not allowed, because they require a condition in order to terminate.
   
   i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
   

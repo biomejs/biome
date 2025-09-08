@@ -8,11 +8,12 @@ use crate::js_kinds_src::JS_KINDS_SRC;
 use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::kind_src::KindsSrc;
 use crate::markdown_kinds_src::MARKDOWN_KINDS_SRC;
+use crate::tailwind_kinds_src::TAILWIND_KINDS_SRC;
 use crate::yaml_kinds_src::YAML_KINDS_SRC;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
 
-pub const LANGUAGE_PREFIXES: [&str; 10] = [
+pub const LANGUAGE_PREFIXES: [&str; 11] = [
     "js_",
     "ts_",
     "jsx_",
@@ -23,6 +24,7 @@ pub const LANGUAGE_PREFIXES: [&str; 10] = [
     "html_",
     "yaml_",
     "markdown_",
+    "tailwind_",
 ];
 
 #[derive(Debug, Eq, Copy, Clone, PartialEq)]
@@ -35,6 +37,7 @@ pub enum LanguageKind {
     Html,
     Yaml,
     Markdown,
+    Tailwind,
 }
 
 impl std::fmt::Display for LanguageKind {
@@ -48,11 +51,12 @@ impl std::fmt::Display for LanguageKind {
             Self::Html => write!(f, "html"),
             Self::Yaml => write!(f, "yaml"),
             Self::Markdown => write!(f, "markdown"),
+            Self::Tailwind => write!(f, "tailwind"),
         }
     }
 }
 
-pub const ALL_LANGUAGE_KIND: [LanguageKind; 8] = [
+pub const ALL_LANGUAGE_KIND: [LanguageKind; 9] = [
     LanguageKind::Js,
     LanguageKind::Css,
     LanguageKind::Json,
@@ -61,6 +65,7 @@ pub const ALL_LANGUAGE_KIND: [LanguageKind; 8] = [
     LanguageKind::Html,
     LanguageKind::Yaml,
     LanguageKind::Markdown,
+    LanguageKind::Tailwind,
 ];
 
 impl FromStr for LanguageKind {
@@ -76,8 +81,9 @@ impl FromStr for LanguageKind {
             "html" => Ok(Self::Html),
             "yaml" => Ok(Self::Yaml),
             "markdown" => Ok(Self::Markdown),
+            "tailwind" => Ok(Self::Tailwind),
             _ => Err(format!(
-                "Language {kind} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html`, `yaml` or `markdown`"
+                "Language {kind} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html`, `yaml`, `markdown`, or `tailwind`"
             )),
         }
     }
@@ -113,7 +119,7 @@ macro_rules! define_language_kind_functions {
 }
 
 impl LanguageKind {
-    define_language_kind_functions!([Js, Css, Json, Graphql, Grit, Html, Yaml, Markdown]);
+    define_language_kind_functions!([Js, Css, Json, Graphql, Grit, Html, Yaml, Markdown, Tailwind]);
 
     pub(crate) fn syntax_crate_ident(&self) -> Ident {
         Ident::new(self.syntax_crate_name().as_str(), Span::call_site())
@@ -135,7 +141,7 @@ impl LanguageKind {
         format!("{self}_target_language")
     }
 
-    pub fn kinds(&self) -> KindsSrc {
+    pub fn kinds(&self) -> KindsSrc<'_> {
         match self {
             Self::Js => JS_KINDS_SRC,
             Self::Css => CSS_KINDS_SRC,
@@ -145,6 +151,7 @@ impl LanguageKind {
             Self::Html => HTML_KINDS_SRC,
             Self::Yaml => YAML_KINDS_SRC,
             Self::Markdown => MARKDOWN_KINDS_SRC,
+            Self::Tailwind => TAILWIND_KINDS_SRC,
         }
     }
 
@@ -158,6 +165,7 @@ impl LanguageKind {
             Self::Html => include_str!("../html.ungram"),
             Self::Yaml => include_str!("../yaml.ungram"),
             Self::Markdown => include_str!("../markdown.ungram"),
+            Self::Tailwind => include_str!("../tailwind.ungram"),
         }
     }
 

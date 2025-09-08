@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/pseudo/pseudo_element_selector.css
 ---
-
 # Input
 
 ```css
@@ -10,19 +9,27 @@ a::after {}
 
 ::before {}
 
-video::cue(  b 
+video::cue(  b
 
 ) {}
-h1 
-video::cue(  b 
+h1
+video::cue(  b
 
 ) area {}
 
-video::cue-region(#scroll 
+video::cue-region(#scroll
 > .div
 ) {}
 
 ::part(  active ) {}
+
+
+
+::part(   active active active
+ active active active
+  active active
+ active active active
+ active ) {}
 
 ```
 
@@ -58,6 +65,20 @@ video::cue-region(#scroll > .div) {
 
 ::part(active) {
 }
+
+::part(
+		active
+		active
+		active
+		active
+		active
+		active
+		active
+		active
+		active
+		active
+		active
+		active
+	) {
+}
 ```
-
-

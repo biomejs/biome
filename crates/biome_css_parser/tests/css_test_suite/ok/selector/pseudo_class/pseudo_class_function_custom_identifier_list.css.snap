@@ -1,0 +1,106 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+html:active-view-transition-type(backwards forwards backwards forwards) {
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..4 "html" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@4..5 ":" [] [],
+                            class: CssPseudoClassFunctionCustomIdentifierList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@5..32 "active-view-transition-type" [] [],
+                                },
+                                l_paren_token: L_PAREN@32..33 "(" [] [],
+                                items: CssCustomIdentifierList [
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@33..43 "backwards" [] [Whitespace(" ")],
+                                    },
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@43..52 "forwards" [] [Whitespace(" ")],
+                                    },
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@52..62 "backwards" [] [Whitespace(" ")],
+                                    },
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@62..70 "forwards" [] [],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@70..72 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@72..73 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@73..75 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@75..76 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..76
+  0: (empty)
+  1: CSS_RULE_LIST@0..75
+    0: CSS_QUALIFIED_RULE@0..75
+      0: CSS_SELECTOR_LIST@0..72
+        0: CSS_COMPOUND_SELECTOR@0..72
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..4
+            0: (empty)
+            1: CSS_IDENTIFIER@0..4
+              0: IDENT@0..4 "html" [] []
+          2: CSS_SUB_SELECTOR_LIST@4..72
+            0: CSS_PSEUDO_CLASS_SELECTOR@4..72
+              0: COLON@4..5 ":" [] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@5..72
+                0: CSS_IDENTIFIER@5..32
+                  0: IDENT@5..32 "active-view-transition-type" [] []
+                1: L_PAREN@32..33 "(" [] []
+                2: CSS_CUSTOM_IDENTIFIER_LIST@33..70
+                  0: CSS_CUSTOM_IDENTIFIER@33..43
+                    0: IDENT@33..43 "backwards" [] [Whitespace(" ")]
+                  1: CSS_CUSTOM_IDENTIFIER@43..52
+                    0: IDENT@43..52 "forwards" [] [Whitespace(" ")]
+                  2: CSS_CUSTOM_IDENTIFIER@52..62
+                    0: IDENT@52..62 "backwards" [] [Whitespace(" ")]
+                  3: CSS_CUSTOM_IDENTIFIER@62..70
+                    0: IDENT@62..70 "forwards" [] []
+                3: R_PAREN@70..72 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@72..75
+        0: L_CURLY@72..73 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@73..73
+        2: R_CURLY@73..75 "}" [Newline("\n")] []
+  2: EOF@75..76 "" [Newline("\n")] []
+
+```

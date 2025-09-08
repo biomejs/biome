@@ -70,7 +70,7 @@ tracing-tree             = "0.4.0"
 
 
 [target.'cfg(unix)'.dependencies]
-libc  = "0.2.173"
+libc  = "0.2.174"
 tokio = { workspace = true, features = ["process"] }
 
 [target.'cfg(windows)'.dependencies]
@@ -89,7 +89,8 @@ regex                = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
 
 [features]
-docgen = ["bpaf/docgen"]
+docgen    = ["bpaf/docgen"]
+js_plugin = ["biome_service/js_plugin"]
 
 [lints]
 workspace = true

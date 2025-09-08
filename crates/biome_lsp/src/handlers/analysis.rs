@@ -17,7 +17,8 @@ use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
-    GetFileContentParams, IsPathIgnoredParams, PullActionsParams, SupportsFeatureParams,
+    GetFileContentParams, IgnoreKind, PathIsIgnoredParams, PullActionsParams,
+    SupportsFeatureParams,
 };
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -61,10 +62,11 @@ pub(crate) fn code_actions(
         return Ok(None);
     }
 
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(Some(Vec::new()));
     }
@@ -161,7 +163,10 @@ pub(crate) fn code_actions(
     }) {
         Ok(result) => result,
         Err(err) => {
-            return if matches!(err, WorkspaceError::FileIgnored(_)) {
+            return if matches!(
+                err,
+                WorkspaceError::FileIgnored(_) | WorkspaceError::SourceFileNotSupported(_)
+            ) {
                 Ok(Some(Vec::new()))
             } else {
                 Err(err.into())
@@ -192,6 +197,7 @@ pub(crate) fn code_actions(
                 "Action: {:?}, and applicability {:?}",
                 &action.category, &action.suggestion.applicability
             );
+
             // Filter out source.organizeImports.biome action when assist is not supported.
             if action.category.matches("source.organizeImports.biome")
                 && !file_features.supports_assist()
@@ -289,10 +295,11 @@ fn fix_all(
         return Ok(None);
     }
 
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features: analyzer_features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }
@@ -310,10 +317,11 @@ fn fix_all(
     })?;
     let should_format = file_features.supports_format();
 
-    if session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features: analyzer_features,
+        ignore_kind: IgnoreKind::Ancestors,
     })? {
         return Ok(None);
     }

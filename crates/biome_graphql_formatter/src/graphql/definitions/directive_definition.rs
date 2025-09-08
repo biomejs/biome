@@ -1,4 +1,6 @@
+use crate::FormatGraphqlSyntaxToken;
 use crate::prelude::*;
+use biome_formatter::trivia::FormatToken;
 use biome_formatter::write;
 use biome_graphql_syntax::{GraphqlDirectiveDefinition, GraphqlDirectiveDefinitionFields};
 
@@ -27,7 +29,7 @@ impl FormatNodeRule<GraphqlDirectiveDefinition> for FormatGraphqlDirectiveDefini
         }
 
         if let Some(bitwise_or_token) = bitwise_or_token {
-            write!(f, [format_removed(&bitwise_or_token)])?;
+            FormatGraphqlSyntaxToken.format_removed(&bitwise_or_token, f)?;
         }
 
         write!(

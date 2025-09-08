@@ -4,7 +4,9 @@ expression: issue_3926.jsx
 ---
 # Input
 ```jsx
+/* should not generate diagnostics */
 export function Panic() {
   return <div>{foo && <>{`(${bar})`}</>}</div>;
 }
+
 ```

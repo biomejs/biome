@@ -339,16 +339,16 @@ impl TestReporter for SummaryReporter {
             }
         }
 
-        if self.detail_level.is_debug() {
-            if let Some(files) = result.outcome.files() {
-                for file in files {
-                    let program = file.parse();
-                    self.writeln(&format!(
-                        "RAST Output for {}:\n{:#?}\n",
-                        &file.name().bold(),
-                        program.syntax()
-                    ));
-                }
+        if self.detail_level.is_debug()
+            && let Some(files) = result.outcome.files()
+        {
+            for file in files {
+                let program = file.parse();
+                self.writeln(&format!(
+                    "RAST Output for {}:\n{:#?}\n",
+                    &file.name().bold(),
+                    program.syntax()
+                ));
             }
         }
     }
