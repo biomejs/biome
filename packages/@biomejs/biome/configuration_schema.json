@@ -3586,6 +3586,34 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoJsxLiteralsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoJsxLiteralsOptions" }
+			]
+		},
+		"NoJsxLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"allowedStrings": {
+					"description": "An array of strings that won't trigger the rule. Whitespaces are taken into consideration",
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"ignoreProps": {
+					"description": "When enabled, strings inside props are always ignored",
+					"default": false,
+					"type": "boolean"
+				},
+				"noStrings": {
+					"description": "When enabled, also flag string literals inside JSX expressions and attributes",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoLabelVarConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4939,6 +4967,13 @@
 					"description": "Prevent import cycles.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoImportCyclesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsxLiterals": {
+					"description": "Disallow string literals inside JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoJsxLiteralsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7560,6 +7595,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoIrregularWhitespaceOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoJsxLiteralsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoJsxLiteralsOptions" }]
 				}
 			},
 			"additionalProperties": false
