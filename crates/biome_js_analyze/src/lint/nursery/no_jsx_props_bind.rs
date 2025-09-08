@@ -136,10 +136,10 @@ impl Rule for NoJsxPropsBind {
                                 if !declaration.syntax().ancestors().any(|anc| anc.kind() == biome_js_syntax::JsSyntaxKind::JS_FUNCTION_DECLARATION) {
                                     return None
                                 }
-                                return Some(NoJsxPropsBindState {
+                                Some(NoJsxPropsBindState {
                                     invalid_kind: InvalidKind::Function,
                                     attribute_range: expression.range(),
-                                });
+                                })
                             }
                             _ => None,
                         }
