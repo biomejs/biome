@@ -103,47 +103,44 @@ impl Rule for UseConsistentArrowReturn {
                     }
                 }
             }
-            UseConsistentArrowReturnStyle::AsNeeded => {
-                match body {
-                    AnyJsFunctionBody::AnyJsExpression(expr) => {
-                        if options.require_for_object_literal {
-                            let mut expression = expr.clone();
-                            if let Some(paren_expr) = expression.as_js_parenthesized_expression() {
-                                expression = paren_expr.expression().ok()?;
-                            }
+            UseConsistentArrowReturnStyle::AsNeeded => match body {
+                AnyJsFunctionBody::AnyJsExpression(expr) => {
+                    if options.require_for_object_literal {
+                        let mut expression = expr.clone();
+                        if let Some(paren_expr) = expression.as_js_parenthesized_expression() {
+                            expression = paren_expr.expression().ok()?;
+                        }
 
-                            if expression.as_js_object_expression().is_some() {
-                                if expr.syntax().has_comments_descendants() {
-                                    return None;
-                                }
-                                return Some(State::AddBraces(expr));
+                        if expression.as_js_object_expression().is_some() {
+                            if expr.syntax().has_comments_descendants() {
+                                return None;
                             }
+                            return Some(State::AddBraces(expr));
                         }
                     }
-                    AnyJsFunctionBody::JsFunctionBody(body) => {
-                        if !body.directives().is_empty() || body.syntax().has_comments_descendants()
-                        {
-                            return None;
-                        }
+                }
+                AnyJsFunctionBody::JsFunctionBody(body) => {
+                    if !body.directives().is_empty() || body.syntax().has_comments_descendants() {
+                        return None;
+                    }
 
-                        if body.statements().len() == 1 {
-                            let first_statement = body.statements().iter().next()?;
-                            if let Some(return_statement) =
-                                JsReturnStatement::cast(first_statement.into_syntax())
-                            {
-                                if let Some(arg) = return_statement.argument() {
-                                    if arg.as_js_object_expression().is_some()
-                                        && options.require_for_object_literal
-                                    {
-                                        return None;
-                                    }
-                                    return Some(State::RemoveBraces(body));
+                    if body.statements().len() == 1 {
+                        let first_statement = body.statements().iter().next()?;
+                        if let Some(return_statement) =
+                            JsReturnStatement::cast(first_statement.into_syntax())
+                        {
+                            if let Some(arg) = return_statement.argument() {
+                                if arg.as_js_object_expression().is_some()
+                                    && options.require_for_object_literal
+                                {
+                                    return None;
                                 }
+                                return Some(State::RemoveBraces(body));
                             }
                         }
                     }
                 }
-            }
+            },
         }
 
         None
