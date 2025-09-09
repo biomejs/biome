@@ -692,7 +692,7 @@ fn test_resolve_generic_return_value_with_multiple_modules() {
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
         .expect("result variable not found");
     let result_ty = resolver.resolved_type_for_id(result_id);
-    assert!(result_ty.is_string());
+    assert!(result_ty.is_string_or_string_literal());
 
     let snapshot =
         ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(resolver.as_ref());
@@ -739,7 +739,7 @@ fn test_resolve_import_as_namespace() {
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
         .expect("result variable not found");
     let result_ty = resolver.resolved_type_for_id(result_id);
-    assert!(result_ty.is_number());
+    assert!(result_ty.is_number_or_number_literal());
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_import_as_namespace");
@@ -1618,7 +1618,7 @@ fn test_resolve_single_reexport() {
         .resolve_type_of(&Text::new_static("result"), ScopeId::GLOBAL)
         .expect("result variable not found");
     let ty = resolver.resolved_type_for_id(result_id);
-    assert!(ty.is_number());
+    assert!(ty.is_number_or_number_literal());
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_single_reexport");
@@ -1748,13 +1748,13 @@ fn test_resolve_multiple_reexports() {
         .resolve_type_of(&Text::new_static("result1"), ScopeId::GLOBAL)
         .expect("result1 variable not found");
     let ty = resolver.resolved_type_for_id(result1_id);
-    assert!(ty.is_number());
+    assert!(ty.is_number_or_number_literal());
 
     let result2_id = resolver
         .resolve_type_of(&Text::new_static("result2"), ScopeId::GLOBAL)
         .expect("result2 variable not found");
     let ty = resolver.resolved_type_for_id(result2_id);
-    assert!(ty.is_string());
+    assert!(ty.is_string_or_string_literal());
 
     let snapshot = ModuleGraphSnapshot::new(module_graph.as_ref(), &fs).with_resolver(&resolver);
     snapshot.assert_snapshot("test_resolve_multiple_reexports");

@@ -178,7 +178,7 @@ impl Type {
     }
 
     /// Returns whether this type is a number or a literal number.
-    pub fn is_number(&self) -> bool {
+    pub fn is_number_or_number_literal(&self) -> bool {
         self.id == GLOBAL_NUMBER_ID
             || self.as_raw_data().is_some_and(|ty| match ty {
                 TypeData::Number => true,
@@ -212,7 +212,7 @@ impl Type {
     }
 
     /// Returns whether this type is a string.
-    pub fn is_string(&self) -> bool {
+    pub fn is_string_or_string_literal(&self) -> bool {
         self.id == GLOBAL_STRING_ID
             || self.as_raw_data().is_some_and(|ty| match ty {
                 TypeData::String => true,
