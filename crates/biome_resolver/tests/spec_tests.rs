@@ -533,3 +533,37 @@ fn test_resolve_type_definitions_without_type_specification() {
         )))
     );
 }
+
+#[test]
+fn test_resolve_alias_with_multiple_target_values() {
+    let base_dir = get_fixtures_path("resolver_cases_6");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["types", "import", "default"],
+        default_files: &["index"],
+        extensions: &["ts", "js"],
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve("#lib/a", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/lib/a.tsx")))
+    );
+    assert_eq!(
+        resolve("#lib/b", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/lib/b.ts")))
+    );
+    assert_eq!(
+        resolve("#lib/c", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/lib/c/index.ts")))
+    );
+    assert_eq!(
+        resolve("#lib/d", &base_dir, &fs, &options),
+        Err(ResolveError::NotFound)
+    );
+    assert_eq!(
+        resolve("#lib/d.js", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/lib/d.js")))
+    );
+}

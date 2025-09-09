@@ -235,7 +235,10 @@ fn resolve_import_alias(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    let imports = package_json.imports.clone().ok_or(ResolveError::NotFound)?;
+    let imports = package_json
+        .imports
+        .as_ref()
+        .ok_or(ResolveError::NotFound)?;
     let imports = imports
         .as_object()
         .ok_or(ResolveError::InvalidMappingTarget)?;
@@ -438,6 +441,12 @@ fn resolve_target_value(
             }
             None => resolve_string(target.as_str()),
         },
+        JsonValue::Array(targets) => targets
+            .iter()
+            .find_map(|target| {
+                resolve_target_value(target, glob_replacement, package_path, fs, options).ok()
+            })
+            .ok_or(ResolveError::NotFound),
         _ => Err(ResolveError::InvalidMappingTarget),
     }
 }
