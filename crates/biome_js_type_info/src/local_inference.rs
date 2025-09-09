@@ -1987,6 +1987,10 @@ impl TypeMember {
                 // TODO: Handle spread operator
                 None
             }
+            AnyJsObjectMember::JsMetavariable(_) => {
+                // Standalone metavariable object members (e.g. $...) do not contribute type info
+                None
+            }
         }
     }
 
