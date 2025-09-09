@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicateDependencies {
-        version: "next",
+        version: "2.2.4",
         name: "noDuplicateDependencies",
         language: "json",
         recommended: false,
