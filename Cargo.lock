@@ -1597,6 +1597,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_formatter",
  "biome_fs",
+ "biome_js_analyze",
  "biome_js_parser",
  "biome_js_type_info",
  "biome_json_parser",
