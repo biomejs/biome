@@ -1,5 +1,97 @@
 # @biomejs/biome
 
+## 2.2.4
+
+### Patch Changes
+
+- [#7415](https://github.com/biomejs/biome/pull/7415) [`d042f18`](https://github.com/biomejs/biome/commit/d042f18f556edfd4fecff562c8f197dbec81a5e7) Thanks [@qraqras](https://github.com/qraqras)! - Fixed [#7212](https://github.com/biomejs/biome/issues/7212), now the [`useOptionalChain`](https://biomejs.dev/linter/rules/use-optional-chain/) rule recognizes optional chaining using `typeof` (e.g., `typeof foo !== 'undefined' && foo.bar`).
+
+- [#7419](https://github.com/biomejs/biome/pull/7419) [`576baf4`](https://github.com/biomejs/biome/commit/576baf4faf568e8b6a295f457f70894235ffdb59) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#7323](https://github.com/biomejs/biome/issues/7323). [`noUnusedPrivateClassMembers`](https://biomejs.dev/linter/rules/no-unused-private-class-members/) no longer reports as unused TypeScript `private` members if the rule encounters a computed access on `this`.
+
+  In the following example, `member` as previously reported as unused.
+  It is no longer reported.
+
+  ```ts
+  class TsBioo {
+    private member: number;
+
+    set_with_name(name: string, value: number) {
+      this[name] = value;
+    }
+  }
+  ```
+
+- [#7248](https://github.com/biomejs/biome/pull/7248) [`75b6a0d`](https://github.com/biomejs/biome/commit/75b6a0d12f3aa30647f743d607b0d60c0470fff3) Thanks [@ematipico](https://github.com/ematipico)! - Added the new nursery lint rule `noJsxLiterals`, which disallows the use of string literals inside JSX.
+
+  The rule catches these cases:
+
+  ```jsx
+  <>
+    <div>test</div> {/* test is invalid */}
+    <>test</>
+    <div>
+      {/* this string is invalid */}
+      asdjfl test foo
+    </div>
+  </>
+  ```
+
+- [#7406](https://github.com/biomejs/biome/pull/7406) [`b906112`](https://github.com/biomejs/biome/commit/b90611223dbab116c4c1678a374c1a48c29a34a0) Thanks [@mdevils](https://github.com/mdevils)! - Fixed an issue (#6393) where the [useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level/) rule reported excessive diagnostics for nested hook calls.
+
+  The rule now reports only the offending top-level call site, not sub-hooks of composite hooks.
+
+  ```js
+  // Before: reported twice (useFoo and useBar).
+  function useFoo() {
+    return useBar();
+  }
+  function Component() {
+    if (cond) useFoo();
+  }
+  // After: reported once at the call to useFoo().
+  ```
+
+- [#7418](https://github.com/biomejs/biome/pull/7418) [`00e1a6b`](https://github.com/biomejs/biome/commit/00e1a6b0afcee3bc89152858bab55efce9cfc18e) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7411](https://github.com/biomejs/biome/issues/7411). The Biome Language Server had a regression where opening an editor with a file already open wouldn't load the project settings correctly.
+
+- [#7142](https://github.com/biomejs/biome/pull/7142) [`53ff5ae`](https://github.com/biomejs/biome/commit/53ff5ae34428f042bb5b80c19862c9cf69fc6359) Thanks [@Netail](https://github.com/Netail)! - Added the new nursery rule [`noDuplicateDependencies`](https://next.biomejs.dev/linter/rules/no-duplicate-dependencies/), which verifies that no dependencies are duplicated between the `bundledDependencies`, `bundleDependencies`, `dependencies`, `devDependencies`, `overrides`, `optionalDependencies`, and `peerDependencies` sections.
+
+  For example, the following snippets will trigger the rule:
+
+  ```json
+  {
+    "dependencies": {
+      "foo": ""
+    },
+    "devDependencies": {
+      "foo": ""
+    }
+  }
+  ```
+
+  ```json
+  {
+    "dependencies": {
+      "foo": ""
+    },
+    "optionalDependencies": {
+      "foo": ""
+    }
+  }
+  ```
+
+  ```json
+  {
+    "dependencies": {
+      "foo": ""
+    },
+    "peerDependencies": {
+      "foo": ""
+    }
+  }
+  ```
+
+- [#7441](https://github.com/biomejs/biome/pull/7441) [`733828c`](https://github.com/biomejs/biome/commit/733828c1996d482235389e3d71ea4706ca3a6be3) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#3824](https://github.com/biomejs/biome/issues/3824). Now the option CLI `--color` is correctly applied to logging too.
+
 ## 2.2.3
 
 ### Patch Changes
