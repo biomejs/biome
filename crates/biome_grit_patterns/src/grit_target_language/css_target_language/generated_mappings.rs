@@ -1,188 +1,204 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 //! Maps GritQL pattern names to Biome's internal syntax kinds.
-use biome_css_syntax::CssSyntaxKind;
-use biome_css_syntax::CssSyntaxKind::*;
+use biome_css_syntax as lang;
 use biome_rowan::AstNode;
+use lang::CssSyntaxKind;
 
 /// Returns the syntax kind for a legacy or native node name.
 pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
-    use CssSyntaxKind::*;
-    use biome_css_syntax::*;
     match node_name {
         // Native Biome AST patterns
-        "CssAtRule" => CssAtRule::KIND_SET.iter().next(),
-        "CssAttributeMatcher" => CssAttributeMatcher::KIND_SET.iter().next(),
-        "CssAttributeMatcherValue" => CssAttributeMatcherValue::KIND_SET.iter().next(),
-        "CssAttributeName" => CssAttributeName::KIND_SET.iter().next(),
-        "CssAttributeSelector" => CssAttributeSelector::KIND_SET.iter().next(),
-        "CssBinaryExpression" => CssBinaryExpression::KIND_SET.iter().next(),
-        "CssBracketedValue" => CssBracketedValue::KIND_SET.iter().next(),
-        "CssCharsetAtRule" => CssCharsetAtRule::KIND_SET.iter().next(),
-        "CssClassSelector" => CssClassSelector::KIND_SET.iter().next(),
-        "CssColor" => CssColor::KIND_SET.iter().next(),
-        "CssColorProfileAtRule" => CssColorProfileAtRule::KIND_SET.iter().next(),
-        "CssComplexSelector" => CssComplexSelector::KIND_SET.iter().next(),
-        "CssComposesImportSpecifier" => CssComposesImportSpecifier::KIND_SET.iter().next(),
-        "CssComposesProperty" => CssComposesProperty::KIND_SET.iter().next(),
-        "CssComposesPropertyValue" => CssComposesPropertyValue::KIND_SET.iter().next(),
-        "CssCompoundSelector" => CssCompoundSelector::KIND_SET.iter().next(),
-        "CssContainerAndQuery" => CssContainerAndQuery::KIND_SET.iter().next(),
-        "CssContainerAtRule" => CssContainerAtRule::KIND_SET.iter().next(),
-        "CssContainerNotQuery" => CssContainerNotQuery::KIND_SET.iter().next(),
-        "CssContainerOrQuery" => CssContainerOrQuery::KIND_SET.iter().next(),
-        "CssContainerQueryInParens" => CssContainerQueryInParens::KIND_SET.iter().next(),
-        "CssContainerSizeFeatureInParens" => {
-            CssContainerSizeFeatureInParens::KIND_SET.iter().next()
+        "CssAtRule" => lang::CssAtRule::KIND_SET.iter().next(),
+        "CssAttributeMatcher" => lang::CssAttributeMatcher::KIND_SET.iter().next(),
+        "CssAttributeMatcherValue" => lang::CssAttributeMatcherValue::KIND_SET.iter().next(),
+        "CssAttributeName" => lang::CssAttributeName::KIND_SET.iter().next(),
+        "CssAttributeSelector" => lang::CssAttributeSelector::KIND_SET.iter().next(),
+        "CssBinaryExpression" => lang::CssBinaryExpression::KIND_SET.iter().next(),
+        "CssBracketedValue" => lang::CssBracketedValue::KIND_SET.iter().next(),
+        "CssCharsetAtRule" => lang::CssCharsetAtRule::KIND_SET.iter().next(),
+        "CssClassSelector" => lang::CssClassSelector::KIND_SET.iter().next(),
+        "CssColor" => lang::CssColor::KIND_SET.iter().next(),
+        "CssColorProfileAtRule" => lang::CssColorProfileAtRule::KIND_SET.iter().next(),
+        "CssComplexSelector" => lang::CssComplexSelector::KIND_SET.iter().next(),
+        "CssComposesImportSpecifier" => lang::CssComposesImportSpecifier::KIND_SET.iter().next(),
+        "CssComposesProperty" => lang::CssComposesProperty::KIND_SET.iter().next(),
+        "CssComposesPropertyValue" => lang::CssComposesPropertyValue::KIND_SET.iter().next(),
+        "CssCompoundSelector" => lang::CssCompoundSelector::KIND_SET.iter().next(),
+        "CssContainerAndQuery" => lang::CssContainerAndQuery::KIND_SET.iter().next(),
+        "CssContainerAtRule" => lang::CssContainerAtRule::KIND_SET.iter().next(),
+        "CssContainerNotQuery" => lang::CssContainerNotQuery::KIND_SET.iter().next(),
+        "CssContainerOrQuery" => lang::CssContainerOrQuery::KIND_SET.iter().next(),
+        "CssContainerQueryInParens" => lang::CssContainerQueryInParens::KIND_SET.iter().next(),
+        "CssContainerSizeFeatureInParens" => lang::CssContainerSizeFeatureInParens::KIND_SET
+            .iter()
+            .next(),
+        "CssContainerStyleAndQuery" => lang::CssContainerStyleAndQuery::KIND_SET.iter().next(),
+        "CssContainerStyleInParens" => lang::CssContainerStyleInParens::KIND_SET.iter().next(),
+        "CssContainerStyleNotQuery" => lang::CssContainerStyleNotQuery::KIND_SET.iter().next(),
+        "CssContainerStyleOrQuery" => lang::CssContainerStyleOrQuery::KIND_SET.iter().next(),
+        "CssContainerStyleQueryInParens" => {
+            lang::CssContainerStyleQueryInParens::KIND_SET.iter().next()
         }
-        "CssContainerStyleAndQuery" => CssContainerStyleAndQuery::KIND_SET.iter().next(),
-        "CssContainerStyleInParens" => CssContainerStyleInParens::KIND_SET.iter().next(),
-        "CssContainerStyleNotQuery" => CssContainerStyleNotQuery::KIND_SET.iter().next(),
-        "CssContainerStyleOrQuery" => CssContainerStyleOrQuery::KIND_SET.iter().next(),
-        "CssContainerStyleQueryInParens" => CssContainerStyleQueryInParens::KIND_SET.iter().next(),
-        "CssCounterStyleAtRule" => CssCounterStyleAtRule::KIND_SET.iter().next(),
-        "CssCustomIdentifier" => CssCustomIdentifier::KIND_SET.iter().next(),
-        "CssDashedIdentifier" => CssDashedIdentifier::KIND_SET.iter().next(),
-        "CssDeclaration" => CssDeclaration::KIND_SET.iter().next(),
-        "CssDeclarationBlock" => CssDeclarationBlock::KIND_SET.iter().next(),
-        "CssDeclarationImportant" => CssDeclarationImportant::KIND_SET.iter().next(),
-        "CssDeclarationOrAtRuleBlock" => CssDeclarationOrAtRuleBlock::KIND_SET.iter().next(),
-        "CssDeclarationOrRuleBlock" => CssDeclarationOrRuleBlock::KIND_SET.iter().next(),
-        "CssDeclarationWithSemicolon" => CssDeclarationWithSemicolon::KIND_SET.iter().next(),
-        "CssDocumentAtRule" => CssDocumentAtRule::KIND_SET.iter().next(),
-        "CssDocumentCustomMatcher" => CssDocumentCustomMatcher::KIND_SET.iter().next(),
-        "CssEmptyDeclaration" => CssEmptyDeclaration::KIND_SET.iter().next(),
-        "CssFontFaceAtRule" => CssFontFaceAtRule::KIND_SET.iter().next(),
-        "CssFontFamilyName" => CssFontFamilyName::KIND_SET.iter().next(),
-        "CssFontFeatureValuesAtRule" => CssFontFeatureValuesAtRule::KIND_SET.iter().next(),
-        "CssFontFeatureValuesBlock" => CssFontFeatureValuesBlock::KIND_SET.iter().next(),
-        "CssFontFeatureValuesItem" => CssFontFeatureValuesItem::KIND_SET.iter().next(),
-        "CssFontPaletteValuesAtRule" => CssFontPaletteValuesAtRule::KIND_SET.iter().next(),
-        "CssFunction" => CssFunction::KIND_SET.iter().next(),
-        "CssGenericDelimiter" => CssGenericDelimiter::KIND_SET.iter().next(),
-        "CssGenericProperty" => CssGenericProperty::KIND_SET.iter().next(),
-        "CssIdSelector" => CssIdSelector::KIND_SET.iter().next(),
-        "CssIdentifier" => CssIdentifier::KIND_SET.iter().next(),
-        "CssImportAnonymousLayer" => CssImportAnonymousLayer::KIND_SET.iter().next(),
-        "CssImportAtRule" => CssImportAtRule::KIND_SET.iter().next(),
-        "CssImportNamedLayer" => CssImportNamedLayer::KIND_SET.iter().next(),
-        "CssImportSupports" => CssImportSupports::KIND_SET.iter().next(),
-        "CssKeyframesAtRule" => CssKeyframesAtRule::KIND_SET.iter().next(),
-        "CssKeyframesBlock" => CssKeyframesBlock::KIND_SET.iter().next(),
-        "CssKeyframesIdentSelector" => CssKeyframesIdentSelector::KIND_SET.iter().next(),
-        "CssKeyframesItem" => CssKeyframesItem::KIND_SET.iter().next(),
-        "CssKeyframesPercentageSelector" => CssKeyframesPercentageSelector::KIND_SET.iter().next(),
-        "CssKeyframesScopeFunction" => CssKeyframesScopeFunction::KIND_SET.iter().next(),
-        "CssKeyframesScopePrefix" => CssKeyframesScopePrefix::KIND_SET.iter().next(),
-        "CssKeyframesScopedName" => CssKeyframesScopedName::KIND_SET.iter().next(),
-        "CssLayerAtRule" => CssLayerAtRule::KIND_SET.iter().next(),
-        "CssLayerDeclaration" => CssLayerDeclaration::KIND_SET.iter().next(),
-        "CssLayerReference" => CssLayerReference::KIND_SET.iter().next(),
-        "CssMarginAtRule" => CssMarginAtRule::KIND_SET.iter().next(),
-        "CssMediaAndCondition" => CssMediaAndCondition::KIND_SET.iter().next(),
-        "CssMediaAndTypeQuery" => CssMediaAndTypeQuery::KIND_SET.iter().next(),
-        "CssMediaAtRule" => CssMediaAtRule::KIND_SET.iter().next(),
-        "CssMediaConditionInParens" => CssMediaConditionInParens::KIND_SET.iter().next(),
-        "CssMediaConditionQuery" => CssMediaConditionQuery::KIND_SET.iter().next(),
-        "CssMediaFeatureInParens" => CssMediaFeatureInParens::KIND_SET.iter().next(),
-        "CssMediaNotCondition" => CssMediaNotCondition::KIND_SET.iter().next(),
-        "CssMediaOrCondition" => CssMediaOrCondition::KIND_SET.iter().next(),
-        "CssMediaType" => CssMediaType::KIND_SET.iter().next(),
-        "CssMediaTypeQuery" => CssMediaTypeQuery::KIND_SET.iter().next(),
-        "CssMetavariable" => CssMetavariable::KIND_SET.iter().next(),
-        "CssNamedNamespacePrefix" => CssNamedNamespacePrefix::KIND_SET.iter().next(),
-        "CssNamespace" => CssNamespace::KIND_SET.iter().next(),
-        "CssNamespaceAtRule" => CssNamespaceAtRule::KIND_SET.iter().next(),
-        "CssNestedQualifiedRule" => CssNestedQualifiedRule::KIND_SET.iter().next(),
-        "CssNestedSelector" => CssNestedSelector::KIND_SET.iter().next(),
-        "CssNthOffset" => CssNthOffset::KIND_SET.iter().next(),
-        "CssNumber" => CssNumber::KIND_SET.iter().next(),
-        "CssPageAtRule" => CssPageAtRule::KIND_SET.iter().next(),
-        "CssPageAtRuleBlock" => CssPageAtRuleBlock::KIND_SET.iter().next(),
-        "CssPageSelector" => CssPageSelector::KIND_SET.iter().next(),
-        "CssPageSelectorPseudo" => CssPageSelectorPseudo::KIND_SET.iter().next(),
-        "CssParameter" => CssParameter::KIND_SET.iter().next(),
-        "CssParenthesizedExpression" => CssParenthesizedExpression::KIND_SET.iter().next(),
-        "CssPercentage" => CssPercentage::KIND_SET.iter().next(),
-        "CssPositionTryAtRule" => CssPositionTryAtRule::KIND_SET.iter().next(),
-        "CssPropertyAtRule" => CssPropertyAtRule::KIND_SET.iter().next(),
+        "CssCounterStyleAtRule" => lang::CssCounterStyleAtRule::KIND_SET.iter().next(),
+        "CssCustomIdentifier" => lang::CssCustomIdentifier::KIND_SET.iter().next(),
+        "CssDashedIdentifier" => lang::CssDashedIdentifier::KIND_SET.iter().next(),
+        "CssDeclaration" => lang::CssDeclaration::KIND_SET.iter().next(),
+        "CssDeclarationBlock" => lang::CssDeclarationBlock::KIND_SET.iter().next(),
+        "CssDeclarationImportant" => lang::CssDeclarationImportant::KIND_SET.iter().next(),
+        "CssDeclarationOrAtRuleBlock" => lang::CssDeclarationOrAtRuleBlock::KIND_SET.iter().next(),
+        "CssDeclarationOrRuleBlock" => lang::CssDeclarationOrRuleBlock::KIND_SET.iter().next(),
+        "CssDeclarationWithSemicolon" => lang::CssDeclarationWithSemicolon::KIND_SET.iter().next(),
+        "CssDocumentAtRule" => lang::CssDocumentAtRule::KIND_SET.iter().next(),
+        "CssDocumentCustomMatcher" => lang::CssDocumentCustomMatcher::KIND_SET.iter().next(),
+        "CssEmptyDeclaration" => lang::CssEmptyDeclaration::KIND_SET.iter().next(),
+        "CssFontFaceAtRule" => lang::CssFontFaceAtRule::KIND_SET.iter().next(),
+        "CssFontFamilyName" => lang::CssFontFamilyName::KIND_SET.iter().next(),
+        "CssFontFeatureValuesAtRule" => lang::CssFontFeatureValuesAtRule::KIND_SET.iter().next(),
+        "CssFontFeatureValuesBlock" => lang::CssFontFeatureValuesBlock::KIND_SET.iter().next(),
+        "CssFontFeatureValuesItem" => lang::CssFontFeatureValuesItem::KIND_SET.iter().next(),
+        "CssFontPaletteValuesAtRule" => lang::CssFontPaletteValuesAtRule::KIND_SET.iter().next(),
+        "CssFunction" => lang::CssFunction::KIND_SET.iter().next(),
+        "CssGenericDelimiter" => lang::CssGenericDelimiter::KIND_SET.iter().next(),
+        "CssGenericProperty" => lang::CssGenericProperty::KIND_SET.iter().next(),
+        "CssIdSelector" => lang::CssIdSelector::KIND_SET.iter().next(),
+        "CssIdentifier" => lang::CssIdentifier::KIND_SET.iter().next(),
+        "CssImportAnonymousLayer" => lang::CssImportAnonymousLayer::KIND_SET.iter().next(),
+        "CssImportAtRule" => lang::CssImportAtRule::KIND_SET.iter().next(),
+        "CssImportNamedLayer" => lang::CssImportNamedLayer::KIND_SET.iter().next(),
+        "CssImportSupports" => lang::CssImportSupports::KIND_SET.iter().next(),
+        "CssKeyframesAtRule" => lang::CssKeyframesAtRule::KIND_SET.iter().next(),
+        "CssKeyframesBlock" => lang::CssKeyframesBlock::KIND_SET.iter().next(),
+        "CssKeyframesIdentSelector" => lang::CssKeyframesIdentSelector::KIND_SET.iter().next(),
+        "CssKeyframesItem" => lang::CssKeyframesItem::KIND_SET.iter().next(),
+        "CssKeyframesPercentageSelector" => {
+            lang::CssKeyframesPercentageSelector::KIND_SET.iter().next()
+        }
+        "CssKeyframesScopeFunction" => lang::CssKeyframesScopeFunction::KIND_SET.iter().next(),
+        "CssKeyframesScopePrefix" => lang::CssKeyframesScopePrefix::KIND_SET.iter().next(),
+        "CssKeyframesScopedName" => lang::CssKeyframesScopedName::KIND_SET.iter().next(),
+        "CssLayerAtRule" => lang::CssLayerAtRule::KIND_SET.iter().next(),
+        "CssLayerDeclaration" => lang::CssLayerDeclaration::KIND_SET.iter().next(),
+        "CssLayerReference" => lang::CssLayerReference::KIND_SET.iter().next(),
+        "CssMarginAtRule" => lang::CssMarginAtRule::KIND_SET.iter().next(),
+        "CssMediaAndCondition" => lang::CssMediaAndCondition::KIND_SET.iter().next(),
+        "CssMediaAndTypeQuery" => lang::CssMediaAndTypeQuery::KIND_SET.iter().next(),
+        "CssMediaAtRule" => lang::CssMediaAtRule::KIND_SET.iter().next(),
+        "CssMediaConditionInParens" => lang::CssMediaConditionInParens::KIND_SET.iter().next(),
+        "CssMediaConditionQuery" => lang::CssMediaConditionQuery::KIND_SET.iter().next(),
+        "CssMediaFeatureInParens" => lang::CssMediaFeatureInParens::KIND_SET.iter().next(),
+        "CssMediaNotCondition" => lang::CssMediaNotCondition::KIND_SET.iter().next(),
+        "CssMediaOrCondition" => lang::CssMediaOrCondition::KIND_SET.iter().next(),
+        "CssMediaType" => lang::CssMediaType::KIND_SET.iter().next(),
+        "CssMediaTypeQuery" => lang::CssMediaTypeQuery::KIND_SET.iter().next(),
+        "CssMetavariable" => lang::CssMetavariable::KIND_SET.iter().next(),
+        "CssNamedNamespacePrefix" => lang::CssNamedNamespacePrefix::KIND_SET.iter().next(),
+        "CssNamespace" => lang::CssNamespace::KIND_SET.iter().next(),
+        "CssNamespaceAtRule" => lang::CssNamespaceAtRule::KIND_SET.iter().next(),
+        "CssNestedQualifiedRule" => lang::CssNestedQualifiedRule::KIND_SET.iter().next(),
+        "CssNestedSelector" => lang::CssNestedSelector::KIND_SET.iter().next(),
+        "CssNthOffset" => lang::CssNthOffset::KIND_SET.iter().next(),
+        "CssNumber" => lang::CssNumber::KIND_SET.iter().next(),
+        "CssPageAtRule" => lang::CssPageAtRule::KIND_SET.iter().next(),
+        "CssPageAtRuleBlock" => lang::CssPageAtRuleBlock::KIND_SET.iter().next(),
+        "CssPageSelector" => lang::CssPageSelector::KIND_SET.iter().next(),
+        "CssPageSelectorPseudo" => lang::CssPageSelectorPseudo::KIND_SET.iter().next(),
+        "CssParameter" => lang::CssParameter::KIND_SET.iter().next(),
+        "CssParenthesizedExpression" => lang::CssParenthesizedExpression::KIND_SET.iter().next(),
+        "CssPercentage" => lang::CssPercentage::KIND_SET.iter().next(),
+        "CssPositionTryAtRule" => lang::CssPositionTryAtRule::KIND_SET.iter().next(),
+        "CssPropertyAtRule" => lang::CssPropertyAtRule::KIND_SET.iter().next(),
         "CssPseudoClassFunctionCompoundSelector" => {
-            CssPseudoClassFunctionCompoundSelector::KIND_SET
+            lang::CssPseudoClassFunctionCompoundSelector::KIND_SET
                 .iter()
                 .next()
         }
-        "CssPseudoClassFunctionIdentifier" => {
-            CssPseudoClassFunctionIdentifier::KIND_SET.iter().next()
+        "CssPseudoClassFunctionIdentifier" => lang::CssPseudoClassFunctionIdentifier::KIND_SET
+            .iter()
+            .next(),
+        "CssPseudoClassFunctionNth" => lang::CssPseudoClassFunctionNth::KIND_SET.iter().next(),
+        "CssPseudoClassFunctionSelector" => {
+            lang::CssPseudoClassFunctionSelector::KIND_SET.iter().next()
         }
-        "CssPseudoClassFunctionNth" => CssPseudoClassFunctionNth::KIND_SET.iter().next(),
-        "CssPseudoClassFunctionSelector" => CssPseudoClassFunctionSelector::KIND_SET.iter().next(),
-        "CssPseudoClassIdentifier" => CssPseudoClassIdentifier::KIND_SET.iter().next(),
-        "CssPseudoClassNth" => CssPseudoClassNth::KIND_SET.iter().next(),
-        "CssPseudoClassNthIdentifier" => CssPseudoClassNthIdentifier::KIND_SET.iter().next(),
-        "CssPseudoClassNthNumber" => CssPseudoClassNthNumber::KIND_SET.iter().next(),
-        "CssPseudoClassNthSelector" => CssPseudoClassNthSelector::KIND_SET.iter().next(),
-        "CssPseudoClassOfNthSelector" => CssPseudoClassOfNthSelector::KIND_SET.iter().next(),
-        "CssPseudoClassSelector" => CssPseudoClassSelector::KIND_SET.iter().next(),
-        "CssPseudoElementFunction" => CssPseudoElementFunction::KIND_SET.iter().next(),
+        "CssPseudoClassIdentifier" => lang::CssPseudoClassIdentifier::KIND_SET.iter().next(),
+        "CssPseudoClassNth" => lang::CssPseudoClassNth::KIND_SET.iter().next(),
+        "CssPseudoClassNthIdentifier" => lang::CssPseudoClassNthIdentifier::KIND_SET.iter().next(),
+        "CssPseudoClassNthNumber" => lang::CssPseudoClassNthNumber::KIND_SET.iter().next(),
+        "CssPseudoClassNthSelector" => lang::CssPseudoClassNthSelector::KIND_SET.iter().next(),
+        "CssPseudoClassOfNthSelector" => lang::CssPseudoClassOfNthSelector::KIND_SET.iter().next(),
+        "CssPseudoClassSelector" => lang::CssPseudoClassSelector::KIND_SET.iter().next(),
+        "CssPseudoElementFunction" => lang::CssPseudoElementFunction::KIND_SET.iter().next(),
         "CssPseudoElementFunctionCustomIdentifier" => {
-            CssPseudoElementFunctionCustomIdentifier::KIND_SET
+            lang::CssPseudoElementFunctionCustomIdentifier::KIND_SET
                 .iter()
                 .next()
         }
-        "CssPseudoElementFunctionSelector" => {
-            CssPseudoElementFunctionSelector::KIND_SET.iter().next()
+        "CssPseudoElementFunctionSelector" => lang::CssPseudoElementFunctionSelector::KIND_SET
+            .iter()
+            .next(),
+        "CssPseudoElementIdentifier" => lang::CssPseudoElementIdentifier::KIND_SET.iter().next(),
+        "CssPseudoElementSelector" => lang::CssPseudoElementSelector::KIND_SET.iter().next(),
+        "CssQualifiedRule" => lang::CssQualifiedRule::KIND_SET.iter().next(),
+        "CssQueryFeatureBoolean" => lang::CssQueryFeatureBoolean::KIND_SET.iter().next(),
+        "CssQueryFeaturePlain" => lang::CssQueryFeaturePlain::KIND_SET.iter().next(),
+        "CssQueryFeatureRange" => lang::CssQueryFeatureRange::KIND_SET.iter().next(),
+        "CssQueryFeatureRangeComparison" => {
+            lang::CssQueryFeatureRangeComparison::KIND_SET.iter().next()
         }
-        "CssPseudoElementIdentifier" => CssPseudoElementIdentifier::KIND_SET.iter().next(),
-        "CssPseudoElementSelector" => CssPseudoElementSelector::KIND_SET.iter().next(),
-        "CssQualifiedRule" => CssQualifiedRule::KIND_SET.iter().next(),
-        "CssQueryFeatureBoolean" => CssQueryFeatureBoolean::KIND_SET.iter().next(),
-        "CssQueryFeaturePlain" => CssQueryFeaturePlain::KIND_SET.iter().next(),
-        "CssQueryFeatureRange" => CssQueryFeatureRange::KIND_SET.iter().next(),
-        "CssQueryFeatureRangeComparison" => CssQueryFeatureRangeComparison::KIND_SET.iter().next(),
-        "CssQueryFeatureRangeInterval" => CssQueryFeatureRangeInterval::KIND_SET.iter().next(),
-        "CssQueryFeatureReverseRange" => CssQueryFeatureReverseRange::KIND_SET.iter().next(),
-        "CssRatio" => CssRatio::KIND_SET.iter().next(),
-        "CssRegularDimension" => CssRegularDimension::KIND_SET.iter().next(),
-        "CssRelativeSelector" => CssRelativeSelector::KIND_SET.iter().next(),
-        "CssRoot" => CssRoot::KIND_SET.iter().next(),
-        "CssRuleBlock" => CssRuleBlock::KIND_SET.iter().next(),
-        "CssScopeAtRule" => CssScopeAtRule::KIND_SET.iter().next(),
-        "CssScopeEdge" => CssScopeEdge::KIND_SET.iter().next(),
-        "CssScopeRangeEnd" => CssScopeRangeEnd::KIND_SET.iter().next(),
-        "CssScopeRangeInterval" => CssScopeRangeInterval::KIND_SET.iter().next(),
-        "CssScopeRangeStart" => CssScopeRangeStart::KIND_SET.iter().next(),
-        "CssStartingStyleAtRule" => CssStartingStyleAtRule::KIND_SET.iter().next(),
-        "CssString" => CssString::KIND_SET.iter().next(),
-        "CssSupportsAndCondition" => CssSupportsAndCondition::KIND_SET.iter().next(),
-        "CssSupportsAtRule" => CssSupportsAtRule::KIND_SET.iter().next(),
-        "CssSupportsConditionInParens" => CssSupportsConditionInParens::KIND_SET.iter().next(),
-        "CssSupportsFeatureDeclaration" => CssSupportsFeatureDeclaration::KIND_SET.iter().next(),
-        "CssSupportsFeatureSelector" => CssSupportsFeatureSelector::KIND_SET.iter().next(),
-        "CssSupportsNotCondition" => CssSupportsNotCondition::KIND_SET.iter().next(),
-        "CssSupportsOrCondition" => CssSupportsOrCondition::KIND_SET.iter().next(),
-        "CssTypeSelector" => CssTypeSelector::KIND_SET.iter().next(),
-        "CssUnicodeCodepoint" => CssUnicodeCodepoint::KIND_SET.iter().next(),
-        "CssUnicodeRange" => CssUnicodeRange::KIND_SET.iter().next(),
-        "CssUnicodeRangeInterval" => CssUnicodeRangeInterval::KIND_SET.iter().next(),
-        "CssUnicodeRangeWildcard" => CssUnicodeRangeWildcard::KIND_SET.iter().next(),
-        "CssUniversalNamespacePrefix" => CssUniversalNamespacePrefix::KIND_SET.iter().next(),
-        "CssUniversalSelector" => CssUniversalSelector::KIND_SET.iter().next(),
-        "CssUnknownBlockAtRule" => CssUnknownBlockAtRule::KIND_SET.iter().next(),
-        "CssUnknownDimension" => CssUnknownDimension::KIND_SET.iter().next(),
-        "CssUnknownValueAtRule" => CssUnknownValueAtRule::KIND_SET.iter().next(),
-        "CssUrlFunction" => CssUrlFunction::KIND_SET.iter().next(),
-        "CssUrlValueRaw" => CssUrlValueRaw::KIND_SET.iter().next(),
-        "CssValueAtRule" => CssValueAtRule::KIND_SET.iter().next(),
-        "CssValueAtRuleDeclarationClause" => {
-            CssValueAtRuleDeclarationClause::KIND_SET.iter().next()
+        "CssQueryFeatureRangeInterval" => {
+            lang::CssQueryFeatureRangeInterval::KIND_SET.iter().next()
         }
-        "CssValueAtRuleGenericProperty" => CssValueAtRuleGenericProperty::KIND_SET.iter().next(),
-        "CssValueAtRuleImportClause" => CssValueAtRuleImportClause::KIND_SET.iter().next(),
-        "CssValueAtRuleImportSpecifier" => CssValueAtRuleImportSpecifier::KIND_SET.iter().next(),
-        "CssValueAtRuleNamedImportSpecifier" => {
-            CssValueAtRuleNamedImportSpecifier::KIND_SET.iter().next()
+        "CssQueryFeatureReverseRange" => lang::CssQueryFeatureReverseRange::KIND_SET.iter().next(),
+        "CssRatio" => lang::CssRatio::KIND_SET.iter().next(),
+        "CssRegularDimension" => lang::CssRegularDimension::KIND_SET.iter().next(),
+        "CssRelativeSelector" => lang::CssRelativeSelector::KIND_SET.iter().next(),
+        "CssRoot" => lang::CssRoot::KIND_SET.iter().next(),
+        "CssRuleBlock" => lang::CssRuleBlock::KIND_SET.iter().next(),
+        "CssScopeAtRule" => lang::CssScopeAtRule::KIND_SET.iter().next(),
+        "CssScopeEdge" => lang::CssScopeEdge::KIND_SET.iter().next(),
+        "CssScopeRangeEnd" => lang::CssScopeRangeEnd::KIND_SET.iter().next(),
+        "CssScopeRangeInterval" => lang::CssScopeRangeInterval::KIND_SET.iter().next(),
+        "CssScopeRangeStart" => lang::CssScopeRangeStart::KIND_SET.iter().next(),
+        "CssStartingStyleAtRule" => lang::CssStartingStyleAtRule::KIND_SET.iter().next(),
+        "CssString" => lang::CssString::KIND_SET.iter().next(),
+        "CssSupportsAndCondition" => lang::CssSupportsAndCondition::KIND_SET.iter().next(),
+        "CssSupportsAtRule" => lang::CssSupportsAtRule::KIND_SET.iter().next(),
+        "CssSupportsConditionInParens" => {
+            lang::CssSupportsConditionInParens::KIND_SET.iter().next()
         }
-        "CssViewTransitionAtRule" => CssViewTransitionAtRule::KIND_SET.iter().next(),
+        "CssSupportsFeatureDeclaration" => {
+            lang::CssSupportsFeatureDeclaration::KIND_SET.iter().next()
+        }
+        "CssSupportsFeatureSelector" => lang::CssSupportsFeatureSelector::KIND_SET.iter().next(),
+        "CssSupportsNotCondition" => lang::CssSupportsNotCondition::KIND_SET.iter().next(),
+        "CssSupportsOrCondition" => lang::CssSupportsOrCondition::KIND_SET.iter().next(),
+        "CssTypeSelector" => lang::CssTypeSelector::KIND_SET.iter().next(),
+        "CssUnicodeCodepoint" => lang::CssUnicodeCodepoint::KIND_SET.iter().next(),
+        "CssUnicodeRange" => lang::CssUnicodeRange::KIND_SET.iter().next(),
+        "CssUnicodeRangeInterval" => lang::CssUnicodeRangeInterval::KIND_SET.iter().next(),
+        "CssUnicodeRangeWildcard" => lang::CssUnicodeRangeWildcard::KIND_SET.iter().next(),
+        "CssUniversalNamespacePrefix" => lang::CssUniversalNamespacePrefix::KIND_SET.iter().next(),
+        "CssUniversalSelector" => lang::CssUniversalSelector::KIND_SET.iter().next(),
+        "CssUnknownBlockAtRule" => lang::CssUnknownBlockAtRule::KIND_SET.iter().next(),
+        "CssUnknownDimension" => lang::CssUnknownDimension::KIND_SET.iter().next(),
+        "CssUnknownValueAtRule" => lang::CssUnknownValueAtRule::KIND_SET.iter().next(),
+        "CssUrlFunction" => lang::CssUrlFunction::KIND_SET.iter().next(),
+        "CssUrlValueRaw" => lang::CssUrlValueRaw::KIND_SET.iter().next(),
+        "CssValueAtRule" => lang::CssValueAtRule::KIND_SET.iter().next(),
+        "CssValueAtRuleDeclarationClause" => lang::CssValueAtRuleDeclarationClause::KIND_SET
+            .iter()
+            .next(),
+        "CssValueAtRuleGenericProperty" => {
+            lang::CssValueAtRuleGenericProperty::KIND_SET.iter().next()
+        }
+        "CssValueAtRuleImportClause" => lang::CssValueAtRuleImportClause::KIND_SET.iter().next(),
+        "CssValueAtRuleImportSpecifier" => {
+            lang::CssValueAtRuleImportSpecifier::KIND_SET.iter().next()
+        }
+        "CssValueAtRuleNamedImportSpecifier" => lang::CssValueAtRuleNamedImportSpecifier::KIND_SET
+            .iter()
+            .next(),
+        "CssViewTransitionAtRule" => lang::CssViewTransitionAtRule::KIND_SET.iter().next(),
         _ => None,
     }
 }
