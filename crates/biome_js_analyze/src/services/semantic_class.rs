@@ -108,7 +108,7 @@ impl Visitor for SemanticClassVisitor {
                     ctx.match_query(node.clone());
                 }
             }
-            WalkEvent::Leave(_) => (),
+            WalkEvent::Leave(_) => {}
         };
     }
 }
