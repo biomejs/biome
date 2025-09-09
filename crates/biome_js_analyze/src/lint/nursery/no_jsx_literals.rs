@@ -124,7 +124,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoJsxLiterals {
-        version: "next",
+        version: "2.2.4",
         name: "noJsxLiterals",
         language: "jsx",
         recommended: false,
