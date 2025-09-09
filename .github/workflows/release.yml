@@ -55,6 +55,11 @@ jobs:
           fi
           scripts/update-next-version.sh --replace "$NEW_VERSION"
 
+      # The changeset action does a hard reset, so we need to save
+      # the changes in a stash so they can be popped later in the `version` command
+      - name: Stash changes
+        run: git stash push -u -m __automated-changes
+
       - name: Create Release Pull Request
         id: changesets-action
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
