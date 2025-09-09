@@ -104,7 +104,7 @@ impl Visitor for SemanticClassVisitor {
     fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
         match event {
             WalkEvent::Enter(node) => {
-                if let Some(_class_decl) = JsClassDeclaration::cast_ref(node) {
+                if JsClassDeclaration::can_cast(node.kind()) {
                     ctx.match_query(node.clone());
                 }
             }
