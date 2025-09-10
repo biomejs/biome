@@ -371,6 +371,42 @@ fn test_resolve_shared_biome_config() {
 
 #[test]
 fn test_resolve_typescript_path_aliases() {
+    let base_dir = get_fixtures_path("resolver_cases_3");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    assert_eq!(
+        resolve(
+            "@/components/Foo",
+            &base_dir.join("src"),
+            &fs,
+            &ResolveOptions {
+                default_files: &["index"],
+                extensions: &["ts", "js"],
+                ..Default::default()
+            }
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/src/components/Foo.ts"
+        )))
+    );
+
+    assert_eq!(
+        resolve(
+            "@/components",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                default_files: &["index"],
+                extensions: &["ts", "js"],
+                ..Default::default()
+            }
+        ),
+        Err(ResolveError::NotFound)
+    );
+}
+
+#[test]
+fn test_resolve_typescript_path_aliases2() {
     let base_dir = get_fixtures_path("resolver_cases_4");
     let fs = OsFileSystem::new(base_dir.clone());
 

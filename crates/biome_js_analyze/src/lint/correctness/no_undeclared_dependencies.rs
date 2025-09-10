@@ -98,7 +98,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// **`package.json`**
     /// ```json,file=package.json
     /// {
     ///   "devDependencies": {
@@ -107,13 +106,11 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// **`src/index.js`**
     /// ```js,expect_diagnostic,use_options,file=src/index.js
     /// // cannot import from a non-test file
     /// import "vite";
     /// ```
     ///
-    /// **`tests/foo.test.js`**
     /// ```js,use_options,file=tests/foo.test.js
     /// // this works, because the file matches a glob from the options
     /// import "vite";

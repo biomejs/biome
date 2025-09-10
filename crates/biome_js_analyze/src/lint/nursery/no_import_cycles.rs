@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic,file=foobar.js
-    ///  import { baz } from "./baz.js";
+    /// import { baz } from "./baz.js";
     ///
     /// export function foo() {
     ///     baz();

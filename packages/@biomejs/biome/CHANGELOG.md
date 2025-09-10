@@ -4,6 +4,127 @@
 
 ### Patch Changes
 
+- [#7453](https://github.com/biomejs/biome/pull/7453) [`aa8cea3`](https://github.com/biomejs/biome/commit/aa8cea31af675699e18988fe79242ae5d5215af1) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#7242](https://github.com/biomejs/biome/issues/7242): Aliases specified in `package.json`'s `imports` section now support having multiple targets as part of an array.
+
+- [#7454](https://github.com/biomejs/biome/pull/7454) [`ac17183`](https://github.com/biomejs/biome/commit/ac171839a31600225e3b759470eaa026746e9cf4) Thanks [@arendjr](https://github.com/arendjr)! - Greatly improved performance of `noImportCycles` by eliminating allocations.
+
+  In one repository, the total runtime of Biome with only `noImportCycles` enabled went from ~23s down to ~4s.
+
+- [#7447](https://github.com/biomejs/biome/pull/7447) [`7139aad`](https://github.com/biomejs/biome/commit/7139aad75b6e8045be6eb09425fb82eb035fb704) Thanks [@rriski](https://github.com/rriski)! - Fixes [#7446](https://github.com/biomejs/biome/issues/7446). The GritQL `$...` spread metavariable now correctly matches members in object literals, aligning its behavior with arrays and function calls.
+
+- [#6710](https://github.com/biomejs/biome/pull/6710) [`98cf9af`](https://github.com/biomejs/biome/commit/98cf9af0a4e02434983899ce49d92209a6abab02) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#4723](https://github.com/biomejs/biome/issues/7423): Type inference now recognises _index signatures_ and their accesses when they are being indexed as a string.
+
+  #### Example
+
+  ```ts
+  type BagOfPromises = {
+    // This is an index signature definition. It declares that instances of type
+    // `BagOfPromises` can be indexed using arbitrary strings.
+    [property: string]: Promise<void>;
+  };
+
+  let bag: BagOfPromises = {};
+  // Because `bag.iAmAPromise` is equivalent to `bag["iAmAPromise"]`, this is
+  // considered an access to the string index, and a Promise is expected.
+  bag.iAmAPromise;
+  ```
+
+- [`351bccd`](https://github.com/biomejs/biome/commit/351bccdfe49a6173cb1446ef2a8a9171c8d78c26) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7212](https://github.com/biomejs/biome/issues/7212), now the [`useOptionalChain`](https://biomejs.dev/linter/rules/use-optional-chain/) rule recognizes optional chaining using `typeof` (e.g., `typeof foo !== 'undefined' && foo.bar`).
+
+- [`351bccd`](https://github.com/biomejs/biome/commit/351bccdfe49a6173cb1446ef2a8a9171c8d78c26) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7323](https://github.com/biomejs/biome/issues/7323). [`noUnusedPrivateClassMembers`](https://biomejs.dev/linter/rules/no-unused-private-class-members/) no longer reports as unused TypeScript `private` members if the rule encounters a computed access on `this`.
+
+  In the following example, `member` as previously reported as unused.
+  It is no longer reported.
+
+  ```ts
+  class TsBioo {
+    private member: number;
+
+    set_with_name(name: string, value: number) {
+      this[name] = value;
+    }
+  }
+  ```
+
+- [`351bccd`](https://github.com/biomejs/biome/commit/351bccdfe49a6173cb1446ef2a8a9171c8d78c26) Thanks [@ematipico](https://github.com/ematipico)! - Added the new nursery lint rule `noJsxLiterals`, which disallows the use of string literals inside JSX.
+
+  The rule catches these cases:
+
+  ```jsx
+  <>
+    <div>test</div> {/* test is invalid */}
+    <>test</>
+    <div>
+      {/* this string is invalid */}
+      asdjfl test foo
+    </div>
+  </>
+  ```
+
+- [`351bccd`](https://github.com/biomejs/biome/commit/351bccdfe49a6173cb1446ef2a8a9171c8d78c26) Thanks [@ematipico](https://github.com/ematipico)! - Fixed an issue (#6393) where the [useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level/) rule reported excessive diagnostics for nested hook calls.
+
+  The rule now reports only the offending top-level call site, not sub-hooks of composite hooks.
+
+  ```js
+  // Before: reported twice (useFoo and useBar).
+  function useFoo() {
+    return useBar();
+  }
+  function Component() {
+    if (cond) useFoo();
+  }
+  // After: reported once at the call to useFoo().
+  ```
+
+- [#7461](https://github.com/biomejs/biome/pull/7461) [`ea585a9`](https://github.com/biomejs/biome/commit/ea585a9394a4126370b865f565ad43b757e736ab) Thanks [@arendjr](https://github.com/arendjr)! - Improved performance of `noPrivateImports` by eliminating allocations.
+
+  In one repository, the total runtime of Biome with only `noPrivateImports` enabled went from ~3.2s down to ~1.4s.
+
+- [`351bccd`](https://github.com/biomejs/biome/commit/351bccdfe49a6173cb1446ef2a8a9171c8d78c26) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7411](https://github.com/biomejs/biome/issues/7411). The Biome Language Server had a regression where opening an editor with a file already open wouldn't load the project settings correctly.
+
+- [`351bccd`](https://github.com/biomejs/biome/commit/351bccdfe49a6173cb1446ef2a8a9171c8d78c26) Thanks [@ematipico](https://github.com/ematipico)! - Added the new nursery rule [`noDuplicateDependencies`](https://next.biomejs.dev/linter/rules/no-duplicate-dependencies/), which verifies that no dependencies are duplicated between the `bundledDependencies`, `bundleDependencies`, `dependencies`, `devDependencies`, `overrides`, `optionalDependencies`, and `peerDependencies` sections.
+
+  For example, the following snippets will trigger the rule:
+
+  ```json
+  {
+    "dependencies": {
+      "foo": ""
+    },
+    "devDependencies": {
+      "foo": ""
+    }
+  }
+  ```
+
+  ```json
+  {
+    "dependencies": {
+      "foo": ""
+    },
+    "optionalDependencies": {
+      "foo": ""
+    }
+  }
+  ```
+
+  ```json
+  {
+    "dependencies": {
+      "foo": ""
+    },
+    "peerDependencies": {
+      "foo": ""
+    }
+  }
+  ```
+
+- [`351bccd`](https://github.com/biomejs/biome/commit/351bccdfe49a6173cb1446ef2a8a9171c8d78c26) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#3824](https://github.com/biomejs/biome/issues/3824). Now the option CLI `--color` is correctly applied to logging too.
+
+## 2.2.4
+
+### Patch Changes
+
 - [#7415](https://github.com/biomejs/biome/pull/7415) [`d042f18`](https://github.com/biomejs/biome/commit/d042f18f556edfd4fecff562c8f197dbec81a5e7) Thanks [@qraqras](https://github.com/qraqras)! - Fixed [#7212](https://github.com/biomejs/biome/issues/7212), now the [`useOptionalChain`](https://biomejs.dev/linter/rules/use-optional-chain/) rule recognizes optional chaining using `typeof` (e.g., `typeof foo !== 'undefined' && foo.bar`).
 
 - [#7419](https://github.com/biomejs/biome/pull/7419) [`576baf4`](https://github.com/biomejs/biome/commit/576baf4faf568e8b6a295f457f70894235ffdb59) Thanks [@Conaclos](https://github.com/Conaclos)! - Fixed [#7323](https://github.com/biomejs/biome/issues/7323). [`noUnusedPrivateClassMembers`](https://biomejs.dev/linter/rules/no-unused-private-class-members/) no longer reports as unused TypeScript `private` members if the rule encounters a computed access on `this`.

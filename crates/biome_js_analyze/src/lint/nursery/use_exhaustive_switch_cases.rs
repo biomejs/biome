@@ -30,7 +30,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts
+    /// ```ts,expect_diagnostic,file=invalid.ts
     /// type Day =
     ///   | 'Monday'
     ///   | 'Tuesday'
@@ -52,7 +52,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```ts
+    /// ```ts,file=valid.ts
     /// type Day =
     ///   | 'Monday'
     ///   | 'Tuesday'
