@@ -89,16 +89,14 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// **`sub/foo.js`**
-    /// ```js
+    /// ```js,file=sub/foo.js
     /// /**
     ///  * @package
     ///  */
     /// export const fooPackageVariable = 1;
     /// ```
     ///
-    /// **`bar.js`**
-    /// ```js
+    /// ```js,expect_diagnostic,file=bar.js
     /// // Attempt to import package private variable from `sub/foo.js` from
     /// // outside its `sub` module:
     /// import { fooPackageVariable } from "./sub/foo.js";
@@ -109,18 +107,16 @@ declare_lint_rule! {
     /// export function getTestStuff() {}
     /// ```
     ///
-    /// **`bar.test.js`** // Attempt to import a private export. To allow this,
-    /// you probably want // to configure an `override` to disable this rule in
-    /// test files. // See:
-    /// https://biomejs.dev/reference/configuration/#overrides
-    /// ```js
+    /// ```js,expect_diagnostic,file=bar.test.js
+    /// // Attempt to import a private export. To allow this, you probably want
+    /// // to configure an `override` to disable this rule in test files.
+    /// // See: https://biomejs.dev/reference/configuration/#overrides
     /// import { getTestStuff } from "./bar.js";
     /// ```
     ///
     /// ### Valid
     ///
-    /// **`sub/index.js`**
-    /// ```js
+    /// ```js,file=sub/index.js
     /// // Package-private exports can be imported from inside the same module.
     /// import { fooPackageVariable } from "./foo.js";
     ///
@@ -131,8 +127,7 @@ declare_lint_rule! {
     /// export const subPrivateVariable = 2;
     /// ```
     ///
-    /// **`sub/deep/index.js`**
-    /// ```js
+    /// ```js,file=sub/deep/index.js
     /// // Private exports are accessible within the same module only, but
     /// // modules can be nested. So the following works because you can always
     /// // import from the index file of a parent module:
