@@ -1638,7 +1638,11 @@ export interface Nursery {
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
 	/**
-	 * Disallow .bind() or function declaration in JSX props
+	 * Disallow string literals inside JSX elements.
+	 */
+	noJsxLiterals?: RuleConfiguration_for_NoJsxLiteralsOptions;
+	/**
+	 * Disallow .bind(), arrow functions, or function expressions in JSX props
 	 */
 	noJsxPropsBind?: RuleConfiguration_for_NoJsxPropsBindOptions;
 	/**
@@ -3618,7 +3622,7 @@ export interface UseSortedAttributesOptions {
 export interface UseSortedKeysOptions {
 	sortOrder?: SortOrder;
 }
-export interface UseSortedPropertiesOptions { }
+export interface UseSortedPropertiesOptions {}
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_NoAccessKeyOptions {
 	/**
@@ -7808,13 +7812,13 @@ export type SortOrder = "natural" | "lexicographic";
  * Used to identify the kind of code action emitted by a rule
  */
 export type FixKind = "none" | "safe" | "unsafe";
-export interface NoAccessKeyOptions { }
-export interface NoAriaHiddenOnFocusableOptions { }
-export interface NoAriaUnsupportedElementsOptions { }
-export interface NoAutofocusOptions { }
-export interface NoDistractingElementsOptions { }
-export interface NoHeaderScopeOptions { }
-export interface NoInteractiveElementToNoninteractiveRoleOptions { }
+export interface NoAccessKeyOptions {}
+export interface NoAriaHiddenOnFocusableOptions {}
+export interface NoAriaUnsupportedElementsOptions {}
+export interface NoAutofocusOptions {}
+export interface NoDistractingElementsOptions {}
+export interface NoHeaderScopeOptions {}
+export interface NoInteractiveElementToNoninteractiveRoleOptions {}
 export interface NoLabelWithoutControlOptions {
 	/**
 	 * Array of component names that should be considered the same as an `input` element.
@@ -7829,31 +7833,31 @@ export interface NoLabelWithoutControlOptions {
 	 */
 	labelComponents?: string[];
 }
-export interface NoNoninteractiveElementInteractionsOptions { }
-export interface NoNoninteractiveElementToInteractiveRoleOptions { }
-export interface NoNoninteractiveTabindexOptions { }
-export interface NoPositiveTabindexOptions { }
-export interface NoRedundantAltOptions { }
-export interface NoRedundantRolesOptions { }
-export interface NoStaticElementInteractionsOptions { }
-export interface NoSvgWithoutTitleOptions { }
-export interface UseAltTextOptions { }
-export interface UseAnchorContentOptions { }
-export interface UseAriaActivedescendantWithTabindexOptions { }
-export interface UseAriaPropsForRoleOptions { }
-export interface UseAriaPropsSupportedByRoleOptions { }
-export interface UseButtonTypeOptions { }
-export interface UseFocusableInteractiveOptions { }
-export interface UseGenericFontNamesOptions { }
-export interface UseHeadingContentOptions { }
-export interface UseHtmlLangOptions { }
-export interface UseIframeTitleOptions { }
-export interface UseKeyWithClickEventsOptions { }
-export interface UseKeyWithMouseEventsOptions { }
-export interface UseMediaCaptionOptions { }
-export interface UseSemanticElementsOptions { }
-export interface UseValidAnchorOptions { }
-export interface UseValidAriaPropsOptions { }
+export interface NoNoninteractiveElementInteractionsOptions {}
+export interface NoNoninteractiveElementToInteractiveRoleOptions {}
+export interface NoNoninteractiveTabindexOptions {}
+export interface NoPositiveTabindexOptions {}
+export interface NoRedundantAltOptions {}
+export interface NoRedundantRolesOptions {}
+export interface NoStaticElementInteractionsOptions {}
+export interface NoSvgWithoutTitleOptions {}
+export interface UseAltTextOptions {}
+export interface UseAnchorContentOptions {}
+export interface UseAriaActivedescendantWithTabindexOptions {}
+export interface UseAriaPropsForRoleOptions {}
+export interface UseAriaPropsSupportedByRoleOptions {}
+export interface UseButtonTypeOptions {}
+export interface UseFocusableInteractiveOptions {}
+export interface UseGenericFontNamesOptions {}
+export interface UseHeadingContentOptions {}
+export interface UseHtmlLangOptions {}
+export interface UseIframeTitleOptions {}
+export interface UseKeyWithClickEventsOptions {}
+export interface UseKeyWithMouseEventsOptions {}
+export interface UseMediaCaptionOptions {}
+export interface UseSemanticElementsOptions {}
+export interface UseValidAnchorOptions {}
+export interface UseValidAriaPropsOptions {}
 export interface UseValidAriaRoleOptions {
 	/**
 	 * It allows specifying a list of roles that might be invalid otherwise
@@ -7864,19 +7868,19 @@ export interface UseValidAriaRoleOptions {
 	 */
 	ignoreNonDom?: boolean;
 }
-export interface UseValidAriaValuesOptions { }
+export interface UseValidAriaValuesOptions {}
 export interface UseValidAutocompleteOptions {
 	/**
 	 * `input` like custom components that should be checked.
 	 */
 	inputComponents?: string[];
 }
-export interface UseValidLangOptions { }
-export interface NoAdjacentSpacesInRegexOptions { }
-export interface NoArgumentsOptions { }
-export interface NoBannedTypesOptions { }
-export interface NoCommaOperatorOptions { }
-export interface NoEmptyTypeParametersOptions { }
+export interface UseValidLangOptions {}
+export interface NoAdjacentSpacesInRegexOptions {}
+export interface NoArgumentsOptions {}
+export interface NoBannedTypesOptions {}
+export interface NoCommaOperatorOptions {}
+export interface NoEmptyTypeParametersOptions {}
 export interface NoExcessiveCognitiveComplexityOptions {
 	/**
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
@@ -7897,68 +7901,68 @@ export interface NoExcessiveLinesPerFunctionOptions {
 	 */
 	skipIifes?: boolean;
 }
-export interface NoExcessiveNestedTestSuitesOptions { }
-export interface NoExtraBooleanCastOptions { }
-export interface NoFlatMapIdentityOptions { }
+export interface NoExcessiveNestedTestSuitesOptions {}
+export interface NoExtraBooleanCastOptions {}
+export interface NoFlatMapIdentityOptions {}
 export interface NoForEachOptions {
 	/**
 	 * A list of variable names allowed for `forEach` calls.
 	 */
 	allowedIdentifiers?: string[];
 }
-export interface NoImplicitCoercionsOptions { }
-export interface NoImportantStylesOptions { }
-export interface NoStaticOnlyClassOptions { }
-export interface NoThisInStaticOptions { }
-export interface NoUselessCatchOptions { }
-export interface NoUselessConstructorOptions { }
-export interface NoUselessContinueOptions { }
-export interface NoUselessEmptyExportOptions { }
-export interface NoUselessEscapeInRegexOptions { }
-export interface NoUselessFragmentsOptions { }
-export interface NoUselessLabelOptions { }
-export interface NoUselessLoneBlockStatementsOptions { }
-export interface NoUselessRenameOptions { }
-export interface NoUselessStringConcatOptions { }
-export interface NoUselessStringRawOptions { }
-export interface NoUselessSwitchCaseOptions { }
-export interface NoUselessTernaryOptions { }
-export interface NoUselessThisAliasOptions { }
-export interface NoUselessTypeConstraintOptions { }
-export interface NoUselessUndefinedInitializationOptions { }
-export interface NoVoidOptions { }
-export interface UseArrowFunctionOptions { }
-export interface UseDateNowOptions { }
-export interface UseFlatMapOptions { }
-export interface UseIndexOfOptions { }
-export interface UseLiteralKeysOptions { }
-export interface UseNumericLiteralsOptions { }
-export interface UseOptionalChainOptions { }
-export interface UseRegexLiteralsOptions { }
-export interface UseSimpleNumberKeysOptions { }
-export interface UseSimplifiedLogicExpressionOptions { }
-export interface UseWhileOptions { }
-export interface NoChildrenPropOptions { }
-export interface NoConstAssignOptions { }
-export interface NoConstantConditionOptions { }
-export interface NoConstantMathMinMaxClampOptions { }
-export interface NoConstructorReturnOptions { }
-export interface NoEmptyCharacterClassInRegexOptions { }
-export interface NoEmptyPatternOptions { }
-export interface NoGlobalDirnameFilenameOptions { }
-export interface NoGlobalObjectCallsOptions { }
-export interface NoInnerDeclarationsOptions { }
-export interface NoInvalidBuiltinInstantiationOptions { }
-export interface NoInvalidConstructorSuperOptions { }
-export interface NoInvalidDirectionInLinearGradientOptions { }
-export interface NoInvalidGridAreasOptions { }
-export interface NoInvalidPositionAtImportRuleOptions { }
-export interface NoInvalidUseBeforeDeclarationOptions { }
-export interface NoMissingVarFunctionOptions { }
-export interface NoNestedComponentDefinitionsOptions { }
-export interface NoNodejsModulesOptions { }
-export interface NoNonoctalDecimalEscapeOptions { }
-export interface NoPrecisionLossOptions { }
+export interface NoImplicitCoercionsOptions {}
+export interface NoImportantStylesOptions {}
+export interface NoStaticOnlyClassOptions {}
+export interface NoThisInStaticOptions {}
+export interface NoUselessCatchOptions {}
+export interface NoUselessConstructorOptions {}
+export interface NoUselessContinueOptions {}
+export interface NoUselessEmptyExportOptions {}
+export interface NoUselessEscapeInRegexOptions {}
+export interface NoUselessFragmentsOptions {}
+export interface NoUselessLabelOptions {}
+export interface NoUselessLoneBlockStatementsOptions {}
+export interface NoUselessRenameOptions {}
+export interface NoUselessStringConcatOptions {}
+export interface NoUselessStringRawOptions {}
+export interface NoUselessSwitchCaseOptions {}
+export interface NoUselessTernaryOptions {}
+export interface NoUselessThisAliasOptions {}
+export interface NoUselessTypeConstraintOptions {}
+export interface NoUselessUndefinedInitializationOptions {}
+export interface NoVoidOptions {}
+export interface UseArrowFunctionOptions {}
+export interface UseDateNowOptions {}
+export interface UseFlatMapOptions {}
+export interface UseIndexOfOptions {}
+export interface UseLiteralKeysOptions {}
+export interface UseNumericLiteralsOptions {}
+export interface UseOptionalChainOptions {}
+export interface UseRegexLiteralsOptions {}
+export interface UseSimpleNumberKeysOptions {}
+export interface UseSimplifiedLogicExpressionOptions {}
+export interface UseWhileOptions {}
+export interface NoChildrenPropOptions {}
+export interface NoConstAssignOptions {}
+export interface NoConstantConditionOptions {}
+export interface NoConstantMathMinMaxClampOptions {}
+export interface NoConstructorReturnOptions {}
+export interface NoEmptyCharacterClassInRegexOptions {}
+export interface NoEmptyPatternOptions {}
+export interface NoGlobalDirnameFilenameOptions {}
+export interface NoGlobalObjectCallsOptions {}
+export interface NoInnerDeclarationsOptions {}
+export interface NoInvalidBuiltinInstantiationOptions {}
+export interface NoInvalidConstructorSuperOptions {}
+export interface NoInvalidDirectionInLinearGradientOptions {}
+export interface NoInvalidGridAreasOptions {}
+export interface NoInvalidPositionAtImportRuleOptions {}
+export interface NoInvalidUseBeforeDeclarationOptions {}
+export interface NoMissingVarFunctionOptions {}
+export interface NoNestedComponentDefinitionsOptions {}
+export interface NoNodejsModulesOptions {}
+export interface NoNonoctalDecimalEscapeOptions {}
+export interface NoPrecisionLossOptions {}
 export interface NoPrivateImportsOptions {
 	/**
 	* The default visibility to assume for symbols without visibility tag.
@@ -7967,20 +7971,20 @@ Default: **public**.
 	 */
 	defaultVisibility?: Visibility;
 }
-export interface NoProcessGlobalOptions { }
-export interface NoReactPropAssignmentsOptions { }
-export interface NoRenderReturnValueOptions { }
+export interface NoProcessGlobalOptions {}
+export interface NoReactPropAssignmentsOptions {}
+export interface NoRenderReturnValueOptions {}
 export interface NoRestrictedElementsOptions {
 	/**
 	 * Elements to restrict. Each key is the element name, and the value is the message to show when the element is used.
 	 */
 	elements: CustomRestrictedElements;
 }
-export interface NoSelfAssignOptions { }
-export interface NoSetterReturnOptions { }
-export interface NoSolidDestructuredPropsOptions { }
-export interface NoStringCaseMismatchOptions { }
-export interface NoSwitchDeclarationsOptions { }
+export interface NoSelfAssignOptions {}
+export interface NoSetterReturnOptions {}
+export interface NoSolidDestructuredPropsOptions {}
+export interface NoStringCaseMismatchOptions {}
+export interface NoSwitchDeclarationsOptions {}
 export interface NoUndeclaredDependenciesOptions {
 	/**
 	 * If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
@@ -8001,35 +8005,35 @@ export interface NoUndeclaredVariablesOptions {
 	 */
 	checkTypes?: boolean;
 }
-export interface NoUnknownFunctionOptions { }
-export interface NoUnknownMediaFeatureNameOptions { }
-export interface NoUnknownPropertyOptions { }
-export interface NoUnknownPseudoClassOptions { }
-export interface NoUnknownPseudoElementOptions { }
-export interface NoUnknownTypeSelectorOptions { }
-export interface NoUnknownUnitOptions { }
-export interface NoUnmatchableAnbSelectorOptions { }
-export interface NoUnreachableOptions { }
-export interface NoUnreachableSuperOptions { }
-export interface NoUnsafeFinallyOptions { }
-export interface NoUnsafeOptionalChainingOptions { }
+export interface NoUnknownFunctionOptions {}
+export interface NoUnknownMediaFeatureNameOptions {}
+export interface NoUnknownPropertyOptions {}
+export interface NoUnknownPseudoClassOptions {}
+export interface NoUnknownPseudoElementOptions {}
+export interface NoUnknownTypeSelectorOptions {}
+export interface NoUnknownUnitOptions {}
+export interface NoUnmatchableAnbSelectorOptions {}
+export interface NoUnreachableOptions {}
+export interface NoUnreachableSuperOptions {}
+export interface NoUnsafeFinallyOptions {}
+export interface NoUnsafeOptionalChainingOptions {}
 export interface NoUnusedFunctionParametersOptions {
 	/**
 	 * Whether to ignore unused variables from an object destructuring with a spread.
 	 */
 	ignoreRestSiblings?: boolean;
 }
-export interface NoUnusedImportsOptions { }
-export interface NoUnusedLabelsOptions { }
-export interface NoUnusedPrivateClassMembersOptions { }
+export interface NoUnusedImportsOptions {}
+export interface NoUnusedLabelsOptions {}
+export interface NoUnusedPrivateClassMembersOptions {}
 export interface NoUnusedVariablesOptions {
 	/**
 	 * Whether to ignore unused variables from an object destructuring with a spread.
 	 */
 	ignoreRestSiblings?: boolean;
 }
-export interface NoVoidElementsWithChildrenOptions { }
-export interface NoVoidTypeReturnOptions { }
+export interface NoVoidElementsWithChildrenOptions {}
+export interface NoVoidTypeReturnOptions {}
 export interface UseExhaustiveDependenciesOptions {
 	/**
 	 * List of hooks of which the dependencies should be validated.
@@ -8044,76 +8048,84 @@ export interface UseExhaustiveDependenciesOptions {
 	 */
 	reportUnnecessaryDependencies?: boolean;
 }
-export interface UseGraphqlNamedOperationsOptions { }
-export interface UseHookAtTopLevelOptions { }
+export interface UseGraphqlNamedOperationsOptions {}
+export interface UseHookAtTopLevelOptions {}
 export interface UseImportExtensionsOptions {
 	/**
 	 * If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.
 	 */
 	forceJsExtensions?: boolean;
 }
-export interface UseIsNanOptions { }
-export interface UseJsonImportAttributesOptions { }
+export interface UseIsNanOptions {}
+export interface UseJsonImportAttributesOptions {}
 export interface UseJsxKeyInIterableOptions {
 	/**
 	 * Set to `true` to check shorthand fragments (`<></>`)
 	 */
 	checkShorthandFragments?: boolean;
 }
-export interface UseParseIntRadixOptions { }
-export interface UseSingleJsDocAsteriskOptions { }
+export interface UseParseIntRadixOptions {}
+export interface UseSingleJsDocAsteriskOptions {}
 export interface UseUniqueElementIdsOptions {
 	/**
 	 * Component names that accept an `id` prop that does not translate to a DOM element id.
 	 */
 	excludedComponents?: string[];
 }
-export interface UseValidForDirectionOptions { }
-export interface UseValidTypeofOptions { }
-export interface UseYieldOptions { }
-export interface NoDuplicateDependenciesOptions { }
-export interface NoFloatingPromisesOptions { }
+export interface UseValidForDirectionOptions {}
+export interface UseValidTypeofOptions {}
+export interface UseYieldOptions {}
+export interface NoDuplicateDependenciesOptions {}
+export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
 	/**
 	 * Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
 	 */
 	ignoreTypes?: boolean;
 }
-export interface NoJsxPropsBindOptions {
-	allowArrowFunctions?: boolean;
-	allowBind?: boolean;
-	allowFunctions?: boolean;
-	ignoreDomComponents?: boolean;
-	ignoreRefs?: boolean;
+export interface NoJsxLiteralsOptions {
+	/**
+	 * An array of strings that won't trigger the rule. Whitespaces are taken into consideration
+	 */
+	allowedStrings?: string[];
+	/**
+	 * When enabled, strings inside props are always ignored
+	 */
+	ignoreProps?: boolean;
+	/**
+	 * When enabled, also flag string literals inside JSX expressions and attributes
+	 */
+	noStrings?: boolean;
 }
-export interface NoMisusedPromisesOptions { }
-export interface NoNextAsyncClientComponentOptions { }
-export interface NoNonNullAssertedOptionalChainOptions { }
-export interface NoQwikUseVisibleTaskOptions { }
+export interface NoJsxPropsBindOptions {}
+export interface NoMisusedPromisesOptions {}
+export interface NoNextAsyncClientComponentOptions {}
+export interface NoNonNullAssertedOptionalChainOptions {}
+export interface NoQwikUseVisibleTaskOptions {}
 export interface NoSecretsOptions {
 	/**
 	 * Set entropy threshold (default is 41).
 	 */
 	entropyThreshold?: number;
 }
-export interface NoShadowOptions { }
-export interface NoUnnecessaryConditionsOptions { }
-export interface NoUnresolvedImportsOptions { }
+export interface NoShadowOptions {}
+export interface NoUnnecessaryConditionsOptions {}
+export interface NoUnresolvedImportsOptions {}
 /**
  * Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).
  */
-export interface NoUselessCatchBindingOptions { }
-export interface NoUselessUndefinedOptions { }
-export interface NoVueDataObjectDeclarationOptions { }
-export interface NoVueReservedKeysOptions { }
-export interface NoVueReservedPropsOptions { }
+export interface NoUselessCatchBindingOptions {}
+export interface NoUselessUndefinedOptions {}
+export interface NoVueDataObjectDeclarationOptions {}
+export interface NoVueReservedKeysOptions {}
+export interface NoVueReservedPropsOptions {}
 export type UseAnchorHrefOptions = null;
-export interface UseConsistentArrowReturnOptions { }
+export interface UseConsistentArrowReturnOptions {}
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
 }
-export interface UseExhaustiveSwitchCasesOptions { }
-export interface UseExplicitTypeOptions { }
+export interface UseExhaustiveSwitchCasesOptions {}
+export interface UseExplicitTypeOptions {}
 export type UseImageSizeOptions = null;
 export interface UseMaxParamsOptions {
 	/**
@@ -8121,8 +8133,8 @@ export interface UseMaxParamsOptions {
 	 */
 	max?: number;
 }
-export interface UseQwikClasslistOptions { }
-export interface UseReactFunctionComponentsOptions { }
+export interface UseQwikClasslistOptions {}
+export interface UseReactFunctionComponentsOptions {}
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -8139,18 +8151,18 @@ export interface UseVueMultiWordComponentNamesOptions {
 	 */
 	ignores: string[];
 }
-export interface NoAccumulatingSpreadOptions { }
-export interface NoAwaitInLoopsOptions { }
-export interface NoBarrelFileOptions { }
-export interface NoDeleteOptions { }
-export interface NoDynamicNamespaceImportAccessOptions { }
-export interface NoImgElementOptions { }
-export interface NoNamespaceImportOptions { }
-export interface NoReExportAllOptions { }
-export interface NoUnwantedPolyfillioOptions { }
-export interface UseGoogleFontPreconnectOptions { }
-export interface UseSolidForComponentOptions { }
-export interface UseTopLevelRegexOptions { }
+export interface NoAccumulatingSpreadOptions {}
+export interface NoAwaitInLoopsOptions {}
+export interface NoBarrelFileOptions {}
+export interface NoDeleteOptions {}
+export interface NoDynamicNamespaceImportAccessOptions {}
+export interface NoImgElementOptions {}
+export interface NoNamespaceImportOptions {}
+export interface NoReExportAllOptions {}
+export interface NoUnwantedPolyfillioOptions {}
+export interface UseGoogleFontPreconnectOptions {}
+export interface UseSolidForComponentOptions {}
+export interface UseTopLevelRegexOptions {}
 export interface NoBlankTargetOptions {
 	/**
 	 * List of domains where `target="_blank"` is allowed without `rel="noopener"`.
@@ -8161,31 +8173,31 @@ export interface NoBlankTargetOptions {
 	 */
 	allowNoReferrer?: boolean;
 }
-export interface NoDangerouslySetInnerHtmlOptions { }
-export interface NoDangerouslySetInnerHtmlWithChildrenOptions { }
-export interface NoGlobalEvalOptions { }
-export interface NoCommonJsOptions { }
-export interface NoDefaultExportOptions { }
-export interface NoDescendingSpecificityOptions { }
-export interface NoDoneCallbackOptions { }
-export interface NoEnumOptions { }
-export interface NoExportedImportsOptions { }
-export interface NoHeadElementOptions { }
-export interface NoImplicitBooleanOptions { }
-export interface NoInferrableTypesOptions { }
-export interface NoMagicNumbersOptions { }
-export interface NoNamespaceOptions { }
-export interface NoNegationElseOptions { }
-export interface NoNestedTernaryOptions { }
-export interface NoNonNullAssertionOptions { }
+export interface NoDangerouslySetInnerHtmlOptions {}
+export interface NoDangerouslySetInnerHtmlWithChildrenOptions {}
+export interface NoGlobalEvalOptions {}
+export interface NoCommonJsOptions {}
+export interface NoDefaultExportOptions {}
+export interface NoDescendingSpecificityOptions {}
+export interface NoDoneCallbackOptions {}
+export interface NoEnumOptions {}
+export interface NoExportedImportsOptions {}
+export interface NoHeadElementOptions {}
+export interface NoImplicitBooleanOptions {}
+export interface NoInferrableTypesOptions {}
+export interface NoMagicNumbersOptions {}
+export interface NoNamespaceOptions {}
+export interface NoNegationElseOptions {}
+export interface NoNestedTernaryOptions {}
+export interface NoNonNullAssertionOptions {}
 export interface NoParameterAssignOptions {
 	/**
 	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.
 	 */
 	propertyAssignment?: PropertyAssignmentMode;
 }
-export interface NoParameterPropertiesOptions { }
-export interface NoProcessEnvOptions { }
+export interface NoParameterPropertiesOptions {}
+export interface NoProcessEnvOptions {}
 export interface NoRestrictedGlobalsOptions {
 	/**
 	 * A list of names that should trigger the rule
@@ -8205,18 +8217,18 @@ export interface NoRestrictedImportsOptions {
 export interface NoRestrictedTypesOptions {
 	types?: Record<string, CustomRestrictedType>;
 }
-export interface NoShoutyConstantsOptions { }
-export interface NoSubstrOptions { }
-export interface NoUnusedTemplateLiteralOptions { }
-export interface NoUselessElseOptions { }
-export interface NoValueAtRuleOptions { }
-export interface NoYodaExpressionOptions { }
-export interface UseArrayLiteralsOptions { }
-export interface UseAsConstAssertionOptions { }
-export interface UseAtIndexOptions { }
-export interface UseBlockStatementsOptions { }
-export interface UseCollapsedElseIfOptions { }
-export interface UseCollapsedIfOptions { }
+export interface NoShoutyConstantsOptions {}
+export interface NoSubstrOptions {}
+export interface NoUnusedTemplateLiteralOptions {}
+export interface NoUselessElseOptions {}
+export interface NoValueAtRuleOptions {}
+export interface NoYodaExpressionOptions {}
+export interface UseArrayLiteralsOptions {}
+export interface UseAsConstAssertionOptions {}
+export interface UseAtIndexOptions {}
+export interface UseBlockStatementsOptions {}
+export interface UseCollapsedElseIfOptions {}
+export interface UseCollapsedIfOptions {}
 export interface UseComponentExportOnlyModulesOptions {
 	/**
 	 * Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)
@@ -8230,8 +8242,8 @@ export interface UseComponentExportOnlyModulesOptions {
 export interface UseConsistentArrayTypeOptions {
 	syntax?: ConsistentArrayType;
 }
-export interface UseConsistentBuiltinInstantiationOptions { }
-export interface UseConsistentCurlyBracesOptions { }
+export interface UseConsistentBuiltinInstantiationOptions {}
+export interface UseConsistentCurlyBracesOptions {}
 export interface UseConsistentMemberAccessibilityOptions {
 	/**
 	 * The kind of accessibility you want to enforce. Default to "noPublic"
@@ -8244,15 +8256,15 @@ export interface UseConsistentObjectDefinitionsOptions {
 	 */
 	syntax?: ObjectPropertySyntax;
 }
-export interface UseConstOptions { }
-export interface UseDefaultParameterLastOptions { }
-export interface UseDefaultSwitchClauseOptions { }
-export interface UseDeprecatedReasonOptions { }
-export interface UseEnumInitializersOptions { }
-export interface UseExplicitLengthCheckOptions { }
-export interface UseExponentiationOperatorOptions { }
-export interface UseExportTypeOptions { }
-export interface UseExportsLastOptions { }
+export interface UseConstOptions {}
+export interface UseDefaultParameterLastOptions {}
+export interface UseDefaultSwitchClauseOptions {}
+export interface UseDeprecatedReasonOptions {}
+export interface UseEnumInitializersOptions {}
+export interface UseExplicitLengthCheckOptions {}
+export interface UseExponentiationOperatorOptions {}
+export interface UseExportTypeOptions {}
+export interface UseExportsLastOptions {}
 export interface UseFilenamingConventionOptions {
 	/**
 	 * Allowed cases for file names.
@@ -8271,17 +8283,17 @@ export interface UseFilenamingConventionOptions {
 	 */
 	strictCase: boolean;
 }
-export interface UseForOfOptions { }
-export interface UseFragmentSyntaxOptions { }
-export interface UseGraphqlNamingConventionOptions { }
-export interface UseGroupedAccessorPairsOptions { }
+export interface UseForOfOptions {}
+export interface UseFragmentSyntaxOptions {}
+export interface UseGraphqlNamingConventionOptions {}
+export interface UseGroupedAccessorPairsOptions {}
 export interface UseImportTypeOptions {
 	/**
 	 * The style to apply when import types. Default to "auto"
 	 */
 	style?: Style2;
 }
-export interface UseLiteralEnumMembersOptions { }
+export interface UseLiteralEnumMembersOptions {}
 /**
  * Rule's options.
  */
@@ -8299,11 +8311,11 @@ export interface UseNamingConventionOptions {
 	 */
 	strictCase: boolean;
 }
-export interface UseNodeAssertStrictOptions { }
-export interface UseNodejsImportProtocolOptions { }
-export interface UseNumberNamespaceOptions { }
-export interface UseNumericSeparatorsOptions { }
-export interface UseObjectSpreadOptions { }
+export interface UseNodeAssertStrictOptions {}
+export interface UseNodejsImportProtocolOptions {}
+export interface UseNumberNamespaceOptions {}
+export interface UseNumericSeparatorsOptions {}
+export interface UseObjectSpreadOptions {}
 export interface UseReadonlyClassPropertiesOptions {
 	/**
 	 * When `true`, the keywords `public`, `protected`, and `private` are analyzed by the rule.
@@ -8313,50 +8325,50 @@ export interface UseReadonlyClassPropertiesOptions {
 export interface UseSelfClosingElementsOptions {
 	ignoreHtmlElements?: boolean;
 }
-export interface UseShorthandAssignOptions { }
-export interface UseShorthandFunctionTypeOptions { }
-export interface UseSingleVarDeclaratorOptions { }
-export interface UseSymbolDescriptionOptions { }
-export interface UseTemplateOptions { }
-export interface UseThrowNewErrorOptions { }
-export interface UseThrowOnlyErrorOptions { }
-export interface UseTrimStartEndOptions { }
-export interface UseUnifiedTypeSignaturesOptions { }
-export interface NoAlertOptions { }
-export interface NoApproximativeNumericConstantOptions { }
-export interface NoArrayIndexKeyOptions { }
-export interface NoAssignInExpressionsOptions { }
-export interface NoAsyncPromiseExecutorOptions { }
-export interface NoBiomeFirstExceptionOptions { }
+export interface UseShorthandAssignOptions {}
+export interface UseShorthandFunctionTypeOptions {}
+export interface UseSingleVarDeclaratorOptions {}
+export interface UseSymbolDescriptionOptions {}
+export interface UseTemplateOptions {}
+export interface UseThrowNewErrorOptions {}
+export interface UseThrowOnlyErrorOptions {}
+export interface UseTrimStartEndOptions {}
+export interface UseUnifiedTypeSignaturesOptions {}
+export interface NoAlertOptions {}
+export interface NoApproximativeNumericConstantOptions {}
+export interface NoArrayIndexKeyOptions {}
+export interface NoAssignInExpressionsOptions {}
+export interface NoAsyncPromiseExecutorOptions {}
+export interface NoBiomeFirstExceptionOptions {}
 export interface NoBitwiseOperatorsOptions {
 	/**
 	 * Allows a list of bitwise operators to be used as exceptions.
 	 */
 	allow: string[];
 }
-export interface NoCatchAssignOptions { }
-export interface NoClassAssignOptions { }
-export interface NoCommentTextOptions { }
-export interface NoCompareNegZeroOptions { }
+export interface NoCatchAssignOptions {}
+export interface NoClassAssignOptions {}
+export interface NoCommentTextOptions {}
+export interface NoCompareNegZeroOptions {}
 export interface NoConfusingLabelsOptions {
 	/**
 	 * A list of (non-confusing) labels that should be allowed
 	 */
 	allowedLabels: string[];
 }
-export interface NoConfusingVoidTypeOptions { }
+export interface NoConfusingVoidTypeOptions {}
 export interface NoConsoleOptions {
 	/**
 	 * Allowed calls on the console object.
 	 */
 	allow: string[];
 }
-export interface NoConstEnumOptions { }
-export interface NoConstantBinaryExpressionsOptions { }
-export interface NoControlCharactersInRegexOptions { }
-export interface NoDebuggerOptions { }
-export interface NoDocumentCookieOptions { }
-export interface NoDocumentImportInPageOptions { }
+export interface NoConstEnumOptions {}
+export interface NoConstantBinaryExpressionsOptions {}
+export interface NoControlCharactersInRegexOptions {}
+export interface NoDebuggerOptions {}
+export interface NoDocumentCookieOptions {}
+export interface NoDocumentImportInPageOptions {}
 export interface NoDoubleEqualsOptions {
 	/**
 	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.
@@ -8365,84 +8377,84 @@ If `false`, no such exception will be made.
 	 */
 	ignoreNull: boolean;
 }
-export interface NoDuplicateAtImportRulesOptions { }
-export interface NoDuplicateCaseOptions { }
-export interface NoDuplicateClassMembersOptions { }
-export interface NoDuplicateCustomPropertiesOptions { }
-export interface NoDuplicateElseIfOptions { }
-export interface NoDuplicateFieldsOptions { }
-export interface NoDuplicateFontNamesOptions { }
-export interface NoDuplicateJsxPropsOptions { }
-export interface NoDuplicateObjectKeysOptions { }
-export interface NoDuplicateParametersOptions { }
-export interface NoDuplicatePropertiesOptions { }
-export interface NoDuplicateSelectorsKeyframeBlockOptions { }
-export interface NoDuplicateTestHooksOptions { }
-export interface NoEmptyBlockOptions { }
-export interface NoEmptyBlockStatementsOptions { }
-export interface NoEmptyInterfaceOptions { }
-export interface NoEvolvingTypesOptions { }
-export interface NoExplicitAnyOptions { }
-export interface NoExportsInTestOptions { }
-export interface NoExtraNonNullAssertionOptions { }
-export interface NoFallthroughSwitchClauseOptions { }
-export interface NoFocusedTestsOptions { }
-export interface NoFunctionAssignOptions { }
-export interface NoGlobalAssignOptions { }
-export interface NoGlobalIsFiniteOptions { }
-export interface NoGlobalIsNanOptions { }
-export interface NoHeadImportInDocumentOptions { }
-export interface NoImplicitAnyLetOptions { }
-export interface NoImportAssignOptions { }
-export interface NoImportantInKeyframeOptions { }
-export interface NoIrregularWhitespaceOptions { }
-export interface NoLabelVarOptions { }
-export interface NoMisleadingCharacterClassOptions { }
-export interface NoMisleadingInstantiatorOptions { }
-export interface NoMisplacedAssertionOptions { }
-export interface NoMisrefactoredShorthandAssignOptions { }
-export interface NoOctalEscapeOptions { }
-export interface NoPrototypeBuiltinsOptions { }
+export interface NoDuplicateAtImportRulesOptions {}
+export interface NoDuplicateCaseOptions {}
+export interface NoDuplicateClassMembersOptions {}
+export interface NoDuplicateCustomPropertiesOptions {}
+export interface NoDuplicateElseIfOptions {}
+export interface NoDuplicateFieldsOptions {}
+export interface NoDuplicateFontNamesOptions {}
+export interface NoDuplicateJsxPropsOptions {}
+export interface NoDuplicateObjectKeysOptions {}
+export interface NoDuplicateParametersOptions {}
+export interface NoDuplicatePropertiesOptions {}
+export interface NoDuplicateSelectorsKeyframeBlockOptions {}
+export interface NoDuplicateTestHooksOptions {}
+export interface NoEmptyBlockOptions {}
+export interface NoEmptyBlockStatementsOptions {}
+export interface NoEmptyInterfaceOptions {}
+export interface NoEvolvingTypesOptions {}
+export interface NoExplicitAnyOptions {}
+export interface NoExportsInTestOptions {}
+export interface NoExtraNonNullAssertionOptions {}
+export interface NoFallthroughSwitchClauseOptions {}
+export interface NoFocusedTestsOptions {}
+export interface NoFunctionAssignOptions {}
+export interface NoGlobalAssignOptions {}
+export interface NoGlobalIsFiniteOptions {}
+export interface NoGlobalIsNanOptions {}
+export interface NoHeadImportInDocumentOptions {}
+export interface NoImplicitAnyLetOptions {}
+export interface NoImportAssignOptions {}
+export interface NoImportantInKeyframeOptions {}
+export interface NoIrregularWhitespaceOptions {}
+export interface NoLabelVarOptions {}
+export interface NoMisleadingCharacterClassOptions {}
+export interface NoMisleadingInstantiatorOptions {}
+export interface NoMisplacedAssertionOptions {}
+export interface NoMisrefactoredShorthandAssignOptions {}
+export interface NoOctalEscapeOptions {}
+export interface NoPrototypeBuiltinsOptions {}
 export interface NoQuickfixBiomeOptions {
 	/**
 	 * A list of additional JSON files that should be checked.
 	 */
 	additionalPaths?: string[];
 }
-export interface NoReactSpecificPropsOptions { }
-export interface NoRedeclareOptions { }
-export interface NoRedundantUseStrictOptions { }
-export interface NoSelfCompareOptions { }
-export interface NoShadowRestrictedNamesOptions { }
-export interface NoShorthandPropertyOverridesOptions { }
-export interface NoSkippedTestsOptions { }
-export interface NoSparseArrayOptions { }
-export interface NoSuspiciousSemicolonInJsxOptions { }
-export interface NoTemplateCurlyInStringOptions { }
-export interface NoThenPropertyOptions { }
-export interface NoTsIgnoreOptions { }
-export interface NoUnassignedVariablesOptions { }
-export interface NoUnknownAtRulesOptions { }
-export interface NoUnsafeDeclarationMergingOptions { }
-export interface NoUnsafeNegationOptions { }
-export interface NoUselessEscapeInStringOptions { }
-export interface NoUselessRegexBackrefsOptions { }
-export interface NoVarOptions { }
-export interface NoWithOptions { }
-export interface UseAdjacentOverloadSignaturesOptions { }
-export interface UseAwaitOptions { }
-export interface UseBiomeIgnoreFolderOptions { }
-export interface UseDefaultSwitchClauseLastOptions { }
-export interface UseErrorMessageOptions { }
-export interface UseGetterReturnOptions { }
-export interface UseGoogleFontDisplayOptions { }
-export interface UseGuardForInOptions { }
-export interface UseIsArrayOptions { }
-export interface UseIterableCallbackReturnOptions { }
-export interface UseNamespaceKeywordOptions { }
-export interface UseNumberToFixedDigitsArgumentOptions { }
-export interface UseStaticResponseMethodsOptions { }
-export interface UseStrictModeOptions { }
+export interface NoReactSpecificPropsOptions {}
+export interface NoRedeclareOptions {}
+export interface NoRedundantUseStrictOptions {}
+export interface NoSelfCompareOptions {}
+export interface NoShadowRestrictedNamesOptions {}
+export interface NoShorthandPropertyOverridesOptions {}
+export interface NoSkippedTestsOptions {}
+export interface NoSparseArrayOptions {}
+export interface NoSuspiciousSemicolonInJsxOptions {}
+export interface NoTemplateCurlyInStringOptions {}
+export interface NoThenPropertyOptions {}
+export interface NoTsIgnoreOptions {}
+export interface NoUnassignedVariablesOptions {}
+export interface NoUnknownAtRulesOptions {}
+export interface NoUnsafeDeclarationMergingOptions {}
+export interface NoUnsafeNegationOptions {}
+export interface NoUselessEscapeInStringOptions {}
+export interface NoUselessRegexBackrefsOptions {}
+export interface NoVarOptions {}
+export interface NoWithOptions {}
+export interface UseAdjacentOverloadSignaturesOptions {}
+export interface UseAwaitOptions {}
+export interface UseBiomeIgnoreFolderOptions {}
+export interface UseDefaultSwitchClauseLastOptions {}
+export interface UseErrorMessageOptions {}
+export interface UseGetterReturnOptions {}
+export interface UseGoogleFontDisplayOptions {}
+export interface UseGuardForInOptions {}
+export interface UseIsArrayOptions {}
+export interface UseIterableCallbackReturnOptions {}
+export interface UseNamespaceKeywordOptions {}
+export interface UseNumberToFixedDigitsArgumentOptions {}
+export interface UseStaticResponseMethodsOptions {}
+export interface UseStrictModeOptions {}
 export type ImportGroup = null | GroupMatcher | GroupMatcher[];
 export type Visibility = "public" | "package" | "private";
 export type CustomRestrictedElements = Record<string, string>;
@@ -9212,21 +9224,21 @@ export type ScanKind =
 	| "noScanner"
 	| "knownFiles"
 	| {
-		targetedKnownFiles: {
-			/**
-			 * Determines whether the file scanner should descend into subdirectories of the target paths.
-			 */
-			descendFromTargets: boolean;
-			/**
-* The paths to target by the scanner.
+			targetedKnownFiles: {
+				/**
+				 * Determines whether the file scanner should descend into subdirectories of the target paths.
+				 */
+				descendFromTargets: boolean;
+				/**
+	* The paths to target by the scanner.
 
 If a target path indicates a folder, all files within are scanned as well.
 
 Target paths must be absolute. 
- */
-			targetPaths: BiomePath[];
-		};
-	}
+	 */
+				targetPaths: BiomePath[];
+			};
+	  }
 	| "project";
 export interface ScanProjectResult {
 	/**
@@ -9417,7 +9429,7 @@ export interface GetSemanticModelParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
-export interface GetModuleGraphParams { }
+export interface GetModuleGraphParams {}
 export interface GetModuleGraphResult {
 	data: Record<string, SerializedJsModuleInfo>;
 }
