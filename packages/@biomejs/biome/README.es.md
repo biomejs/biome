@@ -79,8 +79,7 @@ o andá directamente a la [guía de inicio][getting-started] para empezar a usar
 
 **Biome** busca soportar [todos los lenguajes principales][language-support] del desarrollo web moderno.
 
-**Biome** [no necesita Node.js] para funcionar.
-
+**Biome** [no necesita Node.js](https://biomejs.dev/guides/manual-installation/) para funcionar.
 **Biome** tiene soporte de primera clase para LSP, con un parser sofisticado que representa el texto fuente con total fidelidad y excelente recuperación de errores.
 
 **Biome** apunta a ofrecer una *Experiencia de Desarrollador* de alta calidad, con diagnósticos descriptivos y gran rendimiento.
