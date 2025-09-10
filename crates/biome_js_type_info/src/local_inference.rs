@@ -1987,6 +1987,10 @@ impl TypeMember {
                 // TODO: Handle spread operator
                 None
             }
+            AnyJsObjectMember::JsMetavariable(_) => {
+                // Standalone metavariable object members (e.g. $...) do not contribute type info
+                None
+            }
         }
     }
 
@@ -2045,29 +2049,41 @@ impl TypeMember {
                 })
             }
             AnyTsTypeMember::TsGetterSignatureTypeMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
-                    let function = Function {
-                        is_async: false,
-                        type_parameters: [].into(),
-                        name: Some(name.clone().into()),
-                        parameters: [].into(),
-                        return_type: ReturnType::Type(getter_return_type(
-                            resolver,
-                            scope_id,
-                            member.type_annotation(),
-                            None,
-                        )),
-                    };
-                    let ty = resolver.register_and_resolve(function.into()).into();
-                    Self {
-                        kind: TypeMemberKind::Getter(name.into()),
-                        ty: ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
-                    }
+                let name = member.name().ok().and_then(|name| name.name())?;
+                let function = Function {
+                    is_async: false,
+                    type_parameters: [].into(),
+                    name: Some(name.clone().into()),
+                    parameters: [].into(),
+                    return_type: ReturnType::Type(getter_return_type(
+                        resolver,
+                        scope_id,
+                        member.type_annotation(),
+                        None,
+                    )),
+                };
+                let ty = resolver.register_and_resolve(function.into()).into();
+                Some(Self {
+                    kind: TypeMemberKind::Getter(name.into()),
+                    ty: ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
                 })
             }
-            AnyTsTypeMember::TsIndexSignatureTypeMember(_member) => {
-                // TODO: Handle index signatures
-                None
+            AnyTsTypeMember::TsIndexSignatureTypeMember(member) => {
+                let key_ty = member
+                    .parameter()
+                    .and_then(|parameter| parameter.type_annotation())
+                    .and_then(|annotation| annotation.ty())
+                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .ok()?;
+                let value_ty = member
+                    .type_annotation()
+                    .and_then(|annotation| annotation.ty())
+                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .ok()?;
+                Some(Self {
+                    kind: TypeMemberKind::IndexSignature(key_ty),
+                    ty: value_ty,
+                })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {

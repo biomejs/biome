@@ -14983,6 +14983,7 @@ impl AnyJsObjectBindingPatternMember {
 pub enum AnyJsObjectMember {
     JsBogusMember(JsBogusMember),
     JsGetterObjectMember(JsGetterObjectMember),
+    JsMetavariable(JsMetavariable),
     JsMethodObjectMember(JsMethodObjectMember),
     JsPropertyObjectMember(JsPropertyObjectMember),
     JsSetterObjectMember(JsSetterObjectMember),
@@ -14999,6 +15000,12 @@ impl AnyJsObjectMember {
     pub fn as_js_getter_object_member(&self) -> Option<&JsGetterObjectMember> {
         match &self {
             Self::JsGetterObjectMember(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -36336,6 +36343,11 @@ impl From<JsGetterObjectMember> for AnyJsObjectMember {
         Self::JsGetterObjectMember(node)
     }
 }
+impl From<JsMetavariable> for AnyJsObjectMember {
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
+    }
+}
 impl From<JsMethodObjectMember> for AnyJsObjectMember {
     fn from(node: JsMethodObjectMember) -> Self {
         Self::JsMethodObjectMember(node)
@@ -36365,6 +36377,7 @@ impl AstNode for AnyJsObjectMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsBogusMember::KIND_SET
         .union(JsGetterObjectMember::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsMethodObjectMember::KIND_SET)
         .union(JsPropertyObjectMember::KIND_SET)
         .union(JsSetterObjectMember::KIND_SET)
@@ -36375,6 +36388,7 @@ impl AstNode for AnyJsObjectMember {
             kind,
             JS_BOGUS_MEMBER
                 | JS_GETTER_OBJECT_MEMBER
+                | JS_METAVARIABLE
                 | JS_METHOD_OBJECT_MEMBER
                 | JS_PROPERTY_OBJECT_MEMBER
                 | JS_SETTER_OBJECT_MEMBER
@@ -36386,6 +36400,7 @@ impl AstNode for AnyJsObjectMember {
         let res = match syntax.kind() {
             JS_BOGUS_MEMBER => Self::JsBogusMember(JsBogusMember { syntax }),
             JS_GETTER_OBJECT_MEMBER => Self::JsGetterObjectMember(JsGetterObjectMember { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             JS_METHOD_OBJECT_MEMBER => Self::JsMethodObjectMember(JsMethodObjectMember { syntax }),
             JS_PROPERTY_OBJECT_MEMBER => {
                 Self::JsPropertyObjectMember(JsPropertyObjectMember { syntax })
@@ -36403,6 +36418,7 @@ impl AstNode for AnyJsObjectMember {
         match self {
             Self::JsBogusMember(it) => &it.syntax,
             Self::JsGetterObjectMember(it) => &it.syntax,
+            Self::JsMetavariable(it) => &it.syntax,
             Self::JsMethodObjectMember(it) => &it.syntax,
             Self::JsPropertyObjectMember(it) => &it.syntax,
             Self::JsSetterObjectMember(it) => &it.syntax,
@@ -36414,6 +36430,7 @@ impl AstNode for AnyJsObjectMember {
         match self {
             Self::JsBogusMember(it) => it.syntax,
             Self::JsGetterObjectMember(it) => it.syntax,
+            Self::JsMetavariable(it) => it.syntax,
             Self::JsMethodObjectMember(it) => it.syntax,
             Self::JsPropertyObjectMember(it) => it.syntax,
             Self::JsSetterObjectMember(it) => it.syntax,
@@ -36427,6 +36444,7 @@ impl std::fmt::Debug for AnyJsObjectMember {
         match self {
             Self::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
             Self::JsGetterObjectMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::JsMethodObjectMember(it) => std::fmt::Debug::fmt(it, f),
             Self::JsPropertyObjectMember(it) => std::fmt::Debug::fmt(it, f),
             Self::JsSetterObjectMember(it) => std::fmt::Debug::fmt(it, f),
@@ -36440,6 +36458,7 @@ impl From<AnyJsObjectMember> for SyntaxNode {
         match n {
             AnyJsObjectMember::JsBogusMember(it) => it.into(),
             AnyJsObjectMember::JsGetterObjectMember(it) => it.into(),
+            AnyJsObjectMember::JsMetavariable(it) => it.into(),
             AnyJsObjectMember::JsMethodObjectMember(it) => it.into(),
             AnyJsObjectMember::JsPropertyObjectMember(it) => it.into(),
             AnyJsObjectMember::JsSetterObjectMember(it) => it.into(),
