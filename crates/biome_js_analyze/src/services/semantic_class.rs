@@ -18,18 +18,22 @@ use std::collections::HashSet;
 
 #[derive(Clone)]
 pub struct SemanticClassServices {
-    class_member_references: ClassMemberReferences,
+    pub model: SemanticClassModel,
 }
 
 impl SemanticClassServices {
-    pub fn class_member_references(&self) -> &ClassMemberReferences {
-        &self.class_member_references
+    pub fn model(&self) -> &SemanticClassModel {
+        &self.model
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct SemanticClassModel {
-    pub references: ClassMemberReferences,
+pub struct SemanticClassModel {}
+
+impl SemanticClassModel {
+    pub fn class_member_references(&self, members: &JsClassMemberList) -> ClassMemberReferences {
+        class_member_references(members)
+    }
 }
 
 impl FromServices for SemanticClassServices {
@@ -42,7 +46,7 @@ impl FromServices for SemanticClassServices {
             ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticClassModel"])
         })?;
         Ok(Self {
-            class_member_references: service.references.clone(),
+            model: service.clone(),
         })
     }
 }
@@ -53,36 +57,25 @@ impl Phase for SemanticClassServices {
     }
 }
 
-pub struct ClassMemberReferencesVisitor {
-    references: ClassMemberReferences,
-}
-
-impl ClassMemberReferencesVisitor {
-    pub(crate) fn new(_root: &AnyJsRoot) -> Self {
-        Self {
-            references: ClassMemberReferences::default(),
-        }
-    }
-}
+pub struct ClassMemberReferencesVisitor {}
 
 impl Visitor for ClassMemberReferencesVisitor {
     type Language = JsLanguage;
 
-    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, _ctx: VisitorContext<JsLanguage>) {
+    fn visit(
+        &mut self,
+        event: &WalkEvent<JsSyntaxNode>,
+        mut ctx: VisitorContext<'_, '_, JsLanguage>,
+    ) {
         if let WalkEvent::Enter(node) = event
-            && let Some(js_class_declaration) = JsClassDeclaration::cast_ref(node)
+            && JsClassDeclaration::can_cast(node.kind())
         {
-            let class_member_list = js_class_declaration.members();
-            let refs = class_member_references(&class_member_list);
-            self.references.reads.extend(refs.reads);
-            self.references.writes.extend(refs.writes);
+            ctx.match_query(node.clone());
         }
     }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        ctx.services.insert_service(SemanticClassModel {
-            references: self.references,
-        });
+        ctx.services.insert_service(SemanticClassModel {});
     }
 }
 
@@ -91,25 +84,7 @@ pub struct SemanticClass<N>(pub N);
 
 impl QueryMatch for SemanticClass<JsClassDeclaration> {
     fn text_range(&self) -> TextRange {
-        // return the text range of the class node
         self.0.syntax().text_trimmed_range()
-    }
-}
-
-struct SemanticClassVisitor;
-
-impl Visitor for SemanticClassVisitor {
-    type Language = JsLanguage;
-
-    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
-        match event {
-            WalkEvent::Enter(node) => {
-                if JsClassDeclaration::can_cast(node.kind()) {
-                    ctx.match_query(node.clone());
-                }
-            }
-            WalkEvent::Leave(_) => {}
-        };
     }
 }
 
@@ -123,9 +98,9 @@ where
     type Language = JsLanguage;
     type Services = SemanticClassServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || ClassMemberReferencesVisitor::new(root));
-        analyzer.add_visitor(Phases::Semantic, || SemanticClassVisitor);
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || ClassMemberReferencesVisitor {});
+        analyzer.add_visitor(Phases::Semantic, || ClassMemberReferencesVisitor {});
     }
 
     fn key() -> QueryKey<Self::Language> {
