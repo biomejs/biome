@@ -25,18 +25,30 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 }
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
-#[ignore]
+// #[ignore]
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"import * as postcssModules from "postcss-modules"
+    const SOURCE: &str = r#"class TSDoubleUnusedPrivateConstructor {
+	constructor(
+		private usedOne: number,
+		private usedTwo: string
+	) {
 
-type PostcssOptions = Parameters<postcssModules>[0]
+		// This constructor has two unused private properties
+	}
 
-export function f(options: PostcssOptions) {
-	console.log(options)
+	method() {
+        this.usedOne = usedOne + 'foo';
+	    console.warn(usedTwo);
+    }
 }
-"#;
+
+class TSPartiallyUsedPrivateConstructor {
+  constructor(private param: number) {
+    foo(param)
+  }
+}"#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -52,7 +64,7 @@ export function f(options: PostcssOptions) {
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
         );
-    let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
+    let rule_filter = RuleFilter::Rule("style", "useReadonlyClassProperties");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
