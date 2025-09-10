@@ -35,7 +35,6 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// **`foobar.js`**
     /// ```js,expect_diagnostic,file=foobar.js
     ///  import { baz } from "./baz.js";
     ///
@@ -48,7 +47,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// **`baz.js`**
     /// ```js,expect_diagnostic,file=baz.js
     /// import { bar } from "./foobar.js";
     ///
@@ -59,7 +57,6 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// **`foo.js`**
     /// ```js,file=foo.js
     /// import { baz } from "./baz.js";
     ///
@@ -68,14 +65,12 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// **`bar.js`**
     /// ```js,file=bar.js
     /// export function bar() {
     ///     console.log("foobar");
     /// }
     /// ```
     ///
-    /// **`baz.js`**
     /// ```js,file=baz.js
     /// import { bar } from "./bar.js";
     ///
@@ -84,7 +79,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// **`types.ts`**
     /// ```ts,file=types.ts
     /// import type { bar } from "./qux.ts";
     ///
@@ -93,7 +87,6 @@ declare_lint_rule! {
     /// };
     /// ```
     ///
-    /// **`qux.ts`**
     /// ```ts,file=qux.ts
     /// import type { Foo } from "./types.ts";
     ///
@@ -123,8 +116,7 @@ declare_lint_rule! {
     ///
     /// #### Invalid
     ///
-    /// **`types.ts`**
-    /// ```ts
+    /// ```ts,file=types.ts
     /// import type { bar } from "./qux.ts";
     ///
     /// export type Foo = {
@@ -132,8 +124,7 @@ declare_lint_rule! {
     /// };
     /// ```
     ///
-    /// **`qux.ts`**
-    /// ```ts,use_options
+    /// ```ts,use_options,expect_diagnostic,file=qux.ts
     /// import type { Foo } from "./types.ts";
     ///
     /// export function bar(foo: Foo) {
