@@ -1218,7 +1218,6 @@ The documentation needs to adhere to the following rules:
   ````rust
   /// ### Invalid
   ///
-  /// **`foo.js`**
   /// ```js,expect_diagnostic,file=foo.js
   /// import { bar } from "./bar.js";
   /// export function foo() {
@@ -1226,7 +1225,6 @@ The documentation needs to adhere to the following rules:
   /// }
   /// ```
   ///
-  /// **`bar.js`**
   /// ```js,expect_diagnostic,file=bar.js
   /// import { foo } from "./foo.js";
   /// export function bar() {
