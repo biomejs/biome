@@ -418,15 +418,7 @@ impl<L: Language + Default> RegistryRule<L> {
                 preferred_jsx_quote,
                 jsx_runtime,
                 css_modules,
-            );
-
-            let ctx = match ctx {
-                Ok(ctx) => ctx,
-                Err(e) => {
-                    println!("RuleContext::new failed with error: {:?}", e);
-                    return Err(e);
-                }
-            };
+            )?;
 
             for result in R::run(&ctx) {
                 let text_range =
