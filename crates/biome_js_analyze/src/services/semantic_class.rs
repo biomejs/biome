@@ -28,7 +28,7 @@ impl SemanticClassServices {
 }
 
 #[derive(Debug, Clone)]
-pub struct ClassMemberReferencesService {
+pub struct SemanticClassModel {
     pub references: ClassMemberReferences,
 }
 
@@ -38,8 +38,8 @@ impl FromServices for SemanticClassServices {
         _rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> biome_diagnostics::Result<Self, ServicesDiagnostic> {
-        let service: &ClassMemberReferencesService = services.get_service().ok_or_else(|| {
-            ServicesDiagnostic::new(rule_key.rule_name(), &["ClassMemberReferencesService"])
+        let service: &SemanticClassModel = services.get_service().ok_or_else(|| {
+            ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticClassModel"])
         })?;
         Ok(Self {
             class_member_references: service.references.clone(),
@@ -80,7 +80,7 @@ impl Visitor for ClassMemberReferencesVisitor {
     }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        ctx.services.insert_service(ClassMemberReferencesService {
+        ctx.services.insert_service(SemanticClassModel {
             references: self.references,
         });
     }
@@ -237,7 +237,6 @@ impl ThisScopeVisitor<'_> {
     fn visit(&mut self, event: &WalkEvent<SyntaxNode<JsLanguage>>) {
         match event {
             WalkEvent::Enter(node) => {
-                // println!("enter node in ThisScopeVisitor {:?}", node);
                 if self
                     .skipped_ranges
                     .iter()
