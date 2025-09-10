@@ -156,7 +156,7 @@ pub struct NoPrivateImportsState {
     range: TextRange,
 
     /// The path where the visibility of the imported symbol is defined.
-    path: Box<str>,
+    path: String,
 
     /// The visibility of the offending symbol.
     visibility: Visibility,
@@ -276,15 +276,13 @@ fn get_restricted_imports_from_module_source(
     node: &JsModuleSource,
     options: &GetRestrictedImportOptions,
 ) -> SyntaxResult<Vec<NoPrivateImportsState>> {
-    let path: Box<str> = options.target_path.as_str().into();
-
     let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
         Some(AnyJsImportClause::JsImportCombinedClause(node)) => {
             let range = node.default_specifier()?.range();
             get_restricted_import_visibility(&Text::new_static("default"), options)
                 .map(|visibility| NoPrivateImportsState {
                     range,
-                    path: path.clone(),
+                    path: options.target_path.to_string(),
                     visibility,
                 })
                 .into_iter()
@@ -303,7 +301,7 @@ fn get_restricted_imports_from_module_source(
                             )
                             .map(|visibility| NoPrivateImportsState {
                                 range: name.text_trimmed_range(),
-                                path: path.clone(),
+                                path: options.target_path.to_string(),
                                 visibility,
                             })
                         }),
@@ -315,7 +313,7 @@ fn get_restricted_imports_from_module_source(
             get_restricted_import_visibility(&Text::new_static("default"), options)
                 .map(|visibility| NoPrivateImportsState {
                     range,
-                    path,
+                    path: options.target_path.to_string(),
                     visibility,
                 })
                 .into_iter()
@@ -331,7 +329,7 @@ fn get_restricted_imports_from_module_source(
                 get_restricted_import_visibility(&Text::from(name.token_text_trimmed()), options)
                     .map(|visibility| NoPrivateImportsState {
                         range: name.text_trimmed_range(),
-                        path: path.clone(),
+                        path: options.target_path.to_string(),
                         visibility,
                     })
             })
