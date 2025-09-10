@@ -187,18 +187,6 @@ impl<'src> YamlLexer<'src> {
         let mut headers = self.consume_block_header_tokens();
         tokens.append(&mut headers);
 
-        // The spec only allows trailing trivia followed a block header
-        let mut trivia = self.consume_trivia(true);
-        tokens.append(&mut trivia);
-
-        // So that the block content can cleanly start at a newline
-        while let Some(c) = self.current_byte() {
-            if is_break(c) {
-                break;
-            }
-            tokens.push_back(self.consume_unexpected_token());
-        }
-
         tokens.push_back(self.lex_block_content());
 
         // Block content trailing trivia
@@ -228,6 +216,25 @@ impl<'src> YamlLexer<'src> {
             }
         }
 
+        // The spec only allows trailing trivia followed a block header
+        let mut trivia = self.consume_trivia(true);
+        tokens.append(&mut trivia);
+
+        if self.current_byte().is_none_or(is_break) {
+            return tokens;
+        }
+
+        // Consume the rest of the invalid characters so that the block content can cleanly start
+        // at a newline.
+        let start = self.current_coordinate;
+        while let Some(c) = self.current_byte() {
+            if is_break(c) {
+                break;
+            }
+            self.advance_char_unchecked();
+        }
+
+        tokens.push_back(LexToken::new(ERROR_TOKEN, start, self.current_coordinate));
         tokens
     }
 
@@ -631,7 +638,7 @@ impl<'src> YamlLexer<'src> {
 
         let char = self.current_char_unchecked();
         let err = ParseDiagnostic::new(
-            format!("unexpected character `{char}`"),
+            format!("Unexpected character `{char}`"),
             self.text_position()..self.text_position() + char.text_len(),
         );
         self.diagnostics.push(err);

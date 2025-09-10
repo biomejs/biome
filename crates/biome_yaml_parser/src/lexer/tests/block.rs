@@ -557,10 +557,7 @@ fn lex_invalid_block_scalar_headers() {
     content",
         PIPE:1,
         WHITESPACE:1,
-        ERROR_TOKEN:1,
-        ERROR_TOKEN:1,
-        ERROR_TOKEN:1,
-        ERROR_TOKEN:1,
+        ERROR_TOKEN:4,
         BLOCK_CONTENT_LITERAL:12,
     );
 }
