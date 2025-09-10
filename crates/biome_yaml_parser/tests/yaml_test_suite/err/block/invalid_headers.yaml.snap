@@ -149,7 +149,7 @@ YamlRoot {
 ```
 invalid_headers.yaml:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Block scalar indentation indicator must be between '1' and '9'
+  × Indentation indicator must be between '1' and '9'
   
     1 │ - |+1-2
     2 │ 
@@ -160,7 +160,7 @@ invalid_headers.yaml:3:4 parse ━━━━━━━━━━━━━━━━�
   
 invalid_headers.yaml:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Block scalar indentation indicator must be between '1' and '9'
+  × Indentation indicator must be between '1' and '9'
   
     3 │ - |123
     4 │ 

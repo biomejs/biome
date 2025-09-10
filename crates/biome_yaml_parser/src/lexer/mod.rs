@@ -247,7 +247,7 @@ impl<'src> YamlLexer<'src> {
             }
 
             let err = ParseDiagnostic::new(
-                "Block scalar indentation indicator must be between '1' and '9'",
+                "Indentation indicator must be between '1' and '9'",
                 start_pos..self.text_position(),
             );
             self.diagnostics.push(err);
