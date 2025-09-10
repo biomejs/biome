@@ -22,21 +22,21 @@ impl HtmlSelfClosingElement {
 impl AnyHtmlElement {
     pub fn is_script_tag(&self) -> SyntaxResult<bool> {
         match self {
-            AnyHtmlElement::AnyHtmlContent(_)
-            | AnyHtmlElement::HtmlBogusElement(_)
-            | AnyHtmlElement::HtmlSelfClosingElement(_)
-            | AnyHtmlElement::HtmlCdataSection(_) => Ok(false),
-            AnyHtmlElement::HtmlElement(element) => element.is_script_tag(),
+            Self::AnyHtmlContent(_)
+            | Self::HtmlBogusElement(_)
+            | Self::HtmlSelfClosingElement(_)
+            | Self::HtmlCdataSection(_) => Ok(false),
+            Self::HtmlElement(element) => element.is_script_tag(),
         }
     }
 
     pub fn is_style_tag(&self) -> SyntaxResult<bool> {
         match self {
-            AnyHtmlElement::AnyHtmlContent(_)
-            | AnyHtmlElement::HtmlBogusElement(_)
-            | AnyHtmlElement::HtmlSelfClosingElement(_)
-            | AnyHtmlElement::HtmlCdataSection(_) => Ok(false),
-            AnyHtmlElement::HtmlElement(element) => element.is_style_tag(),
+            Self::AnyHtmlContent(_)
+            | Self::HtmlBogusElement(_)
+            | Self::HtmlSelfClosingElement(_)
+            | Self::HtmlCdataSection(_) => Ok(false),
+            Self::HtmlElement(element) => element.is_style_tag(),
         }
     }
 }

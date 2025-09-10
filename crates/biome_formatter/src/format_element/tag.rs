@@ -69,7 +69,8 @@ pub enum Tag {
     StartLabelled(LabelId),
     EndLabelled,
 
-    /// A content will be formatted later by another formatter
+    /// A content will be formatted later by another formatter.
+    /// These tags must be removed during the second pass.
     StartEmbedded(TextRange),
     EndEmbedded,
 }

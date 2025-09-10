@@ -207,6 +207,13 @@ where
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         if let Some(range) = self.embedded_node_range(node) {
+            // Tokens that belong to embedded nodes are formatted later on,
+            // so we track them, even though they aren't formatted now during this pass.
+            let state = f.state_mut();
+            for token in node.syntax().tokens() {
+                state.track_token(&token);
+            }
+
             f.write_elements(vec![
                 FormatElement::Tag(StartEmbedded(range)),
                 FormatElement::Tag(EndEmbedded),

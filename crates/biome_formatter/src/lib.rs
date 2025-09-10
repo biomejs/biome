@@ -21,6 +21,7 @@
 
 #![deny(clippy::use_self)]
 #![deny(rustdoc::broken_intra_doc_links)]
+extern crate core;
 
 mod arguments;
 mod buffer;
@@ -50,7 +51,9 @@ use std::fmt::{Debug, Display};
 use crate::builders::syntax_token_cow_slice;
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
-use crate::format_element::document::Document;
+use crate::format_element::document::{Document, ElementPath, ElementTransformer};
+use crate::format_element::{Interned, LineMode};
+use crate::prelude::document::DocumentVisitor;
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
@@ -888,40 +891,50 @@ impl<Context> Formatted<Context> {
         &self.context
     }
 
+    /// Visits each embedded element and replaces it with elements contained inside the [Document]
+    /// emitted by `fn_format_embedded`
     #[must_use]
-    pub fn format_embedded(
-        &mut self,
-        fn_format_embedded: impl Fn(TextRange) -> Option<Document>,
-    ) -> Document {
+    pub fn format_embedded<F>(&mut self, fn_format_embedded: F) -> Document
+    where
+        F: Fn(TextRange) -> Option<Document>,
+    {
         let document = &mut self.document;
-        let elements = document.elements().iter().enumerate();
 
-        let mut new_elements = vec![];
-        let mut last_seen_index = None;
-        for (index, element) in elements {
-            match element {
-                FormatElement::Tag(Tag::StartEmbedded(range)) => {
-                    if let Some(new_document) = fn_format_embedded(*range) {
-                        new_elements.extend(new_document.into_elements());
-                    };
-                    last_seen_index = Some(index);
-                }
-                FormatElement::Tag(Tag::EndEmbedded) => {
-                    if let Some(last_seen_index) = last_seen_index {
-                        if last_seen_index != index - 1 {
-                            panic!("Embedded tag must be followed by a start tag")
-                        }
+        struct EmbeddedVisitor<F> {
+            fn_format_embedded: F,
+        }
+
+        impl<F> DocumentVisitor for EmbeddedVisitor<F>
+        where
+            F: Fn(TextRange) -> Option<Document>,
+        {
+            fn visit_element(
+                &mut self,
+                element: &FormatElement,
+                _path: &ElementPath,
+            ) -> Option<FormatElement> {
+                match element {
+                    FormatElement::Tag(Tag::StartEmbedded(range)) => {
+                        (self.fn_format_embedded)(*range).map(|document| {
+                            FormatElement::Interned(Interned::new(document.into_elements()))
+                        })
                     }
-                    last_seen_index = None;
-                    // discard this element
-                }
-                element => {
-                    new_elements.push(element.clone());
+                    FormatElement::Tag(Tag::EndEmbedded) => {
+                        // FIXME: this might not play well for all cases, so we need to figure out
+                        // a nicer way to replace the tag
+                        Some(FormatElement::Line(LineMode::Hard))
+                    }
+                    _ => None,
                 }
             }
         }
 
-        Document::from(new_elements)
+        ElementTransformer::transform_document(
+            document,
+            &mut EmbeddedVisitor { fn_format_embedded },
+        );
+
+        document.clone()
     }
 
     /// Returns the formatted document.

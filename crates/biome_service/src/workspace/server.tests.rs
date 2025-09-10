@@ -112,10 +112,11 @@ fn format_html_with_scripts_and_css() {
     const FILE_CONTENT: &str = r#"<html>
     <head>
         <style>
-                            .#id {}
+            .#id {}
         </style>
         <script>
-                            const foo = "bar";
+            const foo = "bar";
+            function bar() { const object = { ["literal"]: "SOME OTHER STRING" }; return 1; }
         </script>
     </head>
 </html>"#;
@@ -152,20 +153,20 @@ fn format_html_with_scripts_and_css() {
         })
         .unwrap();
 
-    let documents = workspace.documents.pin();
-    let document = documents.get(&Utf8PathBuf::from("/project/file.html"));
-
-    assert!(document.is_some());
-
-    let document = document.unwrap();
-
-    let script = document.embedded_scripts.first().unwrap();
-    let style = document.embedded_styles.first().unwrap();
-
-    let script_node = script.node();
-    dbg!(script_node.text_range_with_trivia());
-
-    let style_node = style.node();
-    dbg!(style_node.text_range_with_trivia());
-    eprintln!("{}", result.as_code());
+    insta::assert_snapshot!(result.as_code(), @r#"
+    <html>
+    	<head>
+    		<style>
+    			.#id {}
+    		</style>
+    		<script>
+    			const foo = "bar";
+    			function bar() {
+    				const object = { ["literal"]: "SOME OTHER STRING" };
+    				return 1;
+    			}
+    		</script>
+    	</head>
+    </html>
+    "#);
 }

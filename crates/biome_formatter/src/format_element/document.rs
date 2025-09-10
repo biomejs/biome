@@ -1,4 +1,5 @@
 #![expect(clippy::mutable_key_type)]
+
 use super::tag::Tag;
 use crate::format_element::tag::DedentMode;
 use crate::prelude::tag::GroupMode;
@@ -19,6 +20,10 @@ pub struct Document {
 }
 
 impl Document {
+    pub fn new(elements: Vec<FormatElement>) -> Self {
+        Self { elements }
+    }
+
     /// Sets [`expand`](tag::Group::expand) to [`GroupMode::Propagated`] if the group contains any of:
     /// * a group with [`expand`](tag::Group::expand) set to [GroupMode::Propagated] or [GroupMode::Expand].
     /// * a non-soft [line break](FormatElement::Line) with mode [LineMode::Hard], [LineMode::Empty], or [LineMode::Literal].
@@ -133,12 +138,99 @@ impl Document {
         propagate_expands(self, &mut enclosing, &mut interned);
     }
 
-    pub(crate) fn elements(&self) -> &[FormatElement] {
-        &self.elements
+    pub fn into_elements(self) -> Vec<FormatElement> {
+        self.elements
+    }
+}
+
+/// Represents a path to a nested element within the document
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ElementPath {
+    /// Path through the nested structure: indices into Vec<FormatElement> at each level
+    indices: Vec<usize>,
+}
+
+impl ElementPath {
+    pub fn new(indices: Vec<usize>) -> Self {
+        Self { indices }
     }
 
-    pub(crate) fn into_elements(self) -> Vec<FormatElement> {
-        self.elements
+    pub fn indices(&self) -> &[usize] {
+        &self.indices
+    }
+}
+
+pub trait DocumentVisitor {
+    /// Visit an element and optionally return a replacement
+    fn visit_element(
+        &mut self,
+        element: &FormatElement,
+        path: &ElementPath,
+    ) -> Option<FormatElement>;
+}
+
+/// Applies a visitor to transform elements in the document
+pub struct ElementTransformer;
+
+impl ElementTransformer {
+    /// Visits a mutable [Document] and replaces its internal elements.
+    pub fn transform_document<V: DocumentVisitor>(document: &mut Document, visitor: &mut V) {
+        document.elements = Self::transform_elements(
+            document.elements.clone(),
+            visitor,
+            &ElementPath::new(Vec::new()),
+        );
+    }
+
+    fn transform_elements<V: DocumentVisitor>(
+        elements: Vec<FormatElement>,
+        visitor: &mut V,
+        base_path: &ElementPath,
+    ) -> Vec<FormatElement> {
+        elements
+            .into_iter()
+            .enumerate()
+            .map(|(index, element)| {
+                let mut current_path = base_path.indices().to_vec();
+                current_path.push(index);
+                let path = ElementPath::new(current_path.clone());
+
+                // Transform nested elements first
+                let transformed_element = match element {
+                    FormatElement::Interned(interned) => {
+                        let nested_elements = interned.deref().to_vec();
+                        let transformed_nested =
+                            Self::transform_elements(nested_elements, visitor, &path);
+                        FormatElement::Interned(Interned::new(transformed_nested))
+                    }
+                    FormatElement::BestFitting(best_fitting) => {
+                        let variants: Vec<Box<[FormatElement]>> = best_fitting
+                            .variants()
+                            .iter()
+                            .enumerate()
+                            .map(|(variant_index, variant)| {
+                                let mut variant_path = current_path.clone();
+                                variant_path.push(variant_index);
+                                let variant_path = ElementPath::new(variant_path);
+                                Self::transform_elements(variant.to_vec(), visitor, &variant_path)
+                                    .into_boxed_slice()
+                            })
+                            .collect();
+                        unsafe {
+                            FormatElement::BestFitting(BestFittingElement::from_vec_unchecked(
+                                variants,
+                            ))
+                        }
+                    }
+                    other => other,
+                };
+
+                // Then apply a visitor to the element itself
+                visitor
+                    .visit_element(&transformed_element, &path)
+                    .unwrap_or(transformed_element)
+            })
+            .collect()
     }
 }
 

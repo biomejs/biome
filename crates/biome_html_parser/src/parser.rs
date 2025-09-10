@@ -117,6 +117,13 @@ impl HtmlParseOptions {
         self.frontmatter = true;
         self
     }
+
+    pub fn set_doublet_text_expression(&mut self, value: bool) {
+        match value {
+            true => self.text_expression = Some(TextExpressionKind::Double),
+            false => self.text_expression = None,
+        }
+    }
 }
 
 impl From<&HtmlFileSource> for HtmlParseOptions {

@@ -3,9 +3,9 @@ use super::{
     ExtensionHandler, FixAllParams, FormatEmbedNode, FormatterCapabilities, LintParams,
     LintResults, ParseResult, ParserCapabilities, SearchCapabilities,
 };
-use crate::settings::{check_feature_activity, check_override_feature_activity};
+use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
+use crate::workspace::FixFileResult;
 use crate::workspace::{EmbeddedCssContent, EmbeddedJsContent};
-use crate::workspace::{FixFileResult, SendEmbeddedParse};
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
@@ -16,12 +16,14 @@ use biome_configuration::html::{
     HtmlFormatterConfiguration, HtmlFormatterEnabled, HtmlParseInterpolation,
     HtmlParserConfiguration,
 };
-use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::{CssParserOptions, parse_css_with_offset_and_cache};
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Diagnostic, Severity};
+use biome_formatter::format_element::{Interned, LineMode};
+use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    AttributePosition, BracketSameLine, FormatElement, IndentStyle, IndentWidth, LineEnding,
+    LineWidth, Printed,
 };
 use biome_fs::BiomePath;
 use biome_html_formatter::context::SelfCloseVoidElements;
@@ -32,9 +34,8 @@ use biome_html_formatter::{
 };
 use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
 use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
-use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::{JsParserOptions, parse_js_with_offset_and_cache};
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage};
+use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, NodeCache};
 use camino::Utf8Path;
@@ -204,6 +205,25 @@ impl ServiceLanguage for HtmlLanguage {
     fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
         None
     }
+
+    type ParserOptions = HtmlParseOptions;
+
+    fn resolve_parse_options(
+        overrides: &OverrideSettings,
+        language: &Self::ParserSettings,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions {
+        let html_file_source = file_source.to_html_file_source().unwrap_or_default();
+        let mut options = HtmlParseOptions::from(&html_file_source);
+        if language.interpolation.unwrap_or_default().into() && html_file_source.is_html() {
+            options = options.with_double_text_expression();
+        }
+
+        overrides.apply_override_html_parser_options(path, &mut options);
+
+        options
+    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -288,39 +308,10 @@ fn parse(
     }
 }
 
-/// Extracts embedded JavaScript content from HTML script elements.
-///
-/// This function walks the HTML syntax tree to find all `<script>` elements
-/// and extracts their content for offset-aware JavaScript parsing.
-///
-/// # Arguments
-/// * `html_root` - The parsed HTML syntax tree
-/// * `source_text` - The original HTML source text
-/// * `cache` - Node cache for performance optimization
-///
-/// # Returns
-/// A vector of `EmbeddedJsContent` containing parsed JavaScript with correct offsets
-pub(crate) fn parse_embedded_scripts(
-    html_root: &HtmlRoot,
-    cache: &mut NodeCache,
-    source_index_fn: impl Fn(JsFileSource) -> usize,
-) -> Vec<EmbeddedJsContent> {
-    let mut scripts = Vec::new();
-
-    // Walk through all HTML elements looking for script tags
-    for element in html_root.syntax().descendants() {
-        let result = extract_embedded_script(element.clone(), cache, &source_index_fn);
-        let Some(list) = result else {
-            continue;
-        };
-        scripts.extend(list);
-    }
-    scripts
-}
-
-fn extract_embedded_script(
+pub(crate) fn extract_embedded_script(
     element: HtmlSyntaxNode,
     cache: &mut NodeCache,
+    options: JsParserOptions,
     source_index_fn: impl Fn(JsFileSource) -> usize,
 ) -> Option<Vec<EmbeddedJsContent>> {
     let html_element = HtmlElement::cast(element)?;
@@ -359,14 +350,14 @@ fn extract_embedded_script(
                 .children()
                 .iter()
                 .filter_map(|child| child.as_any_html_content().cloned())
-                .filter_map(|child| child.as_html_content().cloned())
+                .filter_map(|child| child.as_html_embedded_content().cloned())
                 .filter_map(|child| {
                     let content = child.value_token().ok()?;
                     let parse = parse_js_with_offset_and_cache(
                         content.text(),
                         content.text_range().start(),
-                        JsFileSource::js_script(),
-                        JsParserOptions::default(),
+                        file_source,
+                        options.clone(),
                         cache,
                     );
 
@@ -385,31 +376,10 @@ fn extract_embedded_script(
     }
 }
 
-/// Extracts embedded CSS content from HTML style elements.
-pub(crate) fn parse_embedded_styles<F>(
-    html_root: &HtmlRoot,
-    cache: &mut NodeCache,
-    source_index_fn: F,
-) -> Vec<EmbeddedCssContent>
-where
-    F: Fn(CssFileSource) -> usize,
-{
-    let mut styles = Vec::new();
-
-    // Walk through all HTML elements looking for style tags
-    for element in html_root.syntax().descendants() {
-        let Some(list) = parse_embedded_style(element.clone(), cache, &source_index_fn) else {
-            continue;
-        };
-        styles.extend(list);
-    }
-
-    styles
-}
-
-fn parse_embedded_style<F>(
+pub(crate) fn parse_embedded_style<F>(
     element: HtmlSyntaxNode,
     cache: &mut NodeCache,
+    options: CssParserOptions,
     source_index_fn: F,
 ) -> Option<Vec<EmbeddedCssContent>>
 where
@@ -426,14 +396,14 @@ where
                 .children()
                 .iter()
                 .filter_map(|child| child.as_any_html_content().cloned())
-                .filter_map(|child| child.as_html_content().cloned())
+                .filter_map(|child| child.as_html_embedded_content().cloned())
                 .filter_map(|child| {
                     let content = child.value_token().ok()?;
                     let parse = parse_css_with_offset_and_cache(
                         content.text(),
                         content.text_range().start(),
                         cache,
-                        CssParserOptions::default(),
+                        options,
                     );
 
                     let file_source_index = source_index_fn(CssFileSource::css());
@@ -505,30 +475,51 @@ fn format_embedded(
     let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
 
     let tree = parse.syntax();
+    let indent_script_and_style = options.indent_script_and_style().value();
     let mut formatted = format_node(options, &tree)?;
     let new_document = formatted.format_embedded(move |range| {
         let mut iter = embedded_nodes.iter();
-        let node = iter.find(|node| {
-            eprintln!(
-                "format range {:?} and original range {:?}",
-                &node.range, &range
-            );
-            node.range == range
-        })?;
+        let node = iter.find(|node| node.range == range)?;
 
         match node.source {
             DocumentFileSource::Js(_) => {
+                let js_options = settings.format_options::<JsLanguage>(biome_path, &node.source);
                 let node = node.node.clone().root.into_node::<JsLanguage>();
-                let formatted =
-                    biome_js_formatter::format_node(JsFormatOptions::default(), &node.node).ok()?;
-                Some(formatted.into_document())
+                let formatted = biome_js_formatter::format_node(js_options, &node.node).ok()?;
+                if indent_script_and_style {
+                    let elements = vec![
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Tag(Tag::StartIndent),
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Interned(Interned::new(
+                            formatted.into_document().into_elements(),
+                        )),
+                        FormatElement::Tag(Tag::EndIndent),
+                    ];
+
+                    Some(Document::new(elements))
+                } else {
+                    Some(formatted.into_document())
+                }
             }
             DocumentFileSource::Css(_) => {
+                let css_options = settings.format_options::<CssLanguage>(biome_path, &node.source);
                 let node = node.node.clone().root.into_node::<CssLanguage>();
-                let formatted =
-                    biome_css_formatter::format_node(CssFormatOptions::default(), &node.node)
-                        .ok()?;
-                Some(formatted.into_document())
+                let formatted = biome_css_formatter::format_node(css_options, &node.node).ok()?;
+                if indent_script_and_style {
+                    let elements = vec![
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Tag(Tag::StartIndent),
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Interned(Interned::new(
+                            formatted.into_document().into_elements(),
+                        )),
+                        FormatElement::Tag(Tag::EndIndent),
+                    ];
+                    Some(Document::new(elements))
+                } else {
+                    Some(formatted.into_document())
+                }
             }
             _ => None,
         }

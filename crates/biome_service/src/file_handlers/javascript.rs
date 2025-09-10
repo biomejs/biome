@@ -172,13 +172,38 @@ impl From<JsxRuntime> for JsEnvironmentSettings {
 impl ServiceLanguage for JsLanguage {
     type FormatterSettings = JsFormatterSettings;
     type LinterSettings = JsLinterSettings;
+    type AssistSettings = JsAssistSettings;
     type FormatOptions = JsFormatOptions;
     type ParserSettings = JsParserSettings;
+    type ParserOptions = JsParserOptions;
+
     type EnvironmentSettings = JsEnvironmentSettings;
-    type AssistSettings = JsAssistSettings;
 
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self> {
         &languages.javascript
+    }
+
+    fn resolve_environment(global: &Settings) -> Option<&Self::EnvironmentSettings> {
+        Some(&global.languages.javascript.environment)
+    }
+
+    fn resolve_parse_options(
+        overrides: &OverrideSettings,
+        language: &Self::ParserSettings,
+        path: &BiomePath,
+        _file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions {
+        let mut options = JsParserOptions {
+            grit_metavariables: false,
+            parse_class_parameter_decorators: language
+                .parse_class_parameter_decorators
+                .unwrap_or_default()
+                .into(),
+        };
+
+        overrides.apply_override_js_parser_options(path, &mut options);
+
+        options
     }
 
     fn resolve_format_options(
@@ -354,6 +379,33 @@ impl ServiceLanguage for JsLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
+    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.javascript.linter.enabled,
+                        pattern.linter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
+
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.javascript.linter.enabled,
+                settings.linter.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
+    }
+
     fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
         let overrides_activity =
             settings
@@ -406,37 +458,6 @@ impl ServiceLanguage for JsLanguage {
             ))
             .unwrap_or_default()
             .into()
-    }
-
-    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
-        let overrides_activity =
-            settings
-                .override_settings
-                .patterns
-                .iter()
-                .rev()
-                .find_map(|pattern| {
-                    check_override_feature_activity(
-                        pattern.languages.javascript.linter.enabled,
-                        pattern.linter.enabled,
-                    )
-                    .filter(|_| {
-                        // Then check whether the path satisfies
-                        pattern.is_file_included(path)
-                    })
-                });
-
-        overrides_activity
-            .or(check_feature_activity(
-                settings.languages.javascript.linter.enabled,
-                settings.linter.enabled,
-            ))
-            .unwrap_or_default()
-            .into()
-    }
-
-    fn resolve_environment(global: &Settings) -> Option<&Self::EnvironmentSettings> {
-        Some(&global.languages.javascript.environment)
     }
 }
 
@@ -503,20 +524,7 @@ fn parse(
     settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let mut options = JsParserOptions {
-        grit_metavariables: false,
-        parse_class_parameter_decorators: settings
-            .languages
-            .javascript
-            .parser
-            .parse_class_parameter_decorators
-            .unwrap_or_default()
-            .into(),
-    };
-
-    settings
-        .override_settings
-        .apply_override_js_parser_options(biome_path, &mut options);
+    let options = settings.parse_options::<JsLanguage>(biome_path, &file_source);
 
     let mut file_source = file_source.to_js_file_source().unwrap_or_default();
     let jsx_everywhere = settings

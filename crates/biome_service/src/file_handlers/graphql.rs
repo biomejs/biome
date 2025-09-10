@@ -94,13 +94,27 @@ impl From<GraphqlAssistConfiguration> for GraphqlAssistSettings {
 impl ServiceLanguage for GraphqlLanguage {
     type FormatterSettings = GraphqlFormatterSettings;
     type LinterSettings = GraphqlLinterSettings;
+    type AssistSettings = GraphqlAssistSettings;
     type FormatOptions = GraphqlFormatOptions;
     type ParserSettings = ();
+    type ParserOptions = ();
+
     type EnvironmentSettings = ();
-    type AssistSettings = GraphqlAssistSettings;
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.graphql
+    }
+
+    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
+        None
+    }
+
+    fn resolve_parse_options(
+        _overrides: &OverrideSettings,
+        _language: &Self::ParserSettings,
+        _path: &BiomePath,
+        _file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions {
     }
 
     fn resolve_format_options(
@@ -163,6 +177,33 @@ impl ServiceLanguage for GraphqlLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
+    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.graphql.linter.enabled,
+                        pattern.linter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
+
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.graphql.linter.enabled,
+                settings.linter.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
+    }
+
     fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
         let overrides_activity =
             settings
@@ -215,37 +256,6 @@ impl ServiceLanguage for GraphqlLanguage {
             ))
             .unwrap_or_default()
             .into()
-    }
-
-    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
-        let overrides_activity =
-            settings
-                .override_settings
-                .patterns
-                .iter()
-                .rev()
-                .find_map(|pattern| {
-                    check_override_feature_activity(
-                        pattern.languages.graphql.linter.enabled,
-                        pattern.linter.enabled,
-                    )
-                    .filter(|_| {
-                        // Then check whether the path satisfies
-                        pattern.is_file_included(path)
-                    })
-                });
-
-        overrides_activity
-            .or(check_feature_activity(
-                settings.languages.graphql.linter.enabled,
-                settings.linter.enabled,
-            ))
-            .unwrap_or_default()
-            .into()
-    }
-
-    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
-        None
     }
 }
 
