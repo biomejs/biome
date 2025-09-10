@@ -240,7 +240,7 @@ impl<'src> YamlLexer<'src> {
         let has_more_digits = self.current_byte().is_some_and(|c| c.is_ascii_digit());
         let starts_with_zero = first_digit == b'0';
 
-        if starts_with_zero || has_more_digits {
+        let kind = if starts_with_zero || has_more_digits {
             // Consume any remaining digits for better diagnostic
             while self.current_byte().is_some_and(|c| c.is_ascii_digit()) {
                 self.advance(1);
@@ -251,13 +251,11 @@ impl<'src> YamlLexer<'src> {
                 start_pos..self.text_position(),
             );
             self.diagnostics.push(err);
-        }
-
-        LexToken::new(
-            INDENTATION_INDICATOR,
-            start_coordinate,
-            self.current_coordinate,
-        )
+            ERROR_TOKEN
+        } else {
+            INDENTATION_INDICATOR
+        };
+        LexToken::new(kind, start_coordinate, self.current_coordinate)
     }
 
     /// Lex the content of a block scalar.

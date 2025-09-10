@@ -55,8 +55,10 @@ YamlRoot {
                             properties: missing (optional),
                             bitwise_or_token: PIPE@11..12 "|" [] [],
                             headers: YamlBlockHeaderList [
-                                YamlIndentationIndicator {
-                                    indentation_indicator_token: INDENTATION_INDICATOR@12..15 "123" [] [],
+                                YamlBogusBlockHeader {
+                                    items: [
+                                        ERROR_TOKEN@12..15 "123" [] [],
+                                    ],
                                 },
                             ],
                             content: YamlBlockContent {
@@ -70,8 +72,10 @@ YamlRoot {
                             properties: missing (optional),
                             bitwise_or_token: PIPE@19..20 "|" [] [],
                             headers: YamlBlockHeaderList [
-                                YamlIndentationIndicator {
-                                    indentation_indicator_token: INDENTATION_INDICATOR@20..21 "0" [] [],
+                                YamlBogusBlockHeader {
+                                    items: [
+                                        ERROR_TOKEN@20..21 "0" [] [],
+                                    ],
                                 },
                             ],
                             content: YamlBlockContent {
@@ -124,8 +128,8 @@ YamlRoot {
               0: (empty)
               1: PIPE@11..12 "|" [] []
               2: YAML_BLOCK_HEADER_LIST@12..15
-                0: YAML_INDENTATION_INDICATOR@12..15
-                  0: INDENTATION_INDICATOR@12..15 "123" [] []
+                0: YAML_BOGUS_BLOCK_HEADER@12..15
+                  0: ERROR_TOKEN@12..15 "123" [] []
               3: YAML_BLOCK_CONTENT@15..15
                 0: BLOCK_CONTENT_LITERAL@15..15 "" [] []
           2: YAML_BLOCK_SEQUENCE_ENTRY@15..21
@@ -134,8 +138,8 @@ YamlRoot {
               0: (empty)
               1: PIPE@19..20 "|" [] []
               2: YAML_BLOCK_HEADER_LIST@20..21
-                0: YAML_INDENTATION_INDICATOR@20..21
-                  0: INDENTATION_INDICATOR@20..21 "0" [] []
+                0: YAML_BOGUS_BLOCK_HEADER@20..21
+                  0: ERROR_TOKEN@20..21 "0" [] []
               3: YAML_BLOCK_CONTENT@21..21
                 0: BLOCK_CONTENT_LITERAL@21..21 "" [] []
         3: SEQUENCE_END@21..21 "" [] []

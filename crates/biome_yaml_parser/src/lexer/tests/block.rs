@@ -538,14 +538,14 @@ fn lex_invalid_block_scalar_headers() {
     assert_lex!(
         "|0",
         PIPE:1,
-        INDENTATION_INDICATOR:1,
+        ERROR_TOKEN:1,
         BLOCK_CONTENT_LITERAL:0,
     );
 
     assert_lex!(
         "|12-3+",
         PIPE:1,
-        INDENTATION_INDICATOR:2,
+        ERROR_TOKEN:2,
         DASH:1,
         INDENTATION_INDICATOR:1,
         PLUS:1,
