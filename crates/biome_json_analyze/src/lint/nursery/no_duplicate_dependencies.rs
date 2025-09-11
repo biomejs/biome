@@ -8,7 +8,52 @@ use biome_rule_options::no_duplicate_dependencies::NoDuplicateDependenciesOption
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
-    /// Disallow any dependency from being specified more than once (e.g. in `dependencies` and `devDependencies`)
+    /// Prevent the listing of duplicate dependencies.
+    /// The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
+    ///
+    /// Dependencies are not allowed to be listed twice under the same dependency group.
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```json
+    /// {
+    ///     "dependencies": {
+    ///         "foo": "1.0.0",
+    ///         "foo": "2.0.0"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```json
+    /// {
+    ///     "bundleDependencies": ["foo", "foo"]
+    /// }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```json
+    /// {
+    ///     "dependencies": {
+    ///         "foo": "2.0.0"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```json
+    /// {
+    ///     "bundleDependencies": ["foo"]
+    /// }
+    /// ```
+    ///
+    /// Some dependency group dependencies are checked against other dependency groups;
+    ///  - Dependencies listed in "dependencies" cannot be listed under "devDependencies", "optionalDependencies" or "peerDependencies".
+    ///  - Dependencies listed in "optionalDependencies" cannot be listed under "peerDependencies" (and vice versa).
+    ///
+    /// Dependencies listed in "devDependencies" are allowed to be listed in "optionalDependencies" or "peerDependencies".
+    /// And dependencies listed in "overrides" & "bundleDependencies" are not checked against other dependency groups.
     ///
     /// ## Examples
     ///
