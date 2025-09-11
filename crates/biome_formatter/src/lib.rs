@@ -1461,15 +1461,20 @@ pub trait FormatLanguage {
         self,
         root: &SyntaxNode<Self::SyntaxLanguage>,
         source_map: Option<TransformSourceMap>,
+        delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context;
 }
 
 /// Formats a syntax node file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
+///
+/// When `skip_embedded_nodes` is `true`, the content of `<script>` and `<style` is formatted
+/// verbatim.
 pub fn format_node<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
+    delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<L::Context>> {
     let (root, source_map) = match language.transform(&root.clone()) {
         Some((transformed, source_map)) => {
@@ -1515,7 +1520,7 @@ pub fn format_node<L: FormatLanguage>(
         None => (root.clone(), None),
     };
 
-    let context = language.create_context(&root, source_map);
+    let context = language.create_context(&root, source_map, delegate_fmt_embedded_nodes);
     let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
     let mut state = FormatState::new(context);
@@ -1543,6 +1548,7 @@ pub fn format_node<L: FormatLanguage>(
 pub fn format_node_with_offset<L: FormatLanguage>(
     root: &SyntaxNodeWithOffset<L::SyntaxLanguage>,
     language: L,
+    delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<L::Context>> {
     let (root, source_map) = match language.transform(&root.node.clone()) {
         Some((transformed, source_map)) => {
@@ -1589,7 +1595,7 @@ pub fn format_node_with_offset<L: FormatLanguage>(
         None => (root.node.clone(), None),
     };
 
-    let context = language.create_context(&root, source_map);
+    let context = language.create_context(&root, source_map, delegate_fmt_embedded_nodes);
     let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
     let mut state = FormatState::new(context);
@@ -1978,7 +1984,7 @@ pub fn format_sub_tree<L: FormatLanguage>(
         None => 0,
     };
 
-    let formatted = format_node(root, language)?;
+    let formatted = format_node(root, language, false)?;
     let mut printed = formatted.print_with_indent(initial_indent)?;
     let sourcemap = printed.take_sourcemap();
     let verbatim_ranges = printed.take_verbatim_ranges();

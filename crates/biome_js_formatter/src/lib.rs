@@ -528,6 +528,7 @@ impl FormatLanguage for JsFormatLanguage {
         self,
         root: &JsSyntaxNode,
         source_map: Option<TransformSourceMap>,
+        _delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &JsCommentStyle, source_map.as_ref());
         JsFormatContext::new(self.options, comments).with_source_map(source_map)
@@ -560,7 +561,7 @@ pub fn format_node(
     options: JsFormatOptions,
     root: &JsSyntaxNode,
 ) -> FormatResult<Formatted<JsFormatContext>> {
-    biome_formatter::format_node(root, JsFormatLanguage::new(options))
+    biome_formatter::format_node(root, JsFormatLanguage::new(options), false)
 }
 
 /// Formats a JavaScript (and its super languages) file based on its features.
@@ -570,7 +571,7 @@ pub fn format_node_with_offset(
     options: JsFormatOptions,
     root: &JsSyntaxNodeWithOffset,
 ) -> FormatResult<Formatted<JsFormatContext>> {
-    biome_formatter::format_node_with_offset(root, JsFormatLanguage::new(options))
+    biome_formatter::format_node_with_offset(root, JsFormatLanguage::new(options), false)
 }
 
 /// Formats a single node within a file, supported by Biome.

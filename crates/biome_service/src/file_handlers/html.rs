@@ -305,7 +305,7 @@ pub(crate) fn extract_embedded_script(
     let html_element = HtmlElement::cast(element)?;
     let opening_element = html_element.opening_element().ok()?;
 
-    if html_element.is_script_tag().unwrap_or_default() {
+    if html_element.is_javascript_tag().unwrap_or_default() {
         let is_modules = opening_element.attributes().iter().any(|attr| {
             let attr = attr.as_html_attribute();
             let is_type = attr
@@ -423,7 +423,7 @@ fn debug_formatter_ir(
     let options = settings.format_options::<HtmlLanguage>(path, document_file_source);
 
     let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, false)?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
@@ -439,7 +439,7 @@ fn format(
     let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
 
     let tree = parse.syntax();
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, true)?;
 
     match formatted.print() {
         Ok(printed) => Ok(printed),
@@ -458,7 +458,7 @@ fn format_embedded(
 
     let tree = parse.syntax();
     let indent_script_and_style = options.indent_script_and_style().value();
-    let mut formatted = format_node(options, &tree)?;
+    let mut formatted = format_node(options, &tree, true)?;
     formatted.format_embedded(move |range| {
         let mut iter = embedded_nodes.iter();
         let node = iter.find(|node| node.range == range)?;
@@ -558,6 +558,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 .settings
                 .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source),
             tree.syntax(),
+            false,
         )?
         .print()?
         .into_code()

@@ -371,6 +371,8 @@ pub struct HtmlFormatContext {
     comments: Rc<HtmlComments>,
 
     source_map: Option<TransformSourceMap>,
+
+    should_delegate_fmt_embedded_nodes: bool,
 }
 
 impl HtmlFormatContext {
@@ -379,12 +381,22 @@ impl HtmlFormatContext {
             options,
             comments: Rc::new(comments),
             source_map: None,
+            should_delegate_fmt_embedded_nodes: false,
         }
     }
 
     pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
         self.source_map = source_map;
         self
+    }
+
+    pub fn with_fmt_embedded_nodes(mut self) -> Self {
+        self.should_delegate_fmt_embedded_nodes = true;
+        self
+    }
+
+    pub fn should_delegate_fmt_embedded_nodes(&self) -> bool {
+        self.should_delegate_fmt_embedded_nodes
     }
 }
 

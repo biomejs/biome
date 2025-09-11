@@ -289,6 +289,7 @@ impl FormatLanguage for CssFormatLanguage {
         self,
         root: &CssSyntaxNode,
         source_map: Option<TransformSourceMap>,
+        _delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &CssCommentStyle, source_map.as_ref());
         CssFormatContext::new(self.options, comments).with_source_map(source_map)
@@ -378,7 +379,7 @@ pub fn format_node(
     options: CssFormatOptions,
     root: &CssSyntaxNode,
 ) -> FormatResult<Formatted<CssFormatContext>> {
-    biome_formatter::format_node(root, CssFormatLanguage::new(options))
+    biome_formatter::format_node(root, CssFormatLanguage::new(options), false)
 }
 
 /// Formats a CSS syntax tree.
@@ -388,7 +389,7 @@ pub fn format_node_with_offset(
     options: CssFormatOptions,
     root: &CssSyntaxNodeWithOffset,
 ) -> FormatResult<Formatted<CssFormatContext>> {
-    biome_formatter::format_node_with_offset(root, CssFormatLanguage::new(options))
+    biome_formatter::format_node_with_offset(root, CssFormatLanguage::new(options), false)
 }
 
 /// Formats a single node within a file, supported by Biome.
