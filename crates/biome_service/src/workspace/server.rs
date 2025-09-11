@@ -30,9 +30,8 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
-use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_html_syntax::HtmlRoot;
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};

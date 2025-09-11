@@ -166,6 +166,7 @@ impl ServiceLanguage for CssLanguage {
                 .into(),
             css_modules: language.css_modules_enabled.unwrap_or_default().into(),
             grit_metavariables: false,
+            tailwind_directives: language.tailwind_directives_enabled(),
         };
 
         overrides.apply_override_css_parser_options(path, &mut options);

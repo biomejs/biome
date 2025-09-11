@@ -1636,7 +1636,7 @@ impl OverrideSettingPattern {
         let html_parser = &self.languages.html.parser;
 
         if let Some(interpolation) = html_parser.interpolation {
-            options.set_doublet_text_expression(interpolation.value());
+            options.set_double_text_expression(interpolation.value());
         }
     }
 
