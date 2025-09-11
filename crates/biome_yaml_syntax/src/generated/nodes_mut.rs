@@ -19,6 +19,22 @@ impl YamlAnchorProperty {
         )
     }
 }
+impl YamlBlockContent {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl YamlBlockKeepIndicator {
+    pub fn with_plus_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl YamlBlockMapExplicitEntry {
     pub fn with_question_mark_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -91,20 +107,6 @@ impl YamlBlockMapping {
         )
     }
 }
-impl YamlBlockScalar {
-    pub fn with_properties(self, element: Option<AnyYamlPropertiesCombination>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            0usize..=0usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
-    pub fn with_content(self, element: AnyYamlBlockScalarContent) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
 impl YamlBlockSequence {
     pub fn with_sequence_start_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -143,6 +145,14 @@ impl YamlBlockSequenceEntry {
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
+    }
+}
+impl YamlBlockStripIndicator {
+    pub fn with_minus_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
     }
 }
 impl YamlDirective {
@@ -328,7 +338,33 @@ impl YamlFlowYamlNode {
     }
 }
 impl YamlFoldedScalar {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+    pub fn with_properties(self, element: Option<AnyYamlPropertiesCombination>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            0usize..=0usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_r_angle_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_headers(self, element: YamlBlockHeaderList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_content(self, element: YamlBlockContent) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl YamlIndentationIndicator {
+    pub fn with_indentation_indicator_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
@@ -336,10 +372,28 @@ impl YamlFoldedScalar {
     }
 }
 impl YamlLiteralScalar {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+    pub fn with_properties(self, element: Option<AnyYamlPropertiesCombination>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            0usize..=0usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_bitwise_or_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_headers(self, element: YamlBlockHeaderList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_content(self, element: YamlBlockContent) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
