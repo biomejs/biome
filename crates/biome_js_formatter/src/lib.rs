@@ -190,7 +190,8 @@ use biome_formatter::{
     CstFormatContext, Format, FormatLanguage, TransformSourceMap, comments::Comments, write,
 };
 use biome_js_syntax::{
-    AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxNodeWithOffset, JsSyntaxToken,
 };
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, SyntaxNode};
@@ -560,6 +561,16 @@ pub fn format_node(
     root: &JsSyntaxNode,
 ) -> FormatResult<Formatted<JsFormatContext>> {
     biome_formatter::format_node(root, JsFormatLanguage::new(options))
+}
+
+/// Formats a JavaScript (and its super languages) file based on its features.
+///
+/// It returns a [Formatted] result, which the user can use to override a file.
+pub fn format_node_with_offset(
+    options: JsFormatOptions,
+    root: &JsSyntaxNodeWithOffset,
+) -> FormatResult<Formatted<JsFormatContext>> {
+    biome_formatter::format_node_with_offset(root, JsFormatLanguage::new(options))
 }
 
 /// Formats a single node within a file, supported by Biome.

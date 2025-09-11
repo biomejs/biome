@@ -47,13 +47,13 @@ impl HtmlElement {
         let name = opening_element.name()?;
         let name_text = name.value_token()?;
 
-        Ok(name_text.text_trimmed() == "script")
+        Ok(name_text.text_trimmed().eq_ignore_ascii_case("script"))
     }
 
     pub fn is_style_tag(&self) -> SyntaxResult<bool> {
         let opening_element = self.opening_element()?;
         let name = opening_element.name()?;
         let name_text = name.value_token()?;
-        Ok(name_text.text_trimmed() == "style")
+        Ok(name_text.text_trimmed().eq_ignore_ascii_case("style"))
     }
 }

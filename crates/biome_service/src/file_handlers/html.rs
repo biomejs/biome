@@ -281,25 +281,13 @@ fn search_enabled(_path: &Utf8Path, _settings: &Settings) -> bool {
 }
 
 fn parse(
-    _biome_path: &BiomePath,
+    biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
     settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let html_file_source = file_source.to_html_file_source().unwrap_or_default();
-    let mut options = HtmlParseOptions::from(&html_file_source);
-    if settings
-        .languages
-        .html
-        .parser
-        .interpolation
-        .unwrap_or_default()
-        .into()
-        && html_file_source.is_html()
-    {
-        options = options.with_double_text_expression();
-    }
+    let options = settings.parse_options::<HtmlLanguage>(biome_path, &file_source);
     let parse = parse_html_with_cache(text, cache, options);
 
     ParseResult {
@@ -316,11 +304,8 @@ pub(crate) fn extract_embedded_script(
 ) -> Option<Vec<EmbeddedJsContent>> {
     let html_element = HtmlElement::cast(element)?;
     let opening_element = html_element.opening_element().ok()?;
-    let name = opening_element.name().ok()?;
 
-    let name_text = name.value_token().ok()?;
-
-    if name_text.text_trimmed() == "script" {
+    if html_element.is_script_tag().unwrap_or_default() {
         let is_modules = opening_element.attributes().iter().any(|attr| {
             let attr = attr.as_html_attribute();
             let is_type = attr
@@ -386,11 +371,8 @@ where
     F: Fn(CssFileSource) -> usize,
 {
     let html_element = HtmlElement::cast(element)?;
-    let opening_element = html_element.opening_element().ok()?;
-    let name = opening_element.name().ok()?;
-    let name_text = name.value_token().ok()?;
 
-    if name_text.text_trimmed() == "style" {
+    if html_element.is_style_tag().unwrap_or_default() {
         Some(
             html_element
                 .children()
@@ -485,7 +467,8 @@ fn format_embedded(
             DocumentFileSource::Js(_) => {
                 let js_options = settings.format_options::<JsLanguage>(biome_path, &node.source);
                 let node = node.node.clone().root.into_node::<JsLanguage>();
-                let formatted = biome_js_formatter::format_node(js_options, &node.node).ok()?;
+                let formatted =
+                    biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
                 if indent_script_and_style {
                     let elements = vec![
                         FormatElement::Line(LineMode::Hard),
@@ -499,13 +482,20 @@ fn format_embedded(
 
                     Some(Document::new(elements))
                 } else {
-                    Some(formatted.into_document())
+                    let elements = vec![
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Interned(Interned::new(
+                            formatted.into_document().into_elements(),
+                        )),
+                    ];
+                    Some(Document::new(elements))
                 }
             }
             DocumentFileSource::Css(_) => {
                 let css_options = settings.format_options::<CssLanguage>(biome_path, &node.source);
                 let node = node.node.clone().root.into_node::<CssLanguage>();
-                let formatted = biome_css_formatter::format_node(css_options, &node.node).ok()?;
+                let formatted =
+                    biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
                 if indent_script_and_style {
                     let elements = vec![
                         FormatElement::Line(LineMode::Hard),
@@ -516,9 +506,16 @@ fn format_embedded(
                         )),
                         FormatElement::Tag(Tag::EndIndent),
                     ];
-                    Some(Document::new(elements))
+                    let document = Document::new(elements);
+                    Some(document)
                 } else {
-                    Some(formatted.into_document())
+                    let elements = vec![
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Interned(Interned::new(
+                            formatted.into_document().into_elements(),
+                        )),
+                    ];
+                    Some(Document::new(elements))
                 }
             }
             _ => None,

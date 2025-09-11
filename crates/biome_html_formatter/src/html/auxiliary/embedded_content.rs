@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use biome_deserialize::TextRange;
 use biome_html_syntax::HtmlEmbeddedContent;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TextRange};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlEmbeddedContent;
 impl FormatNodeRule<HtmlEmbeddedContent> for FormatHtmlEmbeddedContent {

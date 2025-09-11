@@ -1,4 +1,5 @@
 use biome_css_parser::CssOffsetParse;
+use biome_css_syntax::CssLanguage;
 use biome_js_parser::JsOffsetParse;
 use biome_js_syntax::JsLanguage;
 use biome_parser::AnyParse;
@@ -66,8 +67,8 @@ impl EmbeddedJsContent {
 
 impl EmbeddedCssContent {
     /// Returns a syntax node
-    pub fn node(&self) -> SyntaxNodeWithOffset<JsLanguage> {
-        self.parse.root.clone().into_node::<JsLanguage>()
+    pub fn node(&self) -> SyntaxNodeWithOffset<CssLanguage> {
+        self.parse.root.clone().into_node::<CssLanguage>()
     }
 }
 

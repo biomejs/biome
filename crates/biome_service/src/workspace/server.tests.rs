@@ -112,7 +112,7 @@ fn format_html_with_scripts_and_css() {
     const FILE_CONTENT: &str = r#"<html>
     <head>
         <style>
-            .#id {}
+            #id { background-color: red; }
         </style>
         <script>
             const foo = "bar";
@@ -157,14 +157,14 @@ fn format_html_with_scripts_and_css() {
     <html>
     	<head>
     		<style>
-    			.#id {}
+    		#id {background-color: red;}
     		</style>
     		<script>
-    			const foo = "bar";
-    			function bar() {
-    				const object = { ["literal"]: "SOME OTHER STRING" };
-    				return 1;
-    			}
+    		const foo = "bar";
+    		function bar() {
+    			const object = { ["literal"]: "SOME OTHER STRING" };
+    			return 1;
+    		}
     		</script>
     	</head>
     </html>
