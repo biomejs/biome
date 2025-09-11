@@ -204,9 +204,10 @@ impl AsRef<Glob> for NormalizedGlob {
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Glob {
-    is_negated: bool,
+    kind: GlobKind,
     glob: globset::GlobMatcher,
 }
+
 impl Glob {
     /// Returns `true` if this glob is negated.
     ///
@@ -214,11 +215,30 @@ impl Glob {
     /// let glob = "!*.js".parse::<biome_glob::Glob>().unwrap();
     /// assert!(glob.is_negated());
     ///
+    /// let glob = "!!*.js".parse::<biome_glob::Glob>().unwrap();
+    /// assert!(glob.is_negated());
+    ///
     /// let glob = "*.js".parse::<biome_glob::Glob>().unwrap();
     /// assert!(!glob.is_negated());
     /// ```
     pub fn is_negated(&self) -> bool {
-        self.is_negated
+        matches!(self.kind, GlobKind::Negated | GlobKind::ForceNegated)
+    }
+
+    /// Returns `true` if this glob is force-negated.
+    ///
+    /// ```
+    /// let glob = "!!*.js".parse::<biome_glob::Glob>().unwrap();
+    /// assert!(glob.is_force_negated());
+    ///
+    /// let glob = "!*.js".parse::<biome_glob::Glob>().unwrap();
+    /// assert!(!glob.is_force_negated());
+    ///
+    /// let glob = "*.js".parse::<biome_glob::Glob>().unwrap();
+    /// assert!(!glob.is_force_negated());
+    /// ```
+    pub fn is_force_negated(&self) -> bool {
+        matches!(self.kind, GlobKind::ForceNegated)
     }
 
     /// Returns the negated version of this glob.
@@ -232,14 +252,18 @@ impl Glob {
     /// ```
     pub fn negated(self) -> Self {
         Self {
-            is_negated: !self.is_negated,
+            kind: if matches!(self.kind, GlobKind::Normal) {
+                GlobKind::Negated
+            } else {
+                GlobKind::Normal
+            },
             glob: self.glob,
         }
     }
 
     /// Tests whether the given path matches this pattern.
     pub fn is_match(&self, path: impl AsRef<std::path::Path>) -> bool {
-        self.is_raw_match(path) != self.is_negated
+        self.is_raw_match(path) != self.is_negated()
     }
 
     /// Tests whether the given path matches this pattern, ignoring the negation.
@@ -249,7 +273,7 @@ impl Glob {
 
     /// Tests whether the given path matches this pattern.
     fn is_match_candidate(&self, path: &CandidatePath<'_>) -> bool {
-        self.is_raw_match_candidate(path) != self.is_negated
+        self.is_raw_match_candidate(path) != self.is_negated()
     }
 
     /// Tests whether the given path matches this pattern, ignoring the negation.
@@ -264,21 +288,20 @@ impl AsRef<Self> for Glob {
 }
 impl PartialEq for Glob {
     fn eq(&self, other: &Self) -> bool {
-        self.is_negated == other.is_negated && self.glob.glob() == other.glob.glob()
+        self.kind == other.kind && self.glob.glob() == other.glob.glob()
     }
 }
 impl Eq for Glob {}
 impl std::hash::Hash for Glob {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.is_negated.hash(state);
+        self.kind.hash(state);
         self.glob.glob().hash(state);
     }
 }
 impl std::fmt::Display for Glob {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = self.glob.glob();
-        let negation = if self.is_negated { "!" } else { "" };
-        write!(f, "{negation}{repr}")
+        write!(f, "{}{repr}", self.kind)
     }
 }
 impl std::fmt::Debug for Glob {
@@ -294,10 +317,14 @@ impl From<Glob> for String {
 impl std::str::FromStr for Glob {
     type Err = GlobError;
     fn from_str(value: &str) -> Result<Self, Self::Err> {
-        let (is_negated, value) = if let Some(stripped) = value.strip_prefix('!') {
-            (true, stripped)
+        let (kind, value) = if let Some(stripped) = value.strip_prefix('!') {
+            if let Some(stripped) = stripped.strip_prefix('!') {
+                (GlobKind::ForceNegated, stripped)
+            } else {
+                (GlobKind::Negated, stripped)
+            }
         } else {
-            (false, value)
+            (GlobKind::Normal, value)
         };
         validate_glob(value)?;
         let mut glob_builder = globset::GlobBuilder::new(value);
@@ -307,7 +334,7 @@ impl std::str::FromStr for Glob {
         glob_builder.literal_separator(true);
         match glob_builder.build() {
             Ok(glob) => Ok(Self {
-                is_negated,
+                kind,
                 glob: glob.compile_matcher(),
             }),
             Err(error) => Err(GlobError::Generic(
@@ -358,6 +385,29 @@ impl schemars::JsonSchema for Glob {
 
     fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
         String::json_schema(generator)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+enum GlobKind {
+    /// A regular glob without modifiers.
+    #[default]
+    Normal,
+
+    /// A negated glob, preceded by a single exclamation mark (`!`).
+    Negated,
+
+    /// A force-negated glob, preceded by a double exclamation mark (`!!`).
+    ForceNegated,
+}
+
+impl std::fmt::Display for GlobKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::Normal => "",
+            Self::Negated => "!",
+            Self::ForceNegated => "!!",
+        })
     }
 }
 
@@ -469,6 +519,48 @@ impl<'a> CandidatePath<'a> {
             }
         }
         default
+    }
+
+    /// Matches against a list of globs and returns whether the path is
+    /// force-ignored by one of the globs.
+    ///
+    /// A forced negation can be undone by a later glob that includes the path.
+    ///
+    /// Let's take an example:
+    ///
+    /// ```
+    /// use biome_glob::{CandidatePath, Glob};
+    ///
+    /// let globs: &[Glob] = &[
+    ///     "*".parse().unwrap(),
+    ///     "!!a*".parse().unwrap(),
+    ///     "a".parse().unwrap(),
+    /// ];
+    ///
+    /// assert!(CandidatePath::new(&"abc").matches_forced_negation(globs));
+    /// assert!(!CandidatePath::new(&"a").matches_forced_negation(globs));
+    /// assert!(!CandidatePath::new(&"b").matches_forced_negation(globs));
+    /// ```
+    ///
+    /// - `abc` matches the forced negation `!!a*`. The later glob `a` doesn't
+    ///   match `abc`, so `abc` is force-negated.
+    /// - `a` also matches the forced negation `!!a*`, but gets included again
+    ///   due to the later glob `a`, so it isn't force-negated.
+    /// - `b` only matches `*` and is therefore not negated.
+    ///
+    pub fn matches_forced_negation<I>(&self, globs: I) -> bool
+    where
+        I: IntoIterator,
+        I::IntoIter: DoubleEndedIterator,
+        I::Item: AsRef<Glob>,
+    {
+        // Iterate in reverse order to avoid unnecessary glob matching.
+        for glob in globs.into_iter().rev() {
+            if glob.as_ref().is_raw_match_candidate(self) {
+                return glob.as_ref().is_force_negated();
+            }
+        }
+        false
     }
 }
 

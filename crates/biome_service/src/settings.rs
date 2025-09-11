@@ -12,11 +12,11 @@ use biome_configuration::max_size::MaxSize;
 use biome_configuration::plugins::Plugins;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
-    BiomeDiagnostic, Configuration, CssConfiguration, FilesConfiguration,
-    FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
-    JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
-    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
-    push_to_analyzer_assist, push_to_analyzer_rules,
+    BiomeDiagnostic, Configuration, CssConfiguration, DEFAULT_SCANNER_IGNORE_ENTRIES,
+    FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration,
+    GritConfiguration, JsConfiguration, JsonConfiguration, LinterConfiguration,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, Overrides, Rules, push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -46,22 +46,6 @@ use std::borrow::Cow;
 use std::ops::Deref;
 use std::sync::Arc;
 use tracing::instrument;
-
-const DEFAULT_SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
-    b".cache",
-    b".git",
-    b".hg",
-    b".netlify",
-    b".output",
-    b".svn",
-    b".yarn",
-    b".timestamp",
-    b".turbo",
-    b".vercel",
-    b".DS_Store",
-    // TODO: Remove when https://github.com/biomejs/biome/issues/6172 is fixed.
-    b"RedisCommander.d.ts",
-];
 
 /// Settings active in a project.
 ///
@@ -955,6 +939,21 @@ impl Includes {
             }
     }
 
+    /// Returns whether the given `path` is force-ignored.
+    #[inline]
+    pub fn is_force_ignored(&self, path: &Utf8Path) -> bool {
+        let Some(globs) = self.globs.as_ref() else {
+            return false;
+        };
+        let path = if let Some(working_directory) = &self.working_directory {
+            path.strip_prefix(working_directory).unwrap_or(path)
+        } else {
+            path
+        };
+        let candidate_path = biome_glob::CandidatePath::new(path);
+        candidate_path.matches_forced_negation(globs)
+    }
+
     /// Returns `true` is no globs are set.
     #[inline]
     pub fn is_unset(&self) -> bool {
@@ -1650,6 +1649,9 @@ impl OverrideSettingPattern {
         if let Some(css_modules) = css_parser.css_modules_enabled {
             options.css_modules = css_modules.value();
         }
+        if let Some(tailwind_directives) = css_parser.tailwind_directives {
+            options.tailwind_directives = tailwind_directives.value();
+        }
     }
 
     #[expect(dead_code)]
@@ -1807,6 +1809,9 @@ fn to_css_language_settings(
         .or(parent_parser.allow_wrong_line_comments);
     language_setting.parser.css_modules_enabled =
         parser.css_modules.or(parent_parser.css_modules_enabled);
+    language_setting.parser.tailwind_directives = parser
+        .tailwind_directives
+        .or(parent_parser.tailwind_directives);
 
     let linter = conf.linter.take().unwrap_or_default();
     language_setting.linter.enabled = linter.enabled;

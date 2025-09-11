@@ -192,7 +192,11 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
         project_key,
         path: biome_path.clone(),
         content: FileContent::from_client(&biome_config_content),
-        document_file_source: Some(JsonFileSource::json().into()),
+        document_file_source: Some(
+            JsonFileSource::try_from(biome_path.as_path())
+                .unwrap_or_default()
+                .into(),
+        ),
         persist_node_cache: false,
     })?;
     let parsed = parse_json_with_cache(&biome_config_content, &mut cache, parse_options);

@@ -35,6 +35,7 @@ pub struct CssConfiguration {
 
 pub type CssAllowWrongLineCommentsEnabled = Bool<false>;
 pub type CssModulesEnabled = Bool<false>;
+pub type CssTailwindDirectivesEnabled = Bool<false>;
 
 /// Options that changes how the CSS parser behaves
 #[derive(
@@ -50,6 +51,10 @@ pub struct CssParserConfiguration {
     /// Enables parsing of CSS Modules specific features.
     #[bpaf(hide)]
     pub css_modules: Option<CssModulesEnabled>,
+
+    /// Enables parsing of Tailwind CSS 4.0 directives and functions.
+    #[bpaf(hide)]
+    pub tailwind_directives: Option<CssTailwindDirectivesEnabled>,
 }
 
 pub type CssFormatterEnabled = Bool<true>;

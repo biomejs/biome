@@ -1,0 +1,74 @@
+/* --spacing() function */
+.test-spacing-basic {
+  margin: --spacing(4);
+  padding: --spacing(2) --spacing(4);
+}
+
+.test-spacing-with-variables {
+  gap: --spacing(var(--gap-base));
+  width: --spacing(var(--container-width));
+}
+
+.test-spacing-in-calc {
+  top: calc(--spacing(4) + 10px);
+  left: calc(--spacing(2) * 3);
+  bottom: calc(100vh - --spacing(8));
+}
+
+.test-spacing-multiple-values {
+  margin: --spacing(1) --spacing(2) --spacing(3) --spacing(4);
+  padding: --spacing(0) --spacing(auto);
+}
+
+.test-spacing-complex-expressions {
+  transform: translateX(--spacing(4));
+  box-shadow: --spacing(1) --spacing(2) --spacing(4) rgba(0, 0, 0, 0.1);
+}
+
+.test-spacing-with-grid {
+  gap: --spacing(4) --spacing(6);
+  grid-template-columns: --spacing(12) 1fr --spacing(12);
+}
+
+.test-spacing-decimal-values {
+  margin: --spacing(0.5);
+  padding: --spacing(1.5) --spacing(2.5);
+}
+
+.test-spacing-large-values {
+  width: --spacing(96);
+  height: --spacing(128);
+  max-width: --spacing(256);
+}
+
+.test-spacing-negative-values {
+  margin: --spacing(-4);
+  top: --spacing(-2);
+}
+
+.test-spacing-empty-params {
+  margin: --spacing();
+}
+
+.test-spacing-nested-functions {
+  padding: --spacing(var(--dynamic-spacing, 4));
+  margin: --spacing(clamp(2, 4, 8));
+}
+
+.test-spacing-with-border-radius {
+  border-radius: --spacing(1) --spacing(2);
+  border-top-left-radius: --spacing(0.5);
+}
+
+.test-spacing-in-flexbox {
+  column-gap: --spacing(4);
+  row-gap: --spacing(2);
+}
+
+.test-spacing-with-positioning {
+  inset: --spacing(4);
+  top: --spacing(8);
+  right: --spacing(6);
+  bottom: --spacing(4);
+  left: --spacing(2);
+}

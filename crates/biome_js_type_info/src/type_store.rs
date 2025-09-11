@@ -25,7 +25,7 @@ use crate::{Resolvable, ResolvedTypeId, TypeData, TypeId, TypeReference, TypeRes
 /// some amount of deduplication is preferred. The reason for this is that type
 /// flattening can reduce disjoint types to the same type, at which point we
 /// store both to preserve their indices.
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct TypeStore {
     types: Vec<Arc<TypeData>>,
     table: HashTable<usize>,
@@ -254,9 +254,9 @@ impl TypeStore {
     }
 }
 
-impl From<TypeStore> for Box<[Arc<TypeData>]> {
+impl From<TypeStore> for Vec<Arc<TypeData>> {
     fn from(store: TypeStore) -> Self {
-        store.types.into()
+        store.types
     }
 }
 

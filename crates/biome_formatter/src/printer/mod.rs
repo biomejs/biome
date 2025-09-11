@@ -61,7 +61,7 @@ impl<'a> Printer<'a> {
         let mut stack = PrintCallStack::new(PrintElementArgs::new());
         let mut queue: PrintQueue<'a> = PrintQueue::new(document.as_ref());
         let mut indent_stack = PrintIndentStack::new(Indention::Level(indent));
-
+        self.state.pending_indent = indent_stack.indention();
         while let Some(element) = queue.pop() {
             self.print_element(&mut stack, &mut indent_stack, &mut queue, element)?;
 
@@ -1422,6 +1422,18 @@ mod tests {
             .expect("Document to be valid")
     }
 
+    fn format_with_options_and_indentation(
+        root: &dyn Format<SimpleFormatContext>,
+        options: PrinterOptions,
+        indent: u16,
+    ) -> Printed {
+        let formatted = crate::format!(SimpleFormatContext::default(), [root]).unwrap();
+
+        Printer::new(options)
+            .print_with_indent(formatted.document(), indent)
+            .expect("Document to be valid")
+    }
+
     #[test]
     fn it_prints_a_group_on_a_single_line_if_it_fits() {
         let result = format(&FormatArrayElements {
@@ -1810,6 +1822,85 @@ Group 1 breaks"#
             "(\nThis is a string\n containing a newline\n)",
             result.as_code()
         );
+    }
+
+    #[test]
+    fn break_group_if_partial_string_exceeds_print_width_with_indent() {
+        let options = PrinterOptions {
+            print_width: PrintWidth::new(10),
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options_and_indentation(
+            &format_args![group(&format_args!(
+                text("Hello world"),
+                soft_line_break(),
+                text("Hello world")
+            ))],
+            options,
+            1,
+        );
+
+        assert_eq!(result.as_code(), "\tHello world\n\tHello world");
+    }
+
+    #[test]
+    fn test_fill_breaks_with_indent() {
+        let mut state = FormatState::new(());
+        let mut buffer = VecBuffer::new(&mut state);
+        let mut formatter = Formatter::new(&mut buffer);
+
+        formatter
+            .fill()
+            // These all fit on the same line together
+            .entry(
+                &soft_line_break_or_space(),
+                &format_args!(text("1"), text(",")),
+            )
+            .entry(
+                &soft_line_break_or_space(),
+                &format_args!(text("2"), text(",")),
+            )
+            .entry(
+                &soft_line_break_or_space(),
+                &format_args!(text("3"), text(",")),
+            )
+            // This one fits on a line by itself,
+            .entry(
+                &soft_line_break_or_space(),
+                &format_args!(text("723493294"), text(",")),
+            )
+            // fits without breaking
+            .entry(
+                &soft_line_break_or_space(),
+                &group(&format_args!(
+                    text("["),
+                    soft_block_indent(&text("5")),
+                    text("],")
+                )),
+            )
+            // this one must be printed in expanded mode to fit
+            .entry(
+                &soft_line_break_or_space(),
+                &group(&format_args!(
+                    text("["),
+                    soft_block_indent(&text("123456789")),
+                    text("]"),
+                )),
+            )
+            .finish()
+            .unwrap();
+
+        let document = Document::from(buffer.into_vec());
+
+        let printed = Printer::new(PrinterOptions::default().with_print_width(PrintWidth::new(10)))
+            .print_with_indent(&document, 1)
+            .unwrap();
+
+        assert_eq!(
+            printed.as_code(),
+            "\t1, 2, 3,\n\t723493294,\n\t[5],\n\t[\n\t\t123456789\n\t]"
+        )
     }
 
     struct FormatArrayElements<'a> {

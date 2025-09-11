@@ -23,7 +23,8 @@ impl TestFormatLanguage for CssTestFormatLanguage {
     fn parse(&self, text: &str) -> AnyParse {
         let options = CssParserOptions::default()
             .allow_wrong_line_comments()
-            .allow_css_modules();
+            .allow_css_modules()
+            .allow_tailwind_directives();
 
         parse_css(text, options).into()
     }

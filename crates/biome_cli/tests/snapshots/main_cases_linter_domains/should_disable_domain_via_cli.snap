@@ -1,0 +1,30 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `test1.js`
+
+```js
+describe.only("bar", () => {});
+
+```
+
+## `test2.js`
+
+```js
+
+describe("foo", () => {
+	beforeEach(() => {});
+    beforeEach(() => {});
+    test("bar", () => {
+        someFn();
+    });
+});
+    
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```

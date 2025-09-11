@@ -8,7 +8,7 @@ use crate::{
     setup_cli_subscriber,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
-use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
+use biome_configuration::analyzer::{AnalyzerSelector, LinterEnabled};
 use biome_configuration::css::{CssFormatterConfiguration, CssLinterConfiguration};
 use biome_configuration::formatter::FormatterEnabled;
 use biome_configuration::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
@@ -233,20 +233,28 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
-        /// Run only the given rule or group of rules.
+        /// Run only the given rule, group of rules or domain.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
         ///
-        /// Example: `biome lint --only=correctness/noUnusedVariables --only=suspicious`
-        #[bpaf(long("only"), argument("GROUP|RULE"))]
-        only: Vec<RuleSelector>,
+        /// Example:
+        ///
+        /// ```shell
+        /// biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test
+        /// ```
+        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
+        only: Vec<AnalyzerSelector>,
 
-        /// Skip the given rule or group of rules by setting the severity level of the rules to `off`.
+        /// Skip the given rule, group of rules or domain by setting the severity level of the rules to `off`.
         /// This option takes precedence over `--only`.
         ///
-        /// Example: `biome lint --skip=correctness/noUnusedVariables --skip=suspicious`
-        #[bpaf(long("skip"), argument("GROUP|RULE"))]
-        skip: Vec<RuleSelector>,
+        /// Example:
+        ///
+        /// ```shell
+        /// biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
+        /// ```
+        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN"))]
+        skip: Vec<AnalyzerSelector>,
 
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
         ///
@@ -689,9 +697,11 @@ pub(crate) fn print_diagnostics_from_workspace_result(
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {
     let mut has_errors = false;
+    let mut has_internal = false;
     for diagnostic in diagnostics {
-        if diagnostic.severity() >= Severity::Error {
-            has_errors = true;
+        has_errors = has_errors || diagnostic.severity() >= Severity::Error;
+        has_internal = has_internal || diagnostic.tags().is_internal();
+        if has_internal || has_errors {
             if diagnostic.tags().is_verbose() && verbose {
                 console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
             } else {

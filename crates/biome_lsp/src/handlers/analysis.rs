@@ -7,8 +7,8 @@ use biome_analyze::{
     ActionCategory, RuleCategoriesBuilder, SUPPRESSION_INLINE_ACTION_CATEGORY,
     SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY, SourceActionKind,
 };
-use biome_configuration::analyzer::RuleSelector;
-use biome_diagnostics::{Applicability, Error};
+use biome_configuration::analyzer::{AnalyzerSelector, RuleSelector};
+use biome_diagnostics::Error;
 use biome_fs::BiomePath;
 use biome_line_index::LineIndex;
 use biome_lsp_converters::from_proto;
@@ -100,16 +100,12 @@ pub(crate) fn code_actions(
     }
 
     let mut has_fix_all = false;
-    let mut has_quick_fix = false;
     let mut filters = Vec::new();
     if let Some(filter) = &params.context.only {
         for kind in filter {
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
                 has_fix_all = true;
-            }
-            if kind == "quickfix.biome" {
-                has_quick_fix = true;
             }
             filters.push(kind);
         }
@@ -162,6 +158,7 @@ pub(crate) fn code_actions(
         enabled_rules: filters
             .iter()
             .filter_map(|filter| RuleSelector::from_lsp_filter(filter))
+            .map(AnalyzerSelector::from)
             .collect(),
         categories: categories.build(),
     }) {
@@ -202,16 +199,6 @@ pub(crate) fn code_actions(
                 &action.category, &action.suggestion.applicability
             );
 
-            // Skip quick fixes that have unsafe code fixes
-            if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
-                return None;
-            }
-
-            if action.category.matches("quickfix.biome")
-                && action.suggestion.applicability == Applicability::MaybeIncorrect
-            {
-                return None;
-            }
             // Filter out source.organizeImports.biome action when assist is not supported.
             if action.category.matches("source.organizeImports.biome")
                 && !file_features.supports_assist()

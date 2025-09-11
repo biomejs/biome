@@ -159,7 +159,8 @@ const END_OF_COMPOSES_CLASS_TOKEN_SET: TokenSet<CssSyntaxKind> =
 
 #[inline]
 fn is_at_generic_property(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && p.nth_at(1, T![:])
+    is_at_identifier(p)
+        && (p.nth_at(1, T![:]) || (p.nth_at(1, T![-]) && p.nth_at(2, T![*]) && p.nth_at(3, T![:])))
 }
 
 #[inline]
@@ -171,7 +172,16 @@ fn parse_generic_property(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     if is_at_dashed_identifier(p) {
-        parse_dashed_identifier(p).ok();
+        let ident = parse_dashed_identifier(p).ok();
+        if let Some(ident) = ident
+            && p.options().is_tailwind_directives_enabled()
+            && p.at(T![-])
+        {
+            let m = ident.precede(p);
+            p.expect(T![-]);
+            p.expect(T![*]);
+            m.complete(p, TW_VALUE_THEME_REFERENCE);
+        }
     } else {
         parse_regular_identifier(p).ok();
     }

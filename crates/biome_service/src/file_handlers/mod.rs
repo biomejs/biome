@@ -19,7 +19,7 @@ use biome_analyze::{
     RuleFilter, RuleGroup,
 };
 use biome_configuration::Rules;
-use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
+use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
 use biome_console::fmt::Formatter;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
@@ -333,6 +333,19 @@ impl DocumentFileSource {
         }
     }
 
+    /// Convert the file source from a JS file source into an HTML-like file source, if the file belongs to an HTML-like language.
+    pub fn to_htmlish(&self) -> Self {
+        match self {
+            Self::Js(js) => match js.as_embedding_kind() {
+                EmbeddingKind::Astro => Self::Html(HtmlFileSource::astro()),
+                EmbeddingKind::Vue => Self::Html(HtmlFileSource::vue()),
+                EmbeddingKind::Svelte => Self::Html(HtmlFileSource::svelte()),
+                EmbeddingKind::None => Self::Unknown,
+            },
+            _ => Self::Unknown,
+        }
+    }
+
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);
@@ -410,11 +423,11 @@ pub struct FixAllParams<'a> {
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: Vec<AnalyzerSelector>,
+    pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) rule_categories: RuleCategories,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) enabled_rules: Vec<AnalyzerSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
 }
 
@@ -474,13 +487,13 @@ pub(crate) struct LintParams<'a> {
     pub(crate) settings: &'a Settings,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: Vec<AnalyzerSelector>,
+    pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) categories: RuleCategories,
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) enabled_selectors: Vec<AnalyzerSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) pull_code_actions: bool,
 }
@@ -602,10 +615,10 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: Vec<AnalyzerSelector>,
+    pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) enabled_rules: Vec<AnalyzerSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) categories: RuleCategories,
 }
@@ -978,8 +991,8 @@ struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: FxHashSet<RuleFilter<'a>>,
     pub(crate) disabled_rules: FxHashSet<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
-    only: Option<&'b [RuleSelector]>,
-    skip: Option<&'b [RuleSelector]>,
+    only: Option<&'b [AnalyzerSelector]>,
+    skip: Option<&'b [AnalyzerSelector]>,
     settings: &'b Settings,
     path: Option<&'b Utf8Path>,
     package_json: Option<PackageJson>,
@@ -988,8 +1001,8 @@ struct LintVisitor<'a, 'b> {
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: Option<&'b [RuleSelector]>,
-        skip: Option<&'b [RuleSelector]>,
+        only: Option<&'b [AnalyzerSelector]>,
+        skip: Option<&'b [AnalyzerSelector]>,
         settings: &'b Settings,
         path: Option<&'b Utf8Path>,
         package_json: Option<PackageJson>,
@@ -1163,17 +1176,35 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         // - if a single rule is run.
         if let Some(only) = self.only {
             for selector in only {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
-                    self.enabled_rules.insert(filter);
+                match selector {
+                    AnalyzerSelector::Rule(selector) => {
+                        let filter = RuleFilter::from(selector);
+                        if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
+                            self.enabled_rules.insert(filter);
+                        }
+                    }
+                    AnalyzerSelector::Domain(selector) => {
+                        if selector.match_rule::<R>() {
+                            self.enabled_rules.extend(selector.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
         if let Some(skip) = self.skip {
             for selector in skip {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
-                    self.disabled_rules.insert(filter);
+                match selector {
+                    AnalyzerSelector::Rule(selector) => {
+                        let filter = RuleFilter::from(selector);
+                        if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
+                            self.disabled_rules.insert(filter);
+                        }
+                    }
+                    AnalyzerSelector::Domain(selector) => {
+                        if selector.match_rule::<R>() {
+                            self.disabled_rules.extend(selector.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
@@ -1278,15 +1309,15 @@ struct AssistsVisitor<'a, 'b> {
     settings: &'b Settings,
     enabled_rules: Vec<RuleFilter<'a>>,
     disabled_rules: Vec<RuleFilter<'a>>,
-    only: Option<&'b [RuleSelector]>,
-    skip: Option<&'b [RuleSelector]>,
+    only: Option<&'b [AnalyzerSelector]>,
+    skip: Option<&'b [AnalyzerSelector]>,
     path: Option<&'b Utf8Path>,
 }
 
 impl<'a, 'b> AssistsVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: Option<&'b [RuleSelector]>,
-        skip: Option<&'b [RuleSelector]>,
+        only: Option<&'b [AnalyzerSelector]>,
+        skip: Option<&'b [AnalyzerSelector]>,
         settings: &'b Settings,
         path: Option<&'b Utf8Path>,
     ) -> Self {
@@ -1314,18 +1345,36 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         // - if a single rule is run.
         if let Some(only) = self.only {
             for selector in only {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() {
-                    self.enabled_rules.push(filter)
+                match selector {
+                    AnalyzerSelector::Rule(rule) => {
+                        let filter = RuleFilter::from(rule);
+                        if filter.match_rule::<R>() {
+                            self.enabled_rules.push(filter)
+                        }
+                    }
+                    AnalyzerSelector::Domain(domain) => {
+                        if domain.match_rule::<R>() {
+                            self.enabled_rules.extend(domain.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
 
         if let Some(skip) = self.skip {
             for selector in skip {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() {
-                    self.disabled_rules.push(filter)
+                match selector {
+                    AnalyzerSelector::Rule(rule) => {
+                        let filter = RuleFilter::from(rule);
+                        if filter.match_rule::<R>() {
+                            self.disabled_rules.push(filter)
+                        }
+                    }
+                    AnalyzerSelector::Domain(domain) => {
+                        if domain.match_rule::<R>() {
+                            self.disabled_rules.extend(domain.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
@@ -1410,10 +1459,10 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'_, '_> {
 
 pub(crate) struct AnalyzerVisitorBuilder<'a> {
     settings: &'a Settings,
-    only: Option<&'a [RuleSelector]>,
-    skip: Option<&'a [RuleSelector]>,
+    only: Option<&'a [AnalyzerSelector]>,
+    skip: Option<&'a [AnalyzerSelector]>,
     path: Option<&'a Utf8Path>,
-    enabled_rules: Option<&'a [RuleSelector]>,
+    enabled_selectors: Option<&'a [AnalyzerSelector]>,
     project_layout: Arc<ProjectLayout>,
     analyzer_options: AnalyzerOptions,
 }
@@ -1425,20 +1474,20 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             only: None,
             skip: None,
             path: None,
-            enabled_rules: None,
+            enabled_selectors: None,
             project_layout: Default::default(),
             analyzer_options,
         }
     }
 
     #[must_use]
-    pub(crate) fn with_only(mut self, only: &'b [RuleSelector]) -> Self {
+    pub(crate) fn with_only(mut self, only: &'b [AnalyzerSelector]) -> Self {
         self.only = Some(only);
         self
     }
 
     #[must_use]
-    pub(crate) fn with_skip(mut self, skip: &'b [RuleSelector]) -> Self {
+    pub(crate) fn with_skip(mut self, skip: &'b [AnalyzerSelector]) -> Self {
         self.skip = Some(skip);
         self
     }
@@ -1450,8 +1499,8 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn with_enabled_rules(mut self, enabled_rules: &'b [RuleSelector]) -> Self {
-        self.enabled_rules = Some(enabled_rules);
+    pub(crate) fn with_enabled_selectors(mut self, enabled_rules: &'b [AnalyzerSelector]) -> Self {
+        self.enabled_selectors = Some(enabled_rules);
         self
     }
 
@@ -1465,15 +1514,20 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>, AnalyzerOptions) {
         let mut analyzer_options = self.analyzer_options;
         let mut disabled_rules = vec![];
-        let mut enabled_rules: Vec<_> = self
-            .enabled_rules
-            .map(|enabled_rules| {
-                enabled_rules
-                    .iter()
-                    .map(RuleFilter::from)
-                    .collect::<Vec<_>>()
-            })
-            .unwrap_or_default();
+        let mut enabled_rules = vec![];
+
+        if let Some(enabled_selectors) = self.enabled_selectors {
+            for selector in enabled_selectors {
+                match selector {
+                    AnalyzerSelector::Rule(rule) => {
+                        enabled_rules.push(RuleFilter::from(rule));
+                    }
+                    AnalyzerSelector::Domain(domain) => {
+                        enabled_rules.extend(domain.as_rule_filters())
+                    }
+                }
+            }
+        }
         let mut syntax = SyntaxVisitor::default();
 
         biome_js_analyze::visit_registry(&mut syntax);

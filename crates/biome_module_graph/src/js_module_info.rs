@@ -1,7 +1,9 @@
 mod binding;
 mod collector;
+mod diagnostics;
 mod module_resolver;
 mod scope;
+mod utils;
 mod visitor;
 
 use biome_js_syntax::AnyJsImportLike;
@@ -20,7 +22,9 @@ use crate::ModuleGraph;
 
 use scope::{JsScope, JsScopeData, TsBindingReference};
 
+use crate::diagnostics::ModuleDiagnostic;
 pub(super) use binding::JsBindingData;
+pub use diagnostics::JsModuleInfoDiagnostic;
 pub use module_resolver::ModuleResolver;
 pub(crate) use visitor::JsModuleVisitor;
 
@@ -44,6 +48,10 @@ impl JsModuleInfo {
             module_info: self.clone(),
             index: 0,
         }
+    }
+
+    pub fn diagnostics(&self) -> &[ModuleDiagnostic] {
+        self.diagnostics.as_slice()
     }
 
     /// Finds an exported symbol by `name`, using the `module_graph` to
@@ -174,10 +182,10 @@ pub struct JsModuleInfoInner {
 
     /// Re-exports that apply to all symbols from another module, without
     /// assigning a name to them.
-    pub blanket_reexports: Box<[JsReexport]>,
+    pub blanket_reexports: Vec<JsReexport>,
 
     /// Collection of all the declarations in the module.
-    pub(crate) bindings: Box<[JsBindingData]>,
+    pub(crate) bindings: Vec<JsBindingData>,
 
     /// Parsed expressions, mapped from their range to their type ID.
     pub(crate) expressions: FxHashMap<TextRange, ResolvedTypeId>,
@@ -185,13 +193,20 @@ pub struct JsModuleInfoInner {
     /// All scopes in this module.
     ///
     /// The first entry is expected to be the global scope.
-    pub(crate) scopes: Box<[JsScopeData]>,
+    pub(crate) scopes: Vec<JsScopeData>,
 
     /// Lookup tree to find scopes by text range.
     pub(crate) scope_by_range: Lapper<u32, ScopeId>,
 
     /// Collection of all types in the module.
-    pub(crate) types: Box<[Arc<TypeData>]>,
+    ///
+    /// We do not store these using our `TypeStore`, because once the module
+    /// info is constructed, no new types can be registered in it, and we have
+    /// no use for a hash table anymore.
+    pub(crate) types: Vec<Arc<TypeData>>,
+
+    /// Diagnostics emitted during the resolution of the module
+    pub(crate) diagnostics: Vec<ModuleDiagnostic>,
 }
 
 #[derive(Debug, Default)]

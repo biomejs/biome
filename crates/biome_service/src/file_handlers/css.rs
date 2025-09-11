@@ -24,7 +24,7 @@ use biome_analyze::{
 use biome_configuration::css::{
     CssAllowWrongLineCommentsEnabled, CssAssistConfiguration, CssAssistEnabled,
     CssFormatterConfiguration, CssFormatterEnabled, CssLinterConfiguration, CssLinterEnabled,
-    CssModulesEnabled, CssParserConfiguration,
+    CssModulesEnabled, CssParserConfiguration, CssTailwindDirectivesEnabled,
 };
 use biome_css_analyze::analyze;
 use biome_css_formatter::context::CssFormatOptions;
@@ -102,6 +102,7 @@ impl From<CssAssistConfiguration> for CssAssistSettings {
 pub struct CssParserSettings {
     pub allow_wrong_line_comments: Option<CssAllowWrongLineCommentsEnabled>,
     pub css_modules_enabled: Option<CssModulesEnabled>,
+    pub tailwind_directives: Option<CssTailwindDirectivesEnabled>,
 }
 
 impl From<CssParserConfiguration> for CssParserSettings {
@@ -109,6 +110,7 @@ impl From<CssParserConfiguration> for CssParserSettings {
         Self {
             allow_wrong_line_comments: configuration.allow_wrong_line_comments,
             css_modules_enabled: configuration.css_modules,
+            tailwind_directives: configuration.tailwind_directives,
         }
     }
 }
@@ -126,6 +128,10 @@ impl CssParserSettings {
 
     pub fn allow_wrong_line_comments(&self) -> bool {
         self.allow_wrong_line_comments.unwrap_or_default().into()
+    }
+
+    pub fn tailwind_directives_enabled(&self) -> bool {
+        self.tailwind_directives.unwrap_or_default().into()
     }
 }
 
@@ -409,6 +415,13 @@ fn parse(
             .unwrap_or_default()
             .into(),
         grit_metavariables: false,
+        tailwind_directives: settings
+            .languages
+            .css
+            .parser
+            .tailwind_directives
+            .unwrap_or_default()
+            .into(),
     };
 
     settings
@@ -531,7 +544,7 @@ fn lint(params: LintParams) -> LintResults {
             .with_only(&params.only)
             .with_skip(&params.skip)
             .with_path(params.path.as_path())
-            .with_enabled_rules(&params.enabled_rules)
+            .with_enabled_selectors(&params.enabled_selectors)
             .with_project_layout(params.project_layout.clone())
             .finish();
 
@@ -590,7 +603,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_only(&only)
             .with_skip(&skip)
             .with_path(path.as_path())
-            .with_enabled_rules(&rules)
+            .with_enabled_selectors(&rules)
             .with_project_layout(project_layout)
             .finish();
 
@@ -636,7 +649,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             .with_only(&params.only)
             .with_skip(&params.skip)
             .with_path(params.biome_path.as_path())
-            .with_enabled_rules(&params.enabled_rules)
+            .with_enabled_selectors(&params.enabled_rules)
             .with_project_layout(params.project_layout)
             .finish();
 

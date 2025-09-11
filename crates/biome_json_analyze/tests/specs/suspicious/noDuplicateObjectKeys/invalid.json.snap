@@ -31,7 +31,7 @@ invalid.json:2:2 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━�
     3 │ 	"foo": "",
     4 │ 	"foo": "",
   
-  i This where a duplicated key was declared again.
+  i This is where a duplicated key was declared again.
   
     1 │ {
     2 │ 	"foo": "",
@@ -40,7 +40,7 @@ invalid.json:2:2 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━�
     4 │ 	"foo": "",
     5 │ 	"foo": "",
   
-  i This where a duplicated key was declared again.
+  i This is where a duplicated key was declared again.
   
     2 │ 	"foo": "",
     3 │ 	"foo": "",
@@ -49,7 +49,7 @@ invalid.json:2:2 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━�
     5 │ 	"foo": "",
     6 │ 	"new": {
   
-  i This where a duplicated key was declared again.
+  i This is where a duplicated key was declared again.
   
     3 │ 	"foo": "",
     4 │ 	"foo": "",
@@ -75,7 +75,7 @@ invalid.json:7:3 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━�
     8 │ 		"ipsum": "",
     9 │ 		"lorem": ""
   
-  i This where a duplicated key was declared again.
+  i This is where a duplicated key was declared again.
   
      7 │ 		"lorem": "",
      8 │ 		"ipsum": "",

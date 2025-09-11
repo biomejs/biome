@@ -139,23 +139,9 @@ export type Extends = string[] | string;
  */
 export interface FilesConfiguration {
 	/**
-	* Set of file and folder names that should be unconditionally ignored by Biome's scanner.
+	* **Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: https://biomejs.dev/reference/configuration/#filesincludes
 
-Biome maintains an internal list of default ignore entries, which is based on user feedback and which may change in any release. This setting allows overriding this internal list completely.
-
-This is considered an advanced feature that users _should_ not need to tweak themselves, but they can as a last resort. This setting can only be configured in root configurations, and is ignored in nested configs.
-
-Entries must be file or folder *names*. Specific paths and globs are not supported.
-
-Examples where this may be useful:
-
-```jsonc { "files": { "experimentalScannerIgnores": [ // You almost certainly don't want to scan your `.git` // folder, which is why it's already ignored by default: ".git",
-
-// But the scanner does scan `node_modules` by default. If // you *really* don't want this, you can ignore it like // this: "node_modules",
-
-// But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: "RedisCommander.d.ts", ], } } ```
-
-Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned. 
+Set of file and folder names that should be unconditionally ignored by Biome's scanner. 
 	 */
 	experimentalScannerIgnores?: string[];
 	/**
@@ -437,6 +423,10 @@ export interface CssParserConfiguration {
 	 * Enables parsing of CSS Modules specific features.
 	 */
 	cssModules?: Bool;
+	/**
+	 * Enables parsing of Tailwind CSS 4.0 directives and functions.
+	 */
+	tailwindDirectives?: Bool;
 }
 export type MaxSize = number;
 export type AttributePosition = "auto" | "multiline";
@@ -9188,7 +9178,9 @@ export type JsonFileVariant = "standard" | "jsonc";
 /**
 	* The style of CSS contained in the file.
 
-Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
+Currently, Biome aims to be compatible with the latest Recommendation level standards.
+
+It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
 	 */
 export type CssVariant = "standard";
 /**
@@ -9202,11 +9194,17 @@ export type HtmlVariant =
 	| "Svelte";
 export type GritVariant = "Standard";
 export type HtmlTextExpressions = "None" | "Single" | "Double";
+export interface OpenFileResult {
+	diagnostics: Diagnostic[];
+}
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
 	projectKey: ProjectKey;
 	version: number;
+}
+export interface ChangeFileResult {
+	diagnostics: Diagnostic[];
 }
 export interface CloseFileParams {
 	path: BiomePath;
@@ -9315,18 +9313,17 @@ export interface PullDiagnosticsParams {
 	/**
 	 * Rules to apply on top of the configuration
 	 */
-	enabledRules?: RuleCode[];
-	only?: RuleCode[];
+	enabledRules?: Selector[];
+	only?: Selector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	/**
 	 * When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
 	 */
 	pullCodeActions: boolean;
-	skip?: RuleCode[];
+	skip?: Selector[];
 }
 export type RuleCategories = RuleCategory[];
-export type RuleCode = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -9335,12 +9332,12 @@ export interface PullDiagnosticsResult {
 }
 export interface PullActionsParams {
 	categories?: RuleCategories;
-	enabledRules?: RuleCode[];
-	only?: RuleCode[];
+	enabledRules?: Selector[];
+	only?: Selector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	range?: TextRange;
-	skip?: RuleCode[];
+	skip?: Selector[];
 	suppressionReason?: string;
 }
 export interface PullActionsResult {
@@ -9435,14 +9432,14 @@ export interface FixFileParams {
 	/**
 	 * Rules to apply to the file
 	 */
-	enabledRules?: RuleCode[];
+	enabledRules?: Selector[];
 	fixFileMode: FixFileMode;
-	only?: RuleCode[];
+	only?: Selector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	ruleCategories: RuleCategories;
 	shouldFormat: boolean;
-	skip?: RuleCode[];
+	skip?: Selector[];
 	suppressionReason?: string;
 }
 /**
@@ -9522,8 +9519,8 @@ export interface Workspace {
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
 	openProject(params: OpenProjectParams): Promise<OpenProjectResult>;
 	scanProject(params: ScanProjectParams): Promise<ScanProjectResult>;
-	openFile(params: OpenFileParams): Promise<void>;
-	changeFile(params: ChangeFileParams): Promise<void>;
+	openFile(params: OpenFileParams): Promise<OpenFileResult>;
+	changeFile(params: ChangeFileParams): Promise<ChangeFileResult>;
 	closeFile(params: CloseFileParams): Promise<void>;
 	fileExists(params: FileExitsParams): Promise<boolean>;
 	isPathIgnored(params: PathIsIgnoredParams): Promise<boolean>;

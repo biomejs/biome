@@ -1,0 +1,104 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@theme {
+	--color-primary: #3b82f6;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    THEME_KW@1..7 "theme" [] [Whitespace(" ")],
+                    CssDeclarationOrRuleBlock {
+                        l_curly_token: L_CURLY@7..8 "{" [] [],
+                        items: CssDeclarationOrRuleList [
+                            CssDeclarationWithSemicolon {
+                                declaration: CssDeclaration {
+                                    property: CssGenericProperty {
+                                        name: CssDashedIdentifier {
+                                            value_token: IDENT@8..25 "--color-primary" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                        colon_token: COLON@25..27 ":" [] [Whitespace(" ")],
+                                        value: CssGenericComponentValueList [
+                                            CssColor {
+                                                hash_token: HASH@27..28 "#" [] [],
+                                                value_token: CSS_COLOR_LITERAL@28..34 "3b82f6" [] [],
+                                            },
+                                        ],
+                                    },
+                                    important: missing (optional),
+                                },
+                                semicolon_token: SEMICOLON@34..35 ";" [] [],
+                            },
+                        ],
+                        r_curly_token: R_CURLY@35..37 "}" [Newline("\n")] [],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@37..38 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..38
+  0: (empty)
+  1: CSS_RULE_LIST@0..37
+    0: CSS_AT_RULE@0..37
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..37
+        0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_BLOCK@7..37
+          0: L_CURLY@7..8 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@8..35
+            0: CSS_DECLARATION_WITH_SEMICOLON@8..35
+              0: CSS_DECLARATION@8..34
+                0: CSS_GENERIC_PROPERTY@8..34
+                  0: CSS_DASHED_IDENTIFIER@8..25
+                    0: IDENT@8..25 "--color-primary" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@25..27 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@27..34
+                    0: CSS_COLOR@27..34
+                      0: HASH@27..28 "#" [] []
+                      1: CSS_COLOR_LITERAL@28..34 "3b82f6" [] []
+                1: (empty)
+              1: SEMICOLON@34..35 ";" [] []
+          2: R_CURLY@35..37 "}" [Newline("\n")] []
+  2: EOF@37..38 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+theme.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+  > 1 │ @theme {
+      │  ^^^^^^^
+  > 2 │ 	--color-primary: #3b82f6;
+  > 3 │ }
+      │ ^
+    4 │ 
+  
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
+  
+```

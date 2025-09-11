@@ -6,6 +6,7 @@ use crate::{
     JsxSelfClosingElement, JsxString, inner_string_text, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
+use biome_string_case::StrOnlyExtension;
 
 impl JsxString {
     /// Returns the inner text of a string not including the quotes.
@@ -376,6 +377,22 @@ impl AnyJsxElement {
     /// - `<span ></span>` is **not** component and it returns `false`
     pub fn is_custom_component(&self) -> bool {
         self.name().is_ok_and(|it| it.as_jsx_name().is_none())
+    }
+
+    /// Whether the current element is a custom element.
+    ///
+    /// A custom element must contain dashes and its name is all lower case.
+    pub fn is_custom_element(&self) -> bool {
+        self.name()
+            .ok()
+            .and_then(|it| it.as_jsx_name().cloned())
+            .and_then(|element| element.value_token().ok())
+            .is_some_and(|token| {
+                token.text_trimmed().contains('-')
+                    && token
+                        .text_trimmed()
+                        .eq(token.text_trimmed().to_lowercase_cow().as_ref())
+            })
     }
 
     /// Returns `true` if the current element is an HTML element.
