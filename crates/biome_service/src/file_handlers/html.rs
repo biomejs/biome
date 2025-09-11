@@ -459,7 +459,7 @@ fn format_embedded(
     let tree = parse.syntax();
     let indent_script_and_style = options.indent_script_and_style().value();
     let mut formatted = format_node(options, &tree)?;
-    let new_document = formatted.format_embedded(move |range| {
+    formatted.format_embedded(move |range| {
         let mut iter = embedded_nodes.iter();
         let node = iter.find(|node| node.range == range)?;
 
@@ -521,8 +521,6 @@ fn format_embedded(
             _ => None,
         }
     });
-
-    formatted.swap_document(new_document);
 
     match formatted.print() {
         Ok(printed) => Ok(printed),

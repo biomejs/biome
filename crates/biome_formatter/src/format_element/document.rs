@@ -158,9 +158,15 @@ pub struct ElementTransformer;
 impl ElementTransformer {
     /// Visits a mutable [Document] and replaces its internal elements.
     pub fn transform_document<V: DocumentVisitor>(document: &mut Document, visitor: &mut V) {
-        document.elements = Self::transform_elements(document.elements.clone(), visitor);
+        let elements = std::mem::take(&mut document.elements);
+        document.elements = Self::transform_elements(elements, visitor);
     }
 
+    /// Iterates over each element of the document and map each element to a new element. The new element is
+    /// optionally crated using [DocumentVisitor::visit_element]. If no element is returned, the original element is kept.
+    ///
+    /// Nested data structures such as [FormatElement::Interned] and [FormatElement::BestFitting] use recursion and call
+    /// [Self::transform_elements] again.
     fn transform_elements<V: DocumentVisitor>(
         elements: Vec<FormatElement>,
         visitor: &mut V,

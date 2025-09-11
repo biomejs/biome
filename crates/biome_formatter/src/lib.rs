@@ -892,10 +892,9 @@ impl<Context> Formatted<Context> {
 
     /// Visits each embedded element and replaces it with elements contained inside the [Document]
     /// emitted by `fn_format_embedded`
-    #[must_use]
-    pub fn format_embedded<F>(&mut self, fn_format_embedded: F) -> Document
+    pub fn format_embedded<F>(&mut self, fn_format_embedded: F)
     where
-        F: Fn(TextRange) -> Option<Document>,
+        F: FnMut(TextRange) -> Option<Document>,
     {
         let document = &mut self.document;
 
@@ -905,7 +904,7 @@ impl<Context> Formatted<Context> {
 
         impl<F> DocumentVisitor for EmbeddedVisitor<F>
         where
-            F: Fn(TextRange) -> Option<Document>,
+            F: FnMut(TextRange) -> Option<Document>,
         {
             fn visit_element(&mut self, element: &FormatElement) -> Option<FormatElement> {
                 match element {
@@ -928,8 +927,6 @@ impl<Context> Formatted<Context> {
             document,
             &mut EmbeddedVisitor { fn_format_embedded },
         );
-
-        document.clone()
     }
 
     /// Returns the formatted document.
@@ -1550,7 +1547,7 @@ pub fn format_node_with_offset<L: FormatLanguage>(
     let (root, source_map) = match language.transform(&root.node.clone()) {
         Some((transformed, source_map)) => {
             // we don't need to insert the node back if it has the same offset
-            if &transformed == &root.node {
+            if transformed == root.node {
                 (transformed, Some(source_map))
             } else {
                 match root
