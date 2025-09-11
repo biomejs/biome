@@ -60,7 +60,7 @@ impl FormatRule<HtmlElementList> for FormatHtmlElementList {
             return Ok(());
         }
         // early exit - If it's just a single HtmlEmbeddedContent node as the only child,
-        // we know the parser will only emit one of these. We can simply call it's formatter and be done.
+        // we know the parser will only emit one of these. We can simply call its formatter and be done.
         // This is also necessary for how we implement embedded language formatting.
         if node.len() == 1
             && let Some(AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(
