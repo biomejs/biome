@@ -21,7 +21,6 @@
 
 #![deny(clippy::use_self)]
 #![deny(rustdoc::broken_intra_doc_links)]
-extern crate core;
 
 mod arguments;
 mod buffer;

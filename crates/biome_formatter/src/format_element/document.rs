@@ -149,11 +149,7 @@ impl Document {
 
 pub trait DocumentVisitor {
     /// Visit an element and optionally return a replacement
-    fn visit_element(
-        &mut self,
-        element: &FormatElement,
-        path: &ElementPath,
-    ) -> Option<FormatElement>;
+    fn visit_element(&mut self, element: &FormatElement) -> Option<FormatElement>;
 }
 
 /// Applies a visitor to transform elements in the document
@@ -171,8 +167,7 @@ impl ElementTransformer {
     ) -> Vec<FormatElement> {
         elements
             .into_iter()
-            .enumerate()
-            .map(|(index, element)| {
+            .map(|element| {
                 // Transform nested elements first
                 let transformed_element = match element {
                     FormatElement::Interned(interned) => {
@@ -184,8 +179,7 @@ impl ElementTransformer {
                         let variants: Vec<Box<[FormatElement]>> = best_fitting
                             .variants()
                             .iter()
-                            .enumerate()
-                            .map(|(variant_index, variant)| {
+                            .map(|variant| {
                                 Self::transform_elements(variant.to_vec(), visitor)
                                     .into_boxed_slice()
                             })

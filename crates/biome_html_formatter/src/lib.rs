@@ -224,7 +224,8 @@ where
         Ok(())
     }
 
-    /// Whether this node contains content that needs to be formatted by an external formatter
+    /// Whether this node contains content that needs to be formatted by an external formatter.
+    /// If so, the function must return the range of the nodes that will be formatted in the second phase.
     fn embedded_node_range(&self, _node: &N) -> Option<TextRange> {
         None
     }

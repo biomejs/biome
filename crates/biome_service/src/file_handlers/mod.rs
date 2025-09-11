@@ -53,6 +53,7 @@ use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
+use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::instrument;
 
