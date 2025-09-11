@@ -55,8 +55,7 @@ impl HtmlElement {
 
             let is_type = name
                 .value_token()
-                .map(|token| token.text_trimmed().eq_ignore_ascii_case("type"))
-                .unwrap_or_default();
+                .is_ok_and(|token| token.text_trimmed().eq_ignore_ascii_case("type"));
 
             if is_type { Some(name) } else { None }
         });
@@ -64,8 +63,7 @@ impl HtmlElement {
         let is_type_javascript = type_attribute.is_none_or(|attribute| {
             attribute
                 .value_token()
-                .map(|token| token.text_trimmed().eq_ignore_ascii_case("text/javascript"))
-                .unwrap_or_default()
+                .is_ok_and(|token| token.text_trimmed().eq_ignore_ascii_case("text/javascript"))
         });
 
         Ok(is_script && is_type_javascript)
@@ -77,12 +75,4 @@ impl HtmlElement {
         let name_text = name.value_token()?;
         Ok(name_text.text_trimmed().eq_ignore_ascii_case("style"))
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn is_javascript_tag() {}
 }

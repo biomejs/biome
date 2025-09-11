@@ -20,7 +20,7 @@ impl FormatNodeRule<HtmlEmbeddedContent> for FormatHtmlEmbeddedContent {
             .syntax()
             .ancestors()
             .skip(1)
-            .find_map(|node| HtmlElement::cast(node))?;
+            .find_map(HtmlElement::cast)?;
         if element.is_javascript_tag().unwrap_or_default()
             || element.is_style_tag().unwrap_or_default()
         {
