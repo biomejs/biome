@@ -82,7 +82,7 @@
 
 - [`351bccd`](https://github.com/biomejs/biome/commit/351bccdfe49a6173cb1446ef2a8a9171c8d78c26) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7411](https://github.com/biomejs/biome/issues/7411). The Biome Language Server had a regression where opening an editor with a file already open wouldn't load the project settings correctly.
 
-- [`351bccd`](https://github.com/biomejs/biome/commit/351bccdfe49a6173cb1446ef2a8a9171c8d78c26) Thanks [@ematipico](https://github.com/ematipico)! - Added the new nursery rule [`noDuplicateDependencies`](https://next.biomejs.dev/linter/rules/no-duplicate-dependencies/), which verifies that no dependencies are duplicated between the `bundledDependencies`, `bundleDependencies`, `dependencies`, `devDependencies`, `overrides`, `optionalDependencies`, and `peerDependencies` sections.
+- [`351bccd`](https://github.com/biomejs/biome/commit/351bccdfe49a6173cb1446ef2a8a9171c8d78c26) Thanks [@ematipico](https://github.com/ematipico)! - Added the new nursery rule [`noDuplicateDependencies`](https://biomejs.dev/linter/rules/no-duplicate-dependencies/), which verifies that no dependencies are duplicated between the `bundledDependencies`, `bundleDependencies`, `dependencies`, `devDependencies`, `overrides`, `optionalDependencies`, and `peerDependencies` sections.
 
   For example, the following snippets will trigger the rule:
 
@@ -174,7 +174,7 @@
 
 - [#7418](https://github.com/biomejs/biome/pull/7418) [`00e1a6b`](https://github.com/biomejs/biome/commit/00e1a6b0afcee3bc89152858bab55efce9cfc18e) Thanks [@ematipico](https://github.com/ematipico)! - Fixed [#7411](https://github.com/biomejs/biome/issues/7411). The Biome Language Server had a regression where opening an editor with a file already open wouldn't load the project settings correctly.
 
-- [#7142](https://github.com/biomejs/biome/pull/7142) [`53ff5ae`](https://github.com/biomejs/biome/commit/53ff5ae34428f042bb5b80c19862c9cf69fc6359) Thanks [@Netail](https://github.com/Netail)! - Added the new nursery rule [`noDuplicateDependencies`](https://next.biomejs.dev/linter/rules/no-duplicate-dependencies/), which verifies that no dependencies are duplicated between the `bundledDependencies`, `bundleDependencies`, `dependencies`, `devDependencies`, `overrides`, `optionalDependencies`, and `peerDependencies` sections.
+- [#7142](https://github.com/biomejs/biome/pull/7142) [`53ff5ae`](https://github.com/biomejs/biome/commit/53ff5ae34428f042bb5b80c19862c9cf69fc6359) Thanks [@Netail](https://github.com/Netail)! - Added the new nursery rule [`noDuplicateDependencies`](https://biomejs.dev/linter/rules/no-duplicate-dependencies/), which verifies that no dependencies are duplicated between the `bundledDependencies`, `bundleDependencies`, `dependencies`, `devDependencies`, `overrides`, `optionalDependencies`, and `peerDependencies` sections.
 
   For example, the following snippets will trigger the rule:
 
