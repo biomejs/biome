@@ -90,7 +90,7 @@ impl Rule for NoJsxPropsBind {
                     .and_then(|c| c.as_js_static_member_expression().cloned())
                     .and_then(|m| m.member().ok())
                     .and_then(|n| n.value_token().ok())
-                    .map_or(false, |t| t.text() == "bind");
+                    .is_some_and(|t| t.text() == "bind");
                 if is_bind {
                     Some(NoJsxPropsBindState {
                         invalid_kind: InvalidKind::Bind,
@@ -122,10 +122,10 @@ impl Rule for NoJsxPropsBind {
                         }) {
                             return None;
                         }
-                        return Some(NoJsxPropsBindState {
+                        Some(NoJsxPropsBindState {
                             invalid_kind: InvalidKind::Function,
                             attribute_range: expression.range(),
-                        });
+                        })
                     }
                     AnyJsBindingDeclaration::JsVariableDeclarator(variable_declarator) => {
                         // dbg!("It's some kind of variable!");
