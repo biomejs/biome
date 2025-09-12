@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
     <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
-    <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
+    <img alt="Muestra el banner de Biome, con su respectivo logo y la frase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
   </picture>
 
   <br>
@@ -25,26 +25,26 @@
   [open-vsx-badge]: https://img.shields.io/visual-studio-marketplace/v/biomejs.biome?label=Open%20VSX%20Registry&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2aWV3Qm94PSI0LjYgNSA5Ni4yIDEyMi43IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxwYXRoIGQ9Ik0zMCA0NC4yTDUyLjYgNUg3LjN6TTQuNiA4OC41aDQ1LjNMMjcuMiA0OS40em01MSAwbDIyLjYgMzkuMiAyMi42LTM5LjJ6IiBmaWxsPSIjYzE2MGVmIi8+CiAgPHBhdGggZD0iTTUyLjYgNUwzMCA0NC4yaDQ1LjJ6TTI3LjIgNDkuNGwyMi43IDM5LjEgMjIuNi0zOS4xem01MSAwTDU1LjYgODguNWg0NS4yeiIgZmlsbD0iI2E2MGVlNSIvPgo8L3N2Zz4=&labelColor=374151&color=60a5fa
   [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
-  <!-- Insert new entries lexicographically by language code.
+<!-- Insert new entries lexicographically by language code.
      For example given below is the same order as these files appear on page:
      https://github.com/biomejs/biome/tree/main/packages/@biomejs/biome -->
 
-  [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [Español](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.es.md) | [Français](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.fr.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | Português do Brasil | [한국어](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md) | [Русский](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ru.md) | [Українська](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.uk.md)
+  [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | Español | [Français](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.fr.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한국어](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md) | [Русский](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ru.md) | [Українська](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.uk.md)
 </div>
 
 <br>
 
-**Biome** é um conjunto de ferramentas de alto desempenho para projetos web, visando fornecer recursos de desenvolvimento para manter a saúde desses projetos.
+**Biome** es una toolchain de alto rendimiento para proyectos web. Su objetivo es proveer herramientas que mantengan la salud de dichos proyectos.
 
-**Biome é um [formatador rápido](./benchmark#formatting)** para _JavaScript_, _TypeScript_, _JSX_, e _JSON_ que atinge **[97% de compatibilidade com o _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome es un [formatter rápido](https://github.com/biomejs/biome/tree/main/benchmark#formatting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ y _GraphQL_ que alcanza un **[97% de compatibilidad con _Prettier_](https://console.algora.io/challenges/prettier)**.
 
-**Biome é um [linter eficiente](https://github.com/biomejs/biome/tree/main/benchmark#linting)** para _JavaScript_, _TypeScript_, e _JSX_ que possui **[mais de 340 regras](https://biomejs.dev/pt-br/linter/javascript/rules/)** do ESLint, typescript-eslint, e de [outras fontes](https://github.com/biomejs/biome/discussions/3).
-Ele **fornece diagnósticos detalhados e contextualizados** que ajudam você a melhorar seu código e se tornar um programador melhor!
+**Biome es un [linter de alto rendimiento](https://github.com/biomejs/biome/tree/main/benchmark#linting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, y _GraphQL_ que incluye **[más de 340 reglas](https://biomejs.dev/linter/javascript/rules/)** de ESLint, typescript-eslint, y [otras fuentes](https://github.com/biomejs/biome/discussions/3).
+Produce **diagnósticos detallados y contextualizados** que ayudan a mejorar tu código y convertirte en un mejor programador!
 
-**Biome** é projetado desde o início para ser usado [interativamente dentro de um editor](https://biomejs.dev/guides/editors/first-party-extensions/).
-Isso permite formatar e lintar códigos malformados enquanto você programa.
+**Biome** fue diseñado desde cero para usarse [interactivamente dentro de un editor](https://biomejs.dev/guides/editors/first-party-extensions/).
+Puede formatear y analizar código mal formado mientras lo estás escribiendo.
 
-### Instalação
+### Instalación
 
 ```shell
 npm install --save-dev --save-exact @biomejs/biome
@@ -53,47 +53,58 @@ npm install --save-dev --save-exact @biomejs/biome
 ### Uso
 
 ```shell
-# formatar arquivos
-npx @biomejs/biome format --write ./src
+# formatea archivos
+npx @biomejs/biome format --write
 
-# lintar arquivos
-npx @biomejs/biome lint ./src
+# analiza archivos y aplica correcciones seguras
+npx @biomejs/biome lint --write
 
-# executar formatação, lint, etc. e aplicar as sugestões seguras
-npx @biomejs/biome check --write ./src
+# ejecuta format, lint, etc. y aplica correcciones seguras
+npx @biomejs/biome check --write
 
-# verificar todos os arquivos contra formatação, lint, etc. em ambientes CI
-npx @biomejs/biome ci ./src
+# valida todos los archivos con format, lint, etc. en entornos CI
+npx @biomejs/biome ci
 ```
 
-Se você quiser experimentar o Biome sem instalá-lo, use o [playground online](https://biomejs.dev/playground/), compilado para WebAssembly.
+Si querés probar Biome sin instalarlo, usá el [playground online](https://biomejs.dev/playground/), compilado a WebAssembly.
 
-## Documentação
+## Documentación
 
-Confira nossa [página inicial][biomejs] para saber mais sobre o Biome,
-ou vá ao [Guia de Introdução][getting-started] para começar a usar o Biome.
+Visitá nuestra [página principal][biomejs] para aprender más sobre Biome,
+o andá directamente a la [guía de inicio][getting-started] para empezar a usarlo.
 
-## Mais sobre o Biome
+## Más sobre Biome
 
-**Biome** tem padrões robustos e não requer configuração.
+**Biome** tiene valores predeterminados sanos y no requiere configuración.
 
-**Biome** visa suportar [todas as principais linguagens][language-support] do desenvolvimento web moderno.
+**Biome** busca soportar [todos los lenguajes principales][language-support] del desarrollo web moderno.
 
-**Biome** [não requer Node.js](https://biomejs.dev/guides/manual-installation/) para funcionar.
+**Biome** [no necesita Node.js](https://biomejs.dev/guides/manual-installation/) para funcionar.
+**Biome** tiene soporte de primera clase para LSP, con un parser sofisticado que representa el texto fuente con total fidelidad y excelente recuperación de errores.
 
-**Biome** tem suporte de primeira linha para LSP, com um
+**Biome** apunta a ofrecer una *Experiencia de Desarrollador* de alta calidad, con diagnósticos descriptivos y gran rendimiento.
 
- parser sofisticado que representa o texto-fonte em sua total fidelidade e recuperação de erro de ponta.
+**Biome** unifica funcionalidades que antes estaban en herramientas separadas. Construir sobre una base compartida nos permite dar una experiencia cohesiva para procesar código, mostrar errores, paralelizar trabajo, usar caché y manejar configuración.
 
-**Biome** unifica funcionalidades que anteriormente eram ferramentas separadas. Construindo sobre uma base compartilhada, podemos fornecer uma experiência coesa para processar código, exibir erros, paralelizar trabalho, cache e configuração.
+Leé más sobre nuestra [filosofía del proyecto][biome-philosophy].
 
-Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
+**Biome** está bajo licencia [MIT](https://github.com/biomejs/biome/tree/main/LICENSE-MIT) o [Apache 2.0 licensed](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE)y moderado bajo el [Código de Conducta](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
 
-**Biome** é licenciado sob [MIT](https://github.com/biomejs/biome/tree/main/LICENSE-MIT) ou [Apache 2.0](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE) e moderado sob o [Código de Conduta do Contribuidor](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
+## Financiamiento
 
-## Patrocinadores
+Podés financiar el proyecto de distintas maneras
 
-### Patrocinadores Ouro
+### Patrocinios y financiamiento
+
+Podés patrocinar o financiar el proyecto a través de [Open collective](https://opencollective.com/biome) o [GitHub sponsors](https://github.com/sponsors/biomejs)
+
+Biome ofrece un programa de patrocinio simple que permite a las empresas obtener visibilidad y reconocimiento entre varios desarrolladores.
+
+Biome ofrece [soporte empresarial](https://biomejs.dev/enterprise), donde colaboradores principales pueden ser contratados para trabajar en proyectos enfocados a compañías.
+
+## Sponsors
+
+### Sponsors Oro
 
 <table>
   <tbody>
@@ -103,7 +114,7 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
           <picture>
             <source media="(prefers-color-scheme: light)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" />
             <source media="(prefers-color-scheme: dark)" srcset="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-dark@3x.png" />
-            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot" />
+            <img src="https://depot.dev/assets/brand/1693758816/depot-logo-horizontal-on-light@3x.png" width="400" alt="Depot logo" />
           </picture>
         </a>
       </td>
@@ -122,8 +133,7 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
   </tbody>
 </table>
 
-
-### Patrocinadores Prata
+### Sponsors Plata
 
 <table>
   <tbody>
@@ -141,7 +151,7 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
   </tbody>
 </table>
 
-### Patrocinadores Bronze
+### Sponsors Bronce
 
 <table>
   <tbody>
@@ -174,7 +184,7 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
   </tbody>
 </table>
 
-[biomejs]: https://biomejs.dev/pt-br/
-[biome-philosophy]: https://biomejs.dev/pt-br/internals/philosophy/
-[language-support]: https://biomejs.dev/pt-br/internals/language-support/
-[getting-started]: https://biomejs.dev/pt-br/guides/getting-started/
+[biomejs]: https://biomejs.dev/
+[biome-philosophy]: https://biomejs.dev/internals/philosophy/
+[language-support]: https://biomejs.dev/internals/language-support/
+[getting-started]: https://biomejs.dev/guides/getting-started/

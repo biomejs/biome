@@ -24,6 +24,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlAnchorProperty::new_unchecked(node) };
                     $body
                 }
+                $crate::YamlSyntaxKind::YAML_BLOCK_CONTENT => {
+                    let $pattern = unsafe { $crate::YamlBlockContent::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_BLOCK_KEEP_INDICATOR => {
+                    let $pattern = unsafe { $crate::YamlBlockKeepIndicator::new_unchecked(node) };
+                    $body
+                }
                 $crate::YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_ENTRY => {
                     let $pattern =
                         unsafe { $crate::YamlBlockMapExplicitEntry::new_unchecked(node) };
@@ -38,16 +46,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlBlockMapping::new_unchecked(node) };
                     $body
                 }
-                $crate::YamlSyntaxKind::YAML_BLOCK_SCALAR => {
-                    let $pattern = unsafe { $crate::YamlBlockScalar::new_unchecked(node) };
-                    $body
-                }
                 $crate::YamlSyntaxKind::YAML_BLOCK_SEQUENCE => {
                     let $pattern = unsafe { $crate::YamlBlockSequence::new_unchecked(node) };
                     $body
                 }
                 $crate::YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY => {
                     let $pattern = unsafe { $crate::YamlBlockSequenceEntry::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_BLOCK_STRIP_INDICATOR => {
+                    let $pattern = unsafe { $crate::YamlBlockStripIndicator::new_unchecked(node) };
                     $body
                 }
                 $crate::YamlSyntaxKind::YAML_DIRECTIVE => {
@@ -94,6 +102,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlFoldedScalar::new_unchecked(node) };
                     $body
                 }
+                $crate::YamlSyntaxKind::YAML_INDENTATION_INDICATOR => {
+                    let $pattern = unsafe { $crate::YamlIndentationIndicator::new_unchecked(node) };
+                    $body
+                }
                 $crate::YamlSyntaxKind::YAML_LITERAL_SCALAR => {
                     let $pattern = unsafe { $crate::YamlLiteralScalar::new_unchecked(node) };
                     $body
@@ -127,6 +139,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::YamlBogus::new_unchecked(node) };
                     $body
                 }
+                $crate::YamlSyntaxKind::YAML_BOGUS_BLOCK_HEADER => {
+                    let $pattern = unsafe { $crate::YamlBogusBlockHeader::new_unchecked(node) };
+                    $body
+                }
                 $crate::YamlSyntaxKind::YAML_BOGUS_BLOCK_MAP_ENTRY => {
                     let $pattern = unsafe { $crate::YamlBogusBlockMapEntry::new_unchecked(node) };
                     $body
@@ -137,6 +153,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::YamlSyntaxKind::YAML_BOGUS_FLOW_NODE => {
                     let $pattern = unsafe { $crate::YamlBogusFlowNode::new_unchecked(node) };
+                    $body
+                }
+                $crate::YamlSyntaxKind::YAML_BLOCK_HEADER_LIST => {
+                    let $pattern = unsafe { $crate::YamlBlockHeaderList::new_unchecked(node) };
                     $body
                 }
                 $crate::YamlSyntaxKind::YAML_BLOCK_MAP_ENTRY_LIST => {
