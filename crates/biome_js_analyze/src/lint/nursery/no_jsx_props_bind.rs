@@ -17,21 +17,21 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <Foo onClick={this._handleClick.bind(this)}></Foo>
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <Foo onClick={() => console.log('Hello!')}></Foo>
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <Foo onClick={function () { console.log('Hello!'); }}></Foo>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// <Foo onClick={this._handleClick}></Foo>
     /// ```
 
