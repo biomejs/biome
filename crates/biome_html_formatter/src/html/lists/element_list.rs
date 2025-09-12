@@ -523,6 +523,12 @@ impl FormatHtmlElementList {
                             .value_token()
                             .is_ok_and(|token| is_meaningful_html_text(token.text()));
                 }
+                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(text)) => {
+                    meta.meaningful_text = meta.meaningful_text
+                        || text
+                            .value_token()
+                            .is_ok_and(|token| is_meaningful_html_text(token.text()));
+                }
                 _ => {}
             }
         }
