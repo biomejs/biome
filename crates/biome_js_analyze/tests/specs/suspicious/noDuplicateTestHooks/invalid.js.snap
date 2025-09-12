@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -180,7 +180,7 @@ describe("foo", () => {
 ```
 invalid.js:4:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeEach hook found.
   
     2 │ 	beforeEach(() => {
     3 │ 	});
@@ -191,7 +191,7 @@ invalid.js:4:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━�
     6 │ 	test("bar", () => {
     7 │ 		someFn();
   
-  i Disallow beforeEach duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -199,7 +199,7 @@ invalid.js:4:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━�
 ```
 invalid.js:16:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeAll hook found.
   
     14 │ 	beforeAll(() => {
     15 │ 	});
@@ -210,7 +210,7 @@ invalid.js:16:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
     18 │ 	test("bar", () => {
     19 │ 		someFn();
   
-  i Disallow beforeAll duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -218,7 +218,7 @@ invalid.js:16:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:26:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate afterEach hook found.
   
     24 │ 	afterEach(() => {
     25 │ 	});
@@ -229,7 +229,7 @@ invalid.js:26:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
     28 │ 	test("bar", () => {
     29 │ 		someFn();
   
-  i Disallow afterEach duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -237,7 +237,7 @@ invalid.js:26:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:36:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate afterAll hook found.
   
     34 │ 	afterAll(() => {
     35 │ 	});
@@ -248,7 +248,7 @@ invalid.js:36:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
     38 │ 	test("bar", () => {
     39 │ 		someFn();
   
-  i Disallow afterAll duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -256,7 +256,7 @@ invalid.js:36:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:46:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeEach hook found.
   
     44 │ 	beforeEach(() => {
     45 │ 	});
@@ -267,7 +267,7 @@ invalid.js:46:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
     48 │ 	beforeEach(() => {
     49 │ 	});
   
-  i Disallow beforeEach duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -275,7 +275,7 @@ invalid.js:46:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:48:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeEach hook found.
   
     46 │ 	beforeEach(() => {
     47 │ 	});
@@ -286,7 +286,7 @@ invalid.js:48:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
     50 │ 	test("bar", () => {
     51 │ 		someFn();
   
-  i Disallow beforeEach duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -294,7 +294,7 @@ invalid.js:48:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:58:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate afterAll hook found.
   
     56 │ 	afterAll(() => {
     57 │ 	});
@@ -305,7 +305,7 @@ invalid.js:58:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
     60 │ 	beforeAll(() => {
     61 │ 	});
   
-  i Disallow afterAll duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -313,7 +313,7 @@ invalid.js:58:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:62:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeAll hook found.
   
     60 │ 	beforeAll(() => {
     61 │ 	});
@@ -324,7 +324,7 @@ invalid.js:62:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
     64 │ 	test("bar", () => {
     65 │ 		someFn();
   
-  i Disallow beforeAll duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -332,7 +332,7 @@ invalid.js:62:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:72:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeEach hook found.
   
     70 │ 	beforeEach(() => {
     71 │ 	});
@@ -343,7 +343,7 @@ invalid.js:72:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
     74 │ 	beforeAll(() => {
     75 │ 	});
   
-  i Disallow beforeEach duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -351,7 +351,7 @@ invalid.js:72:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:90:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeEach hook found.
   
     88 │ 		beforeEach(() => {
     89 │ 		});
@@ -362,7 +362,7 @@ invalid.js:90:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
     92 │ 		test("inner bar", () => {
     93 │ 			someFn();
   
-  i Disallow beforeEach duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -370,7 +370,7 @@ invalid.js:90:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:101:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeEach hook found.
   
      99 │ 	beforeEach(() => {
     100 │ 	});
@@ -381,7 +381,7 @@ invalid.js:101:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
     103 │ 
     104 │ 	it("is not fine", () => {
   
-  i Disallow beforeEach duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -389,7 +389,7 @@ invalid.js:101:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
 ```
 invalid.js:120:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeEach hook found.
   
     118 │ 		beforeEach(() => {
     119 │ 		});
@@ -400,7 +400,7 @@ invalid.js:120:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
     122 │ 
     123 │ 		it("is not fine", () => {
   
-  i Disallow beforeEach duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -408,7 +408,7 @@ invalid.js:120:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
 ```
 invalid.js:141:4 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate beforeEach hook found.
   
     139 │ 			beforeEach(() => {
     140 │ 			});
@@ -419,7 +419,7 @@ invalid.js:141:4 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
     143 │ 
     144 │ 			it("is not fine", () => {
   
-  i Disallow beforeEach duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -427,7 +427,7 @@ invalid.js:141:4 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
 ```
 invalid.js:153:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate before hook found.
   
     151 │ 	before(() => {
     152 │ 	});
@@ -438,7 +438,7 @@ invalid.js:153:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
     155 │ 	test("bar", () => {
     156 │ 		someFn();
   
-  i Disallow before duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
@@ -446,7 +446,7 @@ invalid.js:153:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
 ```
 invalid.js:163:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Disallow duplicate setup and teardown hooks.
+  × Duplicate after hook found.
   
     161 │ 	after(() => {
     162 │ 	});
@@ -457,7 +457,7 @@ invalid.js:163:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
     165 │ 	test("bar", () => {
     166 │ 		someFn();
   
-  i Disallow after duplicacy inside the describe function.
+  i Remove this duplicate hook or consolidate the logic into a single hook.
   
 
 ```
