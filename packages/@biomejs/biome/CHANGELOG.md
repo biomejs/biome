@@ -1,5 +1,11 @@
 # @biomejs/biome
 
+## 2.2.5
+
+### Patch Changes
+
+- [#7476](https://github.com/biomejs/biome/pull/7476) [`c015765`](https://github.com/biomejs/biome/commit/c015765af2defb042285d96588fcb5f531eb8b6f) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where the suppression action for `noPositiveTabindex` didn't place the suppression comment in the correct position.
+
 ## 2.2.4
 
 ### Patch Changes
@@ -1042,7 +1048,7 @@
 
   > [!WARNING]
   > **Breaking Change**: The
-  `noImportCycles` rule no longer detects import cycles that include one or more type-only imports by default.
+  > `noImportCycles` rule no longer detects import cycles that include one or more type-only imports by default.
   > To keep the old behaviour, you can turn off the `ignoreTypes` option explicitly:
   >
   > ```json
@@ -2847,8 +2853,7 @@
 
   The code action `quickfix.suppressRule` was removed in favour of two new code actions:
   - `quickfix.suppressRule.inline.biome`: a code action that adds a suppression comment for each violation.
-  -
-  `quickfix.suppressRule.topLevel.biome`: a code action that adds a suppression comment at the top of the file which suppresses a rule for the whole file.
+  - `quickfix.suppressRule.topLevel.biome`: a code action that adds a suppression comment at the top of the file which suppresses a rule for the whole file.
 
   Given the following code
 
@@ -4729,20 +4734,18 @@
   1. **Accessibility checks**:
 
      Now the rule correctly handles the following cases:
-
   - If an element is hidden from screen readers
   - If an element has the presentation role
   - If an element is interactive
 
-     ```jsx
-     // No errors
-     <div aria-hidden="true" onClick={() => {}} /> // hidden from screen reader
-     <div role="presentation" onClick={() => {}} /> // presentation role
-     <button onClick={() => {}} /> // interactive role
-     ```
+    ```jsx
+    // No errors
+    <div aria-hidden="true" onClick={() => {}} /> // hidden from screen reader
+    <div role="presentation" onClick={() => {}} /> // presentation role
+    <button onClick={() => {}} /> // interactive role
+    ```
 
   This change ensures the rule is more accurate and helpful.
-
   2. **Checks spread syntax**:
 
      Spread syntax used to be ignored, but has been changed to be pointed out for more stringent checking.
