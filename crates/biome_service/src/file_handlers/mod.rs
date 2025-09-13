@@ -11,6 +11,7 @@ pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
 use crate::settings::Settings;
 use crate::workspace::{
     FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult,
+    SendEmbeddedParse,
 };
 use biome_analyze::{
     AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal, ControlFlow,
@@ -655,6 +656,20 @@ type FormatOnType = fn(
     TextSize,
 ) -> Result<Printed, WorkspaceError>;
 
+type FormatEmbedded = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    &Settings,
+    Vec<FormatEmbedNode>,
+) -> Result<Printed, WorkspaceError>;
+
+pub(crate) struct FormatEmbedNode {
+    pub(crate) range: TextRange,
+    pub(crate) node: SendEmbeddedParse,
+    pub(crate) source: DocumentFileSource,
+}
+
 #[derive(Default)]
 pub(crate) struct FormatterCapabilities {
     /// It formats a file
@@ -663,6 +678,8 @@ pub(crate) struct FormatterCapabilities {
     pub(crate) format_range: Option<FormatRange>,
     /// It formats a file while typing
     pub(crate) format_on_type: Option<FormatOnType>,
+    /// It formats a file with embedded nodes
+    pub(crate) format_embedded: Option<FormatEmbedded>,
 }
 
 type Enabled = fn(&Utf8Path, &Settings) -> bool;

@@ -43,14 +43,16 @@ pub mod trivia;
 
 use crate::formatter::Formatter;
 use crate::group_id::UniqueGroupIdBuilder;
-use crate::prelude::TagKind;
+use crate::prelude::{Tag, TagKind};
 use std::fmt;
 use std::fmt::{Debug, Display};
 
 use crate::builders::syntax_token_cow_slice;
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
-use crate::format_element::document::Document;
+use crate::format_element::document::{Document, ElementTransformer};
+use crate::format_element::{Interned, LineMode};
+use crate::prelude::document::DocumentVisitor;
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
@@ -63,8 +65,8 @@ use biome_deserialize::{
 use biome_deserialize_macros::Deserializable;
 use biome_deserialize_macros::Merge;
 use biome_rowan::{
-    Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxResult, SyntaxToken, SyntaxTriviaPiece,
-    TextLen, TextRange, TextSize, TokenAtOffset,
+    Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxNodeWithOffset, SyntaxResult,
+    SyntaxToken, SyntaxTriviaPiece, TextLen, TextRange, TextSize, TokenAtOffset,
 };
 pub use buffer::{
     Buffer, BufferExtensions, BufferSnapshot, Inspect, PreambleBuffer, RemoveSoftLinesBuffer,
@@ -888,6 +890,45 @@ impl<Context> Formatted<Context> {
         &self.context
     }
 
+    /// Visits each embedded element and replaces it with elements contained inside the [Document]
+    /// emitted by `fn_format_embedded`
+    pub fn format_embedded<F>(&mut self, fn_format_embedded: F)
+    where
+        F: FnMut(TextRange) -> Option<Document>,
+    {
+        let document = &mut self.document;
+
+        struct EmbeddedVisitor<F> {
+            fn_format_embedded: F,
+        }
+
+        impl<F> DocumentVisitor for EmbeddedVisitor<F>
+        where
+            F: FnMut(TextRange) -> Option<Document>,
+        {
+            fn visit_element(&mut self, element: &FormatElement) -> Option<FormatElement> {
+                match element {
+                    FormatElement::Tag(Tag::StartEmbedded(range)) => {
+                        (self.fn_format_embedded)(*range).map(|document| {
+                            FormatElement::Interned(Interned::new(document.into_elements()))
+                        })
+                    }
+                    FormatElement::Tag(Tag::EndEmbedded) => {
+                        // FIXME: this might not play well for all cases, so we need to figure out
+                        // a nicer way to replace the tag
+                        Some(FormatElement::Line(LineMode::Hard))
+                    }
+                    _ => None,
+                }
+            }
+        }
+
+        ElementTransformer::transform_document(
+            document,
+            &mut EmbeddedVisitor { fn_format_embedded },
+        );
+    }
+
     /// Returns the formatted document.
     pub fn document(&self) -> &Document {
         &self.document
@@ -896,6 +937,10 @@ impl<Context> Formatted<Context> {
     /// Consumes `self` and returns the formatted document.
     pub fn into_document(self) -> Document {
         self.document
+    }
+
+    pub fn swap_document(&mut self, document: Document) {
+        self.document = document;
     }
 }
 
@@ -969,8 +1014,8 @@ impl Printed {
         }
     }
 
-    /// Range of the input source file covered by this formatted code,
-    /// or None if the entire file is covered in this instance
+    /// [TextRange] of the input source file covered by this formatted code,
+    /// or [None] if the entire file is covered in this instance
     pub fn range(&self) -> Option<TextRange> {
         self.range
     }
@@ -1416,17 +1461,21 @@ pub trait FormatLanguage {
         self,
         root: &SyntaxNode<Self::SyntaxLanguage>,
         source_map: Option<TransformSourceMap>,
+        delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context;
 }
 
 /// Formats a syntax node file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
+///
+/// When `skip_embedded_nodes` is `true`, the content of `<script>` and `<style` is formatted
+/// verbatim.
 pub fn format_node<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
+    delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<L::Context>> {
-    let _ = tracing::trace_span!("format_node").entered();
     let (root, source_map) = match language.transform(&root.clone()) {
         Some((transformed, source_map)) => {
             // we don't need to insert the node back if it has the same offset
@@ -1471,7 +1520,82 @@ pub fn format_node<L: FormatLanguage>(
         None => (root.clone(), None),
     };
 
-    let context = language.create_context(&root, source_map);
+    let context = language.create_context(&root, source_map, delegate_fmt_embedded_nodes);
+    let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
+
+    let mut state = FormatState::new(context);
+    let mut buffer = VecBuffer::new(&mut state);
+
+    write!(buffer, [format_node])?;
+
+    let mut document = Document::from(buffer.into_vec());
+    document.propagate_expand();
+
+    state.assert_formatted_all_tokens(&root);
+
+    let context = state.into_context();
+    let comments = context.comments();
+
+    comments.assert_checked_all_suppressions(&root);
+    comments.assert_formatted_all_comments();
+
+    Ok(Formatted::new(document, context))
+}
+
+/// Formats a syntax node file based on its features.
+///
+/// It returns a [Formatted] result, which the user can use to override a file.
+pub fn format_node_with_offset<L: FormatLanguage>(
+    root: &SyntaxNodeWithOffset<L::SyntaxLanguage>,
+    language: L,
+    delegate_fmt_embedded_nodes: bool,
+) -> FormatResult<Formatted<L::Context>> {
+    let (root, source_map) = match language.transform(&root.node.clone()) {
+        Some((transformed, source_map)) => {
+            // we don't need to insert the node back if it has the same offset
+            if transformed == root.node {
+                (transformed, Some(source_map))
+            } else {
+                match root
+                    .node
+                    .ancestors()
+                    // ancestors() always returns self as the first element of the iterator.
+                    .skip(1)
+                    .last()
+                {
+                    // current root node is the topmost node we don't need to insert the transformed node back
+                    None => (transformed, Some(source_map)),
+                    Some(top_root) => {
+                        // we have to return transformed node back into subtree
+                        let transformed_range = transformed.text_range_with_trivia();
+                        let root_range = root.text_range_with_trivia();
+
+                        let transformed_root = top_root
+                            .replace_child(root.node.clone().into(), transformed.into())
+                            // SAFETY: Calling `unwrap` is safe because we know that `root` is part of the `top_root` subtree.
+                            .unwrap();
+                        let transformed = transformed_root.covering_element(TextRange::new(
+                            root_range.start(),
+                            root_range.start() + transformed_range.len(),
+                        ));
+
+                        let node = match transformed {
+                            NodeOrToken::Node(node) => node,
+                            NodeOrToken::Token(token) => {
+                                // if we get a token we need to get the parent node
+                                token.parent().unwrap_or(transformed_root)
+                            }
+                        };
+
+                        (node, Some(source_map))
+                    }
+                }
+            }
+        }
+        None => (root.node.clone(), None),
+    };
+
+    let context = language.create_context(&root, source_map, delegate_fmt_embedded_nodes);
     let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
     let mut state = FormatState::new(context);
@@ -1860,7 +1984,7 @@ pub fn format_sub_tree<L: FormatLanguage>(
         None => 0,
     };
 
-    let formatted = format_node(root, language)?;
+    let formatted = format_node(root, language, false)?;
     let mut printed = formatted.print_with_indent(initial_indent)?;
     let sourcemap = printed.take_sourcemap();
     let verbatim_ranges = printed.take_verbatim_ranges();

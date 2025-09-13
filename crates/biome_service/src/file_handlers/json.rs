@@ -119,13 +119,47 @@ impl From<JsonAssistConfiguration> for JsonAssistSettings {
 impl ServiceLanguage for JsonLanguage {
     type FormatterSettings = JsonFormatterSettings;
     type LinterSettings = JsonLinterSettings;
+    type AssistSettings = JsonAssistSettings;
     type FormatOptions = JsonFormatOptions;
     type ParserSettings = JsonParserSettings;
-    type AssistSettings = JsonAssistSettings;
+    type ParserOptions = JsonParserOptions;
     type EnvironmentSettings = ();
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.json
+    }
+
+    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
+        None
+    }
+
+    fn resolve_parse_options(
+        overrides: &OverrideSettings,
+        language: &Self::ParserSettings,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions {
+        if path.ends_with(ConfigName::biome_jsonc()) {
+            JsonParserOptions::default()
+                .with_allow_comments()
+                .with_allow_trailing_commas()
+        } else {
+            let optional_json_file_source = file_source.to_json_file_source();
+            let mut options = JsonParserOptions {
+                allow_comments: language.allow_comments.map_or_else(
+                    || optional_json_file_source.is_some_and(|x| x.allow_comments()),
+                    |value| value.value(),
+                ),
+                allow_trailing_commas: language.allow_trailing_commas.map_or_else(
+                    || optional_json_file_source.is_some_and(|x| x.allow_trailing_commas()),
+                    |value| value.value(),
+                ),
+            };
+
+            overrides.apply_override_json_parser_options(path, &mut options);
+
+            options
+        }
     }
 
     fn resolve_format_options(
@@ -208,6 +242,33 @@ impl ServiceLanguage for JsonLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
+    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.json.linter.enabled,
+                        pattern.linter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
+
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.json.linter.enabled,
+                settings.linter.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
+    }
+
     fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
         let overrides_activity =
             settings
@@ -261,37 +322,6 @@ impl ServiceLanguage for JsonLanguage {
             .unwrap_or_default()
             .into()
     }
-
-    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
-        let overrides_activity =
-            settings
-                .override_settings
-                .patterns
-                .iter()
-                .rev()
-                .find_map(|pattern| {
-                    check_override_feature_activity(
-                        pattern.languages.json.linter.enabled,
-                        pattern.linter.enabled,
-                    )
-                    .filter(|_| {
-                        // Then check whether the path satisfies
-                        pattern.is_file_included(path)
-                    })
-                });
-
-        overrides_activity
-            .or(check_feature_activity(
-                settings.languages.json.linter.enabled,
-                settings.linter.enabled,
-            ))
-            .unwrap_or_default()
-            .into()
-    }
-
-    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
-        None
-    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -325,6 +355,7 @@ impl ExtensionHandler for JsonFileHandler {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
+                format_embedded: None,
             },
             search: SearchCapabilities { search: None },
         }
@@ -354,29 +385,7 @@ fn parse(
     settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let options = if biome_path.ends_with(ConfigName::biome_jsonc()) {
-        JsonParserOptions::default()
-            .with_allow_comments()
-            .with_allow_trailing_commas()
-    } else {
-        let parser = &settings.languages.json.parser;
-        let overrides = &settings.override_settings;
-        let optional_json_file_source = file_source.to_json_file_source();
-        let mut options = JsonParserOptions {
-            allow_comments: parser.allow_comments.map_or_else(
-                || optional_json_file_source.is_some_and(|x| x.allow_comments()),
-                |value| value.value(),
-            ),
-            allow_trailing_commas: parser.allow_trailing_commas.map_or_else(
-                || optional_json_file_source.is_some_and(|x| x.allow_trailing_commas()),
-                |value| value.value(),
-            ),
-        };
-
-        overrides.apply_override_json_parser_options(biome_path, &mut options);
-
-        options
-    };
+    let options = settings.parse_options::<JsonLanguage>(biome_path, &file_source);
 
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
 

@@ -382,6 +382,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlElement {
         )
     }
 }
+impl FormatRule<biome_html_syntax::HtmlEmbeddedContent>
+    for crate::html::auxiliary::embedded_content::FormatHtmlEmbeddedContent
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlEmbeddedContent,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlEmbeddedContent>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlEmbeddedContent {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlEmbeddedContent,
+        crate::html::auxiliary::embedded_content::FormatHtmlEmbeddedContent,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::embedded_content::FormatHtmlEmbeddedContent::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlEmbeddedContent {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlEmbeddedContent,
+        crate::html::auxiliary::embedded_content::FormatHtmlEmbeddedContent,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::embedded_content::FormatHtmlEmbeddedContent::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::HtmlOpeningElement>
     for crate::html::auxiliary::opening_element::FormatHtmlOpeningElement
 {

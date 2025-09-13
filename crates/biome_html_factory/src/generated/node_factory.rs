@@ -207,6 +207,12 @@ pub fn html_element(
         ],
     ))
 }
+pub fn html_embedded_content(value_token: SyntaxToken) -> HtmlEmbeddedContent {
+    HtmlEmbeddedContent::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_EMBEDDED_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn html_opening_element(
     l_angle_token: SyntaxToken,
     name: HtmlTagName,

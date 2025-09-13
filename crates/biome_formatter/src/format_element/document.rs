@@ -1,4 +1,5 @@
 #![expect(clippy::mutable_key_type)]
+
 use super::tag::Tag;
 use crate::format_element::tag::DedentMode;
 use crate::prelude::tag::GroupMode;
@@ -19,6 +20,10 @@ pub struct Document {
 }
 
 impl Document {
+    pub fn new(elements: Vec<FormatElement>) -> Self {
+        Self { elements }
+    }
+
     /// Sets [`expand`](tag::Group::expand) to [`GroupMode::Propagated`] if the group contains any of:
     /// * a group with [`expand`](tag::Group::expand) set to [GroupMode::Propagated] or [GroupMode::Expand].
     /// * a non-soft [line break](FormatElement::Line) with mode [LineMode::Hard], [LineMode::Empty], or [LineMode::Literal].
@@ -131,6 +136,75 @@ impl Document {
         let mut enclosing: Vec<Enclosing> = Vec::new();
         let mut interned = FxHashMap::default();
         propagate_expands(self, &mut enclosing, &mut interned);
+    }
+
+    pub fn into_elements(self) -> Vec<FormatElement> {
+        self.elements
+    }
+
+    pub fn as_elements(&self) -> &[FormatElement] {
+        &self.elements
+    }
+}
+
+pub trait DocumentVisitor {
+    /// Visit an element and optionally return a replacement
+    fn visit_element(&mut self, element: &FormatElement) -> Option<FormatElement>;
+}
+
+/// Applies a visitor to transform elements in the document
+pub struct ElementTransformer;
+
+impl ElementTransformer {
+    /// Visits a mutable [Document] and replaces its internal elements.
+    pub fn transform_document<V: DocumentVisitor>(document: &mut Document, visitor: &mut V) {
+        let elements = std::mem::take(&mut document.elements);
+        document.elements = Self::transform_elements(elements, visitor);
+    }
+
+    /// Iterates over each element of the document and map each element to a new element. The new element is
+    /// optionally crated using [DocumentVisitor::visit_element]. If no element is returned, the original element is kept.
+    ///
+    /// Nested data structures such as [FormatElement::Interned] and [FormatElement::BestFitting] use recursion and call
+    /// [Self::transform_elements] again.
+    fn transform_elements<V: DocumentVisitor>(
+        elements: Vec<FormatElement>,
+        visitor: &mut V,
+    ) -> Vec<FormatElement> {
+        elements
+            .into_iter()
+            .map(|element| {
+                // Transform nested elements first
+                let transformed_element = match element {
+                    FormatElement::Interned(interned) => {
+                        let nested_elements = interned.deref().to_vec();
+                        let transformed_nested = Self::transform_elements(nested_elements, visitor);
+                        FormatElement::Interned(Interned::new(transformed_nested))
+                    }
+                    FormatElement::BestFitting(best_fitting) => {
+                        let variants: Vec<Box<[FormatElement]>> = best_fitting
+                            .variants()
+                            .iter()
+                            .map(|variant| {
+                                Self::transform_elements(variant.to_vec(), visitor)
+                                    .into_boxed_slice()
+                            })
+                            .collect();
+                        // SAFETY: Safe because the number of variants is the same after the transformation
+                        unsafe {
+                            FormatElement::BestFitting(BestFittingElement::from_vec_unchecked(
+                                variants,
+                            ))
+                        }
+                    }
+                    other => other,
+                };
+                // Then apply a visitor to the element itself
+                visitor
+                    .visit_element(&transformed_element)
+                    .unwrap_or(transformed_element)
+            })
+            .collect()
     }
 }
 
@@ -530,6 +604,9 @@ impl Format<IrFormatContext> for &[FormatElement] {
                             write!(f, [text("fill(")])?;
                         }
 
+                        StartEmbedded(_) => {
+                            write!(f, [text("embedded(")])?;
+                        }
                         StartEntry => {
                             // handled after the match for all start tags
                         }
@@ -544,7 +621,8 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         | EndGroup
                         | EndLineSuffix
                         | EndDedent(_)
-                        | EndVerbatim => {
+                        | EndVerbatim
+                        | EndEmbedded => {
                             write!(f, [ContentArrayEnd, text(")")])?;
                         }
                     };

@@ -31,7 +31,7 @@ quick brown fox
         .with_line_width(LineWidth::try_from(80).unwrap())
         .with_attribute_position(AttributePosition::Auto);
 
-    let doc = format_node(options.clone(), &tree.syntax()).unwrap();
+    let doc = format_node(options.clone(), &tree.syntax(), false).unwrap();
     let result = doc.print().unwrap();
 
     println!("{}", doc.into_document());

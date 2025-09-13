@@ -9,6 +9,7 @@ pub(crate) mod content;
 pub(crate) mod directive;
 pub(crate) mod double_text_expression;
 pub(crate) mod element;
+pub(crate) mod embedded_content;
 pub(crate) mod opening_element;
 pub(crate) mod root;
 pub(crate) mod self_closing_element;

@@ -269,6 +269,7 @@ impl FormatLanguage for JsonFormatLanguage {
         self,
         root: &JsonSyntaxNode,
         source_map: Option<TransformSourceMap>,
+        _delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &JsonCommentStyle, source_map.as_ref());
         JsonFormatContext::new(self.options, comments).with_source_map(source_map)
@@ -345,7 +346,7 @@ pub fn format_node(
     options: JsonFormatOptions,
     root: &JsonSyntaxNode,
 ) -> FormatResult<Formatted<JsonFormatContext>> {
-    biome_formatter::format_node(root, JsonFormatLanguage::new(options))
+    biome_formatter::format_node(root, JsonFormatLanguage::new(options), false)
 }
 
 /// Formats a single node within a file, supported by Biome.

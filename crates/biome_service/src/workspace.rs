@@ -55,6 +55,7 @@ mod client;
 mod document;
 mod server;
 
+pub use document::{EmbeddedCssContent, EmbeddedJsContent, SendEmbeddedParse};
 use std::{
     borrow::Cow,
     fmt::{Debug, Display, Formatter},
@@ -97,7 +98,6 @@ pub use crate::{
 };
 
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-pub use document::{EmbeddedCssContent, EmbeddedJsContent};
 pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.
