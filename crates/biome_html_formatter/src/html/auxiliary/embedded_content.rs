@@ -5,7 +5,6 @@ use biome_rowan::{AstNode, TextRange};
 pub(crate) struct FormatHtmlEmbeddedContent;
 impl FormatNodeRule<HtmlEmbeddedContent> for FormatHtmlEmbeddedContent {
     fn fmt_fields(&self, node: &HtmlEmbeddedContent, f: &mut HtmlFormatter) -> FormatResult<()> {
-        dbg!("here?");
         format_verbatim_skipped(node.syntax()).fmt(f)
     }
 
@@ -15,7 +14,6 @@ impl FormatNodeRule<HtmlEmbeddedContent> for FormatHtmlEmbeddedContent {
         f: &mut HtmlFormatter,
     ) -> Option<TextRange> {
         if !f.context().should_delegate_fmt_embedded_nodes() {
-            dbg!("CORRECTLY HERE");
             return None;
         }
         let element = node

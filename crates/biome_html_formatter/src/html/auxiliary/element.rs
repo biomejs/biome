@@ -122,7 +122,6 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             &opening_element,
             f,
         )?;
-        dbg!(&tag_name, should_format_embedded_nodes, should_be_verbatim);
         // The order here is important. First, we must check if we can delegate the formatting
         // of embedded nodes, then we check if we should format them verbatim.
         if should_format_embedded_nodes {

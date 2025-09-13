@@ -24,9 +24,11 @@ expression: redactor(content)
 	}
 </script>
 <style>
-	#id .class div > p {background-color: red;
+	#id .class div > p {
+		background-color: red;
 		align: center;
-		padding: 0;}
+		padding: 0;
+	}
 </style>
 
 ```
