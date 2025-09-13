@@ -13,10 +13,11 @@ impl FormatRule<TsTypeArgumentList> for FormatTsTypeArgumentList {
         // When a trailing comma is present, the actual last element is not the comma but a missing element.
         // To omit the trailing comma, drop the missing element.
         let mut elements: Vec<_> = node.elements().collect();
-        if let Some(last) = elements.last() {
-            if last.node().is_err() && last.trailing_separator().ok().is_some() {
-                elements.pop();
-            }
+        if let Some(last) = elements.last()
+            && last.node().is_err()
+            && last.trailing_separator().ok().is_some()
+        {
+            elements.pop();
         }
         let entries = FormatSeparatedIter::new(
             elements.into_iter(),
