@@ -32,6 +32,7 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_grit_formatter::context::GritFormatOptions;
 use biome_grit_syntax::GritLanguage;
 use biome_html_formatter::HtmlFormatOptions;
+use biome_html_parser::HtmlParseOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
@@ -615,6 +616,8 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Settings that belong to the parser
     type ParserSettings: Default;
 
+    type ParserOptions: Default;
+
     /// Settings related to the environment/runtime in which the language is used.
     type EnvironmentSettings: Default;
 
@@ -623,6 +626,14 @@ pub trait ServiceLanguage: biome_rowan::Language {
 
     /// Retrieve the environment settings of the current language
     fn resolve_environment(settings: &Settings) -> Option<&Self::EnvironmentSettings>;
+
+    /// Retrieve the parser options that belong to this language
+    fn resolve_parse_options(
+        overrides: &OverrideSettings,
+        language: &Self::ParserSettings,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions;
 
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
@@ -1061,6 +1072,19 @@ impl Settings {
         L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
     }
 
+    pub fn parse_options<L>(
+        &self,
+        path: &BiomePath,
+        file_source: &DocumentFileSource,
+    ) -> L::ParserOptions
+    where
+        L: ServiceLanguage,
+    {
+        let overrides = &self.override_settings;
+        let editor_settings = &L::lookup_settings(&self.languages).parser;
+        L::resolve_parse_options(overrides, editor_settings, path, file_source)
+    }
+
     pub fn analyzer_options<L>(
         &self,
         path: &BiomePath,
@@ -1223,6 +1247,18 @@ impl OverrideSettings {
         for pattern in self.patterns.iter() {
             if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_json_parser_options(options);
+            }
+        }
+    }
+
+    pub(crate) fn apply_override_html_parser_options(
+        &self,
+        path: &Utf8Path,
+        options: &mut HtmlParseOptions,
+    ) {
+        for pattern in self.patterns.iter() {
+            if pattern.is_file_included(path) {
+                pattern.apply_overrides_to_html_parser_options(options);
             }
         }
     }
@@ -1593,6 +1629,14 @@ impl OverrideSettingPattern {
         }
         if let Some(allow_trailing_commas) = json_parser.allow_trailing_commas {
             options.allow_trailing_commas = allow_trailing_commas.value();
+        }
+    }
+
+    fn apply_overrides_to_html_parser_options(&self, options: &mut HtmlParseOptions) {
+        let html_parser = &self.languages.html.parser;
+
+        if let Some(interpolation) = html_parser.interpolation {
+            options.set_double_text_expression(interpolation.value());
         }
     }
 

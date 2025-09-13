@@ -493,7 +493,6 @@ dependencies = [
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
- "tracing",
  "unicode-width 0.1.12",
 ]
 
@@ -810,6 +809,8 @@ dependencies = [
 name = "biome_html_syntax"
 version = "0.5.7"
 dependencies = [
+ "biome_html_factory",
+ "biome_html_parser",
  "biome_rowan",
  "biome_string_case",
  "camino",

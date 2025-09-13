@@ -126,7 +126,7 @@ impl PrintMode {
 pub struct Interned(Rc<[FormatElement]>);
 
 impl Interned {
-    pub(super) fn new(content: Vec<FormatElement>) -> Self {
+    pub fn new(content: Vec<FormatElement>) -> Self {
         Self(content.into())
     }
 }

@@ -203,6 +203,14 @@ impl HtmlElement {
         )
     }
 }
+impl HtmlEmbeddedContent {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl HtmlOpeningElement {
     pub fn with_l_angle_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

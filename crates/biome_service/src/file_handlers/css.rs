@@ -138,13 +138,40 @@ impl CssParserSettings {
 impl ServiceLanguage for CssLanguage {
     type FormatterSettings = CssFormatterSettings;
     type LinterSettings = CssLinterSettings;
+    type AssistSettings = CssAssistSettings;
     type FormatOptions = CssFormatOptions;
     type ParserSettings = CssParserSettings;
-    type AssistSettings = CssAssistSettings;
+    type ParserOptions = CssParserOptions;
+
     type EnvironmentSettings = ();
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.css
+    }
+
+    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
+        None
+    }
+
+    fn resolve_parse_options(
+        overrides: &OverrideSettings,
+        language: &Self::ParserSettings,
+        path: &BiomePath,
+        _file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions {
+        let mut options = CssParserOptions {
+            allow_wrong_line_comments: language
+                .allow_wrong_line_comments
+                .unwrap_or_default()
+                .into(),
+            css_modules: language.css_modules_enabled.unwrap_or_default().into(),
+            grit_metavariables: false,
+            tailwind_directives: language.tailwind_directives_enabled(),
+        };
+
+        overrides.apply_override_css_parser_options(path, &mut options);
+
+        options
     }
 
     fn resolve_format_options(
@@ -228,6 +255,33 @@ impl ServiceLanguage for CssLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
+    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.css.linter.enabled,
+                        pattern.linter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
+
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.css.linter.enabled,
+                settings.linter.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
+    }
+
     fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
         let overrides_activity =
             settings
@@ -281,37 +335,6 @@ impl ServiceLanguage for CssLanguage {
             .unwrap_or_default()
             .into()
     }
-
-    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
-        let overrides_activity =
-            settings
-                .override_settings
-                .patterns
-                .iter()
-                .rev()
-                .find_map(|pattern| {
-                    check_override_feature_activity(
-                        pattern.languages.css.linter.enabled,
-                        pattern.linter.enabled,
-                    )
-                    .filter(|_| {
-                        // Then check whether the path satisfies
-                        pattern.is_file_included(path)
-                    })
-                });
-
-        overrides_activity
-            .or(check_feature_activity(
-                settings.languages.css.linter.enabled,
-                settings.linter.enabled,
-            ))
-            .unwrap_or_default()
-            .into()
-    }
-
-    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
-        None
-    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -339,6 +362,7 @@ impl ExtensionHandler for CssFileHandler {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
+                format_embedded: None,
             },
             search: SearchCapabilities {
                 search: Some(search),

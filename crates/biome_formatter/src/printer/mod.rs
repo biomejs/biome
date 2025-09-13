@@ -264,7 +264,7 @@ impl<'a> Printer<'a> {
                 stack.push(TagKind::Verbatim, args);
             }
 
-            FormatElement::Tag(tag @ (StartLabelled(_) | StartEntry)) => {
+            FormatElement::Tag(tag @ (StartLabelled(_) | StartEntry | StartEmbedded(_))) => {
                 stack.push(tag.kind(), args);
             }
             FormatElement::Tag(
@@ -273,7 +273,8 @@ impl<'a> Printer<'a> {
                 | EndGroup
                 | EndConditionalContent
                 | EndVerbatim
-                | EndFill),
+                | EndFill
+                | EndEmbedded),
             ) => {
                 stack.pop(tag.kind())?;
             }
@@ -1228,7 +1229,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             }
 
             FormatElement::Tag(
-                tag @ (StartFill | StartVerbatim(_) | StartLabelled(_) | StartEntry),
+                tag @ (StartFill | StartVerbatim(_) | StartLabelled(_) | StartEntry
+                | StartEmbedded(_)),
             ) => {
                 self.stack.push(tag.kind(), args);
             }
@@ -1238,7 +1240,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 | EndGroup
                 | EndConditionalContent
                 | EndVerbatim
-                | EndFill),
+                | EndFill
+                | EndEmbedded),
             ) => {
                 self.stack.pop(tag.kind())?;
             }
@@ -1735,7 +1738,7 @@ two lines`,
                         text("The referenced group breaks."),
                         hard_line_break()
                     ])
-                    .with_group_id(Some(group_id)),
+                        .with_group_id(Some(group_id)),
                     group(&format_args![
                         text("This group breaks because:"),
                         soft_line_break_or_space(),

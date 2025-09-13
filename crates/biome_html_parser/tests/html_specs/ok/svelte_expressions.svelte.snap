@@ -32,7 +32,7 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@7..8 ">" [] [],
             },
             children: HtmlElementList [
-                HtmlContent {
+                HtmlEmbeddedContent {
                     value_token: HTML_LITERAL@8..33 "\n\tlet binding = \"World\";\n" [] [],
                 },
             ],
@@ -93,7 +93,7 @@ HtmlRoot {
         2: HTML_ATTRIBUTE_LIST@7..7
         3: R_ANGLE@7..8 ">" [] []
       1: HTML_ELEMENT_LIST@8..33
-        0: HTML_CONTENT@8..33
+        0: HTML_EMBEDDED_CONTENT@8..33
           0: HTML_LITERAL@8..33 "\n\tlet binding = \"World\";\n" [] []
       2: HTML_CLOSING_ELEMENT@33..42
         0: L_ANGLE@33..34 "<" [] []
