@@ -132,6 +132,13 @@ impl ReactLibrary {
             Self::ReactDOM => "ReactDOM",
         }
     }
+
+    pub const fn get_import_aliases(self) -> &'static [&'static str] {
+        match self {
+            Self::React => &["@rbxts/react"],
+            Self::ReactDOM => &[],
+        }
+    }
 }
 
 /// List of valid [`React` API]
@@ -324,5 +331,9 @@ pub(crate) fn is_global_react_import(binding: &JsIdentifierBinding, lib: ReactLi
         .skip(1)
         .find_map(JsImport::cast)
         .and_then(|import| import.source_text().ok())
-        .is_some_and(|source| lib.import_names().contains(&source.text()))
+        .is_some_and(|source| {
+            let source_text = source.text();
+            lib.import_names().contains(&source_text)
+                || lib.get_import_aliases().contains(&source_text)
+        })
 }
