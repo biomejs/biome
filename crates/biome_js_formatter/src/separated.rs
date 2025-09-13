@@ -14,6 +14,15 @@ where
     node: PhantomData<N>,
 }
 
+impl<N> JsFormatSeparatedElementRule<N>
+where
+    N: AstNode<Language = JsLanguage>,
+{
+    pub fn new() -> Self {
+        Self { node: PhantomData }
+    }
+}
+
 impl<N> FormatSeparatedElementRule<N> for JsFormatSeparatedElementRule<N>
 where
     N: AstNode<Language = JsLanguage> + AsFormat<JsFormatContext> + 'static,
@@ -55,7 +64,7 @@ pub(crate) trait FormatAstSeparatedListExtension:
         JsFormatSeparatedIter::new(
             self.elements(),
             separator,
-            JsFormatSeparatedElementRule { node: PhantomData },
+            JsFormatSeparatedElementRule::new(),
             on_skipped,
             on_removed,
         )
