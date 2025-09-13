@@ -1,19 +1,10 @@
-use biome_js_syntax::{
-    AnyJsClassMember, AnyJsExpression, AnyJsRoot, JsArrayAssignmentPattern,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsClassDeclaration, JsClassMemberList,
-    JsConstructorClassMember, JsFunctionBody, JsLanguage, JsObjectAssignmentPattern,
-    JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember,
-    JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclarator, TextRange, TsPropertyParameter,
-};
+use biome_js_syntax::{AnyJsClassMember, AnyJsExpression, AnyJsRoot, JsArrayAssignmentPattern, JsArrowFunctionExpression, JsAssignmentExpression, JsClassDeclaration, JsClassMemberList, JsConstructorClassMember, JsFunctionBody, JsLanguage, JsObjectAssignmentPattern, JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange, TsPropertyParameter};
 
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
 };
-use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, WalkEvent, declare_node_union,
-};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, WalkEvent, declare_node_union};
 use std::collections::HashSet;
 
 #[derive(Clone)]
@@ -116,6 +107,7 @@ where
 pub struct ClassMemberReference {
     pub name: Text,
     pub range: TextRange,
+    pub parent_statement_kind: Option<JsSyntaxKind>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
@@ -271,7 +263,6 @@ impl ThisScopeVisitor<'_> {
             }
 
             WalkEvent::Leave(node) => {
-                // println!("leave node in ThisScopeVisitor {:?}", node);
                 if let Some(last) = self.skipped_ranges.last()
                     && *last == node.text_range()
                 {
@@ -332,11 +323,12 @@ impl ThisScopeReferences {
                 let id = fields.id.ok()?;
                 let expr = fields.initializer?.expression().ok()?;
                 let unwrapped = &expr.omit_parentheses();
-
+      
                 (unwrapped.syntax().first_token()?.text_trimmed() == "this").then(|| {
                     ClassMemberReference {
                         name: id.to_trimmed_text().clone(),
                         range: id.syntax().text_trimmed_range(),
+                        parent_statement_kind: parent_statement_kind(unwrapped.syntax())
                     }
                 })
             })
@@ -493,12 +485,14 @@ impl ThisPatternResolver {
             if let Ok(object) = assignment.object()
                 && is_this_reference(&object, scoped_this_references)
             {
+                let parent_statement_kind: Option<JsSyntaxKind> = parent_statement_kind(assignment.syntax());
                 assignment.member().ok().and_then(|member| {
                     member
                         .as_js_name()
                         .map(|name| ClassMemberReference {
                             name: name.to_trimmed_text(),
                             range: name.syntax().text_trimmed_range(),
+                            parent_statement_kind
                         })
                         .or_else(|| {
                             member
@@ -506,6 +500,7 @@ impl ThisPatternResolver {
                                 .map(|private_name| ClassMemberReference {
                                     name: private_name.to_trimmed_text(),
                                     range: private_name.syntax().text_trimmed_range(),
+                                    parent_statement_kind
                                 })
                         })
                 })
@@ -592,6 +587,7 @@ fn handle_object_binding_pattern(
                 reads.insert(ClassMemberReference {
                     name: declarator.to_trimmed_text(),
                     range: declarator.syntax().text_trimmed_range(),
+                    parent_statement_kind: parent_statement_kind(expression.syntax())
                 });
             }
         }
@@ -627,6 +623,7 @@ fn handle_static_member_expression(
         reads.insert(ClassMemberReference {
             name: member.to_trimmed_text(),
             range: static_member.syntax().text_trimmed_range(),
+            parent_statement_kind: parent_statement_kind(object.syntax())
         });
     }
 }
@@ -777,6 +774,7 @@ fn collect_class_property_reads_from_static_member(
         reads.insert(ClassMemberReference {
             name,
             range: static_member.syntax().text_trimmed_range(),
+            parent_statement_kind: parent_statement_kind(static_member.syntax())
         });
     }
 
@@ -802,6 +800,51 @@ fn is_within_scope_without_shadowing(
     }
 
     false
+}
+
+/// Walks up the AST until a statement node is found.
+/// Returns `Some(kind)` if a statement is found, otherwise `None`.
+pub fn parent_statement_kind(node: &JsSyntaxNode) -> Option<JsSyntaxKind> {
+    let mut current = node.clone(); // clone to own the node
+
+    if is_js_statement(current.kind()) {
+        return Some(current.kind());
+    }
+
+    while let Some(parent) = current.parent() {
+        if is_js_statement(parent.kind()) {
+            return Some(parent.kind());
+        }
+        current = parent;
+    }
+
+    None
+}
+
+/// Returns true if the kind is considered a JS statement
+fn is_js_statement(kind: JsSyntaxKind) -> bool {
+    matches!(
+        kind,
+        JsSyntaxKind::JS_BLOCK_STATEMENT
+            | JsSyntaxKind::JS_BREAK_STATEMENT
+            | JsSyntaxKind::JS_CONTINUE_STATEMENT
+            | JsSyntaxKind::JS_DEBUGGER_STATEMENT
+            | JsSyntaxKind::JS_DO_WHILE_STATEMENT
+            | JsSyntaxKind::JS_EMPTY_STATEMENT
+            | JsSyntaxKind::JS_EXPRESSION_STATEMENT
+            | JsSyntaxKind::JS_FOR_STATEMENT
+            | JsSyntaxKind::JS_FOR_IN_STATEMENT
+            | JsSyntaxKind::JS_FOR_OF_STATEMENT
+            | JsSyntaxKind::JS_IF_STATEMENT
+            | JsSyntaxKind::JS_LABELED_STATEMENT
+            | JsSyntaxKind::JS_RETURN_STATEMENT
+            | JsSyntaxKind::JS_SWITCH_STATEMENT
+            | JsSyntaxKind::JS_THROW_STATEMENT
+            | JsSyntaxKind::JS_TRY_STATEMENT
+            | JsSyntaxKind::JS_VARIABLE_STATEMENT
+            | JsSyntaxKind::JS_WHILE_STATEMENT
+            | JsSyntaxKind::JS_WITH_STATEMENT
+    )
 }
 
 #[cfg(test)]
