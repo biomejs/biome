@@ -3614,6 +3614,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoJsxPropsBindConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoJsxPropsBindOptions" }
+			]
+		},
+		"NoJsxPropsBindOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoLabelVarConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4974,6 +4984,13 @@
 					"description": "Disallow string literals inside JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoJsxLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsxPropsBind": {
+					"description": "Disallow .bind(), arrow functions, or function expressions in JSX props",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoJsxPropsBindConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7610,6 +7627,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoJsxLiteralsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoJsxPropsBindOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoJsxPropsBindOptions" }]
 				}
 			},
 			"additionalProperties": false
