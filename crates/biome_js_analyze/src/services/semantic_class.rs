@@ -1,17 +1,116 @@
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsExpression, JsArrayAssignmentPattern, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsClassMemberList, JsConstructorClassMember, JsFunctionBody,
-    JsLanguage, JsObjectAssignmentPattern, JsObjectBindingPattern, JsPostUpdateExpression,
-    JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange,
-    TsPropertyParameter,
+    AnyJsClassMember, AnyJsExpression, AnyJsRoot, JsArrayAssignmentPattern,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsClassDeclaration, JsClassMemberList,
+    JsConstructorClassMember, JsFunctionBody, JsLanguage, JsObjectAssignmentPattern,
+    JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember,
+    JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
+    JsVariableDeclarator, TextRange, TsPropertyParameter,
 };
 
-use biome_analyze::QueryMatch;
+use biome_analyze::{
+    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
+};
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, WalkEvent, declare_node_union,
 };
 use std::collections::HashSet;
+
+#[derive(Clone)]
+pub struct SemanticClassServices {
+    pub model: SemanticClassModel,
+}
+
+impl SemanticClassServices {
+    pub fn model(&self) -> &SemanticClassModel {
+        &self.model
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct SemanticClassModel {}
+
+impl SemanticClassModel {
+    pub fn class_member_references(&self, members: &JsClassMemberList) -> ClassMemberReferences {
+        class_member_references(members)
+    }
+}
+
+impl FromServices for SemanticClassServices {
+    fn from_services(
+        rule_key: &RuleKey,
+        _rule_metadata: &RuleMetadata,
+        services: &ServiceBag,
+    ) -> biome_diagnostics::Result<Self, ServicesDiagnostic> {
+        let service: &SemanticClassModel = services.get_service().ok_or_else(|| {
+            ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticClassModel"])
+        })?;
+        Ok(Self {
+            model: service.clone(),
+        })
+    }
+}
+
+impl Phase for SemanticClassServices {
+    fn phase() -> Phases {
+        Phases::Semantic
+    }
+}
+
+pub struct ClassMemberReferencesVisitor {}
+
+impl Visitor for ClassMemberReferencesVisitor {
+    type Language = JsLanguage;
+
+    fn visit(
+        &mut self,
+        event: &WalkEvent<JsSyntaxNode>,
+        mut ctx: VisitorContext<'_, '_, JsLanguage>,
+    ) {
+        if let WalkEvent::Enter(node) = event
+            && JsClassDeclaration::can_cast(node.kind())
+        {
+            ctx.match_query(node.clone());
+        }
+    }
+
+    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
+        ctx.services.insert_service(SemanticClassModel {});
+    }
+}
+
+#[derive(Clone)]
+pub struct SemanticClass<N>(pub N);
+
+impl QueryMatch for SemanticClass<JsClassDeclaration> {
+    fn text_range(&self) -> TextRange {
+        self.0.syntax().text_trimmed_range()
+    }
+}
+
+impl<N> Queryable for SemanticClass<N>
+where
+    N: AstNode<Language = JsLanguage> + 'static,
+{
+    type Input = JsSyntaxNode;
+    type Output = N;
+
+    type Language = JsLanguage;
+    type Services = SemanticClassServices;
+
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || ClassMemberReferencesVisitor {});
+        analyzer.add_visitor(Phases::Semantic, || ClassMemberReferencesVisitor {});
+    }
+
+    fn key() -> QueryKey<Self::Language> {
+        QueryKey::Syntax(N::KIND_SET)
+    }
+
+    fn unwrap_match(_service_bag: &ServiceBag, node: &Self::Input) -> Self::Output {
+        N::unwrap_cast(node.clone())
+    }
+}
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct ClassMemberReference {
@@ -19,7 +118,7 @@ pub struct ClassMemberReference {
     pub range: TextRange,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct ClassMemberReferences {
     pub reads: HashSet<ClassMemberReference>,
     pub writes: HashSet<ClassMemberReference>,
@@ -36,7 +135,7 @@ declare_node_union! {
 /// read and write references to `this` properties across all supported member types.
 ///
 /// Returns a `ClassMemberReferences` struct containing the combined set of read and write references.
-pub fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
+fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
     let all_references: Vec<ClassMemberReferences> = list
         .iter()
         .filter_map(|member| match member {
@@ -172,6 +271,7 @@ impl ThisScopeVisitor<'_> {
             }
 
             WalkEvent::Leave(node) => {
+                // println!("leave node in ThisScopeVisitor {:?}", node);
                 if let Some(last) = self.skipped_ranges.last()
                     && *last == node.text_range()
                 {
@@ -191,7 +291,7 @@ struct ThisScopeReferences {
 }
 
 impl ThisScopeReferences {
-    pub fn new(body: &JsFunctionBody) -> Self {
+    fn new(body: &JsFunctionBody) -> Self {
         Self {
             body: body.clone(),
             local_this_references: Self::collect_local_this_references(body),
@@ -201,7 +301,7 @@ impl ThisScopeReferences {
     /// Collects all `this` scope references in the function body and nested
     /// functions using `ThisScopeVisitor`, combining local and inherited ones
     /// into a list of `FunctionThisReferences`.
-    pub fn collect_function_this_references(&self) -> Vec<FunctionThisReferences> {
+    fn collect_function_this_references(&self) -> Vec<FunctionThisReferences> {
         let mut visitor = ThisScopeVisitor {
             skipped_ranges: vec![],
             current_this_scopes: vec![],
@@ -209,7 +309,6 @@ impl ThisScopeReferences {
         };
 
         let iter = self.body.syntax().preorder();
-
         for event in iter {
             visitor.visit(&event);
         }
