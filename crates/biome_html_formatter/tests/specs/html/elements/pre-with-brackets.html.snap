@@ -1,7 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: elements/pre-with-brackets.html
-snapshot_kind: text
 ---
 # Input
 
@@ -50,3 +49,9 @@ Self close void elements: never
                 ||     ||
 </pre>
 ```
+
+
+
+## Unimplemented nodes/tokens
+
+"\n _______\n< Biome >\n -------\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||\n" => 5..157

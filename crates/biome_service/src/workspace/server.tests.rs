@@ -162,7 +162,9 @@ fn format_html_with_scripts_and_css() {
     <html>
     	<head>
     		<style>
-    		#id {background-color: red;}
+    		#id {
+    			background-color: red;
+    		}
     		</style>
     		<script>
     		const foo = "bar";

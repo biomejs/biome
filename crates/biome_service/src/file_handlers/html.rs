@@ -303,25 +303,9 @@ pub(crate) fn extract_embedded_script(
     source_index_fn: impl Fn(JsFileSource) -> usize,
 ) -> Option<Vec<EmbeddedJsContent>> {
     let html_element = HtmlElement::cast(element)?;
-    let opening_element = html_element.opening_element().ok()?;
 
     if html_element.is_javascript_tag().unwrap_or_default() {
-        let is_modules = opening_element.attributes().iter().any(|attr| {
-            let attr = attr.as_html_attribute();
-            let is_type = attr
-                .and_then(|attr| attr.name().ok())
-                .and_then(|name| name.value_token().ok())
-                .is_some_and(|name| name.text_trimmed() == "type");
-            if is_type {
-                attr.and_then(|attr| attr.initializer())
-                    .and_then(|initializer| initializer.value().ok())
-                    .and_then(|value| value.as_html_string().cloned())
-                    .and_then(|value| value.value_token().ok())
-                    .is_some_and(|value| value.text_trimmed() == "module")
-            } else {
-                false
-            }
-        });
+        let is_modules = html_element.is_javascript_module().unwrap_or_default();
         let file_source = if is_modules {
             JsFileSource::js_module()
         } else {

@@ -59,15 +59,16 @@ impl FormatRule<HtmlElementList> for FormatHtmlElementList {
         if node.is_empty() {
             return Ok(());
         }
+
         let should_delegate_fmt_embedded_nodes = f.context().should_delegate_fmt_embedded_nodes();
         // early exit - If it's just a single HtmlEmbeddedContent node as the only child,
         // we know the parser will only emit one of these. We can simply call its formatter and be done.
         // This is also necessary for how we implement embedded language formatting.
         if node.len() == 1
+            && should_delegate_fmt_embedded_nodes
             && let Some(AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(
                 embedded_content,
             ))) = node.first()
-            && should_delegate_fmt_embedded_nodes
         {
             return embedded_content.format().fmt(f);
         }

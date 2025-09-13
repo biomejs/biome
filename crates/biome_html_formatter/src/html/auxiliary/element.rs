@@ -15,7 +15,12 @@ use super::{
 };
 
 /// `pre` tags are "preformatted", so we should not format the content inside them. <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/pre>
-const HTML_VERBATIM_TAGS: &[&str] = &["pre"];
+/// We ignore the `script` and `style` tags as well, since embedded language parsing/formatting is not yet implemented.
+///
+const HTML_VERBATIM_TAGS: &[&str] = &["script", "style", "pre"];
+
+/// script and style should be ignored when there's no delegation of formatting of embedded nodes.
+const EMBEDDED_NODES: &[&str] = &["script", "style"];
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElement;
@@ -42,6 +47,13 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                 .as_ref()
                 .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
         });
+
+        let should_format_embedded_nodes = f.context().should_delegate_fmt_embedded_nodes()
+            && EMBEDDED_NODES.iter().any(|tag| {
+                tag_name
+                    .as_ref()
+                    .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
+            });
 
         let content_has_leading_whitespace = children
             .syntax()
@@ -110,7 +122,12 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             &opening_element,
             f,
         )?;
-        if should_be_verbatim {
+        dbg!(&tag_name, should_format_embedded_nodes, should_be_verbatim);
+        // The order here is important. First, we must check if we can delegate the formatting
+        // of embedded nodes, then we check if we should format them verbatim.
+        if should_format_embedded_nodes {
+            write!(f, [children.format()])?;
+        } else if should_be_verbatim {
             write!(f, [&format_html_verbatim_node(children.syntax())])?;
         } else {
             let format_children = FormatHtmlElementList::default()
