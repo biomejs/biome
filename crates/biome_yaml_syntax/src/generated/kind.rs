@@ -20,6 +20,9 @@ pub enum YamlSyntaxKind {
     R_BRACK,
     QUESTION,
     DASH,
+    PIPE,
+    R_ANGLE,
+    PLUS,
     DIRECTIVE_END,
     DOC_END,
     BACKTICK,
@@ -31,8 +34,8 @@ pub enum YamlSyntaxKind {
     DOUBLE_QUOTED_LITERAL,
     SINGLE_QUOTED_LITERAL,
     PLAIN_LITERAL,
-    LITERAL_BLOCK_LITERAL,
-    FOLDED_BLOCK_LITERAL,
+    INDENTATION_INDICATOR,
+    BLOCK_CONTENT_LITERAL,
     ERROR_TOKEN,
     NEWLINE,
     WHITESPACE,
@@ -58,7 +61,6 @@ pub enum YamlSyntaxKind {
     YAML_FLOW_MAP_IMPLICIT_ENTRY,
     YAML_ALIAS_NODE,
     YAML_FLOW_IN_BLOCK_NODE,
-    YAML_BLOCK_SCALAR,
     YAML_BLOCK_SEQUENCE,
     YAML_BLOCK_SEQUENCE_ENTRY_LIST,
     YAML_BLOCK_SEQUENCE_ENTRY,
@@ -76,6 +78,11 @@ pub enum YamlSyntaxKind {
     YAML_PLAIN_SCALAR,
     YAML_LITERAL_SCALAR,
     YAML_FOLDED_SCALAR,
+    YAML_BLOCK_HEADER_LIST,
+    YAML_BLOCK_STRIP_INDICATOR,
+    YAML_BLOCK_KEEP_INDICATOR,
+    YAML_INDENTATION_INDICATOR,
+    YAML_BLOCK_CONTENT,
     YAML_PROPERTIES_ANCHOR_FIRST,
     YAML_PROPERTIES_TAG_FIRST,
     YAML_ANCHOR_PROPERTY,
@@ -83,6 +90,7 @@ pub enum YamlSyntaxKind {
     YAML_BOGUS,
     YAML_BOGUS_BLOCK_NODE,
     YAML_BOGUS_BLOCK_MAP_ENTRY,
+    YAML_BOGUS_BLOCK_HEADER,
     YAML_BOGUS_FLOW_NODE,
     #[doc(hidden)]
     __LAST,
@@ -100,6 +108,9 @@ impl YamlSyntaxKind {
                 | R_BRACK
                 | QUESTION
                 | DASH
+                | PIPE
+                | R_ANGLE
+                | PLUS
                 | DIRECTIVE_END
                 | DOC_END
                 | BACKTICK
@@ -116,8 +127,8 @@ impl YamlSyntaxKind {
                 | DOUBLE_QUOTED_LITERAL
                 | SINGLE_QUOTED_LITERAL
                 | PLAIN_LITERAL
-                | LITERAL_BLOCK_LITERAL
-                | FOLDED_BLOCK_LITERAL
+                | INDENTATION_INDICATOR
+                | BLOCK_CONTENT_LITERAL
         )
     }
     pub const fn is_list(self) -> bool {
@@ -129,6 +140,7 @@ impl YamlSyntaxKind {
                 | YAML_FLOW_MAP_ENTRY_LIST
                 | YAML_BLOCK_SEQUENCE_ENTRY_LIST
                 | YAML_BLOCK_MAP_ENTRY_LIST
+                | YAML_BLOCK_HEADER_LIST
         )
     }
     pub fn from_keyword(_ident: &str) -> Option<Self> {
@@ -144,6 +156,9 @@ impl YamlSyntaxKind {
             R_BRACK => "]",
             QUESTION => "?",
             DASH => "-",
+            PIPE => "|",
+            R_ANGLE => ">",
+            PLUS => "+",
             DIRECTIVE_END => "---",
             DOC_END => "...",
             BACKTICK => "`",
@@ -162,4 +177,4 @@ impl YamlSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [:] => { $ crate :: YamlSyntaxKind :: COLON } ; [,] => { $ crate :: YamlSyntaxKind :: COMMA } ; ['{'] => { $ crate :: YamlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: YamlSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: YamlSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: YamlSyntaxKind :: R_BRACK } ; [?] => { $ crate :: YamlSyntaxKind :: QUESTION } ; [-] => { $ crate :: YamlSyntaxKind :: DASH } ; [---] => { $ crate :: YamlSyntaxKind :: DIRECTIVE_END } ; [...] => { $ crate :: YamlSyntaxKind :: DOC_END } ; ['`'] => { $ crate :: YamlSyntaxKind :: BACKTICK } ; [@] => { $ crate :: YamlSyntaxKind :: AT } ; [ident] => { $ crate :: YamlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: YamlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: YamlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: YamlSyntaxKind :: HASH } ; }
+macro_rules ! T { [:] => { $ crate :: YamlSyntaxKind :: COLON } ; [,] => { $ crate :: YamlSyntaxKind :: COMMA } ; ['{'] => { $ crate :: YamlSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: YamlSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: YamlSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: YamlSyntaxKind :: R_BRACK } ; [?] => { $ crate :: YamlSyntaxKind :: QUESTION } ; [-] => { $ crate :: YamlSyntaxKind :: DASH } ; [|] => { $ crate :: YamlSyntaxKind :: PIPE } ; [>] => { $ crate :: YamlSyntaxKind :: R_ANGLE } ; [+] => { $ crate :: YamlSyntaxKind :: PLUS } ; [---] => { $ crate :: YamlSyntaxKind :: DIRECTIVE_END } ; [...] => { $ crate :: YamlSyntaxKind :: DOC_END } ; ['`'] => { $ crate :: YamlSyntaxKind :: BACKTICK } ; [@] => { $ crate :: YamlSyntaxKind :: AT } ; [ident] => { $ crate :: YamlSyntaxKind :: IDENT } ; [EOF] => { $ crate :: YamlSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: YamlSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: YamlSyntaxKind :: HASH } ; }

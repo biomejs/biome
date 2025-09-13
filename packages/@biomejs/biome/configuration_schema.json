@@ -4950,7 +4950,7 @@
 			"type": "object",
 			"properties": {
 				"noDuplicateDependencies": {
-					"description": "Disallow any dependency from being specified more than once (e.g. in dependencies and devDependencies)",
+					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDuplicateDependenciesConfiguration" },
 						{ "type": "null" }

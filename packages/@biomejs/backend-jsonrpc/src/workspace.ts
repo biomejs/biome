@@ -1626,7 +1626,7 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
-	 * Disallow any dependency from being specified more than once (e.g. in dependencies and devDependencies)
+	 * Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
 	/**

@@ -18,6 +18,18 @@ pub fn yaml_anchor_property(value_token: SyntaxToken) -> YamlAnchorProperty {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn yaml_block_content(value_token: SyntaxToken) -> YamlBlockContent {
+    YamlBlockContent::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_BLOCK_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn yaml_block_keep_indicator(plus_token: SyntaxToken) -> YamlBlockKeepIndicator {
+    YamlBlockKeepIndicator::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_BLOCK_KEEP_INDICATOR,
+        [Some(SyntaxElement::Token(plus_token))],
+    ))
+}
 pub fn yaml_block_map_explicit_entry(
     question_mark_token: SyntaxToken,
 ) -> YamlBlockMapExplicitEntryBuilder {
@@ -131,32 +143,6 @@ impl YamlBlockMappingBuilder {
         ))
     }
 }
-pub fn yaml_block_scalar(content: AnyYamlBlockScalarContent) -> YamlBlockScalarBuilder {
-    YamlBlockScalarBuilder {
-        content,
-        properties: None,
-    }
-}
-pub struct YamlBlockScalarBuilder {
-    content: AnyYamlBlockScalarContent,
-    properties: Option<AnyYamlPropertiesCombination>,
-}
-impl YamlBlockScalarBuilder {
-    pub fn with_properties(mut self, properties: AnyYamlPropertiesCombination) -> Self {
-        self.properties = Some(properties);
-        self
-    }
-    pub fn build(self) -> YamlBlockScalar {
-        YamlBlockScalar::unwrap_cast(SyntaxNode::new_detached(
-            YamlSyntaxKind::YAML_BLOCK_SCALAR,
-            [
-                self.properties
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.content.into_syntax())),
-            ],
-        ))
-    }
-}
 pub fn yaml_block_sequence(
     sequence_start_token: SyntaxToken,
     entries: YamlBlockSequenceEntryList,
@@ -218,6 +204,12 @@ impl YamlBlockSequenceEntryBuilder {
             ],
         ))
     }
+}
+pub fn yaml_block_strip_indicator(minus_token: SyntaxToken) -> YamlBlockStripIndicator {
+    YamlBlockStripIndicator::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_BLOCK_STRIP_INDICATOR,
+        [Some(SyntaxElement::Token(minus_token))],
+    ))
 }
 pub fn yaml_directive(value_token: SyntaxToken) -> YamlDirective {
     YamlDirective::unwrap_cast(SyntaxNode::new_detached(
@@ -465,17 +457,85 @@ impl YamlFlowYamlNodeBuilder {
         ))
     }
 }
-pub fn yaml_folded_scalar(value_token: SyntaxToken) -> YamlFoldedScalar {
-    YamlFoldedScalar::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_FOLDED_SCALAR,
-        [Some(SyntaxElement::Token(value_token))],
+pub fn yaml_folded_scalar(
+    r_angle_token: SyntaxToken,
+    headers: YamlBlockHeaderList,
+    content: YamlBlockContent,
+) -> YamlFoldedScalarBuilder {
+    YamlFoldedScalarBuilder {
+        r_angle_token,
+        headers,
+        content,
+        properties: None,
+    }
+}
+pub struct YamlFoldedScalarBuilder {
+    r_angle_token: SyntaxToken,
+    headers: YamlBlockHeaderList,
+    content: YamlBlockContent,
+    properties: Option<AnyYamlPropertiesCombination>,
+}
+impl YamlFoldedScalarBuilder {
+    pub fn with_properties(mut self, properties: AnyYamlPropertiesCombination) -> Self {
+        self.properties = Some(properties);
+        self
+    }
+    pub fn build(self) -> YamlFoldedScalar {
+        YamlFoldedScalar::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_FOLDED_SCALAR,
+            [
+                self.properties
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_angle_token)),
+                Some(SyntaxElement::Node(self.headers.into_syntax())),
+                Some(SyntaxElement::Node(self.content.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn yaml_indentation_indicator(
+    indentation_indicator_token: SyntaxToken,
+) -> YamlIndentationIndicator {
+    YamlIndentationIndicator::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_INDENTATION_INDICATOR,
+        [Some(SyntaxElement::Token(indentation_indicator_token))],
     ))
 }
-pub fn yaml_literal_scalar(value_token: SyntaxToken) -> YamlLiteralScalar {
-    YamlLiteralScalar::unwrap_cast(SyntaxNode::new_detached(
-        YamlSyntaxKind::YAML_LITERAL_SCALAR,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
+pub fn yaml_literal_scalar(
+    bitwise_or_token: SyntaxToken,
+    headers: YamlBlockHeaderList,
+    content: YamlBlockContent,
+) -> YamlLiteralScalarBuilder {
+    YamlLiteralScalarBuilder {
+        bitwise_or_token,
+        headers,
+        content,
+        properties: None,
+    }
+}
+pub struct YamlLiteralScalarBuilder {
+    bitwise_or_token: SyntaxToken,
+    headers: YamlBlockHeaderList,
+    content: YamlBlockContent,
+    properties: Option<AnyYamlPropertiesCombination>,
+}
+impl YamlLiteralScalarBuilder {
+    pub fn with_properties(mut self, properties: AnyYamlPropertiesCombination) -> Self {
+        self.properties = Some(properties);
+        self
+    }
+    pub fn build(self) -> YamlLiteralScalar {
+        YamlLiteralScalar::unwrap_cast(SyntaxNode::new_detached(
+            YamlSyntaxKind::YAML_LITERAL_SCALAR,
+            [
+                self.properties
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.bitwise_or_token)),
+                Some(SyntaxElement::Node(self.headers.into_syntax())),
+                Some(SyntaxElement::Node(self.content.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn yaml_plain_scalar(value_token: SyntaxToken) -> YamlPlainScalar {
     YamlPlainScalar::unwrap_cast(SyntaxNode::new_detached(
@@ -550,6 +610,18 @@ pub fn yaml_tag_property(value_token: SyntaxToken) -> YamlTagProperty {
     YamlTagProperty::unwrap_cast(SyntaxNode::new_detached(
         YamlSyntaxKind::YAML_TAG_PROPERTY,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn yaml_block_header_list<I>(items: I) -> YamlBlockHeaderList
+where
+    I: IntoIterator<Item = AnyYamlBlockHeader>,
+    I::IntoIter: ExactSizeIterator,
+{
+    YamlBlockHeaderList::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_BLOCK_HEADER_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn yaml_block_map_entry_list<I>(items: I) -> YamlBlockMapEntryList
@@ -648,6 +720,16 @@ where
     I::IntoIter: ExactSizeIterator,
 {
     YamlBogus::unwrap_cast(SyntaxNode::new_detached(YamlSyntaxKind::YAML_BOGUS, slots))
+}
+pub fn yaml_bogus_block_header<I>(slots: I) -> YamlBogusBlockHeader
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    YamlBogusBlockHeader::unwrap_cast(SyntaxNode::new_detached(
+        YamlSyntaxKind::YAML_BOGUS_BLOCK_HEADER,
+        slots,
+    ))
 }
 pub fn yaml_bogus_block_map_entry<I>(slots: I) -> YamlBogusBlockMapEntry
 where
