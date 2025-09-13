@@ -58,7 +58,10 @@ impl HtmlSelfClosingElement {
             let attribute = attr.as_html_attribute()?;
             let name = attribute.name().ok()?;
             let name_token = name.value_token().ok()?;
-            if name_token.text_trimmed() == name_to_lookup {
+            if name_token
+                .text_trimmed()
+                .eq_ignore_ascii_case(name_to_lookup)
+            {
                 Some(attribute.clone())
             } else {
                 None
@@ -77,7 +80,10 @@ impl HtmlElement {
                 let attribute = attr.as_html_attribute()?;
                 let name = attribute.name().ok()?;
                 let name_token = name.value_token().ok()?;
-                if name_token.text_trimmed() == name_to_lookup {
+                if name_token
+                    .text_trimmed()
+                    .eq_ignore_ascii_case(name_to_lookup)
+                {
                     Some(attribute.clone())
                 } else {
                     None
@@ -110,7 +116,7 @@ impl HtmlElement {
     pub fn is_javascript_module(&self) -> SyntaxResult<bool> {
         let is_script = self.is_script_tag()?;
         let type_attribute = self.find_attribute_by_name("type");
-        let is_type_module = type_attribute.is_none_or(|attribute| {
+        let is_type_module = type_attribute.is_some_and(|attribute| {
             attribute
                 .initializer()
                 .and_then(|initializer| initializer.value().ok())

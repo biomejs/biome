@@ -19,9 +19,6 @@ use super::{
 ///
 const HTML_VERBATIM_TAGS: &[&str] = &["script", "style", "pre"];
 
-/// script and style should be ignored when there's no delegation of formatting of embedded nodes.
-const EMBEDDED_NODES: &[&str] = &["script", "style"];
-
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElement;
 
@@ -48,12 +45,12 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                 .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
         });
 
-        let should_format_embedded_nodes = f.context().should_delegate_fmt_embedded_nodes()
-            && EMBEDDED_NODES.iter().any(|tag| {
-                tag_name
-                    .as_ref()
-                    .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
-            });
+        let should_format_embedded_nodes = if f.context().should_delegate_fmt_embedded_nodes() {
+            // Only delegate for JS <script> or <style> content
+            node.is_javascript_tag()? || node.is_style_tag()?
+        } else {
+            false
+        };
 
         let content_has_leading_whitespace = children
             .syntax()
@@ -96,11 +93,13 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         let should_borrow_opening_r_angle = is_whitespace_sensitive
             && !children.is_empty()
             && !content_has_leading_whitespace
-            && !should_be_verbatim;
+            && !should_be_verbatim
+            && !should_format_embedded_nodes;
         let should_borrow_closing_tag = is_whitespace_sensitive
             && !children.is_empty()
             && !content_has_trailing_whitespace
-            && !should_be_verbatim;
+            && !should_be_verbatim
+            && !should_format_embedded_nodes;
 
         let borrowed_r_angle = if should_borrow_opening_r_angle {
             opening_element.r_angle_token().ok()
