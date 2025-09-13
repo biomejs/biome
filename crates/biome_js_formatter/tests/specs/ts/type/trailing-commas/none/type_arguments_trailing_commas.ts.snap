@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
 info: ts/type/trailing-commas/none/type_arguments_trailing_commas.ts
 ---
 # Input
@@ -10,6 +11,17 @@ type Foo = Bar<A, >;
 
 type Foo = Bar<1, 2,>;
 type Foo = Bar<1, 2, >;
+
+type C1 = Bar<A, /* tail */>;
+type C2 = Bar<1, 2, /* tail */>;
+
+type M1 = Bar<
+    A, // tail
+>;
+type M2 = Bar<
+    1,
+    2, // tail
+>;
 
 ```
 
@@ -44,6 +56,17 @@ type Foo = Bar<A>;
 
 type Foo = Bar<1, 2>;
 type Foo = Bar<1, 2>;
+
+type C1 = Bar<A /* tail */>;
+type C2 = Bar<1, 2 /* tail */>;
+
+type M1 = Bar<
+	A // tail
+>;
+type M2 = Bar<
+	1,
+	2 // tail
+>;
 ```
 
 ## Output 1
@@ -72,4 +95,15 @@ type Foo = Bar<A>;
 
 type Foo = Bar<1, 2>;
 type Foo = Bar<1, 2>;
+
+type C1 = Bar<A /* tail */>;
+type C2 = Bar<1, 2 /* tail */>;
+
+type M1 = Bar<
+	A // tail
+>;
+type M2 = Bar<
+	1,
+	2 // tail
+>;
 ```

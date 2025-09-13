@@ -18,7 +18,7 @@ impl<N> JsFormatSeparatedElementRule<N>
 where
     N: AstNode<Language = JsLanguage>,
 {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self { node: PhantomData }
     }
 }
