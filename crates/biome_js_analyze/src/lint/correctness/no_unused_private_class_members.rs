@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use crate::JsRuleAction;
 use crate::services::semantic_class::{
     AnyPropertyMember, ClassMemberReference, ClassMemberReferences, SemanticClass,
@@ -9,14 +8,14 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, JsClassDeclaration,
-    JsSyntaxKind, TsAccessibilityModifier, TsPropertyParameter,
+    AnyJsClassMember, AnyJsClassMemberName, AnyJsFormalParameter, JsClassDeclaration, JsSyntaxKind,
+    TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TextRange,
-    declare_node_union,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TextRange, declare_node_union,
 };
 use biome_rule_options::no_unused_private_class_members::NoUnusedPrivateClassMembersOptions;
+use std::collections::{HashMap, HashSet};
 
 declare_lint_rule! {
     /// Disallow unused private class members
@@ -127,6 +126,7 @@ impl Rule for NoUnusedPrivateClassMembers {
             let class_member_references = ctx.model.class_member_references(&node.members());
             let unused_members = traverse_members_usage(private_members, &class_member_references);
 
+            println!("unused_members: {unused_members:#?}");
             for member in unused_members {
                 match &member {
                     AnyMember::AnyJsClassMember(_) => {
@@ -239,6 +239,31 @@ impl Rule for NoUnusedPrivateClassMembers {
         }
     }
 }
+/// Remove duplicate accessors, keeping only one of each kind (getter/setter)
+fn dedup_accessors(members: Vec<AnyMember>) -> Vec<AnyMember> {
+    let mut seen: HashMap<Text, AnyMember> = HashMap::new();
+
+    for member in members {
+        if let Some(key) = extract_member_text(&member) {
+            match seen.get(&key) {
+                Some(existing) => {
+                    // If both are accessors, keep the existing one
+                    if existing.is_accessor() && member.is_accessor() {
+                        continue;
+                    }
+                    // Otherwise, replace the existing one
+                    seen.insert(key.clone(), member);
+                }
+                None => {
+                    // First time seeing this member
+                    seen.insert(key.clone(), member);
+                }
+            }
+        }
+    }
+
+    seen.into_values().collect()
+}
 
 /// Check for private member usage
 /// if the member usage is found, we remove it from the hashmap
@@ -248,6 +273,7 @@ fn traverse_members_usage(
 ) -> Vec<AnyMember> {
     let ClassMemberReferences { reads, writes } = class_member_references;
 
+    let private_members = dedup_accessors(private_members);
     private_members
         .into_iter()
         .filter(|private_member| {
@@ -259,18 +285,21 @@ fn traverse_members_usage(
                 .iter()
                 .any(|write| private_member.match_class_member_reference(write));
 
-            if !is_read && !is_write {
-                // No references at all
-                return true;
-            }
+            println!("is_read: {is_read}, is_write: {is_write}");
+            // if !is_read && !is_write {
+            //     return true;
+            // }
 
             // let is_write_only = !is_read && is_write && !private_member.is_accessor();
             let all_refs: HashSet<_> = reads.iter().chain(writes.iter()).collect();
             // todo add check if has update usage for writes too;
             let has_update_usage = all_refs.into_iter().any(|reference| {
-                !is_in_expression_statement(reference)
-                    && private_member.match_class_member_reference(reference)
+                (!is_in_expression_statement(reference)
+                    && private_member.match_class_member_reference(reference))
+                    || private_member.is_accessor()
             });
+
+            println!("has update usage {:?}", has_update_usage);
             if !has_update_usage {
                 return true;
             } else {
@@ -343,6 +372,7 @@ fn get_constructor_params(
 
 fn is_in_expression_statement(reference: &ClassMemberReference) -> bool {
     let maybe_kind = reference.parent_statement_kind.clone();
+    println!("maybe_kind: {maybe_kind:?}");
     if let Some(kind) = maybe_kind {
         return JsSyntaxKind::JS_EXPRESSION_STATEMENT == kind;
     }
@@ -351,6 +381,13 @@ fn is_in_expression_statement(reference: &ClassMemberReference) -> bool {
 }
 
 impl AnyMember {
+    fn is_accessor(&self) -> bool {
+        matches!(
+            self.syntax().kind(),
+            JsSyntaxKind::JS_SETTER_CLASS_MEMBER | JsSyntaxKind::JS_GETTER_CLASS_MEMBER
+        )
+    }
+
     fn is_private(&self) -> Option<bool> {
         match self {
             Self::AnyJsClassMember(member) => {
@@ -425,8 +462,7 @@ impl AnyMember {
     fn match_class_member_reference(&self, class_member_reference: &ClassMemberReference) -> bool {
         let ClassMemberReference { name, .. } = class_member_reference;
 
-        if let Some(prop_name) = extract_property_or_param_range_and_text(self) {
-            // println!("Comparing member '{:?}' with reference '{name}'", prop_name);
+        if let Some(prop_name) = extract_member_text(self) {
             return prop_name.eq(name);
         }
 
@@ -435,7 +471,7 @@ impl AnyMember {
 }
 
 /// Extracts the text from a property class member or constructor parameter
-fn extract_property_or_param_range_and_text(property_or_param: &AnyMember) -> Option<Text> {
+fn extract_member_text(property_or_param: &AnyMember) -> Option<Text> {
     if let Some(AnyPropertyMember::JsPropertyClassMember(member)) =
         AnyPropertyMember::cast(property_or_param.clone().into())
     {
@@ -456,6 +492,15 @@ fn extract_property_or_param_range_and_text(property_or_param: &AnyMember) -> Op
             .ok()?;
 
         return Some(name.to_trimmed_text());
+    }
+
+    if let Some(AnyPropertyMember::JsMethodClassMember(method)) =
+        AnyPropertyMember::cast(property_or_param.clone().into())
+    {
+        if let Ok(method_name) = method.name() {
+            return Some(method_name.to_trimmed_text());
+        }
+        return None;
     }
 
     None

@@ -30,20 +30,12 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
     const SOURCE: &str = r#"
-class Foo {
-	#usedOnlyInWriteStatement = 5;
-	method() {
-		++this.#usedOnlyInWriteStatement;
+class UsedMember {
+	#usedMember = 42;
+	foo() {
+		this.#usedMember = this.#usedMember;
 	}
 }
-//
-// class C {
-// 	#usedOnlyInIncrement;
-//
-// 	foo() {
-// 			this.#usedOnlyInIncrement++;
-// 	}
-// }
 "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
@@ -60,7 +52,8 @@ class Foo {
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
         );
-    let rule_filter = RuleFilter::Rule("correctness", "noUnusedPrivateClassMembers");
+   let rule_filter = RuleFilter::Rule("correctness", "noUnusedPrivateClassMembers");
+ //    let rule_filter = RuleFilter::Rule("style", "useReadonlyClassProperties");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 

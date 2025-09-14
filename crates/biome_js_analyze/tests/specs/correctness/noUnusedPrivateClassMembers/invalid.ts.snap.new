@@ -166,51 +166,6 @@ invalid.ts:25:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
 ```
 
 ```
-invalid.ts:33:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    32 │ class TsAccessor {
-  > 33 │ 	private get unusedAccessor() { }
-       │ 	            ^^^^^^^^^^^^^^
-    34 │ 	private set unusedAccessor(value) { }
-    35 │ }
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    31 31 │   
-    32 32 │   class TsAccessor {
-    33    │ - → private·get·unusedAccessor()·{·}
-    34 33 │   	private set unusedAccessor(value) { }
-    35 34 │   }
-  
-
-```
-
-```
-invalid.ts:34:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    32 │ class TsAccessor {
-    33 │ 	private get unusedAccessor() { }
-  > 34 │ 	private set unusedAccessor(value) { }
-       │ 	            ^^^^^^^^^^^^^^
-    35 │ }
-    36 │ 
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    32 32 │   class TsAccessor {
-    33 33 │   	private get unusedAccessor() { }
-    34    │ - → private·set·unusedAccessor(value)·{·}
-    35 34 │   }
-    36 35 │   
-  
-
-```
-
-```
 invalid.ts:39:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This private class member is defined but never used.

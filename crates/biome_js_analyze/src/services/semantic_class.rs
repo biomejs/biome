@@ -1,4 +1,4 @@
-use biome_js_syntax::{AnyJsClassMember, AnyJsExpression, AnyJsRoot, JsArrayAssignmentPattern, JsArrowFunctionExpression, JsAssignmentExpression, JsClassDeclaration, JsClassMemberList, JsConstructorClassMember, JsFunctionBody, JsLanguage, JsObjectAssignmentPattern, JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange, TsPropertyParameter};
+use biome_js_syntax::{AnyJsClassMember, AnyJsExpression, AnyJsRoot, JsArrayAssignmentPattern, JsArrowFunctionExpression, JsAssignmentExpression, JsClassDeclaration, JsClassMemberList, JsConstructorClassMember, JsFunctionBody, JsLanguage, JsMethodClassMember, JsObjectAssignmentPattern, JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange, TsPropertyParameter};
 
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
@@ -117,7 +117,7 @@ pub struct ClassMemberReferences {
 }
 
 declare_node_union! {
-    pub AnyPropertyMember = JsPropertyClassMember | TsPropertyParameter
+    pub AnyPropertyMember = JsPropertyClassMember | TsPropertyParameter | JsMethodClassMember
 }
 
 /// Collects all `this` property references used within the members of a JavaScript class.
@@ -323,7 +323,7 @@ impl ThisScopeReferences {
                 let id = fields.id.ok()?;
                 let expr = fields.initializer?.expression().ok()?;
                 let unwrapped = &expr.omit_parentheses();
-      
+
                 (unwrapped.syntax().first_token()?.text_trimmed() == "this").then(|| {
                     ClassMemberReference {
                         name: id.to_trimmed_text().clone(),
@@ -805,13 +805,18 @@ fn is_within_scope_without_shadowing(
 /// Walks up the AST until a statement node is found.
 /// Returns `Some(kind)` if a statement is found, otherwise `None`.
 pub fn parent_statement_kind(node: &JsSyntaxNode) -> Option<JsSyntaxKind> {
-    let mut current = node.clone(); // clone to own the node
+    let mut current = node.clone();
+    let mut depth = 0;
 
     if is_js_statement(current.kind()) {
         return Some(current.kind());
     }
 
     while let Some(parent) = current.parent() {
+        depth += 1;
+        if depth > 10 {
+            break;
+        }
         if is_js_statement(parent.kind()) {
             return Some(parent.kind());
         }
