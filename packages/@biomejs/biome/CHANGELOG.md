@@ -582,8 +582,7 @@
   - Promoted [`useSolidForComponent`](https://biomejs.dev/linter/rules/use-solid-for-component) to the
     `performance` group.
   - Promoted [`noMagicNumbers`](https://biomejs.dev/linter/rules/no-magic-numbers) to the `style` group.
-  - Promoted [
-    `useConsistentObjectDefinitions`](https://biomejs.dev/linter/rules/use-consistent-object-definitions) to the
+  - Promoted [`useConsistentObjectDefinitions`](https://biomejs.dev/linter/rules/use-consistent-object-definitions) to the
     `style` group.
   - Promoted [`useExportsLast`](https://biomejs.dev/linter/rules/use-exports-last) to the `style` group.
   - Promoted [`useGroupedAccessorPairs`](https://biomejs.dev/linter/rules/use-grouped-accessor-pairs) to the
@@ -614,31 +613,20 @@
 
   The following rules have been renamed during promotion. The migration tool will automatically update your configuration:
   - Renamed `noAwaitInLoop` to [`noAwaitInLoops`](https://biomejs.dev/linter/rules/no-await-in-loops).
-  - Renamed `noConstantBinaryExpression` to [
-    `noConstantBinaryExpressions`](https://biomejs.dev/linter/rules/no-constant-binary-expressions).
-  - Renamed `noDestructuredProps` to [
-    `noSolidDestructuredProps`](https://biomejs.dev/linter/rules/no-solid-destructured-props).
+  - Renamed `noConstantBinaryExpression` to [`noConstantBinaryExpressions`](https://biomejs.dev/linter/rules/no-constant-binary-expressions).
+  - Renamed `noDestructuredProps` to [`noSolidDestructuredProps`](https://biomejs.dev/linter/rules/no-solid-destructured-props).
   - Renamed `noImplicitCoercion` to [`noImplicitCoercions`](https://biomejs.dev/linter/rules/no-implicit-coercions).
-  - Renamed `noReactPropAssign` to [
-    `noReactPropAssignments`](https://biomejs.dev/linter/rules/no-react-prop-assignments).
+  - Renamed `noReactPropAssign` to [`noReactPropAssignments`](https://biomejs.dev/linter/rules/no-react-prop-assignments).
   - Renamed `noUnknownAtRule` to [`noUnknownAtRules`](https://biomejs.dev/linter/rules/no-unknown-at-rules).
-  - Renamed `noUselessBackrefInRegex` to [
-    `noUselessRegexBackrefs`](https://biomejs.dev/linter/rules/no-useless-regex-backrefs).
-  - Renamed `useAdjacentGetterSetter` to [
-    `useGroupedAccessorPairs`](https://biomejs.dev/linter/rules/use-grouped-accessor-pairs).
-  - Renamed `useConsistentObjectDefinition` to [
-    `useConsistentObjectDefinitions`](https://biomejs.dev/linter/rules/use-consistent-object-definitions).
-  - Renamed `useConsistentResponse` to [
-    `useStaticResponseMethods`](https://biomejs.dev/linter/rules/use-static-response-methods).
+  - Renamed `noUselessBackrefInRegex` to [`noUselessRegexBackrefs`](https://biomejs.dev/linter/rules/no-useless-regex-backrefs).
+  - Renamed `useAdjacentGetterSetter` to [`useGroupedAccessorPairs`](https://biomejs.dev/linter/rules/use-grouped-accessor-pairs).
+  - Renamed `useConsistentObjectDefinition` to [`useConsistentObjectDefinitions`](https://biomejs.dev/linter/rules/use-consistent-object-definitions).
+  - Renamed `useConsistentResponse` to [`useStaticResponseMethods`](https://biomejs.dev/linter/rules/use-static-response-methods).
   - Renamed `useForComponent` to [`useSolidForComponent`](https://biomejs.dev/linter/rules/use-solid-for-component).
-  - Renamed `useJsonImportAttribute` to [
-    `useJsonImportAttributes`](https://biomejs.dev/linter/rules/use-json-import-attributes).
-  - Renamed `useNamedOperation` to [
-    `useGraphqlNamedOperations`](https://biomejs.dev/linter/rules/use-graphql-named-operations).
-  - Renamed `useNamingConvention` to [
-    `useGraphqlNamingConvention`](https://biomejs.dev/linter/rules/use-graphql-naming-convention).
-  - Renamed `useUnifiedTypeSignature` to [
-    `useUnifiedTypeSignatures`](https://biomejs.dev/linter/rules/use-unified-type-signatures).
+  - Renamed `useJsonImportAttribute` to [`useJsonImportAttributes`](https://biomejs.dev/linter/rules/use-json-import-attributes).
+  - Renamed `useNamedOperation` to [`useGraphqlNamedOperations`](https://biomejs.dev/linter/rules/use-graphql-named-operations).
+  - Renamed `useNamingConvention` to [`useGraphqlNamingConvention`](https://biomejs.dev/linter/rules/use-graphql-naming-convention).
+  - Renamed `useUnifiedTypeSignature` to [`useUnifiedTypeSignatures`](https://biomejs.dev/linter/rules/use-unified-type-signatures).
 
   Configuration files using the old rule names will need to be updated. Use the migration tool to automatically update your configuration:
 
@@ -4730,9 +4718,9 @@
 
      Now the rule correctly handles the following cases:
 
-  - If an element is hidden from screen readers
-  - If an element has the presentation role
-  - If an element is interactive
+     - If an element is hidden from screen readers
+     - If an element has the presentation role
+     - If an element is interactive
 
      ```jsx
      // No errors
@@ -4741,7 +4729,7 @@
      <button onClick={() => {}} /> // interactive role
      ```
 
-  This change ensures the rule is more accurate and helpful.
+     This change ensures the rule is more accurate and helpful.
 
   2. **Checks spread syntax**:
 
