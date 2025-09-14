@@ -11,8 +11,8 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsComputedMember, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsName, JsAssignmentExpression, JsClassDeclaration, JsSyntaxKind,
-    JsSyntaxNode, TsAccessibilityModifier, TsPropertyParameter,
+    AnyJsFormalParameter, AnyJsName, JsAssignmentExpression, JsAssignmentOperator,
+    JsClassDeclaration, JsSyntaxKind, JsSyntaxNode, TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
@@ -268,7 +268,11 @@ fn traverse_members_usage(
                         is_write_only(&js_name) == Some(true) && !private_member.is_accessor();
                     let is_in_update_expression = is_in_update_expression(&js_name);
 
-                    if is_in_update_expression || is_write_only {
+                    if is_in_update_expression {
+                        return false;
+                    }
+
+                    if is_write_only {
                         return true;
                     }
 
@@ -423,10 +427,19 @@ fn is_in_update_expression(js_name: &AnyJsName) -> bool {
         return false;
     }
 
-    matches!(
-        grand_parent.kind(),
-        JsSyntaxKind::JS_POST_UPDATE_EXPRESSION | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
-    )
+    // grand_parent can also be js expression statement
+    match grand_parent.kind() {
+        JsSyntaxKind::JS_POST_UPDATE_EXPRESSION | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION => true,
+        JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
+            if let Some(assign_expr) = JsAssignmentExpression::cast(grand_parent.clone())
+                && let Ok(op_kind) = assign_expr.operator()
+            {
+                return op_kind != JsAssignmentOperator::Assign;
+            }
+            false
+        }
+        _ => false,
+    }
 }
 
 impl AnyMember {

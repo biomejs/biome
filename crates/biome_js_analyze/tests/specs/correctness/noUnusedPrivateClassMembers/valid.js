@@ -203,3 +203,164 @@ class UsedPostUpdateExpr {
     return this.#val++;
   }
 }
+
+class AppSelfAdd {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest += this.#persistenceRequest;
+	}
+}
+
+class AppSelfSubtract {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest -= this.#persistenceRequest;
+	}
+}
+
+class AppSelfMultiply {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest *= this.#persistenceRequest;
+	}
+}
+
+class AppSelfDivide {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest /= this.#persistenceRequest;
+	}
+}
+
+class AppSelfExponent {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest **= this.#persistenceRequest;
+	}
+}
+
+class AppSelfAnd {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest &&= this.#persistenceRequest;
+	}
+}
+
+class AppSelfOr {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest ||= this.#persistenceRequest;
+	}
+}
+
+class AppSelfNullish {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest ??= this.#persistenceRequest;
+	}
+}
+
+class AppAddAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest += 1;
+	}
+}
+
+class AppSubtractAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest -= 1;
+	}
+}
+
+class AppMultiplyAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest *= 2;
+	}
+}
+
+class AppDivideAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest /= 2;
+	}
+}
+
+class AppExponentAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest **= 2;
+	}
+}
+
+class AppModuloAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest %= 2;
+	}
+}
+
+class AppAndAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest &= 1;
+	}
+}
+
+class AppOrAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest |= 1;
+	}
+}
+
+class AppXorAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest ^= 1;
+	}
+}
+
+class AppLeftShiftAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest <<= 1;
+	}
+}
+
+class AppRightShiftAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest >>= 1;
+	}
+}
+
+class AppUnsignedRightShiftAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest >>>= 1;
+	}
+}
+
+class AppAndLogicalAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest &&= 1;
+	}
+}
+
+class AppOrLogicalAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest ||= 1;
+	}
+}
+
+class AppNullishAssignment {
+	#persistenceRequest = 0;
+	saveData() {
+		this.#persistenceRequest ??= 1;
+	}
+}

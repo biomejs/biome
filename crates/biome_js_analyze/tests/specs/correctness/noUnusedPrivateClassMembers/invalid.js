@@ -14,14 +14,6 @@ class OnlyWrite {
 	}
 }
 
-class SelfUpdate {
-	#usedOnlyToUpdateItself = 5;
-
-	method() {
-			this.#usedOnlyToUpdateItself++;
-	}
-}
-
 class Accessor {
 	get #unusedAccessor() {}
 	set #unusedAccessor(value) {}

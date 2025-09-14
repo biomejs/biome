@@ -21,14 +21,6 @@ class TsOnlyWrite {
 	}
 }
 
-class TsSelfUpdate {
-	private usedOnlyToUpdateItself = 5;
-
-	method() {
-		this.usedOnlyToUpdateItself++;
-	}
-}
-
 class TsAccessor {
 	private get unusedAccessor() { }
 	private set unusedAccessor(value) { }
