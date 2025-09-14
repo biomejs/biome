@@ -52,8 +52,8 @@ class UsedMember {
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
         );
-   let rule_filter = RuleFilter::Rule("correctness", "noUnusedPrivateClassMembers");
- //    let rule_filter = RuleFilter::Rule("style", "useReadonlyClassProperties");
+    let rule_filter = RuleFilter::Rule("correctness", "noUnusedPrivateClassMembers");
+    //    let rule_filter = RuleFilter::Rule("style", "useReadonlyClassProperties");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 

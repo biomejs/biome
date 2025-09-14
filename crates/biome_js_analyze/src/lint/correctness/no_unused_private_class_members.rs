@@ -212,7 +212,7 @@ impl Rule for NoUnusedPrivateClassMembers {
                     // If needed, rename with underscore prefix
                     if *rename_with_underscore
                         && let Ok(AnyJsFormalParameter::JsFormalParameter(param)) =
-                        ts_property_param.formal_parameter()
+                            ts_property_param.formal_parameter()
                     {
                         let binding = param.binding().ok()?;
                         let identifier_binding =
@@ -314,8 +314,8 @@ fn check_ts_property_parameter_usage(ts_property_param: &TsPropertyParameter) ->
     if let Ok(AnyJsFormalParameter::JsFormalParameter(param)) = ts_property_param.formal_parameter()
         && let Ok(binding) = param.binding()
         && let Some(identifier_binding) = binding
-        .as_any_js_binding()
-        .and_then(|b| b.as_js_identifier_binding())
+            .as_any_js_binding()
+            .and_then(|b| b.as_js_identifier_binding())
     {
         let name_token = match identifier_binding.name_token() {
             Ok(token) => token,
@@ -336,7 +336,7 @@ fn check_ts_property_parameter_usage(ts_property_param: &TsPropertyParameter) ->
 
 fn get_all_declared_private_members(
     class_declaration: &JsClassDeclaration,
-) -> impl Iterator<Item=AnyMember> {
+) -> impl Iterator<Item = AnyMember> {
     class_declaration
         .members()
         .iter()
@@ -347,7 +347,7 @@ fn get_all_declared_private_members(
 
 fn get_constructor_params(
     class_declaration: &JsClassDeclaration,
-) -> impl Iterator<Item=AnyMember> {
+) -> impl Iterator<Item = AnyMember> {
     class_declaration
         .members()
         .iter()
