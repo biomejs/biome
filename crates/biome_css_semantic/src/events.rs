@@ -1,10 +1,11 @@
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssProperty, AnyCssSelector, CssDeclaration, CssPropertyAtRule,
-    CssRelativeSelector, CssSyntaxKind::*, CssSyntaxNode,
+    CssRelativeSelector, CssSyntaxKind::*,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
 
+use crate::model::{AnyCssSelectorLike, AnyRuleStart};
 use crate::{
     model::{CssProperty, CssPropertyInitialValue},
     semantic_model::model::Specificity,
@@ -15,10 +16,10 @@ const ROOT_SELECTOR: &str = ":root";
 
 #[derive(Debug)]
 pub enum SemanticEvent {
-    RuleStart(CssSyntaxNode),
+    RuleStart(AnyRuleStart),
     RuleEnd,
     SelectorDeclaration {
-        node: CssSyntaxNode,
+        node: AnyCssSelectorLike,
         specificity: Specificity,
     },
     PropertyDeclaration {
@@ -65,7 +66,9 @@ impl SemanticEventExtractor {
                 || kind == CSS_MEDIA_AT_RULE
                 || kind == CSS_SUPPORTS_AT_RULE =>
             {
-                self.stash.push_back(SemanticEvent::RuleStart(node.clone()));
+                if let Some(start) = AnyRuleStart::cast(node.clone()) {
+                    self.stash.push_back(SemanticEvent::RuleStart(start));
+                }
             }
             CSS_SELECTOR_LIST => {
                 if !matches!(
@@ -216,7 +219,11 @@ impl SemanticEventExtractor {
                         syntax = Some(prop.value().to_trimmed_string().to_string());
                     }
                     "inherits" => {
-                        inherits = Some(prop.value().to_trimmed_string() == "true");
+                        inherits = Some(
+                            prop.value()
+                                .to_trimmed_string()
+                                .eq_ignore_ascii_case("true"),
+                        );
                     }
                     _ => {}
                 }
@@ -232,7 +239,7 @@ impl SemanticEventExtractor {
         });
     }
 
-    fn add_selector_event(&mut self, node: CssSyntaxNode, specificity: Specificity) {
+    fn add_selector_event(&mut self, node: AnyCssSelectorLike, specificity: Specificity) {
         self.stash
             .push_back(SemanticEvent::SelectorDeclaration { node, specificity });
     }

@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Remove triaging label
         if: contains(github.event.issue.labels.*.name, 'S-Bug-confirmed') && contains(github.event.issue.labels.*.name, 'S-Needs triage')
-        uses: actions-cool/issues-helper@50068f49b7b2b3857270ead65e2d02e4459b022c # v3.6.2
+        uses: actions-cool/issues-helper@45d75b6cf72bf4f254be6230cb887ad002702491 # v3.6.3
         with:
           actions: "remove-labels"
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -23,7 +23,7 @@ jobs:
 
       - name: Needs reproduction
         if: github.event.label.name == 'S-Needs repro'
-        uses: actions-cool/issues-helper@50068f49b7b2b3857270ead65e2d02e4459b022c # v3.6.2
+        uses: actions-cool/issues-helper@45d75b6cf72bf4f254be6230cb887ad002702491 # v3.6.3
         with:
           actions: "create-comment, remove-labels"
           token: ${{ secrets.GITHUB_TOKEN }}

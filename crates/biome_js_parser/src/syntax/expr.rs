@@ -1335,19 +1335,17 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
             let m = p.start();
             p.bump_any();
 
-            // test js import_meta
-            // import.meta
             if p.eat(T![.]) {
-                // test_err js import_no_meta
-                // import.foo
-                // import.metaa
-                if p.at(T![ident]) && p.text(p.cur_range()) == "meta" {
+                if p.eat(T![defer]) || p.eat(T![source]) {
+                    // Parse the call arguments
+                    parse_import_call_expression(p, context, m)
+                } else if p.at(T![ident]) && p.text(p.cur_range()) == "meta" {
                     p.bump_remap(META);
                     m.complete(p, JS_IMPORT_META_EXPRESSION)
                 } else if p.at(T![ident]) {
                     let err = p.err_builder(
                         format!(
-                            "Expected `meta` following an import keyword, but found `{}`",
+                            "Expected `meta`, `source()`, or `defer()` following an import keyword, but found `{}`",
                             p.text(p.cur_range())
                         ),
                         p.cur_range(),
@@ -1357,7 +1355,7 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
                     m.complete(p, JS_IMPORT_META_EXPRESSION)
                 } else {
                     let err = p.err_builder(
-                        "Expected `meta` following an import keyword, but found none",
+                        "Expected `meta`, `source()`, or `defer()` following an import keyword, but found none",
                         p.cur_range(),
                     );
 
@@ -1365,65 +1363,8 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
                     m.complete(p, JS_BOGUS)
                 }
             } else {
-                // test js import_call
-                // import("foo")
-                // import("foo", { assert: { type: 'json' } })
-                // import("foo", { with: { 'resolution-mode': 'import' } })
-
-                // test_err js import_invalid_args
-                // import()
-                // import(...["foo"])
-                // import("foo", { assert: { type: 'json' } }, "bar")
-                // import("foo", { with: { type: 'json' } }, "bar")
-                let args = p.start();
-                p.bump(T!['(']);
-                let args_list = p.start();
-
-                let mut progress = ParserProgress::default();
-                let mut error_range_start = p.cur_range().start();
-                let mut args_count = 0;
-
-                while !p.at(EOF) && !p.at(T![')']) {
-                    progress.assert_progressing(p);
-                    args_count += 1;
-
-                    if args_count == 3 {
-                        error_range_start = p.cur_range().start();
-                    }
-
-                    if p.at(T![...]) {
-                        parse_spread_element(p, context)
-                            .add_diagnostic_if_present(p, |p, range| {
-                                p.err_builder("`...` is not allowed in `import()`", range)
-                            })
-                            .map(|mut marker| {
-                                marker.change_to_bogus(p);
-                                marker
-                            });
-                    } else {
-                        parse_assignment_expression_or_higher(p, ExpressionContext::default())
-                            .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
-                    }
-
-                    if p.at(T![,]) {
-                        p.bump_any();
-                    } else {
-                        break;
-                    }
-                }
-
-                args_list.complete(p, JS_CALL_ARGUMENT_LIST);
-                if args_count == 0 || args_count > 2 {
-                    let err = p.err_builder(
-                        "`import()` requires exactly one or two arguments. ",
-                        error_range_start..p.cur_range().end(),
-                    );
-                    p.error(err);
-                }
-
-                p.expect(T![')']);
-                args.complete(p, JS_CALL_ARGUMENTS);
-                m.complete(p, JS_IMPORT_CALL_EXPRESSION)
+                // This is a direct import() call without phase
+                parse_import_call_expression(p, context, m)
             }
         }
         T![new] => parse_new_expr(p, context).unwrap(),
@@ -2169,4 +2110,61 @@ pub(super) fn is_nth_at_name(p: &mut JsParser, offset: usize) -> bool {
 
 pub(super) fn is_nth_at_any_name(p: &mut JsParser, n: usize) -> bool {
     is_nth_at_name(p, n) || p.nth_at(n, T![#])
+}
+
+/// Parse the arguments for an import call expression (import() or import.defer() or import.source())
+fn parse_import_call_expression(
+    p: &mut JsParser,
+    context: ExpressionContext,
+    marker: Marker,
+) -> CompletedMarker {
+    let args = p.start();
+    p.bump(T!['(']);
+    let args_list = p.start();
+
+    let mut progress = ParserProgress::default();
+    let mut error_range_start = p.cur_range().start();
+    let mut args_count = 0;
+
+    while !p.at(EOF) && !p.at(T![')']) {
+        progress.assert_progressing(p);
+        args_count += 1;
+
+        if args_count == 3 {
+            error_range_start = p.cur_range().start();
+        }
+
+        if p.at(T![...]) {
+            parse_spread_element(p, context)
+                .add_diagnostic_if_present(p, |p, range| {
+                    p.err_builder("`...` is not allowed in `import()`", range)
+                })
+                .map(|mut marker| {
+                    marker.change_to_bogus(p);
+                    marker
+                });
+        } else {
+            parse_assignment_expression_or_higher(p, ExpressionContext::default())
+                .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
+        }
+
+        if p.at(T![,]) {
+            p.bump_any();
+        } else {
+            break;
+        }
+    }
+
+    args_list.complete(p, JS_CALL_ARGUMENT_LIST);
+    if args_count == 0 || args_count > 2 {
+        let err = p.err_builder(
+            "`import()` requires exactly one or two arguments. ",
+            error_range_start..p.cur_range().end(),
+        );
+        p.error(err);
+    }
+
+    p.expect(T![')']);
+    args.complete(p, JS_CALL_ARGUMENTS);
+    marker.complete(p, JS_IMPORT_CALL_EXPRESSION)
 }

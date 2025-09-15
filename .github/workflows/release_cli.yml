@@ -87,7 +87,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@f63c33fd96cc1e69a29bafd06541cf28588b43a4 # v2.58.21
+        uses: taiki-e/install-action@9545a0634ccdca487a09cde61d362f0bc5fb5df9 # v2.61.4
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -237,7 +237,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.19.4
+          node-version: 20.19.5
           registry-url: 'https://registry.npmjs.org'
 
       - name: Set release infos
@@ -247,12 +247,12 @@ jobs:
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
       - name: Publish npm packages as latest
-        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag latest --access public --provenance; fi; done
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ] && [ $package != "packages/@biomejs/plugin-api" ]; then npm publish $package --tag latest --access public --provenance; fi; done
         if: needs.build.outputs.prerelease != 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish npm packages as nightly
-        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag nightly --access public --provenance; fi; done
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ] && [ $package != "packages/@biomejs/plugin-api" ]; then npm publish $package --tag nightly --access public --provenance; fi; done
         if: needs.build.outputs.prerelease == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -261,7 +261,7 @@ jobs:
         run: |
           bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
       - name: Create GitHub release and tag
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

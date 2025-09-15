@@ -4,6 +4,7 @@ expression: function_pseudo_selector.invalid.css
 ---
 # Input
 ```css
+/* should generate diagnostics */
 :is(#a, a) f {
     color: red;
 }
@@ -19,27 +20,29 @@ expression: function_pseudo_selector.invalid.css
 :where(*) g {
     color: red;
 }
+
 ```
 
 # Diagnostics
 ```
-function_pseudo_selector.invalid.css:5:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━
+function_pseudo_selector.invalid.css:6:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Descending specificity selector found. This selector specificity is (0, 0, 2)
   
-    3 │ }
-    4 │ 
-  > 5 │ :is(a, b, c, d) f {
+    4 │ }
+    5 │ 
+  > 6 │ :is(a, b, c, d) f {
       │ ^^^^^^^^^^^^^^^^^
-    6 │     color: red;
-    7 │ }
+    7 │     color: red;
+    8 │ }
   
   i This selector specificity is (1, 0, 1)
   
-  > 1 │ :is(#a, a) f {
+    1 │ /* should generate diagnostics */
+  > 2 │ :is(#a, a) f {
       │ ^^^^^^^^^^^^
-    2 │     color: red;
-    3 │ }
+    3 │     color: red;
+    4 │ }
   
   i Descending specificity selector may not applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
   
@@ -47,25 +50,25 @@ function_pseudo_selector.invalid.css:5:1 lint/style/noDescendingSpecificity ━�
 ```
 
 ```
-function_pseudo_selector.invalid.css:13:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━
+function_pseudo_selector.invalid.css:14:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Descending specificity selector found. This selector specificity is (0, 0, 1)
   
-    11 │ }
-    12 │ 
-  > 13 │ :where(*) g {
+    12 │ }
+    13 │ 
+  > 14 │ :where(*) g {
        │ ^^^^^^^^^^^
-    14 │     color: red;
-    15 │ }
+    15 │     color: red;
+    16 │ }
   
   i This selector specificity is (6, 0, 1)
   
-     7 │ }
-     8 │ 
-   > 9 │ :is(#fake#fake#fake#fake#fake#fake, *) g {
+     8 │ }
+     9 │ 
+  > 10 │ :is(#fake#fake#fake#fake#fake#fake, *) g {
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │     color: red;
-    11 │ }
+    11 │     color: red;
+    12 │ }
   
   i Descending specificity selector may not applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
   

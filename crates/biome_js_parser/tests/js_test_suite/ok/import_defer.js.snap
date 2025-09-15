@@ -7,6 +7,8 @@ expression: snapshot
 ```js
 import defer * as feature from "some-module";
 import defer * as ns from "x" with { attr: "val" };
+import.defer("foo");
+import.defer("x", { with: { attr: "val" } });
 ```
 
 
@@ -69,19 +71,81 @@ JsModule {
             },
             semicolon_token: SEMICOLON@96..97 ";" [] [],
         },
+        JsExpressionStatement {
+            expression: JsImportCallExpression {
+                import_token: IMPORT_KW@97..104 "import" [Newline("\n")] [],
+                dot_token: DOT@104..105 "." [] [],
+                phase: DEFER_KW@105..110 "defer" [] [],
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@110..111 "(" [] [],
+                    args: JsCallArgumentList [
+                        JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@111..116 "\"foo\"" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@116..117 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@117..118 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsImportCallExpression {
+                import_token: IMPORT_KW@118..125 "import" [Newline("\n")] [],
+                dot_token: DOT@125..126 "." [] [],
+                phase: DEFER_KW@126..131 "defer" [] [],
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@131..132 "(" [] [],
+                    args: JsCallArgumentList [
+                        JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@132..135 "\"x\"" [] [],
+                        },
+                        COMMA@135..137 "," [] [Whitespace(" ")],
+                        JsObjectExpression {
+                            l_curly_token: L_CURLY@137..139 "{" [] [Whitespace(" ")],
+                            members: JsObjectMemberList [
+                                JsPropertyObjectMember {
+                                    name: JsLiteralMemberName {
+                                        value: IDENT@139..143 "with" [] [],
+                                    },
+                                    colon_token: COLON@143..145 ":" [] [Whitespace(" ")],
+                                    value: JsObjectExpression {
+                                        l_curly_token: L_CURLY@145..147 "{" [] [Whitespace(" ")],
+                                        members: JsObjectMemberList [
+                                            JsPropertyObjectMember {
+                                                name: JsLiteralMemberName {
+                                                    value: IDENT@147..151 "attr" [] [],
+                                                },
+                                                colon_token: COLON@151..153 ":" [] [Whitespace(" ")],
+                                                value: JsStringLiteralExpression {
+                                                    value_token: JS_STRING_LITERAL@153..159 "\"val\"" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@159..161 "}" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                            r_curly_token: R_CURLY@161..162 "}" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@162..163 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@163..164 ";" [] [],
+        },
     ],
-    eof_token: EOF@97..97 "" [] [],
+    eof_token: EOF@164..164 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: JS_MODULE@0..97
+0: JS_MODULE@0..164
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..97
+  3: JS_MODULE_ITEM_LIST@0..164
     0: JS_IMPORT@0..45
       0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
       1: JS_IMPORT_NAMESPACE_CLAUSE@7..44
@@ -120,6 +184,49 @@ JsModule {
               2: JS_STRING_LITERAL@89..95 "\"val\"" [] [Whitespace(" ")]
           3: R_CURLY@95..96 "}" [] []
       2: SEMICOLON@96..97 ";" [] []
-  4: EOF@97..97 "" [] []
+    2: JS_EXPRESSION_STATEMENT@97..118
+      0: JS_IMPORT_CALL_EXPRESSION@97..117
+        0: IMPORT_KW@97..104 "import" [Newline("\n")] []
+        1: DOT@104..105 "." [] []
+        2: DEFER_KW@105..110 "defer" [] []
+        3: JS_CALL_ARGUMENTS@110..117
+          0: L_PAREN@110..111 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@111..116
+            0: JS_STRING_LITERAL_EXPRESSION@111..116
+              0: JS_STRING_LITERAL@111..116 "\"foo\"" [] []
+          2: R_PAREN@116..117 ")" [] []
+      1: SEMICOLON@117..118 ";" [] []
+    3: JS_EXPRESSION_STATEMENT@118..164
+      0: JS_IMPORT_CALL_EXPRESSION@118..163
+        0: IMPORT_KW@118..125 "import" [Newline("\n")] []
+        1: DOT@125..126 "." [] []
+        2: DEFER_KW@126..131 "defer" [] []
+        3: JS_CALL_ARGUMENTS@131..163
+          0: L_PAREN@131..132 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@132..162
+            0: JS_STRING_LITERAL_EXPRESSION@132..135
+              0: JS_STRING_LITERAL@132..135 "\"x\"" [] []
+            1: COMMA@135..137 "," [] [Whitespace(" ")]
+            2: JS_OBJECT_EXPRESSION@137..162
+              0: L_CURLY@137..139 "{" [] [Whitespace(" ")]
+              1: JS_OBJECT_MEMBER_LIST@139..161
+                0: JS_PROPERTY_OBJECT_MEMBER@139..161
+                  0: JS_LITERAL_MEMBER_NAME@139..143
+                    0: IDENT@139..143 "with" [] []
+                  1: COLON@143..145 ":" [] [Whitespace(" ")]
+                  2: JS_OBJECT_EXPRESSION@145..161
+                    0: L_CURLY@145..147 "{" [] [Whitespace(" ")]
+                    1: JS_OBJECT_MEMBER_LIST@147..159
+                      0: JS_PROPERTY_OBJECT_MEMBER@147..159
+                        0: JS_LITERAL_MEMBER_NAME@147..151
+                          0: IDENT@147..151 "attr" [] []
+                        1: COLON@151..153 ":" [] [Whitespace(" ")]
+                        2: JS_STRING_LITERAL_EXPRESSION@153..159
+                          0: JS_STRING_LITERAL@153..159 "\"val\"" [] [Whitespace(" ")]
+                    2: R_CURLY@159..161 "}" [] [Whitespace(" ")]
+              2: R_CURLY@161..162 "}" [] []
+          2: R_PAREN@162..163 ")" [] []
+      1: SEMICOLON@163..164 ";" [] []
+  4: EOF@164..164 "" [] []
 
 ```

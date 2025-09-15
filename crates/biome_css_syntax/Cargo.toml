@@ -19,6 +19,10 @@ camino            = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true, features = ["derive"] }
 
+[dev-dependencies]
+biome_css_factory = { path = "../biome_css_factory" }
+biome_css_parser  = { path = "../biome_css_parser" }
+
 [features]
 schema = ["schemars", "biome_rowan/serde"]
 

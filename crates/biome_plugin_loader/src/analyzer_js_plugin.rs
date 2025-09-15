@@ -6,12 +6,13 @@ use boa_engine::object::builtins::JsFunction;
 use boa_engine::{JsNativeError, JsResult, JsString, JsValue};
 use camino::{Utf8Path, Utf8PathBuf};
 
-use biome_analyze::{AnalyzerPlugin, RuleDiagnostic};
+use biome_analyze::{AnalyzerPlugin, PluginTargetLanguage, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_js_runtime::JsExecContext;
-use biome_parser::AnyParse;
+use biome_js_syntax::AnyJsRoot;
 use biome_resolver::FsWithResolverProxy;
+use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
 
 use crate::PluginDiagnostic;
@@ -72,7 +73,19 @@ impl AnalyzerJsPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerJsPlugin {
-    fn evaluate(&self, _root: AnyParse, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
+    fn language(&self) -> PluginTargetLanguage {
+        PluginTargetLanguage::JavaScript
+    }
+
+    fn query(&self) -> Vec<RawSyntaxKind> {
+        // TODO: Support granular query defined in the JS plugin.
+        AnyJsRoot::KIND_SET
+            .iter()
+            .map(|kind| kind.to_raw())
+            .collect()
+    }
+
+    fn evaluate(&self, _node: AnySyntaxNode, path: Arc<Utf8PathBuf>) -> Vec<RuleDiagnostic> {
         let mut plugin = match self
             .loaded
             .get_mut_or_try_init(|| load_plugin(self.fs.clone(), &self.path))
@@ -107,14 +120,6 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                 },
                 |_| plugin.ctx.pull_diagnostics(),
             )
-    }
-
-    fn supports_css(&self) -> bool {
-        false
-    }
-
-    fn supports_js(&self) -> bool {
-        true
     }
 }
 
@@ -167,7 +172,7 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.into(), Arc::new("/foo.js".into()))
+                plugin.evaluate(parse.syntax().into(), Arc::new("/foo.js".into()))
             })
         };
 
@@ -181,7 +186,7 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.into(), Arc::new("/bar.js".into()))
+                plugin.evaluate(parse.syntax().into(), Arc::new("/bar.js".into()))
             })
         };
 

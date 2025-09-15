@@ -158,6 +158,10 @@ pub enum RuleSource {
     EslintVitest(&'static str),
     /// Rules from [Eslint Plugin Vue.js](https://eslint.vuejs.org/)
     EslintVueJs(&'static str),
+    /// Rules from [Eslint Plugin Package.json](https://github.com/JoshuaKGoldberg/eslint-plugin-package-json)
+    EslintPackageJson(&'static str),
+    /// Rules from [Eslint Plugin Package.json Dependencies](https://github.com/idan-at/eslint-plugin-package-json-dependencies)
+    EslintPackageJsonDependencies(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -203,6 +207,10 @@ impl std::fmt::Display for RuleSource {
             Self::DenoLint(_) => write!(f, "deno-lint"),
             Self::EslintVitest(_) => write!(f, "@vitest/eslint-plugin"),
             Self::EslintVueJs(_) => write!(f, "eslint-plugin-vue"),
+            Self::EslintPackageJson(_) => write!(f, "eslint-plugin-package-json"),
+            Self::EslintPackageJsonDependencies(_) => {
+                write!(f, "eslint-plugin-package-json-dependencies")
+            }
         }
     }
 }
@@ -279,7 +287,9 @@ impl RuleSource {
             | Self::Stylelint(rule_name)
             | Self::DenoLint(rule_name)
             | Self::EslintVitest(rule_name)
-            | Self::EslintVueJs(rule_name) => rule_name,
+            | Self::EslintVueJs(rule_name)
+            | Self::EslintPackageJson(rule_name)
+            | Self::EslintPackageJsonDependencies(rule_name) => rule_name,
         }
     }
 
@@ -318,6 +328,10 @@ impl RuleSource {
             Self::DenoLint(rule_name) => format!("deno-lint/{rule_name}"),
             Self::EslintVitest(rule_name) => format!("vitest/{rule_name}"),
             Self::EslintVueJs(rule_name) => format!("vue/{rule_name}"),
+            Self::EslintPackageJson(rule_name) => format!("package-json/{rule_name}"),
+            Self::EslintPackageJsonDependencies(rule_name) => {
+                format!("package-json-dependencies/{rule_name}")
+            }
         }
     }
 
@@ -355,6 +369,8 @@ impl RuleSource {
             Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
             Self::EslintVitest(rule_name) => format!("https://github.com/vitest-dev/eslint-plugin-vitest/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
+            Self::EslintPackageJson(rule_name) => format!("https://github.com/JoshuaKGoldberg/eslint-plugin-package-json/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintPackageJsonDependencies(rule_name) => format!("https://github.com/idan-at/eslint-plugin-package-json-dependencies/blob/master/docs/rules/{rule_name}.md"),
         }
     }
 

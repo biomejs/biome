@@ -837,7 +837,7 @@ export interface Source {
 	 */
 	organizeImports?: RuleAssistConfiguration_for_OrganizeImportsOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -845,7 +845,7 @@ export interface Source {
 	 */
 	useSortedAttributes?: RuleAssistConfiguration_for_UseSortedAttributesOptions;
 	/**
-	 * Sorts the keys of a JSON object in natural order
+	 * Sort the keys of a JSON object in natural order.
 	 */
 	useSortedKeys?: RuleAssistConfiguration_for_UseSortedKeysOptions;
 	/**
@@ -1073,7 +1073,7 @@ export interface A11y {
 	 */
 	noSvgWithoutTitle?: RuleConfiguration_for_NoSvgWithoutTitleOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1294,7 +1294,7 @@ export interface Complexity {
 	 */
 	noVoid?: RuleConfiguration_for_NoVoidOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1555,7 +1555,7 @@ export interface Correctness {
 	 */
 	noVoidTypeReturn?: RuleConfiguration_for_NoVoidTypeReturnOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1616,6 +1616,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
+	 */
+	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
+	/**
 	 * Require Promise-like statements to be handled appropriately.
 	 */
 	noFloatingPromises?: RuleFixConfiguration_for_NoFloatingPromisesOptions;
@@ -1623,6 +1627,10 @@ export interface Nursery {
 	 * Prevent import cycles.
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;
+	/**
+	 * Disallow string literals inside JSX elements.
+	 */
+	noJsxLiterals?: RuleConfiguration_for_NoJsxLiteralsOptions;
 	/**
 	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 */
@@ -1656,6 +1664,10 @@ export interface Nursery {
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
 	/**
+	 * Disallow unused catch bindings.
+	 */
+	noUselessCatchBinding?: RuleFixConfiguration_for_NoUselessCatchBindingOptions;
+	/**
 	 * Disallow the use of useless undefined.
 	 */
 	noUselessUndefined?: RuleFixConfiguration_for_NoUselessUndefinedOptions;
@@ -1672,13 +1684,17 @@ export interface Nursery {
 	 */
 	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
 	 * Enforces href attribute for \<a> elements.
 	 */
 	useAnchorHref?: RuleConfiguration_for_UseAnchorHrefOptions;
+	/**
+	 * Enforce consistent arrow function bodies.
+	 */
+	useConsistentArrowReturn?: RuleFixConfiguration_for_UseConsistentArrowReturnOptions;
 	/**
 	 * Enforce type definitions to consistently use either interface or type.
 	 */
@@ -1711,6 +1727,10 @@ export interface Nursery {
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
+	/**
+	 * Enforce multi-word component names in Vue components.
+	 */
+	useVueMultiWordComponentNames?: RuleConfiguration_for_UseVueMultiWordComponentNamesOptions;
 }
 /**
  * A list of rules that belong to this group
@@ -1753,7 +1773,7 @@ export interface Performance {
 	 */
 	noUnwantedPolyfillio?: RuleConfiguration_for_NoUnwantedPolyfillioOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -1790,7 +1810,7 @@ export interface Security {
 	 */
 	noGlobalEval?: RuleConfiguration_for_NoGlobalEvalOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 }
@@ -1903,7 +1923,7 @@ export interface Style {
 	 */
 	noYodaExpression?: RuleFixConfiguration_for_NoYodaExpressionOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -2412,7 +2432,7 @@ export interface Suspicious {
 	 */
 	noWith?: RuleConfiguration_for_NoWithOptions;
 	/**
-	 * It enables the recommended rules for this group
+	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
 	/**
@@ -2948,12 +2968,18 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
 export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoFloatingPromisesOptions;
 export type RuleConfiguration_for_NoImportCyclesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoImportCyclesOptions;
+export type RuleConfiguration_for_NoJsxLiteralsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoJsxLiteralsOptions;
 export type RuleFixConfiguration_for_NoMisusedPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoMisusedPromisesOptions;
@@ -2978,6 +3004,9 @@ export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
+export type RuleFixConfiguration_for_NoUselessCatchBindingOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoUselessCatchBindingOptions;
 export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessUndefinedOptions;
@@ -2993,6 +3022,9 @@ export type RuleConfiguration_for_NoVueReservedPropsOptions =
 export type RuleConfiguration_for_UseAnchorHrefOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAnchorHrefOptions;
+export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseConsistentArrowReturnOptions;
 export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
@@ -3017,6 +3049,9 @@ export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 export type RuleFixConfiguration_for_UseSortedClassesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSortedClassesOptions;
+export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseVueMultiWordComponentNamesOptions;
 export type RuleConfiguration_for_NoAccumulatingSpreadOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoAccumulatingSpreadOptions;
@@ -5302,6 +5337,16 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 */
 	options: UseYieldOptions;
 }
+export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDuplicateDependenciesOptions;
+}
 export interface RuleWithFixOptions_for_NoFloatingPromisesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5325,6 +5370,16 @@ export interface RuleWithOptions_for_NoImportCyclesOptions {
 	 * Rule's options
 	 */
 	options: NoImportCyclesOptions;
+}
+export interface RuleWithOptions_for_NoJsxLiteralsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoJsxLiteralsOptions;
 }
 export interface RuleWithFixOptions_for_NoMisusedPromisesOptions {
 	/**
@@ -5410,6 +5465,20 @@ export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	 */
 	options: NoUnresolvedImportsOptions;
 }
+export interface RuleWithFixOptions_for_NoUselessCatchBindingOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUselessCatchBindingOptions;
+}
 export interface RuleWithFixOptions_for_NoUselessUndefinedOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5467,6 +5536,20 @@ export interface RuleWithOptions_for_UseAnchorHrefOptions {
 	 * Rule's options
 	 */
 	options: UseAnchorHrefOptions;
+}
+export interface RuleWithFixOptions_for_UseConsistentArrowReturnOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentArrowReturnOptions;
 }
 export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	/**
@@ -5559,6 +5642,16 @@ export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	 * Rule's options
 	 */
 	options: UseSortedClassesOptions;
+}
+export interface RuleWithOptions_for_UseVueMultiWordComponentNamesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueMultiWordComponentNamesOptions;
 }
 export interface RuleWithOptions_for_NoAccumulatingSpreadOptions {
 	/**
@@ -7955,12 +8048,27 @@ export interface UseUniqueElementIdsOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoDuplicateDependenciesOptions {}
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
 	/**
 	 * Ignores type-only imports when finding an import cycle. A type-only import (`import type`) will be removed by the compiler, so it cuts an import cycle at runtime. Note that named type imports (`import { type Foo }`) aren't considered as type-only because it's not removed by the compiler if the `verbatimModuleSyntax` option is enabled. Enabled by default.
 	 */
 	ignoreTypes?: boolean;
+}
+export interface NoJsxLiteralsOptions {
+	/**
+	 * An array of strings that won't trigger the rule. Whitespaces are taken into consideration
+	 */
+	allowedStrings?: string[];
+	/**
+	 * When enabled, strings inside props are always ignored
+	 */
+	ignoreProps?: boolean;
+	/**
+	 * When enabled, also flag string literals inside JSX expressions and attributes
+	 */
+	noStrings?: boolean;
 }
 export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
@@ -7975,11 +8083,16 @@ export interface NoSecretsOptions {
 export interface NoShadowOptions {}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
+/**
+ * Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).
+ */
+export interface NoUselessCatchBindingOptions {}
 export interface NoUselessUndefinedOptions {}
 export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export type UseAnchorHrefOptions = null;
+export interface UseConsistentArrowReturnOptions {}
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
 }
@@ -8003,6 +8116,12 @@ export interface UseSortedClassesOptions {
 	 * Names of the functions or tagged templates that will be sorted.
 	 */
 	functions?: string[];
+}
+export interface UseVueMultiWordComponentNamesOptions {
+	/**
+	 * Component names to ignore (allowed to be single-word).
+	 */
+	ignores: string[];
 }
 export interface NoAccumulatingSpreadOptions {}
 export interface NoAwaitInLoopsOptions {}
@@ -8671,25 +8790,26 @@ export type Category =
 	| "lint/correctness/noVoidElementsWithChildren"
 	| "lint/correctness/noVoidTypeReturn"
 	| "lint/correctness/useExhaustiveDependencies"
+	| "lint/correctness/useGraphqlNamedOperations"
 	| "lint/correctness/useHookAtTopLevel"
 	| "lint/correctness/useImportExtensions"
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useJsonImportAttributes"
 	| "lint/correctness/useJsxKeyInIterable"
-	| "lint/correctness/useGraphqlNamedOperations"
 	| "lint/correctness/useParseIntRadix"
 	| "lint/correctness/useSingleJsDocAsterisk"
 	| "lint/correctness/useUniqueElementIds"
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
-	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
+	| "lint/nursery/noJsxLiterals"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
+	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noSecrets"
@@ -8698,12 +8818,14 @@ export type Category =
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
+	| "lint/nursery/noUselessCatchBinding"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useExhaustiveSwitchCases"
@@ -8716,6 +8838,7 @@ export type Category =
 	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
@@ -8830,6 +8953,7 @@ export type Category =
 	| "lint/suspicious/noDuplicateCase"
 	| "lint/suspicious/noDuplicateClassMembers"
 	| "lint/suspicious/noDuplicateCustomProperties"
+	| "lint/nursery/noDuplicateDependencies"
 	| "lint/suspicious/noDuplicateElseIf"
 	| "lint/suspicious/noDuplicateFields"
 	| "lint/suspicious/noDuplicateFontNames"
@@ -8881,20 +9005,20 @@ export type Category =
 	| "lint/suspicious/noUnknownAtRules"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
-	| "lint/suspicious/noUselessRegexBackrefs"
 	| "lint/suspicious/noUselessEscapeInString"
+	| "lint/suspicious/noUselessRegexBackrefs"
 	| "lint/suspicious/noVar"
 	| "lint/suspicious/noWith"
 	| "lint/suspicious/useAdjacentOverloadSignatures"
 	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useBiomeIgnoreFolder"
-	| "lint/suspicious/useIterableCallbackReturn"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
 	| "lint/suspicious/useErrorMessage"
 	| "lint/suspicious/useGetterReturn"
 	| "lint/suspicious/useGoogleFontDisplay"
 	| "lint/suspicious/useGuardForIn"
 	| "lint/suspicious/useIsArray"
+	| "lint/suspicious/useIterableCallbackReturn"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"

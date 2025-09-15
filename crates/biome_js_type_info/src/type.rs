@@ -129,6 +129,17 @@ impl Type {
         }
     }
 
+    /// Returns whether this type is a boolean with the given `value`.
+    pub fn is_boolean_literal(&self, value: bool) -> bool {
+        self.as_raw_data().is_some_and(|ty| match ty {
+            TypeData::Literal(literal) => match literal.as_ref() {
+                Literal::Boolean(literal) => literal.as_bool() == value,
+                _ => false,
+            },
+            _ => false,
+        })
+    }
+
     /// Returns whether `self` is a function with a return type matching the
     /// given `predicate`.
     pub fn is_function_with_return_type(&self, predicate: impl Fn(Self) -> bool) -> bool {
@@ -167,13 +178,26 @@ impl Type {
     }
 
     /// Returns whether this type is a number or a literal number.
-    pub fn is_number(&self) -> bool {
+    pub fn is_number_or_number_literal(&self) -> bool {
         self.id == GLOBAL_NUMBER_ID
             || self.as_raw_data().is_some_and(|ty| match ty {
                 TypeData::Number => true,
                 TypeData::Literal(literal) => matches!(literal.as_ref(), Literal::Number(_)),
                 _ => false,
             })
+    }
+
+    /// Returns whether this type is a number with the given `value`.
+    pub fn is_number_literal(&self, value: f64) -> bool {
+        self.as_raw_data().is_some_and(|ty| match ty {
+            TypeData::Literal(literal) => match literal.as_ref() {
+                Literal::Number(literal) => literal
+                    .to_f64()
+                    .is_some_and(|literal_value| literal_value == value),
+                _ => false,
+            },
+            _ => false,
+        })
     }
 
     /// Returns whether this type is the `Promise` class.
@@ -188,7 +212,7 @@ impl Type {
     }
 
     /// Returns whether this type is a string.
-    pub fn is_string(&self) -> bool {
+    pub fn is_string_or_string_literal(&self) -> bool {
         self.id == GLOBAL_STRING_ID
             || self.as_raw_data().is_some_and(|ty| match ty {
                 TypeData::String => true,

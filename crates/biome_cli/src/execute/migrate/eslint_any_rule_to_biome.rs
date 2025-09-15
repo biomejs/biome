@@ -629,6 +629,18 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "arrow-body-style" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_consistent_arrow_return
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "barrel-files/avoid-barrel-files" => {
             if !options.include_inspired {
                 results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
@@ -1993,6 +2005,30 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "package-json-dependencies/duplicate-dependencies" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_duplicate_dependencies
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "package-json/unique-dependencies" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_duplicate_dependencies
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "prefer-arrow-callback" => {
             if !options.include_inspired {
                 results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
@@ -2242,6 +2278,18 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_duplicate_jsx_props
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "react/jsx-no-literals" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_jsx_literals
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
@@ -2694,6 +2742,22 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_misplaced_assertion
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "vue/multi-word-component-names" => {
+            if !options.include_inspired {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
+                return false;
+            }
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_vue_multi_word_component_names
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }

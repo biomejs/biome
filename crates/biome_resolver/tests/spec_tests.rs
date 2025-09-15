@@ -372,6 +372,42 @@ fn test_resolve_shared_biome_config() {
 
 #[test]
 fn test_resolve_typescript_path_aliases() {
+    let base_dir = get_fixtures_path("resolver_cases_3");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    assert_eq!(
+        resolve(
+            "@/components/Foo",
+            &base_dir.join("src"),
+            &fs,
+            &ResolveOptions {
+                default_files: &["index"],
+                extensions: &["ts", "js"],
+                ..Default::default()
+            }
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/src/components/Foo.ts"
+        )))
+    );
+
+    assert_eq!(
+        resolve(
+            "@/components",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                default_files: &["index"],
+                extensions: &["ts", "js"],
+                ..Default::default()
+            }
+        ),
+        Err(ResolveError::NotFound)
+    );
+}
+
+#[test]
+fn test_resolve_typescript_path_aliases2() {
     let base_dir = get_fixtures_path("resolver_cases_4");
     let fs = OsFileSystem::new(base_dir.clone());
 
@@ -612,5 +648,39 @@ fn test_resolve_from_base_url() {
         Ok(Utf8PathBuf::from(format!(
             "{base_dir}/node_modules/bar/index.js"
         )))
+    );
+}
+
+#[test]
+fn test_resolve_alias_with_multiple_target_values() {
+    let base_dir = get_fixtures_path("resolver_cases_6");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["types", "import", "default"],
+        default_files: &["index"],
+        extensions: &["ts", "js"],
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve("#lib/a", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/lib/a.tsx")))
+    );
+    assert_eq!(
+        resolve("#lib/b", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/lib/b.ts")))
+    );
+    assert_eq!(
+        resolve("#lib/c", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/lib/c/index.ts")))
+    );
+    assert_eq!(
+        resolve("#lib/d", &base_dir, &fs, &options),
+        Err(ResolveError::NotFound)
+    );
+    assert_eq!(
+        resolve("#lib/d.js", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/src/lib/d.js")))
     );
 }

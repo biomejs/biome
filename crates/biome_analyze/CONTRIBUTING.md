@@ -1207,21 +1207,47 @@ The documentation needs to adhere to the following rules:
 
   You should usually prefer to show a concise but complete sample snippet instead.
 
+- **Multi-file snippets**
+
+  For rules that analyze relationships between multiple files (e.g., import cycles, cross-file dependencies), you can use the `file=<path>` property to create an in-memory file system for testing.
+
+  This is also useful to trigger type inference even for examples that only consist of individual files.
+
+  Files are organized by documentation section (Markdown headings), where all files in a section are collected before any tests run. This ensures each test has access to the complete file system regardless of definition order.
+
+  ````rust
+  /// ### Invalid
+  ///
+  /// ```js,expect_diagnostic,file=foo.js
+  /// import { bar } from "./bar.js";
+  /// export function foo() {
+  ///     return bar();
+  /// }
+  /// ```
+  ///
+  /// ```js,expect_diagnostic,file=bar.js
+  /// import { foo } from "./foo.js";
+  /// export function bar() {
+  ///     return foo();
+  /// }
+  /// ```
+  ````
+
 - **Ordering of code block properties**
 
-  In addition to the language, a code block can be tagged with a few additional properties like `expect_diagnostic`, `options`, `full_options`, `use_options` and/or `ignore`.
+  In addition to the language, a code block can be tagged with a few additional properties like `expect_diagnostic`, `options`, `full_options`, `use_options`, `ignore` and/or `file=<path>`.
 
   The parser does not care about the order, but for consistency, modifiers should always be ordered as follows:
 
   ````rust
-  /// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore]
+  /// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore][,file=path]
   /// ```
   ````
 
   e.g.
 
   ````rust
-  /// ```tsx,expect_diagnostic,use_options,ignore
+  /// ```tsx,expect_diagnostic,use_options,ignore,file=foobar.tsx
   /// ```
   ````
 

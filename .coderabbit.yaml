@@ -7,7 +7,7 @@ reviews:
   high_level_summary: false
   commit_status: true
   poem: false
-  review_status: true
+  review_status: false
   collapse_walkthrough: false
   estimate_code_review_effort: false
   sequence_diagrams: false

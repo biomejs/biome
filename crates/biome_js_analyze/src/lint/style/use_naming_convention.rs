@@ -286,6 +286,14 @@ declare_lint_rule! {
     ///   }
     ///   ```
     ///
+    /// - Declarations inside a global declaration
+    ///
+    ///   ```ts
+    ///   declare global {
+    ///     interface HTMLElement {}
+    ///   }
+    ///   ```
+    ///
     /// ## Options
     ///
     /// The rule provides several options that are detailed in the following subsections.
@@ -1195,7 +1203,6 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_) => {
-
                 selector_from_parent_binding_pattern_declaration(&decl.parent_binding_pattern_declaration()?)
             }
             AnyJsBindingDeclaration::JsVariableDeclarator(var) => {
@@ -1240,9 +1247,12 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             }
             AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
             | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportAlias, Scope::Global)),
-            AnyJsBindingDeclaration::TsModuleDeclaration(_) => Some(Selector::with_scope(Kind::Namespace, Scope::Global)),
-            AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) => Some(Selector::with_scope(Kind::TypeAlias, scope_from_declaration(decl)?)),
+            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) =>
+                Some(Selector::with_scope(Kind::ImportAlias, Scope::Global)),
+            AnyJsBindingDeclaration::TsModuleDeclaration(_) =>
+                Some(Selector::with_scope(Kind::Namespace, Scope::Global)),
+            AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) =>
+                Some(Selector::with_scope(Kind::TypeAlias, scope_from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsClassDeclaration(class) => {
                 Some(Selector {
                     kind: Kind::Class,
@@ -1268,8 +1278,10 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             AnyJsBindingDeclaration::JsClassExpression(_) => {
                 Some(Selector::with_scope(Kind::Class, scope_from_declaration(decl)?))
             }
-            AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(Selector::with_scope(Kind::Interface, scope_from_declaration(decl)?)),
-            AnyJsBindingDeclaration::TsEnumDeclaration(_) => Some(Selector::with_scope(Kind::Enum, scope_from_declaration(decl)?)),
+            AnyJsBindingDeclaration::TsInterfaceDeclaration(_) =>
+                Some(Selector::with_scope(Kind::Interface, scope_from_declaration(decl)?)),
+            AnyJsBindingDeclaration::TsEnumDeclaration(_) =>
+                Some(Selector::with_scope(Kind::Enum, scope_from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
@@ -1312,7 +1324,9 @@ fn selector_from_variable_declarator(var: &JsVariableDeclarator, scope: Scope) -
 
 fn selector_from_object_member(member: &AnyJsObjectMember) -> Option<Selector> {
     match member {
-        AnyJsObjectMember::JsBogusMember(_) | AnyJsObjectMember::JsSpread(_) => None,
+        AnyJsObjectMember::JsBogusMember(_)
+        | AnyJsObjectMember::JsSpread(_)
+        | AnyJsObjectMember::JsMetavariable(_) => None,
         AnyJsObjectMember::JsGetterObjectMember(_) => Some(Kind::ObjectLiteralGetter.into()),
         AnyJsObjectMember::JsMethodObjectMember(_) => Some(Kind::ObjectLiteralMethod.into()),
         AnyJsObjectMember::JsPropertyObjectMember(_)
@@ -1452,14 +1466,15 @@ fn scope_from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
         AnyJsControlFlowRoot::can_cast(x.kind())
             || x.kind() == JsSyntaxKind::TS_DECLARATION_MODULE
             || x.kind() == JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION
+            || x.kind() == JsSyntaxKind::TS_GLOBAL_DECLARATION
     })?;
     match control_flow_root.kind() {
         JsSyntaxKind::JS_MODULE
         | JsSyntaxKind::JS_SCRIPT
         | JsSyntaxKind::TS_DECLARATION_MODULE
         | JsSyntaxKind::TS_MODULE_DECLARATION => Some(Scope::Global),
-        // Ignore declarations in an external module declaration
-        JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION => None,
+        // Ignore declarations in external module declaration and global declarations.
+        JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION | JsSyntaxKind::TS_GLOBAL_DECLARATION => None,
         _ => Some(Scope::Any),
     }
 }

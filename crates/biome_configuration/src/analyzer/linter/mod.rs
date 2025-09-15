@@ -47,7 +47,7 @@ pub enum RuleDomainValue {
     All,
     /// Disables all the rules that belong to this domain
     None,
-    /// It enables only the recommended rules for this domain
+    /// Enables only the recommended rules for this domain
     Recommended,
 }
 

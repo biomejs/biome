@@ -3,6 +3,7 @@
 #[macro_use]
 mod file_source;
 mod generated;
+pub mod selector_ext;
 pub mod stmt_ext;
 mod string_ext;
 mod syntax_node;

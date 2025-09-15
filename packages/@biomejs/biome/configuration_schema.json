@@ -226,7 +226,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAltText": {
@@ -666,7 +666,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useArrowFunction": {
@@ -1180,7 +1180,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useExhaustiveDependencies": {
@@ -2962,6 +2962,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateDependenciesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoDuplicateDependenciesOptions" }
+			]
+		},
+		"NoDuplicateDependenciesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateElseIfConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3579,6 +3589,34 @@
 		},
 		"NoIrregularWhitespaceOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"NoJsxLiteralsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoJsxLiteralsOptions" }
+			]
+		},
+		"NoJsxLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"allowedStrings": {
+					"description": "An array of strings that won't trigger the rule. Whitespaces are taken into consideration",
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"ignoreProps": {
+					"description": "When enabled, strings inside props are always ignored",
+					"default": false,
+					"type": "boolean"
+				},
+				"noStrings": {
+					"description": "When enabled, also flag string literals inside JSX expressions and attributes",
+					"default": false,
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoLabelVarConfiguration": {
@@ -4610,6 +4648,17 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessCatchBindingConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUselessCatchBindingOptions" }
+			]
+		},
+		"NoUselessCatchBindingOptions": {
+			"description": "Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessCatchConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4905,6 +4954,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noDuplicateDependencies": {
+					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDuplicateDependenciesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.",
 					"anyOf": [
@@ -4916,6 +4972,13 @@
 					"description": "Prevent import cycles.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoImportCyclesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsxLiterals": {
+					"description": "Disallow string literals inside JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoJsxLiteralsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4977,6 +5040,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessCatchBinding": {
+					"description": "Disallow unused catch bindings.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUselessCatchBindingConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessUndefined": {
 					"description": "Disallow the use of useless undefined.",
 					"anyOf": [
@@ -5006,13 +5076,20 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAnchorHref": {
 					"description": "Enforces href attribute for \\<a> elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentArrowReturn": {
+					"description": "Enforce consistent arrow function bodies.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseConsistentArrowReturnConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5071,6 +5148,15 @@
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseSortedClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueMultiWordComponentNames": {
+					"description": "Enforce multi-word component names in Vue components.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseVueMultiWordComponentNamesConfiguration"
+						},
 						{ "type": "null" }
 					]
 				}
@@ -5439,7 +5525,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useGoogleFontPreconnect": {
@@ -5640,7 +5726,7 @@
 					"enum": ["none"]
 				},
 				{
-					"description": "It enables only the recommended rules for this domain",
+					"description": "Enables only the recommended rules for this domain",
 					"type": "string",
 					"enum": ["recommended"]
 				}
@@ -6520,6 +6606,21 @@
 					"allOf": [
 						{ "$ref": "#/definitions/NoDuplicateCustomPropertiesOptions" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoDuplicateDependenciesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoDuplicateDependenciesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -7499,6 +7600,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoIrregularWhitespaceOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoJsxLiteralsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoJsxLiteralsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -9073,6 +9189,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoUselessCatchBindingOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUselessCatchBindingOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoUselessCatchOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9954,6 +10089,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseConsistentArrayTypeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseConsistentArrowReturnOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseConsistentArrowReturnOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -11627,6 +11781,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseVueMultiWordComponentNamesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseVueMultiWordComponentNamesOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseWhileOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -11756,7 +11927,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				}
 			},
@@ -11859,7 +12030,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useSortedAttributes": {
@@ -11872,7 +12043,7 @@
 					]
 				},
 				"useSortedKeys": {
-					"description": "Sorts the keys of a JSON object in natural order",
+					"description": "Sort the keys of a JSON object in natural order.",
 					"anyOf": [
 						{
 							"$ref": "#/definitions/RuleAssistConfiguration_for_UseSortedKeysOptions"
@@ -12116,7 +12287,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useArrayLiterals": {
@@ -13042,7 +13213,7 @@
 					]
 				},
 				"recommended": {
-					"description": "It enables the recommended rules for this group",
+					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
 				"useAdjacentOverloadSignatures": {
@@ -13377,6 +13548,16 @@
 					"allOf": [{ "$ref": "#/definitions/ConsistentArrayType" }]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseConsistentArrowReturnConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseConsistentArrowReturnOptions" }
+			]
+		},
+		"UseConsistentArrowReturnOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseConsistentBuiltinInstantiationConfiguration": {
@@ -14470,6 +14651,23 @@
 		},
 		"UseValidTypeofOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueMultiWordComponentNamesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseVueMultiWordComponentNamesOptions" }
+			]
+		},
+		"UseVueMultiWordComponentNamesOptions": {
+			"type": "object",
+			"properties": {
+				"ignores": {
+					"description": "Component names to ignore (allowed to be single-word).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseWhileConfiguration": {

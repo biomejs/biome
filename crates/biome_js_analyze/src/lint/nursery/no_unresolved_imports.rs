@@ -31,21 +31,22 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// **`foo.js`**
-    /// ```js
+    /// ```js,file=foo.js
     /// export function foo() {};
     /// ```
     ///
-    /// **`bar.js`**
-    /// ```js
+    /// ```js,expect_diagnostic,file=bar.js
     /// // Attempt to import symbol with a typo:
     /// import { fooo } from "./foo.js";
     /// ```
     ///
     /// ### Valid
     ///
-    /// **`bar.js`**
-    /// ```js
+    /// ```js,file=foo.js
+    /// export function foo() {};
+    /// ```
+    ///
+    /// ```js,file=bar.js
     /// // Fixed typo:
     /// import { foo } from "./foo.js";
     /// ```

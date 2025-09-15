@@ -138,12 +138,24 @@ impl PartialEq<RuleKey> for RuleFilter<'static> {
     }
 }
 
+#[derive(Clone, Debug)]
+pub enum SignalRuleKey {
+    Rule(RuleKey),
+    Plugin(Box<str>),
+}
+
+impl From<RuleKey> for SignalRuleKey {
+    fn from(value: RuleKey) -> Self {
+        Self::Rule(value)
+    }
+}
+
 /// Entry for a pending signal in the `signal_queue`
 pub struct SignalEntry<'phase, L: Language> {
     /// Boxed analyzer signal to be emitted
     pub signal: Box<dyn AnalyzerSignal<L> + 'phase>,
     /// Unique identifier for the rule that emitted this signal
-    pub rule: RuleKey,
+    pub rule: SignalRuleKey,
     /// Optional rule instances being suppressed
     pub instances: Box<[Box<str>]>,
     /// Text range in the document this signal covers
@@ -243,7 +255,7 @@ mod tests {
             let span = node.text_trimmed_range();
             params.signal_queue.push(SignalEntry {
                 signal: Box::new(DiagnosticSignal::new(move || TestDiagnostic { span })),
-                rule: RuleKey::new("group", "rule"),
+                rule: RuleKey::new("group", "rule").into(),
                 instances: Default::default(),
                 text_range: span,
                 category: RuleCategory::Lint,
