@@ -1,0 +1,191 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+assertion_line: 177
+expression: snapshot
+---
+## Input
+
+```ts
+type Foo = Bar<, A>;
+
+type Foo = Bar<A, , B>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..9 "Foo" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@9..11 "=" [] [Whitespace(" ")],
+            ty: TsReferenceType {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@11..14 "Bar" [] [],
+                },
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@14..15 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [],
+                    r_angle_token: missing (required),
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                COMMA@15..17 "," [] [Whitespace(" ")],
+                IDENT@17..18 "A" [] [],
+                R_ANGLE@18..19 ">" [] [],
+            ],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@19..20 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@20..27 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@27..31 "Foo" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@31..33 "=" [] [Whitespace(" ")],
+            ty: TsReferenceType {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@33..36 "Bar" [] [],
+                },
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@36..37 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@37..38 "A" [] [],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                        COMMA@38..40 "," [] [Whitespace(" ")],
+                        missing element,
+                    ],
+                    r_angle_token: missing (required),
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                COMMA@40..42 "," [] [Whitespace(" ")],
+                IDENT@42..43 "B" [] [],
+                R_ANGLE@43..44 ">" [] [],
+            ],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@44..45 ";" [] [],
+        },
+    ],
+    eof_token: EOF@45..46 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..46
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..45
+    0: TS_TYPE_ALIAS_DECLARATION@0..15
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..9
+        0: IDENT@5..9 "Foo" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@9..11 "=" [] [Whitespace(" ")]
+      4: TS_REFERENCE_TYPE@11..15
+        0: JS_REFERENCE_IDENTIFIER@11..14
+          0: IDENT@11..14 "Bar" [] []
+        1: TS_TYPE_ARGUMENTS@14..15
+          0: L_ANGLE@14..15 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@15..15
+          2: (empty)
+      5: (empty)
+    1: JS_BOGUS_STATEMENT@15..19
+      0: COMMA@15..17 "," [] [Whitespace(" ")]
+      1: IDENT@17..18 "A" [] []
+      2: R_ANGLE@18..19 ">" [] []
+    2: JS_EMPTY_STATEMENT@19..20
+      0: SEMICOLON@19..20 ";" [] []
+    3: TS_TYPE_ALIAS_DECLARATION@20..40
+      0: TYPE_KW@20..27 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@27..31
+        0: IDENT@27..31 "Foo" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@31..33 "=" [] [Whitespace(" ")]
+      4: TS_REFERENCE_TYPE@33..40
+        0: JS_REFERENCE_IDENTIFIER@33..36
+          0: IDENT@33..36 "Bar" [] []
+        1: TS_TYPE_ARGUMENTS@36..40
+          0: L_ANGLE@36..37 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@37..40
+            0: TS_REFERENCE_TYPE@37..38
+              0: JS_REFERENCE_IDENTIFIER@37..38
+                0: IDENT@37..38 "A" [] []
+              1: (empty)
+            1: COMMA@38..40 "," [] [Whitespace(" ")]
+            2: (empty)
+          2: (empty)
+      5: (empty)
+    4: JS_BOGUS_STATEMENT@40..44
+      0: COMMA@40..42 "," [] [Whitespace(" ")]
+      1: IDENT@42..43 "B" [] []
+      2: R_ANGLE@43..44 ">" [] []
+    5: JS_EMPTY_STATEMENT@44..45
+      0: SEMICOLON@44..45 ";" [] []
+  4: EOF@45..46 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+type_arguments_missing_elements.ts:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found ','.
+  
+  > 1 │ type Foo = Bar<, A>;
+      │                ^
+    2 │ 
+    3 │ type Foo = Bar<A, , B>;
+  
+  i Expected a type parameter here.
+  
+  > 1 │ type Foo = Bar<, A>;
+      │                ^
+    2 │ 
+    3 │ type Foo = Bar<A, , B>;
+  
+type_arguments_missing_elements.ts:3:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found ','.
+  
+    1 │ type Foo = Bar<, A>;
+    2 │ 
+  > 3 │ type Foo = Bar<A, , B>;
+      │                   ^
+    4 │ 
+  
+  i Expected a type parameter here.
+  
+    1 │ type Foo = Bar<, A>;
+    2 │ 
+  > 3 │ type Foo = Bar<A, , B>;
+      │                   ^
+    4 │ 
+  
+```
