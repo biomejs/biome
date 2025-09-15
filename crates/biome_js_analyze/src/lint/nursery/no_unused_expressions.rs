@@ -69,25 +69,25 @@ declare_lint_rule! {
     /// injectGlobal`body{ color: red; }`
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// Set<number>
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// 1 as number
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// window!
     /// ```
     ///
     /// JSX expressions are considered invalid when used as a statement too:
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <MyComponent />
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsx,expect_diagnostic
     /// <></>
     /// ```
     ///
@@ -266,7 +266,6 @@ fn is_disallowed(expr: &AnyJsExpression) -> SyntaxResult<bool> {
         | AnyJsExpression::JsLogicalExpression(_)
         | AnyJsExpression::JsNewTargetExpression(_)
         | AnyJsExpression::JsObjectExpression(_)
-        | AnyJsExpression::JsParenthesizedExpression(_)
         | AnyJsExpression::JsSequenceExpression(_)
         | AnyJsExpression::JsStaticMemberExpression(_)
         | AnyJsExpression::JsSuperExpression(_)
@@ -283,6 +282,7 @@ fn is_disallowed(expr: &AnyJsExpression) -> SyntaxResult<bool> {
         | AnyJsExpression::JsPreUpdateExpression(_)
         | AnyJsExpression::JsBogusExpression(_)
         | AnyJsExpression::JsMetavariable(_) => false,
+        AnyJsExpression::JsParenthesizedExpression(expr) => is_disallowed(&expr.expression()?)?,
         AnyJsExpression::JsUnaryExpression(expr) => match expr.operator()? {
             JsUnaryOperator::BitwiseNot
             | JsUnaryOperator::LogicalNot
