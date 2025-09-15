@@ -95,10 +95,9 @@ impl Rule for UseConsistentArrowReturn {
                         let first_statement = body.statements().iter().next()?;
                         if let Some(return_statement) =
                             JsReturnStatement::cast(first_statement.into_syntax())
+                            && return_statement.argument().is_some()
                         {
-                            if return_statement.argument().is_some() {
-                                return Some(State::RemoveBraces(body));
-                            }
+                            return Some(State::RemoveBraces(body));
                         }
                     }
                 }
@@ -128,15 +127,14 @@ impl Rule for UseConsistentArrowReturn {
                         let first_statement = body.statements().iter().next()?;
                         if let Some(return_statement) =
                             JsReturnStatement::cast(first_statement.into_syntax())
+                            && let Some(arg) = return_statement.argument()
                         {
-                            if let Some(arg) = return_statement.argument() {
-                                if arg.as_js_object_expression().is_some()
-                                    && options.require_for_object_literal
-                                {
-                                    return None;
-                                }
-                                return Some(State::RemoveBraces(body));
+                            if arg.as_js_object_expression().is_some()
+                                && options.require_for_object_literal
+                            {
+                                return None;
                             }
+                            return Some(State::RemoveBraces(body));
                         }
                     }
                 }
