@@ -1,5 +1,5 @@
 use biome_deserialize::{
-    Deserializable, DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
 };
 use biome_deserialize_macros::Deserializable;
 use serde::{Deserialize, Serialize};
