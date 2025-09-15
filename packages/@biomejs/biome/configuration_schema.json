@@ -5046,7 +5046,7 @@
 					]
 				},
 				"noUnusedExpressions": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow expression statements that are neither a function call nor an assignment.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnusedExpressionsConfiguration" },
 						{ "type": "null" }

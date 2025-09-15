@@ -1674,7 +1674,7 @@ export interface Nursery {
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow expression statements that are neither a function call nor an assignment.
 	 */
 	noUnusedExpressions?: RuleConfiguration_for_NoUnusedExpressionsOptions;
 	/**
