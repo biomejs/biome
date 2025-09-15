@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+const Component1 = ({ ref }) => {
+	return null;
+};
+
+const Component2 = ({ ref, ...props }) => {
+	return null;
+};
+
+```
