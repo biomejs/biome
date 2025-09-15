@@ -4559,6 +4559,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnusedExpressionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnusedExpressionsOptions" }
+			]
+		},
+		"NoUnusedExpressionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnusedFunctionParametersConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5032,6 +5042,13 @@
 					"description": "Warn when importing non-existing exports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoUnresolvedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnusedExpressions": {
+					"description": "Disallow expression statements that are neither a function call nor an assignment.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedExpressionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9047,6 +9064,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUnsafeOptionalChainingOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUnusedExpressionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnusedExpressionsOptions" }]
 				}
 			},
 			"additionalProperties": false

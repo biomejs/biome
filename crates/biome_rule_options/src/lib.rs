@@ -200,6 +200,7 @@ pub mod no_unsafe_declaration_merging;
 pub mod no_unsafe_finally;
 pub mod no_unsafe_negation;
 pub mod no_unsafe_optional_chaining;
+pub mod no_unused_expressions;
 pub mod no_unused_function_parameters;
 pub mod no_unused_imports;
 pub mod no_unused_labels;
