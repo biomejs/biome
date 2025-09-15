@@ -57,9 +57,26 @@ impl Phase for SemanticClassServices {
     }
 }
 
-pub struct ClassMemberReferencesVisitor {}
+pub struct SyntaxClassMemberReferencesVisitor {}
 
-impl Visitor for ClassMemberReferencesVisitor {
+impl Visitor for SyntaxClassMemberReferencesVisitor {
+    type Language = JsLanguage;
+
+    fn visit(
+        &mut self,
+        _event: &WalkEvent<JsSyntaxNode>,
+        mut _ctx: VisitorContext<'_, '_, JsLanguage>,
+    ) {
+    }
+
+    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
+        ctx.services.insert_service(SemanticClassModel {});
+    }
+}
+
+pub struct SemanticClassMemberReferencesVisitor {}
+
+impl Visitor for SemanticClassMemberReferencesVisitor {
     type Language = JsLanguage;
 
     fn visit(
@@ -72,10 +89,6 @@ impl Visitor for ClassMemberReferencesVisitor {
         {
             ctx.match_query(node.clone());
         }
-    }
-
-    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        ctx.services.insert_service(SemanticClassModel {});
     }
 }
 
@@ -99,8 +112,8 @@ where
     type Services = SemanticClassServices;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || ClassMemberReferencesVisitor {});
-        analyzer.add_visitor(Phases::Semantic, || ClassMemberReferencesVisitor {});
+        analyzer.add_visitor(Phases::Syntax, || SyntaxClassMemberReferencesVisitor {});
+        analyzer.add_visitor(Phases::Semantic, || SemanticClassMemberReferencesVisitor {});
     }
 
     fn key() -> QueryKey<Self::Language> {
