@@ -1,4 +1,5 @@
 mod constants;
+pub mod generated_mappings;
 
 use super::{
     DisregardedSlotCondition, GritTargetLanguageImpl, LeafEquivalenceClass, LeafNormalizer,
@@ -11,6 +12,9 @@ use crate::{
 use biome_js_syntax::{JsLanguage, JsSyntaxKind};
 use biome_rowan::{RawSyntaxKind, SyntaxKindSet};
 use constants::DISREGARDED_SNIPPET_SLOTS;
+use generated_mappings::{
+    kind_by_name, legacy_treesitter_name_for_kind, legacy_treesitter_slots_for_kind,
+};
 
 const COMMENT_KINDS: SyntaxKindSet<JsLanguage> =
     SyntaxKindSet::from_raw(RawSyntaxKind(JsSyntaxKind::COMMENT as u16)).union(
@@ -36,30 +40,12 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
 
     /// Returns the syntax kind for a node by name.
     ///
-    /// For compatibility with existing Grit snippets (as well as the online
-    /// Grit playground), node names should be aligned with TreeSitter's
-    /// `ts_language_symbol_for_name()`.
+    /// Supports both TreeSitter patterns (for compatibility with existing Grit snippets)
+    /// and native Biome AST patterns (for full language coverage).
+    ///
+    /// TreeSitter patterns take precedence for backward compatibility.
     fn kind_by_name(&self, node_name: &str) -> Option<JsSyntaxKind> {
-        use JsSyntaxKind::*;
-        let kind = match node_name {
-            "assignment_expression" => JS_ASSIGNMENT_EXPRESSION,
-            "call_expression" => JS_CALL_EXPRESSION,
-            "new_expression" => JS_NEW_EXPRESSION,
-            "jsx_expression" => JSX_EXPRESSION_CHILD,
-            "jsx_attribute" => JSX_ATTRIBUTE,
-            "jsx_element" => JSX_ELEMENT,
-            "jsx_self_closing_element" => JSX_SELF_CLOSING_ELEMENT,
-            "jsx_opening_element" => JSX_OPENING_ELEMENT,
-            "jsx_closing_element" => JSX_CLOSING_ELEMENT,
-            "jsx_text" => JSX_TEXT,
-            "jsx_namespace_name" => JSX_NAMESPACE_NAME,
-            // TODO: Many more of these. We should probably find a way to
-            // generate these impls from TS `grammar.js` files, combined with
-            // our `js.ungram`.
-            _ => return None,
-        };
-
-        Some(kind)
+        kind_by_name(node_name)
     }
 
     /// Returns the node name for a given syntax kind.
@@ -71,25 +57,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
         let Some(kind) = kind.as_js_kind() else {
             return "(unexpected language)";
         };
-
-        use JsSyntaxKind::*;
-        match kind {
-            JS_ASSIGNMENT_EXPRESSION => "assignment_expression",
-            JS_CALL_EXPRESSION => "call_expression",
-            JS_NEW_EXPRESSION => "new_expression",
-            JSX_EXPRESSION_CHILD => "jsx_expression",
-            JSX_ATTRIBUTE => "jsx_attribute",
-            JSX_ELEMENT => "jsx_element",
-            JSX_SELF_CLOSING_ELEMENT => "jsx_self_closing_element",
-            JSX_OPENING_ELEMENT => "jsx_opening_element",
-            JSX_CLOSING_ELEMENT => "jsx_closing_element",
-            JSX_TEXT => "jsx_text",
-            JSX_NAMESPACE_NAME => "jsx_namespace_name",
-            // TODO: Many more of these. We should probably find a way to
-            // generate these impls from TS `grammar.js` files, combined with
-            // our `js.ungram`.
-            _ => "(unknown node)",
-        }
+        legacy_treesitter_name_for_kind(kind).unwrap_or("(unknown node)")
     }
 
     /// Returns the slots with their names for the given node kind.
@@ -101,29 +69,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
         let Some(kind) = kind.as_js_kind() else {
             return &[];
         };
-
-        use JsSyntaxKind::*;
-        match kind {
-            JS_ASSIGNMENT_EXPRESSION => &[],
-            JS_CALL_EXPRESSION => &[("function", 0), ("type_arguments", 2), ("arguments", 3)],
-            JS_NEW_EXPRESSION => &[],
-            JSX_ELEMENT => &[
-                ("opening_element", 0),
-                ("children", 1),
-                ("closing_element", 2),
-            ],
-            JSX_SELF_CLOSING_ELEMENT => &[("name", 1), ("attributes", 2)],
-            JSX_OPENING_ELEMENT => &[("name", 1), ("attributes", 2)],
-            JSX_CLOSING_ELEMENT => &[("name", 2)],
-            JSX_ATTRIBUTE => &[],
-            JSX_EXPRESSION_CHILD => &[("expression", 1)],
-            JSX_TEXT => &[],
-            JSX_NAMESPACE_NAME => &[("namespace", 0), ("name", 2)],
-            // TODO: Many more of these. We should probably find a way to
-            // generate these impls from TS `grammar.js` files, combined with
-            // our `js.ungram`.
-            _ => &[],
-        }
+        legacy_treesitter_slots_for_kind(kind)
     }
 
     fn snippet_context_strings(&self) -> &[(&'static str, &'static str)] {
