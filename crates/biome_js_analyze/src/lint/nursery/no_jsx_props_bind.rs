@@ -157,7 +157,7 @@ impl Rule for NoJsxPropsBind {
             RuleDiagnostic::new(
                 rule_category!(),
                 state.attribute_range,
-                "Pass stable function references as props to avoid unnecessary rerenders.",
+                "This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.",
             )
             .note(note)
             .note("Consider extracting the function or wrapping it in useCallback"),
