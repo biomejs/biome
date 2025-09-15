@@ -34,7 +34,7 @@ impl DeserializableValidator for UseConsistentArrowReturnOptions {
         {
             ctx.report(
                 DeserializationDiagnostic::new(
-                    "`require_for_object_literal` can only be used when `style` is `as-needed`.",
+                    "`require_for_object_literal` can only be used when `style` is `asNeeded`.",
                 )
                 .with_range(range),
             );
