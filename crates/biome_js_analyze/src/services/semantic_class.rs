@@ -14,7 +14,7 @@ use biome_analyze::{
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, WalkEvent, declare_node_union,
 };
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 
 #[derive(Clone)]
 pub struct SemanticClassServices {
@@ -120,8 +120,8 @@ pub struct ClassMemberReference {
 
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct ClassMemberReferences {
-    pub reads: HashSet<ClassMemberReference>,
-    pub writes: HashSet<ClassMemberReference>,
+    pub reads: FxHashSet<ClassMemberReference>,
+    pub writes: FxHashSet<ClassMemberReference>,
 }
 
 declare_node_union! {
@@ -179,8 +179,8 @@ fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
         })
         .collect();
 
-    let mut combined_reads = HashSet::new();
-    let mut combined_writes = HashSet::new();
+    let mut combined_reads = FxHashSet::default();
+    let mut combined_writes = FxHashSet::default();
 
     for refs in all_references {
         combined_reads.extend(refs.reads);
@@ -197,7 +197,7 @@ fn class_member_references(list: &JsClassMemberList) -> ClassMemberReferences {
 #[derive(Clone, Debug)]
 struct FunctionThisReferences {
     scope: JsFunctionBody,
-    this_references: HashSet<ClassMemberReference>,
+    this_references: FxHashSet<ClassMemberReference>,
 }
 
 /// A visitor that collects `this` references in nested function scopes,
@@ -239,7 +239,7 @@ impl ThisScopeVisitor<'_> {
 
                     if !is_constructor {
                         let current_scope = ThisScopeReferences::new(&body).local_this_references;
-                        let mut scoped_this_references = HashSet::new();
+                        let mut scoped_this_references = FxHashSet::default();
                         scoped_this_references
                             .extend(self.inherited_this_references.iter().cloned());
                         scoped_this_references.extend(current_scope);
@@ -259,7 +259,7 @@ impl ThisScopeVisitor<'_> {
                 {
                     let current_scope_aliases =
                         ThisScopeReferences::new(&body).local_this_references;
-                    let mut scoped_this_references = HashSet::new();
+                    let mut scoped_this_references = FxHashSet::default();
                     scoped_this_references.extend(self.inherited_this_references.iter().cloned());
                     scoped_this_references.extend(current_scope_aliases.clone());
 
@@ -524,8 +524,8 @@ fn collect_references_from_body(
 ) -> Option<ClassMemberReferences> {
     let scoped_this_references = ThisScopeReferences::new(body).collect_function_this_references();
 
-    let mut reads = HashSet::new();
-    let mut writes = HashSet::new();
+    let mut reads = FxHashSet::default();
+    let mut writes = FxHashSet::default();
 
     visit_references_in_body(member, &scoped_this_references, &mut writes, &mut reads);
 
@@ -541,8 +541,8 @@ fn collect_references_from_body(
 fn visit_references_in_body(
     method_body_element: &JsSyntaxNode,
     scoped_this_references: &[FunctionThisReferences],
-    writes: &mut HashSet<ClassMemberReference>,
-    reads: &mut HashSet<ClassMemberReference>,
+    writes: &mut FxHashSet<ClassMemberReference>,
+    reads: &mut FxHashSet<ClassMemberReference>,
 ) {
     let iter = method_body_element.preorder();
 
@@ -577,7 +577,7 @@ fn visit_references_in_body(
 fn handle_object_binding_pattern(
     node: &SyntaxNode<JsLanguage>,
     scoped_this_references: &[FunctionThisReferences],
-    reads: &mut HashSet<ClassMemberReference>,
+    reads: &mut FxHashSet<ClassMemberReference>,
 ) {
     if let Some(binding) = JsObjectBindingPattern::cast_ref(node)
         && let Some(parent) = binding.syntax().parent()
@@ -617,7 +617,7 @@ fn handle_object_binding_pattern(
 fn handle_static_member_expression(
     node: &SyntaxNode<JsLanguage>,
     scoped_this_references: &[FunctionThisReferences],
-    reads: &mut HashSet<ClassMemberReference>,
+    reads: &mut FxHashSet<ClassMemberReference>,
 ) {
     if let Some(static_member) = JsStaticMemberExpression::cast_ref(node)
         && let Ok(object) = static_member.object()
@@ -651,8 +651,8 @@ fn handle_static_member_expression(
 fn handle_assignment_expression(
     node: &SyntaxNode<JsLanguage>,
     scoped_this_references: &[FunctionThisReferences],
-    reads: &mut HashSet<ClassMemberReference>,
-    writes: &mut HashSet<ClassMemberReference>,
+    reads: &mut FxHashSet<ClassMemberReference>,
+    writes: &mut FxHashSet<ClassMemberReference>,
 ) {
     if let Some(assignment) = JsAssignmentExpression::cast_ref(node)
         && let Ok(left) = assignment.left()
@@ -722,8 +722,8 @@ fn handle_assignment_expression(
 fn handle_pre_or_post_update_expression(
     node: &SyntaxNode<JsLanguage>,
     scoped_this_references: &[FunctionThisReferences],
-    reads: &mut HashSet<ClassMemberReference>,
-    writes: &mut HashSet<ClassMemberReference>,
+    reads: &mut FxHashSet<ClassMemberReference>,
+    writes: &mut FxHashSet<ClassMemberReference>,
 ) {
     let operand = JsPostUpdateExpression::cast_ref(node)
         .and_then(|expr| expr.operand().ok())
@@ -745,8 +745,8 @@ fn handle_pre_or_post_update_expression(
 fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> ClassMemberReferences {
     let all_descendants_fn_bodies_and_this_scopes: Vec<_> =
         ThisScopeReferences::new(constructor_body).collect_function_this_references();
-    let mut reads = HashSet::new();
-    let mut writes = HashSet::new();
+    let mut reads = FxHashSet::default();
+    let mut writes = FxHashSet::default();
 
     for this_scope in all_descendants_fn_bodies_and_this_scopes.iter() {
         visit_references_in_body(
@@ -769,8 +769,8 @@ fn collect_references_from_constructor(constructor_body: &JsFunctionBody) -> Cla
 fn collect_class_property_reads_from_static_member(
     static_member: &JsStaticMemberExpression,
 ) -> Option<ClassMemberReferences> {
-    let mut reads = HashSet::new();
-    let writes = HashSet::new();
+    let mut reads = FxHashSet::default();
+    let writes = FxHashSet::default();
 
     if let Ok(member) = static_member.member() {
         let name = member.to_trimmed_text();
@@ -879,7 +879,7 @@ mod tests {
             let function_this_references =
                 ThisScopeReferences::new(&body).collect_function_this_references();
             let node = parse_first_object_binding(body.syntax());
-            let mut reads = HashSet::new();
+            let mut reads = FxHashSet::default();
 
             handle_object_binding_pattern(&node, &function_this_references, &mut reads);
 
@@ -940,7 +940,7 @@ mod tests {
                 ThisScopeReferences::new(&body).collect_function_this_references();
 
             // Collect all static member expressions in the syntax
-            let mut reads = HashSet::new();
+            let mut reads = FxHashSet::default();
 
             for member_expr in syntax
                 .descendants()
@@ -1012,8 +1012,8 @@ mod tests {
             let function_this_references =
                 ThisScopeReferences::new(&body).collect_function_this_references();
 
-            let mut reads = HashSet::new();
-            let mut writes = HashSet::new();
+            let mut reads = FxHashSet::default();
+            let mut writes = FxHashSet::default();
 
             for assignment_expr in syntax
                 .descendants()
@@ -1094,8 +1094,8 @@ mod tests {
             let function_this_references =
                 ThisScopeReferences::new(&body).collect_function_this_references();
 
-            let mut reads = HashSet::new();
-            let mut writes = HashSet::new();
+            let mut reads = FxHashSet::default();
+            let mut writes = FxHashSet::default();
 
             for node in syntax.descendants() {
                 handle_pre_or_post_update_expression(
