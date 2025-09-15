@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 146
+assertion_line: 152
 expression: invalid.ts
 ---
 # Input
@@ -114,59 +114,10 @@ invalid.ts:10:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     11 │ 
     12 │ 	}
   
-  i Unsafe fix: Remove private modifier
-  
-     8  8 │   
-     9  9 │   class TSUnusedPrivateConstructor {
-    10    │ - → constructor(private·nusedProperty·=·3){
-       10 │ + → constructor(_nusedProperty·=·3){
-    11 11 │   
-    12 12 │   	}
-  
-
-```
-
-```
-invalid.ts:17:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    16 │ class TsOnlyWrite {
-  > 17 │ 	private usedOnlyInWrite = 5;
-       │ 	        ^^^^^^^^^^^^^^^
-    18 │ 
-    19 │ 	method() {
-  
   i Unsafe fix: Remove unused declaration.
   
-    15 15 │   
-    16 16 │   class TsOnlyWrite {
-    17    │ - → private·usedOnlyInWrite·=·5;
-    18 17 │   
-    19 18 │   	method() {
-  
-
-```
-
-```
-invalid.ts:25:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    24 │ class TsSelfUpdate {
-  > 25 │ 	private usedOnlyToUpdateItself = 5;
-       │ 	        ^^^^^^^^^^^^^^^^^^^^^^
-    26 │ 
-    27 │ 	method() {
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    23 23 │   
-    24 24 │   class TsSelfUpdate {
-    25    │ - → private·usedOnlyToUpdateItself·=·5;
-    26 25 │   
-    27 26 │   	method() {
-  
+    10 │ → constructor(private·nusedProperty·=·3){
+       │               -------------------------  
 
 ```
 

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
 expression: invalid.js
 ---
 # Input
@@ -111,50 +112,6 @@ invalid.js:4:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
 ```
 
 ```
-invalid.js:10:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-     9 │ class OnlyWrite {
-  > 10 │ 	#usedOnlyInWrite = 5;
-       │ 	^^^^^^^^^^^^^^^^
-    11 │ 
-    12 │ 	method() {
-  
-  i Unsafe fix: Remove unused declaration.
-  
-     8  8 │   
-     9  9 │   class OnlyWrite {
-    10    │ - → #usedOnlyInWrite·=·5;
-    11 10 │   
-    12 11 │   	method() {
-  
-
-```
-
-```
-invalid.js:18:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    17 │ class SelfUpdate {
-  > 18 │ 	#usedOnlyToUpdateItself = 5;
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^
-    19 │ 
-    20 │ 	method() {
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    16 16 │   
-    17 17 │   class SelfUpdate {
-    18    │ - → #usedOnlyToUpdateItself·=·5;
-    19 18 │   
-    20 19 │   	method() {
-  
-
-```
-
-```
 invalid.js:26:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This private class member is defined but never used.
@@ -217,72 +174,6 @@ invalid.js:31:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     31    │ - → #unusedMemberInFirstClass·=·5;
     32 31 │   }
     33 32 │   
-  
-
-```
-
-```
-invalid.js:35:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    34 │ class Foo {
-  > 35 │ 	#usedOnlyInWrite = 5;
-       │ 	^^^^^^^^^^^^^^^^
-    36 │ 	method() {
-    37 │ 			this.#usedOnlyInWrite = 42;
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    33 33 │   
-    34 34 │   class Foo {
-    35    │ - → #usedOnlyInWrite·=·5;
-    36 35 │   	method() {
-    37 36 │   			this.#usedOnlyInWrite = 42;
-  
-
-```
-
-```
-invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    41 │ class Foo {
-  > 42 │ 	#usedOnlyInWriteStatement = 5;
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
-    43 │ 	method() {
-    44 │ 			this.#usedOnlyInWriteStatement += 42;
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    40 40 │   
-    41 41 │   class Foo {
-    42    │ - → #usedOnlyInWriteStatement·=·5;
-    43 42 │   	method() {
-    44 43 │   			this.#usedOnlyInWriteStatement += 42;
-  
-
-```
-
-```
-invalid.js:49:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This private class member is defined but never used.
-  
-    48 │ class C {
-  > 49 │ 	#usedOnlyInIncrement;
-       │ 	^^^^^^^^^^^^^^^^^^^^
-    50 │ 
-    51 │ 	foo() {
-  
-  i Unsafe fix: Remove unused declaration.
-  
-    47 47 │   
-    48 48 │   class C {
-    49    │ - → #usedOnlyInIncrement;
-    50 49 │   
-    51 50 │   	foo() {
   
 
 ```

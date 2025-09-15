@@ -29,10 +29,12 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"class TSDoubleUnusedPrivateConstructor {
-	constructor(private unusedProperty = 3, private anotherUnusedProperty = 4) {
-		// This constructor has two unused private properties
+    const SOURCE: &str = r#"class UsedMember {
+	#usedInForInLoop;
+	method() {
+			for (const bar in this.#usedInForInLoop) {
 
+			}
 	}
 }"#;
 

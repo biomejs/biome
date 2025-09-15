@@ -93,14 +93,12 @@ declare_node_union! {
 #[derive(Debug, Clone)]
 pub enum UnusedMemberAction {
     RemoveMember(AnyMember),
-    RemovePrivateModifier { member: AnyMember },
 }
 
 impl UnusedMemberAction {
     fn property_range(&self) -> Option<TextRange> {
         match self {
             Self::RemoveMember(member) => member.property_range(),
-            Self::RemovePrivateModifier { member, .. } => member.property_range(),
         }
     }
 }
@@ -138,13 +136,6 @@ impl Rule for NoUnusedPrivateClassMembers {
                     "This private class member is defined but never used."
                 },
             )),
-            UnusedMemberAction::RemovePrivateModifier { .. } => Some(RuleDiagnostic::new(
-                rule_category!(),
-                state.property_range(),
-                markup! {
-                    "This parameter is never used outside of the constructor."
-                },
-            )),
         }
     }
 
@@ -161,27 +152,6 @@ impl Rule for NoUnusedPrivateClassMembers {
                     mutation,
                 ))
             }
-            UnusedMemberAction::RemovePrivateModifier { member } => {
-                if let AnyMember::TsPropertyParameter(ts_property_param) = member {
-                    // Remove the private modifier
-                    let modifiers = ts_property_param.modifiers();
-                    for modifier in modifiers.iter() {
-                        if let Some(accessibility_modifier) =
-                            TsAccessibilityModifier::cast(modifier.into_syntax())
-                            && accessibility_modifier.is_private()
-                        {
-                            mutation.remove_node(accessibility_modifier);
-                            break;
-                        }
-                    }
-                }
-                Some(JsRuleAction::new(
-                    ctx.metadata().action_category(ctx.category(), ctx.group()),
-                    ctx.metadata().applicability(),
-                    markup! { "Remove private modifier" }.to_owned(),
-                    mutation,
-                ))
-            }
         }
     }
 }
@@ -192,14 +162,15 @@ fn traverse_members_usage(
     private_members: Vec<AnyMember>,
     class_member_references: &ClassMemberReferences,
 ) -> Vec<AnyMember> {
-    let ClassMemberReferences { writes, .. } = class_member_references;
+    let ClassMemberReferences { writes, reads } = class_member_references;
+    let all_references: Vec<&ClassMemberReference> = reads.iter().chain(writes.iter()).collect();
 
     private_members
         .into_iter()
         .filter_map(|private_member| {
-            if !writes
+            if !all_references
                 .iter()
-                .any(|write| private_member.match_class_member_reference(write))
+                .any(|reference| private_member.match_class_member_reference(reference))
             {
                 Some(private_member)
             } else {
