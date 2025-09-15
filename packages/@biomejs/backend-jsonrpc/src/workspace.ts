@@ -1674,6 +1674,10 @@ export interface Nursery {
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noUnusedExpressions?: RuleConfiguration_for_NoUnusedExpressionsOptions;
+	/**
 	 * Disallow unused catch bindings.
 	 */
 	noUselessCatchBinding?: RuleFixConfiguration_for_NoUselessCatchBindingOptions;
@@ -3014,6 +3018,9 @@ export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
+export type RuleConfiguration_for_NoUnusedExpressionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnusedExpressionsOptions;
 export type RuleFixConfiguration_for_NoUselessCatchBindingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessCatchBindingOptions;
@@ -5474,6 +5481,16 @@ export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	 * Rule's options
 	 */
 	options: NoUnresolvedImportsOptions;
+}
+export interface RuleWithOptions_for_NoUnusedExpressionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnusedExpressionsOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessCatchBindingOptions {
 	/**
@@ -8093,6 +8110,7 @@ export interface NoSecretsOptions {
 export interface NoShadowOptions {}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
+export interface NoUnusedExpressionsOptions {}
 /**
  * Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).
  */
@@ -8813,6 +8831,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
@@ -8826,6 +8845,7 @@ export type Category =
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
+	| "lint/nursery/noUnusedExpressions"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCatchBinding"
@@ -8963,7 +8983,6 @@ export type Category =
 	| "lint/suspicious/noDuplicateCase"
 	| "lint/suspicious/noDuplicateClassMembers"
 	| "lint/suspicious/noDuplicateCustomProperties"
-	| "lint/nursery/noDuplicateDependencies"
 	| "lint/suspicious/noDuplicateElseIf"
 	| "lint/suspicious/noDuplicateFields"
 	| "lint/suspicious/noDuplicateFontNames"
