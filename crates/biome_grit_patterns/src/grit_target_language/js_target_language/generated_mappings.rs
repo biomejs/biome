@@ -31,7 +31,7 @@ pub const LEGACY_TREESITTER_COMPATIBILITY_PATTERNS: &[LegacyTreeSitterPattern] =
     },
     LegacyTreeSitterPattern {
         name: "property_identifier",
-        kind: JsSyntaxKind::JS_REFERENCE_IDENTIFIER,
+        kind: JsSyntaxKind::JS_LITERAL_MEMBER_NAME,
         slots: &[],
     },
     LegacyTreeSitterPattern {
@@ -43,6 +43,11 @@ pub const LEGACY_TREESITTER_COMPATIBILITY_PATTERNS: &[LegacyTreeSitterPattern] =
         name: "member_expression",
         kind: JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION,
         slots: &[("object", 0), ("property", 2)],
+    },
+    LegacyTreeSitterPattern {
+        name: "subscript_expression",
+        kind: JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION,
+        slots: &[("object", 0), ("index", 3)],
     },
     LegacyTreeSitterPattern {
         name: "binary_expression",
@@ -179,9 +184,10 @@ pub fn kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
         "identifier" => Some(JsSyntaxKind::JS_REFERENCE_IDENTIFIER),
         "string" => Some(JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION),
         "number" => Some(JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION),
-        "property_identifier" => Some(JsSyntaxKind::JS_REFERENCE_IDENTIFIER),
+        "property_identifier" => Some(JsSyntaxKind::JS_LITERAL_MEMBER_NAME),
         "call_expression" => Some(JsSyntaxKind::JS_CALL_EXPRESSION),
         "member_expression" => Some(JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION),
+        "subscript_expression" => Some(JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION),
         "binary_expression" => Some(JsSyntaxKind::JS_BINARY_EXPRESSION),
         "assignment_expression" => Some(JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION),
         "conditional_expression" => Some(JsSyntaxKind::JS_CONDITIONAL_EXPRESSION),

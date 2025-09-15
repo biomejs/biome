@@ -179,7 +179,7 @@ const JS_TREESITTER_PATTERNS: &[TreeSitterPattern] = &[
     },
     TreeSitterPattern {
         name: "property_identifier",
-        biome_kind: "JS_REFERENCE_IDENTIFIER",
+        biome_kind: "JS_LITERAL_MEMBER_NAME",
         slots: &[],
     },
     TreeSitterPattern {
@@ -191,6 +191,11 @@ const JS_TREESITTER_PATTERNS: &[TreeSitterPattern] = &[
         name: "member_expression",
         biome_kind: "JS_STATIC_MEMBER_EXPRESSION",
         slots: &[("object", 0), ("property", 2)],
+    },
+    TreeSitterPattern {
+        name: "subscript_expression",
+        biome_kind: "JS_COMPUTED_MEMBER_EXPRESSION",
+        slots: &[("object", 0), ("index", 3)],
     },
     TreeSitterPattern {
         name: "binary_expression",
