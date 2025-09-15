@@ -1,9 +1,9 @@
 use crate::JsRuleAction;
-use crate::class_member_references::{
-    AnyPropertyMember, ClassMemberReference, ClassMemberReferences, class_member_references,
+use crate::services::semantic_class::{
+    AnyPropertyMember, ClassMemberReference, ClassMemberReferences, SemanticClass,
 };
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -124,7 +124,7 @@ declare_lint_rule! {
 }
 
 impl Rule for UseReadonlyClassProperties {
-    type Query = Ast<JsClassDeclaration>;
+    type Query = SemanticClass<JsClassDeclaration>;
     type State = AnyPropertyMember;
     type Signals = Box<[Self::State]>;
     type Options = UseReadonlyClassPropertiesOptions;
@@ -137,11 +137,12 @@ impl Rule for UseReadonlyClassProperties {
 
         let root = ctx.query();
         let members = root.members();
-        let private_only = !ctx.options().check_all_properties;
-        let ClassMemberReferences { writes, .. } = class_member_references(&members);
 
+        let ClassMemberReferences { writes, .. } = ctx.model.class_member_references(&members);
+
+        let private_only = !ctx.options().check_all_properties;
         let constructor_params: Vec<_> =
-            collect_non_readonly_constructor_parameters(root, private_only);
+            collect_non_readonly_constructor_parameters(&members, private_only);
         let non_readonly_class_property_members =
             collect_non_readonly_class_member_properties(&members, private_only);
 
@@ -325,15 +326,14 @@ fn collect_non_readonly_class_member_properties(
     })
 }
 
-/// Collects all all mutable (non-readonly) constructor parameters from a given class declaration. If private_only is true, it only includes parameters with private visibility.
+/// Collects all all mutable (non-readonly) constructor parameters from a given class member list. If private_only is true, it only includes parameters with private visibility.
 /// It returns a Vec<PropOrParam> representing these parameters, which are candidates for being marked as readonly.
 /// e.g. constructor(private paramOne: string, public paramTwo: number) {} makes both paramOne and paramTwo class member properties.
 fn collect_non_readonly_constructor_parameters(
-    class_declaration: &JsClassDeclaration,
+    class_members: &JsClassMemberList,
     private_only: bool,
 ) -> Vec<AnyPropertyMember> {
-    class_declaration
-        .members()
+    class_members
         .iter()
         .find_map(|member| match member {
             AnyJsClassMember::JsConstructorClassMember(member) => Some(member),
