@@ -227,10 +227,18 @@ impl<'a> JsModuleVisitor<'a> {
         node: &AnyJsExpression,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
-        let type_data = TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, node);
-        let ty = TypeReference::from(collector.register_and_resolve(type_data));
+        match node {
+            AnyJsExpression::JsIdentifierExpression(ident) => {
+                let local_name = ident.name().ok()?.name().ok()?;
+                collector.register_export(JsCollectedExport::ExportNamedDefault { local_name });
+            }
+            _ => {
+                let type_data = TypeData::from_any_js_expression(collector, ScopeId::GLOBAL, node);
+                let ty = TypeReference::from(collector.register_and_resolve(type_data));
+                collector.register_export(JsCollectedExport::ExportDefault { ty });
+            }
+        }
 
-        collector.register_export(JsCollectedExport::ExportDefault { ty });
         Some(())
     }
 
