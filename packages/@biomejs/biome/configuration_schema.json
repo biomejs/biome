@@ -4150,6 +4150,24 @@
 			},
 			"additionalProperties": false
 		},
+		"NoRethrowWithoutCauseConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoRethrowWithoutCauseOptions" }
+			]
+		},
+		"NoRethrowWithoutCauseOptions": {
+			"description": "Options for the `noRethrowWithoutCause` rule.",
+			"type": "object",
+			"properties": {
+				"requireCatchParameter": {
+					"description": "When set to `true`, the rule requires that `catch` clauses have a parameter.",
+					"default": true,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoSecretsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5058,6 +5076,13 @@
 					"description": "Replaces usages of forwardRef with passing ref as a prop.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoReactForwardRefConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRethrowWithoutCause": {
+					"description": "Disallow rethrowing caught errors without wrapping them.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoRethrowWithoutCauseConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8487,6 +8512,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoRestrictedTypesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoRethrowWithoutCauseOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoRethrowWithoutCauseOptions" }]
 				}
 			},
 			"additionalProperties": false

@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: requireCatchParameter.invalid.js
+---
+# Input
+```js
+
+try {
+    foo();
+} catch {
+    throw new Error("fail");
+}
+
+
+try {
+    foo();
+} catch {
+    throw new Error("fail", { cause: err });
+}
+
+```

@@ -1,0 +1,111 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw err;
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error("Wrapper error");
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed: ${err.message}`);
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  if (true) {
+    throw err;
+  }
+}
+
+try {
+	doSomething();
+} catch {
+	throw new TypeError("Something went wrong");
+}
+
+
+try {
+  throw new Error("Original error");
+} catch ({ message }) {
+  throw new Error(message);
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:12:3 lint/nursery/noRethrowWithoutCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    10 │   throw new Error("Original error");
+    11 │ } catch (err) {
+  > 12 │   throw new Error("Wrapper error");
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+
+```
+
+```
+invalid.js:19:3 lint/nursery/noRethrowWithoutCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    17 │   throw new Error("Original error");
+    18 │ } catch (err) {
+  > 19 │   throw new Error(`Failed: ${err.message}`);
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+
+```
+
+```
+invalid.js:34:2 lint/nursery/noRethrowWithoutCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is being discarded because the `catch` clause doesn't have a parameter.Specify an error object in the `catch` clause to access the original error.
+  
+    32 │ 	doSomething();
+    33 │ } catch {
+  > 34 │ 	throw new TypeError("Something went wrong");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ }
+    36 │ 
+  
+
+```
+
+```
+invalid.js:40:10 lint/nursery/noRethrowWithoutCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
+  
+    38 │ try {
+    39 │   throw new Error("Original error");
+  > 40 │ } catch ({ message }) {
+       │          ^^^^^^^^^^^
+    41 │   throw new Error(message);
+    42 │ }
+  
+
+```
