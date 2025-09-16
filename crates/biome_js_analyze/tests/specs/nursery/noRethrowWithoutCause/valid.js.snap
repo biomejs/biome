@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+// should not generate diagnostics
+
+// Rethrowing a new error with the original error as a cause
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error("Wrapper error", { cause: err });
+}
+
+// Handling the error without rethrowing
+try {
+  throw new Error("Original error");
+} catch (err) {
+  console.error("Caught error:", err);
+}
+
+// Rethrowing a new custom error with the original error as a cause
+class CustomError extends Error {
+  constructor(message, options) {
+    super(message, options);
+    this.name = "CustomError";
+  }
+}
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new CustomError("Custom failure", { cause: err });
+}
+
+// Rethrowing a new error with a cause, even if the message is derived from the original error
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed to process: ${err.message}`, { cause: err });
+}
+
+// No throw inside catch
+try {
+    doSomething();
+} catch (e) {
+    console.error(e);
+}
+
+// When the thrown error is not directly related to the caught error.
+try {
+} catch (error) {
+	foo = {
+		bar() {
+			// This throw is not directly related to the caught error.
+			throw new Error("Something went wrong");
+		}
+	};
+}
+
+```

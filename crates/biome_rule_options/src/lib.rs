@@ -160,6 +160,7 @@ pub mod no_restricted_elements;
 pub mod no_restricted_globals;
 pub mod no_restricted_imports;
 pub mod no_restricted_types;
+pub mod no_rethrow_without_cause;
 pub mod no_secrets;
 pub mod no_self_assign;
 pub mod no_self_compare;

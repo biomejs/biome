@@ -1666,6 +1666,10 @@ export interface Nursery {
 	 */
 	noReactForwardRef?: RuleFixConfiguration_for_NoReactForwardRefOptions;
 	/**
+	 * Disallow rethrowing caught errors without wrapping them.
+	 */
+	noRethrowWithoutCause?: RuleConfiguration_for_NoRethrowWithoutCauseOptions;
+	/**
 	 * Disallow usage of sensitive data such as API keys and tokens.
 	 */
 	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
@@ -3024,6 +3028,9 @@ export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
 export type RuleFixConfiguration_for_NoReactForwardRefOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoReactForwardRefOptions;
+export type RuleConfiguration_for_NoRethrowWithoutCauseOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoRethrowWithoutCauseOptions;
 export type RuleConfiguration_for_NoSecretsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoSecretsOptions;
@@ -5486,6 +5493,16 @@ export interface RuleWithFixOptions_for_NoReactForwardRefOptions {
 	 * Rule's options
 	 */
 	options: NoReactForwardRefOptions;
+}
+export interface RuleWithOptions_for_NoRethrowWithoutCauseOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoRethrowWithoutCauseOptions;
 }
 export interface RuleWithOptions_for_NoSecretsOptions {
 	/**
@@ -8158,6 +8175,9 @@ export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoQwikUseVisibleTaskOptions {}
 export interface NoReactForwardRefOptions {}
+export interface NoRethrowWithoutCauseOptions {
+	requireCatchParameter: boolean;
+}
 export interface NoSecretsOptions {
 	/**
 	 * Set entropy threshold (default is 41).
@@ -8916,6 +8936,7 @@ export type Category =
 	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noReactForwardRef"
+	| "lint/nursery/noRethrowWithoutCause"
 	| "lint/nursery/noSecrets"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noUnnecessaryConditions"
