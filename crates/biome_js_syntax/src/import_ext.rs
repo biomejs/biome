@@ -6,7 +6,8 @@ use crate::{
     JsSyntaxKind, JsSyntaxToken, inner_string_text,
 };
 use biome_rowan::{
-    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText, declare_node_union,
+    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, Text, TextRange, TokenText,
+    declare_node_union,
 };
 
 impl JsImport {
@@ -113,6 +114,92 @@ impl AnyJsImportClause {
             Self::JsImportNamedClause(clause) => clause.assertion(),
             Self::JsImportNamespaceClause(clause) => clause.assertion(),
             Self::JsImportCombinedClause(clause) => clause.assertion(),
+        }
+    }
+
+    /// Creates a vector with items of type `T` that is constructed by calling
+    /// the given `filter_map` function for every symbol that is imported in
+    /// this clause.
+    ///
+    /// `filter_map` receives two arguments: The name of the imported symbol
+    /// (not the local name it is imported as), and the trimmed text range of
+    /// the imported symbol.
+    ///
+    /// ## Known Caveat
+    ///
+    /// This method only filters over imported default and named symbols.
+    /// Namespace imports are not considered, because they cannot be
+    /// individually evaluated.
+    pub fn filter_map_all_imported_symbols<F, T>(&self, filter_map: F) -> Vec<T>
+    where
+        F: Fn(Text, TextRange) -> Option<T>,
+    {
+        match self {
+            Self::JsImportCombinedClause(node) => {
+                let mut vec = Vec::new();
+                if let Some(local_name) = node
+                    .default_specifier()
+                    .and_then(|specifier| specifier.local_name())
+                    .ok()
+                    .and_then(|local_name| {
+                        local_name
+                            .as_js_identifier_binding()
+                            .and_then(|binding| binding.name_token().ok())
+                    })
+                {
+                    vec.extend(filter_map(
+                        Text::new_static("default"),
+                        local_name.text_trimmed_range(),
+                    ));
+                }
+                if let Some(specifiers) = node.specifier().ok().and_then(|specifier| {
+                    specifier
+                        .as_js_named_import_specifiers()
+                        .map(|specifiers| specifiers.specifiers())
+                }) {
+                    vec.extend(specifiers.into_iter().flatten().filter_map(|specifier| {
+                        let imported_name = specifier.imported_name()?;
+                        filter_map(
+                            imported_name.token_text_trimmed().into(),
+                            imported_name.text_trimmed_range(),
+                        )
+                    }));
+                }
+                vec
+            }
+            Self::JsImportDefaultClause(node) => node
+                .default_specifier()
+                .and_then(|specifier| specifier.local_name())
+                .ok()
+                .and_then(|local_name| {
+                    local_name
+                        .as_js_identifier_binding()
+                        .and_then(|binding| binding.name_token().ok())
+                })
+                .and_then(|local_name| {
+                    filter_map(Text::new_static("default"), local_name.text_trimmed_range())
+                })
+                .into_iter()
+                .collect(),
+            Self::JsImportNamedClause(node) => node
+                .named_specifiers()
+                .ok()
+                .into_iter()
+                .flat_map(|specifiers| {
+                    specifiers
+                        .specifiers()
+                        .into_iter()
+                        .flatten()
+                        .filter_map(|specifier| {
+                            let imported_name = specifier.imported_name()?;
+                            filter_map(
+                                imported_name.token_text_trimmed().into(),
+                                imported_name.text_trimmed_range(),
+                            )
+                        })
+                })
+                .collect(),
+            Self::JsImportBareClause(_) | Self::JsImportNamespaceClause(_) => Vec::new(),
         }
     }
 

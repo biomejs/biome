@@ -5,12 +5,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_fs::BiomePath;
-use biome_js_syntax::{
-    AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
-};
+use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_jsdoc_comment::JsdocComment;
 use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph};
-use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
+use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_private_imports::{NoPrivateImportsOptions, Visibility};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::str::FromStr;
@@ -193,7 +191,7 @@ impl Rule for NoPrivateImports {
             default_visibility: ctx.options().default_visibility,
         };
 
-        let result = match node {
+        match node {
             AnyJsImportLike::JsModuleSource(node) => {
                 get_restricted_imports_from_module_source(node, &options)
             }
@@ -201,10 +199,8 @@ impl Rule for NoPrivateImports {
             // TODO: require() and import() calls should also be handled here, but tracking the
             //       bindings to get the used symbol names is not easy. I think we can leave it
             //       for future opportunities.
-            _ => Ok(Vec::new()),
-        };
-
-        result.unwrap_or_default()
+            _ => Vec::new(),
+        }
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -270,86 +266,20 @@ impl GetRestrictedImportOptions<'_> {
 fn get_restricted_imports_from_module_source(
     node: &JsModuleSource,
     options: &GetRestrictedImportOptions,
-) -> SyntaxResult<Vec<NoPrivateImportsState>> {
-    let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
-        Some(AnyJsImportClause::JsImportCombinedClause(node)) => {
-            let range = node.default_specifier()?.range();
-            get_restricted_import_visibility(&Text::new_static("default"), options)
-                .map(|visibility| NoPrivateImportsState {
-                    range,
-                    path: options.target_path.to_string(),
-                    visibility,
-                })
-                .into_iter()
-                .chain(
-                    node.specifier()?
-                        .as_js_named_import_specifiers()
-                        .map(|specifiers| specifiers.specifiers())
-                        .into_iter()
-                        .flatten()
-                        .flatten()
-                        .filter_map(get_named_specifier_import_name)
-                        .filter_map(|name| {
-                            get_restricted_import_visibility(
-                                &Text::from(name.token_text_trimmed()),
-                                options,
-                            )
-                            .map(|visibility| NoPrivateImportsState {
-                                range: name.text_trimmed_range(),
-                                path: options.target_path.to_string(),
-                                visibility,
-                            })
-                        }),
-                )
-                .collect()
-        }
-        Some(AnyJsImportClause::JsImportDefaultClause(node)) => {
-            let range = node.default_specifier()?.range();
-            get_restricted_import_visibility(&Text::new_static("default"), options)
-                .map(|visibility| NoPrivateImportsState {
-                    range,
-                    path: options.target_path.to_string(),
-                    visibility,
-                })
-                .into_iter()
-                .collect()
-        }
-        Some(AnyJsImportClause::JsImportNamedClause(node)) => node
-            .named_specifiers()?
-            .specifiers()
-            .into_iter()
-            .flatten()
-            .filter_map(get_named_specifier_import_name)
-            .filter_map(|name| {
-                get_restricted_import_visibility(&Text::from(name.token_text_trimmed()), options)
-                    .map(|visibility| NoPrivateImportsState {
-                        range: name.text_trimmed_range(),
-                        path: options.target_path.to_string(),
-                        visibility,
-                    })
-            })
-            .collect(),
-        Some(
-            AnyJsImportClause::JsImportBareClause(_)
-            | AnyJsImportClause::JsImportNamespaceClause(_),
-        )
-        | None => Vec::new(),
+) -> Vec<NoPrivateImportsState> {
+    let Some(import_clause) = node.syntax().parent().and_then(AnyJsImportClause::cast) else {
+        return Vec::new();
     };
 
-    Ok(results)
-}
-
-fn get_named_specifier_import_name(specifier: AnyJsNamedImportSpecifier) -> Option<JsSyntaxToken> {
-    match specifier {
-        AnyJsNamedImportSpecifier::JsNamedImportSpecifier(specifier) => {
-            specifier.name().ok().and_then(|name| name.value().ok())
-        }
-        AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(specifier) => specifier
-            .local_name()
-            .ok()
-            .and_then(|binding| binding.as_js_identifier_binding()?.name_token().ok()),
-        _ => None,
-    }
+    import_clause.filter_map_all_imported_symbols(|imported_name, range| {
+        get_restricted_import_visibility(&imported_name, options).map(|visibility| {
+            NoPrivateImportsState {
+                range,
+                path: options.target_path.to_string(),
+                visibility,
+            }
+        })
+    })
 }
 
 /// Returns the visibility of the symbol exported as the given `import_name`,
