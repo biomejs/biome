@@ -2851,6 +2851,16 @@
 			]
 		},
 		"NoDeleteOptions": { "type": "object", "additionalProperties": false },
+		"NoDeprecatedImportsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoDeprecatedImportsOptions" }
+			]
+		},
+		"NoDeprecatedImportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDescendingSpecificityConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4959,6 +4969,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noDeprecatedImports": {
+					"description": "Restrict imports of deprecated exports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDeprecatedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateDependencies": {
 					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".",
 					"anyOf": [
@@ -6467,6 +6484,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoDeleteOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoDeprecatedImportsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoDeprecatedImportsOptions" }]
 				}
 			},
 			"additionalProperties": false

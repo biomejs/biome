@@ -1626,6 +1626,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Restrict imports of deprecated exports.
+	 */
+	noDeprecatedImports?: RuleConfiguration_for_NoDeprecatedImportsOptions;
+	/**
 	 * Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
@@ -2982,6 +2986,9 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoDeprecatedImportsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoDeprecatedImportsOptions;
 export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
@@ -5353,6 +5360,16 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 * Rule's options
 	 */
 	options: UseYieldOptions;
+}
+export interface RuleWithOptions_for_NoDeprecatedImportsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDeprecatedImportsOptions;
 }
 export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
 	/**
@@ -8075,6 +8092,7 @@ export interface UseUniqueElementIdsOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
@@ -8831,6 +8849,7 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"

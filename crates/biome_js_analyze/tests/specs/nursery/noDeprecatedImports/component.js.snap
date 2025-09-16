@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: component.js
+---
+# Input
+```js
+/**
+ * Very awesome component.
+ */
+export function Component(props) {}
+
+/**
+ * @deprecated Use a named import instead.
+ */
+const DefaultComponent = Component;
+
+export default DefaultComponent;
+
+```
