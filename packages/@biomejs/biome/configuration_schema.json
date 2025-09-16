@@ -4970,7 +4970,7 @@
 			"type": "object",
 			"properties": {
 				"noDeprecatedImports": {
-					"description": "Succinct description of the rule.",
+					"description": "Restrict imports of deprecated exports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDeprecatedImportsConfiguration" },
 						{ "type": "null" }

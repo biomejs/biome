@@ -1626,7 +1626,7 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
-	 * Succinct description of the rule.
+	 * Restrict imports of deprecated exports.
 	 */
 	noDeprecatedImports?: RuleConfiguration_for_NoDeprecatedImportsOptions;
 	/**
