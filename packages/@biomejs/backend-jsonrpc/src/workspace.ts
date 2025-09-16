@@ -1746,6 +1746,10 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
 	/**
+	 * Enforce that all dependencies used in TanStack Query's queryFn are included in the queryKey.
+	 */
+	useTanStackQueryExhaustiveDeps?: RuleConfiguration_for_UseTanStackQueryExhaustiveDepsOptions;
+	/**
 	 * Enforce multi-word component names in Vue components.
 	 */
 	useVueMultiWordComponentNames?: RuleConfiguration_for_UseVueMultiWordComponentNamesOptions;
@@ -3073,6 +3077,9 @@ export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 export type RuleFixConfiguration_for_UseSortedClassesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSortedClassesOptions;
+export type RuleConfiguration_for_UseTanStackQueryExhaustiveDepsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseTanStackQueryExhaustiveDepsOptions;
 export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseVueMultiWordComponentNamesOptions;
@@ -5687,6 +5694,16 @@ export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	 */
 	options: UseSortedClassesOptions;
 }
+export interface RuleWithOptions_for_UseTanStackQueryExhaustiveDepsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseTanStackQueryExhaustiveDepsOptions;
+}
 export interface RuleWithOptions_for_UseVueMultiWordComponentNamesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8163,6 +8180,16 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export interface UseTanStackQueryExhaustiveDepsOptions {
+	/**
+	 * Enable/disable checking useInfiniteQuery hooks. Defaults to true.
+	 */
+	useInfiniteQuery?: boolean;
+	/**
+	 * Enable/disable checking useQuery hooks. Defaults to true.
+	 */
+	useQuery?: boolean;
+}
 export interface UseVueMultiWordComponentNamesOptions {
 	/**
 	 * Component names to ignore (allowed to be single-word).
@@ -8887,6 +8914,7 @@ export type Category =
 	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useTanStackQueryExhaustiveDeps"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"

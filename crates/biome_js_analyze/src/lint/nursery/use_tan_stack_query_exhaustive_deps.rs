@@ -1,11 +1,9 @@
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsMemberExpression, AnyJsNamedImportSpecifier, JsArrayExpression, JsCallExpression,
-    AnyJsObjectMember, JsSyntaxNode, JsSyntaxKind, JsIdentifierBinding, JsImport,
+    AnyJsExpression, AnyJsMemberExpression, AnyJsNamedImportSpecifier, AnyJsObjectMember,
+    JsArrayExpression, JsCallExpression, JsIdentifierBinding, JsImport, JsSyntaxKind, JsSyntaxNode,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_tan_stack_query_exhaustive_deps::UseTanStackQueryExhaustiveDepsOptions;
@@ -141,27 +139,28 @@ fn is_tanstack_query_hook(
     let callee = callee.omit_parentheses();
 
     // Handle both direct calls (useQuery) and member calls (QueryClient.useQuery)
-    let (hook_name, binding_to_check) = if let Some(member_expr) = AnyJsMemberExpression::cast_ref(callee.syntax()) {
-        // Handle React.useQuery style calls (though less common with TanStack Query)
-        let Some(member_name) = member_expr.member_name() else {
+    let (hook_name, binding_to_check) =
+        if let Some(member_expr) = AnyJsMemberExpression::cast_ref(callee.syntax()) {
+            // Handle React.useQuery style calls (though less common with TanStack Query)
+            let Some(member_name) = member_expr.member_name() else {
+                return false;
+            };
+            let Some(object) = member_expr.object().ok() else {
+                return false;
+            };
+            let Some(reference) = object.omit_parentheses().as_js_reference_identifier() else {
+                return false;
+            };
+            (member_name.text().to_string(), model.binding(&reference))
+        } else if let Some(identifier) = callee.as_js_reference_identifier() {
+            // Handle direct calls like useQuery()
+            let Some(name) = identifier.name().ok() else {
+                return false;
+            };
+            (name.text().to_string(), model.binding(&identifier))
+        } else {
             return false;
         };
-        let Some(object) = member_expr.object().ok() else {
-            return false;
-        };
-        let Some(reference) = object.omit_parentheses().as_js_reference_identifier() else {
-            return false;
-        };
-        (member_name.text().to_string(), model.binding(&reference))
-    } else if let Some(identifier) = callee.as_js_reference_identifier() {
-        // Handle direct calls like useQuery()
-        let Some(name) = identifier.name().ok() else {
-            return false;
-        };
-        (name.text().to_string(), model.binding(&identifier))
-    } else {
-        return false;
-    };
 
     // Check if it's a hook we're interested in
     let is_target_hook = match hook_name.as_str() {
@@ -213,9 +212,7 @@ fn is_named_tanstack_query_export(binding: &Binding, expected_name: &str) -> Opt
         AnyJsNamedImportSpecifier::JsNamedImportSpecifier(named_import) => {
             named_import.name().ok()?.value().ok()?
         }
-        AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(_) => {
-            ident.name_token().ok()?
-        }
+        AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(_) => ident.name_token().ok()?,
         AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(_) => {
             return Some(false);
         }
@@ -232,9 +229,17 @@ fn is_named_tanstack_query_export(binding: &Binding, expected_name: &str) -> Opt
         .map(|import_name| TANSTACK_QUERY_PACKAGES.contains(&import_name.text()))
 }
 
-fn extract_query_properties(call: &JsCallExpression) -> Option<(JsArrayExpression, AnyJsExpression)> {
+fn extract_query_properties(
+    call: &JsCallExpression,
+) -> Option<(JsArrayExpression, AnyJsExpression)> {
     let args = call.arguments().ok()?;
-    let first_arg = args.args().iter().next()?.ok()?.as_any_js_expression()?.clone();
+    let first_arg = args
+        .args()
+        .iter()
+        .next()?
+        .ok()?
+        .as_any_js_expression()?
+        .clone();
 
     let AnyJsExpression::JsObjectExpression(obj) = first_arg else {
         return None;
@@ -276,7 +281,7 @@ fn extract_query_properties(call: &JsCallExpression) -> Option<(JsArrayExpressio
 fn get_semantic_captures(
     query_fn: &AnyJsExpression,
     model: &SemanticModel,
-    hook_call: &JsCallExpression
+    hook_call: &JsCallExpression,
 ) -> Vec<biome_js_semantic::Capture> {
     // Find the component function that contains this hook call
     let Some(component_function) = function_of_hook_call(hook_call) else {
