@@ -42,11 +42,8 @@ invalid.cjs:2:1 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━�
   
   i Safe fix: Remove the redundant use strict directive.
   
-     1  1 │   "use strict";
-     2    │ - "use·strict";
-     3  2 │   
-     4  3 │   function test() {
-  
+    2 │ "use·strict";
+      │ -------------
 
 ```
 
@@ -70,12 +67,8 @@ invalid.cjs:5:2 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━�
   
   i Safe fix: Remove the redundant use strict directive.
   
-     3  3 │   
-     4  4 │   function test() {
-     5    │ - → "use·strict";
-     6  5 │   	function inner_a() {
-     7  6 │   		"use strict"; // redundant directive
-  
+    5 │ → "use·strict";
+      │   -------------
 
 ```
 
@@ -100,12 +93,8 @@ invalid.cjs:7:3 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━�
   
   i Safe fix: Remove the redundant use strict directive.
   
-     5  5 │   	"use strict";
-     6  6 │   	function inner_a() {
-     7    │ - → → "use·strict";·//·redundant·directive
-     8  7 │   	}
-     9  8 │   	function inner_b() {
-  
+    7 │ → → "use·strict";·//·redundant·directive
+      │     ------------------------------------
 
 ```
 
@@ -130,11 +119,7 @@ invalid.cjs:11:4 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━�
   
   i Safe fix: Remove the redundant use strict directive.
   
-     9  9 │   	function inner_b() {
-    10 10 │   		function inner_inner() {
-    11    │ - → → → "use·strict";·//·additional·redundant·directive
-    12 11 │   		}
-    13 12 │   	}
-  
+    11 │ → → → "use·strict";·//·additional·redundant·directive
+       │       -----------------------------------------------
 
 ```
