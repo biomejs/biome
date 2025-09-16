@@ -5163,6 +5163,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useTanStackQueryExhaustiveDeps": {
+					"description": "Enforce that all dependencies used in TanStack Query's queryFn are included in the queryKey.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseTanStackQueryExhaustiveDepsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useVueMultiWordComponentNames": {
 					"description": "Enforce multi-word component names in Vue components.",
 					"anyOf": [
@@ -11555,6 +11564,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseTanStackQueryExhaustiveDepsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseTanStackQueryExhaustiveDepsOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseTemplateOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -14504,6 +14530,30 @@
 		},
 		"UseSymbolDescriptionOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTanStackQueryExhaustiveDepsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithUseTanStackQueryExhaustiveDepsOptions"
+				}
+			]
+		},
+		"UseTanStackQueryExhaustiveDepsOptions": {
+			"type": "object",
+			"properties": {
+				"useInfiniteQuery": {
+					"description": "Enable/disable checking useInfiniteQuery hooks. Defaults to true.",
+					"default": true,
+					"type": "boolean"
+				},
+				"useQuery": {
+					"description": "Enable/disable checking useQuery hooks. Defaults to true.",
+					"default": true,
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseTemplateConfiguration": {

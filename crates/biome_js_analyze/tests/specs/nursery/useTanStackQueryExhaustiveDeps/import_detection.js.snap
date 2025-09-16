@@ -1,0 +1,143 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: import_detection.js
+---
+# Input
+```js
+// Valid: Properly imported from @tanstack/react-query
+import { useQuery } from '@tanstack/react-query';
+
+function ValidComponent1({ userId }) {
+  const query = useQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchUser(userId) // Should report missing userId
+  });
+}
+
+// Valid: Namespace import
+import * as Query from '@tanstack/react-query';
+
+function ValidComponent2({ userId }) {
+  const query = Query.useQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchUser(userId) // Should report missing userId
+  });
+}
+
+// Valid: Experimental package
+import { useQuery } from '@tanstack/react-query/experimental';
+
+function ValidComponent3({ userId }) {
+  const query = useQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchUser(userId) // Should report missing userId
+  });
+}
+
+// Valid: Legacy package name
+import { useQuery } from 'react-query';
+
+function ValidComponent4({ userId }) {
+  const query = useQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchUser(userId) // Should report missing userId
+  });
+}
+
+// Invalid: Not imported from TanStack Query package
+import { useQuery } from 'some-other-library';
+
+function InvalidComponent1({ userId }) {
+  const query = useQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchUser(userId) // Should NOT report - not a TanStack Query hook
+  });
+}
+
+// Invalid: No import at all (global function)
+function InvalidComponent2({ userId }) {
+  const query = useQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchUser(userId) // Should still report as we're permissive for globals
+  });
+}
+
+// Valid: Different hook name from wrong package should not trigger
+import { useMutation } from 'some-other-library';
+
+function InvalidComponent3({ userId }) {
+  const query = useMutation({
+    queryKey: ['users'],
+    queryFn: () => fetchUser(userId) // Should NOT report - not useQuery/useInfiniteQuery
+  });
+}
+```
+
+# Diagnostics
+```
+import_detection.js:7:14 lint/nursery/useTanStackQueryExhaustiveDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The following dependencies are missing in your queryKey: userId
+  
+    5 │   const query = useQuery({
+    6 │     queryKey: ['users'],
+  > 7 │     queryFn: () => fetchUser(userId) // Should report missing userId
+      │              ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   });
+    9 │ }
+  
+  i Variables used in queryFn should be included in queryKey to ensure proper cache invalidation.
+  
+
+```
+
+```
+import_detection.js:17:14 lint/nursery/useTanStackQueryExhaustiveDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The following dependencies are missing in your queryKey: userId
+  
+    15 │   const query = Query.useQuery({
+    16 │     queryKey: ['users'],
+  > 17 │     queryFn: () => fetchUser(userId) // Should report missing userId
+       │              ^^^^^^^^^^^^^^^^^^^^^^^
+    18 │   });
+    19 │ }
+  
+  i Variables used in queryFn should be included in queryKey to ensure proper cache invalidation.
+  
+
+```
+
+```
+import_detection.js:27:14 lint/nursery/useTanStackQueryExhaustiveDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The following dependencies are missing in your queryKey: userId
+  
+    25 │   const query = useQuery({
+    26 │     queryKey: ['users'],
+  > 27 │     queryFn: () => fetchUser(userId) // Should report missing userId
+       │              ^^^^^^^^^^^^^^^^^^^^^^^
+    28 │   });
+    29 │ }
+  
+  i Variables used in queryFn should be included in queryKey to ensure proper cache invalidation.
+  
+
+```
+
+```
+import_detection.js:37:14 lint/nursery/useTanStackQueryExhaustiveDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The following dependencies are missing in your queryKey: userId
+  
+    35 │   const query = useQuery({
+    36 │     queryKey: ['users'],
+  > 37 │     queryFn: () => fetchUser(userId) // Should report missing userId
+       │              ^^^^^^^^^^^^^^^^^^^^^^^
+    38 │   });
+    39 │ }
+  
+  i Variables used in queryFn should be included in queryKey to ensure proper cache invalidation.
+  
+
+```

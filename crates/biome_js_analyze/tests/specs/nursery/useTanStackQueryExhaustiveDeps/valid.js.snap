@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+
+// All dependencies included
+function Component1({ userId }) {
+  const query = useQuery({
+    queryKey: ['users', userId],
+    queryFn: () => fetchUser(userId)
+  });
+}
+
+// Multiple dependencies all included
+function Component2({ userId, status }) {
+  const query = useQuery({
+    queryKey: ['users', userId, status],
+    queryFn: () => fetchUsersByStatus(userId, status)
+  });
+}
+
+// useInfiniteQuery with all dependencies
+function Component3({ categoryId }) {
+  const query = useInfiniteQuery({
+    queryKey: ['posts', categoryId],
+    queryFn: ({ pageParam = 1 }) => fetchPosts(categoryId, pageParam)
+  });
+}
+
+// No external dependencies used
+function Component4() {
+  const query = useQuery({
+    queryKey: ['static-data'],
+    queryFn: () => fetchStaticData()
+  });
+}
+
+// No external dependencies used in static function
+function Component5() {
+  const query = useQuery({
+    queryKey: ['users'],
+    queryFn: function() { return fetchStaticData(); }
+  });
+}
+```

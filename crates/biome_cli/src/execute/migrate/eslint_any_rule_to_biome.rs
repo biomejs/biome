@@ -2174,10 +2174,14 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "react-hooks/exhaustive-deps" => {
-            let group = rules.correctness.get_or_insert_with(Default::default);
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
-                .use_exhaustive_dependencies
+                .use_tan_stack_query_exhaustive_deps
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
