@@ -134,43 +134,10 @@ impl AnyJsImportClause {
     where
         F: Fn(Text, TextRange) -> Option<T>,
     {
-        match self {
-            Self::JsImportCombinedClause(node) => {
-                let mut vec = Vec::new();
-                if let Some(local_name) = node
-                    .default_specifier()
-                    .and_then(|specifier| specifier.local_name())
-                    .ok()
-                    .and_then(|local_name| {
-                        local_name
-                            .as_js_identifier_binding()
-                            .and_then(|binding| binding.name_token().ok())
-                    })
-                {
-                    vec.extend(filter_map(
-                        Text::new_static("default"),
-                        local_name.text_trimmed_range(),
-                    ));
-                }
-                if let Some(specifiers) = node.specifier().ok().and_then(|specifier| {
-                    specifier
-                        .as_js_named_import_specifiers()
-                        .map(|specifiers| specifiers.specifiers())
-                }) {
-                    vec.extend(specifiers.into_iter().flatten().filter_map(|specifier| {
-                        let imported_name = specifier.imported_name()?;
-                        filter_map(
-                            imported_name.token_text_trimmed().into(),
-                            imported_name.text_trimmed_range(),
-                        )
-                    }));
-                }
-                vec
-            }
-            Self::JsImportDefaultClause(node) => node
-                .default_specifier()
-                .and_then(|specifier| specifier.local_name())
+        let process_default_specifier = |specifier: SyntaxResult<JsDefaultImportSpecifier>| {
+            specifier
                 .ok()
+                .and_then(|specifier| specifier.local_name().ok())
                 .and_then(|local_name| {
                     local_name
                         .as_js_identifier_binding()
@@ -179,25 +146,42 @@ impl AnyJsImportClause {
                 .and_then(|local_name| {
                     filter_map(Text::new_static("default"), local_name.text_trimmed_range())
                 })
+        };
+
+        let process_named_specifiers = |specifiers: &JsNamedImportSpecifiers| {
+            specifiers
+                .specifiers()
                 .into_iter()
-                .collect(),
+                .flatten()
+                .filter_map(|specifier| {
+                    let imported_name = specifier.imported_name()?;
+                    filter_map(
+                        imported_name.token_text_trimmed().into(),
+                        imported_name.text_trimmed_range(),
+                    )
+                })
+        };
+
+        match self {
+            Self::JsImportCombinedClause(node) => {
+                let mut vec = Vec::from_iter(process_default_specifier(node.default_specifier()));
+                if let Some(specifiers) = node.specifier().ok()
+                    && let Some(specifiers) = specifiers.as_js_named_import_specifiers()
+                {
+                    vec.extend(process_named_specifiers(specifiers));
+                }
+                vec
+            }
+            Self::JsImportDefaultClause(node) => {
+                process_default_specifier(node.default_specifier())
+                    .into_iter()
+                    .collect()
+            }
             Self::JsImportNamedClause(node) => node
                 .named_specifiers()
                 .ok()
-                .into_iter()
-                .flat_map(|specifiers| {
-                    specifiers
-                        .specifiers()
-                        .into_iter()
-                        .flatten()
-                        .filter_map(|specifier| {
-                            let imported_name = specifier.imported_name()?;
-                            filter_map(
-                                imported_name.token_text_trimmed().into(),
-                                imported_name.text_trimmed_range(),
-                            )
-                        })
-                })
+                .iter()
+                .flat_map(process_named_specifiers)
                 .collect(),
             Self::JsImportBareClause(_) | Self::JsImportNamespaceClause(_) => Vec::new(),
         }
