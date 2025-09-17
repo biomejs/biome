@@ -4,7 +4,7 @@ expression: invalid-named-import.jsx
 ---
 # Input
 ```jsx
-import { forwardRef } from "react";
+import { forwardRef, memo } from "react";
 
 const Component1 = forwardRef((props, ref) => {
 	return null;
@@ -20,6 +20,10 @@ const Component4 = forwardRef(function Component(props, ref) {
 	return null;
 });
 
+const Component5 = memo(forwardRef(function Component(props, ref) {
+	return <div ref={ref} />;
+}));
+
 ```
 
 # Diagnostics
@@ -28,7 +32,7 @@ invalid-named-import.jsx:3:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━
 
   ! Replaces usages of forwardRef with passing ref as a prop.
   
-    1 │ import { forwardRef } from "react";
+    1 │ import { forwardRef, memo } from "react";
     2 │ 
   > 3 │ const Component1 = forwardRef((props, ref) => {
       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -44,7 +48,7 @@ invalid-named-import.jsx:3:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━
   
   i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
   
-     1  1 │   import { forwardRef } from "react";
+     1  1 │   import { forwardRef, memo } from "react";
      2  2 │   
      3    │ - const·Component1·=·forwardRef((props,·ref)·=>·{
         3 │ + const·Component1·=·({·ref,·...props·})·=>·{
@@ -132,6 +136,7 @@ invalid-named-import.jsx:13:20 lint/nursery/noReactForwardRef  FIXABLE  ━━�
   > 15 │ });
        │ ^^
     16 │ 
+    17 │ const Component5 = memo(forwardRef(function Component(props, ref) {
   
   i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
   
@@ -147,6 +152,39 @@ invalid-named-import.jsx:13:20 lint/nursery/noReactForwardRef  FIXABLE  ━━�
     15    │ - });
        15 │ + };
     16 16 │   
+    17 17 │   const Component5 = memo(forwardRef(function Component(props, ref) {
+  
+
+```
+
+```
+invalid-named-import.jsx:17:25 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replaces usages of forwardRef with passing ref as a prop.
+  
+    15 │ });
+    16 │ 
+  > 17 │ const Component5 = memo(forwardRef(function Component(props, ref) {
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 18 │ 	return <div ref={ref} />;
+  > 19 │ }));
+       │ ^^
+    20 │ 
+  
+  i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
+  
+  i Consider disabling this rule if you are working with React 18 or earlier.
+  
+  i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
+  
+    15 15 │   });
+    16 16 │   
+    17    │ - const·Component5·=·memo(forwardRef(function·Component(props,·ref)·{
+       17 │ + const·Component5·=·memo(function·Component({·ref,·...props·})·{
+    18 18 │   	return <div ref={ref} />;
+    19    │ - }));
+       19 │ + });
+    20 20 │   
   
 
 ```

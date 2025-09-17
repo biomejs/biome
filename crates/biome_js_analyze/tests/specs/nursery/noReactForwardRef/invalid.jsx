@@ -21,3 +21,7 @@ const Component5 = React.forwardRef(function Component(props, ref) {
 const Component6 = React.forwardRef(function Component({ foo, bar }, ref) {
 	return <div ref={ref} />;
 });
+
+const Component7 = React.memo(React.forwardRef(function Component(props, ref) {
+	return <div ref={ref} />;
+}));
