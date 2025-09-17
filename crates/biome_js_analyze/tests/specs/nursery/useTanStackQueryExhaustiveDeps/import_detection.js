@@ -1,4 +1,4 @@
-// Valid: Properly imported from @tanstack/react-query
+// TanStack: Properly imported from @tanstack/react-query
 import { useQuery } from '@tanstack/react-query';
 
 function ValidComponent1({ userId }) {
@@ -8,7 +8,7 @@ function ValidComponent1({ userId }) {
   });
 }
 
-// Valid: Namespace import
+// TanStack: Namespace import
 import * as Query from '@tanstack/react-query';
 
 function ValidComponent2({ userId }) {
@@ -18,7 +18,7 @@ function ValidComponent2({ userId }) {
   });
 }
 
-// Valid: Experimental package
+// TanStack: Experimental package
 import { useQuery } from '@tanstack/react-query/experimental';
 
 function ValidComponent3({ userId }) {
@@ -28,7 +28,7 @@ function ValidComponent3({ userId }) {
   });
 }
 
-// Valid: Legacy package name
+// TanStack: Legacy package name
 import { useQuery } from 'react-query';
 
 function ValidComponent4({ userId }) {
@@ -38,7 +38,7 @@ function ValidComponent4({ userId }) {
   });
 }
 
-// Invalid: Not imported from TanStack Query package
+// Non‑TanStack: Not imported from TanStack Query package
 import { useQuery } from 'some-other-library';
 
 function InvalidComponent1({ userId }) {
@@ -48,7 +48,7 @@ function InvalidComponent1({ userId }) {
   });
 }
 
-// Invalid: No import at all (global function)
+// Global: No import at all (global function)
 function InvalidComponent2({ userId }) {
   const query = useQuery({
     queryKey: ['users'],
@@ -56,12 +56,22 @@ function InvalidComponent2({ userId }) {
   });
 }
 
-// Valid: Different hook name from wrong package should not trigger
+// Non‑TanStack: Different hook name should not trigger
 import { useMutation } from 'some-other-library';
 
 function InvalidComponent3({ userId }) {
   const query = useMutation({
     queryKey: ['users'],
     queryFn: () => fetchUser(userId) // Should NOT report - not useQuery/useInfiniteQuery
+  });
+}
+
+// TanStack: Alias import
+import { useQuery as useReactQuery } from '@tanstack/react-query';
+
+function AliasComponent({ userId }) {
+  const query = useReactQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchUser(userId) // Should report missing userId
   });
 }
