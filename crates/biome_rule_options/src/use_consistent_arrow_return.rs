@@ -8,9 +8,12 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum UseConsistentArrowReturnStyle {
+    //enforces braces around the function body
     #[default]
     AsNeeded,
+    //enforces no braces where they can be omitted (default)
     Always,
+    //enforces no braces around the function body (constrains arrow functions to the role of returning an expression)
     Never,
 }
 
@@ -20,6 +23,7 @@ pub enum UseConsistentArrowReturnStyle {
 #[deserializable(with_validator)]
 pub struct UseConsistentArrowReturnOptions {
     pub style: UseConsistentArrowReturnStyle,
+    // This option is only applicable when used in conjunction with the "asNeeded" option.
     pub require_for_object_literal: bool,
 }
 
@@ -34,7 +38,7 @@ impl DeserializableValidator for UseConsistentArrowReturnOptions {
         {
             ctx.report(
                 DeserializationDiagnostic::new(
-                    "`require_for_object_literal` can only be used when `style` is `asNeeded`.",
+                    "`requireForObjectLiteral` can only be used when `style` is `asNeeded`.",
                 )
                 .with_range(range),
             );

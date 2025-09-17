@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: requireReturn.valid.js
 ---
 # Input
@@ -69,5 +68,6 @@ const withCommentBetweenReturnAndExpr = () => { return /* comment */ 1; };
 
 const returnsSequenceArrow = () => (a, b)
 const returnsAwaitArrow = async () => await fetchData()
+
 
 ```

@@ -12,3 +12,4 @@ const returnsAwaitArrow = async () => {
     return await fetchData();
 }
 
+

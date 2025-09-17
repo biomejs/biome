@@ -62,3 +62,4 @@ const withCommentBetweenReturnAndExpr = () => { return /* comment */ 1; };
 
 const returnsSequenceArrow = () => (a, b)
 const returnsAwaitArrow = async () => await fetchData()
+

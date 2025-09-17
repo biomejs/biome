@@ -189,10 +189,14 @@ impl Rule for UseConsistentArrowReturn {
                     .build();
 
                 let body = make::js_function_body(
-                    make::token(T!['{']),
+                    make::token(T!['{']).with_trailing_trivia([
+                        (biome_js_syntax::TriviaPieceKind::Newline, "\n"),
+                        (biome_js_syntax::TriviaPieceKind::Whitespace, "    "),
+                    ]),
                     make::js_directive_list([]),
                     make::js_statement_list([AnyJsStatement::from(return_statement)]),
-                    make::token(T!['}']),
+                    make::token(T!['}'])
+                        .with_leading_trivia([(biome_js_syntax::TriviaPieceKind::Newline, "\n")]),
                 );
                 mutation.replace_node(old_body, AnyJsFunctionBody::from(body));
                 Some(JsRuleAction::new(
