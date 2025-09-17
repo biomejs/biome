@@ -1,8 +1,9 @@
 use biome_deserialize_macros::Deserializable;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Copy, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+/// Options for the `useTanStackQueryExhaustiveDeps` lint rule.
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseTanStackQueryExhaustiveDepsOptions {
     /// Enable/disable checking useQuery hooks. Defaults to true.
