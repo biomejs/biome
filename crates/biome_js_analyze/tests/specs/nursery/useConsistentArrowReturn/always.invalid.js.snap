@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: always.invalid.js
 ---
 # Input
@@ -8,6 +7,7 @@ expression: always.invalid.js
 const returnsSequenceArrow = () => (a, b)
 
 const returnsAwaitArrow = async () => await fetchData()
+
 
 ```
 
@@ -25,9 +25,11 @@ always.invalid.js:1:30 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━
   i Safe fix: Add braces to the arrow function body.
   
     1   │ - const·returnsSequenceArrow·=·()·=>·(a,·b)
-      1 │ + const·returnsSequenceArrow·=·()·=>·{return·a,·b;}
-    2 2 │   
-    3 3 │   const returnsAwaitArrow = async () => await fetchData()
+      1 │ + const·returnsSequenceArrow·=·()·=>·{
+      2 │ + ····return·a,·b;
+      3 │ + }
+    2 4 │   
+    3 5 │   const returnsAwaitArrow = async () => await fetchData()
   
 
 ```
@@ -45,7 +47,14 @@ always.invalid.js:3:27 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━
   
   i Safe fix: Add braces to the arrow function body.
   
-    3 │ const·returnsAwaitArrow·=·async·()·=>·{return·await·fetchData();}
-      │                                       ++++++++                 ++
+    1 1 │   const returnsSequenceArrow = () => (a, b)
+    2 2 │   
+    3   │ - const·returnsAwaitArrow·=·async·()·=>·await·fetchData()
+      3 │ + const·returnsAwaitArrow·=·async·()·=>·{
+      4 │ + ····return·await·fetchData();
+      5 │ + }
+    4 6 │   
+    5 7 │   
+  
 
 ```

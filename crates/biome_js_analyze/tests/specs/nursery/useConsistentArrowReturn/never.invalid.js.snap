@@ -16,6 +16,7 @@ const d = () => {
     return { a: 1 };
 }
 
+
 ```
 
 # Diagnostics
@@ -96,6 +97,7 @@ never.invalid.js:9:11 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━�
     11    │ - }
         9 │ + const·d·=·()·=>·({·a:·1·})
     12 10 │   
+    13 11 │   
   
 
 ```

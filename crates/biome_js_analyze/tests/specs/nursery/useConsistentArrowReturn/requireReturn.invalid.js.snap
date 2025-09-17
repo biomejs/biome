@@ -19,6 +19,7 @@ const returnsAwaitArrow = async () => {
 }
 
 
+
 ```
 
 # Diagnostics
@@ -36,9 +37,11 @@ requireReturn.invalid.js:3:28 lint/nursery/useConsistentArrowReturn  FIXABLE  �
      1  1 │   
      2  2 │   
      3    │ - const·returnsObjectArrow·=·()·=>·(·{·a:·1,·b:·2·});
-        3 │ + const·returnsObjectArrow·=·()·=>·{return·{·a:·1,·b:·2·};};
-     4  4 │   
-     5  5 │   
+        3 │ + const·returnsObjectArrow·=·()·=>·{
+        4 │ + ····return·{·a:·1,·b:·2·};
+        5 │ + };
+     4  6 │   
+     5  7 │   
   
 
 ```

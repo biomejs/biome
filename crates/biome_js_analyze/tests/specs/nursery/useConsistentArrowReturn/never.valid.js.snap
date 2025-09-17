@@ -30,4 +30,5 @@ const f = () => {
 const g = () => {
     return;
 }
+
 ```

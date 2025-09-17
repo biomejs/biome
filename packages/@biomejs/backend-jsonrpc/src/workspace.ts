@@ -9779,3 +9779,4 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 	};
 }
+

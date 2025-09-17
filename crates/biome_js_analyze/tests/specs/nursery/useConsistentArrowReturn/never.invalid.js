@@ -9,3 +9,4 @@ const b = async () => {
 const d = () => {
     return { a: 1 };
 }
+
