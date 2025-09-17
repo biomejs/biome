@@ -114,6 +114,10 @@ pub(super) enum JsCollectedExport {
         /// Reference to the type being exported.
         ty: TypeReference,
     },
+    ExportNamedDefault {
+        /// Local name of the symbol in the global scope.
+        local_name: TokenText,
+    },
     ExportDefaultAssignment {
         /// Reference to the type assigned to the export.
         ty: TypeReference,
@@ -793,6 +797,7 @@ impl JsModuleInfoCollector {
                     }
                 }
                 JsCollectedExport::ExportNamedSymbol { .. }
+                | JsCollectedExport::ExportNamedDefault { .. }
                 | JsCollectedExport::Reexport { .. } => {}
             }
         }
@@ -812,53 +817,15 @@ impl JsModuleInfoCollector {
                     export_name,
                     local_name,
                 } => {
-                    let Some(binding_ref) = self.scopes[0].bindings_by_name.get(&local_name) else {
-                        continue;
-                    };
-
-                    let export = match binding_ref {
-                        TsBindingReference::Merged {
-                            ty,
-                            value_ty,
-                            namespace_ty,
-                        } => {
-                            let ty = ty.map(|ty| &self.bindings[ty.index()].ty);
-                            let value_ty = value_ty.map(|ty| &self.bindings[ty.index()].ty);
-                            let namespace_ty = namespace_ty.map(|ty| &self.bindings[ty.index()].ty);
-                            match (ty, value_ty, namespace_ty) {
-                                (Some(ty1), Some(ty2), None)
-                                | (Some(ty1), None, Some(ty2))
-                                | (None, Some(ty1), Some(ty2))
-                                    if ty1 == ty2 =>
-                                {
-                                    let ty =
-                                        self.register_and_resolve(TypeData::reference(ty1.clone()));
-                                    JsOwnExport::Type(ty)
-                                }
-                                (Some(ty1), Some(ty2), Some(ty3)) if ty1 == ty2 && ty2 == ty3 => {
-                                    let ty =
-                                        self.register_and_resolve(TypeData::reference(ty1.clone()));
-                                    JsOwnExport::Type(ty)
-                                }
-                                _ => {
-                                    let ty = self.register_and_resolve(TypeData::merged_reference(
-                                        ty.cloned(),
-                                        value_ty.cloned(),
-                                        namespace_ty.cloned(),
-                                    ));
-                                    JsOwnExport::Type(ty)
-                                }
-                            }
-                        }
-                        TsBindingReference::Type(binding_id)
-                        | TsBindingReference::ValueType(binding_id)
-                        | TsBindingReference::TypeAndValueType(binding_id)
-                        | TsBindingReference::NamespaceAndValueType(binding_id) => {
-                            JsOwnExport::Binding(*binding_id)
-                        }
-                    };
-
-                    finalised_exports.insert(export_name, JsExport::Own(export));
+                    if let Some(export) = self.get_export_for_local_name(local_name) {
+                        finalised_exports.insert(export_name, JsExport::Own(export));
+                    }
+                }
+                JsCollectedExport::ExportNamedDefault { local_name } => {
+                    if let Some(export) = self.get_export_for_local_name(local_name) {
+                        finalised_exports
+                            .insert(Text::new_static("default"), JsExport::Own(export));
+                    }
                 }
                 JsCollectedExport::ExportDefault { ty } => {
                     let resolved = self.resolve_reference(&ty).unwrap_or(GLOBAL_UNKNOWN_ID);
@@ -903,6 +870,52 @@ impl JsModuleInfoCollector {
         }
 
         finalised_exports
+    }
+
+    fn get_export_for_local_name(&mut self, local_name: TokenText) -> Option<JsOwnExport> {
+        let binding_ref = self.scopes[0].bindings_by_name.get(&local_name)?;
+
+        let export = match binding_ref {
+            TsBindingReference::Merged {
+                ty,
+                value_ty,
+                namespace_ty,
+            } => {
+                let ty = ty.map(|ty| &self.bindings[ty.index()].ty);
+                let value_ty = value_ty.map(|ty| &self.bindings[ty.index()].ty);
+                let namespace_ty = namespace_ty.map(|ty| &self.bindings[ty.index()].ty);
+                match (ty, value_ty, namespace_ty) {
+                    (Some(ty1), Some(ty2), None)
+                    | (Some(ty1), None, Some(ty2))
+                    | (None, Some(ty1), Some(ty2))
+                        if ty1 == ty2 =>
+                    {
+                        let ty = self.register_and_resolve(TypeData::reference(ty1.clone()));
+                        JsOwnExport::Type(ty)
+                    }
+                    (Some(ty1), Some(ty2), Some(ty3)) if ty1 == ty2 && ty2 == ty3 => {
+                        let ty = self.register_and_resolve(TypeData::reference(ty1.clone()));
+                        JsOwnExport::Type(ty)
+                    }
+                    _ => {
+                        let ty = self.register_and_resolve(TypeData::merged_reference(
+                            ty.cloned(),
+                            value_ty.cloned(),
+                            namespace_ty.cloned(),
+                        ));
+                        JsOwnExport::Type(ty)
+                    }
+                }
+            }
+            TsBindingReference::Type(binding_id)
+            | TsBindingReference::ValueType(binding_id)
+            | TsBindingReference::TypeAndValueType(binding_id)
+            | TsBindingReference::NamespaceAndValueType(binding_id) => {
+                JsOwnExport::Binding(*binding_id)
+            }
+        };
+
+        Some(export)
     }
 }
 
@@ -1065,11 +1078,13 @@ impl JsModuleInfo {
 }
 
 fn find_jsdoc(node: &JsSyntaxNode) -> Option<JsdocComment> {
-    match node.ancestors().find_map(biome_js_syntax::JsExport::cast) {
-        Some(export) => JsdocComment::try_from(export.syntax()).ok(),
-        None => match node.ancestors().find_map(AnyJsDeclaration::cast) {
-            Some(decl) => JsdocComment::try_from(decl.syntax()).ok(),
-            None => JsdocComment::try_from(node).ok(),
-        },
-    }
+    node.ancestors().find_map(|ancestor| {
+        if let Some(export) = biome_js_syntax::JsExport::cast_ref(&ancestor) {
+            JsdocComment::try_from(export.syntax()).ok()
+        } else if let Some(decl) = AnyJsDeclaration::cast(ancestor) {
+            JsdocComment::try_from(decl.syntax()).ok()
+        } else {
+            None
+        }
+    })
 }

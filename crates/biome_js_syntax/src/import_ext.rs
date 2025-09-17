@@ -6,7 +6,8 @@ use crate::{
     JsSyntaxKind, JsSyntaxToken, inner_string_text,
 };
 use biome_rowan::{
-    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText, declare_node_union,
+    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, Text, TextRange, TokenText,
+    declare_node_union,
 };
 
 impl JsImport {
@@ -113,6 +114,76 @@ impl AnyJsImportClause {
             Self::JsImportNamedClause(clause) => clause.assertion(),
             Self::JsImportNamespaceClause(clause) => clause.assertion(),
             Self::JsImportCombinedClause(clause) => clause.assertion(),
+        }
+    }
+
+    /// Creates a vector with items of type `T` that is constructed by calling
+    /// the given `filter_map` function for every symbol that is imported in
+    /// this clause.
+    ///
+    /// `filter_map` receives two arguments: The name of the imported symbol
+    /// (not the local name it is imported as), and the trimmed text range of
+    /// the imported symbol.
+    ///
+    /// ## Known Caveat
+    ///
+    /// This method only filters over imported default and named symbols.
+    /// Namespace imports are not considered, because they cannot be
+    /// individually evaluated.
+    pub fn filter_map_all_imported_symbols<F, T>(&self, filter_map: F) -> Vec<T>
+    where
+        F: Fn(Text, TextRange) -> Option<T>,
+    {
+        let process_default_specifier = |specifier: SyntaxResult<JsDefaultImportSpecifier>| {
+            specifier
+                .ok()
+                .and_then(|specifier| specifier.local_name().ok())
+                .and_then(|local_name| {
+                    local_name
+                        .as_js_identifier_binding()
+                        .and_then(|binding| binding.name_token().ok())
+                })
+                .and_then(|local_name| {
+                    filter_map(Text::new_static("default"), local_name.text_trimmed_range())
+                })
+        };
+
+        let process_named_specifiers = |specifiers: &JsNamedImportSpecifiers| {
+            specifiers
+                .specifiers()
+                .into_iter()
+                .flatten()
+                .filter_map(|specifier| {
+                    let imported_name = specifier.imported_name()?;
+                    filter_map(
+                        imported_name.token_text_trimmed().into(),
+                        imported_name.text_trimmed_range(),
+                    )
+                })
+        };
+
+        match self {
+            Self::JsImportCombinedClause(node) => {
+                let mut vec = Vec::from_iter(process_default_specifier(node.default_specifier()));
+                if let Some(specifiers) = node.specifier().ok()
+                    && let Some(specifiers) = specifiers.as_js_named_import_specifiers()
+                {
+                    vec.extend(process_named_specifiers(specifiers));
+                }
+                vec
+            }
+            Self::JsImportDefaultClause(node) => {
+                process_default_specifier(node.default_specifier())
+                    .into_iter()
+                    .collect()
+            }
+            Self::JsImportNamedClause(node) => node
+                .named_specifiers()
+                .ok()
+                .iter()
+                .flat_map(process_named_specifiers)
+                .collect(),
+            Self::JsImportBareClause(_) | Self::JsImportNamespaceClause(_) => Vec::new(),
         }
     }
 
