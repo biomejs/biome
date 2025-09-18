@@ -376,17 +376,29 @@ fn extract_optional_chain_like_typeof(
     fn typeof_argument(expression: &AnyJsExpression) -> SyntaxResult<Option<AnyJsExpression>> {
         if let Some(unary) = expression.as_js_unary_expression() {
             return Ok(match unary.operator()? {
-                JsUnaryOperator::Typeof => Some(unary.argument()?),
+                JsUnaryOperator::Typeof => Some(unary.argument()?.omit_parentheses()),
                 _ => None,
             });
         }
         Ok(None)
     }
-    fn is_unbound_reference(model: &SemanticModel, node: &AnyJsExpression) -> SyntaxResult<bool> {
-        if let Some(ident) = node.as_js_reference_identifier() {
-            return Ok(ident.binding(model).is_none());
+    fn is_unbound_root(model: &SemanticModel, expr: &AnyJsExpression) -> SyntaxResult<bool> {
+        let mut current = expr.clone().omit_parentheses();
+        loop {
+            current = match current {
+                AnyJsExpression::JsStaticMemberExpression(e) => e.object()?,
+                AnyJsExpression::JsComputedMemberExpression(e) => e.object()?,
+                AnyJsExpression::JsCallExpression(e) => e.callee()?,
+                AnyJsExpression::JsParenthesizedExpression(e) => e.expression()?,
+                _ => {
+                    break;
+                }
+            }
         }
-        Ok(false)
+        Ok(match current.as_js_reference_identifier() {
+            Some(ident) => ident.binding(model).is_none(),
+            None => false,
+        })
     }
     let left_is_string_undefined = is_string_literal_undefined(left);
     let right_is_string_undefined = is_string_literal_undefined(right);
@@ -396,7 +408,7 @@ fn extract_optional_chain_like_typeof(
         // Unbound references are treated as global references and are not subject to optional chaining.
         // `typeof window !== "undefined"` should not be converted to `window?.foo`
         if let Ok(Some(arg)) = &arg
-            && is_unbound_reference(model, arg)?
+            && is_unbound_root(model, arg)?
         {
             return Ok(None);
         }
@@ -408,7 +420,7 @@ fn extract_optional_chain_like_typeof(
         // Unbound references are treated as global references and are not subject to optional chaining.
         // `"undefined" !== typeof window` should not be converted to `window?.foo`
         if let Ok(Some(arg)) = &arg
-            && is_unbound_reference(model, arg)?
+            && is_unbound_root(model, arg)?
         {
             return Ok(None);
         }
