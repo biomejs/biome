@@ -191,16 +191,21 @@ impl FromStr for LoggingKind {
 }
 
 mod tracing_subscriber_ext {
+    //! Extensions module for [tracing_subscriber].
+    //!
+    //! This module is kept private to preserve API flexibility.
+
     use tracing::{Metadata, Subscriber};
     use tracing_subscriber::{
         Layer,
         fmt::{MakeWriter, writer::OptionalWriter},
     };
 
-    /// A wrapper type for an optional [MakeWriter]
+    /// A wrapper type for an optional [MakeWriter].
     ///
-    /// Implements [MakeWriter] for `Option<M>` where `M: MakeWriter`
-    // XXX: Remove after [PR](https://github.com/tokio-rs/tracing/pull/3196) is merged
+    /// Implements [MakeWriter] for `Option<M>` where `M: MakeWriter`.
+    ///
+    /// XXX: Remove after [PR](https://github.com/tokio-rs/tracing/pull/3196) is merged.
     pub(super) struct OptionMakeWriter<M>(Option<M>);
 
     impl<'a, M> MakeWriter<'a> for OptionMakeWriter<M>
@@ -224,7 +229,7 @@ mod tracing_subscriber_ext {
         }
     }
 
-    /// Extension trait for creating [OptionMakeWriter]
+    /// Extension trait for creating [OptionMakeWriter].
     pub(super) trait OptionMakeWriterExt<M> {
         fn optional(self) -> OptionMakeWriter<M>
         where
@@ -255,8 +260,9 @@ mod tracing_subscriber_ext {
     {
     }
 
-    /// Extension trait for creating [OrderedVariants]
+    /// Extension trait for creating [OrderedVariants].
     pub(super) trait OrderedVariantsExt {
+        /// Wraps `self` in the [OrderedVariants::First] variant.
         fn first<Second, Third>(self) -> OrderedVariants<Self, Second, Third>
         where
             Self: Sized,
@@ -264,6 +270,7 @@ mod tracing_subscriber_ext {
             OrderedVariants::First(self)
         }
 
+        /// Wraps `self` in the [OrderedVariants::Second] variant.
         fn second<First, Third>(self) -> OrderedVariants<First, Self, Third>
         where
             Self: Sized,
@@ -271,6 +278,7 @@ mod tracing_subscriber_ext {
             OrderedVariants::Second(self)
         }
 
+        /// Wraps `self` in the [OrderedVariants::Third] variant.
         fn third<First, Second>(self) -> OrderedVariants<First, Second, Self>
         where
             Self: Sized,
