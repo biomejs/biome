@@ -22,6 +22,8 @@ let baz = 4;
 
 <Foo>{' '}</Foo>
 
+<Foo>{'  '}</Foo>
+
 <Foo>Invalid closing tag {'}'}</Foo>
 
 <Foo>{'Invalid closing tag }'}</Foo>

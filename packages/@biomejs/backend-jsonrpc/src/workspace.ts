@@ -1626,6 +1626,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Restrict imports of deprecated exports.
+	 */
+	noDeprecatedImports?: RuleConfiguration_for_NoDeprecatedImportsOptions;
+	/**
 	 * Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
@@ -1677,6 +1681,10 @@ export interface Nursery {
 	 * Warn when importing non-existing exports.
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
+	/**
+	 * Disallow expression statements that are neither a function call nor an assignment.
+	 */
+	noUnusedExpressions?: RuleConfiguration_for_NoUnusedExpressionsOptions;
 	/**
 	 * Disallow unused catch bindings.
 	 */
@@ -2982,6 +2990,9 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoDeprecatedImportsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoDeprecatedImportsOptions;
 export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
@@ -3021,6 +3032,9 @@ export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
+export type RuleConfiguration_for_NoUnusedExpressionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnusedExpressionsOptions;
 export type RuleFixConfiguration_for_NoUselessCatchBindingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessCatchBindingOptions;
@@ -5354,6 +5368,16 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 */
 	options: UseYieldOptions;
 }
+export interface RuleWithOptions_for_NoDeprecatedImportsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDeprecatedImportsOptions;
+}
 export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5491,6 +5515,16 @@ export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	 * Rule's options
 	 */
 	options: NoUnresolvedImportsOptions;
+}
+export interface RuleWithOptions_for_NoUnusedExpressionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnusedExpressionsOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessCatchBindingOptions {
 	/**
@@ -8075,6 +8109,7 @@ export interface UseUniqueElementIdsOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
@@ -8111,6 +8146,7 @@ export interface NoSecretsOptions {
 export interface NoShadowOptions {}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
+export interface NoUnusedExpressionsOptions {}
 /**
  * Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).
  */
@@ -8831,6 +8867,8 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
@@ -8845,6 +8883,7 @@ export type Category =
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
+	| "lint/nursery/noUnusedExpressions"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCatchBinding"
@@ -8982,7 +9021,6 @@ export type Category =
 	| "lint/suspicious/noDuplicateCase"
 	| "lint/suspicious/noDuplicateClassMembers"
 	| "lint/suspicious/noDuplicateCustomProperties"
-	| "lint/nursery/noDuplicateDependencies"
 	| "lint/suspicious/noDuplicateElseIf"
 	| "lint/suspicious/noDuplicateFields"
 	| "lint/suspicious/noDuplicateFontNames"

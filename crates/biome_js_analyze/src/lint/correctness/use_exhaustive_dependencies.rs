@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 
+use rustc_hash::{FxHashMap, FxHashSet};
+
 use biome_analyze::{FixKind, RuleSource};
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
@@ -7,22 +9,21 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, JsArrayExpression, T, TsTypeofType,
+    AnyJsArrayElement, AnyJsExpression, AnyJsMemberExpression, JsArrayExpression,
+    JsReferenceIdentifier, T, TsTypeofType,
 };
 use biome_js_syntax::{
     JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TextRange,
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
-use rustc_hash::{FxHashMap, FxHashSet};
+use biome_rule_options::use_exhaustive_dependencies::{
+    StableHookResult, UseExhaustiveDependenciesOptions,
+};
 
 use crate::JsRuleAction;
 use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
-
-use biome_rule_options::use_exhaustive_dependencies::{
-    StableHookResult, UseExhaustiveDependenciesOptions,
-};
 
 declare_lint_rule! {
     /// Enforce all dependencies are correctly specified in a React hook.
@@ -1000,7 +1001,11 @@ impl Rule for UseExhaustiveDependencies {
             } => {
                 let new_elements = captures.first().into_iter().filter_map(|node| {
                     node.ancestors()
-                        .find_map(|node| node.cast::<AnyJsExpression>()?.trim_trivia())
+                        .find_map(|node| match JsReferenceIdentifier::cast_ref(&node) {
+                            Some(node) => Some(make::js_identifier_expression(node).into()),
+                            _ => node.cast::<AnyJsExpression>(),
+                        })
+                        .and_then(|node| node.trim_trivia())
                         .map(AnyJsArrayElement::AnyJsExpression)
                 });
 
