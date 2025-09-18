@@ -5132,7 +5132,7 @@
 					]
 				},
 				"noVueSetupPropsReactivityLoss": {
-					"description": "Disallow usages that lose the reactivity of props passed to setup in Vue projects.",
+					"description": "Disallow destructuring of props passed to setup in Vue projects.",
 					"anyOf": [
 						{
 							"$ref": "#/definitions/NoVueSetupPropsReactivityLossConfiguration"

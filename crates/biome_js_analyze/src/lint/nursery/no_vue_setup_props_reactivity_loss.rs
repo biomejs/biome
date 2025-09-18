@@ -11,7 +11,7 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 
 declare_lint_rule! {
-    /// Disallow usages that lose the reactivity of `props` passed to `setup` in Vue projects.
+    /// Disallow destructuring of props passed to setup in Vue projects.
     ///
     /// Vue's Composition API requires that props passed to the `setup` function
     /// maintain reactivity. Destructuring props or using member expressions on props
@@ -215,6 +215,31 @@ impl Rule for NoVueSetupPropsReactivityLoss {
 }
 
 fn is_vue_setup_function(function: &AnyJsFunction) -> bool {
+    // Check for method shorthand (setup() {})
+    if let Some(method) = function
+        .syntax()
+        .parent()
+        .and_then(biome_js_syntax::JsMethodObjectMember::cast)
+    {
+        let is_setup = method
+            .name()
+            .ok()
+            .as_ref()
+            .and_then(get_object_member_name_text)
+            .is_some_and(|name| name == "setup");
+
+        if !is_setup {
+            return false;
+        }
+
+        return method
+            .syntax()
+            .ancestors()
+            .find_map(JsObjectExpression::cast)
+            .is_some_and(|object_expr| is_vue_component_export(&object_expr));
+    }
+
+    // Check for property with function value (setup: function() {})
     let Some(property) = function
         .syntax()
         .parent()

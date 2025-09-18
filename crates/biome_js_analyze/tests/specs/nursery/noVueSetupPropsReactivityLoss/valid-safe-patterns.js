@@ -1,0 +1,43 @@
+/* should not generate diagnostics */
+
+// Safe patterns that preserve reactivity
+
+// Normal props usage
+export default {
+  setup(props) {
+    console.log(props.foo);
+    return () => h('div', props.foo)
+  }
+}
+
+// Using toRefs
+export default {
+  setup(props) {
+    const { foo } = toRefs(props);
+    return () => h('div', foo.value)
+  }
+}
+
+// Using toRef
+export default {
+  setup(props) {
+    const foo = toRef(props, 'foo');
+    return () => h('div', foo.value)
+  }
+}
+
+// Using reactive wrapper
+export default {
+  setup(props) {
+    const reactiveProps = reactive(props);
+    return () => h('div', reactiveProps.foo)
+  }
+}
+
+// Using ref for individual properties
+export default {
+  setup(props) {
+    const foo = ref(props.foo);
+    return () => h('div', foo.value)
+  }
+}
