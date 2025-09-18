@@ -421,7 +421,7 @@ fn get_object_member_name_text(name: &AnyJsObjectMemberName) -> Option<String> {
             {
                 Some(text[1..text.len() - 1].to_string())
             } else {
-                Some(text.to_string())
+                Some(value_token.token_text_trimmed().text().to_string())
             }
         }
 
@@ -441,7 +441,7 @@ fn get_object_member_name_text(name: &AnyJsObjectMemberName) -> Option<String> {
                 {
                     return Some(text[1..text.len() - 1].to_string());
                 }
-                Some(text.to_string())
+                Some(value_token.token_text_trimmed().text().to_string())
             } else {
                 None
             }
