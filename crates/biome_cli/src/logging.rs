@@ -45,9 +45,9 @@ pub fn setup_cli_subscriber(
         .with_writer(make_writer);
 
     let layer = match kind {
-        LoggingKind::Pretty => layer.pretty().a(),
-        LoggingKind::Compact => layer.compact().b(),
-        LoggingKind::Json => layer.json().flatten_event(true).c(),
+        LoggingKind::Pretty => layer.pretty().first(),
+        LoggingKind::Compact => layer.compact().second(),
+        LoggingKind::Json => layer.json().flatten_event(true).third(),
     }
     .with_filter(LoggingFilter { level });
 
@@ -239,45 +239,45 @@ mod tracing_subscriber_ext {
 
     /// A wrapper type for one of three possible values.
     ///
-    /// Implements [Layer] if `A`, `B`, and `C` all implement [Layer].
-    pub(super) enum OneOfThree<A, B, C> {
-        A(A),
-        B(B),
-        C(C),
+    /// Implements [Layer] if `First`, `Second`, and `Third` all implement [Layer].
+    pub(super) enum OrderedVariants<First, Second, Third> {
+        First(First),
+        Second(Second),
+        Third(Third),
     }
 
-    impl<A, B, C, S> Layer<S> for OneOfThree<A, B, C>
+    impl<First, Second, Third, S> Layer<S> for OrderedVariants<First, Second, Third>
     where
-        A: Layer<S>,
-        B: Layer<S>,
-        C: Layer<S>,
+        First: Layer<S>,
+        Second: Layer<S>,
+        Third: Layer<S>,
         S: Subscriber,
     {
     }
 
-    /// Extension trait for creating [OneOfThree]
-    pub(super) trait OneOfThreeExt {
-        fn a<B, C>(self) -> OneOfThree<Self, B, C>
+    /// Extension trait for creating [OrderedVariants]
+    pub(super) trait OrderedVariantsExt {
+        fn first<Second, Third>(self) -> OrderedVariants<Self, Second, Third>
         where
             Self: Sized,
         {
-            OneOfThree::A(self)
+            OrderedVariants::First(self)
         }
 
-        fn b<A, C>(self) -> OneOfThree<A, Self, C>
+        fn second<First, Third>(self) -> OrderedVariants<First, Self, Third>
         where
             Self: Sized,
         {
-            OneOfThree::B(self)
+            OrderedVariants::Second(self)
         }
 
-        fn c<A, B>(self) -> OneOfThree<A, B, Self>
+        fn third<First, Second>(self) -> OrderedVariants<First, Second, Self>
         where
             Self: Sized,
         {
-            OneOfThree::C(self)
+            OrderedVariants::Third(self)
         }
     }
 
-    impl<T> OneOfThreeExt for T {}
+    impl<T> OrderedVariantsExt for T {}
 }
