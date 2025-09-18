@@ -1702,7 +1702,7 @@ export interface Nursery {
 	 */
 	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
 	/**
-	 * Disallow usages that lose the reactivity of props passed to setup in Vue projects.
+	 * Disallow destructuring of props passed to setup in Vue projects.
 	 */
 	noVueSetupPropsReactivityLoss?: RuleConfiguration_for_NoVueSetupPropsReactivityLossOptions;
 	/**
