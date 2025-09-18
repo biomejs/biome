@@ -154,13 +154,13 @@ impl Rule for NoVueSetupPropsReactivityLoss {
             return violations;
         };
 
+        // A props object can be destructured in two ways: directly in the
+        // function parameters, or from a variable assignment in the body.
         match pattern {
             AnyJsBindingPattern::JsObjectBindingPattern(obj_pattern) => {
-                // Direct destructuring in parameters
                 violations.push(Violation::ParameterDestructuring(obj_pattern.range()));
             }
             AnyJsBindingPattern::AnyJsBinding(binding) => {
-                // Props is a regular parameter, check for destructuring in root scope
                 if let Some(props_binding) = binding.as_js_identifier_binding() {
                     violations.extend(check_root_scope_destructuring(
                         function,
@@ -241,20 +241,15 @@ fn is_vue_setup_function(function: &AnyJsFunction) -> bool {
         .is_some_and(|object_expr| is_vue_component_export(&object_expr))
 }
 
-/// Check if an object expression is part of a Vue component export
-/// Handles: export default { ... }, export const Comp = { ... }, export default defineComponent({ ... })
 fn is_vue_component_export(object_expr: &JsObjectExpression) -> bool {
-    // Check for direct default export: export default { setup: ... }
     if is_direct_default_export(object_expr) {
         return true;
     }
 
-    // Check for defineComponent call: export default defineComponent({ setup: ... })
     if is_define_component_export(object_expr) {
         return true;
     }
 
-    // Check for named export: export const Comp = { setup: ... }
     if is_named_component_export(object_expr) {
         return true;
     }
@@ -262,7 +257,6 @@ fn is_vue_component_export(object_expr: &JsObjectExpression) -> bool {
     false
 }
 
-/// Check for direct default export: export default { setup: ... }
 fn is_direct_default_export(object_expr: &JsObjectExpression) -> bool {
     object_expr
         .syntax()
@@ -276,9 +270,7 @@ fn is_direct_default_export(object_expr: &JsObjectExpression) -> bool {
         .is_some()
 }
 
-/// Check for defineComponent export: export default defineComponent({ setup: ... })
 fn is_define_component_export(object_expr: &JsObjectExpression) -> bool {
-    // Check if object is argument to a call expression
     let Some(call_expr) = object_expr
         .syntax()
         .parent()
@@ -287,7 +279,6 @@ fn is_define_component_export(object_expr: &JsObjectExpression) -> bool {
         return false;
     };
 
-    // Check if the call is to defineComponent
     let Ok(callee) = call_expr.callee() else {
         return false;
     };
@@ -308,15 +299,12 @@ fn is_define_component_export(object_expr: &JsObjectExpression) -> bool {
         return false;
     }
 
-    // Check if this call is part of a default export
     call_expr.syntax().ancestors().any(|ancestor| {
         ancestor.kind() == biome_js_syntax::JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
     })
 }
 
-/// Check for named component export: export const Comp = { setup: ... }
 fn is_named_component_export(object_expr: &JsObjectExpression) -> bool {
-    // Look for pattern: const Comp = { setup: ... }
     let Some(declarator) = object_expr
         .syntax()
         .parent()
@@ -325,7 +313,6 @@ fn is_named_component_export(object_expr: &JsObjectExpression) -> bool {
         return false;
     };
 
-    // Check if this declarator is part of an export statement
     declarator
         .syntax()
         .ancestors()
@@ -349,13 +336,11 @@ fn get_function_first_parameter(func: &AnyJsFunction) -> Option<AnyJsBindingPatt
         AnyJsFunction::JsArrowFunctionExpression(arrow) => {
             let params = arrow.parameters().ok()?;
             match params {
-                // 圆括号参数：(a, b) => {}
                 biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(js_params) => {
                     let param = js_params.items().iter().next()?.ok()?;
                     let formal_param = param.as_any_js_formal_parameter()?;
                     formal_param.as_js_formal_parameter()?.binding().ok()
                 }
-                // 单个参数：a => {}
                 biome_js_syntax::AnyJsArrowFunctionParameters::AnyJsBinding(binding) => {
                     Some(AnyJsBindingPattern::AnyJsBinding(binding))
                 }
@@ -370,27 +355,23 @@ fn check_root_scope_destructuring(
     props_binding: &JsIdentifierBinding,
     model: &SemanticModel,
 ) -> Vec<Violation> {
+    // Find all references to the `props` binding and check if they are
+    // part of a destructuring expression within the setup function's root scope.
     let mut violations = Vec::new();
 
-    // 1. 获取 props 的绑定信息
     let props_semantic_binding = model.as_binding(props_binding);
 
-    // 2. 遍历所有对 props 的读引用
     for reference in props_semantic_binding.all_reads() {
-        // 获取引用的语法节点
         if let Some(reference_node) = reference.syntax().parent()
             && let Some(identifier) = biome_js_syntax::JsReferenceIdentifier::cast(reference_node)
         {
-            // 3. 检查引用是否在 setup 函数的根作用域内
             if !is_reference_in_root_scope_of_function(&identifier, setup_fn) {
-                continue; // 跳过不在根作用域的引用
+                continue;
             }
 
-            // 4. 检查这个引用是否是解构表达式的一部分
             if let Some(destructuring_info) = is_reference_in_destructuring(&identifier) {
-                // 检查是否是通过 toRefs/toRef 等响应式 API 进行的解构
                 if is_safe_reactive_destructuring(&destructuring_info) {
-                    continue; // 安全的解构，跳过
+                    continue;
                 }
 
                 violations.push(Violation::RootScopeDestructuring {
@@ -404,21 +385,17 @@ fn check_root_scope_destructuring(
     violations
 }
 
-/// Get the text content from an object member name
-/// 从对象成员名称中提取文本内容，支持各种属性名格式
 fn get_object_member_name_text(name: &AnyJsObjectMemberName) -> Option<String> {
     match name {
         AnyJsObjectMemberName::JsLiteralMemberName(literal_name) => {
             let value_token = literal_name.value().ok()?;
             let text = value_token.text_trimmed();
 
-            // 处理字符串字面量，去掉引号
             if (text.starts_with('"') && text.ends_with('"') && text.len() >= 2)
                 || (text.starts_with('\'') && text.ends_with('\'') && text.len() >= 2)
             {
                 Some(text[1..text.len() - 1].to_string())
             } else {
-                // 标识符或数字字面量
                 Some(text.to_string())
             }
         }
@@ -426,7 +403,6 @@ fn get_object_member_name_text(name: &AnyJsObjectMemberName) -> Option<String> {
         AnyJsObjectMemberName::JsComputedMemberName(computed_name) => {
             let expression = computed_name.expression().ok()?;
 
-            // 处理计算属性中的字符串字面量：{ ["setup"]: ... }
             if let Some(string_literal) = expression
                 .as_any_js_literal_expression()
                 .and_then(|literal| literal.as_js_string_literal_expression())
@@ -442,7 +418,6 @@ fn get_object_member_name_text(name: &AnyJsObjectMemberName) -> Option<String> {
                 }
                 Some(text.to_string())
             } else {
-                // 动态计算属性无法静态确定
                 None
             }
         }
@@ -458,16 +433,13 @@ fn is_reference_in_root_scope_of_function(
     let reference_syntax = reference.syntax();
     let function_syntax = function.syntax();
 
-    // 获取引用到函数之间的所有祖先节点
     let mut current = reference_syntax.parent();
 
     while let Some(node) = current {
-        // 如果到达了目标函数，说明引用在该函数内
         if node == *function_syntax {
             return true;
         }
 
-        // 如果遇到了其他函数节点，说明引用不在根作用域
         if is_function_like_node(&node) && node != *function_syntax {
             return false;
         }
@@ -478,7 +450,6 @@ fn is_reference_in_root_scope_of_function(
     false
 }
 
-/// 检查节点是否是函数类节点
 fn is_function_like_node(node: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>) -> bool {
     use biome_js_syntax::JsSyntaxKind;
     matches!(
@@ -495,31 +466,24 @@ fn is_function_like_node(node: &biome_rowan::SyntaxNode<biome_js_syntax::JsLangu
     )
 }
 
-/// 解构信息结构
 #[derive(Debug)]
 struct DestructuringInfo {
-    /// 解构模式的范围
     destructuring_range: TextRange,
-    /// 解构的初始化表达式（可能是 props, toRefs(props) 等）
     initializer: Option<AnyJsExpression>,
 }
 
-/// 检查引用是否是解构表达式的一部分
 fn is_reference_in_destructuring(
     reference: &biome_js_syntax::JsReferenceIdentifier,
 ) -> Option<DestructuringInfo> {
     let reference_syntax = reference.syntax();
 
-    // 向上遍历祖先节点，寻找解构模式
     let mut current = reference_syntax.parent();
 
     while let Some(node) = current {
-        // 检查是否是变量声明器（const { a } = props 的情况）
         if let Some(declarator) = biome_js_syntax::JsVariableDeclarator::cast(node.clone())
             && let Ok(id) = declarator.id()
             && let Some(obj_pattern) = id.as_js_object_binding_pattern()
         {
-            // 检查初始化器
             let initializer = declarator
                 .initializer()
                 .and_then(|init| init.expression().ok());
@@ -530,7 +494,6 @@ fn is_reference_in_destructuring(
             });
         }
 
-        // 检查是否是赋值表达式的解构（{ a } = props 的情况）
         if let Some(assignment) = biome_js_syntax::JsAssignmentExpression::cast(node.clone())
             && let Ok(left) = assignment.left()
             && let Some(obj_pattern) = left.as_js_object_assignment_pattern()
@@ -548,18 +511,14 @@ fn is_reference_in_destructuring(
     None
 }
 
-/// 检查是否是安全的响应式解构
-/// 例如：const { count } = toRefs(props) 或 const { count } = toRef(props, 'count')
 fn is_safe_reactive_destructuring(destructuring_info: &DestructuringInfo) -> bool {
     if let Some(initializer) = &destructuring_info.initializer {
-        // 检查初始化器是否是 toRefs/toRef 等响应式 API 调用
         is_reactive_api_call(initializer)
     } else {
         false
     }
 }
 
-/// Check if expression is a reactive API call (supports common alias patterns)
 fn is_reactive_api_call(expr: &AnyJsExpression) -> bool {
     let Some(call_expr) = expr.as_js_call_expression() else {
         return false;
@@ -583,7 +542,6 @@ fn is_reactive_api_call(expr: &AnyJsExpression) -> bool {
 
     let function_name = token.text_trimmed();
 
-    // Check for known reactive API functions and common alias patterns
     matches!(
         function_name,
         "toRefs"
