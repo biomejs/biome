@@ -200,8 +200,7 @@ mod tracing_subscriber_ext {
     /// A wrapper type for an optional [MakeWriter]
     ///
     /// Implements [MakeWriter] for `Option<M>` where `M: MakeWriter`
-    ///
-    /// Remove after [PR](https://github.com/tokio-rs/tracing/pull/3196) is merged
+    // XXX: Remove after [PR](https://github.com/tokio-rs/tracing/pull/3196) is merged
     pub(super) struct OptionMakeWriter<M>(Option<M>);
 
     impl<'a, M> MakeWriter<'a> for OptionMakeWriter<M>
@@ -225,14 +224,14 @@ mod tracing_subscriber_ext {
         }
     }
 
-    /// Extension trait for creating [OptionalWriter]
-    pub(super) trait OptionalMakeWriterExt<M> {
+    /// Extension trait for creating [OptionMakeWriter]
+    pub(super) trait OptionMakeWriterExt<M> {
         fn optional(self) -> OptionMakeWriter<M>
         where
             Self: Sized;
     }
 
-    impl<M> OptionalMakeWriterExt<M> for Option<M> {
+    impl<M> OptionMakeWriterExt<M> for Option<M> {
         fn optional(self) -> OptionMakeWriter<M> {
             OptionMakeWriter(self)
         }
