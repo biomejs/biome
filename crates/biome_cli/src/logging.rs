@@ -7,6 +7,7 @@ use tracing::Metadata;
 use tracing::subscriber::Interest;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::fmt::format::FmtSpan;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::layer::{Context, Filter, SubscriberExt};
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer as _, registry};
@@ -17,70 +18,40 @@ pub fn setup_cli_subscriber(
     kind: LoggingKind,
     colors: Option<&ColorsArg>,
 ) {
+    use tracing_subscriber_ext::*;
+
     if level == LoggingLevel::None {
         return;
     }
 
-    let mut format = tracing_subscriber::fmt::layer()
+    let fmt_span = matches!(level, LoggingLevel::Tracing)
+        .then_some(FmtSpan::CLOSE)
+        .unwrap_or(FmtSpan::NONE);
+
+    let make_writer = file
+        .map(File::create)
+        .transpose()
+        .expect("Failed to create log file")
+        .optional()
+        .or_else(std::io::stdout);
+
+    let layer = tracing_subscriber::fmt::layer()
         .with_level(true)
         .with_target(false)
         .with_thread_names(true)
         .with_file(true)
-        .with_ansi(colors.is_none_or(|c| c.is_enabled()));
+        .with_ansi(colors.is_none_or(|c| c.is_enabled()))
+        .with_span_events(fmt_span)
+        .with_writer(make_writer);
 
-    if level == LoggingLevel::Tracing {
-        format = format.with_span_events(FmtSpan::CLOSE);
+    let layer = match kind {
+        LoggingKind::Pretty => layer.pretty().a(),
+        LoggingKind::Compact => layer.compact().b(),
+        LoggingKind::Json => layer.json().flatten_event(true).c(),
     }
+    .with_filter(LoggingFilter { level });
 
-    // FIXME: I hate the duplication here, and I tried to make a function that
-    //        could take `impl Layer<Registry>` so the compiler could expand
-    //        this for us... but I got dragged into a horrible swamp of generic
-    //        constraints...
-    if let Some(file) = file {
-        let file = File::create(file).expect("Failed to create log file");
-        let format = format.with_writer(file);
-        match kind {
-            LoggingKind::Pretty => {
-                let format = format.pretty();
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-            LoggingKind::Compact => {
-                let format = format.compact();
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-            LoggingKind::Json => {
-                let format = format.json().flatten_event(true);
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-        }
-    } else {
-        match kind {
-            LoggingKind::Pretty => {
-                let format = format.pretty();
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-            LoggingKind::Compact => {
-                let format = format.compact();
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-            LoggingKind::Json => {
-                let format = format.json().flatten_event(true);
-                registry()
-                    .with(format.with_filter(LoggingFilter { level }))
-                    .init()
-            }
-        }
-    };
+    registry().with(layer).init();
 }
 
 #[derive(Copy, Debug, Default, Clone, Ord, PartialOrd, Eq, PartialEq)]
@@ -217,4 +188,97 @@ impl FromStr for LoggingKind {
             _ => Err("This log kind doesn't exist".to_string()),
         }
     }
+}
+
+mod tracing_subscriber_ext {
+    use tracing::{Metadata, Subscriber};
+    use tracing_subscriber::{
+        Layer,
+        fmt::{MakeWriter, writer::OptionalWriter},
+    };
+
+    /// A wrapper type for an optional [MakeWriter]
+    ///
+    /// Implements [MakeWriter] for `Option<M>` where `M: MakeWriter`
+    ///
+    /// Remove after [PR](https://github.com/tokio-rs/tracing/pull/3196) is merged
+    pub(super) struct OptionMakeWriter<M>(Option<M>);
+
+    impl<'a, M> MakeWriter<'a> for OptionMakeWriter<M>
+    where
+        M: MakeWriter<'a> + 'a,
+    {
+        type Writer = OptionalWriter<M::Writer>;
+
+        fn make_writer(&'a self) -> Self::Writer {
+            match &self.0 {
+                Some(inner) => OptionalWriter::some(inner.make_writer()),
+                None => OptionalWriter::none(),
+            }
+        }
+
+        fn make_writer_for(&'a self, meta: &Metadata<'_>) -> Self::Writer {
+            match &self.0 {
+                Some(inner) => OptionalWriter::some(inner.make_writer_for(meta)),
+                None => OptionalWriter::none(),
+            }
+        }
+    }
+
+    /// Extension trait for creating [OptionalWriter]
+    pub(super) trait OptionalMakeWriterExt<M> {
+        fn optional(self) -> OptionMakeWriter<M>
+        where
+            Self: Sized;
+    }
+
+    impl<M> OptionalMakeWriterExt<M> for Option<M> {
+        fn optional(self) -> OptionMakeWriter<M> {
+            OptionMakeWriter(self)
+        }
+    }
+
+    /// A wrapper type for one of three possible values.
+    ///
+    /// Implements [Layer] if `A`, `B`, and `C` all implement [Layer].
+    pub(super) enum OneOfThree<A, B, C> {
+        A(A),
+        B(B),
+        C(C),
+    }
+
+    impl<A, B, C, S> Layer<S> for OneOfThree<A, B, C>
+    where
+        A: Layer<S>,
+        B: Layer<S>,
+        C: Layer<S>,
+        S: Subscriber,
+    {
+    }
+
+    /// Extension trait for creating [OneOfThree]
+    pub(super) trait OneOfThreeExt {
+        fn a<B, C>(self) -> OneOfThree<Self, B, C>
+        where
+            Self: Sized,
+        {
+            OneOfThree::A(self)
+        }
+
+        fn b<A, C>(self) -> OneOfThree<A, Self, C>
+        where
+            Self: Sized,
+        {
+            OneOfThree::B(self)
+        }
+
+        fn c<A, B>(self) -> OneOfThree<A, B, Self>
+        where
+            Self: Sized,
+        {
+            OneOfThree::C(self)
+        }
+    }
+
+    impl<T> OneOfThreeExt for T {}
 }
