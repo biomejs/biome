@@ -1,3 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
 /* should not generate diagnostics */
 
 // Normal usage of props
@@ -111,3 +117,4 @@ const regularObject = {
     return () => h('div', foo)
   }
 }
+```

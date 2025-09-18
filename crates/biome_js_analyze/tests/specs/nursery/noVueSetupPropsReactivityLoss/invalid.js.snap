@@ -1,3 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
 // Parameter destructuring
 export default {
   setup({ foo }) {
@@ -84,3 +90,4 @@ export default {
     return () => h('div', foo)
   }
 }
+```

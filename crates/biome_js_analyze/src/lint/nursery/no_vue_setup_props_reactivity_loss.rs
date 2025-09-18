@@ -5,8 +5,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBindingPattern, AnyJsExpression, AnyJsFunction, AnyJsObjectMemberName,
-    JsIdentifierBinding, JsObjectExpression, JsPropertyObjectMember,
+    AnyJsBindingPattern, AnyJsExpression, AnyJsFunction, AnyJsObjectMemberName, JsCallExpression,
+    JsIdentifierBinding, JsObjectExpression, JsPropertyObjectMember, JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 
@@ -238,19 +238,98 @@ fn is_vue_setup_function(function: &AnyJsFunction) -> bool {
         .syntax()
         .ancestors()
         .find_map(JsObjectExpression::cast)
-        .is_some_and(|object_expr| is_default_export(&object_expr).is_some())
+        .is_some_and(|object_expr| is_vue_component_export(&object_expr))
 }
 
-fn is_default_export(object_expr: &JsObjectExpression) -> Option<()> {
-    object_expr.syntax().parent().and_then(|parent| {
-        parent
-            .parent()
-            .filter(|grandparent| {
+/// Check if an object expression is part of a Vue component export
+/// Handles: export default { ... }, export const Comp = { ... }, export default defineComponent({ ... })
+fn is_vue_component_export(object_expr: &JsObjectExpression) -> bool {
+    // Check for direct default export: export default { setup: ... }
+    if is_direct_default_export(object_expr) {
+        return true;
+    }
+
+    // Check for defineComponent call: export default defineComponent({ setup: ... })
+    if is_define_component_export(object_expr) {
+        return true;
+    }
+
+    // Check for named export: export const Comp = { setup: ... }
+    if is_named_component_export(object_expr) {
+        return true;
+    }
+
+    false
+}
+
+/// Check for direct default export: export default { setup: ... }
+fn is_direct_default_export(object_expr: &JsObjectExpression) -> bool {
+    object_expr
+        .syntax()
+        .parent()
+        .and_then(|parent| {
+            parent.parent().filter(|grandparent| {
                 grandparent.kind()
                     == biome_js_syntax::JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
             })
-            .map(|_| ())
+        })
+        .is_some()
+}
+
+/// Check for defineComponent export: export default defineComponent({ setup: ... })
+fn is_define_component_export(object_expr: &JsObjectExpression) -> bool {
+    // Check if object is argument to a call expression
+    let Some(call_expr) = object_expr
+        .syntax()
+        .parent()
+        .and_then(JsCallExpression::cast)
+    else {
+        return false;
+    };
+
+    // Check if the call is to defineComponent
+    let Ok(callee) = call_expr.callee() else {
+        return false;
+    };
+
+    let Some(ident_expr) = callee.as_js_identifier_expression() else {
+        return false;
+    };
+
+    let Ok(name) = ident_expr.name() else {
+        return false;
+    };
+
+    let Ok(token) = name.value_token() else {
+        return false;
+    };
+
+    if token.text_trimmed() != "defineComponent" {
+        return false;
+    }
+
+    // Check if this call is part of a default export
+    call_expr.syntax().ancestors().any(|ancestor| {
+        ancestor.kind() == biome_js_syntax::JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
     })
+}
+
+/// Check for named component export: export const Comp = { setup: ... }
+fn is_named_component_export(object_expr: &JsObjectExpression) -> bool {
+    // Look for pattern: const Comp = { setup: ... }
+    let Some(declarator) = object_expr
+        .syntax()
+        .parent()
+        .and_then(JsVariableDeclarator::cast)
+    else {
+        return false;
+    };
+
+    // Check if this declarator is part of an export statement
+    declarator
+        .syntax()
+        .ancestors()
+        .any(|ancestor| ancestor.kind() == biome_js_syntax::JsSyntaxKind::JS_EXPORT_NAMED_CLAUSE)
 }
 
 fn get_function_first_parameter(func: &AnyJsFunction) -> Option<AnyJsBindingPattern> {
@@ -480,16 +559,40 @@ fn is_safe_reactive_destructuring(destructuring_info: &DestructuringInfo) -> boo
     }
 }
 
-/// 检查表达式是否是响应式 API 调用
+/// Check if expression is a reactive API call (supports common alias patterns)
 fn is_reactive_api_call(expr: &AnyJsExpression) -> bool {
-    if let Some(call_expr) = expr.as_js_call_expression()
-        && let Ok(callee) = call_expr.callee()
-        && let Some(ident_expr) = callee.as_js_identifier_expression()
-        && let Ok(name) = ident_expr.name()
-        && let Ok(token) = name.value_token()
-    {
-        let text = token.text_trimmed();
-        return matches!(text, "toRefs" | "toRef" | "reactive" | "ref");
-    }
-    false
+    let Some(call_expr) = expr.as_js_call_expression() else {
+        return false;
+    };
+
+    let Ok(callee) = call_expr.callee() else {
+        return false;
+    };
+
+    let Some(ident_expr) = callee.as_js_identifier_expression() else {
+        return false;
+    };
+
+    let Ok(name) = ident_expr.name() else {
+        return false;
+    };
+
+    let Ok(token) = name.value_token() else {
+        return false;
+    };
+
+    let function_name = token.text_trimmed();
+
+    // Check for known reactive API functions and common alias patterns
+    matches!(
+        function_name,
+        "toRefs"
+            | "toRef"
+            | "reactive"
+            | "ref"
+            | "vueToRefs"
+            | "vueToRef"
+            | "vueReactive"
+            | "vueRef"
+    )
 }
