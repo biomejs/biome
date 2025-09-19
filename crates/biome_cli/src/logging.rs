@@ -289,3 +289,82 @@ mod tracing_subscriber_ext {
 
     impl<T> OrderedVariantsExt for T {}
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{
+        io::Write,
+        sync::{Arc, Mutex},
+    };
+
+    struct MockWriter {
+        bytes: Mutex<Vec<u8>>,
+    }
+
+    impl MockWriter {
+        /// Creates a new, empty `Arc<Self>`.
+        fn new() -> Arc<Self> {
+            Arc::new(Self {
+                bytes: Mutex::new(Vec::new()),
+            })
+        }
+
+        /// Wraps `Arc<Self>` in `Some`.
+        fn some(self: Arc<Self>) -> Option<Arc<Self>> {
+            Some(self)
+        }
+
+        /// Wraps `Arc<Self>` in `None`.
+        fn none(self: Arc<Self>) -> Option<Arc<Self>> {
+            None
+        }
+
+        /// Asserts that something was written to this writer.
+        fn assert_written(&self) {
+            assert!(!self.bytes.lock().unwrap().is_empty())
+        }
+    }
+
+    impl std::io::Write for &MockWriter {
+        fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+            self.bytes.lock().unwrap().extend_from_slice(buf);
+
+            Ok(buf.len())
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn optional_writer_or_else_test() {
+        use super::tracing_subscriber_ext::*;
+        use tracing_subscriber::fmt::{MakeWriter, writer::MakeWriterExt};
+
+        let writer_one = MockWriter::new();
+        let writer_two = MockWriter::new();
+
+        let make_writer = writer_one
+            .clone()
+            .some()
+            .optional()
+            .or_else(writer_two.clone());
+
+        let mut writer = make_writer.make_writer();
+
+        writer.write_all(b"Hello, world!").unwrap();
+
+        writer_one.assert_written();
+
+        let writer_one = MockWriter::new();
+        let writer_two = MockWriter::new();
+
+        let make_writer = writer_one.none().optional().or_else(writer_two.clone());
+        let mut writer = make_writer.make_writer();
+
+        writer.write_all(b"Hello, world!").unwrap();
+
+        writer_two.assert_written();
+    }
+}
