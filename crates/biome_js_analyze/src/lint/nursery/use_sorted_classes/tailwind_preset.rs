@@ -5,7 +5,7 @@ use super::sort_config::UtilityLayer;
 
 const COMPONENTS_LAYER_CLASSES: [&str; 1] = ["container$"];
 
-const UTILITIES_LAYER_CLASSES: [&str; 578] = [
+const UTILITIES_LAYER_CLASSES: [&str; 587] = [
     "sr-only$",
     "not-sr-only$",
     "pointer-events-none$",
@@ -19,14 +19,23 @@ const UTILITIES_LAYER_CLASSES: [&str; 578] = [
     "relative$",
     "sticky$",
     "inset-",
+    "-inset-",
     "inset-x-",
+    "-inset-x-",
     "inset-y-",
+    "-inset-y-",
     "start-",
+    "-start-",
     "end-",
+    "-end-",
     "top-",
+    "-top-",
     "right-",
+    "-right-",
     "bottom-",
+    "-bottom-",
     "left-",
+    "-left-",
     "isolate$",
     "isolation-auto$",
     "z-",
