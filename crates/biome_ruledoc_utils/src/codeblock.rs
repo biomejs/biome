@@ -138,6 +138,11 @@ impl FromStr for CodeBlock {
 
                         code_block.file_path = Some(normalize_file_path(path));
                     } else {
+                        if DocumentFileSource::from_extension(token) == DocumentFileSource::Unknown
+                        {
+                            bail!("Unrecognised attribute in code block: {token}");
+                        }
+
                         if code_block.document_file_source() != DocumentFileSource::Unknown {
                             bail!(
                                 "Only one language tag is accepted per code block. Found '{}' and '{}'",
@@ -147,10 +152,6 @@ impl FromStr for CodeBlock {
                         }
 
                         code_block.tag = token.to_string();
-
-                        if code_block.document_file_source() == DocumentFileSource::Unknown {
-                            bail!("Unrecognised attribute in code block: {token}");
-                        }
                     }
                 }
             }
