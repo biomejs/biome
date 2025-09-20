@@ -670,7 +670,7 @@ fn handle_static_member_expression(
     {
         reads.insert(ClassMemberReference {
             name: member.to_trimmed_text(),
-            range: static_member.syntax().text_trimmed_range(),
+            range: member.syntax().text_trimmed_range(),
             is_meaningful_read: is_meaningful_read(&static_member.into()),
         });
     }
