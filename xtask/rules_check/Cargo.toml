@@ -29,8 +29,8 @@ biome_json_syntax     = { workspace = true }
 biome_module_graph    = { workspace = true }
 biome_project_layout  = { workspace = true }
 biome_rowan           = { workspace = true }
+biome_ruledoc_utils   = { workspace = true }
 biome_service         = { workspace = true }
-biome_test_utils      = { workspace = true }
 camino                = { workspace = true }
 pulldown-cmark        = "0.13.0"
 
