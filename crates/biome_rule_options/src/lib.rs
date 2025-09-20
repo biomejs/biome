@@ -237,6 +237,7 @@ pub mod no_void;
 pub mod no_void_elements_with_children;
 pub mod no_void_type_return;
 pub mod no_vue_data_object_declaration;
+pub mod no_vue_duplicate_keys;
 pub mod no_vue_reserved_keys;
 pub mod no_vue_reserved_props;
 pub mod no_with;
