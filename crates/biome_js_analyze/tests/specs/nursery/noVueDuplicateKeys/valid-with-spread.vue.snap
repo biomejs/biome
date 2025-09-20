@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-with-spread.vue
+---
+# Input
+```ts
+export default {
+    ...foo(),
+    props: {
+        ...foo(),
+        foo: String
+    },
+    computed: {
+        ...mapGetters({
+            test: 'getTest'
+        }),
+        bar: {
+            get () {}
+        }
+    }
+}
+
+```
