@@ -71,6 +71,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noVueDataObjectDeclaration"),
         RuleFilter::Rule("nursery", "noVueReservedKeys"),
         RuleFilter::Rule("nursery", "noVueReservedProps"),
+        RuleFilter::Rule("nursery", "useVueMultiWordComponentNames"),
     ]
 });
 impl DomainSelector {
