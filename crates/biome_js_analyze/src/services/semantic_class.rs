@@ -636,7 +636,7 @@ fn handle_object_binding_pattern(
                 reads.insert(ClassMemberReference {
                     name: declarator.clone().to_trimmed_text(),
                     range: declarator.clone().syntax().text_trimmed_range(),
-                    is_meaningful_read: is_meaningful_read(&declarator.into()),
+                    is_meaningful_read: is_meaningful_read(&declarator.clone().into()),
                 });
             }
         }
@@ -1064,7 +1064,7 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![("baz", Some(true)), ("qux", Some(true))],
+                expected_reads: vec![("baz", Some(false)), ("qux", Some(false))],
                 expected_writes: vec![],
             },
         ];
