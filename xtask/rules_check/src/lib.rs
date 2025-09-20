@@ -1,10 +1,15 @@
 //! This module is in charge of checking if the documentation and tests cases inside the Analyzer rules are correct.
 //!
 //!
-use anyhow::{bail, ensure};
+use std::collections::{BTreeMap, HashMap};
+use std::fmt::{Display, Formatter, Write};
+use std::str::FromStr;
+use std::{mem, slice};
+
+use anyhow::bail;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
-    RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
+    AnalysisFilter, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory,
+    RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_configuration::Configuration;
 use biome_console::{Console, markup};
@@ -12,7 +17,6 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
-use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
@@ -20,16 +24,9 @@ use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
 use biome_rowan::AstNode;
-use biome_service::projects::{ProjectKey, Projects};
-use biome_service::settings::ServiceLanguage;
+use biome_ruledoc_utils::{AnalyzerServicesBuilder, CodeBlock, OptionsParsingMode};
 use biome_service::workspace::DocumentFileSource;
-use biome_test_utils::get_test_services;
-use camino::Utf8PathBuf;
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
-use std::collections::{BTreeMap, HashMap};
-use std::fmt::{Display, Formatter, Write};
-use std::slice;
-use std::str::FromStr;
 
 #[derive(Debug)]
 struct Errors(String);
@@ -151,105 +148,10 @@ pub fn check_rules() -> anyhow::Result<()> {
     Ok(())
 }
 
-struct CodeBlockTest {
-    /// The language tag of this code block.
-    tag: String,
-
-    /// True if this is an invalid example that should trigger a diagnostic.
-    expect_diagnostic: bool,
-
-    /// Whether to ignore this code block.
-    ignore: bool,
-
-    /// Whether this is a block of configuration options instead
-    /// of a valid/invalid code example, and if yes, how that
-    /// block of configuration options should be parsed:
-    options: OptionsParsingMode,
-
-    /// Whether to use the last code block that was marked with
-    /// `options` as the configuration settings for this code block.
-    use_options: bool,
-
-    /// The given file path in the testing in memory file system if provided.
-    file_path: Option<String>,
-}
-
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-enum OptionsParsingMode {
-    /// This code block does not contain configuration options.
-    #[default]
-    NoOptions,
-
-    /// This code block contains the options for a single rule only.
-    RuleOptionsOnly,
-
-    /// This code block contains JSON that adheres to the full `biome.json` schema.
-    FullConfiguration,
-}
-
-impl CodeBlockTest {
-    fn document_file_source(&self) -> DocumentFileSource {
-        DocumentFileSource::from_extension(&self.tag)
-    }
-}
-
-impl FromStr for CodeBlockTest {
-    type Err = anyhow::Error;
-
-    fn from_str(input: &str) -> anyhow::Result<Self> {
-        // This is based on the parsing logic for code block languages in `rustdoc`:
-        // https://github.com/rust-lang/rust/blob/6ac8adad1f7d733b5b97d1df4e7f96e73a46db42/src/librustdoc/html/markdown.rs#L873
-        let tokens = input
-            .split([',', ' ', '\t'])
-            .map(str::trim)
-            .filter(|token| !token.is_empty());
-
-        let mut test = Self {
-            tag: String::new(),
-            expect_diagnostic: false,
-            ignore: false,
-            options: OptionsParsingMode::NoOptions,
-            use_options: false,
-            file_path: None,
-        };
-
-        for token in tokens {
-            // Handle file=path attribute to create multi-file test scenarios
-            if let Some(file) = token.strip_prefix("file=") {
-                if file.is_empty() {
-                    bail!("The 'file' attribute must be followed by a file path");
-                }
-
-                // Normalize to absolute paths for consistent module resolution
-                let path = file
-                    .trim_start_matches("./")
-                    .trim_start_matches("../")
-                    .trim();
-                test.file_path = Some(format!("/{path}"));
-
-                continue;
-            }
-
-            match token {
-                // Other attributes
-                "expect_diagnostic" => test.expect_diagnostic = true,
-                "ignore" => test.ignore = true,
-                "options" => test.options = OptionsParsingMode::RuleOptionsOnly,
-                "full_options" => test.options = OptionsParsingMode::FullConfiguration,
-                "use_options" => test.use_options = true,
-                // Regard as language tags, last one wins
-                _ => test.tag = token.to_string(),
-            }
-        }
-
-        Ok(test)
-    }
-}
-
 struct DiagnosticWriter<'a> {
     group: &'a str,
     rule: &'a str,
-    test: &'a CodeBlockTest,
+    test: &'a CodeBlock,
     code: &'a str,
     diagnostic_count: i32,
     all_diagnostics: Vec<biome_diagnostics::Error>,
@@ -258,7 +160,7 @@ struct DiagnosticWriter<'a> {
 }
 
 impl<'a> DiagnosticWriter<'a> {
-    pub fn new(group: &'a str, rule: &'a str, test: &'a CodeBlockTest, code: &'a str) -> Self {
+    pub fn new(group: &'a str, rule: &'a str, test: &'a CodeBlock, code: &'a str) -> Self {
         DiagnosticWriter {
             group,
             rule,
@@ -279,17 +181,26 @@ impl<'a> DiagnosticWriter<'a> {
         // Record the diagnostic
         self.all_diagnostics.push(self.adjust_span_offset(diag));
 
-        // Fail the test if the analysis returns more diagnostics than expected...
         if self.test.expect_diagnostic {
-            if self.all_diagnostics.len() > 1 {
+            // Fail the test if the analysis does not return exactly one diagnostic...
+            if self.all_diagnostics.len() != 1 {
                 self.print_all_diagnostics();
                 self.has_error = true;
                 bail!(
-                    "Analysis of '{group}/{rule}' on the following code block returned multiple diagnostics.\n\n{code}"
+                    "Analysis of '{group}/{rule}' on the following code block returned {num_diagnostics} diagnostics, but a single diagnostic was expected.\n\n{code}",
+                    num_diagnostics = self.all_diagnostics.len()
+                );
+            }
+        } else if self.test.expect_diff {
+            // ...or there is no diff...
+            if self.all_diagnostics.is_empty() {
+                self.has_error = true;
+                bail!(
+                    "Analysis of '{group}/{rule}' on the following code block returned no diff where one was expected.\n\n{code}",
                 );
             }
         } else {
-            // ...or if the analysis returns a diagnostic when it is expected to not report one.
+            // ...or if the analysis returns a diagnostic when none are expected.
             self.print_all_diagnostics();
             self.has_error = true;
             bail!(
@@ -329,52 +240,17 @@ impl<'a> DiagnosticWriter<'a> {
     }
 }
 
-fn create_analyzer_options<L>(
-    workspace_settings: &Projects,
-    project_key: ProjectKey,
-    file_path: &String,
-    test: &CodeBlockTest,
-) -> AnalyzerOptions
-where
-    L: ServiceLanguage,
-{
-    let path = BiomePath::new(Utf8PathBuf::from(&file_path));
-    let file_source = &test.document_file_source();
-    let suppression_reason = None;
-
-    let Some(settings) = workspace_settings.get_root_settings(project_key) else {
-        return AnalyzerOptions::default();
-    };
-    let language_settings = &L::lookup_settings(&settings.languages).linter;
-
-    let environment = L::resolve_environment(&settings);
-
-    L::resolve_analyzer_options(
-        &settings,
-        language_settings,
-        environment,
-        &path,
-        file_source,
-        suppression_reason,
-    )
-}
-
 /// Parse and analyze the provided code block, and asserts that it emits
 /// exactly zero or one diagnostic depending on the value of `expect_diagnostic`.
 /// That diagnostic is then emitted as text into the `content` buffer
 fn assert_lint(
     group: &'static str,
     rule: &'static str,
-    test: &CodeBlockTest,
+    test: &CodeBlock,
     code: &str,
-    config: &Option<Configuration>,
-    test_files: &HashMap<String, String>,
+    config: Option<Configuration>,
+    services_builder: &AnalyzerServicesBuilder,
 ) -> anyhow::Result<()> {
-    let file_path = test
-        .file_path
-        .clone()
-        .unwrap_or_else(|| format!("code-block.{}", test.tag));
-
     if test.ignore {
         return Ok(());
     }
@@ -382,24 +258,6 @@ fn assert_lint(
     // Record the diagnostics emitted by the lint rule to later check if
     // what was emitted matches the expectations set for this code block.
     let mut diagnostics = DiagnosticWriter::new(group, rule, test, code);
-
-    // Create a synthetic workspace configuration
-    let workspace_settings = Projects::default();
-    let project_key = workspace_settings.insert_project(Utf8PathBuf::new());
-
-    // Load settings from the preceding `json,options` block if requested
-    if test.use_options {
-        let Some(partial_config) = config else {
-            bail!(
-                "Code blocks tagged with 'use_options' must be preceded by a valid 'json,options' code block."
-            );
-        };
-
-        if let Some(mut settings) = workspace_settings.get_root_settings(project_key) {
-            settings.merge_with_configuration(partial_config.clone(), None)?;
-            workspace_settings.set_root_settings(project_key, settings);
-        }
-    }
 
     match test.document_file_source() {
         DocumentFileSource::Js(file_source) => {
@@ -424,7 +282,9 @@ fn assert_lint(
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
-                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                    let error = diag
+                        .with_file_path(test.file_path())
+                        .with_file_source_code(code);
                     diagnostics.write_diagnostic(error)?;
                 }
             } else {
@@ -436,14 +296,9 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsLanguage>(
-                    &workspace_settings,
-                    project_key,
-                    &file_path,
-                    test,
-                );
+                let options = test.create_analyzer_options::<JsLanguage>(config)?;
 
-                let services = get_test_services(file_source, test_files);
+                let services = services_builder.build_for_js_file_source(file_source);
 
                 biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -453,7 +308,9 @@ fn assert_lint(
                             }
                         }
 
-                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                        let error = diag
+                            .with_file_path(test.file_path())
+                            .with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -472,7 +329,9 @@ fn assert_lint(
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
-                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                    let error = diag
+                        .with_file_path(test.file_path())
+                        .with_file_source_code(code);
                     diagnostics.write_diagnostic(error)?;
                 }
             } else {
@@ -484,12 +343,7 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(
-                    &workspace_settings,
-                    project_key,
-                    &file_path,
-                    test,
-                );
+                let options = test.create_analyzer_options::<JsonLanguage>(config)?;
 
                 biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -499,7 +353,9 @@ fn assert_lint(
                             }
                         }
 
-                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                        let error = diag
+                            .with_file_path(test.file_path())
+                            .with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -518,7 +374,9 @@ fn assert_lint(
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
-                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                    let error = diag
+                        .with_file_path(test.file_path())
+                        .with_file_source_code(code);
                     diagnostics.write_diagnostic(error)?;
                 }
             } else {
@@ -530,12 +388,7 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(
-                    &workspace_settings,
-                    project_key,
-                    &file_path,
-                    test,
-                );
+                let options = test.create_analyzer_options::<CssLanguage>(config)?;
 
                 biome_css_analyze::analyze(&root, filter, &options, &[], |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -545,7 +398,9 @@ fn assert_lint(
                             }
                         }
 
-                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                        let error = diag
+                            .with_file_path(test.file_path())
+                            .with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -564,7 +419,9 @@ fn assert_lint(
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
-                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                    let error = diag
+                        .with_file_path(test.file_path())
+                        .with_file_source_code(code);
                     diagnostics.write_diagnostic(error)?;
                 }
             } else {
@@ -576,12 +433,7 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(
-                    &workspace_settings,
-                    project_key,
-                    &file_path,
-                    test,
-                );
+                let options = test.create_analyzer_options::<GraphqlLanguage>(config)?;
 
                 biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -591,7 +443,9 @@ fn assert_lint(
                             }
                         }
 
-                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                        let error = diag
+                            .with_file_path(test.file_path())
+                            .with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -612,18 +466,8 @@ fn assert_lint(
         DocumentFileSource::Unknown | DocumentFileSource::Ignore => {}
     }
 
-    if test.expect_diagnostic {
-        // Fail the test if the analysis didn't emit any diagnostic
-        ensure!(
-            diagnostics.diagnostic_count == 1,
-            "Analysis of '{group}/{rule}' on the following code block with path '{file_path}' returned no diagnostics.\n\n{code}",
-        );
-    }
-
     if diagnostics.has_error {
-        bail!(
-            "A code snippet must emit one single diagnostic, but it seems multiple diagnostics were emitted. Make sure that all the snippets inside the code block 'expect_diagnostic' emit only one diagnostic."
-        )
+        bail!("Please resolve the error in the above code block(s).")
     }
 
     Ok(())
@@ -670,10 +514,10 @@ fn parse_rule_options(
     group: &'static str,
     rule_metadata: &RuleMetadata,
     category: RuleCategory,
-    test: &CodeBlockTest,
+    test: &CodeBlock,
     code: &str,
 ) -> anyhow::Result<Option<Configuration>> {
-    let file_path = format!("code-block.{}", test.tag);
+    let file_path = test.file_path();
 
     // Record the diagnostics emitted during configuration parsing to later check
     // if what was emitted matches the expectations set for this code block.
@@ -847,7 +691,7 @@ fn parse_documentation(
             // CodeBlock-specific handling
             Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(meta))) => {
                 // Track the content of code blocks to pass them through the analyzer
-                let test = CodeBlockTest::from_str(meta.as_ref())?;
+                let test = CodeBlock::from_str(meta.as_ref())?;
                 language = Some((test, String::new()));
             }
             Event::End(TagEnd::CodeBlock) => {
@@ -856,10 +700,10 @@ fn parse_documentation(
                         last_options =
                             parse_rule_options(group, &rule_metadata, category, &test, &block)?;
                     } else {
-                        if let Some(file_path) = &test.file_path {
+                        if let Some(file_path) = test.explicit_file_path() {
                             test_runner
                                 .file_system
-                                .insert(file_path.clone(), block.clone());
+                                .insert(file_path.to_string(), block.clone());
                         }
 
                         test_runner.pending_tests.push(PendingTest {
@@ -902,7 +746,7 @@ fn parse_documentation(
 
 struct PendingTest {
     /// The test definition
-    test: CodeBlockTest,
+    test: CodeBlock,
     /// The code block content for the test
     block: String,
     /// The last encountered configuration options block seen before this test was collected.
@@ -938,21 +782,23 @@ impl TestRunner {
         }
     }
 
-    /// Runs all pending tests with the current file system, then resets state for the next section.
+    /// Runs all pending tests with the current file system.
+    ///
+    /// Resets state for the next section.
     pub fn run_pending_tests(&mut self) -> anyhow::Result<()> {
-        for test in &self.pending_tests {
+        let services_builder =
+            AnalyzerServicesBuilder::from_files(mem::take(&mut self.file_system));
+
+        for test in self.pending_tests.drain(..) {
             assert_lint(
                 self.group,
                 self.rule_name,
                 &test.test,
                 &test.block,
-                &test.options_snapshot,
-                &self.file_system,
+                test.options_snapshot,
+                &services_builder,
             )?;
         }
-
-        self.pending_tests.clear();
-        self.file_system.clear();
 
         Ok(())
     }

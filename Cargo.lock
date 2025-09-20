@@ -1453,6 +1453,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_ruledoc_utils"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "biome_analyze",
+ "biome_configuration",
+ "biome_fs",
+ "biome_js_analyze",
+ "biome_js_parser",
+ "biome_json_parser",
+ "biome_module_graph",
+ "biome_project_layout",
+ "biome_service",
+ "biome_test_utils",
+ "camino",
+]
+
+[[package]]
 name = "biome_service"
 version = "0.0.0"
 dependencies = [
@@ -4038,8 +4056,8 @@ dependencies = [
  "biome_module_graph",
  "biome_project_layout",
  "biome_rowan",
+ "biome_ruledoc_utils",
  "biome_service",
- "biome_test_utils",
  "camino",
  "pulldown-cmark",
 ]
