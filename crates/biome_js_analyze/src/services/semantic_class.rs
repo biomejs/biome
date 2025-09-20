@@ -1,20 +1,21 @@
-use biome_js_syntax::{
-    AnyJsClassMember, AnyJsExpression, AnyJsRoot, JsArrayAssignmentPattern,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsClassDeclaration, JsClassMemberList,
-    JsConstructorClassMember, JsFunctionBody, JsLanguage, JsObjectAssignmentPattern,
-    JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember,
-    JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclarator, TextRange, TsPropertyParameter,
-};
-
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
+};
+use biome_js_syntax::{
+    AnyJsClassMember, AnyJsExpression, AnyJsObjectBindingPatternMember, AnyJsRoot,
+    JsArrayAssignmentPattern, JsArrowFunctionExpression, JsAssignmentExpression,
+    JsClassDeclaration, JsClassMemberList, JsConstructorClassMember, JsFunctionBody, JsLanguage,
+    JsObjectAssignmentPattern, JsObjectBindingPattern, JsPostUpdateExpression,
+    JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment,
+    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange,
+    TsPropertyParameter,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, WalkEvent, declare_node_union,
 };
 use rustc_hash::FxHashSet;
+use std::option::Option;
 
 #[derive(Clone)]
 pub struct SemanticClassServices {
@@ -129,6 +130,7 @@ where
 pub struct ClassMemberReference {
     pub name: Text,
     pub range: TextRange,
+    pub is_meaningful_read: Option<bool>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
@@ -139,6 +141,14 @@ pub struct ClassMemberReferences {
 
 declare_node_union! {
     pub AnyPropertyMember = JsPropertyClassMember | TsPropertyParameter
+}
+
+declare_node_union! {
+    pub MeaningfulReadNode = AnyJsUpdateExpression | AnyJsObjectBindingPatternMember | JsStaticMemberExpression
+}
+
+declare_node_union! {
+    pub AnyJsUpdateExpression = JsPreUpdateExpression | JsPostUpdateExpression
 }
 
 /// Collects all `this` property references used within the members of a JavaScript class.
@@ -336,7 +346,6 @@ impl ThisScopeReferences {
             .filter_map(|node| node.as_js_variable_statement().cloned())
             .filter_map(|stmt| stmt.declaration().ok().map(|decl| decl.declarators()))
             .flat_map(|declarators| {
-                // .into() not working here, JsVariableDeclaratorList is not implmenting it correctly
                 declarators.into_iter().filter_map(|declaration| {
                     declaration.ok().map(|declarator| declarator.as_fields())
                 })
@@ -350,6 +359,8 @@ impl ThisScopeReferences {
                     ClassMemberReference {
                         name: id.to_trimmed_text().clone(),
                         range: id.syntax().text_trimmed_range(),
+                        // right hand side of a js variable statement is meaningful read
+                        is_meaningful_read: Some(true),
                     }
                 })
             })
@@ -406,6 +417,7 @@ struct ThisPatternResolver {}
 
 impl ThisPatternResolver {
     /// Extracts `this` references from array assignments (e.g., `[this.#value]` or `[...this.#value]`).
+    /// only applicable to writes
     fn collect_array_assignment_names(
         array_assignment_pattern: &JsArrayAssignmentPattern,
         scoped_this_references: &[FunctionThisReferences],
@@ -426,6 +438,8 @@ impl ThisPatternResolver {
                             Self::extract_this_member_reference(
                                 assignment.as_js_static_member_assignment(),
                                 scoped_this_references,
+                                // it is a write reference
+                                None,
                             )
                         })
                 }
@@ -441,6 +455,8 @@ impl ThisPatternResolver {
                             Self::extract_this_member_reference(
                                 assignment.as_js_static_member_assignment(),
                                 scoped_this_references,
+                                // it is a write reference
+                                None,
                             )
                         })
                 } else {
@@ -451,6 +467,7 @@ impl ThisPatternResolver {
     }
 
     /// Collects assignment names from a JavaScript object assignment pattern, e.g. `{...this.#value}`.
+    /// only applicable to writes
     fn collect_object_assignment_names(
         assignment: &JsObjectAssignmentPattern,
         scoped_this_references: &[FunctionThisReferences],
@@ -468,6 +485,8 @@ impl ThisPatternResolver {
                     return Self::extract_this_member_reference(
                         rest_params.target().ok()?.as_js_static_member_assignment(),
                         scoped_this_references,
+                        // it is a write reference
+                        None,
                     );
                 }
                 if let Some(property) = prop
@@ -483,6 +502,8 @@ impl ThisPatternResolver {
                             .as_any_js_assignment()?
                             .as_js_static_member_assignment(),
                         scoped_this_references,
+                        // it is a write reference
+                        None,
                     );
                 }
                 None
@@ -501,6 +522,7 @@ impl ThisPatternResolver {
     fn extract_this_member_reference(
         operand: Option<&JsStaticMemberAssignment>,
         scoped_this_references: &[FunctionThisReferences],
+        is_meaningful_read: Option<bool>,
     ) -> Option<ClassMemberReference> {
         operand.and_then(|assignment| {
             if let Ok(object) = assignment.object()
@@ -512,6 +534,7 @@ impl ThisPatternResolver {
                         .map(|name| ClassMemberReference {
                             name: name.to_trimmed_text(),
                             range: name.syntax().text_trimmed_range(),
+                            is_meaningful_read,
                         })
                         .or_else(|| {
                             member
@@ -519,6 +542,7 @@ impl ThisPatternResolver {
                                 .map(|private_name| ClassMemberReference {
                                     name: private_name.to_trimmed_text(),
                                     range: private_name.syntax().text_trimmed_range(),
+                                    is_meaningful_read,
                                 })
                         })
                 })
@@ -565,7 +589,14 @@ fn visit_references_in_body(
                 handle_object_binding_pattern(&node, scoped_this_references, reads);
                 handle_static_member_expression(&node, scoped_this_references, reads);
                 handle_assignment_expression(&node, scoped_this_references, reads, writes);
-                handle_pre_or_post_update_expression(&node, scoped_this_references, reads, writes);
+                if let Some(js_update_expression) = AnyJsUpdateExpression::cast_ref(&node) {
+                    handle_pre_or_post_update_expression(
+                        &js_update_expression,
+                        scoped_this_references,
+                        reads,
+                        writes,
+                    );
+                }
             }
             WalkEvent::Leave(_) => {}
         }
@@ -603,8 +634,9 @@ fn handle_object_binding_pattern(
                 && is_this_reference(&expression, scoped_this_references)
             {
                 reads.insert(ClassMemberReference {
-                    name: declarator.to_trimmed_text(),
-                    range: declarator.syntax().text_trimmed_range(),
+                    name: declarator.clone().to_trimmed_text(),
+                    range: declarator.clone().syntax().text_trimmed_range(),
+                    is_meaningful_read: is_meaningful_read(&declarator.into()),
                 });
             }
         }
@@ -640,6 +672,7 @@ fn handle_static_member_expression(
         reads.insert(ClassMemberReference {
             name: member.to_trimmed_text(),
             range: static_member.syntax().text_trimmed_range(),
+            is_meaningful_read: is_meaningful_read(&static_member.into()),
         });
     }
 }
@@ -685,6 +718,8 @@ fn handle_assignment_expression(
             && let Some(name) = ThisPatternResolver::extract_this_member_reference(
                 operand.as_js_static_member_assignment(),
                 scoped_this_references,
+                // nodes inside assignment expressions are considered meaningful reads e.g. this.x += 1;
+                Some(true),
             )
         {
             reads.insert(name.clone());
@@ -711,6 +746,8 @@ fn handle_assignment_expression(
             && let Some(name) = ThisPatternResolver::extract_this_member_reference(
                 assignment.as_js_static_member_assignment(),
                 scoped_this_references,
+                // it is a write reference
+                None,
             )
         {
             writes.insert(name.clone());
@@ -733,23 +770,35 @@ fn handle_assignment_expression(
 /// }
 /// ```
 fn handle_pre_or_post_update_expression(
-    node: &SyntaxNode<JsLanguage>,
+    js_update_expression: &AnyJsUpdateExpression,
     scoped_this_references: &[FunctionThisReferences],
     reads: &mut FxHashSet<ClassMemberReference>,
     writes: &mut FxHashSet<ClassMemberReference>,
 ) {
-    let operand = JsPostUpdateExpression::cast_ref(node)
-        .and_then(|expr| expr.operand().ok())
-        .or_else(|| JsPreUpdateExpression::cast_ref(node).and_then(|expr| expr.operand().ok()));
+    let operand = match js_update_expression {
+        AnyJsUpdateExpression::JsPreUpdateExpression(expr) => expr.operand().ok(),
+        AnyJsUpdateExpression::JsPostUpdateExpression(expr) => expr.operand().ok(),
+    };
 
     if let Some(operand) = operand
         && let Some(name) = ThisPatternResolver::extract_this_member_reference(
             operand.as_js_static_member_assignment(),
             scoped_this_references,
+            None,
         )
     {
-        writes.insert(name.clone());
-        reads.insert(name.clone());
+        writes.insert(ClassMemberReference {
+            name: name.name.clone(),
+            range: name.range,
+            is_meaningful_read: None,
+        });
+        reads.insert(ClassMemberReference {
+            name: name.name,
+            range: name.range,
+            is_meaningful_read: is_meaningful_read(&MeaningfulReadNode::from(
+                js_update_expression.clone(),
+            )),
+        });
     }
 }
 
@@ -790,6 +839,9 @@ fn collect_class_property_reads_from_static_member(
         reads.insert(ClassMemberReference {
             name,
             range: static_member.syntax().text_trimmed_range(),
+            is_meaningful_read: is_meaningful_read(&MeaningfulReadNode::from(
+                static_member.clone(),
+            )),
         });
     }
 
@@ -817,6 +869,43 @@ fn is_within_scope_without_shadowing(
     false
 }
 
+pub fn is_meaningful_read(node: &MeaningfulReadNode) -> Option<bool> {
+    is_used_in_expression_context(node)
+}
+
+fn skip_parentheses(mut node: JsSyntaxNode) -> JsSyntaxNode {
+    while let Some(child) = node.first_child() {
+        if child.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
+            node = child; // move ownership
+        } else {
+            break;
+        }
+    }
+    node
+}
+
+fn is_used_in_expression_context(node: &MeaningfulReadNode) -> Option<bool> {
+    let mut current: JsSyntaxNode = node.syntax().clone();
+
+    // Limit the number of parent traversals to avoid deep recursion
+    for _ in 0..8 {
+        if let Some(parent) = current.parent() {
+            let parent = skip_parentheses(parent); // strip parentheses
+            match parent.kind() {
+                JsSyntaxKind::JS_RETURN_STATEMENT
+                | JsSyntaxKind::JS_CALL_ARGUMENTS
+                | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
+                | JsSyntaxKind::JS_LOGICAL_EXPRESSION
+                | JsSyntaxKind::JS_BINARY_EXPRESSION => return Some(true),
+                _ => current = parent,
+            }
+        } else {
+            break;
+        }
+    }
+    Some(false)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -827,8 +916,56 @@ mod tests {
     struct TestCase<'a> {
         description: &'a str,
         code: &'a str,
-        expected_reads: Vec<&'a str>,
-        expected_writes: Vec<&'a str>,
+        expected_reads: Vec<(&'a str, Option<bool>)>, // (name, is_meaningful_read)
+        expected_writes: Vec<(&'a str, Option<bool>)>, // (name, is_meaningful_read)
+    }
+
+    fn assert_reads(
+        reads: &FxHashSet<ClassMemberReference>,
+        expected: &[(&str, Option<bool>)],
+        description: &str,
+    ) {
+        for (expected_name, expected_meaningful) in expected {
+            let found = reads
+                .iter()
+                .find(|r| r.name.clone().text() == *expected_name)
+                .unwrap_or_else(|| {
+                    panic!(
+                        "Case '{}' failed: expected to find read '{}'",
+                        description, expected_name
+                    )
+                });
+
+            assert_eq!(
+                found.is_meaningful_read, *expected_meaningful,
+                "Case '{}' failed: read '{}' meaningful mismatch",
+                description, expected_name
+            );
+        }
+    }
+
+    fn assert_writes(
+        writes: &FxHashSet<ClassMemberReference>,
+        expected: &[(&str, Option<bool>)],
+        description: &str,
+    ) {
+        for (expected_name, expected_meaningful) in expected {
+            let found = writes
+                .iter()
+                .find(|r| r.name.clone().text() == *expected_name)
+                .unwrap_or_else(|| {
+                    panic!(
+                        "Case '{}' failed: expected to find write '{}'",
+                        description, expected_name
+                    )
+                });
+
+            assert_eq!(
+                found.is_meaningful_read, *expected_meaningful,
+                "Case '{}' failed: write '{}' meaningful mismatch",
+                description, expected_name
+            );
+        }
     }
 
     fn parse_ts(code: &str) -> Parse<AnyJsRoot> {
@@ -857,26 +994,26 @@ mod tests {
             TestCase {
                 description: "reads from this",
                 code: r#"
-                class Example {
-                    method() {
-                        const { foo, bar } = this;
-                    }
+            class Example {
+                method() {
+                    const { foo, bar } = this;
                 }
-            "#,
-                expected_reads: vec!["foo", "bar"],
+            }
+        "#,
+                expected_reads: vec![("foo", Some(false)), ("bar", Some(false))],
                 expected_writes: vec![],
             },
             TestCase {
                 description: "reads from aliasForThis",
                 code: r#"
-                class Example {
-                    method() {
-                        const aliasForThis = this;
-                        const { baz, qux } = aliasForThis;
-                    }
+            class Example {
+                method() {
+                    const aliasForThis = this;
+                    const { baz, qux } = aliasForThis;
                 }
-            "#,
-                expected_reads: vec!["baz", "qux"],
+            }
+        "#,
+                expected_reads: vec![("baz", Some(false)), ("qux", Some(false))],
                 expected_writes: vec![],
             },
         ];
@@ -896,16 +1033,7 @@ mod tests {
 
             handle_object_binding_pattern(&node, &function_this_references, &mut reads);
 
-            let names: Vec<_> = reads.into_iter().map(|r| r.name.to_string()).collect();
-
-            for expected_reads in &case.expected_reads {
-                assert!(
-                    names.contains(&(*expected_reads).to_string()),
-                    "Case '{}' failed: expected to find '{}'",
-                    case.description,
-                    expected_reads
-                );
-            }
+            assert_reads(&reads, &case.expected_reads, case.description);
         }
     }
 
@@ -915,28 +1043,28 @@ mod tests {
             TestCase {
                 description: "reads static members from this",
                 code: r#"
-                class Example {
-                    method() {
-                        console.log(this.foo);
-                        console.log(this.bar);
-                    }
+            class Example {
+                method() {
+                    console.log(this.foo);
+                    console.log(this.bar);
                 }
-            "#,
-                expected_reads: vec!["foo", "bar"],
+            }
+        "#,
+                expected_reads: vec![("foo", Some(true)), ("bar", Some(true))],
                 expected_writes: vec![],
             },
             TestCase {
                 description: "reads static members from aliasForThis",
                 code: r#"
-                class Example {
-                    method() {
-                        const aliasForThis = this;
-                        aliasForThis.baz;
-                        aliasForThis.qux;
-                    }
+            class Example {
+                method() {
+                    const aliasForThis = this;
+                    aliasForThis.baz;
+                    aliasForThis.qux;
                 }
-            "#,
-                expected_reads: vec!["baz", "qux"],
+            }
+        "#,
+                expected_reads: vec![("baz", Some(true)), ("qux", Some(true))],
                 expected_writes: vec![],
             },
         ];
@@ -952,7 +1080,6 @@ mod tests {
             let function_this_references =
                 ThisScopeReferences::new(&body).collect_function_this_references();
 
-            // Collect all static member expressions in the syntax
             let mut reads = FxHashSet::default();
 
             for member_expr in syntax
@@ -966,16 +1093,7 @@ mod tests {
                 );
             }
 
-            let names: Vec<_> = reads.into_iter().map(|r| r.name.to_string()).collect();
-
-            for expected_reads in &case.expected_reads {
-                assert!(
-                    names.contains(&(*expected_reads).to_string()),
-                    "Case '{}' failed: expected to find '{}'",
-                    case.description,
-                    expected_reads
-                );
-            }
+            assert_reads(&reads, &case.expected_reads, case.description);
         }
     }
 
@@ -985,32 +1103,32 @@ mod tests {
             TestCase {
                 description: "assignment reads and writes with this",
                 code: r#"
-                class Example {
-                    method() {
-                        this.x += 1;
-                        [this.y] = [10];
-                        ({ a: this.z } = obj);
-                    }
+            class Example {
+                method() {
+                    this.x += 1;
+                    [this.y] = [10];
+                    ({ a: this.z } = obj);
                 }
-            "#,
-                expected_reads: vec!["x"],
-                expected_writes: vec!["x", "y", "z"],
+            }
+        "#,
+                expected_reads: vec![("x", Some(true))], // x is read due to +=
+                expected_writes: vec![("x", None), ("y", None), ("z", None)],
             },
             TestCase {
                 description: "assignment reads and writes with aliasForThis",
                 code: r#"
-                class Example {
-                    method() {
-                        const aliasForThis = this;
-                        [aliasForThis.value] = [42];
-                        aliasForThis.x += 1;
-                        [aliasForThis.y] = [10];
-                        ({ a: aliasForThis.z } = obj);
-                    }
+            class Example {
+                method() {
+                    const aliasForThis = this;
+                    [aliasForThis.value] = [42];
+                    aliasForThis.x += 1;
+                    [aliasForThis.y] = [10];
+                    ({ a: aliasForThis.z } = obj);
                 }
-            "#,
-                expected_reads: vec!["x"],
-                expected_writes: vec!["x", "y", "z"],
+            }
+        "#,
+                expected_reads: vec![("x", Some(true))],
+                expected_writes: vec![("x", None), ("y", None), ("z", None)],
             },
         ];
 
@@ -1040,26 +1158,8 @@ mod tests {
                 );
             }
 
-            let read_names: Vec<_> = reads.into_iter().map(|r| r.name.to_string()).collect();
-            let write_names: Vec<_> = writes.into_iter().map(|r| r.name.to_string()).collect();
-
-            for expected_read in &case.expected_reads {
-                assert!(
-                    read_names.contains(&(*expected_read).to_string()),
-                    "Case '{}' failed: expected to find read '{}'",
-                    case.description,
-                    expected_read
-                );
-            }
-
-            for expected_write in &case.expected_writes {
-                assert!(
-                    write_names.contains(&(*expected_write).to_string()),
-                    "Case '{}' failed: expected to find write '{}'",
-                    case.description,
-                    expected_write
-                );
-            }
+            assert_reads(&reads, &case.expected_reads, case.description);
+            assert_writes(&writes, &case.expected_writes, case.description);
         }
     }
 
@@ -1069,15 +1169,30 @@ mod tests {
             TestCase {
                 description: "pre/post update expressions on this properties",
                 code: r#"
-                class Example {
+                class AnyJsUpdateExpression {
                     method() {
                         this.count++;
                         --this.total;
+
+                        if (this.inIfCondition++ > 5) {
+                        }
+
+                        return this.inReturn++;
                     }
                 }
             "#,
-                expected_reads: vec!["count", "total"],
-                expected_writes: vec!["count", "total"],
+                expected_reads: vec![
+                    ("count", Some(false)),
+                    ("total", Some(false)),
+                    ("inIfCondition", Some(true)),
+                    ("inReturn", Some(true)),
+                ],
+                expected_writes: vec![
+                    ("count", None),
+                    ("total", None),
+                    ("inIfCondition", None),
+                    ("inReturn", None),
+                ],
             },
             TestCase {
                 description: "pre/post update expressions on aliasForThis properties",
@@ -1086,13 +1201,23 @@ mod tests {
                     method() {
                         const aliasForThis = this;
                         const anotherAlias = this;
-                       aliasForThis.count++;
+                        aliasForThis.count++;
                         --anotherAlias.total;
+
+                        return anotherAlias.inReturnIncrement++;
                     }
                 }
             "#,
-                expected_reads: vec!["count", "total"],
-                expected_writes: vec!["count", "total"],
+                expected_reads: vec![
+                    ("count", Some(false)),
+                    ("total", Some(false)),
+                    ("inReturnIncrement", Some(true)),
+                ],
+                expected_writes: vec![
+                    ("count", None),
+                    ("total", None),
+                    ("inReturnIncrement", None),
+                ],
             },
         ];
 
@@ -1111,34 +1236,138 @@ mod tests {
             let mut writes = FxHashSet::default();
 
             for node in syntax.descendants() {
-                handle_pre_or_post_update_expression(
-                    &node,
-                    &function_this_references,
-                    &mut reads,
-                    &mut writes,
-                );
+                if let Some(js_update_expression) = AnyJsUpdateExpression::cast_ref(&node) {
+                    handle_pre_or_post_update_expression(
+                        &js_update_expression,
+                        &function_this_references,
+                        &mut reads,
+                        &mut writes,
+                    );
+                }
             }
 
-            let read_names: Vec<_> = reads.into_iter().map(|r| r.name.to_string()).collect();
-            let write_names: Vec<_> = writes.into_iter().map(|r| r.name.to_string()).collect();
+            assert_reads(&reads, &case.expected_reads, case.description);
+            assert_writes(&writes, &case.expected_writes, case.description);
+        }
+    }
 
-            for expected_name in &case.expected_reads {
+    mod is_meaningful_read_tests {
+        use super::*;
+        fn extract_all_meaningful_nodes(code: &str) -> Vec<MeaningfulReadNode> {
+            let parsed = parse_ts(code);
+            let root = parsed.syntax();
+
+            let mut nodes = vec![];
+
+            for descendant in root.descendants() {
+                // Try to cast the node itself
+                if let Some(node) = MeaningfulReadNode::cast_ref(&descendant) {
+                    nodes.push(node);
+                }
+
+                // If this is an assignment, also include LHS
+                if let Some(assign_expr) = JsAssignmentExpression::cast_ref(&descendant) {
+                    if let Ok(lhs) = assign_expr.left()
+                        && let Some(node) = MeaningfulReadNode::cast_ref(lhs.syntax())
+                    {
+                        nodes.push(node.clone());
+                    }
+
+                    if let Ok(rhs) = assign_expr.right()
+                        && let Some(node) = MeaningfulReadNode::cast_ref(rhs.syntax())
+                    {
+                        nodes.push(node.clone());
+                    }
+                }
+            }
+
+            nodes
+        }
+
+        struct TestCase<'a> {
+            code: &'a str,
+            node_index: usize,
+            expected: Option<bool>,
+        }
+
+        fn run_test_cases(cases: &[TestCase]) {
+            for case in cases {
+                let nodes = extract_all_meaningful_nodes(case.code);
                 assert!(
-                    read_names.contains(&(*expected_name).to_string()),
-                    "Case '{}' failed: expected to find read '{}'",
-                    case.description,
-                    expected_name
+                    nodes.len() > case.node_index,
+                    "Not enough nodes found in code: {}",
+                    case.code
                 );
-            }
 
-            for expected_name in &case.expected_writes {
-                assert!(
-                    write_names.contains(&(*expected_name).to_string()),
-                    "Case '{}' failed: expected to find write '{}'",
-                    case.description,
-                    expected_name
+                let node = &nodes[case.node_index];
+                let meaningful_node = MeaningfulReadNode::cast_ref(node.syntax())
+                    .expect("Failed to cast node to MeaningfulReadNode");
+
+                assert_eq!(
+                    is_meaningful_read(&meaningful_node),
+                    case.expected,
+                    "Failed for code: {}",
+                    case.code
                 );
             }
+        }
+
+        #[test]
+        fn test_meaningful_reads() {
+            let cases = [
+                TestCase {
+                    code: "class Test { method() { return this.x; } }",
+                    node_index: 0,
+                    expected: Some(true),
+                },
+                TestCase {
+                    code: "class Test { method() { if(this.x === 2) {} } }",
+                    node_index: 0,
+                    expected: Some(true),
+                },
+                TestCase {
+                    code: "class Test { method() { foo(this.x); } }",
+                    node_index: 0,
+                    expected: Some(true),
+                },
+                TestCase {
+                    code: "class Test { method() { const y = this.x + 1; } }",
+                    node_index: 0,
+                    expected: Some(true),
+                },
+                TestCase {
+                    code: "class Test { method() { bar(this.x || 0); } }",
+                    node_index: 0,
+                    expected: Some(true),
+                },
+                TestCase {
+                    code: "class Test { method() { this.x--; } }",
+                    node_index: 0,
+                    expected: Some(false),
+                },
+                TestCase {
+                    code: "class Test { method() { const unused = this.y; } }",
+                    node_index: 0,
+                    expected: Some(false),
+                },
+                TestCase {
+                    code: "class Test { method() { ++this.x; } }",
+                    node_index: 0,
+                    expected: Some(false),
+                },
+                TestCase {
+                    code: "class Test { method() { const incremented = this.x + 1; } }",
+                    node_index: 0,
+                    expected: Some(true),
+                },
+                TestCase {
+                    code: "class Test { method() { return this.x; } }",
+                    node_index: 0,
+                    expected: Some(true),
+                },
+            ];
+
+            run_test_cases(&cases);
         }
     }
 }
