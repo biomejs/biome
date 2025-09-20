@@ -13617,7 +13617,18 @@
 		},
 		"UseConsistentArrowReturnOptions": {
 			"type": "object",
+			"properties": {
+				"requireForObjectLiteral": { "default": false, "type": "boolean" },
+				"style": {
+					"default": "asNeeded",
+					"allOf": [{ "$ref": "#/definitions/UseConsistentArrowReturnStyle" }]
+				}
+			},
 			"additionalProperties": false
+		},
+		"UseConsistentArrowReturnStyle": {
+			"type": "string",
+			"enum": ["asNeeded", "always", "never"]
 		},
 		"UseConsistentBuiltinInstantiationConfiguration": {
 			"anyOf": [

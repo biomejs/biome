@@ -1,0 +1,103 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: never.invalid.js
+---
+# Input
+```js
+const a = () => {
+    return 1;
+};
+
+const b = async () => {
+    return await Promise.resolve(1);
+}
+
+const d = () => {
+    return { a: 1 };
+}
+
+
+```
+
+# Diagnostics
+```
+never.invalid.js:1:11 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The body of this arrow function contains a single return statement.
+  
+  > 1 │ const a = () => {
+      │           ^^^^^^^
+  > 2 │     return 1;
+  > 3 │ };
+      │ ^
+    4 │ 
+    5 │ const b = async () => {
+  
+  i Safe fix: Remove the return statement.
+  
+     1    │ - const·a·=·()·=>·{
+     2    │ - ····return·1;
+     3    │ - };
+        1 │ + const·a·=·()·=>·1;
+     4  2 │   
+     5  3 │   const b = async () => {
+  
+
+```
+
+```
+never.invalid.js:5:11 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The body of this arrow function contains a single return statement.
+  
+    3 │ };
+    4 │ 
+  > 5 │ const b = async () => {
+      │           ^^^^^^^^^^^^^
+  > 6 │     return await Promise.resolve(1);
+  > 7 │ }
+      │ ^
+    8 │ 
+    9 │ const d = () => {
+  
+  i Safe fix: Remove the return statement.
+  
+     3  3 │   };
+     4  4 │   
+     5    │ - const·b·=·async·()·=>·{
+     6    │ - ····return·await·Promise.resolve(1);
+     7    │ - }
+        5 │ + const·b·=·async·()·=>·await·Promise.resolve(1)
+     8  6 │   
+     9  7 │   const d = () => {
+  
+
+```
+
+```
+never.invalid.js:9:11 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The body of this arrow function contains a single return statement.
+  
+     7 │ }
+     8 │ 
+   > 9 │ const d = () => {
+       │           ^^^^^^^
+  > 10 │     return { a: 1 };
+  > 11 │ }
+       │ ^
+    12 │ 
+  
+  i Safe fix: Remove the return statement.
+  
+     7  7 │   }
+     8  8 │   
+     9    │ - const·d·=·()·=>·{
+    10    │ - ····return·{·a:·1·};
+    11    │ - }
+        9 │ + const·d·=·()·=>·({·a:·1·})
+    12 10 │   
+    13 11 │   
+  
+
+```

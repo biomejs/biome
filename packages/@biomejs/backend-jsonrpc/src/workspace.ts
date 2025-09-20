@@ -8138,7 +8138,10 @@ export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export type UseAnchorHrefOptions = null;
-export interface UseConsistentArrowReturnOptions {}
+export interface UseConsistentArrowReturnOptions {
+	requireForObjectLiteral?: boolean;
+	style?: UseConsistentArrowReturnStyle;
+}
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
 }
@@ -8503,6 +8506,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
+export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 export type ConsistentTypeDefinition = "interface" | "type";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
