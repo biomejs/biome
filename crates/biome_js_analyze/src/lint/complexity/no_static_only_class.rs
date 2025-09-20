@@ -34,7 +34,7 @@ declare_lint_rule! {
     ///   static bar() {};
     /// }
     /// ```
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// class StaticConstants {
     ///   static readonly version = 42;
     ///

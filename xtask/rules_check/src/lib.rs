@@ -148,67 +148,21 @@ pub fn check_rules() -> anyhow::Result<()> {
     Ok(())
 }
 
-struct DiagnosticWriter<'a> {
-    group: &'a str,
-    rule: &'a str,
-    test: &'a CodeBlock,
-    code: &'a str,
-    diagnostic_count: i32,
+#[derive(Default)]
+struct DiagnosticWriter {
     all_diagnostics: Vec<biome_diagnostics::Error>,
-    has_error: bool,
+    has_parse_error: bool,
     subtract_offset: TextSize,
 }
 
-impl<'a> DiagnosticWriter<'a> {
-    pub fn new(group: &'a str, rule: &'a str, test: &'a CodeBlock, code: &'a str) -> Self {
-        DiagnosticWriter {
-            group,
-            rule,
-            test,
-            code,
-            diagnostic_count: 0,
-            all_diagnostics: vec![],
-            has_error: false,
-            subtract_offset: TextSize::from(0),
-        }
+impl DiagnosticWriter {
+    pub fn write_diagnostic(&mut self, diag: biome_diagnostics::Error) {
+        self.all_diagnostics.push(self.adjust_span_offset(diag));
     }
 
-    pub fn write_diagnostic(&mut self, diag: biome_diagnostics::Error) -> anyhow::Result<()> {
-        let group = self.group;
-        let rule = self.rule;
-        let code = self.code;
-
-        // Record the diagnostic
-        self.all_diagnostics.push(self.adjust_span_offset(diag));
-
-        if self.test.expect_diagnostic {
-            // Fail the test if the analysis does not return exactly one diagnostic...
-            if self.all_diagnostics.len() != 1 {
-                self.print_all_diagnostics();
-                self.has_error = true;
-                bail!(
-                    "Analysis of '{group}/{rule}' on the following code block returned {num_diagnostics} diagnostics, but a single diagnostic was expected.\n\n{code}",
-                    num_diagnostics = self.all_diagnostics.len()
-                );
-            }
-        } else if self.test.expect_diff {
-            // ...or there is no diff...
-            if self.all_diagnostics.is_empty() {
-                self.has_error = true;
-                bail!(
-                    "Analysis of '{group}/{rule}' on the following code block returned no diff where one was expected.\n\n{code}",
-                );
-            }
-        } else {
-            // ...or if the analysis returns a diagnostic when none are expected.
-            self.print_all_diagnostics();
-            self.has_error = true;
-            bail!(
-                "Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}"
-            );
-        }
-        self.diagnostic_count += 1;
-        Ok(())
+    pub fn write_parse_error(&mut self, diag: biome_diagnostics::Error) {
+        self.has_parse_error = true;
+        self.write_diagnostic(diag);
     }
 
     /// Prints all diagnostics to help the user.
@@ -257,7 +211,7 @@ fn assert_lint(
 
     // Record the diagnostics emitted by the lint rule to later check if
     // what was emitted matches the expectations set for this code block.
-    let mut diagnostics = DiagnosticWriter::new(group, rule, test, code);
+    let mut diagnostics = DiagnosticWriter::default();
 
     match test.document_file_source() {
         DocumentFileSource::Js(file_source) => {
@@ -285,7 +239,7 @@ fn assert_lint(
                     let error = diag
                         .with_file_path(test.file_path())
                         .with_file_source_code(code);
-                    diagnostics.write_diagnostic(error)?;
+                    diagnostics.write_parse_error(error);
                 }
             } else {
                 let root = parse.tree();
@@ -311,16 +265,10 @@ fn assert_lint(
                         let error = diag
                             .with_file_path(test.file_path())
                             .with_file_source_code(code);
-                        let res = diagnostics.write_diagnostic(error);
-
-                        // Abort the analysis on error
-                        if let Err(err) = res {
-                            eprintln!("Error: {err}");
-                            return ControlFlow::Break(err);
-                        }
+                        diagnostics.write_diagnostic(error);
                     }
 
-                    ControlFlow::Continue(())
+                    ControlFlow::<()>::Continue(())
                 });
             }
         }
@@ -332,7 +280,7 @@ fn assert_lint(
                     let error = diag
                         .with_file_path(test.file_path())
                         .with_file_source_code(code);
-                    diagnostics.write_diagnostic(error)?;
+                    diagnostics.write_parse_error(error);
                 }
             } else {
                 let root = parse.tree();
@@ -356,28 +304,25 @@ fn assert_lint(
                         let error = diag
                             .with_file_path(test.file_path())
                             .with_file_source_code(code);
-                        let res = diagnostics.write_diagnostic(error);
-
-                        // Abort the analysis on error
-                        if let Err(err) = res {
-                            eprintln!("Error: {err}");
-                            return ControlFlow::Break(err);
-                        }
+                        diagnostics.write_diagnostic(error);
                     }
 
-                    ControlFlow::Continue(())
+                    ControlFlow::<()>::Continue(())
                 });
             }
         }
         DocumentFileSource::Css(..) => {
-            let parse = biome_css_parser::parse_css(code, CssParserOptions::default());
+            let parse_options = CssParserOptions::default()
+                .allow_css_modules()
+                .allow_tailwind_directives();
+            let parse = biome_css_parser::parse_css(code, parse_options);
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
                     let error = diag
                         .with_file_path(test.file_path())
                         .with_file_source_code(code);
-                    diagnostics.write_diagnostic(error)?;
+                    diagnostics.write_parse_error(error);
                 }
             } else {
                 let root = parse.tree();
@@ -401,16 +346,10 @@ fn assert_lint(
                         let error = diag
                             .with_file_path(test.file_path())
                             .with_file_source_code(code);
-                        let res = diagnostics.write_diagnostic(error);
-
-                        // Abort the analysis on error
-                        if let Err(err) = res {
-                            eprintln!("Error: {err}");
-                            return ControlFlow::Break(err);
-                        }
+                        diagnostics.write_diagnostic(error);
                     }
 
-                    ControlFlow::Continue(())
+                    ControlFlow::<()>::Continue(())
                 });
             }
         }
@@ -422,7 +361,7 @@ fn assert_lint(
                     let error = diag
                         .with_file_path(test.file_path())
                         .with_file_source_code(code);
-                    diagnostics.write_diagnostic(error)?;
+                    diagnostics.write_parse_error(error);
                 }
             } else {
                 let root = parse.tree();
@@ -446,16 +385,10 @@ fn assert_lint(
                         let error = diag
                             .with_file_path(test.file_path())
                             .with_file_source_code(code);
-                        let res = diagnostics.write_diagnostic(error);
-
-                        // Abort the analysis on error
-                        if let Err(err) = res {
-                            eprintln!("Error: {err}");
-                            return ControlFlow::Break(err);
-                        }
+                        diagnostics.write_diagnostic(error);
                     }
 
-                    ControlFlow::Continue(())
+                    ControlFlow::<()>::Continue(())
                 });
             }
         }
@@ -466,8 +399,34 @@ fn assert_lint(
         DocumentFileSource::Unknown | DocumentFileSource::Ignore => {}
     }
 
-    if diagnostics.has_error {
-        bail!("Please resolve the error in the above code block(s).")
+    if diagnostics.has_parse_error {
+        // Fail if there is a parse error...
+        diagnostics.print_all_diagnostics();
+        bail!(
+            "Analysis of '{group}/{rule}' on the following code block resulted in a parse error.\n\n{code}"
+        );
+    } else if test.expect_diagnostic {
+        // ...or if the analysis does not return exactly one diagnostic...
+        if diagnostics.all_diagnostics.len() != 1 {
+            diagnostics.print_all_diagnostics();
+            bail!(
+                "Analysis of '{group}/{rule}' on the following code block returned {num_diagnostics} diagnostics, but a single diagnostic was expected.\n\n{code}",
+                num_diagnostics = diagnostics.all_diagnostics.len()
+            );
+        }
+    } else if test.expect_diff {
+        // ...or there is no diff...
+        if diagnostics.all_diagnostics.is_empty() {
+            bail!(
+                "Analysis of '{group}/{rule}' on the following code block returned no diff where one was expected.\n\n{code}",
+            );
+        }
+    } else if !diagnostics.all_diagnostics.is_empty() {
+        // ...or if the analysis returns a diagnostic when none are expected.
+        diagnostics.print_all_diagnostics();
+        bail!(
+            "Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}"
+        );
     }
 
     Ok(())
@@ -514,160 +473,162 @@ fn parse_rule_options(
     group: &'static str,
     rule_metadata: &RuleMetadata,
     category: RuleCategory,
-    test: &CodeBlock,
+    block: &CodeBlock,
     code: &str,
 ) -> anyhow::Result<Option<Configuration>> {
-    let file_path = test.file_path();
+    let DocumentFileSource::Json(file_source) = block.document_file_source() else {
+        bail!(
+            "The following non-JSON code block for '{group}/{}' was marked as containing configuration options. Only JSON code blocks can used to provide configuration options.\n\n{code}",
+            rule_metadata.name
+        );
+    };
 
     // Record the diagnostics emitted during configuration parsing to later check
     // if what was emitted matches the expectations set for this code block.
-    let mut diagnostics = DiagnosticWriter::new(group, rule_metadata.name, test, code);
+    let mut diagnostics = DiagnosticWriter::default();
 
-    match test.document_file_source() {
-        DocumentFileSource::Json(file_source) => {
-            let parse = biome_json_parser::parse_json(code, JsonParserOptions::from(&file_source));
+    let parse = biome_json_parser::parse_json(code, JsonParserOptions::from(&file_source));
 
-            if parse.has_errors() {
-                for diag in parse.into_diagnostics() {
-                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
-                    diagnostics.write_diagnostic(error)?;
-                }
-                // Parsing failed, but test.expect_diagnostic is true
-                return Ok(None);
-            }
-
-            let parsed_root = parse.tree();
-            let parsed_options = parsed_root.value()?;
-
-            let root = match test.options {
-                OptionsParsingMode::NoOptions => {
-                    unreachable!("parse_rule_options should only be called for options blocks")
-                }
-                OptionsParsingMode::RuleOptionsOnly => {
-                    // By convention, the configuration blocks in the documentation
-                    // only contain the settings for the lint rule itself, like so:
-                    //
-                    // ```json,options
-                    // {
-                    //     "options": {
-                    //         ...
-                    //     }
-                    // }
-                    // ```
-                    //
-                    // We therefore extend the JSON AST with some synthetic elements
-                    // to make it match the structure expected by the configuration parse:
-                    //
-                    // {
-                    //     "linter": {
-                    //         "rules": {
-                    //             "<group>": {
-                    //                 "<rule>": {<options>}
-                    //             }
-                    //         }
-                    //     }
-                    // }
-                    let lint_or_assist = if category == RuleCategory::Lint {
-                        "linter"
-                    } else {
-                        "assist"
-                    };
-                    let rules_or_actions = if category == RuleCategory::Lint {
-                        "rules"
-                    } else {
-                        "actions"
-                    };
-                    let synthetic_tree = make_json_object_with_single_member(
-                        lint_or_assist,
-                        make_json_object_with_single_member(
-                            rules_or_actions,
-                            make_json_object_with_single_member(
-                                group,
-                                make_json_object_with_single_member(
-                                    rule_metadata.name,
-                                    parsed_options,
-                                ),
-                            ),
-                        ),
-                    );
-
-                    // Create a new JsonRoot from the synthetic AST
-                    let eof_token = parsed_root.eof_token()?;
-                    let mut root_builder = make::json_root(synthetic_tree.into(), eof_token);
-                    if let Some(bom_token) = parsed_root.bom_token() {
-                        root_builder = root_builder.with_bom_token(bom_token);
-                    }
-                    let synthetic_root = root_builder.build();
-
-                    // Adjust source code spans to account for the synthetic nodes
-                    // so that errors are reported at the correct source code locations:
-                    let original_offset =
-                        parsed_root.value().ok().map(|v| AstNode::range(&v).start());
-                    let wrapped_offset = synthetic_root
-                        .value()
-                        .ok()
-                        .and_then(|v| get_first_member(v, lint_or_assist))
-                        .and_then(|v| get_first_member(v, rules_or_actions))
-                        .and_then(|v| get_first_member(v, group))
-                        .and_then(|v| get_first_member(v, rule_metadata.name))
-                        .map(|v| AstNode::range(&v).start());
-                    diagnostics.subtract_offset = wrapped_offset
-                        .zip(original_offset)
-                        .and_then(|(wrapped, original)| wrapped.checked_sub(original))
-                        .unwrap_or_default();
-
-                    synthetic_root
-                }
-                OptionsParsingMode::FullConfiguration => {
-                    // In some rare cases, we want to be able to display full JSON configuration
-                    // instead, e.t. to be able to show off per-file overrides:
-                    //
-                    // ```json,full-options
-                    // {
-                    //     "linter": {
-                    //         "rules": {
-                    //             "<group>": {
-                    //                 "<rule>": {<options>}
-                    //             }
-                    //         }
-                    //     }
-                    // }
-                    // ```
-                    parsed_root
-                }
-            };
-
-            // Deserialize the configuration from the partially-synthetic AST,
-            // and report any errors encountered during deserialization.
-            let deserialized = deserialize_from_json_ast::<Configuration>(&root, "");
-            let (partial_configuration, deserialize_diagnostics) = deserialized.consume();
-
-            if !deserialize_diagnostics.is_empty() {
-                for diag in deserialize_diagnostics {
-                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
-                    diagnostics.write_diagnostic(error)?;
-                }
-                // Deserialization failed, but test.expect_diagnostic is true
-                return Ok(None);
-            }
-
-            let Some(result) = partial_configuration else {
-                bail!(
-                    "Failed to deserialize configuration options for '{group}/{}' from the following code block due to unknown error.\n\n{code}",
-                    rule_metadata.name
-                );
-            };
-
-            Ok(Some(result))
+    if parse.has_errors() {
+        for diag in parse.into_diagnostics() {
+            let error = diag
+                .with_file_path(block.file_path())
+                .with_file_source_code(code);
+            diagnostics.write_parse_error(error);
         }
-        _ => {
-            // Only JSON code blocks can contain configuration options
-            bail!(
-                "The following non-JSON code block for '{group}/{}' was marked as containing configuration options. Only JSON code blocks can used to provide configuration options.\n\n{code}",
-                rule_metadata.name
-            );
-        }
+        if block.expect_diagnostic {
+            return Ok(None);
+        } else {
+            diagnostics.print_all_diagnostics();
+            bail!("Please fix the parse errors above.");
+        };
     }
+
+    let parsed_root = parse.tree();
+    let parsed_options = parsed_root.value()?;
+
+    let root = match block.options {
+        OptionsParsingMode::NoOptions => {
+            unreachable!("parse_rule_options should only be called for options blocks")
+        }
+        OptionsParsingMode::RuleOptionsOnly => {
+            // By convention, the configuration blocks in the documentation
+            // only contain the settings for the lint rule itself, like so:
+            //
+            // ```json,options
+            // {
+            //     "options": {
+            //         ...
+            //     }
+            // }
+            // ```
+            //
+            // We therefore extend the JSON AST with some synthetic elements
+            // to make it match the structure expected by the configuration parse:
+            //
+            // {
+            //     "linter": {
+            //         "rules": {
+            //             "<group>": {
+            //                 "<rule>": {<options>}
+            //             }
+            //         }
+            //     }
+            // }
+            let lint_or_assist = if category == RuleCategory::Lint {
+                "linter"
+            } else {
+                "assist"
+            };
+            let rules_or_actions = if category == RuleCategory::Lint {
+                "rules"
+            } else {
+                "actions"
+            };
+            let synthetic_tree = make_json_object_with_single_member(
+                lint_or_assist,
+                make_json_object_with_single_member(
+                    rules_or_actions,
+                    make_json_object_with_single_member(
+                        group,
+                        make_json_object_with_single_member(rule_metadata.name, parsed_options),
+                    ),
+                ),
+            );
+
+            // Create a new JsonRoot from the synthetic AST
+            let eof_token = parsed_root.eof_token()?;
+            let mut root_builder = make::json_root(synthetic_tree.into(), eof_token);
+            if let Some(bom_token) = parsed_root.bom_token() {
+                root_builder = root_builder.with_bom_token(bom_token);
+            }
+            let synthetic_root = root_builder.build();
+
+            // Adjust source code spans to account for the synthetic nodes
+            // so that errors are reported at the correct source code locations:
+            let original_offset = parsed_root.value().ok().map(|v| AstNode::range(&v).start());
+            let wrapped_offset = synthetic_root
+                .value()
+                .ok()
+                .and_then(|v| get_first_member(v, lint_or_assist))
+                .and_then(|v| get_first_member(v, rules_or_actions))
+                .and_then(|v| get_first_member(v, group))
+                .and_then(|v| get_first_member(v, rule_metadata.name))
+                .map(|v| AstNode::range(&v).start());
+            diagnostics.subtract_offset = wrapped_offset
+                .zip(original_offset)
+                .and_then(|(wrapped, original)| wrapped.checked_sub(original))
+                .unwrap_or_default();
+
+            synthetic_root
+        }
+        OptionsParsingMode::FullConfiguration => {
+            // In some rare cases, we want to be able to display full JSON configuration
+            // instead, e.t. to be able to show off per-file overrides:
+            //
+            // ```json,full-options
+            // {
+            //     "linter": {
+            //         "rules": {
+            //             "<group>": {
+            //                 "<rule>": {<options>}
+            //             }
+            //         }
+            //     }
+            // }
+            // ```
+            parsed_root
+        }
+    };
+
+    // Deserialize the configuration from the partially-synthetic AST,
+    // and report any errors encountered during deserialization.
+    let deserialized = deserialize_from_json_ast::<Configuration>(&root, "");
+    let (config, deserialize_diagnostics) = deserialized.consume();
+
+    if !deserialize_diagnostics.is_empty() {
+        for diag in deserialize_diagnostics {
+            let error = diag
+                .with_file_path(block.file_path())
+                .with_file_source_code(code);
+            diagnostics.write_diagnostic(error);
+        }
+        if block.expect_diagnostic {
+            return Ok(None);
+        } else {
+            diagnostics.print_all_diagnostics();
+            bail!("Please fix the configuration errors above.");
+        };
+    }
+
+    if config.is_none() {
+        bail!(
+            "Failed to deserialize configuration options for '{group}/{}' from the following code block due to unknown error.\n\n{code}",
+            rule_metadata.name
+        );
+    }
+
+    Ok(config)
 }
 
 /// Parse the documentation fragment for a lint rule (in markdown) and lint the code blocks.
