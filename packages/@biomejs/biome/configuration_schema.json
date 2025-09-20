@@ -3999,6 +3999,16 @@
 			]
 		},
 		"NoReExportAllOptions": { "type": "object", "additionalProperties": false },
+		"NoReactForwardRefConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoReactForwardRefOptions" }
+			]
+		},
+		"NoReactForwardRefOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactPropAssignmentsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5031,6 +5041,13 @@
 					"description": "Disallow useVisibleTask$() functions in Qwik components.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactForwardRef": {
+					"description": "Replaces usages of forwardRef with passing ref as a prop.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoReactForwardRefConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8239,6 +8256,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoReExportAllOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoReactForwardRefOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoReactForwardRefOptions" }]
 				}
 			},
 			"additionalProperties": false

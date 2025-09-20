@@ -9,6 +9,18 @@ pub(crate) fn migrate_eslint_any_rule(
     results: &mut eslint_to_biome::MigrationResults,
 ) -> bool {
     match eslint_name {
+        "@eslint-react/no-forward-ref" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_react_forward_ref
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "@eslint-react/no-nested-component-definitions" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
