@@ -1,5 +1,109 @@
 # @biomejs/biome
 
+## 2.2.5
+
+### Patch Changes
+
+- [#7498](https://github.com/biomejs/biome/pull/7498) [`002cded`](https://github.com/biomejs/biome/commit/002cded543e6aa5f5cf55f48312f40c83975a22f) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6893](https://github.com/biomejs/biome/issues/6893): The [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) rule now correctly adds a dependency that is captured in a shorthand object member. For example:
+
+  ```jsx
+  useEffect(() => {
+    console.log({ firstId, secondId });
+  }, []);
+  ```
+
+  is now correctly fixed to:
+
+  ```jsx
+  useEffect(() => {
+    console.log({ firstId, secondId });
+  }, [firstId, secondId]);
+  ```
+
+- [#7520](https://github.com/biomejs/biome/pull/7520) [`3f06e19`](https://github.com/biomejs/biome/commit/3f06e19c6eb8476ad9de4e3dac00c50a2d6f0aed) Thanks [@arendjr](https://github.com/arendjr)! - Added new nursery rule [`noDeprecatedImports`](https://biomejs.dev/linter/rules/no-deprecated-imports/) to flag imports of deprecated symbols.
+
+  #### Invalid example
+
+  ```js
+  // foo.js
+  import { oldUtility } from "./utils.js";
+  ```
+
+  ```js
+  // utils.js
+  /**
+   * @deprecated
+   */
+  export function oldUtility() {}
+  ```
+
+  #### Valid examples
+
+  ```js
+  // foo.js
+  import { newUtility, oldUtility } from "./utils.js";
+  ```
+
+  ```js
+  // utils.js
+  export function newUtility() {}
+
+  // @deprecated (this is not a JSDoc comment)
+  export function oldUtility() {}
+  ```
+
+- [#7510](https://github.com/biomejs/biome/pull/7510) [`527cec2`](https://github.com/biomejs/biome/commit/527cec2ca10df23754e9958d17baefca6a559154) Thanks [@rriski](https://github.com/rriski)! - Implements [#7339](https://github.com/biomejs/biome/discussions/7339). GritQL patterns can now use native Biome AST nodes using their `PascalCase` names, in addition to the existing TreeSitter-compatible `snake_case` names.
+
+  ```grit
+  engine biome(1.0)
+  language js(typescript,jsx)
+
+  or {
+    // TreeSitter-compatible pattern
+    if_statement(),
+
+    // Native Biome AST node pattern
+    JsIfStatement()
+  } as $stmt where {
+    register_diagnostic(
+      span=$stmt,
+      message="Found an if statement"
+    )
+  }
+  ```
+
+- [#7497](https://github.com/biomejs/biome/pull/7497) [`bd70f40`](https://github.com/biomejs/biome/commit/bd70f40cb933c1df0c171a9048b62da432093308) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#7320](https://github.com/biomejs/biome/issues/7320): The [`useConsistentCurlyBraces`](https://biomejs.dev/linter/rules/use-consistent-curly-braces/) rule now correctly detects a string literal including `"` inside a JSX attribute value.
+
+- [#7497](https://github.com/biomejs/biome/pull/7497) [`bd70f40`](https://github.com/biomejs/biome/commit/bd70f40cb933c1df0c171a9048b62da432093308) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#7256](https://github.com/biomejs/biome/issues/7256): The [`useConsistentCurlyBraces`](https://biomejs.dev/linter/rules/use-consistent-curly-braces/) rule now correctly ignores a string literal with braces that contains only whitespaces. Previously, literals that contains single whitespace were only allowed.
+
+- [#7476](https://github.com/biomejs/biome/pull/7476) [`c015765`](https://github.com/biomejs/biome/commit/c015765af2defb042285d96588fcb5f531eb8b6f) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where the suppression action for `noPositiveTabindex` didn't place the suppression comment in the correct position.
+
+- [#7511](https://github.com/biomejs/biome/pull/7511) [`a0039fd`](https://github.com/biomejs/biome/commit/a0039fd5457d0df18242feed5d21ff868ceb0693) Thanks [@arendjr](https://github.com/arendjr)! - Added nursery rule [`noUnusedExpressions`](https://biomejs.dev/linter/rules/no-unused-expressions/) to flag expressions used as a statement that is neither an assignment nor a function call.
+
+  #### Invalid examples
+
+  ```js
+  f; // intended to call `f()` instead
+  ```
+
+  ```js
+  function foo() {
+    0; // intended to `return 0` instead
+  }
+  ```
+
+  #### Valid examples
+
+  ```js
+  f();
+  ```
+
+  ```js
+  function foo() {
+    return 0;
+  }
+  ```
+
 ## 2.2.4
 
 ### Patch Changes
@@ -1030,7 +1134,7 @@
 
   > [!WARNING]
   > **Breaking Change**: The
-  `noImportCycles` rule no longer detects import cycles that include one or more type-only imports by default.
+  > `noImportCycles` rule no longer detects import cycles that include one or more type-only imports by default.
   > To keep the old behaviour, you can turn off the `ignoreTypes` option explicitly:
   >
   > ```json
@@ -2835,8 +2939,7 @@
 
   The code action `quickfix.suppressRule` was removed in favour of two new code actions:
   - `quickfix.suppressRule.inline.biome`: a code action that adds a suppression comment for each violation.
-  -
-  `quickfix.suppressRule.topLevel.biome`: a code action that adds a suppression comment at the top of the file which suppresses a rule for the whole file.
+  - `quickfix.suppressRule.topLevel.biome`: a code action that adds a suppression comment at the top of the file which suppresses a rule for the whole file.
 
   Given the following code
 
@@ -4717,7 +4820,6 @@
   1. **Accessibility checks**:
 
      Now the rule correctly handles the following cases:
-
      - If an element is hidden from screen readers
      - If an element has the presentation role
      - If an element is interactive
