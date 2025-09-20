@@ -294,7 +294,6 @@ impl ThisScopeVisitor<'_> {
             }
 
             WalkEvent::Leave(node) => {
-                // println!("leave node in ThisScopeVisitor {:?}", node);
                 if let Some(last) = self.skipped_ranges.last()
                     && *last == node.text_range()
                 {
