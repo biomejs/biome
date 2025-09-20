@@ -872,12 +872,13 @@ pub fn is_meaningful_read(node: &MeaningfulReadNode) -> Option<bool> {
     is_used_in_expression_context(node)
 }
 
-fn skip_parentheses(mut node: JsSyntaxNode) -> JsSyntaxNode {
-    while let Some(child) = node.first_child() {
-        if child.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
-            node = child; // move ownership
-        } else {
-            break;
+/// If the node is a parenthesized expression, return the inner expression,
+/// otherwise return the node itself.
+fn skip_parentheses(node: JsSyntaxNode) -> JsSyntaxNode {
+    if node.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
+        // Assume the first child is the expression inside parentheses
+        if let Some(inner) = node.first_child() {
+            return inner;
         }
     }
     node
