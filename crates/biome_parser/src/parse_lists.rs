@@ -127,6 +127,11 @@ pub trait ParseSeparatedList {
         false
     }
 
+    /// `true` if the list allows for missing elements
+    fn allow_missing_elements(&self) -> bool {
+        true
+    }
+
     /// Method called at each iteration of the loop and checks if the expected
     /// separator is present.
     ///
@@ -166,7 +171,10 @@ pub trait ParseSeparatedList {
 
             let parsed_element = self.parse_element(p);
 
-            if parsed_element.is_absent() && p.at(self.separating_element_kind()) {
+            if parsed_element.is_absent()
+                && p.at(self.separating_element_kind())
+                && self.allow_missing_elements()
+            {
                 // a missing element
                 continue;
             }
