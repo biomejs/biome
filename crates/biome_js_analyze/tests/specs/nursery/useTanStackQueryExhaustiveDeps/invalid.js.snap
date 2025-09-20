@@ -1,0 +1,114 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// Missing userId in queryKey
+function Component1({ userId }) {
+  const query = useQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchUser(userId)
+  });
+}
+
+// Missing multiple dependencies
+function Component2({ userId, status }) {
+  const query = useQuery({
+    queryKey: ['users'],
+    queryFn: () => fetchUsersByStatus(userId, status)
+  });
+}
+
+// Missing dependency in template literal
+function Component3({ propertyId }) {
+  const query = useQuery({
+    queryKey: ['config'],
+    queryFn: () => fetch(`/api/config/${propertyId}`).then(res => res.json())
+  });
+}
+
+// Missing function parameter dependency
+function usePublicConfig(propertyId) {
+  return useQuery({
+    queryKey: ['config'],
+    queryFn: () => {
+      return fetch(`/api/config/${propertyId}`)
+        .then((res) => res.data);
+    }
+  });
+}
+```
+
+# Diagnostics
+```
+invalid.js:5:14 lint/nursery/useTanStackQueryExhaustiveDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The following dependencies are missing in your queryKey: userId
+  
+    3 │   const query = useQuery({
+    4 │     queryKey: ['users'],
+  > 5 │     queryFn: () => fetchUser(userId)
+      │              ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   });
+    7 │ }
+  
+  i Variables used in queryFn should be included in queryKey to ensure proper cache invalidation.
+  
+
+```
+
+```
+invalid.js:13:14 lint/nursery/useTanStackQueryExhaustiveDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The following dependencies are missing in your queryKey: status, userId
+  
+    11 │   const query = useQuery({
+    12 │     queryKey: ['users'],
+  > 13 │     queryFn: () => fetchUsersByStatus(userId, status)
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │   });
+    15 │ }
+  
+  i Variables used in queryFn should be included in queryKey to ensure proper cache invalidation.
+  
+
+```
+
+```
+invalid.js:21:14 lint/nursery/useTanStackQueryExhaustiveDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The following dependencies are missing in your queryKey: propertyId
+  
+    19 │   const query = useQuery({
+    20 │     queryKey: ['config'],
+  > 21 │     queryFn: () => fetch(`/api/config/${propertyId}`).then(res => res.json())
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │   });
+    23 │ }
+  
+  i Variables used in queryFn should be included in queryKey to ensure proper cache invalidation.
+  
+
+```
+
+```
+invalid.js:29:14 lint/nursery/useTanStackQueryExhaustiveDeps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The following dependencies are missing in your queryKey: propertyId
+  
+    27 │   return useQuery({
+    28 │     queryKey: ['config'],
+  > 29 │     queryFn: () => {
+       │              ^^^^^^^
+  > 30 │       return fetch(`/api/config/${propertyId}`)
+  > 31 │         .then((res) => res.data);
+  > 32 │     }
+       │     ^
+    33 │   });
+    34 │ }
+  
+  i Variables used in queryFn should be included in queryKey to ensure proper cache invalidation.
+  
+
+```
