@@ -1,4 +1,4 @@
-use crate::options::{JsxRuntime, PreferredQuote};
+use crate::options::{JsxRuntime, PreferredIndentation, PreferredQuote};
 use crate::{FromServices, Queryable, Rule, RuleKey, ServiceBag, registry::RuleRoot};
 use crate::{GroupCategory, RuleCategory, RuleGroup, RuleMetadata};
 use biome_diagnostics::{Error, Result};
@@ -16,8 +16,9 @@ pub struct RuleContext<'a, R: Rule> {
     globals: &'a [&'a str],
     file_path: &'a Utf8Path,
     options: &'a R::Options,
-    preferred_quote: &'a PreferredQuote,
-    preferred_jsx_quote: &'a PreferredQuote,
+    preferred_quote: PreferredQuote,
+    preferred_jsx_quote: PreferredQuote,
+    preferred_indentation: PreferredIndentation,
     jsx_runtime: Option<JsxRuntime>,
     css_modules: bool,
 }
@@ -34,8 +35,9 @@ where
         globals: &'a [&'a str],
         file_path: &'a Utf8Path,
         options: &'a R::Options,
-        preferred_quote: &'a PreferredQuote,
-        preferred_jsx_quote: &'a PreferredQuote,
+        preferred_quote: PreferredQuote,
+        preferred_jsx_quote: PreferredQuote,
+        preferred_indentation: PreferredIndentation,
         jsx_runtime: Option<JsxRuntime>,
         css_modules: bool,
     ) -> Result<Self, Error> {
@@ -50,6 +52,7 @@ where
             options,
             preferred_quote,
             preferred_jsx_quote,
+            preferred_indentation,
             jsx_runtime,
             css_modules,
         })
@@ -170,13 +173,18 @@ where
     }
 
     /// Returns the preferred quote that should be used when providing code actions
-    pub fn as_preferred_quote(&self) -> &PreferredQuote {
+    pub fn preferred_quote(&self) -> PreferredQuote {
         self.preferred_quote
     }
 
     /// Returns the preferred JSX quote that should be used when providing code actions
-    pub fn as_preferred_jsx_quote(&self) -> &PreferredQuote {
+    pub fn preferred_jsx_quote(&self) -> PreferredQuote {
         self.preferred_jsx_quote
+    }
+
+    /// Returns the preferred indentation style that should be when providing code actions.
+    pub fn preferred_indentation(&self) -> PreferredIndentation {
+        self.preferred_indentation
     }
 
     pub fn is_css_modules(&self) -> bool {

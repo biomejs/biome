@@ -191,7 +191,7 @@ impl Rule for UseValidTypeof {
         mutation.replace_node(
             other.clone(),
             AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(
-                make::js_string_literal_expression(if ctx.as_preferred_quote().is_double() {
+                make::js_string_literal_expression(if ctx.preferred_quote().is_double() {
                     make::js_string_literal(suggestion)
                 } else {
                     make::js_string_literal_single_quotes(suggestion)

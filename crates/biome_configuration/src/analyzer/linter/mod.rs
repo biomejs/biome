@@ -92,7 +92,3 @@ impl LinterConfiguration {
         self.rules.clone().unwrap_or_default()
     }
 }
-
-impl Rules {
-    pub fn get_rule(&self) {}
-}

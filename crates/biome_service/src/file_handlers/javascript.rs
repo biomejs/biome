@@ -18,7 +18,7 @@ use crate::{
         RenameResult,
     },
 };
-use biome_analyze::options::PreferredQuote;
+use biome_analyze::options::{PreferredIndentation, PreferredQuote};
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
     RuleCategoriesBuilder, RuleError, RuleFilter,
@@ -260,12 +260,9 @@ impl ServiceLanguage for JsLanguage {
             .javascript
             .formatter
             .quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
+            .map(|quote_style: QuoteStyle| match quote_style {
+                QuoteStyle::Single => PreferredQuote::Single,
+                QuoteStyle::Double => PreferredQuote::Double,
             })
             .unwrap_or_default();
         let preferred_jsx_quote = global
@@ -273,14 +270,26 @@ impl ServiceLanguage for JsLanguage {
             .javascript
             .formatter
             .jsx_quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
+            .map(|quote_style: QuoteStyle| match quote_style {
+                QuoteStyle::Single => PreferredQuote::Single,
+                QuoteStyle::Double => PreferredQuote::Double,
             })
             .unwrap_or_default();
+        let preferred_indentation = global.languages.javascript.formatter.indent_style.map_or(
+            PreferredIndentation::default(),
+            |indent_style| match indent_style {
+                IndentStyle::Tab => PreferredIndentation::Tab,
+                IndentStyle::Space => PreferredIndentation::Spaces(
+                    global
+                        .languages
+                        .javascript
+                        .formatter
+                        .indent_width
+                        .unwrap_or_default()
+                        .value(),
+                ),
+            },
+        );
 
         let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
@@ -349,7 +358,8 @@ impl ServiceLanguage for JsLanguage {
             .with_rules(to_analyzer_rules(global, path.as_path()))
             .with_globals(globals)
             .with_preferred_quote(preferred_quote)
-            .with_preferred_jsx_quote(preferred_jsx_quote);
+            .with_preferred_jsx_quote(preferred_jsx_quote)
+            .with_preferred_indentation(preferred_indentation);
 
         AnalyzerOptions::default()
             .with_file_path(path.as_path())

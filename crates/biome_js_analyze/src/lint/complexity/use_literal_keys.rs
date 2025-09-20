@@ -174,7 +174,7 @@ impl Rule for UseLiteralKeys {
                     token.clone()
                 } else {
                     let identifier = inner_string_text(token);
-                    if ctx.as_preferred_quote().is_double() {
+                    if ctx.preferred_quote().is_double() {
                         make::js_string_literal(&identifier)
                     } else {
                         make::js_string_literal_single_quotes(&identifier)
