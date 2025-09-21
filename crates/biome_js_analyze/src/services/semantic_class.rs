@@ -874,7 +874,7 @@ fn is_within_scope_without_shadowing(
 
 /// Checks if the given node is used in an expression context
 /// (e.g., return, call arguments, conditionals, binary expressions).
-/// NOt limited to `this` references. Can be used for any node.
+/// NOt limited to `this` references. Can be used for any node, but requires more work e.g.
 /// Returns `true` if the read is meaningful, `false` otherwise.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
     let mut current: JsSyntaxNode =
@@ -1272,8 +1272,10 @@ mod tests {
             for descendant in root.descendants() {
                 // 1) Skip the identifier that is the class name (e.g. `Test` in `class Test {}`)
                 if AnyJsIdentifierBinding::can_cast(descendant.kind())
-                    && let Some(parent) = descendant.parent() && JsClassDeclaration::can_cast(parent.kind()) {
-                        continue;
+                    && let Some(parent) = descendant.parent()
+                    && JsClassDeclaration::can_cast(parent.kind())
+                {
+                    continue;
                 }
 
                 // Try to cast the node itself
@@ -1315,14 +1317,6 @@ mod tests {
                     !nodes.is_empty(),
                     "No match found for test case: '{}'",
                     case.description
-                );
-
-                println!(
-                    "nodes found: {:?}",
-                    nodes
-                        .iter()
-                        .map(|n| n.to_trimmed_text())
-                        .collect::<Vec<_>>()
                 );
 
                 // Ensure the number of nodes matches expected
@@ -1435,6 +1429,21 @@ mod tests {
                     description: "binary expression",
                     code: r#"class Test { method() { const sum = this.a + this.b; } }"#,
                     expected: vec![("sum", false), ("this.a", true), ("this.b", true)],
+                },
+                TestCase {
+                    description: "binary expression nested parenthesis",
+                    code: r#"class Test { method() { const sum = (((this.a + ((this.b * 2))))); } }"#,
+                    expected: vec![("sum", false), ("this.a", true), ("this.b", true)],
+                },
+                TestCase {
+                    description: "nested logical and conditional expressions",
+                    code: r#"class Test { method() { const val = foo(this.a && (this.b ? this.c : 7)); } }"#,
+                    expected: vec![
+                        ("val", false),
+                        ("this.a", true),
+                        ("this.b", true),
+                        ("this.c", true),
+                    ],
                 },
             ];
 
