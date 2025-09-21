@@ -142,10 +142,16 @@ impl Rule for UseExhaustiveSwitchCases {
         } {
             let intersection_part = flatten_type(&intersection_part)?;
 
+            // Skip undefined if the discriminant has a default value
+            // This handles cases like `{ b = "thing" }: Test = {}` where `b` can never be undefined
+            let should_skip_undefined = matches!(intersection_part.deref(), TypeData::Undefined)
+                && has_default_value_for_discriminant(&discriminant, ctx);
+
             if !matches!(
                 intersection_part.deref(),
                 TypeData::Literal(_) | TypeData::Null | TypeData::Undefined | TypeData::Symbol
             ) || found_cases.contains(&intersection_part)
+                || should_skip_undefined
             {
                 continue;
             }
@@ -308,4 +314,59 @@ fn type_to_expression(ty: &Type) -> Option<AnyJsExpression> {
         }
         _ => return None,
     })
+}
+
+fn has_default_value_for_discriminant(
+    discriminant: &AnyJsExpression,
+    _ctx: &RuleContext<UseExhaustiveSwitchCases>,
+) -> bool {
+    use biome_js_syntax::{AnyJsObjectBindingPatternMember, JsFunctionDeclaration};
+
+    let Some(identifier_expr) = discriminant.as_js_identifier_expression() else {
+        return false;
+    };
+
+    let Ok(name_token) = identifier_expr.name() else {
+        return false;
+    };
+    let Ok(value_token) = name_token.value_token() else {
+        return false;
+    };
+    let name = value_token.text_trimmed();
+
+    // Traverse up to find the scope where this identifier is declared
+    let mut current = identifier_expr.syntax().clone();
+
+    while let Some(parent) = current.parent() {
+        if let Some(func_decl) = JsFunctionDeclaration::cast(parent.clone())
+            && let Ok(params) = func_decl.parameters()
+        {
+            for param in params.items().into_iter().flatten() {
+                if let Some(pattern) = param
+                    .as_any_js_formal_parameter()
+                    .and_then(|p| p.as_js_formal_parameter())
+                    .and_then(|p| p.binding().ok())
+                {
+                    if let Some(obj_pattern) = pattern.as_js_object_binding_pattern() {
+                        for member in obj_pattern.properties().into_iter().flatten() {
+                            if let AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(shorthand) = member {
+                                if let Ok(identifier) = shorthand.identifier()
+                                    && let Some(id_binding) = identifier.as_js_identifier_binding()
+                                    && let Ok(id_name) = id_binding.name_token()
+                                    && id_name.text_trimmed() == name 
+                                    && shorthand.init().is_some()
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        current = parent;
+    }
+
+    false
 }
