@@ -875,10 +875,10 @@ pub fn is_meaningful_read(node: &AnyMeaningfulReadNode) -> Option<bool> {
 }
 
 fn is_used_in_expression_context(node: &AnyMeaningfulReadNode) -> Option<bool> {
-    let mut current = if let Some(expression) = AnyJsExpression::cast(node.syntax().into()) {
-        expression.omit_parentheses().syntax().clone()
+    let mut current: JsSyntaxNode = if let Some(expression) = AnyJsExpression::cast(node.syntax().clone()) {
+        expression.syntax().clone() // get JsSyntaxNode
     } else {
-        node.syntax().clone()
+        node.syntax().clone() // fallback to the node itself
     };
 
     // Limit the number of parent traversals to avoid deep recursion
@@ -889,6 +889,18 @@ fn is_used_in_expression_context(node: &AnyMeaningfulReadNode) -> Option<bool> {
                 | JsSyntaxKind::JS_CALL_ARGUMENTS
                 | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
                 | JsSyntaxKind::JS_LOGICAL_EXPRESSION
+                | JsSyntaxKind::JS_THROW_STATEMENT
+                | JsSyntaxKind::JS_AWAIT_EXPRESSION
+                | JsSyntaxKind::JS_YIELD_EXPRESSION
+                | JsSyntaxKind::JS_UNARY_EXPRESSION
+                | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
+                | JsSyntaxKind::JS_CALL_EXPRESSION // (callee)
+                | JsSyntaxKind::JS_NEW_EXPRESSION
+                | JsSyntaxKind::JS_IF_STATEMENT
+                | JsSyntaxKind::JS_SWITCH_STATEMENT
+                | JsSyntaxKind::JS_FOR_STATEMENT
+                | JsSyntaxKind::JS_FOR_IN_STATEMENT
+                | JsSyntaxKind::JS_FOR_OF_STATEMENT
                 | JsSyntaxKind::JS_BINARY_EXPRESSION => return Some(true),
                 _ => current = parent,
             }
@@ -1246,6 +1258,7 @@ mod tests {
 
     mod is_meaningful_read_tests {
         use super::*;
+
         fn extract_all_meaningful_nodes(code: &str) -> Vec<AnyMeaningfulReadNode> {
             let parsed = parse_ts(code);
             let root = parsed.syntax();
@@ -1278,85 +1291,128 @@ mod tests {
         }
 
         struct TestCase<'a> {
+            description: &'a str,
             code: &'a str,
-            node_index: usize,
-            expected: Option<bool>,
+            expected: Vec<(&'a str, Option<bool>)>, // (member name, is_meaningful_read)
         }
 
         fn run_test_cases(cases: &[TestCase]) {
             for case in cases {
                 let nodes = extract_all_meaningful_nodes(case.code);
                 assert!(
-                    nodes.len() > case.node_index,
-                    "Not enough nodes found in code: {}",
-                    case.code
+                    !nodes.is_empty(),
+                    "No match found for test case: '{}'",
+                    case.description
                 );
 
-                let node = &nodes[case.node_index];
-                let meaningful_node = AnyMeaningfulReadNode::cast_ref(node.syntax())
-                    .expect("Failed to cast node to MeaningfulReadNode");
-
+                // Ensure the number of nodes matches expected
                 assert_eq!(
-                    is_meaningful_read(&meaningful_node),
-                    case.expected,
-                    "Failed for code: {}",
-                    case.code
+                    nodes.len(),
+                    case.expected.len(),
+                    "Number of nodes does not match expected for test case: '{}'",
+                    case.description
                 );
+
+                for (node, (expected_name, expected_meaningful)) in nodes.iter().zip(&case.expected) {
+                    let meaningful_node = AnyMeaningfulReadNode::cast_ref(node.syntax())
+                        .expect("Failed to cast node to AnyMeaningfulReadNode");
+
+                    // Compare node name
+                    let node_name = meaningful_node.to_trimmed_text();
+                    assert_eq!(
+                        &node_name, expected_name,
+                        "Node name mismatch for test case: '{}'",
+                        case.description
+                    );
+
+                    // Compare is_meaningful_read
+                    let actual_meaningful = is_meaningful_read(&meaningful_node);
+                    assert_eq!(
+                        actual_meaningful, *expected_meaningful,
+                        "Meaningful read mismatch for node '{}' in test case: '{}'",
+                        expected_name, case.description
+                    );
+                }
             }
         }
 
         #[test]
-        fn test_meaningful_reads() {
+        fn test_meaningful_read_contexts() {
             let cases = [
                 TestCase {
-                    code: "class Test { method() { return this.x; } }",
-                    node_index: 0,
-                    expected: Some(true),
+                    description: "return statement",
+                    code: r#"class Test { method() { return this.x; } }"#,
+                    expected: vec![("this.x", Some(true))],
                 },
                 TestCase {
-                    code: "class Test { method() { if(this.x === 2) {} } }",
-                    node_index: 0,
-                    expected: Some(true),
+                    description: "call arguments",
+                    code: r#"class Test { method() { foo(this.y); } }"#,
+                    expected: vec![("this.y", Some(true))],
                 },
                 TestCase {
-                    code: "class Test { method() { foo(this.x); } }",
-                    node_index: 0,
-                    expected: Some(true),
+                    description: "conditional expression",
+                    code: r#"class Test { method() { const a = this.z ? 1 : 2; } }"#,
+                    expected: vec![("this.z", Some(true))],
                 },
                 TestCase {
-                    code: "class Test { method() { const y = this.x + 1; } }",
-                    node_index: 0,
-                    expected: Some(true),
+                    description: "logical expression",
+                    code: r#"class Test { method() { const a = this.a && this.b; } }"#,
+                    expected: vec![("this.a", Some(true)), ("this.b", Some(true))],
                 },
                 TestCase {
-                    code: "class Test { method() { bar(this.x || 0); } }",
-                    node_index: 0,
-                    expected: Some(true),
+                    description: "throw statement",
+                    code: r#"class Test { method() { throw this.err; } }"#,
+                    expected: vec![("this.err", Some(true))],
                 },
                 TestCase {
-                    code: "class Test { method() { this.x--; } }",
-                    node_index: 0,
-                    expected: Some(false),
+                    description: "await expression",
+                    code: r#"class Test { async method() { await this.promise; } }"#,
+                    expected: vec![("this.promise", Some(true))],
                 },
                 TestCase {
-                    code: "class Test { method() { const unused = this.y; } }",
-                    node_index: 0,
-                    expected: Some(false),
+                    description: "yield expression",
+                    code: r#"class Test { *method() { yield this.gen; } }"#,
+                    expected: vec![("this.gen", Some(true))],
                 },
                 TestCase {
-                    code: "class Test { method() { ++this.x; } }",
-                    node_index: 0,
-                    expected: Some(false),
+                    description: "unary expression",
+                    code: r#"class Test { method() { -this.num; } }"#,
+                    expected: vec![("this.num", Some(true))],
                 },
                 TestCase {
-                    code: "class Test { method() { const incremented = this.x + 1; } }",
-                    node_index: 0,
-                    expected: Some(true),
+                    description: "template expression",
+                    code: r#"class Test { method() { `${this.str}`; } }"#,
+                    expected: vec![("this.str", Some(true))],
                 },
                 TestCase {
-                    code: "class Test { method() { return this.x; } }",
-                    node_index: 0,
-                    expected: Some(true),
+                    description: "call expression callee",
+                    code: r#"class Test { method() { this.func(); } }"#,
+                    expected: vec![("this.func", Some(true))],
+                },
+                TestCase {
+                    description: "new expression",
+                    code: r#"class Test { method() { new this.ClassName(); } }"#,
+                    expected: vec![("this.ClassName", Some(true))],
+                },
+                TestCase {
+                    description: "if statement",
+                    code: r#"class Test { method() { if(this.cond) {} } }"#,
+                    expected: vec![("this.cond", Some(true))],
+                },
+                TestCase {
+                    description: "switch statement",
+                    code: r#"class Test { method() { switch(this.val) {} } }"#,
+                    expected: vec![("this.val", Some(true))],
+                },
+                TestCase {
+                    description: "for statement",
+                    code: r#"class Test { method() { for(this.i = 0; this.i < 10; this.i++) {} } }"#, // First this.i = 0 is a write, so not a match at all
+                    expected: vec![("this.i", Some(true)), ("this.i++", Some(true))],
+                },
+                TestCase {
+                    description: "binary expression",
+                    code: r#"class Test { method() { const sum = this.a + this.b; } }"#,
+                    expected: vec![("this.a", Some(true)), ("this.b", Some(true))],
                 },
             ];
 
