@@ -875,11 +875,12 @@ pub fn is_meaningful_read(node: &AnyMeaningfulReadNode) -> Option<bool> {
 }
 
 fn is_used_in_expression_context(node: &AnyMeaningfulReadNode) -> Option<bool> {
-    let mut current: JsSyntaxNode = if let Some(expression) = AnyJsExpression::cast(node.syntax().clone()) {
-        expression.syntax().clone() // get JsSyntaxNode
-    } else {
-        node.syntax().clone() // fallback to the node itself
-    };
+    let mut current: JsSyntaxNode =
+        if let Some(expression) = AnyJsExpression::cast(node.syntax().clone()) {
+            expression.syntax().clone() // get JsSyntaxNode
+        } else {
+            node.syntax().clone() // fallback to the node itself
+        };
 
     // Limit the number of parent traversals to avoid deep recursion
     for _ in 0..8 {
@@ -1313,7 +1314,8 @@ mod tests {
                     case.description
                 );
 
-                for (node, (expected_name, expected_meaningful)) in nodes.iter().zip(&case.expected) {
+                for (node, (expected_name, expected_meaningful)) in nodes.iter().zip(&case.expected)
+                {
                     let meaningful_node = AnyMeaningfulReadNode::cast_ref(node.syntax())
                         .expect("Failed to cast node to AnyMeaningfulReadNode");
 
