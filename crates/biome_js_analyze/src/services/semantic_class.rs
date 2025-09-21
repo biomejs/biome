@@ -130,6 +130,8 @@ where
 pub struct ClassMemberReference {
     pub name: Text,
     pub range: TextRange,
+    /// Indicates if the read is meaningful (e.g., used in an expression) or not (e.g. part of a destructuring assignment).
+    /// `None` if not applicable (e.g. for write references).
     pub is_meaningful_read: Option<bool>,
 }
 
@@ -873,12 +875,11 @@ pub fn is_meaningful_read(node: &AnyMeaningfulReadNode) -> Option<bool> {
 }
 
 fn is_used_in_expression_context(node: &AnyMeaningfulReadNode) -> Option<bool> {
-    let mut current =
-        if let Some(expression) = AnyJsExpression::cast(node.syntax().into()) {
-            expression.omit_parentheses().syntax().clone()
-        } else {
-            node.syntax().clone()
-        };
+    let mut current = if let Some(expression) = AnyJsExpression::cast(node.syntax().into()) {
+        expression.omit_parentheses().syntax().clone()
+    } else {
+        node.syntax().clone()
+    };
 
     // Limit the number of parent traversals to avoid deep recursion
     for _ in 0..8 {
