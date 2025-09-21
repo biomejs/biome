@@ -466,7 +466,7 @@ impl ThisPatternResolver {
     }
 
     /// Collects assignment names from a JavaScript object assignment pattern, e.g. `{...this.#value}`.
-    /// only applicable to writes
+    /// Only applicable to writes.
     fn collect_object_assignment_names(
         assignment: &JsObjectAssignmentPattern,
         scoped_this_references: &[FunctionThisReferences],
