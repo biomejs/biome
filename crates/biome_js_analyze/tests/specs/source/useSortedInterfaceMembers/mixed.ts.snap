@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mixed.ts
+---
+# Input
+```ts
+interface MixedMembersInterface {
+	zProperty: string;
+	aProperty: number;
+	(): void;  // Call signature - non-sortable
+	yMethod(): boolean;
+	bMethod(): string;
+	[key: string]: any;  // Index signature - non-sortable
+	cField: object;
+	new (): any;  // Construct signature - non-sortable
+	aField: boolean;
+}
+```
+
+# Diagnostics
+```
+mixed.ts:2:2 assist/source/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+     1 │ interface MixedMembersInterface {
+   > 2 │ 	zProperty: string;
+       │ 	^^^^^^^^^^^^^^^^^^
+   > 3 │ 	aProperty: number;
+   > 4 │ 	(): void;  // Call signature - non-sortable
+        ...
+   > 8 │ 	cField: object;
+   > 9 │ 	new (): any;  // Construct signature - non-sortable
+  > 10 │ 	aField: boolean;
+       │ 	^^^^^^^^^^^^^^^^
+    11 │ }
+  
+  i Safe fix: Sort the interface members by key.
+  
+     1  1 │   interface MixedMembersInterface {
+     2    │ - → zProperty:·string;
+        2 │ + → aField:·boolean;
+     3  3 │   	aProperty: number;
+     4    │ - → ():·void;··//·Call·signature·-·non-sortable
+        4 │ + → bMethod():·string;
+        5 │ + → cField:·object;
+     5  6 │   	yMethod(): boolean;
+     6    │ - → bMethod():·string;
+        7 │ + → zProperty:·string;
+        8 │ + → ():·void;··//·Call·signature·-·non-sortable
+     7  9 │   	[key: string]: any;  // Index signature - non-sortable
+     8    │ - → cField:·object;
+     9 10 │   	new (): any;  // Construct signature - non-sortable
+    10    │ - → aField:·boolean;
+    11 11 │   }
+  
+
+```
