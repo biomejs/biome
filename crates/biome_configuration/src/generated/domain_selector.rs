@@ -42,13 +42,19 @@ static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 });
 static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("correctness", "noChildrenProp"),
         RuleFilter::Rule("correctness", "noNestedComponentDefinitions"),
+        RuleFilter::Rule("correctness", "noReactPropAssignments"),
         RuleFilter::Rule("correctness", "noRenderReturnValue"),
         RuleFilter::Rule("correctness", "useExhaustiveDependencies"),
         RuleFilter::Rule("correctness", "useHookAtTopLevel"),
         RuleFilter::Rule("correctness", "useJsxKeyInIterable"),
         RuleFilter::Rule("correctness", "useUniqueElementIds"),
         RuleFilter::Rule("nursery", "useReactFunctionComponents"),
+        RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
+        RuleFilter::Rule("security", "noDangerouslySetInnerHtmlWithChildren"),
+        RuleFilter::Rule("style", "useComponentExportOnlyModules"),
+        RuleFilter::Rule("suspicious", "noArrayIndexKey"),
     ]
 });
 static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
