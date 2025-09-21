@@ -191,7 +191,12 @@ impl Watcher {
                 // `RenameMode::Any` and `ModifyKind::Any` need to be included as a catch-all.
                 // Without it, we'll miss events on Windows or macOS.
                 ModifyKind::Data(_) | ModifyKind::Name(RenameMode::Any) | ModifyKind::Any => {
-                    Self::index_paths(workspace, paths)
+                    // It's possible to receive Modify(Data) event after the file is removed on macOS.
+                    if paths[0].exists() {
+                        Self::index_paths(workspace, paths)
+                    } else {
+                        Self::unload_paths(workspace, paths)
+                    }
                 }
                 _ => Ok(vec![]),
             },
