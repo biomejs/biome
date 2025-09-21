@@ -158,7 +158,8 @@ impl Rule for NoVueDuplicateKeys {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let first_declaration = state.declarations.first()?;
+        let mut declarations_iterator = state.declarations.iter();
+        let first_declaration = declarations_iterator.next()?;
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
             first_declaration.declaration_name_range()?,
@@ -168,7 +169,7 @@ impl Rule for NoVueDuplicateKeys {
         );
 
         // Add related information for other occurrences
-        for declaration in state.declarations.iter().skip(1) {
+        for declaration in declarations_iterator {
             if let Some(range) = declaration.declaration_name_range() {
                 diagnostic = diagnostic.detail(
                     range,
@@ -180,7 +181,7 @@ impl Rule for NoVueDuplicateKeys {
         }
 
         diagnostic = diagnostic.note(markup! {
-            "Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template."
+            "Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts."
         });
 
         Some(diagnostic)
