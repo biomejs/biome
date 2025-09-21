@@ -447,7 +447,7 @@ fn resolve_extension_alias(
     }
 
     let path = if is_relative_specifier(specifier) {
-        base_dir.join(&specifier)
+        base_dir.join(specifier)
     } else {
         return Err(ResolveError::NotFound);
     };
