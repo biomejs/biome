@@ -416,7 +416,7 @@ struct ThisPatternResolver {}
 
 impl ThisPatternResolver {
     /// Extracts `this` references from array assignments (e.g., `[this.#value]` or `[...this.#value]`).
-    /// only applicable to writes
+    /// Only applicable to writes.
     fn collect_array_assignment_names(
         array_assignment_pattern: &JsArrayAssignmentPattern,
         scoped_this_references: &[FunctionThisReferences],
