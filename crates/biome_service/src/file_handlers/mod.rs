@@ -1036,8 +1036,9 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
         let path = self.path.expect("File path");
 
+        let is_recommended = R::METADATA.recommended;
         let recommended_enabled = self.settings.linter_recommended_enabled();
-        if !recommended_enabled {
+        if !is_recommended || !recommended_enabled {
             return;
         }
 
