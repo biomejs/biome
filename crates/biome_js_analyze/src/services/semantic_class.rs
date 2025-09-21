@@ -144,7 +144,7 @@ declare_node_union! {
 }
 
 declare_node_union! {
-    pub MeaningfulReadNode = AnyJsUpdateExpression | AnyJsObjectBindingPatternMember | JsStaticMemberExpression
+    pub AnyMeaningfulReadNode = AnyJsUpdateExpression | AnyJsObjectBindingPatternMember | JsStaticMemberExpression
 }
 
 declare_node_union! {
@@ -794,7 +794,7 @@ fn handle_pre_or_post_update_expression(
         reads.insert(ClassMemberReference {
             name: name.name,
             range: name.range,
-            is_meaningful_read: is_meaningful_read(&MeaningfulReadNode::from(
+            is_meaningful_read: is_meaningful_read(&AnyMeaningfulReadNode::from(
                 js_update_expression.clone(),
             )),
         });
@@ -838,7 +838,7 @@ fn collect_class_property_reads_from_static_member(
         reads.insert(ClassMemberReference {
             name,
             range: static_member.syntax().text_trimmed_range(),
-            is_meaningful_read: is_meaningful_read(&MeaningfulReadNode::from(
+            is_meaningful_read: is_meaningful_read(&AnyMeaningfulReadNode::from(
                 static_member.clone(),
             )),
         });
@@ -868,7 +868,7 @@ fn is_within_scope_without_shadowing(
     false
 }
 
-pub fn is_meaningful_read(node: &MeaningfulReadNode) -> Option<bool> {
+pub fn is_meaningful_read(node: &AnyMeaningfulReadNode) -> Option<bool> {
     is_used_in_expression_context(node)
 }
 
@@ -884,7 +884,7 @@ fn skip_parentheses(node: JsSyntaxNode) -> JsSyntaxNode {
     node
 }
 
-fn is_used_in_expression_context(node: &MeaningfulReadNode) -> Option<bool> {
+fn is_used_in_expression_context(node: &AnyMeaningfulReadNode) -> Option<bool> {
     let mut current: JsSyntaxNode = node.syntax().clone();
 
     // Limit the number of parent traversals to avoid deep recursion
@@ -1253,7 +1253,7 @@ mod tests {
 
     mod is_meaningful_read_tests {
         use super::*;
-        fn extract_all_meaningful_nodes(code: &str) -> Vec<MeaningfulReadNode> {
+        fn extract_all_meaningful_nodes(code: &str) -> Vec<AnyMeaningfulReadNode> {
             let parsed = parse_ts(code);
             let root = parsed.syntax();
 
@@ -1261,20 +1261,20 @@ mod tests {
 
             for descendant in root.descendants() {
                 // Try to cast the node itself
-                if let Some(node) = MeaningfulReadNode::cast_ref(&descendant) {
+                if let Some(node) = AnyMeaningfulReadNode::cast_ref(&descendant) {
                     nodes.push(node);
                 }
 
                 // If this is an assignment, also include LHS
                 if let Some(assign_expr) = JsAssignmentExpression::cast_ref(&descendant) {
                     if let Ok(lhs) = assign_expr.left()
-                        && let Some(node) = MeaningfulReadNode::cast_ref(lhs.syntax())
+                        && let Some(node) = AnyMeaningfulReadNode::cast_ref(lhs.syntax())
                     {
                         nodes.push(node.clone());
                     }
 
                     if let Ok(rhs) = assign_expr.right()
-                        && let Some(node) = MeaningfulReadNode::cast_ref(rhs.syntax())
+                        && let Some(node) = AnyMeaningfulReadNode::cast_ref(rhs.syntax())
                     {
                         nodes.push(node.clone());
                     }
@@ -1300,7 +1300,7 @@ mod tests {
                 );
 
                 let node = &nodes[case.node_index];
-                let meaningful_node = MeaningfulReadNode::cast_ref(node.syntax())
+                let meaningful_node = AnyMeaningfulReadNode::cast_ref(node.syntax())
                     .expect("Failed to cast node to MeaningfulReadNode");
 
                 assert_eq!(
