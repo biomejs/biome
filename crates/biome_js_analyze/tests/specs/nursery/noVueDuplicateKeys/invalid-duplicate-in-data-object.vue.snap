@@ -35,7 +35,7 @@ invalid-duplicate-in-data-object.vue:3:9 lint/nursery/noVueDuplicateKeys ━━�
     5 │     }
     6 │ }
   
-  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template.
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
   
 
 ```

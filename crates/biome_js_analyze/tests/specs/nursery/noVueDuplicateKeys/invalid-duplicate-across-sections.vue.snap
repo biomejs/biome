@@ -60,7 +60,7 @@ invalid-duplicate-across-sections.vue:2:13 lint/nursery/noVueDuplicateKeys ━�
     13 │     }
     14 │ }
   
-  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template.
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
   
 
 ```

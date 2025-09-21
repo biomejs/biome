@@ -67,7 +67,7 @@ invalid-with-setup.vue:2:11 lint/nursery/noVueDuplicateKeys ━━━━━━�
     13 │   },
     14 │   setup () {
   
-  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template.
+  i Keys defined in different Vue component options (props, data, methods, computed) can conflict when accessed in the template. Rename the key to avoid conflicts.
   
 
 ```
