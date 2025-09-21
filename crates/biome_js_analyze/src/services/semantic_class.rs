@@ -230,7 +230,7 @@ struct ThisScopeVisitor<'a> {
     inherited_this_references: &'a [ClassMemberReference],
     current_this_scopes: Vec<FunctionThisReferences>,
 }
-// can not implement `Visitor` directly because it requires a new ctx that can not be created here
+// Can not implement `Visitor` directly because it requires a new ctx that can not be created here
 impl ThisScopeVisitor<'_> {
     fn visit(&mut self, event: &WalkEvent<SyntaxNode<JsLanguage>>) {
         match event {
@@ -358,7 +358,7 @@ impl ThisScopeReferences {
                     ClassMemberReference {
                         name: id.to_trimmed_text().clone(),
                         range: id.syntax().text_trimmed_range(),
-                        // right hand side of a js variable statement is meaningful read
+                        // Right hand side of a js variable statement is meaningful read
                         is_meaningful_read: Some(true),
                     }
                 })
@@ -437,7 +437,7 @@ impl ThisPatternResolver {
                             Self::extract_this_member_reference(
                                 assignment.as_js_static_member_assignment(),
                                 scoped_this_references,
-                                // it is a write reference
+                                // It is a write reference, so not applicable for meaningful read
                                 None,
                             )
                         })
@@ -454,7 +454,7 @@ impl ThisPatternResolver {
                             Self::extract_this_member_reference(
                                 assignment.as_js_static_member_assignment(),
                                 scoped_this_references,
-                                // it is a write reference
+                                // It is a write reference, so not applicable for meaningful read
                                 None,
                             )
                         })
@@ -484,7 +484,7 @@ impl ThisPatternResolver {
                     return Self::extract_this_member_reference(
                         rest_params.target().ok()?.as_js_static_member_assignment(),
                         scoped_this_references,
-                        // it is a write reference
+                        // It is a write reference, so not applicable for meaningful read
                         None,
                     );
                 }
@@ -501,7 +501,7 @@ impl ThisPatternResolver {
                             .as_any_js_assignment()?
                             .as_js_static_member_assignment(),
                         scoped_this_references,
-                        // it is a write reference
+                        // It is a write reference, so not applicable for meaningful read
                         None,
                     );
                 }
@@ -717,7 +717,7 @@ fn handle_assignment_expression(
             && let Some(name) = ThisPatternResolver::extract_this_member_reference(
                 operand.as_js_static_member_assignment(),
                 scoped_this_references,
-                // nodes inside assignment expressions are considered meaningful reads e.g. this.x += 1;
+                // Nodes inside assignment expressions are considered meaningful reads e.g. this.x += 1;
                 Some(true),
             )
         {
@@ -745,7 +745,7 @@ fn handle_assignment_expression(
             && let Some(name) = ThisPatternResolver::extract_this_member_reference(
                 assignment.as_js_static_member_assignment(),
                 scoped_this_references,
-                // it is a write reference
+                // It is a write reference, so not applicable for meaningful read
                 None,
             )
         {
@@ -872,25 +872,17 @@ pub fn is_meaningful_read(node: &AnyMeaningfulReadNode) -> Option<bool> {
     is_used_in_expression_context(node)
 }
 
-/// If the node is a parenthesized expression, return the inner expression,
-/// otherwise return the node itself.
-fn skip_parentheses(node: JsSyntaxNode) -> JsSyntaxNode {
-    if node.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
-        // Assume the first child is the expression inside parentheses
-        if let Some(inner) = node.first_child() {
-            return inner;
-        }
-    }
-    node
-}
-
 fn is_used_in_expression_context(node: &AnyMeaningfulReadNode) -> Option<bool> {
-    let mut current: JsSyntaxNode = node.syntax().clone();
+    let mut current =
+        if let Some(expression) = AnyJsExpression::cast(node.syntax().into()) {
+            expression.omit_parentheses().syntax().clone()
+        } else {
+            node.syntax().clone()
+        };
 
     // Limit the number of parent traversals to avoid deep recursion
     for _ in 0..8 {
         if let Some(parent) = current.parent() {
-            let parent = skip_parentheses(parent); // strip parentheses
             match parent.kind() {
                 JsSyntaxKind::JS_RETURN_STATEMENT
                 | JsSyntaxKind::JS_CALL_ARGUMENTS
