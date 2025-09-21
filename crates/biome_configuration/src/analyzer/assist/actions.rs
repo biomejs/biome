@@ -67,6 +67,7 @@ impl std::fmt::Display for RuleGroup {
 pub enum ActionName {
     OrganizeImports,
     UseSortedAttributes,
+    UseSortedInterfaceMembers,
     UseSortedKeys,
     UseSortedProperties,
 }
@@ -75,6 +76,7 @@ impl ActionName {
         match self {
             Self::OrganizeImports => "organizeImports",
             Self::UseSortedAttributes => "useSortedAttributes",
+            Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
             Self::UseSortedKeys => "useSortedKeys",
             Self::UseSortedProperties => "useSortedProperties",
         }
@@ -83,6 +85,7 @@ impl ActionName {
         match self {
             Self::OrganizeImports => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
+            Self::UseSortedInterfaceMembers => RuleGroup::Source,
             Self::UseSortedKeys => RuleGroup::Source,
             Self::UseSortedProperties => RuleGroup::Source,
         }
@@ -94,6 +97,7 @@ impl std::str::FromStr for ActionName {
         match s {
             "organizeImports" => Ok(Self::OrganizeImports),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
+            "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),
             "useSortedKeys" => Ok(Self::UseSortedKeys),
             "useSortedProperties" => Ok(Self::UseSortedProperties),
             _ => Err("This rule name doesn't exist."),
@@ -193,6 +197,13 @@ pub struct Source {
             biome_rule_options::use_sorted_attributes::UseSortedAttributesOptions,
         >,
     >,
+    #[doc = "Sort interface members by key."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_sorted_interface_members: Option<
+        RuleAssistConfiguration<
+            biome_rule_options::use_sorted_interface_members::UseSortedInterfaceMembersOptions,
+        >,
+    >,
     #[doc = "Sort the keys of a JSON object in natural order."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys:
@@ -210,6 +221,7 @@ impl Source {
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "organizeImports",
         "useSortedAttributes",
+        "useSortedInterfaceMembers",
         "useSortedKeys",
         "useSortedProperties",
     ];
@@ -237,15 +249,20 @@ impl Source {
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref()
+        if let Some(rule) = self.use_sorted_interface_members.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref()
+        if let Some(rule) = self.use_sorted_keys.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
+        }
+        if let Some(rule) = self.use_sorted_properties.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
         }
         index_set
     }
@@ -261,15 +278,20 @@ impl Source {
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref()
+        if let Some(rule) = self.use_sorted_interface_members.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref()
+        if let Some(rule) = self.use_sorted_keys.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
+        }
+        if let Some(rule) = self.use_sorted_properties.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
         }
         index_set
     }
@@ -298,6 +320,10 @@ impl Source {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSortedAttributes" => self
                 .use_sorted_attributes
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useSortedInterfaceMembers" => self
+                .use_sorted_interface_members
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSortedKeys" => self

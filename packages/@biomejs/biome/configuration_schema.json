@@ -5624,6 +5624,14 @@
 				}
 			]
 		},
+		"RuleAssistConfiguration_for_UseSortedInterfaceMembersOptions": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleAssistWithOptions_for_UseSortedInterfaceMembersOptions"
+				}
+			]
+		},
 		"RuleAssistConfiguration_for_UseSortedKeysOptions": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
@@ -5667,6 +5675,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseSortedAttributesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleAssistWithOptions_for_UseSortedInterfaceMembersOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseSortedInterfaceMembersOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -12101,6 +12126,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedInterfaceMembers": {
+					"description": "Sort interface members by key.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/RuleAssistConfiguration_for_UseSortedInterfaceMembersOptions"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useSortedKeys": {
 					"description": "Sort the keys of a JSON object in natural order.",
 					"anyOf": [
@@ -14495,6 +14529,10 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseSortedInterfaceMembersOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseSortedKeysOptions": {

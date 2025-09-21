@@ -855,6 +855,10 @@ export interface Source {
 	 */
 	useSortedAttributes?: RuleAssistConfiguration_for_UseSortedAttributesOptions;
 	/**
+	 * Sort interface members by key.
+	 */
+	useSortedInterfaceMembers?: RuleAssistConfiguration_for_UseSortedInterfaceMembersOptions;
+	/**
 	 * Sort the keys of a JSON object in natural order.
 	 */
 	useSortedKeys?: RuleAssistConfiguration_for_UseSortedKeysOptions;
@@ -1007,6 +1011,9 @@ export type RuleAssistConfiguration_for_OrganizeImportsOptions =
 export type RuleAssistConfiguration_for_UseSortedAttributesOptions =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithOptions_for_UseSortedAttributesOptions;
+export type RuleAssistConfiguration_for_UseSortedInterfaceMembersOptions =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithOptions_for_UseSortedInterfaceMembersOptions;
 export type RuleAssistConfiguration_for_UseSortedKeysOptions =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithOptions_for_UseSortedKeysOptions;
@@ -2531,6 +2538,16 @@ export interface RuleAssistWithOptions_for_UseSortedAttributesOptions {
 	 */
 	options: UseSortedAttributesOptions;
 }
+export interface RuleAssistWithOptions_for_UseSortedInterfaceMembersOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RuleAssistPlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseSortedInterfaceMembersOptions;
+}
 export interface RuleAssistWithOptions_for_UseSortedKeysOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -3626,6 +3643,7 @@ export interface OrganizeImportsOptions {
 export interface UseSortedAttributesOptions {
 	sortOrder?: SortOrder;
 }
+export interface UseSortedInterfaceMembersOptions {}
 export interface UseSortedKeysOptions {
 	sortOrder?: SortOrder;
 }
@@ -9072,6 +9090,7 @@ export type Category =
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
 	| "assist/source/useSortedKeys"
+	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedAttributes"
 	| "assist/source/organizeImports"
