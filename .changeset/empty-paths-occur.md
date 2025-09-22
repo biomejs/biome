@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added option to the lint rule `useConsistentArrowReturn`.
+Added `style` and `requireForObjectLiteral` options to the lint rule [`useConsistentArrowReturn`](https://biomejs.dev/linter/rules/use-consistent-arrow-return/).
 
 This rule enforces a consistent return style for arrow functions. It can be configured with the following options:
 
