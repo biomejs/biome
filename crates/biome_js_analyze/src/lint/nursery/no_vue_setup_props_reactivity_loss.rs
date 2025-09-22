@@ -359,24 +359,29 @@ fn check_root_scope_destructuring(
     let props_semantic_binding = model.as_binding(props_binding);
 
     for reference in props_semantic_binding.all_reads() {
-        if let Some(reference_node) = reference.syntax().parent()
-            && let Some(identifier) = biome_js_syntax::JsReferenceIdentifier::cast(reference_node)
-        {
-            if !is_reference_in_root_scope_of_function(&identifier, setup_fn) {
-                continue;
-            }
+        let Some(reference_node) = reference.syntax().parent() else {
+            continue;
+        };
+        let Some(identifier) = biome_js_syntax::JsReferenceIdentifier::cast(reference_node) else {
+            continue;
+        };
 
-            if let Some(destructuring_info) = is_reference_in_destructuring(&identifier) {
-                if is_safe_reactive_destructuring(&destructuring_info) {
-                    continue;
-                }
-
-                violations.push(Violation::RootScopeDestructuring {
-                    destructuring_range: destructuring_info.destructuring_range,
-                    props_param_range: props_binding.range(),
-                });
-            }
+        if !is_reference_in_root_scope_of_function(&identifier, setup_fn) {
+            continue;
         }
+
+        let Some(destructuring_info) = is_reference_in_destructuring(&identifier) else {
+            continue;
+        };
+
+        if is_safe_reactive_destructuring(&destructuring_info, model) {
+            continue;
+        }
+
+        violations.push(Violation::RootScopeDestructuring {
+            destructuring_range: destructuring_info.destructuring_range,
+            props_param_range: props_binding.range(),
+        });
     }
 
     violations
@@ -470,15 +475,18 @@ fn is_reference_in_destructuring(
     None
 }
 
-fn is_safe_reactive_destructuring(destructuring_info: &DestructuringInfo) -> bool {
+fn is_safe_reactive_destructuring(
+    destructuring_info: &DestructuringInfo,
+    model: &SemanticModel,
+) -> bool {
     if let Some(initializer) = &destructuring_info.initializer {
-        is_reactive_api_call(initializer)
+        is_reactive_api_call(initializer, model)
     } else {
         false
     }
 }
 
-fn is_reactive_api_call(expr: &AnyJsExpression) -> bool {
+fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
     let Some(call_expr) = expr.as_js_call_expression() else {
         return false;
     };
@@ -501,15 +509,38 @@ fn is_reactive_api_call(expr: &AnyJsExpression) -> bool {
 
     let function_name = token.text_trimmed();
 
-    matches!(
-        function_name,
-        "toRefs"
-            | "toRef"
-            | "reactive"
-            | "ref"
-            | "vueToRefs"
-            | "vueToRef"
-            | "vueReactive"
-            | "vueRef"
-    )
+    let is_vue_reactive_function = matches!(function_name, "toRefs" | "toRef" | "reactive" | "ref");
+
+    if !is_vue_reactive_function {
+        return false;
+    }
+
+    let Some(name_node) = ident_expr.name().ok() else {
+        return true;
+    };
+
+    let Some(binding) = model.binding(&name_node) else {
+        return true;
+    };
+
+    if !binding.is_imported() {
+        return true;
+    }
+
+    let binding_node = binding.syntax();
+
+    for ancestor in binding_node.ancestors() {
+        let Some(import_decl) = biome_js_syntax::JsImport::cast(ancestor) else {
+            continue;
+        };
+        let Ok(source) = import_decl.source_text() else {
+            continue;
+        };
+        let source_value = source.text();
+        return source_value == "vue"
+            || source_value == "@vue/reactivity"
+            || source_value == "@vue/composition-api";
+    }
+
+    true
 }
