@@ -1,7 +1,7 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, JsVariableStatement};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsVariableStatement};
 use biome_rowan::AstNode;
 use biome_rule_options::use_qwik_valid_lexical_scope::UseQwikValidLexicalScopeOptions;
 
@@ -16,16 +16,18 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// const print = (msg: string) => {
-    ///   console.log(msg);
+    /// // Arrow function assigned without wrapping it in $(...)
+    /// const handleClick = () => {
+    ///   console.log("clicked");
     /// };
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// const print = $((msg) => {
-    ///   console.log(msg);
+    /// const handleClick = $(() => {
+    ///   // Valid: only using serializable variables or props
+    ///   console.log("clicked");
     /// });
     /// ```
     ///
@@ -48,15 +50,18 @@ impl Rule for UseQwikValidLexicalScope {
 
     fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
         let var_stmt = ctx.query();
-
         for declarator in var_stmt.declaration().ok()?.declarators() {
-            declarator
+            if let Some(expr) = declarator
                 .ok()
                 .and_then(|d| d.initializer())
                 .and_then(|init| init.expression().ok())
-                .filter(|expr| matches!(expr, AnyJsExpression::JsArrowFunctionExpression(_)))
-                .filter(|expr| !is_wrapped_with_dollar(expr))
-                .map(|expr| expr.range());
+            {
+                if matches!(expr, AnyJsExpression::JsArrowFunctionExpression(_))
+                    && !is_wrapped_with_dollar(&expr)
+                {
+                    return Some(expr.range());
+                }
+            }
         }
         None
     }
@@ -87,14 +92,11 @@ impl Rule for UseQwikValidLexicalScope {
 }
 
 fn is_wrapped_with_dollar(expr: &AnyJsExpression) -> bool {
-    match expr {
-        AnyJsExpression::JsCallExpression(call) => call
-            .callee()
-            .ok()
-            .and_then(|callee| callee.as_js_identifier_expression().cloned())
-            .and_then(|ident| ident.name().ok())
-            .and_then(|name| name.value_token().ok())
-            .is_some_and(|token| token.text() == "$"),
-        _ => false,
-    }
+    expr.syntax()
+        .ancestors()
+        .find_map(JsCallExpression::cast)
+        .and_then(|call| call.callee().ok())
+        .and_then(|callee| callee.as_js_reference_identifier())
+        .and_then(|ident| ident.value_token().ok())
+        .is_some_and(|token| token.text_trimmed() == "$")
 }

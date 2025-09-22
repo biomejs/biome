@@ -5,7 +5,7 @@ use biome_js_syntax::{AnyJsFunction, JsCallExpression, JsVariableDeclarator};
 use biome_rowan::AstNode;
 use biome_rule_options::use_qwik_method_usage::UseQwikMethodUsageOptions;
 declare_lint_rule! {
-    /// Disallow use* hooks outside of component$ or other use* hooks.
+    /// Disallow `use*` hooks outside of `component$` or other `use*` hooks in Qwik applications.
     ///
     /// Ensures Qwik's lifecycle hooks are only used in valid reactive contexts.
     /// See [Qwik Component Lifecycle](https://qwik.dev/docs/components/lifecycle/) for proper hook usage.
@@ -55,8 +55,8 @@ impl Rule for UseQwikMethodUsage {
         if !is_hook {
             return None;
         }
-        let is_valid_context = is_inside_component_or_hook(call).unwrap_or(false)
-            || is_in_named_function(call).unwrap_or(false);
+        let is_valid_context = is_inside_component_or_hook(call).unwrap_or_default()
+            || is_in_named_function(call).unwrap_or_default();
         if is_valid_context {
             None
         } else {

@@ -3,16 +3,16 @@
 ---
 
 
-Added the [`useQwikValidLexicalScope`](https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope) rule to Qwik.
+Added the [`useQwikValidLexicalScope`](https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope) rule to the Qwik domain.
 
-This rule is intended for use in Qwik applications to validate proper lexical scope usage in Qwik components and prevent common reactivity issues.
+This rule helps you avoid common bugs in Qwik components by checking that your variables and functions are declared in the correct place.
 
 **Invalid:**
 
 ```js
+// Invalid: state defined outside the component's lexical scope.
+let state = useStore({ count: 0 });
 const Component = component$(() => {
-  const state = useStore({ count: 0 }); // Defined in wrong scope
-
   return <button onClick$={() => state.count++}>
     Invalid: {state.count}
   </button>;
@@ -22,11 +22,10 @@ const Component = component$(() => {
 **Valid:**
 
 ```js
+// Valid: state initialised within the component's lexical scope and captured by the event.
 const Component = component$(() => {
-  return <button onClick$={() => {
-    const state = useStore({ count: 0 }); // Correct lexical scope
-    state.count++;
-  }}>
+  const state = useStore({ count: 0 });
+  return <button onClick$={() => state.count++}>
     Valid: {state.count}
   </button>;
 });
