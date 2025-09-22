@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
 info: typescript/error-recovery/generic.ts
 ---
 # Input
@@ -79,14 +80,14 @@ class f7<> {
 ```
 generic.ts:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a type parameter but instead found '>'.
+  × Expected a type argument but instead found '>'.
   
   > 1 │ f1<>();
       │    ^
     2 │ 
     3 │ new f2<>();
   
-  i Expected a type parameter here.
+  i Expected a type argument here.
   
   > 1 │ f1<>();
       │    ^
@@ -95,7 +96,7 @@ generic.ts:1:4 parse ━━━━━━━━━━━━━━━━━━━�
   
 generic.ts:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a type parameter but instead found '>'.
+  × Expected a type argument but instead found '>'.
   
     1 │ f1<>();
     2 │ 
@@ -104,7 +105,7 @@ generic.ts:3:8 parse ━━━━━━━━━━━━━━━━━━━�
     4 │ 
     5 │ function f3<>() {}
   
-  i Expected a type parameter here.
+  i Expected a type argument here.
   
     1 │ f1<>();
     2 │ 

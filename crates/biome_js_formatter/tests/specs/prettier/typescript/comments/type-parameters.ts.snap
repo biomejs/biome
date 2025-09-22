@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
 info: typescript/comments/type-parameters.ts
 ---
 # Input
@@ -100,7 +101,7 @@ type T = <
 ```
 type-parameters.ts:2:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a type parameter but instead found '>'.
+  × Expected a type argument but instead found '>'.
   
     1 │ functionName<A /* A comment */>();
   > 2 │ const a: T</* comment */> = 1;
@@ -108,7 +109,7 @@ type-parameters.ts:2:25 parse ━━━━━━━━━━━━━━━━�
     3 │ functionName</* comment */>();
     4 │ function foo</* comment */>() {}
   
-  i Expected a type parameter here.
+  i Expected a type argument here.
   
     1 │ functionName<A /* A comment */>();
   > 2 │ const a: T</* comment */> = 1;
@@ -118,7 +119,7 @@ type-parameters.ts:2:25 parse ━━━━━━━━━━━━━━━━�
   
 type-parameters.ts:3:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a type parameter but instead found '>'.
+  × Expected a type argument but instead found '>'.
   
     1 │ functionName<A /* A comment */>();
     2 │ const a: T</* comment */> = 1;
@@ -127,7 +128,7 @@ type-parameters.ts:3:27 parse ━━━━━━━━━━━━━━━━�
     4 │ function foo</* comment */>() {}
     5 │ interface Foo {
   
-  i Expected a type parameter here.
+  i Expected a type argument here.
   
     1 │ functionName<A /* A comment */>();
     2 │ const a: T</* comment */> = 1;
@@ -198,7 +199,7 @@ type-parameters.ts:8:24 parse ━━━━━━━━━━━━━━━━�
   
 type-parameters.ts:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a type parameter but instead found '>'.
+  × Expected a type argument but instead found '>'.
   
     13 │ const a: T<
     14 │   // comment
@@ -207,7 +208,7 @@ type-parameters.ts:15:1 parse ━━━━━━━━━━━━━━━━�
     16 │ functionName<
     17 │   // comment
   
-  i Expected a type parameter here.
+  i Expected a type argument here.
   
     13 │ const a: T<
     14 │   // comment
@@ -218,7 +219,7 @@ type-parameters.ts:15:1 parse ━━━━━━━━━━━━━━━━�
   
 type-parameters.ts:18:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a type parameter but instead found '>'.
+  × Expected a type argument but instead found '>'.
   
     16 │ functionName<
     17 │   // comment
@@ -227,7 +228,7 @@ type-parameters.ts:18:1 parse ━━━━━━━━━━━━━━━━�
     19 │ function foo<
     20 │   // comment
   
-  i Expected a type parameter here.
+  i Expected a type argument here.
   
     16 │ functionName<
     17 │   // comment
