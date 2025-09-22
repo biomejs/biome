@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsExpression, AnyJsFunction, AnyJsObjectMemberName, JsCallExpression,
     JsIdentifierBinding, JsObjectExpression, JsPropertyObjectMember, JsVariableDeclarator,
 };
-use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, TextSize, TokenText};
 
 declare_lint_rule! {
     /// Disallow destructuring of props passed to setup in Vue projects.
@@ -410,19 +410,23 @@ fn check_root_scope_destructuring(
     violations
 }
 
-fn get_object_member_name_text(name: &AnyJsObjectMemberName) -> Option<String> {
+fn get_object_member_name_text(name: &AnyJsObjectMemberName) -> Option<TokenText> {
     match name {
         AnyJsObjectMemberName::JsLiteralMemberName(literal_name) => {
             let value_token = literal_name.value().ok()?;
-            let text = value_token.text_trimmed();
+            let mut text = value_token.token_text_trimmed();
 
-            if (text.starts_with('"') && text.ends_with('"') && text.len() >= 2)
-                || (text.starts_with('\'') && text.ends_with('\'') && text.len() >= 2)
+            // If the token is a quoted string, remove the quotes
+            let text_str = text.text();
+            if (text_str.starts_with('"') && text_str.ends_with('"') && text_str.len() >= 2)
+                || (text_str.starts_with('\'') && text_str.ends_with('\'') && text_str.len() >= 2)
             {
-                Some(text[1..text.len() - 1].to_string())
-            } else {
-                Some(value_token.token_text_trimmed().text().to_string())
+                // Remove the quotes by slicing the TokenText
+                let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
+                text = text.slice(range);
             }
+
+            Some(text)
         }
 
         AnyJsObjectMemberName::JsComputedMemberName(computed_name) => {
@@ -433,15 +437,19 @@ fn get_object_member_name_text(name: &AnyJsObjectMemberName) -> Option<String> {
                 .and_then(|literal| literal.as_js_string_literal_expression())
             {
                 let value_token = string_literal.value_token().ok()?;
-                let text = value_token.text_trimmed();
+                let mut text = value_token.token_text_trimmed();
 
-                if text.len() >= 2
-                    && ((text.starts_with('"') && text.ends_with('"'))
-                        || (text.starts_with('\'') && text.ends_with('\'')))
+                // For computed member names with string literals, also remove quotes
+                let text_str = text.text();
+                if text_str.len() >= 2
+                    && ((text_str.starts_with('"') && text_str.ends_with('"'))
+                        || (text_str.starts_with('\'') && text_str.ends_with('\'')))
                 {
-                    return Some(text[1..text.len() - 1].to_string());
+                    let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
+                    text = text.slice(range);
                 }
-                Some(value_token.token_text_trimmed().text().to_string())
+
+                Some(text)
             } else {
                 None
             }
