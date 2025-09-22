@@ -181,6 +181,5 @@ fn is_in_named_function(call: &JsCallExpression) -> bool {
                 .map(|token| token.token_text_trimmed()),
         });
 
-    function_name
-        .is_some_and(|name| is_component_or_hook_name(name.text()))
+    function_name.is_some_and(|name| is_component_or_hook_name(name.text()))
 }

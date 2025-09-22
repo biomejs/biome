@@ -51,21 +51,16 @@ impl Rule for UseQwikValidLexicalScope {
     fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
         let var_stmt = ctx.query();
         for declarator in var_stmt.declaration().ok()?.declarators() {
-            if declarator
+            let expr_opt = declarator
+                .as_ref()
                 .ok()
                 .and_then(|d| d.initializer())
-                .and_then(|init| init.expression().ok())
-                .is_some_and(|expr| {
-                    matches!(expr, AnyJsExpression::JsArrowFunctionExpression(_))
-                        && !is_wrapped_with_dollar(&expr)
-                })
-            {
-                // The expression exists and matches the condition; it is safe to unwrap
-                let expr = declarator
-                    .ok()
-                    .and_then(|d| d.initializer())
-                    .and_then(|init| init.expression().ok())
-                    .expect("expression just validated by is_some_and");
+                .and_then(|init| init.expression().ok());
+
+            if let Some(expr) = expr_opt.filter(|expr| {
+                matches!(expr, AnyJsExpression::JsArrowFunctionExpression(_))
+                    && !is_wrapped_with_dollar(expr)
+            }) {
                 return Some(expr.range());
             }
         }
