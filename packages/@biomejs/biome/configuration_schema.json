@@ -13616,10 +13616,16 @@
 			]
 		},
 		"UseConsistentArrowReturnOptions": {
+			"description": "Options for the `useConsistentArrowReturn` rule.",
 			"type": "object",
 			"properties": {
-				"requireForObjectLiteral": { "default": false, "type": "boolean" },
+				"requireForObjectLiteral": {
+					"description": "This option is only applicable when used in conjunction with the `asNeeded` option.",
+					"default": false,
+					"type": "boolean"
+				},
 				"style": {
+					"description": "The style to enforce for arrow function return statements.",
 					"default": "asNeeded",
 					"allOf": [{ "$ref": "#/definitions/UseConsistentArrowReturnStyle" }]
 				}
@@ -13627,8 +13633,23 @@
 			"additionalProperties": false
 		},
 		"UseConsistentArrowReturnStyle": {
-			"type": "string",
-			"enum": ["asNeeded", "always", "never"]
+			"oneOf": [
+				{
+					"description": "Enforces no braces where they can be omitted (default).",
+					"type": "string",
+					"enum": ["asNeeded"]
+				},
+				{
+					"description": "Enforces braces around the function body.",
+					"type": "string",
+					"enum": ["always"]
+				},
+				{
+					"description": "Enforces no braces around the function body (constrains arrow functions to the role of returning an expression).",
+					"type": "string",
+					"enum": ["never"]
+				}
+			]
 		},
 		"UseConsistentBuiltinInstantiationConfiguration": {
 			"anyOf": [
@@ -14819,4 +14840,3 @@
 		}
 	}
 }
-

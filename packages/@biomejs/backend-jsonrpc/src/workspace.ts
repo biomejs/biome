@@ -8138,8 +8138,17 @@ export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export type UseAnchorHrefOptions = null;
+/**
+ * Options for the `useConsistentArrowReturn` rule.
+ */
 export interface UseConsistentArrowReturnOptions {
+	/**
+	 * This option is only applicable when used in conjunction with the `asNeeded` option.
+	 */
 	requireForObjectLiteral?: boolean;
+	/**
+	 * The style to enforce for arrow function return statements.
+	 */
 	style?: UseConsistentArrowReturnStyle;
 }
 export interface UseConsistentTypeDefinitionsOptions {
@@ -9817,4 +9826,3 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 	};
 }
-
