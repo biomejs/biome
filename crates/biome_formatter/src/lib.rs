@@ -895,21 +895,16 @@ impl<Context> Formatted<Context> {
     where
         F: FnMut(TextRange) -> Option<Document>,
     {
-        self.document
-            .transform(move |element: &FormatElement| -> Option<FormatElement> {
-                match element {
-                    FormatElement::Tag(Tag::StartEmbedded(range)) => fn_format_embedded(*range)
-                        .map(|document| {
-                            FormatElement::Interned(Interned::new(document.into_elements()))
-                        }),
-                    FormatElement::Tag(Tag::EndEmbedded) => {
-                        // FIXME: this might not play well for all cases, so we need to figure out
-                        // a nicer way to replace the tag
-                        Some(FormatElement::Line(LineMode::Hard))
-                    }
-                    _ => None,
-                }
-            });
+        self.document.transform(move |element| match element {
+            FormatElement::Tag(Tag::StartEmbedded(range)) => fn_format_embedded(*range)
+                .map(|document| FormatElement::Interned(Interned::new(document.into_elements()))),
+            FormatElement::Tag(Tag::EndEmbedded) => {
+                // FIXME: this might not play well for all cases, so we need to figure out
+                // a nicer way to replace the tag
+                Some(FormatElement::Line(LineMode::Hard))
+            }
+            _ => None,
+        });
     }
 
     /// Returns the formatted document.
