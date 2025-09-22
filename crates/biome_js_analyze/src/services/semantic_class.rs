@@ -874,7 +874,7 @@ fn is_within_scope_without_shadowing(
 
 /// Checks if the given node is used in an expression context
 /// (e.g., return, call arguments, conditionals, binary expressions).
-/// NOt limited to `this` references. Can be used for any node, but requires more work e.g.
+/// Not limited to `this` references. Can be used for any node, but requires more work e.g.
 /// Returns `true` if the read is meaningful, `false` otherwise.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
     let mut current: JsSyntaxNode =
