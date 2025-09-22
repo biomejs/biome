@@ -130,7 +130,7 @@ where
 pub struct ClassMemberReference {
     pub name: Text,
     pub range: TextRange,
-    /// Indicates if the read is meaningful (e.g., used in an expression) or not (e.g. part of a destructuring assignment).
+    /// Indicates if the read is meaningful (e.g. used in an expression) or not (e.g. part of a destructuring assignment).
     /// `None` if not applicable (e.g. for write references).
     pub is_meaningful_read: Option<bool>,
 }
