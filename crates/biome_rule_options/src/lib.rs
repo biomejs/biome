@@ -148,6 +148,7 @@ pub mod no_prototype_builtins;
 pub mod no_quickfix_biome;
 pub mod no_qwik_use_visible_task;
 pub mod no_re_export_all;
+pub mod no_react_forward_ref;
 pub mod no_react_prop_assignments;
 pub mod no_react_specific_props;
 pub mod no_redeclare;

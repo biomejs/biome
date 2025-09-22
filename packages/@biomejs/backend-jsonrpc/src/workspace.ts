@@ -1662,6 +1662,10 @@ export interface Nursery {
 	 */
 	noQwikUseVisibleTask?: RuleConfiguration_for_NoQwikUseVisibleTaskOptions;
 	/**
+	 * Replaces usages of forwardRef with passing ref as a prop.
+	 */
+	noReactForwardRef?: RuleFixConfiguration_for_NoReactForwardRefOptions;
+	/**
 	 * Disallow usage of sensitive data such as API keys and tokens.
 	 */
 	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
@@ -3013,6 +3017,9 @@ export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
 export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
+export type RuleFixConfiguration_for_NoReactForwardRefOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoReactForwardRefOptions;
 export type RuleConfiguration_for_NoSecretsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoSecretsOptions;
@@ -5458,6 +5465,20 @@ export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
 	 * Rule's options
 	 */
 	options: NoQwikUseVisibleTaskOptions;
+}
+export interface RuleWithFixOptions_for_NoReactForwardRefOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoReactForwardRefOptions;
 }
 export interface RuleWithOptions_for_NoSecretsOptions {
 	/**
@@ -8119,6 +8140,7 @@ export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoQwikUseVisibleTaskOptions {}
+export interface NoReactForwardRefOptions {}
 export interface NoSecretsOptions {
 	/**
 	 * Set entropy threshold (default is 41).
@@ -8860,6 +8882,7 @@ export type Category =
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noQwikUseVisibleTask"
+	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noSecrets"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noUnnecessaryConditions"

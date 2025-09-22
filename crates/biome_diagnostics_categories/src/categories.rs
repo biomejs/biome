@@ -173,6 +173,7 @@ define_categories! {
     "lint/nursery/noNextAsyncClientComponent": "https://biomejs.dev/linter/rules/no-next-async-client-component",
     "lint/nursery/noNonNullAssertedOptionalChain": "https://biomejs.dev/linter/rules/no-non-null-asserted-optional-chain",
     "lint/nursery/noQwikUseVisibleTask": "https://biomejs.dev/linter/rules/no-qwik-use-visible-task",
+    "lint/nursery/noReactForwardRef": "https://biomejs.dev/linter/rules/no-react-forward-ref",
     "lint/nursery/noSecrets": "https://biomejs.dev/linter/rules/no-secrets",
     "lint/nursery/noShadow": "https://biomejs.dev/linter/rules/no-shadow",
     "lint/nursery/noUnnecessaryConditions": "https://biomejs.dev/linter/rules/no-unnecessary-conditions",
