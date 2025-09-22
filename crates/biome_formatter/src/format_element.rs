@@ -317,7 +317,7 @@ impl BestFittingElement {
         &self.variants
     }
 
-    pub fn variants_mut(&mut self) -> &mut [Box<[FormatElement]>] {
+    pub(crate) fn variants_mut(&mut self) -> &mut [Box<[FormatElement]>] {
         &mut self.variants
     }
 
