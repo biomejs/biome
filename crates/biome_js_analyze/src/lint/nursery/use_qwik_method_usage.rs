@@ -118,9 +118,8 @@ fn is_inside_component_or_hook(call: &JsCallExpression) -> bool {
                 .ok()
                 .and_then(|callee| callee.as_js_reference_identifier())
                 .and_then(|ident| ident.value_token().ok())
-                .map(|token| is_component_or_hook_name(token.text()))
         })
-        .unwrap_or_default()
+        .is_some_and(|token| is_component_or_hook_name(token.text()))
 }
 
 /// Returns true if the given identifier name represents a Qwik hook name.
@@ -183,6 +182,5 @@ fn is_in_named_function(call: &JsCallExpression) -> bool {
         });
 
     function_name
-        .map(|name| is_component_or_hook_name(name.text()))
-        .unwrap_or_default()
+        .is_some_and(|name| is_component_or_hook_name(name.text()))
 }
