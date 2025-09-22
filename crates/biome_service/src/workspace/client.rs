@@ -1,11 +1,12 @@
 use super::{
-    ChangeFileParams, CloseFileParams, FileExitsParams, FixFileParams, FixFileResult,
-    FormatFileParams, FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams,
-    GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult, GetSemanticModelParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams,
-    ScanProjectResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
-    UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
+    ChangeFileParams, ChangeFileResult, CloseFileParams, FileExitsParams, FixFileParams,
+    FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
+    GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
+    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
+    OpenFileResult, PullActionsParams, PullActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams, ScanProjectResult,
+    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateModuleGraphParams,
+    UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -126,7 +127,7 @@ where
         self.request("biome/close_project", params)
     }
 
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
+    fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError> {
         self.request("biome/open_file", params)
     }
 
@@ -189,7 +190,7 @@ where
         self.request("biome/check_file_size", params)
     }
 
-    fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError> {
+    fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError> {
         self.request("biome/change_file", params)
     }
 

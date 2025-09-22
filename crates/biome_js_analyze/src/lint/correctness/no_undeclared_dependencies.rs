@@ -18,6 +18,9 @@ declare_lint_rule! {
     /// This means that if the package `@org/foo` has a dependency on `lodash`, and then you use
     /// `import "lodash"` somewhere in your project, the rule will trigger a diagnostic for this import.
     ///
+    /// The rule is meant to catch those dependencies that aren't declared inside the closest `package.json`, and
+    /// isn't meant to detect dependencies declared in other manifest files, e.g. the root `package.json` in a monorepo setting.
+    ///
     /// The rule ignores imports that are not valid package names.
     /// This includes internal imports that start with `#` and `@/` and imports with a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
     ///
@@ -28,24 +31,33 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,ignore
+    /// ```json,file=package.json
+    /// {
+    ///   "dependencies": {}
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,file=index.js
     /// import "vite";
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js,ignore
-    /// import { A } from "./local.js";
+    /// ```json,file=package.json
+    /// {
+    ///   "dependencies": {
+    ///     "vite": "*"
+    ///   }
+    /// }
     /// ```
     ///
-    /// ```js,ignore
-    /// import assert from "node:assert";
-    /// ```
+    /// ```js,file=index.js
+    /// import "vite"; // package is correctly declared
     ///
-    /// If you have declared `type-fest` in the `devDependencies` section:
+    /// import assert from "node:assert"; // Node imports don't need declaration
     ///
-    /// ```js,ignore
-    /// import type { SetRequired } from "type-fest";
+    /// import { A } from "./local.js"; // relative imports don't trigger the rule
+    /// import { B } from "#alias"; // same goes for aliases
     /// ```
     ///
     /// ## Options
@@ -72,15 +84,36 @@ declare_lint_rule! {
     /// if the name of the file being linted (i.e. not the imported file/module) matches a single glob
     /// in the array, and `false` otherwise.
     ///
-    /// In the following example, only test files can use dependencies in `devDependencies` section.
-    /// `dependencies`, `peerDependencies`, and `optionalDependencies` are always available.
+    /// ### Example using the `devDependencies` option
     ///
-    /// ```json
+    /// In this example, only test files can use dependencies in the
+    /// `devDependencies` section. `dependencies`, `peerDependencies`, and
+    /// `optionalDependencies` are always available.
+    ///
+    /// ```json,options
     /// {
     ///   "options": {
-    ///     "devDependencies": ["tests/*.test.js", "tests/*.spec.js"]
+    ///     "devDependencies": ["**/tests/*.test.js", "**/tests/*.spec.js"]
     ///   }
     /// }
+    /// ```
+    ///
+    /// ```json,file=package.json
+    /// {
+    ///   "devDependencies": {
+    ///     "vite": "*"
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options,file=src/index.js
+    /// // cannot import from a non-test file
+    /// import "vite";
+    /// ```
+    ///
+    /// ```js,use_options,file=tests/foo.test.js
+    /// // this works, because the file matches a glob from the options
+    /// import "vite";
     /// ```
     pub NoUndeclaredDependencies {
         version: "1.6.0",

@@ -1,6 +1,6 @@
 use crate::{
-    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleCategories, RuleGroup,
-    RuleKey, RuleMetadata, ServiceBag, SignalEntry, Visitor,
+    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleGroup, RuleKey,
+    RuleMetadata, ServiceBag, SignalEntry, Visitor,
     context::RuleContext,
     matcher::{GroupKey, MatchQueryParams},
     query::{QueryKey, Queryable},
@@ -240,7 +240,6 @@ type BuilderResult<L> = (
     ServiceBag,
     Vec<Error>,
     BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>>,
-    RuleCategories,
 );
 
 impl<L: Language> RuleRegistryBuilder<'_, L> {
@@ -250,7 +249,6 @@ impl<L: Language> RuleRegistryBuilder<'_, L> {
             self.services,
             self.diagnostics,
             self.visitors,
-            self.filter.categories,
         )
     }
 }
@@ -406,6 +404,7 @@ impl<L: Language + Default> RegistryRule<L> {
             let globals = params.options.globals();
             let preferred_quote = params.options.preferred_quote();
             let preferred_jsx_quote = params.options.preferred_jsx_quote();
+            let preferred_indentation = params.options.preferred_indentation();
             let jsx_runtime = params.options.jsx_runtime();
             let css_modules = params.options.css_modules();
             let options = params.options.rule_options::<R>().unwrap_or_default();
@@ -418,6 +417,7 @@ impl<L: Language + Default> RegistryRule<L> {
                 &options,
                 preferred_quote,
                 preferred_jsx_quote,
+                preferred_indentation,
                 jsx_runtime,
                 css_modules,
             )?;
@@ -440,7 +440,7 @@ impl<L: Language + Default> RegistryRule<L> {
 
                 params.signal_queue.push(SignalEntry {
                     signal,
-                    rule: RuleKey::rule::<R>(),
+                    rule: RuleKey::rule::<R>().into(),
                     instances,
                     text_range,
                     category: <R::Group as RuleGroup>::Category::CATEGORY,

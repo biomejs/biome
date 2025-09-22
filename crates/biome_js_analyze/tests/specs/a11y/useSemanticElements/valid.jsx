@@ -32,3 +32,13 @@ export const Component2 = () => (
     <div role="listbox"></div>
     <div role="option"></div>
 </>
+
+<>
+	<Div role="combobox"></Div>
+	<custom-element role="combobox"></custom-element>
+	<Card
+		role="button"
+	>
+		{children}
+	</Card>
+</>

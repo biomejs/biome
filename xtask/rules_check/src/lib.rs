@@ -14,7 +14,6 @@ use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
-use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
 use biome_json_factory::make;
@@ -24,9 +23,10 @@ use biome_rowan::AstNode;
 use biome_service::projects::{ProjectKey, Projects};
 use biome_service::settings::ServiceLanguage;
 use biome_service::workspace::DocumentFileSource;
+use biome_test_utils::get_test_services;
 use camino::Utf8PathBuf;
-use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
-use std::collections::BTreeMap;
+use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
+use std::collections::{BTreeMap, HashMap};
 use std::fmt::{Display, Formatter, Write};
 use std::slice;
 use std::str::FromStr;
@@ -169,6 +169,9 @@ struct CodeBlockTest {
     /// Whether to use the last code block that was marked with
     /// `options` as the configuration settings for this code block.
     use_options: bool,
+
+    /// The given file path in the testing in memory file system if provided.
+    file_path: Option<String>,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -207,9 +210,26 @@ impl FromStr for CodeBlockTest {
             ignore: false,
             options: OptionsParsingMode::NoOptions,
             use_options: false,
+            file_path: None,
         };
 
         for token in tokens {
+            // Handle file=path attribute to create multi-file test scenarios
+            if let Some(file) = token.strip_prefix("file=") {
+                if file.is_empty() {
+                    bail!("The 'file' attribute must be followed by a file path");
+                }
+
+                // Normalize to absolute paths for consistent module resolution
+                let path = file
+                    .trim_start_matches("./")
+                    .trim_start_matches("../")
+                    .trim();
+                test.file_path = Some(format!("/{path}"));
+
+                continue;
+            }
+
             match token {
                 // Other attributes
                 "expect_diagnostic" => test.expect_diagnostic = true,
@@ -348,8 +368,12 @@ fn assert_lint(
     test: &CodeBlockTest,
     code: &str,
     config: &Option<Configuration>,
+    test_files: &HashMap<String, String>,
 ) -> anyhow::Result<()> {
-    let file_path = format!("code-block.{}", test.tag);
+    let file_path = test
+        .file_path
+        .clone()
+        .unwrap_or_else(|| format!("code-block.{}", test.tag));
 
     if test.ignore {
         return Ok(());
@@ -419,8 +443,7 @@ fn assert_lint(
                     test,
                 );
 
-                let services =
-                    JsAnalyzerServices::from((Default::default(), Default::default(), file_source));
+                let services = get_test_services(file_source, test_files);
 
                 biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -593,7 +616,7 @@ fn assert_lint(
         // Fail the test if the analysis didn't emit any diagnostic
         ensure!(
             diagnostics.diagnostic_count == 1,
-            "Analysis of '{group}/{rule}' on the following code block returned no diagnostics.\n\n{code}",
+            "Analysis of '{group}/{rule}' on the following code block with path '{file_path}' returned no diagnostics.\n\n{code}",
         );
     }
 
@@ -811,6 +834,8 @@ fn parse_documentation(
 ) -> anyhow::Result<()> {
     let parser = Parser::new(rule_metadata.docs);
 
+    let mut test_runner = TestRunner::new(group, rule_metadata.name);
+
     // Track the last configuration options block that was encountered
     let mut last_options: Option<Configuration> = None;
 
@@ -831,7 +856,17 @@ fn parse_documentation(
                         last_options =
                             parse_rule_options(group, &rule_metadata, category, &test, &block)?;
                     } else {
-                        assert_lint(group, rule_metadata.name, &test, &block, &last_options)?;
+                        if let Some(file_path) = &test.file_path {
+                            test_runner
+                                .file_system
+                                .insert(file_path.clone(), block.clone());
+                        }
+
+                        test_runner.pending_tests.push(PendingTest {
+                            test,
+                            block,
+                            options_snapshot: last_options.clone(),
+                        });
                     }
                 }
             }
@@ -845,10 +880,80 @@ fn parse_documentation(
                     }
                 }
             }
+            Event::Start(Tag::Heading { level, .. }) => {
+                // Major headings delineate testable sections. When we encounter a new section,
+                // run all tests from the previous section with the complete file system.
+                if matches!(
+                    level,
+                    HeadingLevel::H1 | HeadingLevel::H2 | HeadingLevel::H3 | HeadingLevel::H4
+                ) {
+                    test_runner.run_pending_tests()?;
+                }
+            }
             // We don't care other events
             _ => {}
         }
     }
 
+    test_runner.run_pending_tests()?;
+
     Ok(())
+}
+
+struct PendingTest {
+    /// The test definition
+    test: CodeBlockTest,
+    /// The code block content for the test
+    block: String,
+    /// The last encountered configuration options block seen before this test was collected.
+    /// We take a copy of the options because one document may contain multiple options blocks.
+    options_snapshot: Option<Configuration>,
+}
+
+/// The test runner collects code block tests into batches grouped by documentation sections
+/// (delineated by markdown headings). It gathers all context required for each test,
+/// including options and in-memory files that may be referenced by the code blocks.
+struct TestRunner {
+    group: &'static str,
+    rule_name: &'static str,
+
+    /// Code block tests for the current documentation section.
+    /// Tests are deferred and run as a batch when the section ends.
+    pub pending_tests: Vec<PendingTest>,
+
+    /// In-memory file system for code blocks annotated with `file=path`.
+    /// All files are collected before running tests, ensuring each test
+    /// has access to the complete file system regardless of definition order.
+    /// This is essential for multi-file rules like import cycle detection.
+    pub file_system: HashMap<String, String>,
+}
+
+impl TestRunner {
+    pub fn new(group: &'static str, rule_name: &'static str) -> Self {
+        Self {
+            group,
+            rule_name,
+            pending_tests: Vec::new(),
+            file_system: HashMap::new(),
+        }
+    }
+
+    /// Runs all pending tests with the current file system, then resets state for the next section.
+    pub fn run_pending_tests(&mut self) -> anyhow::Result<()> {
+        for test in &self.pending_tests {
+            assert_lint(
+                self.group,
+                self.rule_name,
+                &test.test,
+                &test.block,
+                &test.options_snapshot,
+                &self.file_system,
+            )?;
+        }
+
+        self.pending_tests.clear();
+        self.file_system.clear();
+
+        Ok(())
+    }
 }

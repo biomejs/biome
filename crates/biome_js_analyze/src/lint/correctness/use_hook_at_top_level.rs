@@ -422,6 +422,7 @@ impl Queryable for FunctionCall {
 #[derive(Debug)]
 pub struct CallPath {
     call: JsCallExpression,
+    is_enclosed_in_component_or_hook: bool,
     path: Vec<TextRange>,
 }
 
@@ -449,10 +450,16 @@ impl Rule for UseHookAtTopLevel {
         let root = CallPath {
             call: call.clone(),
             path: vec![],
+            is_enclosed_in_component_or_hook: false,
         };
         let mut calls = vec![root];
 
-        while let Some(CallPath { call, mut path }) = calls.pop() {
+        while let Some(CallPath {
+            call,
+            mut path,
+            is_enclosed_in_component_or_hook,
+        }) = calls.pop()
+        {
             let range = call.syntax().text_range_with_trivia();
 
             if path.contains(&range) {
@@ -485,6 +492,9 @@ impl Rule for UseHookAtTopLevel {
                     });
                 }
 
+                let enclosed = is_enclosed_in_component_or_hook
+                    || enclosing_function.is_react_component_or_hook();
+
                 if let AnyJsFunctionOrMethod::AnyJsFunction(function) = enclosing_function
                     && let Some(calls_iter) = function.all_calls(model)
                 {
@@ -492,10 +502,17 @@ impl Rule for UseHookAtTopLevel {
                         calls.push(CallPath {
                             call: call.tree(),
                             path: path.clone(),
+                            is_enclosed_in_component_or_hook: enclosed,
                         });
                     }
                 }
             } else {
+                // Avoid duplicate diagnostics if this path already passed through
+                // a component/hook. We still keep previously enqueued paths to
+                // allow recursion detection elsewhere.
+                if is_enclosed_in_component_or_hook {
+                    continue;
+                }
                 return Some(Suggestion {
                     hook_name_range: get_hook_name_range()?,
                     path,

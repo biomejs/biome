@@ -13,7 +13,7 @@ export const Counter = () => {
 ```
 invalid.jsx:2:17 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Qwik hook detected outside of allowed scope
+  × Qwik hook detected outside of an allowed scope
   
     1 │ export const Counter = () => {
   > 2 │   const count = useSignal(0);

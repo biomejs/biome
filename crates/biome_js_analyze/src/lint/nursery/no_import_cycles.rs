@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsImportLike;
 use biome_module_graph::{JsImportPath, JsImportPhase, JsModuleInfo};
+use biome_resolver::ResolvedPath;
 use biome_rowan::AstNode;
 use biome_rule_options::no_import_cycles::NoImportCyclesOptions;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -34,8 +35,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// **`foobar.js`**
-    /// ```js
+    /// ```js,expect_diagnostic,file=foobar.js
     /// import { baz } from "./baz.js";
     ///
     /// export function foo() {
@@ -47,8 +47,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// **`baz.js`**
-    /// ```js
+    /// ```js,expect_diagnostic,file=baz.js
     /// import { bar } from "./foobar.js";
     ///
     /// export function baz() {
@@ -58,8 +57,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// **`foo.js`**
-    /// ```js
+    /// ```js,file=foo.js
     /// import { baz } from "./baz.js";
     ///
     /// export function foo() {
@@ -67,15 +65,13 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// **`bar.js`**
-    /// ```js
+    /// ```js,file=bar.js
     /// export function bar() {
     ///     console.log("foobar");
     /// }
     /// ```
     ///
-    /// **`baz.js`**
-    /// ```js
+    /// ```js,file=baz.js
     /// import { bar } from "./bar.js";
     ///
     /// export function baz() {
@@ -83,8 +79,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// **`types.ts`**
-    /// ```ts
+    /// ```ts,file=types.ts
     /// import type { bar } from "./qux.ts";
     ///
     /// export type Foo = {
@@ -92,8 +87,7 @@ declare_lint_rule! {
     /// };
     /// ```
     ///
-    /// **`qux.ts`**
-    /// ```ts
+    /// ```ts,file=qux.ts
     /// import type { Foo } from "./types.ts";
     ///
     /// export function bar(foo: Foo) {
@@ -122,8 +116,7 @@ declare_lint_rule! {
     ///
     /// #### Invalid
     ///
-    /// **`types.ts`**
-    /// ```ts
+    /// ```ts,file=types.ts
     /// import type { bar } from "./qux.ts";
     ///
     /// export type Foo = {
@@ -131,8 +124,7 @@ declare_lint_rule! {
     /// };
     /// ```
     ///
-    /// **`qux.ts`**
-    /// ```ts,use_options
+    /// ```ts,use_options,expect_diagnostic,file=qux.ts
     /// import type { Foo } from "./types.ts";
     ///
     /// export function bar(foo: Foo) {
@@ -154,7 +146,7 @@ declare_lint_rule! {
 
 impl Rule for NoImportCycles {
     type Query = ResolvedImports<AnyJsImportLike>;
-    type State = Box<[Box<str>]>;
+    type State = Vec<String>;
     type Signals = Option<Self::State>;
     type Options = NoImportCyclesOptions;
 
@@ -227,10 +219,10 @@ fn find_cycle(
     ctx: &RuleContext<NoImportCycles>,
     start_path: &Utf8Path,
     mut module_info: JsModuleInfo,
-) -> Option<Box<[Box<str>]>> {
+) -> Option<Vec<String>> {
     let options = ctx.options();
     let mut seen = FxHashSet::default();
-    let mut stack: Vec<(Box<str>, JsModuleInfo)> = Vec::new();
+    let mut stack: Vec<(ResolvedPath, JsModuleInfo)> = Vec::new();
 
     'outer: loop {
         for JsImportPath {
@@ -252,17 +244,21 @@ fn find_cycle(
 
             if path == ctx.file_path() {
                 // Return all the paths from `start_path` to `resolved_path`:
-                let paths = Some(start_path.as_str())
+                let paths = Some(start_path.to_string())
                     .into_iter()
-                    .map(Box::from)
-                    .chain(stack.into_iter().map(|(path, _)| path))
-                    .chain(Some(Box::from(path.as_str())))
+                    .chain(
+                        stack
+                            .iter()
+                            .filter_map(|(path, _)| path.as_path())
+                            .map(ToString::to_string),
+                    )
+                    .chain(Some(path.to_string()))
                     .collect();
                 return Some(paths);
             }
 
             if let Some(next_module_info) = ctx.module_info_for_path(path) {
-                stack.push((path.as_str().into(), module_info));
+                stack.push((resolved_path.clone(), module_info));
                 module_info = next_module_info;
                 continue 'outer;
             }

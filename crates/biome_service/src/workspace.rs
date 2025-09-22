@@ -750,6 +750,12 @@ pub struct OpenFileParams {
     #[serde(default)]
     pub persist_node_cache: bool,
 }
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct OpenFileResult {
+    diagnostics: Vec<Diagnostic>,
+}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -871,6 +877,13 @@ pub struct ChangeFileParams {
     pub path: BiomePath,
     pub content: String,
     pub version: i32,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct ChangeFileResult {
+    diagnostics: Vec<Diagnostic>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1212,7 +1225,7 @@ pub struct PathIsIgnoredParams {
     /// Controls how to ignore check should be done
     pub ignore_kind: IgnoreKind,
 }
-#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum IgnoreKind {
@@ -1365,7 +1378,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ///
     /// If the file path is under a folder that belongs to an opened project
     /// other than the current one, the current project is changed accordingly.
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
+    fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
 
     /// Checks if `file_path` exists in the workspace.
     ///
@@ -1405,7 +1418,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ) -> Result<CheckFileSizeResult, WorkspaceError>;
 
     /// Changes the content of an open file.
-    fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError>;
+    fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
 
     /// Retrieves the list of diagnostics associated with a file.
     fn pull_diagnostics(
@@ -1600,7 +1613,11 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn change_file(&self, version: i32, content: String) -> Result<(), WorkspaceError> {
+    pub fn change_file(
+        &self,
+        version: i32,
+        content: String,
+    ) -> Result<ChangeFileResult, WorkspaceError> {
         self.workspace.change_file(ChangeFileParams {
             project_key: self.project_key,
             path: self.path.clone(),

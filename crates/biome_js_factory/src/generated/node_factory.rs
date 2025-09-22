@@ -2045,14 +2045,40 @@ impl JsImportBareClauseBuilder {
 pub fn js_import_call_expression(
     import_token: SyntaxToken,
     arguments: JsCallArguments,
-) -> JsImportCallExpression {
-    JsImportCallExpression::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION,
-        [
-            Some(SyntaxElement::Token(import_token)),
-            Some(SyntaxElement::Node(arguments.into_syntax())),
-        ],
-    ))
+) -> JsImportCallExpressionBuilder {
+    JsImportCallExpressionBuilder {
+        import_token,
+        arguments,
+        dot_token: None,
+        phase_token: None,
+    }
+}
+pub struct JsImportCallExpressionBuilder {
+    import_token: SyntaxToken,
+    arguments: JsCallArguments,
+    dot_token: Option<SyntaxToken>,
+    phase_token: Option<SyntaxToken>,
+}
+impl JsImportCallExpressionBuilder {
+    pub fn with_dot_token(mut self, dot_token: SyntaxToken) -> Self {
+        self.dot_token = Some(dot_token);
+        self
+    }
+    pub fn with_phase_token(mut self, phase_token: SyntaxToken) -> Self {
+        self.phase_token = Some(phase_token);
+        self
+    }
+    pub fn build(self) -> JsImportCallExpression {
+        JsImportCallExpression::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION,
+            [
+                Some(SyntaxElement::Token(self.import_token)),
+                self.dot_token.map(|token| SyntaxElement::Token(token)),
+                self.phase_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.arguments.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn js_import_combined_clause(
     default_specifier: JsDefaultImportSpecifier,

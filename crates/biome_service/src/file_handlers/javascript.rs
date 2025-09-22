@@ -18,7 +18,7 @@ use crate::{
         RenameResult,
     },
 };
-use biome_analyze::options::PreferredQuote;
+use biome_analyze::options::{PreferredIndentation, PreferredQuote};
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
     RuleCategoriesBuilder, RuleError, RuleFilter,
@@ -47,8 +47,7 @@ use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsRoot, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
-    JsLanguage, JsSyntaxNode, JsVariableDeclarator, LanguageVariant, TextRange, TextSize,
-    TokenAtOffset,
+    JsLanguage, JsSyntaxNode, JsVariableDeclarator, TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
@@ -261,12 +260,9 @@ impl ServiceLanguage for JsLanguage {
             .javascript
             .formatter
             .quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
+            .map(|quote_style: QuoteStyle| match quote_style {
+                QuoteStyle::Single => PreferredQuote::Single,
+                QuoteStyle::Double => PreferredQuote::Double,
             })
             .unwrap_or_default();
         let preferred_jsx_quote = global
@@ -274,14 +270,26 @@ impl ServiceLanguage for JsLanguage {
             .javascript
             .formatter
             .jsx_quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
+            .map(|quote_style: QuoteStyle| match quote_style {
+                QuoteStyle::Single => PreferredQuote::Single,
+                QuoteStyle::Double => PreferredQuote::Double,
             })
             .unwrap_or_default();
+        let preferred_indentation = global.languages.javascript.formatter.indent_style.map_or(
+            PreferredIndentation::default(),
+            |indent_style| match indent_style {
+                IndentStyle::Tab => PreferredIndentation::Tab,
+                IndentStyle::Space => PreferredIndentation::Spaces(
+                    global
+                        .languages
+                        .javascript
+                        .formatter
+                        .indent_width
+                        .unwrap_or_default()
+                        .value(),
+                ),
+            },
+        );
 
         let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
@@ -350,7 +358,8 @@ impl ServiceLanguage for JsLanguage {
             .with_rules(to_analyzer_rules(global, path.as_path()))
             .with_globals(globals)
             .with_preferred_quote(preferred_quote)
-            .with_preferred_jsx_quote(preferred_jsx_quote);
+            .with_preferred_jsx_quote(preferred_jsx_quote)
+            .with_preferred_indentation(preferred_indentation);
 
         AnalyzerOptions::default()
             .with_file_path(path.as_path())
@@ -521,17 +530,7 @@ fn parse(
         .override_settings
         .apply_override_js_parser_options(biome_path, &mut options);
 
-    let mut file_source = file_source.to_js_file_source().unwrap_or_default();
-    let jsx_everywhere = settings
-        .languages
-        .javascript
-        .parser
-        .jsx_everywhere
-        .unwrap_or_default()
-        .into();
-    if jsx_everywhere && !file_source.is_typescript() {
-        file_source = file_source.with_variant(LanguageVariant::Jsx);
-    }
+    let file_source = file_source.to_js_file_source().unwrap_or_default();
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
     ParseResult {
         any_parse: parse.into(),
@@ -1094,7 +1093,3 @@ fn rename(
         ))
     }
 }
-
-#[cfg(test)]
-#[path = "javascript.tests.rs"]
-mod tests;

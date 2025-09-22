@@ -196,6 +196,14 @@ impl Rule for NoPositiveTabindex {
             mutation,
         ))
     }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        if let NoPositiveTabindexQuery::AnyJsxElement(element) = ctx.query() {
+            Some(element.range())
+        } else {
+            None
+        }
+    }
 }
 
 /// Verify that a JSX attribute value has a valid tab index, meaning it is not positive.

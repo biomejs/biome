@@ -1,4 +1,4 @@
-name: autofix.ci  # needed to securely identify the workflow
+name: autofix.ci # needed to securely identify the workflow
 
 on:
   pull_request:
@@ -19,6 +19,7 @@ permissions:
 jobs:
   autofix:
     runs-on: depot-ubuntu-24.04-arm-16
+    if: ${{ github.actor != 'autofix-ci[bot]' }}
     steps:
       - name: Checkout branch
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0

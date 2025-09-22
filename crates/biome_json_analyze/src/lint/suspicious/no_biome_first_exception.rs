@@ -41,7 +41,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoBiomeFirstException {
-        version: "next",
+        version: "2.2.0",
         name: "noBiomeFirstException",
         language: "json",
         recommended: true,

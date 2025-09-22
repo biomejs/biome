@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::str::FromStr;
 
+use crate::cli_options::ColorsArg;
 use tracing::Metadata;
 use tracing::subscriber::Interest;
 use tracing_subscriber::filter::LevelFilter;
@@ -10,7 +11,12 @@ use tracing_subscriber::layer::{Context, Filter, SubscriberExt};
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer as _, registry};
 
-pub fn setup_cli_subscriber(file: Option<&str>, level: LoggingLevel, kind: LoggingKind) {
+pub fn setup_cli_subscriber(
+    file: Option<&str>,
+    level: LoggingLevel,
+    kind: LoggingKind,
+    colors: Option<&ColorsArg>,
+) {
     if level == LoggingLevel::None {
         return;
     }
@@ -20,7 +26,7 @@ pub fn setup_cli_subscriber(file: Option<&str>, level: LoggingLevel, kind: Loggi
         .with_target(false)
         .with_thread_names(true)
         .with_file(true)
-        .with_ansi(true);
+        .with_ansi(colors.is_none_or(|c| c.is_enabled()));
 
     if level == LoggingLevel::Tracing {
         format = format.with_span_events(FmtSpan::CLOSE);

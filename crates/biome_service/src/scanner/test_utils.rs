@@ -1,12 +1,12 @@
 use std::sync::mpsc;
 
+use crate::projects::ProjectKey;
+use crate::{WatcherInstruction, WorkspaceError};
+use biome_diagnostics::serde::Diagnostic;
 use biome_fs::{BiomePath, FileSystem};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashSet;
 use rustc_hash::{FxBuildHasher, FxHashSet};
-
-use crate::projects::ProjectKey;
-use crate::{WatcherInstruction, WorkspaceError};
 
 use super::watcher::WatcherInstructionChannel;
 use super::{ScanKind, WorkspaceWatcherBridge};
@@ -101,20 +101,20 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
         &self,
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         assert_eq!(project_key, self.project_key);
 
         self.indexed_files.pin().insert(path.into().into());
         self.tx.send(()).expect("can send notification");
 
-        Ok(())
+        Ok(vec![])
     }
 
-    fn index_folder(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn index_folder(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.indexed_folders.pin().insert(path.to_path_buf());
         self.tx.send(()).expect("can send notification");
 
-        Ok(())
+        Ok(vec![])
     }
 
     fn insert_watched_folder(&self, path: Utf8PathBuf) -> bool {
@@ -128,19 +128,19 @@ impl WorkspaceWatcherBridge for MockWorkspaceWatcherBridge<'_> {
         self.tx.send(()).expect("can send notification");
     }
 
-    fn unload_file(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn unload_file(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.indexed_files.pin().remove(path);
         self.tx.send(()).expect("can send notification");
 
-        Ok(())
+        Ok(vec![])
     }
 
-    fn unload_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn unload_path(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.indexed_files.pin().remove(path);
         self.indexed_folders.pin().remove(path);
         self.tx.send(()).expect("can send notification");
 
-        Ok(())
+        Ok(vec![])
     }
 
     fn notify_stopped(&self) {}

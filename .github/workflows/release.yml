@@ -31,7 +31,7 @@ jobs:
       - name: Setup Node.js 22.x
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.18.0
+          node-version: 22.19.0
 
       - name: Install pnpm
         run: |
@@ -41,6 +41,24 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Update rule version metadata
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+          pnpm exec changeset status --output="changeset_status.json"
+          NEW_VERSION=$(jq -r '.releases[] | select(.name=="@biomejs/biome") | .newVersion' changeset_status.json)
+          rm changeset_status.json
+          if [ -z "$NEW_VERSION" ]; then
+            echo "No new @biomejs/biome version detected; skipping rule version metadata update."
+            exit 0
+          fi
+          scripts/update-next-version.sh --replace "$NEW_VERSION"
+
+      # The changeset action does a hard reset, so we need to save
+      # the changes in a stash so they can be popped later in the `version` command
+      - name: Stash changes
+        run: git stash push -u -m __automated-changes
 
       - name: Create Release Pull Request
         id: changesets-action
@@ -68,7 +86,7 @@ jobs:
       - name: Setup Node.js 22.x
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 22.18.0
+          node-version: 22.19.0
 
       - name: Check CLI version changes
         id: cli-version-changed
@@ -128,7 +146,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@ad95d4e02e061d4390c4b66ef5ed56c7fee3d2ce # v2.58.17
+        uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
@@ -185,7 +203,7 @@ jobs:
     name: Package ${{ matrix.code-target }}
     runs-on: ${{ matrix.os }}
     container:
-      image: rust:1.89.0-bullseye@sha256:5b0defc2e3b26c97c917406f3d7c682028f87b2ae9adee184694b5c0279e2740
+      image: rust:1.89.0-bullseye@sha256:8f72d971a31b278cebdb2eb64a44c3900ff27c716a4ef6f4db05946d10c9ae4e
 
     steps:
       - name: Checkout repository
@@ -262,7 +280,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.19.4
+          node-version: 20.19.5
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -275,7 +293,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-
       - name: Compile backends
         run: |
           pnpm --filter @biomejs/js-api run build:wasm-bundler
@@ -328,8 +345,8 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.19.4
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 20.19.5
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install pnpm
         run: |
@@ -351,7 +368,7 @@ jobs:
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
       - name: Publish npm packages as latest
-        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package  --tag latest --access public --provenance; fi; done
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ] && [ $package != "packages/@biomejs/plugin-api" ]; then npm publish $package  --tag latest --access public --provenance; fi; done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -360,7 +377,7 @@ jobs:
           bash scripts/print-changelog.sh ${{ needs.build-binaries.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
 
       - name: Create GitHub @biomejs/biome release and tag
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -411,8 +428,8 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20.19.4
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 20.19.5
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install pnpm
         run: |
@@ -433,7 +450,7 @@ jobs:
           bash scripts/print-changelog.sh ${{ needs.build-js-api.outputs.version }} packages/@biomejs/js-api/CHANGELOG.md  >| ${{ github.workspace }}/JS_RELEASE_NOTES
 
       - name: Create GitHub @biomejs/js-api release and tag
-        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

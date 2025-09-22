@@ -357,6 +357,7 @@ where
         let globals = self.options.globals();
         let preferred_quote = self.options.preferred_quote();
         let preferred_jsx_quote = self.options.preferred_jsx_quote();
+        let preferred_indentation = self.options.preferred_indentation();
         let options = self.options.rule_options::<R>().unwrap_or_default();
         let ctx = RuleContext::new(
             &self.query_result,
@@ -367,6 +368,7 @@ where
             &options,
             preferred_quote,
             preferred_jsx_quote,
+            preferred_indentation,
             self.options.jsx_runtime(),
             self.options.css_modules(),
         )
@@ -403,6 +405,7 @@ where
             &options,
             self.options.preferred_quote(),
             self.options.preferred_jsx_quote(),
+            self.options.preferred_indentation(),
             self.options.jsx_runtime(),
             self.options.css_modules(),
         )
@@ -467,6 +470,7 @@ where
             &options,
             self.options.preferred_quote(),
             self.options.preferred_jsx_quote(),
+            self.options.preferred_indentation(),
             self.options.jsx_runtime(),
             self.options.css_modules(),
         )

@@ -55,8 +55,7 @@ impl Rule for UseQwikMethodUsage {
         if !is_hook {
             return None;
         }
-        let is_valid_context = is_inside_component_or_hook(call).unwrap_or_default()
-            || is_in_named_function(call).unwrap_or_default();
+        let is_valid_context = is_inside_component_or_hook(call) || is_in_named_function(call);
         if is_valid_context {
             None
         } else {
@@ -72,7 +71,7 @@ impl Rule for UseQwikMethodUsage {
             rule_category!(),
             range,
             markup! {
-                "Qwik hook detected outside of allowed scope"
+                "Qwik hook detected outside of an allowed scope"
             },
         )
             .note(markup! {
@@ -95,37 +94,58 @@ fn is_qwik_hook(call: &JsCallExpression) -> Option<bool> {
         .value_token()
         .ok()?;
     let name = binding.text();
-    Some(name.starts_with("use") && name.chars().nth(3).is_some_and(|c| c.is_uppercase()))
+    Some(is_qwik_hook_name(name))
 }
 
-fn is_inside_component_or_hook(call: &JsCallExpression) -> Option<bool> {
+fn is_inside_component_or_hook(call: &JsCallExpression) -> bool {
     let outer_call = call
         .syntax()
         .ancestors()
+        .skip(1)
         .find_map(AnyJsFunction::cast)
         .and_then(|function| {
             function
                 .syntax()
                 .ancestors()
+                .skip(1)
                 .find_map(JsCallExpression::cast)
         });
 
-    outer_call.and_then(|call_expr| {
-        call_expr
-            .callee()
-            .ok()
-            .and_then(|callee| callee.as_js_reference_identifier())
-            .and_then(|ident| ident.value_token().ok())
-            .map(|token| {
-                let name = token.text();
-                name == "component$"
-                    || (name.starts_with("use")
-                        && name.chars().nth(3).is_some_and(|c| c.is_uppercase()))
-            })
-    })
+    outer_call
+        .and_then(|call_expr| {
+            call_expr
+                .callee()
+                .ok()
+                .and_then(|callee| callee.as_js_reference_identifier())
+                .and_then(|ident| ident.value_token().ok())
+                .map(|token| is_component_or_hook_name(token.text()))
+        })
+        .unwrap_or_default()
 }
 
-fn is_in_named_function(call: &JsCallExpression) -> Option<bool> {
+/// Returns true if the given identifier name represents a Qwik hook name.
+///
+/// In Qwik, hooks are functions whose names start with `use` and where the
+/// first character after `use` is uppercase, for example `useSignal`.
+fn is_qwik_hook_name(name: &str) -> bool {
+    name.starts_with("use") && name.chars().nth(3).is_some_and(|c| c.is_uppercase())
+}
+
+/// Returns true if the identifier name is either `component$` or a Qwik hook.
+fn is_component_or_hook_name(name: &str) -> bool {
+    name == "component$" || is_qwik_hook_name(name)
+}
+
+/// Determines whether `call` is enclosed in a named function whose identifier
+/// designates a valid reactive context for Qwik hooks.
+///
+/// For this rule, a "named function" is any function with an explicit
+/// identifier (function declaration, named function expression, or a variable
+/// binding for an arrow/function expression). If that identifier is
+/// `component$` or another Qwik hook (a name matching `use[A-Z]...`), we treat
+/// the context as valid because hooks are allowed inside components or other
+/// hooks.
+fn is_in_named_function(call: &JsCallExpression) -> bool {
     let function_name = call
         .syntax()
         .ancestors()
@@ -162,9 +182,7 @@ fn is_in_named_function(call: &JsCallExpression) -> Option<bool> {
                 .map(|token| token.token_text_trimmed()),
         });
 
-    function_name.map(|name| {
-        name.text() == "component$"
-            || (name.text().starts_with("use")
-                && name.text().chars().nth(3).is_some_and(|c| c.is_uppercase()))
-    })
+    function_name
+        .map(|name| is_component_or_hook_name(name.text()))
+        .unwrap_or_default()
 }
