@@ -146,7 +146,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-audit
-        uses: taiki-e/install-action@9545a0634ccdca487a09cde61d362f0bc5fb5df9 # v2.61.4
+        uses: taiki-e/install-action@d6912b47771be2c443ec90dbb3d28e023987e782 # v2.62.1
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-audit
