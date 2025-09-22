@@ -36,7 +36,7 @@ const Component5 = React.forwardRef<HTMLElement, { foo: string, bar: number }>(f
 ```
 invalid.tsx:7:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replaces usages of forwardRef with passing ref as a prop.
+  ! Use of forwardRef is detected, which is deprecated.
   
      5 │ }
      6 │ 
@@ -50,7 +50,7 @@ invalid.tsx:7:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━�
   
   i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
   
-  i Consider disabling this rule if you are working with React 18 or earlier.
+  i Replace the use of forwardRef with passing ref as a prop.
   
   i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
   
@@ -70,7 +70,7 @@ invalid.tsx:7:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━�
 ```
 invalid.tsx:11:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replaces usages of forwardRef with passing ref as a prop.
+  ! Use of forwardRef is detected, which is deprecated.
   
      9 │ });
     10 │ 
@@ -84,7 +84,7 @@ invalid.tsx:11:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━
   
   i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
   
-  i Consider disabling this rule if you are working with React 18 or earlier.
+  i Replace the use of forwardRef with passing ref as a prop.
   
   i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
   
@@ -104,7 +104,7 @@ invalid.tsx:11:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━
 ```
 invalid.tsx:15:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replaces usages of forwardRef with passing ref as a prop.
+  ! Use of forwardRef is detected, which is deprecated.
   
     13 │ });
     14 │ 
@@ -118,7 +118,7 @@ invalid.tsx:15:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━
   
   i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
   
-  i Consider disabling this rule if you are working with React 18 or earlier.
+  i Replace the use of forwardRef with passing ref as a prop.
   
   i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
   
@@ -138,7 +138,7 @@ invalid.tsx:15:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━
 ```
 invalid.tsx:19:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replaces usages of forwardRef with passing ref as a prop.
+  ! Use of forwardRef is detected, which is deprecated.
   
     17 │ });
     18 │ 
@@ -152,7 +152,7 @@ invalid.tsx:19:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━
   
   i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
   
-  i Consider disabling this rule if you are working with React 18 or earlier.
+  i Replace the use of forwardRef with passing ref as a prop.
   
   i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
   
@@ -172,7 +172,7 @@ invalid.tsx:19:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━
 ```
 invalid.tsx:23:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replaces usages of forwardRef with passing ref as a prop.
+  ! Use of forwardRef is detected, which is deprecated.
   
     21 │ });
     22 │ 
@@ -185,7 +185,7 @@ invalid.tsx:23:20 lint/nursery/noReactForwardRef  FIXABLE  ━━━━━━━
   
   i In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead.
   
-  i Consider disabling this rule if you are working with React 18 or earlier.
+  i Replace the use of forwardRef with passing ref as a prop.
   
   i Unsafe fix: Remove the forwardRef() call and receive the ref as a prop.
   

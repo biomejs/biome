@@ -1,17 +1,17 @@
 /* should not generate diagnostics */
 
-const Component1 = ({ ref }) => {
-	return null;
+const Component1 = ({ ref, ...props }) => {
+	return <div ref={ref} />;
 };
 
-const Component2 = ({ ref, ...props }) => {
-	return null;
+const Component2 = ({ foo, bar, ref }) => {
+	return <div ref={ref} />;
 };
 
-const Component3 = (props) => {
-	return null;
-};
+const Component3 = React.memo(({ ref, ...props }) => {
+	return <div ref={ref} />;
+});
 
-const Component4 = ({ foo, bar }) => {
-	return null;
-};
+function Component4({ ref, ...props }) {
+	return <div ref={ref} />;
+}

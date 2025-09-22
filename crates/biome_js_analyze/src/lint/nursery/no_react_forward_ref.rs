@@ -21,7 +21,8 @@ declare_lint_rule! {
     /// Replaces usages of `forwardRef` with passing `ref` as a prop.
     ///
     /// In React 19, `forwardRef` is no longer necessary. Pass `ref` as a prop instead.
-    /// `forwardRef` will be deprecated in a future release.
+    /// This rule detects the usage of the `forwardRef` API, and it suggests using the prop `ref`
+    /// instead.
     /// See [the official blog post](https://react.dev/blog/2024/12/05/react-19#ref-as-a-prop) for details.
     ///
     /// This rule should be disabled if you are working with React 18 or earlier.
@@ -94,14 +95,14 @@ impl Rule for NoReactForwardRef {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Replaces usages of "<Emphasis>"forwardRef"</Emphasis>" with passing "<Emphasis>"ref"</Emphasis>" as a prop."
-                },
+                    "Use of "<Emphasis>"forwardRef"</Emphasis>" is detected, which is deprecated."
+                }
             )
             .note(markup! {
                 "In React 19, 'forwardRef' is no longer necessary. Pass 'ref' as a prop instead."
             })
             .note(markup! {
-                "Consider disabling this rule if you are working with React 18 or earlier."
+                "Replace the use of "<Emphasis>"forwardRef"</Emphasis>" with passing "<Emphasis>"ref"</Emphasis>" as a prop."
             }),
         )
     }
