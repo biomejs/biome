@@ -41,6 +41,7 @@ Array.from([], () => {
 Array.from([], function() {
     return;
 });
+Array.from([], () => void null);
 [].every(() => {
     return;
 });
@@ -88,6 +89,7 @@ Array.from([], function() {
         return true;
     } finally {}
 });
+[].every(() => void null);
 [].filter(() => {
     return;
 });
@@ -96,6 +98,7 @@ Array.from([], function() {
 });
 [].filter(() => {});
 [].filter(function() {});
+[].filter(() => void null);
 [].find(() => {
     return;
 });
@@ -104,6 +107,7 @@ Array.from([], function() {
 });
 [].find(() => {});
 [].find(function() {});
+[].find(() => void null);
 [].findIndex(() => {
     return;
 });
@@ -112,6 +116,7 @@ Array.from([], function() {
 });
 [].findIndex(() => {});
 [].findIndex(function() {});
+[].findIndex(() => void null);
 [].findLast(() => {
     return;
 });
@@ -120,6 +125,7 @@ Array.from([], function() {
 });
 [].findLast(() => {});
 [].findLast(function() {});
+[].findLast(() => void null);
 [].findLastIndex(() => {
     return;
 });
@@ -128,6 +134,7 @@ Array.from([], function() {
 });
 [].findLastIndex(() => {});
 [].findLastIndex(function() {});
+[].findLastIndex(() => void null);
 [].some(() => {
     return;
 });
@@ -136,6 +143,7 @@ Array.from([], function() {
 });
 [].some(() => {});
 [].some(function() {});
+[].some(() => void null);
 [].flatMap(() => {
     return;
 });
@@ -144,6 +152,7 @@ Array.from([], function() {
 });
 [].flatMap(() => {});
 [].flatMap(function() {});
+[].flatMap(() => void null);
 [].map(() => {
     return;
 });
@@ -152,6 +161,7 @@ Array.from([], function() {
 });
 [].map(() => {});
 [].map(function() {});
+[].map(() => void null);
 [].reduce((a, b) => {
     return;
 });
@@ -160,6 +170,7 @@ Array.from([], function() {
 });
 [].reduce((a, b) => {});
 [].reduce(function(a, b) {});
+[].reduce(() => void null);
 [].reduceRight((a, b) => {
     return;
 });
@@ -168,6 +179,7 @@ Array.from([], function() {
 });
 [].reduceRight((a, b) => {});
 [].reduceRight(function(a, b) {});
+[].reduceRight(() => void null);
 [].sort((a, b) => {
     return;
 });
@@ -176,6 +188,7 @@ Array.from([], function() {
 });
 [].sort((a, b) => {});
 [].sort(function(a, b) {});
+[].sort(() => void null);
 [].toSorted((a, b) => {
     return;
 });
@@ -205,6 +218,7 @@ Array.from([], function() {
         return;
     }
 });
+[].toSorted(() => void null);
 
 ```
 
@@ -430,16 +444,16 @@ invalid.js:35:7 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 ```
 
 ```
-invalid.js:38:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:38:7 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to every() iterable method should always return a value.
+  × This callback passed to Array.from() method should always return a value.
   
     36 │     return;
     37 │ });
-  > 38 │ [].every(() => {
-       │    ^^^^^
-    39 │     return;
-    40 │ });
+  > 38 │ Array.from([], () => void null);
+       │       ^^^^
+    39 │ [].every(() => {
+    40 │     return;
   
   i Add a return with a value to this callback.
   
@@ -447,16 +461,16 @@ invalid.js:38:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 ```
 
 ```
-invalid.js:41:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:39:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
-    39 │     return;
-    40 │ });
-  > 41 │ [].every(function() {
+    37 │ });
+    38 │ Array.from([], () => void null);
+  > 39 │ [].every(() => {
        │    ^^^^^
-    42 │     return;
-    43 │ });
+    40 │     return;
+    41 │ });
   
   i Add a return with a value to this callback.
   
@@ -464,16 +478,16 @@ invalid.js:41:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 ```
 
 ```
-invalid.js:44:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:42:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
-    42 │     return;
-    43 │ });
-  > 44 │ [].every(() => {});
+    40 │     return;
+    41 │ });
+  > 42 │ [].every(function() {
        │    ^^^^^
-    45 │ [].every(function() {});
-    46 │ [].every(() => {
+    43 │     return;
+    44 │ });
   
   i Add a return with a value to this callback.
   
@@ -485,12 +499,12 @@ invalid.js:45:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 
   × This callback passed to every() iterable method should always return a value.
   
-    43 │ });
-    44 │ [].every(() => {});
-  > 45 │ [].every(function() {});
+    43 │     return;
+    44 │ });
+  > 45 │ [].every(() => {});
        │    ^^^^^
-    46 │ [].every(() => {
-    47 │     try {
+    46 │ [].every(function() {});
+    47 │ [].every(() => {
   
   i Add a return with a value to this callback.
   
@@ -502,12 +516,12 @@ invalid.js:46:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 
   × This callback passed to every() iterable method should always return a value.
   
-    44 │ [].every(() => {});
-    45 │ [].every(function() {});
-  > 46 │ [].every(() => {
+    44 │ });
+    45 │ [].every(() => {});
+  > 46 │ [].every(function() {});
        │    ^^^^^
-    47 │     try {
-    48 │         // ok
+    47 │ [].every(() => {
+    48 │     try {
   
   i Add a return with a value to this callback.
   
@@ -515,16 +529,16 @@ invalid.js:46:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 ```
 
 ```
-invalid.js:53:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:47:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
-    51 │     }
-    52 │ });
-  > 53 │ [].every(() => {
+    45 │ [].every(() => {});
+    46 │ [].every(function() {});
+  > 47 │ [].every(() => {
        │    ^^^^^
-    54 │     try {
-    55 │         // ok
+    48 │     try {
+    49 │         // ok
   
   i Add a return with a value to this callback.
   
@@ -532,16 +546,33 @@ invalid.js:53:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 ```
 
 ```
-invalid.js:62:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:54:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to every() iterable method should always return a value.
   
-    60 │     }
-    61 │ });
-  > 62 │ [].every(() => {
+    52 │     }
+    53 │ });
+  > 54 │ [].every(() => {
        │    ^^^^^
-    63 │     try {
-    64 │         return true;
+    55 │     try {
+    56 │         // ok
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:63:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to every() iterable method should always return a value.
+  
+    61 │     }
+    62 │ });
+  > 63 │ [].every(() => {
+       │    ^^^^^
+    64 │     try {
+    65 │         return true;
   
   i Add missing return statements so that this callback returns a value on all execution paths.
   
@@ -549,33 +580,16 @@ invalid.js:62:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 ```
 
 ```
-invalid.js:85:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:86:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to filter() iterable method should always return a value.
+  × This callback passed to every() iterable method should always return a value.
   
-    83 │     } finally {}
-    84 │ });
-  > 85 │ [].filter(() => {
-       │    ^^^^^^
-    86 │     return;
-    87 │ });
-  
-  i Add a return with a value to this callback.
-  
-
-```
-
-```
-invalid.js:88:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This callback passed to filter() iterable method should always return a value.
-  
-    86 │     return;
-    87 │ });
-  > 88 │ [].filter(function() {
-       │    ^^^^^^
-    89 │     return;
-    90 │ });
+    84 │     } finally {}
+    85 │ });
+  > 86 │ [].every(() => void null);
+       │    ^^^^^
+    87 │ [].filter(() => {
+    88 │     return;
   
   i Add a return with a value to this callback.
   
@@ -583,16 +597,16 @@ invalid.js:88:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 ```
 
 ```
-invalid.js:91:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:87:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to filter() iterable method should always return a value.
   
-    89 │     return;
-    90 │ });
-  > 91 │ [].filter(() => {});
+    85 │ });
+    86 │ [].every(() => void null);
+  > 87 │ [].filter(() => {
        │    ^^^^^^
-    92 │ [].filter(function() {});
-    93 │ [].find(() => {
+    88 │     return;
+    89 │ });
   
   i Add a return with a value to this callback.
   
@@ -600,16 +614,16 @@ invalid.js:91:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 ```
 
 ```
-invalid.js:92:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:90:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to filter() iterable method should always return a value.
   
-    90 │ });
-    91 │ [].filter(() => {});
-  > 92 │ [].filter(function() {});
+    88 │     return;
+    89 │ });
+  > 90 │ [].filter(function() {
        │    ^^^^^^
-    93 │ [].find(() => {
-    94 │     return;
+    91 │     return;
+    92 │ });
   
   i Add a return with a value to this callback.
   
@@ -619,14 +633,48 @@ invalid.js:92:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 ```
 invalid.js:93:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to find() iterable method should always return a value.
+  × This callback passed to filter() iterable method should always return a value.
   
-    91 │ [].filter(() => {});
-    92 │ [].filter(function() {});
-  > 93 │ [].find(() => {
-       │    ^^^^
-    94 │     return;
-    95 │ });
+    91 │     return;
+    92 │ });
+  > 93 │ [].filter(() => {});
+       │    ^^^^^^
+    94 │ [].filter(function() {});
+    95 │ [].filter(() => void null);
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:94:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to filter() iterable method should always return a value.
+  
+    92 │ });
+    93 │ [].filter(() => {});
+  > 94 │ [].filter(function() {});
+       │    ^^^^^^
+    95 │ [].filter(() => void null);
+    96 │ [].find(() => {
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:95:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to filter() iterable method should always return a value.
+  
+    93 │ [].filter(() => {});
+    94 │ [].filter(function() {});
+  > 95 │ [].filter(() => void null);
+       │    ^^^^^^
+    96 │ [].find(() => {
+    97 │     return;
   
   i Add a return with a value to this callback.
   
@@ -638,9 +686,9 @@ invalid.js:96:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 
   × This callback passed to find() iterable method should always return a value.
   
-    94 │     return;
-    95 │ });
-  > 96 │ [].find(function() {
+    94 │ [].filter(function() {});
+    95 │ [].filter(() => void null);
+  > 96 │ [].find(() => {
        │    ^^^^
     97 │     return;
     98 │ });
@@ -657,10 +705,10 @@ invalid.js:99:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
   
      97 │     return;
      98 │ });
-   > 99 │ [].find(() => {});
+   > 99 │ [].find(function() {
         │    ^^^^
-    100 │ [].find(function() {});
-    101 │ [].findIndex(() => {
+    100 │     return;
+    101 │ });
   
   i Add a return with a value to this callback.
   
@@ -668,16 +716,16 @@ invalid.js:99:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━�
 ```
 
 ```
-invalid.js:100:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:102:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to find() iterable method should always return a value.
   
-     98 │ });
-     99 │ [].find(() => {});
-  > 100 │ [].find(function() {});
+    100 │     return;
+    101 │ });
+  > 102 │ [].find(() => {});
         │    ^^^^
-    101 │ [].findIndex(() => {
-    102 │     return;
+    103 │ [].find(function() {});
+    104 │ [].find(() => void null);
   
   i Add a return with a value to this callback.
   
@@ -685,16 +733,16 @@ invalid.js:100:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:101:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:103:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to findIndex() iterable method should always return a value.
+  × This callback passed to find() iterable method should always return a value.
   
-     99 │ [].find(() => {});
-    100 │ [].find(function() {});
-  > 101 │ [].findIndex(() => {
-        │    ^^^^^^^^^
-    102 │     return;
-    103 │ });
+    101 │ });
+    102 │ [].find(() => {});
+  > 103 │ [].find(function() {});
+        │    ^^^^
+    104 │ [].find(() => void null);
+    105 │ [].findIndex(() => {
   
   i Add a return with a value to this callback.
   
@@ -704,14 +752,14 @@ invalid.js:101:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:104:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to findIndex() iterable method should always return a value.
+  × This callback passed to find() iterable method should always return a value.
   
-    102 │     return;
-    103 │ });
-  > 104 │ [].findIndex(function() {
-        │    ^^^^^^^^^
-    105 │     return;
-    106 │ });
+    102 │ [].find(() => {});
+    103 │ [].find(function() {});
+  > 104 │ [].find(() => void null);
+        │    ^^^^
+    105 │ [].findIndex(() => {
+    106 │     return;
   
   i Add a return with a value to this callback.
   
@@ -719,16 +767,16 @@ invalid.js:104:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:107:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:105:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findIndex() iterable method should always return a value.
   
-    105 │     return;
-    106 │ });
-  > 107 │ [].findIndex(() => {});
+    103 │ [].find(function() {});
+    104 │ [].find(() => void null);
+  > 105 │ [].findIndex(() => {
         │    ^^^^^^^^^
-    108 │ [].findIndex(function() {});
-    109 │ [].findLast(() => {
+    106 │     return;
+    107 │ });
   
   i Add a return with a value to this callback.
   
@@ -740,12 +788,12 @@ invalid.js:108:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 
   × This callback passed to findIndex() iterable method should always return a value.
   
-    106 │ });
-    107 │ [].findIndex(() => {});
-  > 108 │ [].findIndex(function() {});
+    106 │     return;
+    107 │ });
+  > 108 │ [].findIndex(function() {
         │    ^^^^^^^^^
-    109 │ [].findLast(() => {
-    110 │     return;
+    109 │     return;
+    110 │ });
   
   i Add a return with a value to this callback.
   
@@ -753,16 +801,16 @@ invalid.js:108:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:109:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:111:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to findLast() iterable method should always return a value.
+  × This callback passed to findIndex() iterable method should always return a value.
   
-    107 │ [].findIndex(() => {});
-    108 │ [].findIndex(function() {});
-  > 109 │ [].findLast(() => {
-        │    ^^^^^^^^
-    110 │     return;
-    111 │ });
+    109 │     return;
+    110 │ });
+  > 111 │ [].findIndex(() => {});
+        │    ^^^^^^^^^
+    112 │ [].findIndex(function() {});
+    113 │ [].findIndex(() => void null);
   
   i Add a return with a value to this callback.
   
@@ -772,31 +820,14 @@ invalid.js:109:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:112:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to findLast() iterable method should always return a value.
+  × This callback passed to findIndex() iterable method should always return a value.
   
-    110 │     return;
-    111 │ });
-  > 112 │ [].findLast(function() {
-        │    ^^^^^^^^
-    113 │     return;
-    114 │ });
-  
-  i Add a return with a value to this callback.
-  
-
-```
-
-```
-invalid.js:115:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This callback passed to findLast() iterable method should always return a value.
-  
-    113 │     return;
-    114 │ });
-  > 115 │ [].findLast(() => {});
-        │    ^^^^^^^^
-    116 │ [].findLast(function() {});
-    117 │ [].findLastIndex(() => {
+    110 │ });
+    111 │ [].findIndex(() => {});
+  > 112 │ [].findIndex(function() {});
+        │    ^^^^^^^^^
+    113 │ [].findIndex(() => void null);
+    114 │ [].findLast(() => {
   
   i Add a return with a value to this callback.
   
@@ -804,16 +835,33 @@ invalid.js:115:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:116:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:113:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to findIndex() iterable method should always return a value.
+  
+    111 │ [].findIndex(() => {});
+    112 │ [].findIndex(function() {});
+  > 113 │ [].findIndex(() => void null);
+        │    ^^^^^^^^^
+    114 │ [].findLast(() => {
+    115 │     return;
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:114:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findLast() iterable method should always return a value.
   
-    114 │ });
-    115 │ [].findLast(() => {});
-  > 116 │ [].findLast(function() {});
+    112 │ [].findIndex(function() {});
+    113 │ [].findIndex(() => void null);
+  > 114 │ [].findLast(() => {
         │    ^^^^^^^^
-    117 │ [].findLastIndex(() => {
-    118 │     return;
+    115 │     return;
+    116 │ });
   
   i Add a return with a value to this callback.
   
@@ -823,12 +871,12 @@ invalid.js:116:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:117:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to findLastIndex() iterable method should always return a value.
+  × This callback passed to findLast() iterable method should always return a value.
   
-    115 │ [].findLast(() => {});
-    116 │ [].findLast(function() {});
-  > 117 │ [].findLastIndex(() => {
-        │    ^^^^^^^^^^^^^
+    115 │     return;
+    116 │ });
+  > 117 │ [].findLast(function() {
+        │    ^^^^^^^^
     118 │     return;
     119 │ });
   
@@ -840,14 +888,48 @@ invalid.js:117:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:120:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to findLastIndex() iterable method should always return a value.
+  × This callback passed to findLast() iterable method should always return a value.
   
     118 │     return;
     119 │ });
-  > 120 │ [].findLastIndex(function() {
-        │    ^^^^^^^^^^^^^
-    121 │     return;
-    122 │ });
+  > 120 │ [].findLast(() => {});
+        │    ^^^^^^^^
+    121 │ [].findLast(function() {});
+    122 │ [].findLast(() => void null);
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:121:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to findLast() iterable method should always return a value.
+  
+    119 │ });
+    120 │ [].findLast(() => {});
+  > 121 │ [].findLast(function() {});
+        │    ^^^^^^^^
+    122 │ [].findLast(() => void null);
+    123 │ [].findLastIndex(() => {
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:122:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to findLast() iterable method should always return a value.
+  
+    120 │ [].findLast(() => {});
+    121 │ [].findLast(function() {});
+  > 122 │ [].findLast(() => void null);
+        │    ^^^^^^^^
+    123 │ [].findLastIndex(() => {
+    124 │     return;
   
   i Add a return with a value to this callback.
   
@@ -859,12 +941,12 @@ invalid.js:123:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 
   × This callback passed to findLastIndex() iterable method should always return a value.
   
-    121 │     return;
-    122 │ });
-  > 123 │ [].findLastIndex(() => {});
+    121 │ [].findLast(function() {});
+    122 │ [].findLast(() => void null);
+  > 123 │ [].findLastIndex(() => {
         │    ^^^^^^^^^^^^^
-    124 │ [].findLastIndex(function() {});
-    125 │ [].some(() => {
+    124 │     return;
+    125 │ });
   
   i Add a return with a value to this callback.
   
@@ -872,16 +954,16 @@ invalid.js:123:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:124:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:126:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to findLastIndex() iterable method should always return a value.
   
-    122 │ });
-    123 │ [].findLastIndex(() => {});
-  > 124 │ [].findLastIndex(function() {});
+    124 │     return;
+    125 │ });
+  > 126 │ [].findLastIndex(function() {
         │    ^^^^^^^^^^^^^
-    125 │ [].some(() => {
-    126 │     return;
+    127 │     return;
+    128 │ });
   
   i Add a return with a value to this callback.
   
@@ -889,16 +971,16 @@ invalid.js:124:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:125:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:129:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to some() iterable method should always return a value.
+  × This callback passed to findLastIndex() iterable method should always return a value.
   
-    123 │ [].findLastIndex(() => {});
-    124 │ [].findLastIndex(function() {});
-  > 125 │ [].some(() => {
-        │    ^^^^
-    126 │     return;
-    127 │ });
+    127 │     return;
+    128 │ });
+  > 129 │ [].findLastIndex(() => {});
+        │    ^^^^^^^^^^^^^
+    130 │ [].findLastIndex(function() {});
+    131 │ [].findLastIndex(() => void null);
   
   i Add a return with a value to this callback.
   
@@ -906,16 +988,16 @@ invalid.js:125:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:128:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:130:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to some() iterable method should always return a value.
+  × This callback passed to findLastIndex() iterable method should always return a value.
   
-    126 │     return;
-    127 │ });
-  > 128 │ [].some(function() {
-        │    ^^^^
-    129 │     return;
-    130 │ });
+    128 │ });
+    129 │ [].findLastIndex(() => {});
+  > 130 │ [].findLastIndex(function() {});
+        │    ^^^^^^^^^^^^^
+    131 │ [].findLastIndex(() => void null);
+    132 │ [].some(() => {
   
   i Add a return with a value to this callback.
   
@@ -925,14 +1007,14 @@ invalid.js:128:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:131:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to some() iterable method should always return a value.
+  × This callback passed to findLastIndex() iterable method should always return a value.
   
-    129 │     return;
-    130 │ });
-  > 131 │ [].some(() => {});
-        │    ^^^^
-    132 │ [].some(function() {});
-    133 │ [].flatMap(() => {
+    129 │ [].findLastIndex(() => {});
+    130 │ [].findLastIndex(function() {});
+  > 131 │ [].findLastIndex(() => void null);
+        │    ^^^^^^^^^^^^^
+    132 │ [].some(() => {
+    133 │     return;
   
   i Add a return with a value to this callback.
   
@@ -944,12 +1026,12 @@ invalid.js:132:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 
   × This callback passed to some() iterable method should always return a value.
   
-    130 │ });
-    131 │ [].some(() => {});
-  > 132 │ [].some(function() {});
+    130 │ [].findLastIndex(function() {});
+    131 │ [].findLastIndex(() => void null);
+  > 132 │ [].some(() => {
         │    ^^^^
-    133 │ [].flatMap(() => {
-    134 │     return;
+    133 │     return;
+    134 │ });
   
   i Add a return with a value to this callback.
   
@@ -957,16 +1039,16 @@ invalid.js:132:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:133:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:135:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to flatMap() iterable method should always return a value.
+  × This callback passed to some() iterable method should always return a value.
   
-    131 │ [].some(() => {});
-    132 │ [].some(function() {});
-  > 133 │ [].flatMap(() => {
-        │    ^^^^^^^
-    134 │     return;
-    135 │ });
+    133 │     return;
+    134 │ });
+  > 135 │ [].some(function() {
+        │    ^^^^
+    136 │     return;
+    137 │ });
   
   i Add a return with a value to this callback.
   
@@ -974,16 +1056,16 @@ invalid.js:133:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:136:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:138:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to flatMap() iterable method should always return a value.
+  × This callback passed to some() iterable method should always return a value.
   
-    134 │     return;
-    135 │ });
-  > 136 │ [].flatMap(function() {
-        │    ^^^^^^^
-    137 │     return;
-    138 │ });
+    136 │     return;
+    137 │ });
+  > 138 │ [].some(() => {});
+        │    ^^^^
+    139 │ [].some(function() {});
+    140 │ [].some(() => void null);
   
   i Add a return with a value to this callback.
   
@@ -993,14 +1075,14 @@ invalid.js:136:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:139:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to flatMap() iterable method should always return a value.
+  × This callback passed to some() iterable method should always return a value.
   
-    137 │     return;
-    138 │ });
-  > 139 │ [].flatMap(() => {});
-        │    ^^^^^^^
-    140 │ [].flatMap(function() {});
-    141 │ [].map(() => {
+    137 │ });
+    138 │ [].some(() => {});
+  > 139 │ [].some(function() {});
+        │    ^^^^
+    140 │ [].some(() => void null);
+    141 │ [].flatMap(() => {
   
   i Add a return with a value to this callback.
   
@@ -1010,13 +1092,13 @@ invalid.js:139:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:140:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to flatMap() iterable method should always return a value.
+  × This callback passed to some() iterable method should always return a value.
   
-    138 │ });
-    139 │ [].flatMap(() => {});
-  > 140 │ [].flatMap(function() {});
-        │    ^^^^^^^
-    141 │ [].map(() => {
+    138 │ [].some(() => {});
+    139 │ [].some(function() {});
+  > 140 │ [].some(() => void null);
+        │    ^^^^
+    141 │ [].flatMap(() => {
     142 │     return;
   
   i Add a return with a value to this callback.
@@ -1027,12 +1109,12 @@ invalid.js:140:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:141:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to map() iterable method should always return a value.
+  × This callback passed to flatMap() iterable method should always return a value.
   
-    139 │ [].flatMap(() => {});
-    140 │ [].flatMap(function() {});
-  > 141 │ [].map(() => {
-        │    ^^^
+    139 │ [].some(function() {});
+    140 │ [].some(() => void null);
+  > 141 │ [].flatMap(() => {
+        │    ^^^^^^^
     142 │     return;
     143 │ });
   
@@ -1044,12 +1126,12 @@ invalid.js:141:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:144:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to map() iterable method should always return a value.
+  × This callback passed to flatMap() iterable method should always return a value.
   
     142 │     return;
     143 │ });
-  > 144 │ [].map(function() {
-        │    ^^^
+  > 144 │ [].flatMap(function() {
+        │    ^^^^^^^
     145 │     return;
     146 │ });
   
@@ -1061,14 +1143,14 @@ invalid.js:144:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:147:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to map() iterable method should always return a value.
+  × This callback passed to flatMap() iterable method should always return a value.
   
     145 │     return;
     146 │ });
-  > 147 │ [].map(() => {});
-        │    ^^^
-    148 │ [].map(function() {});
-    149 │ [].reduce((a, b) => {
+  > 147 │ [].flatMap(() => {});
+        │    ^^^^^^^
+    148 │ [].flatMap(function() {});
+    149 │ [].flatMap(() => void null);
   
   i Add a return with a value to this callback.
   
@@ -1078,14 +1160,14 @@ invalid.js:147:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:148:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to map() iterable method should always return a value.
+  × This callback passed to flatMap() iterable method should always return a value.
   
     146 │ });
-    147 │ [].map(() => {});
-  > 148 │ [].map(function() {});
-        │    ^^^
-    149 │ [].reduce((a, b) => {
-    150 │     return;
+    147 │ [].flatMap(() => {});
+  > 148 │ [].flatMap(function() {});
+        │    ^^^^^^^
+    149 │ [].flatMap(() => void null);
+    150 │ [].map(() => {
   
   i Add a return with a value to this callback.
   
@@ -1095,31 +1177,14 @@ invalid.js:148:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:149:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to reduce() iterable method should always return a value.
+  × This callback passed to flatMap() iterable method should always return a value.
   
-    147 │ [].map(() => {});
-    148 │ [].map(function() {});
-  > 149 │ [].reduce((a, b) => {
-        │    ^^^^^^
-    150 │     return;
-    151 │ });
-  
-  i Add a return with a value to this callback.
-  
-
-```
-
-```
-invalid.js:152:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This callback passed to reduce() iterable method should always return a value.
-  
-    150 │     return;
-    151 │ });
-  > 152 │ [].reduce(function(a, b) {
-        │    ^^^^^^
-    153 │     return;
-    154 │ });
+    147 │ [].flatMap(() => {});
+    148 │ [].flatMap(function() {});
+  > 149 │ [].flatMap(() => void null);
+        │    ^^^^^^^
+    150 │ [].map(() => {
+    151 │     return;
   
   i Add a return with a value to this callback.
   
@@ -1127,16 +1192,33 @@ invalid.js:152:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:155:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:150:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to reduce() iterable method should always return a value.
+  × This callback passed to map() iterable method should always return a value.
   
-    153 │     return;
-    154 │ });
-  > 155 │ [].reduce((a, b) => {});
-        │    ^^^^^^
-    156 │ [].reduce(function(a, b) {});
-    157 │ [].reduceRight((a, b) => {
+    148 │ [].flatMap(function() {});
+    149 │ [].flatMap(() => void null);
+  > 150 │ [].map(() => {
+        │    ^^^
+    151 │     return;
+    152 │ });
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:153:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method should always return a value.
+  
+    151 │     return;
+    152 │ });
+  > 153 │ [].map(function() {
+        │    ^^^
+    154 │     return;
+    155 │ });
   
   i Add a return with a value to this callback.
   
@@ -1146,14 +1228,14 @@ invalid.js:155:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:156:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to reduce() iterable method should always return a value.
+  × This callback passed to map() iterable method should always return a value.
   
-    154 │ });
-    155 │ [].reduce((a, b) => {});
-  > 156 │ [].reduce(function(a, b) {});
-        │    ^^^^^^
-    157 │ [].reduceRight((a, b) => {
-    158 │     return;
+    154 │     return;
+    155 │ });
+  > 156 │ [].map(() => {});
+        │    ^^^
+    157 │ [].map(function() {});
+    158 │ [].map(() => void null);
   
   i Add a return with a value to this callback.
   
@@ -1163,31 +1245,14 @@ invalid.js:156:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:157:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to reduceRight() iterable method should always return a value.
+  × This callback passed to map() iterable method should always return a value.
   
-    155 │ [].reduce((a, b) => {});
-    156 │ [].reduce(function(a, b) {});
-  > 157 │ [].reduceRight((a, b) => {
-        │    ^^^^^^^^^^^
-    158 │     return;
-    159 │ });
-  
-  i Add a return with a value to this callback.
-  
-
-```
-
-```
-invalid.js:160:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This callback passed to reduceRight() iterable method should always return a value.
-  
-    158 │     return;
-    159 │ });
-  > 160 │ [].reduceRight(function(a, b) {
-        │    ^^^^^^^^^^^
-    161 │     return;
-    162 │ });
+    155 │ });
+    156 │ [].map(() => {});
+  > 157 │ [].map(function() {});
+        │    ^^^
+    158 │ [].map(() => void null);
+    159 │ [].reduce((a, b) => {
   
   i Add a return with a value to this callback.
   
@@ -1195,16 +1260,16 @@ invalid.js:160:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:163:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:158:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to reduceRight() iterable method should always return a value.
+  × This callback passed to map() iterable method should always return a value.
   
-    161 │     return;
-    162 │ });
-  > 163 │ [].reduceRight((a, b) => {});
-        │    ^^^^^^^^^^^
-    164 │ [].reduceRight(function(a, b) {});
-    165 │ [].sort((a, b) => {
+    156 │ [].map(() => {});
+    157 │ [].map(function() {});
+  > 158 │ [].map(() => void null);
+        │    ^^^
+    159 │ [].reduce((a, b) => {
+    160 │     return;
   
   i Add a return with a value to this callback.
   
@@ -1212,16 +1277,33 @@ invalid.js:163:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:164:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:159:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to reduceRight() iterable method should always return a value.
+  × This callback passed to reduce() iterable method should always return a value.
   
-    162 │ });
-    163 │ [].reduceRight((a, b) => {});
-  > 164 │ [].reduceRight(function(a, b) {});
-        │    ^^^^^^^^^^^
-    165 │ [].sort((a, b) => {
-    166 │     return;
+    157 │ [].map(function() {});
+    158 │ [].map(() => void null);
+  > 159 │ [].reduce((a, b) => {
+        │    ^^^^^^
+    160 │     return;
+    161 │ });
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:162:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to reduce() iterable method should always return a value.
+  
+    160 │     return;
+    161 │ });
+  > 162 │ [].reduce(function(a, b) {
+        │    ^^^^^^
+    163 │     return;
+    164 │ });
   
   i Add a return with a value to this callback.
   
@@ -1231,14 +1313,48 @@ invalid.js:164:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:165:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to sort() iterable method should always return a value.
+  × This callback passed to reduce() iterable method should always return a value.
   
-    163 │ [].reduceRight((a, b) => {});
-    164 │ [].reduceRight(function(a, b) {});
-  > 165 │ [].sort((a, b) => {
-        │    ^^^^
-    166 │     return;
-    167 │ });
+    163 │     return;
+    164 │ });
+  > 165 │ [].reduce((a, b) => {});
+        │    ^^^^^^
+    166 │ [].reduce(function(a, b) {});
+    167 │ [].reduce(() => void null);
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:166:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to reduce() iterable method should always return a value.
+  
+    164 │ });
+    165 │ [].reduce((a, b) => {});
+  > 166 │ [].reduce(function(a, b) {});
+        │    ^^^^^^
+    167 │ [].reduce(() => void null);
+    168 │ [].reduceRight((a, b) => {
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:167:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to reduce() iterable method should always return a value.
+  
+    165 │ [].reduce((a, b) => {});
+    166 │ [].reduce(function(a, b) {});
+  > 167 │ [].reduce(() => void null);
+        │    ^^^^^^
+    168 │ [].reduceRight((a, b) => {
+    169 │     return;
   
   i Add a return with a value to this callback.
   
@@ -1248,12 +1364,12 @@ invalid.js:165:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:168:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to sort() iterable method should always return a value.
+  × This callback passed to reduceRight() iterable method should always return a value.
   
-    166 │     return;
-    167 │ });
-  > 168 │ [].sort(function(a, b) {
-        │    ^^^^
+    166 │ [].reduce(function(a, b) {});
+    167 │ [].reduce(() => void null);
+  > 168 │ [].reduceRight((a, b) => {
+        │    ^^^^^^^^^^^
     169 │     return;
     170 │ });
   
@@ -1265,14 +1381,14 @@ invalid.js:168:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:171:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to sort() iterable method should always return a value.
+  × This callback passed to reduceRight() iterable method should always return a value.
   
     169 │     return;
     170 │ });
-  > 171 │ [].sort((a, b) => {});
-        │    ^^^^
-    172 │ [].sort(function(a, b) {});
-    173 │ [].toSorted((a, b) => {
+  > 171 │ [].reduceRight(function(a, b) {
+        │    ^^^^^^^^^^^
+    172 │     return;
+    173 │ });
   
   i Add a return with a value to this callback.
   
@@ -1280,16 +1396,16 @@ invalid.js:171:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:172:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:174:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to sort() iterable method should always return a value.
+  × This callback passed to reduceRight() iterable method should always return a value.
   
-    170 │ });
-    171 │ [].sort((a, b) => {});
-  > 172 │ [].sort(function(a, b) {});
-        │    ^^^^
-    173 │ [].toSorted((a, b) => {
-    174 │     return;
+    172 │     return;
+    173 │ });
+  > 174 │ [].reduceRight((a, b) => {});
+        │    ^^^^^^^^^^^
+    175 │ [].reduceRight(function(a, b) {});
+    176 │ [].reduceRight(() => void null);
   
   i Add a return with a value to this callback.
   
@@ -1297,16 +1413,16 @@ invalid.js:172:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:173:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:175:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to toSorted() iterable method should always return a value.
+  × This callback passed to reduceRight() iterable method should always return a value.
   
-    171 │ [].sort((a, b) => {});
-    172 │ [].sort(function(a, b) {});
-  > 173 │ [].toSorted((a, b) => {
-        │    ^^^^^^^^
-    174 │     return;
-    175 │ });
+    173 │ });
+    174 │ [].reduceRight((a, b) => {});
+  > 175 │ [].reduceRight(function(a, b) {});
+        │    ^^^^^^^^^^^
+    176 │ [].reduceRight(() => void null);
+    177 │ [].sort((a, b) => {
   
   i Add a return with a value to this callback.
   
@@ -1316,14 +1432,14 @@ invalid.js:173:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 invalid.js:176:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This callback passed to toSorted() iterable method should always return a value.
+  × This callback passed to reduceRight() iterable method should always return a value.
   
-    174 │     return;
-    175 │ });
-  > 176 │ [].toSorted(function(a, b) {
-        │    ^^^^^^^^
-    177 │     return;
-    178 │ });
+    174 │ [].reduceRight((a, b) => {});
+    175 │ [].reduceRight(function(a, b) {});
+  > 176 │ [].reduceRight(() => void null);
+        │    ^^^^^^^^^^^
+    177 │ [].sort((a, b) => {
+    178 │     return;
   
   i Add a return with a value to this callback.
   
@@ -1331,53 +1447,172 @@ invalid.js:176:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:179:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:177:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to sort() iterable method should always return a value.
+  
+    175 │ [].reduceRight(function(a, b) {});
+    176 │ [].reduceRight(() => void null);
+  > 177 │ [].sort((a, b) => {
+        │    ^^^^
+    178 │     return;
+    179 │ });
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:180:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to sort() iterable method should always return a value.
+  
+    178 │     return;
+    179 │ });
+  > 180 │ [].sort(function(a, b) {
+        │    ^^^^
+    181 │     return;
+    182 │ });
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:183:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to sort() iterable method should always return a value.
+  
+    181 │     return;
+    182 │ });
+  > 183 │ [].sort((a, b) => {});
+        │    ^^^^
+    184 │ [].sort(function(a, b) {});
+    185 │ [].sort(() => void null);
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:184:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to sort() iterable method should always return a value.
+  
+    182 │ });
+    183 │ [].sort((a, b) => {});
+  > 184 │ [].sort(function(a, b) {});
+        │    ^^^^
+    185 │ [].sort(() => void null);
+    186 │ [].toSorted((a, b) => {
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:185:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to sort() iterable method should always return a value.
+  
+    183 │ [].sort((a, b) => {});
+    184 │ [].sort(function(a, b) {});
+  > 185 │ [].sort(() => void null);
+        │    ^^^^
+    186 │ [].toSorted((a, b) => {
+    187 │     return;
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:186:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to toSorted() iterable method should always return a value.
   
-    177 │     return;
-    178 │ });
-  > 179 │ [].toSorted((a, b) => {
+    184 │ [].sort(function(a, b) {});
+    185 │ [].sort(() => void null);
+  > 186 │ [].toSorted((a, b) => {
         │    ^^^^^^^^
-    180 │     if (a > b) {
-    181 │         return;
+    187 │     return;
+    188 │ });
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:189:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to toSorted() iterable method should always return a value.
+  
+    187 │     return;
+    188 │ });
+  > 189 │ [].toSorted(function(a, b) {
+        │    ^^^^^^^^
+    190 │     return;
+    191 │ });
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:192:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to toSorted() iterable method should always return a value.
+  
+    190 │     return;
+    191 │ });
+  > 192 │ [].toSorted((a, b) => {
+        │    ^^^^^^^^
+    193 │     if (a > b) {
+    194 │         return;
   
   i Change this return so that it returns a value.
   
-    180 │     if (a > b) {
-    181 │         return;
-  > 182 │     } else if (a < b) {
+    193 │     if (a > b) {
+    194 │         return;
+  > 195 │     } else if (a < b) {
         │                        
-  > 183 │         return;
+  > 196 │         return;
         │         ^^^^^^
-    184 │     } else {
-    185 │         return 1;
+    197 │     } else {
+    198 │         return 1;
   
   i Change this return so that it returns a value.
   
-    178 │ });
-    179 │ [].toSorted((a, b) => {
-  > 180 │     if (a > b) {
+    191 │ });
+    192 │ [].toSorted((a, b) => {
+  > 193 │     if (a > b) {
         │                 
-  > 181 │         return;
+  > 194 │         return;
         │         ^^^^^^
-    182 │     } else if (a < b) {
-    183 │         return;
+    195 │     } else if (a < b) {
+    196 │         return;
   
 
 ```
 
 ```
-invalid.js:188:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:201:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to toSorted() iterable method should always return a value.
   
-    186 │     }
-    187 │ });
-  > 188 │ [].toSorted((a, b) => {
+    199 │     }
+    200 │ });
+  > 201 │ [].toSorted((a, b) => {
         │    ^^^^^^^^
-    189 │     if (a > b) {
-    190 │         return;
+    202 │     if (a > b) {
+    203 │         return;
   
   i Add a return with a value to this callback.
   
@@ -1385,16 +1620,32 @@ invalid.js:188:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━
 ```
 
 ```
-invalid.js:195:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:208:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This callback passed to toSorted() iterable method should always return a value.
   
-    193 │     }
-    194 │ });
-  > 195 │ [].toSorted((a, b) => {
+    206 │     }
+    207 │ });
+  > 208 │ [].toSorted((a, b) => {
         │    ^^^^^^^^
-    196 │     if (a > b) {
-    197 │         throw new Error();
+    209 │     if (a > b) {
+    210 │         throw new Error();
+  
+  i Add a return with a value to this callback.
+  
+
+```
+
+```
+invalid.js:215:4 lint/suspicious/useIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to toSorted() iterable method should always return a value.
+  
+    213 │     }
+    214 │ });
+  > 215 │ [].toSorted(() => void null);
+        │    ^^^^^^^^
+    216 │ 
   
   i Add a return with a value to this callback.
   

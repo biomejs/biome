@@ -35,6 +35,7 @@ Array.from([], () => {
 Array.from([], function() {
     return;
 });
+Array.from([], () => void null);
 [].every(() => {
     return;
 });
@@ -82,6 +83,7 @@ Array.from([], function() {
         return true;
     } finally {}
 });
+[].every(() => void null);
 [].filter(() => {
     return;
 });
@@ -90,6 +92,7 @@ Array.from([], function() {
 });
 [].filter(() => {});
 [].filter(function() {});
+[].filter(() => void null);
 [].find(() => {
     return;
 });
@@ -98,6 +101,7 @@ Array.from([], function() {
 });
 [].find(() => {});
 [].find(function() {});
+[].find(() => void null);
 [].findIndex(() => {
     return;
 });
@@ -106,6 +110,7 @@ Array.from([], function() {
 });
 [].findIndex(() => {});
 [].findIndex(function() {});
+[].findIndex(() => void null);
 [].findLast(() => {
     return;
 });
@@ -114,6 +119,7 @@ Array.from([], function() {
 });
 [].findLast(() => {});
 [].findLast(function() {});
+[].findLast(() => void null);
 [].findLastIndex(() => {
     return;
 });
@@ -122,6 +128,7 @@ Array.from([], function() {
 });
 [].findLastIndex(() => {});
 [].findLastIndex(function() {});
+[].findLastIndex(() => void null);
 [].some(() => {
     return;
 });
@@ -130,6 +137,7 @@ Array.from([], function() {
 });
 [].some(() => {});
 [].some(function() {});
+[].some(() => void null);
 [].flatMap(() => {
     return;
 });
@@ -138,6 +146,7 @@ Array.from([], function() {
 });
 [].flatMap(() => {});
 [].flatMap(function() {});
+[].flatMap(() => void null);
 [].map(() => {
     return;
 });
@@ -146,6 +155,7 @@ Array.from([], function() {
 });
 [].map(() => {});
 [].map(function() {});
+[].map(() => void null);
 [].reduce((a, b) => {
     return;
 });
@@ -154,6 +164,7 @@ Array.from([], function() {
 });
 [].reduce((a, b) => {});
 [].reduce(function(a, b) {});
+[].reduce(() => void null);
 [].reduceRight((a, b) => {
     return;
 });
@@ -162,6 +173,7 @@ Array.from([], function() {
 });
 [].reduceRight((a, b) => {});
 [].reduceRight(function(a, b) {});
+[].reduceRight(() => void null);
 [].sort((a, b) => {
     return;
 });
@@ -170,6 +182,7 @@ Array.from([], function() {
 });
 [].sort((a, b) => {});
 [].sort(function(a, b) {});
+[].sort(() => void null);
 [].toSorted((a, b) => {
     return;
 });
@@ -199,3 +212,4 @@ Array.from([], function() {
         return;
     }
 });
+[].toSorted(() => void null);

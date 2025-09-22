@@ -75,6 +75,9 @@ declare_lint_rule! {
     /// [].forEach(() => {
     ///     // No return value, which is correct
     /// });
+    ///
+    /// ```js
+    /// [].forEach(() => void null); // Void return value, which is correct
     /// ```
     pub UseIterableCallbackReturn {
         version: "2.0.0",
@@ -269,6 +272,19 @@ fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
     if let Some(arrow_expression) = JsArrowFunctionExpression::cast_ref(&cfg.node)
         && let Ok(AnyJsFunctionBody::AnyJsExpression(expression)) = arrow_expression.body()
     {
+        let is_void_expression = expression
+            .as_js_unary_expression()
+            .and_then(|unary| unary.is_void().ok())
+            .unwrap_or(false);
+
+        if is_void_expression {
+            return FunctionReturnsInfo {
+                has_paths_without_returns: false,
+                returns_with_value: Vec::new(),
+                returns_without_value: vec![expression.range()],
+            };
+        }
+
         return FunctionReturnsInfo {
             has_paths_without_returns: false,
             returns_with_value: vec![expression.range()],

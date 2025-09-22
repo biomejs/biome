@@ -22,6 +22,7 @@
 [].forEach(function (a) {
     a.fn();
 });
+[].forEach(() => void null);
 Array.from([], (a) => {
     return a + 1;
 });
