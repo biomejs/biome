@@ -54,3 +54,32 @@ export default {
   }
 }
 ```
+
+# Diagnostics
+```
+invalid-conditional-destructuring.js:7:13 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━
+
+  i Destructuring props in the root scope of setup loses reactivity.
+  
+    5 │   setup(props) {
+    6 │     if (props.show) {
+  > 7 │       const { foo } = props;
+      │             ^^^^^^^
+    8 │       return () => h('div', foo)
+    9 │     }
+  
+  i The props parameter is defined here.
+  
+    3 │ // Conditional destructuring
+    4 │ export default {
+  > 5 │   setup(props) {
+      │         ^^^^^
+    6 │     if (props.show) {
+    7 │       const { foo } = props;
+  
+  i In Vue's Composition API, props must be accessed as properties to maintain reactivity.
+  
+  i Use 'props.propertyName' or 'toRefs(props)' to maintain reactivity.
+  
+
+```

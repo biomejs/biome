@@ -43,3 +43,60 @@ export default defineComponent({
   }
 });
 ```
+
+# Diagnostics
+```
+invalid-typescript.ts:6:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring props in the root scope of setup loses reactivity.
+  
+    4 │ export default {
+    5 │   setup(props: { foo: string; bar: number }) {
+  > 6 │     const { foo, bar } = props;
+      │           ^^^^^^^^^^^^
+    7 │     return () => h('div', foo + bar)
+    8 │   }
+  
+  i The props parameter is defined here.
+  
+    3 │ // TypeScript interface props
+    4 │ export default {
+  > 5 │   setup(props: { foo: string; bar: number }) {
+      │         ^^^^^
+    6 │     const { foo, bar } = props;
+    7 │     return () => h('div', foo + bar)
+  
+  i In Vue's Composition API, props must be accessed as properties to maintain reactivity.
+  
+  i Use 'props.propertyName' or 'toRefs(props)' to maintain reactivity.
+  
+
+```
+
+```
+invalid-typescript.ts:35:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring props in the root scope of setup loses reactivity.
+  
+    33 │ export default defineComponent({
+    34 │   setup(props: { foo: string }) {
+  > 35 │     const { foo } = props;
+       │           ^^^^^^^
+    36 │     return () => h('div', foo)
+    37 │   }
+  
+  i The props parameter is defined here.
+  
+    32 │ // defineComponent with TypeScript
+    33 │ export default defineComponent({
+  > 34 │   setup(props: { foo: string }) {
+       │         ^^^^^
+    35 │     const { foo } = props;
+    36 │     return () => h('div', foo)
+  
+  i In Vue's Composition API, props must be accessed as properties to maintain reactivity.
+  
+  i Use 'props.propertyName' or 'toRefs(props)' to maintain reactivity.
+  
+
+```

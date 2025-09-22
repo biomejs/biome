@@ -167,6 +167,8 @@ impl Rule for NoVueSetupPropsReactivityLoss {
             }
         }
 
+        violations.extend(check_additional_setup_patterns(ctx.query(), ctx.model()));
+
         violations
     }
 
@@ -222,13 +224,12 @@ fn find_setup_functions(component: &VueComponent) -> Vec<SetupFunction> {
                 setup_functions.push(SetupFunction::Function(func));
             }
 
-            for (name, member) in options_api.iter_declaration_groups() {
-                if name.text() == "setup"
-                    && let Some(setup_fn) = extract_setup_from_object_member(&member)
-                {
-                    setup_functions.push(setup_fn);
-                }
-            }
+            setup_functions.extend(
+                options_api
+                    .iter_declaration_groups()
+                    .filter(|(name, _)| name.text() == "setup")
+                    .filter_map(|(_, member)| extract_setup_from_object_member(&member)),
+            );
         }
         AnyVueComponent::DefineComponent(define_component) => {
             if let Some(setup_func_expr) = define_component.setup_func()
@@ -237,22 +238,20 @@ fn find_setup_functions(component: &VueComponent) -> Vec<SetupFunction> {
                 setup_functions.push(SetupFunction::Function(func));
             }
 
-            for (name, member) in define_component.iter_declaration_groups() {
-                if name.text() == "setup"
-                    && let Some(setup_fn) = extract_setup_from_object_member(&member)
-                {
-                    setup_functions.push(setup_fn);
-                }
-            }
+            setup_functions.extend(
+                define_component
+                    .iter_declaration_groups()
+                    .filter(|(name, _)| name.text() == "setup")
+                    .filter_map(|(_, member)| extract_setup_from_object_member(&member)),
+            );
         }
         AnyVueComponent::CreateApp(create_app) => {
-            for (name, member) in create_app.iter_declaration_groups() {
-                if name.text() == "setup"
-                    && let Some(setup_fn) = extract_setup_from_object_member(&member)
-                {
-                    setup_functions.push(setup_fn);
-                }
-            }
+            setup_functions.extend(
+                create_app
+                    .iter_declaration_groups()
+                    .filter(|(name, _)| name.text() == "setup")
+                    .filter_map(|(_, member)| extract_setup_from_object_member(&member)),
+            );
         }
         AnyVueComponent::Setup(_) => {}
     }
@@ -277,21 +276,16 @@ fn extract_setup_from_object_member(
 ) -> Option<SetupFunction> {
     use biome_js_syntax::AnyJsObjectMember;
 
-    let is_setup_member = match member {
+    match member {
         AnyJsObjectMember::JsMethodObjectMember(method) => {
-            is_member_named_setup(&method.name().ok()?)
+            let name = method.name().ok()?;
+            is_member_named_setup(&name).then(|| SetupFunction::Method(method.clone()))
         }
         AnyJsObjectMember::JsPropertyObjectMember(property) => {
-            is_member_named_setup(&property.name().ok()?)
-        }
-        _ => return None,
-    };
-
-    match (is_setup_member, member) {
-        (true, AnyJsObjectMember::JsMethodObjectMember(method)) => {
-            Some(SetupFunction::Method(method.clone()))
-        }
-        (true, AnyJsObjectMember::JsPropertyObjectMember(property)) => {
+            let name = property.name().ok()?;
+            if !is_member_named_setup(&name) {
+                return None;
+            }
             let value = property.value().ok()?;
             extract_function_from_expression(&value).map(SetupFunction::Function)
         }
@@ -353,19 +347,23 @@ fn check_root_scope_destructuring(
     props_binding: &JsIdentifierBinding,
     model: &SemanticModel,
 ) -> Vec<Violation> {
-    model
-        .as_binding(props_binding)
-        .all_reads()
-        .filter_map(|reference| reference.syntax().parent())
-        .filter_map(biome_js_syntax::JsReferenceIdentifier::cast)
-        .filter(|identifier| is_reference_in_root_scope_of_function(identifier, setup_fn))
-        .filter_map(|identifier| is_reference_in_destructuring(&identifier))
-        .filter(|destructuring_info| !is_safe_reactive_destructuring(destructuring_info, model))
-        .map(|destructuring_info| Violation::RootScopeDestructuring {
-            destructuring_range: destructuring_info.destructuring_range,
-            props_param_range: props_binding.range(),
-        })
-        .collect()
+    let mut violations = Vec::new();
+
+    for reference in model.as_binding(props_binding).all_reads() {
+        if let Some(identifier) =
+            biome_js_syntax::JsReferenceIdentifier::cast(reference.syntax().clone())
+            && is_reference_in_root_scope_of_function(&identifier, setup_fn)
+            && let Some(destructuring_info) = is_reference_in_destructuring(&identifier)
+            && !is_safe_reactive_destructuring(&destructuring_info, model)
+        {
+            violations.push(Violation::RootScopeDestructuring {
+                destructuring_range: destructuring_info.destructuring_range,
+                props_param_range: props_binding.range(),
+            });
+        }
+    }
+
+    violations
 }
 
 fn is_reference_in_root_scope_of_function(
@@ -377,13 +375,9 @@ fn is_reference_in_root_scope_of_function(
         SetupFunction::Method(method) => method.syntax(),
     };
 
-    reference
-        .syntax()
-        .ancestors()
-        .find(|node| {
-            *node == *function_syntax || (is_function_like_node(node) && *node != *function_syntax)
-        })
-        .is_some_and(|node| node == *function_syntax)
+    let nearest_function = reference.syntax().ancestors().find(is_function_like_node);
+
+    nearest_function.is_some_and(|func_node| func_node == *function_syntax)
 }
 
 fn is_function_like_node(node: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>) -> bool {
@@ -411,51 +405,127 @@ struct DestructuringInfo {
 fn is_reference_in_destructuring(
     reference: &biome_js_syntax::JsReferenceIdentifier,
 ) -> Option<DestructuringInfo> {
-    reference.syntax().ancestors().find_map(|node| {
-        extract_variable_declarator_info(&node)
-            .or_else(|| extract_assignment_expression_info(&node))
-    })
+    let current = reference.syntax().clone();
+
+    for ancestor in current.ancestors() {
+        if let Some(declarator) = biome_js_syntax::JsVariableDeclarator::cast(ancestor.clone()) {
+            let Ok(id) = declarator.id() else {
+                continue;
+            };
+            let has_destructuring = id.as_js_object_binding_pattern().is_some()
+                || id.as_js_array_binding_pattern().is_some();
+
+            if !has_destructuring {
+                continue;
+            }
+
+            let Some(init) = declarator.initializer() else {
+                continue;
+            };
+            let Ok(init_expr) = init.expression() else {
+                continue;
+            };
+
+            if is_reference_inside_expression(reference, &init_expr) {
+                return extract_variable_declarator_info(ancestor);
+            }
+        }
+
+        if let Some(assignment) = biome_js_syntax::JsAssignmentExpression::cast(ancestor.clone()) {
+            let Ok(left) = assignment.left() else {
+                continue;
+            };
+            let has_destructuring = left.as_js_object_assignment_pattern().is_some()
+                || left.as_js_array_assignment_pattern().is_some();
+
+            if !has_destructuring {
+                continue;
+            }
+
+            let Ok(right_expr) = assignment.right() else {
+                continue;
+            };
+
+            if is_reference_inside_expression(reference, &right_expr) {
+                return extract_assignment_expression_info(ancestor);
+            }
+        }
+    }
+
+    None
+}
+
+fn is_reference_inside_expression(
+    reference: &biome_js_syntax::JsReferenceIdentifier,
+    expression: &AnyJsExpression,
+) -> bool {
+    expression.range().contains_range(reference.range())
 }
 
 fn extract_variable_declarator_info(
-    node: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
+    node: biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
 ) -> Option<DestructuringInfo> {
-    let declarator = biome_js_syntax::JsVariableDeclarator::cast(node.clone())?;
+    let declarator = biome_js_syntax::JsVariableDeclarator::cast(node)?;
     let id = declarator.id().ok()?;
-    let obj_pattern = id.as_js_object_binding_pattern()?;
-    let initializer = declarator
-        .initializer()
-        .and_then(|init| init.expression().ok());
 
-    Some(DestructuringInfo {
-        destructuring_range: obj_pattern.range(),
-        initializer,
-    })
+    if let Some(obj_pattern) = id.as_js_object_binding_pattern() {
+        let initializer = declarator
+            .initializer()
+            .and_then(|init| init.expression().ok());
+
+        return Some(DestructuringInfo {
+            destructuring_range: obj_pattern.range(),
+            initializer,
+        });
+    }
+
+    if let Some(array_pattern) = id.as_js_array_binding_pattern() {
+        let initializer = declarator
+            .initializer()
+            .and_then(|init| init.expression().ok());
+
+        return Some(DestructuringInfo {
+            destructuring_range: array_pattern.range(),
+            initializer,
+        });
+    }
+
+    None
 }
 
 fn extract_assignment_expression_info(
-    node: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
+    node: biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
 ) -> Option<DestructuringInfo> {
-    let assignment = biome_js_syntax::JsAssignmentExpression::cast(node.clone())?;
+    let assignment = biome_js_syntax::JsAssignmentExpression::cast(node)?;
     let left = assignment.left().ok()?;
-    let obj_pattern = left.as_js_object_assignment_pattern()?;
-    let initializer = assignment.right().ok();
 
-    Some(DestructuringInfo {
-        destructuring_range: obj_pattern.range(),
-        initializer,
-    })
+    if let Some(obj_pattern) = left.as_js_object_assignment_pattern() {
+        let initializer = assignment.right().ok();
+        return Some(DestructuringInfo {
+            destructuring_range: obj_pattern.range(),
+            initializer,
+        });
+    }
+
+    if let Some(array_pattern) = left.as_js_array_assignment_pattern() {
+        let initializer = assignment.right().ok();
+        return Some(DestructuringInfo {
+            destructuring_range: array_pattern.range(),
+            initializer,
+        });
+    }
+
+    None
 }
 
 fn is_safe_reactive_destructuring(
     destructuring_info: &DestructuringInfo,
     model: &SemanticModel,
 ) -> bool {
-    if let Some(initializer) = &destructuring_info.initializer {
-        is_reactive_api_call(initializer, model)
-    } else {
-        false
-    }
+    destructuring_info
+        .initializer
+        .as_ref()
+        .is_some_and(|init| is_reactive_api_call(init, model))
 }
 
 fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
@@ -526,11 +596,13 @@ fn check_setup_function(setup_fn: &SetupFunction, model: &SemanticModel) -> Vec<
         AnyJsBindingPattern::JsObjectBindingPattern(obj_pattern) => {
             vec![Violation::ParameterDestructuring(obj_pattern.range())]
         }
+        AnyJsBindingPattern::JsArrayBindingPattern(array_pattern) => {
+            vec![Violation::ParameterDestructuring(array_pattern.range())]
+        }
         AnyJsBindingPattern::AnyJsBinding(binding) => binding
             .as_js_identifier_binding()
             .map(|props_binding| check_root_scope_destructuring(setup_fn, props_binding, model))
             .unwrap_or_default(),
-        _ => Vec::new(),
     }
 }
 
@@ -590,4 +662,23 @@ fn extract_setup_violations_from_members(
         .filter_map(|member| extract_setup_from_object_member(&member))
         .flat_map(|setup_fn| check_setup_function(&setup_fn, model))
         .collect()
+}
+
+fn check_additional_setup_patterns(
+    potential_component: &AnyPotentialVueComponent,
+    model: &SemanticModel,
+) -> Vec<Violation> {
+    match potential_component {
+        AnyPotentialVueComponent::JsExportDefaultExpressionClause(export_clause) => {
+            let Ok(expr) = export_clause.expression() else {
+                return Vec::new();
+            };
+            let Some(func) = extract_function_from_expression(&expr) else {
+                return Vec::new();
+            };
+            let setup_func = SetupFunction::Function(func);
+            check_setup_function(&setup_func, model)
+        }
+        AnyPotentialVueComponent::JsCallExpression(_) => Vec::new(),
+    }
 }
