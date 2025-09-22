@@ -8,8 +8,40 @@ use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::{Mutex, MutexGuard};
 use std::{env, fs};
 
+/// helper to temporarily set or unset an environment variable for the duration of a scope.
+/// restores the previous value on drop.
+struct EnvVarGuard {
+    key: &'static str,
+    prev: Option<String>,
+}
+
+
+impl EnvVarGuard {
+    fn unset(key: &'static str) -> Self {
+        let prev = std::env::var(key).ok();
+        unsafe { std::env::remove_var(key); }
+        EnvVarGuard { key, prev }
+    }
+    fn set(key: &'static str, value: &str) -> Self {
+        let prev = std::env::var(key).ok();
+        unsafe { std::env::set_var(key, value); }
+        EnvVarGuard { key, prev }
+    }
+}
+
+impl Drop for EnvVarGuard {
+    fn drop(&mut self) {
+        if let Some(ref val) = self.prev {
+            unsafe { std::env::set_var(self.key, val); }
+        } else {
+            unsafe { std::env::remove_var(self.key); }
+        }
+    }
+}
+
 #[test]
 fn rage_help() {
+    let _guard = EnvVarGuard::unset("BIOME_CONFIG_PATH");
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -28,6 +60,7 @@ fn rage_help() {
 
 #[test]
 fn ok() {
+    let _guard = EnvVarGuard::unset("BIOME_CONFIG_PATH");
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -64,6 +97,84 @@ fn with_configuration() {
     assert_rage_snapshot(SnapshotPayload::new(
         module_path!(),
         "with_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn rage_with_config_path_argument() {
+    let _guard = EnvVarGuard::unset("BIOME_CONFIG_PATH");
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config_path = Utf8Path::new("custom-config.json");
+    fs.insert(
+        config_path.to_path_buf(),
+        r#"{\n  \"formatter\": {\n    \"enabled\": false\n  }\n}"#,
+    );
+
+    let (fs, result) = run_rage(
+        fs,
+        &mut console,
+        Args::from(["rage", "--config-path", "custom-config.json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "rage_with_config_path_argument",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn rage_with_biome_config_path_env() {
+    let _guard = EnvVarGuard::set("BIOME_CONFIG_PATH", "env-config.json");
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config_path = Utf8Path::new("env-config.json");
+    fs.insert(
+        config_path.to_path_buf(),
+        r#"{\n  \"formatter\": {\n    \"enabled\": false\n  }\n}"#,
+    );
+    unsafe { std::env::set_var("BIOME_CONFIG_PATH", "env-config.json"); }
+
+    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+
+    unsafe { std::env::remove_var("BIOME_CONFIG_PATH"); }
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "rage_with_biome_config_path_env",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn rage_with_invalid_config_path() {
+    let _guard = EnvVarGuard::unset("BIOME_CONFIG_PATH");
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_rage(
+        fs,
+        &mut console,
+        Args::from(["rage", "--config-path", "does_not_exist.json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "rage_with_invalid_config_path",
         fs,
         console,
         result,
@@ -386,7 +497,7 @@ impl TestLogDir {
         let guard = RAGE_GUARD.lock().unwrap();
         let path = env::temp_dir().join(name);
 
-        unsafe { env::set_var("BIOME_LOG_PATH", &path) };
+        unsafe { env::set_var("BIOME_LOG_PATH", &path); }
 
         Self {
             path: Utf8PathBuf::from_path_buf(path).unwrap(),
@@ -398,6 +509,6 @@ impl TestLogDir {
 impl Drop for TestLogDir {
     fn drop(&mut self) {
         fs::remove_dir_all(&self.path).ok();
-        unsafe { env::remove_var("BIOME_LOG_PATH") };
+        unsafe { env::remove_var("BIOME_LOG_PATH"); }
     }
 }
