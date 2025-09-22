@@ -59,7 +59,7 @@ Valid:
 const f = () => 1;
 ```
 
-#### `style: "asNeeded"` and `requireForObjectLiteral: false`
+#### `style: "asNeeded"` and `requireForObjectLiteral: true`
 
 Valid:
 
