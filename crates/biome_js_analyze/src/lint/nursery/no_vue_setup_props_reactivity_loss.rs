@@ -537,40 +537,55 @@ fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
         return false;
     };
 
-    let Some(ident_expr) = callee.as_js_identifier_expression() else {
-        return false;
+    let base_identifier = match &callee {
+        AnyJsExpression::JsIdentifierExpression(ident_expr) => {
+            let Ok(name) = ident_expr.name() else {
+                return false;
+            };
+            let Ok(token) = name.value_token() else {
+                return false;
+            };
+            let function_name = token.text_trimmed();
+            if function_name != "toRefs" {
+                return false;
+            }
+            name
+        }
+        AnyJsExpression::JsStaticMemberExpression(member_expr) => {
+            let Ok(member) = member_expr.member() else {
+                return false;
+            };
+            let Ok(token) = member.value_token() else {
+                return false;
+            };
+            let property_name = token.text_trimmed();
+            if property_name != "toRefs" {
+                return false;
+            }
+
+            let Ok(object) = member_expr.object() else {
+                return false;
+            };
+            let Some(ident_expr) = object.as_js_identifier_expression() else {
+                return false;
+            };
+            let Ok(name) = ident_expr.name() else {
+                return false;
+            };
+            name
+        }
+        _ => return false,
     };
 
-    let Ok(name) = ident_expr.name() else {
+    let Some(binding) = model.binding(&base_identifier) else {
         return false;
-    };
-
-    let Ok(token) = name.value_token() else {
-        return false;
-    };
-
-    let function_name = token.text_trimmed();
-
-    let is_vue_reactive_function = matches!(function_name, "toRefs" | "toRef" | "reactive" | "ref");
-
-    if !is_vue_reactive_function {
-        return false;
-    }
-
-    let Some(name_node) = ident_expr.name().ok() else {
-        return true;
-    };
-
-    let Some(binding) = model.binding(&name_node) else {
-        return true;
     };
 
     if !binding.is_imported() {
-        return true;
+        return false;
     }
 
     let binding_node = binding.syntax();
-
     for ancestor in binding_node.ancestors() {
         let Some(import_decl) = biome_js_syntax::JsImport::cast(ancestor) else {
             continue;
@@ -584,7 +599,7 @@ fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
             || source_value == "@vue/composition-api";
     }
 
-    true
+    false
 }
 
 fn check_setup_function(setup_fn: &SetupFunction, model: &SemanticModel) -> Vec<Violation> {

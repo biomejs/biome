@@ -1,4 +1,5 @@
 /* should not generate diagnostics */
+import { toRefs, toRef, reactive, ref } from 'vue';
 
 // Safe patterns that preserve reactivity
 

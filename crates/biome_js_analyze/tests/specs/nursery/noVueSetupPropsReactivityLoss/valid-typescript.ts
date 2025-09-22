@@ -1,4 +1,5 @@
 /* should not generate diagnostics */
+import { toRefs, toRef, reactive, defineComponent } from 'vue';
 
 // Valid TypeScript patterns
 
