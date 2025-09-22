@@ -8,22 +8,24 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum UseConsistentArrowReturnStyle {
-    //enforces braces around the function body
+    /// Enforces no braces where they can be omitted (default).
     #[default]
     AsNeeded,
-    //enforces no braces where they can be omitted (default)
+    /// Enforces braces around the function body.
     Always,
-    //enforces no braces around the function body (constrains arrow functions to the role of returning an expression)
+    /// Enforces no braces around the function body (constrains arrow functions to the role of returning an expression).
     Never,
 }
 
+/// Options for the `useConsistentArrowReturn` rule.
 #[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 #[deserializable(with_validator)]
 pub struct UseConsistentArrowReturnOptions {
+    /// The style to enforce for arrow function return statements.
     pub style: UseConsistentArrowReturnStyle,
-    // This option is only applicable when used in conjunction with the "asNeeded" option.
+    /// This option is only applicable when used in conjunction with the `asNeeded` option.
     pub require_for_object_literal: bool,
 }
 

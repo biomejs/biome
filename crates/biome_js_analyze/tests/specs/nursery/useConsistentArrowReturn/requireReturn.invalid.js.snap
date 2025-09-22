@@ -18,6 +18,13 @@ const returnsAwaitArrow = async () => {
     return await fetchData();
 }
 
+const nestedArrow = {
+    method: () => {
+        const inner = () => ({ a: 1 });
+        return inner;
+    }
+};
+
 
 
 ```
@@ -83,6 +90,7 @@ requireReturn.invalid.js:11:27 lint/nursery/useConsistentArrowReturn  FIXABLE  �
   > 13 │ }
        │ ^
     14 │ 
+    15 │ const nestedArrow = {
   
   i Safe fix: Remove the return statement.
   
@@ -93,7 +101,33 @@ requireReturn.invalid.js:11:27 lint/nursery/useConsistentArrowReturn  FIXABLE  �
     13    │ - }
        11 │ + const·returnsAwaitArrow·=·async·()·=>·await·fetchData()
     14 12 │   
-    15 13 │   
+    15 13 │   const nestedArrow = {
+  
+
+```
+
+```
+requireReturn.invalid.js:17:23 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This arrow function body should be a block statement.
+  
+    15 │ const nestedArrow = {
+    16 │     method: () => {
+  > 17 │         const inner = () => ({ a: 1 });
+       │                       ^^^^^^^^^^^^^^^^
+    18 │         return inner;
+    19 │     }
+  
+  i Safe fix: Add braces to the arrow function body.
+  
+    15 15 │   const nestedArrow = {
+    16 16 │       method: () => {
+    17    │ - ········const·inner·=·()·=>·({·a:·1·});
+       17 │ + ········const·inner·=·()·=>·{
+       18 │ + ············return·{·a:·1·};
+       19 │ + ········};
+    18 20 │           return inner;
+    19 21 │       }
   
 
 ```

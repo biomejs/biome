@@ -12,4 +12,11 @@ const returnsAwaitArrow = async () => {
     return await fetchData();
 }
 
+const nestedArrow = {
+    method: () => {
+        const inner = () => ({ a: 1 });
+        return inner;
+    }
+};
+
 

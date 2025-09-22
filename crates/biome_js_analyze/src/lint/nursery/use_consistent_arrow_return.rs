@@ -188,15 +188,38 @@ impl Rule for UseConsistentArrowReturn {
                     .with_semicolon_token(make::token(T![;]))
                     .build();
 
+                let statement = arrow.syntax().ancestors().find_map(AnyJsStatement::cast)?;
+                let mut base_indent = String::new();
+                if let Some(trivia) = statement.syntax().first_leading_trivia() {
+                    for piece in trivia.pieces().rev() {
+                        if piece.is_newline() {
+                            break;
+                        }
+                        if let Some(ws) = piece.as_whitespace() {
+                            base_indent.insert_str(0, ws.text());
+                        }
+                    }
+                }
+
+                let body_indent =
+                    format!("{}{}", base_indent, ctx.preferred_indentation().to_string(),);
                 let body = make::js_function_body(
                     make::token(T!['{']).with_trailing_trivia([
                         (biome_js_syntax::TriviaPieceKind::Newline, "\n"),
-                        (biome_js_syntax::TriviaPieceKind::Whitespace, "    "),
+                        (
+                            biome_js_syntax::TriviaPieceKind::Whitespace,
+                            body_indent.as_str(),
+                        ),
                     ]),
                     make::js_directive_list([]),
                     make::js_statement_list([AnyJsStatement::from(return_statement)]),
-                    make::token(T!['}'])
-                        .with_leading_trivia([(biome_js_syntax::TriviaPieceKind::Newline, "\n")]),
+                    make::token(T!['}']).with_leading_trivia([
+                        (biome_js_syntax::TriviaPieceKind::Newline, "\n"),
+                        (
+                            biome_js_syntax::TriviaPieceKind::Whitespace,
+                            base_indent.as_str(),
+                        ),
+                    ]),
                 );
                 mutation.replace_node(old_body, AnyJsFunctionBody::from(body));
                 Some(JsRuleAction::new(
