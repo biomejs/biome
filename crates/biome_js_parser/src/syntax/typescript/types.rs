@@ -25,7 +25,7 @@ use crate::syntax::object::{
 use crate::syntax::stmt::optional_semi;
 use crate::syntax::typescript::try_parse;
 use crate::syntax::typescript::ts_parse_error::{
-    expected_ts_type, expected_ts_type_parameter, infer_not_allowed,
+    expected_ts_type, expected_ts_type_argument, expected_ts_type_parameter, infer_not_allowed,
     ts_const_modifier_cannot_appear_on_a_type_parameter,
     ts_in_out_modifier_cannot_appear_on_a_type_parameter,
 };
@@ -2147,7 +2147,7 @@ pub(crate) fn parse_ts_type_arguments_in_expression(
         p.bump(T![<]);
 
         if p.at(T![>]) {
-            p.error(expected_ts_type_parameter(p, p.cur_range()));
+            p.error(expected_ts_type_argument(p, p.cur_range()));
         }
         TypeArgumentsList::new(TypeContext::default(), false).parse_list(p);
         p.re_lex(JsReLexContext::BinaryOperator);
@@ -2205,7 +2205,7 @@ pub(crate) fn parse_ts_type_arguments_impl(
     p.bump(T![<]);
 
     if p.at(T![>]) {
-        p.error(expected_ts_type_parameter(p, p.cur_range()));
+        p.error(expected_ts_type_argument(p, p.cur_range()));
     }
     TypeArgumentsList::new(context, recover_on_errors).parse_list(p);
     p.expect(T![>]);
@@ -2264,7 +2264,7 @@ impl ParseSeparatedList for TypeArgumentsList {
                     token_set![T![>], T![,], T![ident], T![yield], T![await]],
                 )
                 .enable_recovery_on_line_break(),
-                expected_ts_type_parameter,
+                expected_ts_type_argument,
             )
         }
     }
