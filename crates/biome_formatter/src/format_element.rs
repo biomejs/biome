@@ -317,6 +317,10 @@ impl BestFittingElement {
         &self.variants
     }
 
+    pub fn variants_mut(&mut self) -> &mut [Box<[FormatElement]>] {
+        &mut self.variants
+    }
+
     /// Returns the least expanded variant
     pub fn most_flat(&self) -> &[FormatElement] {
         self.variants.first().expect(
