@@ -45,7 +45,7 @@ requireReturn.invalid.js:3:28 lint/nursery/useConsistentArrowReturn  FIXABLE  �
      2  2 │   
      3    │ - const·returnsObjectArrow·=·()·=>·(·{·a:·1,·b:·2·});
         3 │ + const·returnsObjectArrow·=·()·=>·{
-        4 │ + ····return·{·a:·1,·b:·2·};
+        4 │ + → return·{·a:·1,·b:·2·};
         5 │ + };
      4  6 │   
      5  7 │   
@@ -124,7 +124,7 @@ requireReturn.invalid.js:17:23 lint/nursery/useConsistentArrowReturn  FIXABLE  �
     16 16 │       method: () => {
     17    │ - ········const·inner·=·()·=>·({·a:·1·});
        17 │ + ········const·inner·=·()·=>·{
-       18 │ + ············return·{·a:·1·};
+       18 │ + ········→ return·{·a:·1·};
        19 │ + ········};
     18 20 │           return inner;
     19 21 │       }

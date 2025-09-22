@@ -26,7 +26,7 @@ always.invalid.js:1:30 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━
   
     1   │ - const·returnsSequenceArrow·=·()·=>·(a,·b)
       1 │ + const·returnsSequenceArrow·=·()·=>·{
-      2 │ + ····return·a,·b;
+      2 │ + → return·a,·b;
       3 │ + }
     2 4 │   
     3 5 │   const returnsAwaitArrow = async () => await fetchData()
@@ -51,7 +51,7 @@ always.invalid.js:3:27 lint/nursery/useConsistentArrowReturn  FIXABLE  ━━━
     2 2 │   
     3   │ - const·returnsAwaitArrow·=·async·()·=>·await·fetchData()
       3 │ + const·returnsAwaitArrow·=·async·()·=>·{
-      4 │ + ····return·await·fetchData();
+      4 │ + → return·await·fetchData();
       5 │ + }
     4 6 │   
     5 7 │   
