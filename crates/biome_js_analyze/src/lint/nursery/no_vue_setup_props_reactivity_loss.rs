@@ -537,7 +537,7 @@ fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
         return false;
     };
 
-    let base_identifier = match &callee {
+    match &callee {
         AnyJsExpression::JsIdentifierExpression(ident_expr) => {
             let Ok(name) = ident_expr.name() else {
                 return false;
@@ -549,7 +549,12 @@ fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
             if function_name != "toRefs" {
                 return false;
             }
-            name
+
+            if let Some(binding) = model.binding(&name) {
+                is_vue_reactive_function_binding(&binding)
+            } else {
+                false
+            }
         }
         AnyJsExpression::JsStaticMemberExpression(member_expr) => {
             let Ok(member) = member_expr.member() else {
@@ -566,21 +571,14 @@ fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
             let Ok(object) = member_expr.object() else {
                 return false;
             };
-            let Some(ident_expr) = object.as_js_identifier_expression() else {
-                return false;
-            };
-            let Ok(name) = ident_expr.name() else {
-                return false;
-            };
-            name
+
+            is_vue_namespace_or_import(&object, model)
         }
-        _ => return false,
-    };
+        _ => false,
+    }
+}
 
-    let Some(binding) = model.binding(&base_identifier) else {
-        return false;
-    };
-
+fn is_vue_reactive_function_binding(binding: &biome_js_semantic::Binding) -> bool {
     if !binding.is_imported() {
         return false;
     }
@@ -598,8 +596,30 @@ fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
             || source_value == "@vue/reactivity"
             || source_value == "@vue/composition-api";
     }
-
     false
+}
+
+fn is_vue_namespace_or_import(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
+    match expr {
+        AnyJsExpression::JsIdentifierExpression(ident_expr) => {
+            let Ok(name) = ident_expr.name() else {
+                return false;
+            };
+
+            if let Some(binding) = model.binding(&name) {
+                is_vue_reactive_function_binding(&binding)
+            } else {
+                false
+            }
+        }
+        AnyJsExpression::JsStaticMemberExpression(member_expr) => {
+            let Ok(object) = member_expr.object() else {
+                return false;
+            };
+            is_vue_namespace_or_import(&object, model)
+        }
+        _ => false,
+    }
 }
 
 fn check_setup_function(setup_fn: &SetupFunction, model: &SemanticModel) -> Vec<Violation> {
