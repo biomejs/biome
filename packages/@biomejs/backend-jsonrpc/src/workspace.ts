@@ -8143,7 +8143,9 @@ export type UseAnchorHrefOptions = null;
  */
 export interface UseConsistentArrowReturnOptions {
 	/**
-	 * This option is only applicable when used in conjunction with the `asNeeded` option.
+	* Determines whether the rule enforces a consistent style when the return value is an object literal.
+
+This option is only applicable when used in conjunction with the `asNeeded` option. 
 	 */
 	requireForObjectLiteral?: boolean;
 	/**

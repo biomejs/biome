@@ -13620,7 +13620,7 @@
 			"type": "object",
 			"properties": {
 				"requireForObjectLiteral": {
-					"description": "This option is only applicable when used in conjunction with the `asNeeded` option.",
+					"description": "Determines whether the rule enforces a consistent style when the return value is an object literal.\n\nThis option is only applicable when used in conjunction with the `asNeeded` option.",
 					"default": false,
 					"type": "boolean"
 				},
