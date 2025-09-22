@@ -1,3 +1,7 @@
+use std::sync::Arc;
+
+use camino::Utf8PathBuf;
+
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,6 +14,7 @@ use biome_js_syntax::{
     AnyTsType, AnyTsTypeMember, JsCallExpression, JsIdentifierBinding, JsParameters, T,
     TsPropertySignatureTypeMember, TsReferenceType,
 };
+use biome_package::PackageJson;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_react_forward_ref::NoReactForwardRefOptions;
 
@@ -83,6 +88,18 @@ impl Rule for NoReactForwardRef {
         let node = ctx.query();
         let model = ctx.model();
         let callee = node.callee().ok()?;
+
+        let is_react_19 = ctx
+            .get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()
+            .and_then(|manifest| {
+                manifest
+                    .as_ref()
+                    .map(|(_, package_json)| package_json.matches_dependency("react", ">=19.0.0"))
+            });
+
+        if is_react_19 == Some(false) {
+            return None;
+        }
 
         is_react_call_api(&callee, model, ReactLibrary::React, "forwardRef").then_some(())
     }
