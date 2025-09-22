@@ -1714,7 +1714,7 @@ export interface Nursery {
 	 */
 	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
 	/**
-	 * Disallow use* hooks outside of component$ or other use* hooks.
+	 * Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.
 	 */
 	useQwikMethodUsage?: RuleConfiguration_for_UseQwikMethodUsageOptions;
 	/**
@@ -8037,7 +8037,7 @@ export interface UseMaxParamsOptions {
 	max?: number;
 }
 export interface UseQwikClasslistOptions {}
-export type UseQwikMethodUsageOptions = null;
+export interface UseQwikMethodUsageOptions {}
 export interface UseQwikValidLexicalScopeOptions {}
 export interface UseReactFunctionComponentsOptions {}
 export interface UseSortedClassesOptions {

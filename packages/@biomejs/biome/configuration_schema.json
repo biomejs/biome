@@ -5056,7 +5056,7 @@
 					]
 				},
 				"useQwikMethodUsage": {
-					"description": "Disallow use* hooks outside of component$ or other use* hooks.",
+					"description": "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseQwikMethodUsageConfiguration" },
 						{ "type": "null" }
@@ -14141,7 +14141,10 @@
 				{ "$ref": "#/definitions/RuleWithUseQwikMethodUsageOptions" }
 			]
 		},
-		"UseQwikMethodUsageOptions": { "type": "null" },
+		"UseQwikMethodUsageOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseQwikValidLexicalScopeConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },

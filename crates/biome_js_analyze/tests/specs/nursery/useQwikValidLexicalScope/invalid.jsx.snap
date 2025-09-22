@@ -4,25 +4,30 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
-import { component$, useTask$, $ } from '@builder.io/qwik';
+// should emit diagnostics
+// minimal example and concise-body arrow function without braces
+const f = () => "bar";
 
-export const HelloWorld = component$(() => {
-  const print = (msg) => {
-    console.log(msg);
-  };
+```
 
-  const handleClick = (event) => {
-    console.log('clicked', event);
-  };
+# Diagnostics
+```
+invalid.jsx:3:11 lint/nursery/useQwikValidLexicalScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  const processData = (data) => {
-    return data.map(item => item.name);
-  };
+  × Non-serializable expression must be wrapped with $(...)
+  
+    1 │ // should emit diagnostics
+    2 │ // minimal example and concise-body arrow function without braces
+  > 3 │ const f = () => "bar";
+      │           ^^^^^^^^^^^
+    4 │ 
+  
+  i Qwik requires serializable closures for:
+    - Resumability (pausing/resuming execution)
+    - Code splitting (lazy loading components)
+    - Optimized rehydration (client-side continuation)
+  
+  i Wrap the expression with $(...) to make it serializable. Learn more: Qwik documentation.
+  
 
-  useTask$(() => {
-    print("Hello World");
-  });
-
-  return <h1>Hello</h1>;
-}); 
 ```
