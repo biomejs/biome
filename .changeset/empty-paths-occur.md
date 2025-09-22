@@ -59,7 +59,9 @@ Valid:
 const f = () => 1;
 ```
 
-Valid (with requireForObjectLiteral):
+#### `style: "asNeeded"` and `requireForObjectLiteral: false`
+
+Valid:
 
 ```js
 const f = () => {
