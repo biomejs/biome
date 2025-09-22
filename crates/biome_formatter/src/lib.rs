@@ -50,9 +50,8 @@ use std::fmt::{Debug, Display};
 use crate::builders::syntax_token_cow_slice;
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
-use crate::format_element::document::{Document, ElementTransformer};
+use crate::format_element::document::Document;
 use crate::format_element::{Interned, LineMode};
-use crate::prelude::document::DocumentVisitor;
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
@@ -892,41 +891,20 @@ impl<Context> Formatted<Context> {
 
     /// Visits each embedded element and replaces it with elements contained inside the [Document]
     /// emitted by `fn_format_embedded`
-    pub fn format_embedded<F>(&mut self, fn_format_embedded: F)
+    pub fn format_embedded<F>(&mut self, mut fn_format_embedded: F)
     where
         F: FnMut(TextRange) -> Option<Document>,
     {
-        let document = &mut self.document;
-
-        struct EmbeddedVisitor<F> {
-            fn_format_embedded: F,
-        }
-
-        impl<F> DocumentVisitor for EmbeddedVisitor<F>
-        where
-            F: FnMut(TextRange) -> Option<Document>,
-        {
-            fn visit_element(&mut self, element: &FormatElement) -> Option<FormatElement> {
-                match element {
-                    FormatElement::Tag(Tag::StartEmbedded(range)) => {
-                        (self.fn_format_embedded)(*range).map(|document| {
-                            FormatElement::Interned(Interned::new(document.into_elements()))
-                        })
-                    }
-                    FormatElement::Tag(Tag::EndEmbedded) => {
-                        // FIXME: this might not play well for all cases, so we need to figure out
-                        // a nicer way to replace the tag
-                        Some(FormatElement::Line(LineMode::Hard))
-                    }
-                    _ => None,
-                }
+        self.document.transform(move |element| match element {
+            FormatElement::Tag(Tag::StartEmbedded(range)) => fn_format_embedded(*range)
+                .map(|document| FormatElement::Interned(Interned::new(document.into_elements()))),
+            FormatElement::Tag(Tag::EndEmbedded) => {
+                // FIXME: this might not play well for all cases, so we need to figure out
+                // a nicer way to replace the tag
+                Some(FormatElement::Line(LineMode::Hard))
             }
-        }
-
-        ElementTransformer::transform_document(
-            document,
-            &mut EmbeddedVisitor { fn_format_embedded },
-        );
+            _ => None,
+        });
     }
 
     /// Returns the formatted document.
@@ -937,10 +915,6 @@ impl<Context> Formatted<Context> {
     /// Consumes `self` and returns the formatted document.
     pub fn into_document(self) -> Document {
         self.document
-    }
-
-    pub fn swap_document(&mut self, document: Document) {
-        self.document = document;
     }
 }
 

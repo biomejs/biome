@@ -145,66 +145,52 @@ impl Document {
     pub fn as_elements(&self) -> &[FormatElement] {
         &self.elements
     }
-}
 
-pub trait DocumentVisitor {
-    /// Visit an element and optionally return a replacement
-    fn visit_element(&mut self, element: &FormatElement) -> Option<FormatElement>;
-}
-
-/// Applies a visitor to transform elements in the document
-pub struct ElementTransformer;
-
-impl ElementTransformer {
-    /// Visits a mutable [Document] and replaces its internal elements.
-    pub fn transform_document<V: DocumentVisitor>(document: &mut Document, visitor: &mut V) {
-        let elements = std::mem::take(&mut document.elements);
-        document.elements = Self::transform_elements(elements, visitor);
-    }
-
-    /// Iterates over each element of the document and map each element to a new element. The new element is
-    /// optionally crated using [DocumentVisitor::visit_element]. If no element is returned, the original element is kept.
+    /// Transforms the document by visiting every element, optionally replacing
+    /// them.
     ///
-    /// Nested data structures such as [FormatElement::Interned] and [FormatElement::BestFitting] use recursion and call
-    /// [Self::transform_elements] again.
-    fn transform_elements<V: DocumentVisitor>(
-        elements: Vec<FormatElement>,
-        visitor: &mut V,
-    ) -> Vec<FormatElement> {
-        elements
-            .into_iter()
-            .map(|element| {
-                // Transform nested elements first
-                let transformed_element = match element {
-                    FormatElement::Interned(interned) => {
-                        let nested_elements = interned.deref().to_vec();
-                        let transformed_nested = Self::transform_elements(nested_elements, visitor);
-                        FormatElement::Interned(Interned::new(transformed_nested))
-                    }
-                    FormatElement::BestFitting(best_fitting) => {
-                        let variants: Vec<Box<[FormatElement]>> = best_fitting
-                            .variants()
-                            .iter()
-                            .map(|variant| {
-                                Self::transform_elements(variant.to_vec(), visitor)
-                                    .into_boxed_slice()
-                            })
-                            .collect();
-                        // SAFETY: Safe because the number of variants is the same after the transformation
-                        unsafe {
-                            FormatElement::BestFitting(BestFittingElement::from_vec_unchecked(
-                                variants,
-                            ))
-                        }
-                    }
-                    other => other,
-                };
-                // Then apply a visitor to the element itself
-                visitor
-                    .visit_element(&transformed_element)
-                    .unwrap_or(transformed_element)
-            })
-            .collect()
+    /// Accepts a `visitor` that will be called to visit each element, and which
+    /// may optionally return a replacement.
+    ///
+    /// Elements that contain nested elements, such as [FormatElement::Interned]
+    /// and [FormatElement::BestFitting], have the visitor called on their
+    /// nested elements, but not on the elements themselves.
+    pub(crate) fn transform(
+        &mut self,
+        mut visitor: impl FnMut(&FormatElement) -> Option<FormatElement>,
+    ) {
+        transform_elements(&mut self.elements, &mut visitor);
+    }
+}
+
+/// Iterates over each of the given `elements` and optionally replaces each
+/// element with a new one.
+///
+/// Nested data structures such as [FormatElement::Interned] and
+/// [FormatElement::BestFitting] use recursion and call [transform_elements()]
+/// again. The visitor is *not* invoked on these elements.
+fn transform_elements(
+    elements: &mut [FormatElement],
+    visitor: &mut impl FnMut(&FormatElement) -> Option<FormatElement>,
+) {
+    for element in elements {
+        match element {
+            FormatElement::Interned(interned) => {
+                let mut nested_elements = interned.deref().to_vec();
+                transform_elements(&mut nested_elements, visitor);
+                *element = FormatElement::Interned(Interned::new(nested_elements));
+            }
+            FormatElement::BestFitting(best_fitting) => {
+                for variant in best_fitting.variants_mut() {
+                    transform_elements(variant, visitor);
+                }
+            }
+            _ => {
+                if let Some(replacement) = visitor(element) {
+                    *element = replacement;
+                }
+            }
+        }
     }
 }
 
