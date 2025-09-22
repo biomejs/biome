@@ -202,7 +202,7 @@ impl Rule for UseConsistentArrowReturn {
                 }
 
                 let body_indent =
-                    format!("{}{}", base_indent, ctx.preferred_indentation().to_string(),);
+                    format!("{base_indent}{}", ctx.preferred_indentation().to_string());
                 let body = make::js_function_body(
                     make::token(T!['{']).with_trailing_trivia([
                         (biome_js_syntax::TriviaPieceKind::Newline, "\n"),
