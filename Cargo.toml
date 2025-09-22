@@ -233,7 +233,7 @@ tokio                = "1.47.1"
 tower                = "0.5.2"
 tower-lsp-server     = "0.22.1"
 tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }
-tracing-subscriber   = "0.3.19"
+tracing-subscriber   = "0.3.20"
 unicode-bom          = "2.0.3"
 unicode-width        = "0.1.12"
 ureq                 = "3.0.12"
