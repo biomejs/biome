@@ -20,10 +20,10 @@ use super::{ResolvedPath, collector::JsModuleInfoCollector};
 
 /// Extensions to try to resolve based on the extension in the import specifier.
 /// ref: https://www.typescriptlang.org/docs/handbook/modules/reference.html#the-moduleresolution-compiler-option
-const EXTENSION_ALIAS: &[(&str, &[&str])] = &[
-    ("js", &["ts", "tsx", "d.ts", "js", "jsx"]),
-    ("mjs", &["mts", "d.mts", "mjs"]),
-    ("cjs", &["cts", "d.cts", "cjs"]),
+const EXTENSION_ALIASES: &[(&str, &[&str])] = &[
+    ("js", &["ts", "tsx", "d.ts", "jsx"]),
+    ("mjs", &["mts", "d.mts"]),
+    ("cjs", &["cts", "d.cts"]),
 ];
 
 pub(crate) struct JsModuleVisitor<'a> {
@@ -450,7 +450,7 @@ impl<'a> JsModuleVisitor<'a> {
             condition_names: &["types", "import", "default"],
             default_files: &["index"],
             extensions: SUPPORTED_EXTENSIONS,
-            extension_alias: EXTENSION_ALIAS,
+            extension_aliases: EXTENSION_ALIASES,
             resolve_node_builtins: true,
             resolve_types: true,
             ..Default::default()

@@ -693,7 +693,7 @@ fn test_resolve_extension_alias() {
     let options = ResolveOptions {
         default_files: &["index"],
         extensions: &["js"],
-        extension_alias: &[("js", &["ts", "js"]), ("mjs", &["mts"])],
+        extension_aliases: &[("js", &["ts", "tsx"]), ("mjs", &["mts"])],
         ..Default::default()
     };
 
@@ -711,14 +711,14 @@ fn test_resolve_extension_alias() {
 
     assert_eq!(
         resolve("./dir2/index.js", &base_dir, &fs, &options),
-        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.js"))),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.tsx"))),
         "should also allow the second alternative",
     );
 
     assert_eq!(
         resolve("./dir2/index.mjs", &base_dir, &fs, &options),
         Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.mts"))),
-        "should support alias option without an array",
+        "should support alias another extension",
     );
 }
 
@@ -730,19 +730,19 @@ fn test_resolve_extension_alias_not_apply_to_extension_nor_main_files() {
     let options = ResolveOptions {
         default_files: &["index"],
         extensions: &["js"],
-        extension_alias: &[("js", &[])],
+        extension_aliases: &[("js", &[])],
         ..Default::default()
     };
 
     assert_eq!(
-        resolve("./dir2", &base_dir, &fs, &options),
-        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.js"))),
+        resolve("./dir3", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir3/index.js"))),
         "directory",
     );
 
     assert_eq!(
-        resolve("./dir2/index", &base_dir, &fs, &options),
-        Ok(Utf8PathBuf::from(format!("{base_dir}/dir2/index.js"))),
+        resolve("./dir3/index", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!("{base_dir}/dir3/index.js"))),
         "file",
     );
 }
