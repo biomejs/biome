@@ -25,6 +25,8 @@ pub enum UseConsistentArrowReturnStyle {
 pub struct UseConsistentArrowReturnOptions {
     /// The style to enforce for arrow function return statements.
     pub style: UseConsistentArrowReturnStyle,
+    /// Determines whether the rule enforces a consistent style when the return value is an object literal.
+    ///
     /// This option is only applicable when used in conjunction with the `asNeeded` option.
     pub require_for_object_literal: bool,
 }
