@@ -129,16 +129,13 @@ fn is_inside_component_or_hook(call: &JsCallExpression) -> bool {
         .is_some_and(|token| is_component_or_hook_name(token.text_trimmed()))
 }
 
-
 fn is_qwik_hook_name(name: &str) -> bool {
     name.starts_with("use") && name.chars().nth(3).is_some_and(|c| c.is_uppercase())
 }
 
-
 fn is_component_or_hook_name(name: &str) -> bool {
     name == "component$" || is_qwik_hook_name(name)
 }
-
 
 fn is_in_named_function(call: &JsCallExpression) -> bool {
     let function_name = call
