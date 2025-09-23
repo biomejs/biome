@@ -897,9 +897,8 @@ fn get_read_access_kind(node: &AnyCandidateForUsedInExpressionNode) -> AccessKin
 /// Not limited to `this` references. Can be used for any node, but requires more work e.g.
 /// Returns `true` if the read is access_kind, `false` otherwise.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
-    node.syntax()
-        .ancestors()
-        .any(|ancestor| matches!(
+    node.syntax().ancestors().any(|ancestor| {
+        matches!(
             ancestor.kind(),
             JsSyntaxKind::JS_RETURN_STATEMENT
                 | JsSyntaxKind::JS_CALL_ARGUMENTS
@@ -918,7 +917,8 @@ fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> 
                 | JsSyntaxKind::JS_FOR_IN_STATEMENT
                 | JsSyntaxKind::JS_FOR_OF_STATEMENT
                 | JsSyntaxKind::JS_BINARY_EXPRESSION
-        ))
+        )
+    })
 }
 
 #[cfg(test)]
@@ -1354,7 +1354,8 @@ mod tests {
                     case.description
                 );
 
-                for (node, (expected_name, expected_access_kind)) in nodes.iter().zip(&case.expected)
+                for (node, (expected_name, expected_access_kind)) in
+                    nodes.iter().zip(&case.expected)
                 {
                     let meaningful_node =
                         AnyCandidateForUsedInExpressionNode::cast_ref(node.syntax())
