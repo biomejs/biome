@@ -4,8 +4,7 @@ use super::{
     LintResults, ParseResult, ParserCapabilities, SearchCapabilities,
 };
 use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
-use crate::workspace::FixFileResult;
-use crate::workspace::{EmbeddedCssContent, EmbeddedJsContent};
+use crate::workspace::{EmbeddedContent, FixFileResult};
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
@@ -33,9 +32,11 @@ use biome_html_formatter::{
     format_node,
 };
 use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
-use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode, ScriptType};
 use biome_js_parser::{JsParserOptions, parse_js_with_offset_and_cache};
 use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_json_parser::{JsonParserOptions, parse_json_with_offset_and_cache};
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, NodeCache};
 use camino::Utf8Path;
@@ -296,97 +297,119 @@ fn parse(
     }
 }
 
-pub(crate) fn extract_embedded_script(
-    element: HtmlSyntaxNode,
+pub(crate) fn parse_embedded_js_script(
+    element: HtmlElement,
+    script_type: ScriptType,
     cache: &mut NodeCache,
     options: JsParserOptions,
     source_index_fn: impl Fn(JsFileSource) -> usize,
-) -> Option<Vec<EmbeddedJsContent>> {
-    let html_element = HtmlElement::cast(element)?;
-
-    if html_element.is_javascript_tag().unwrap_or_default() {
-        let is_modules = html_element.is_javascript_module().unwrap_or_default();
-        let file_source = if is_modules {
-            JsFileSource::js_module()
-        } else {
-            JsFileSource::js_script()
-        };
-
-        let file_source_index = source_index_fn(file_source);
-
-        Some(
-            html_element
-                .children()
-                .iter()
-                .filter_map(|child| child.as_any_html_content().cloned())
-                .filter_map(|child| child.as_html_embedded_content().cloned())
-                .filter_map(|child| {
-                    let content = child.value_token().ok()?;
-                    let parse = parse_js_with_offset_and_cache(
-                        content.text(),
-                        content.text_range().start(),
-                        file_source,
-                        options.clone(),
-                        cache,
-                    );
-
-                    Some(EmbeddedJsContent {
-                        parse: parse.into(),
-                        element_range: child.range(),
-                        content_range: content.text_range(),
-                        content_offset: content.text_range().start(),
-                        file_source_index,
-                    })
-                })
-                .collect::<Vec<_>>(),
-        )
+) -> Option<Vec<EmbeddedContent<JsLanguage>>> {
+    let file_source = if script_type.is_javascript_module() {
+        JsFileSource::js_module()
+    } else if script_type.is_javascript() {
+        JsFileSource::js_script()
     } else {
-        None
-    }
+        return None;
+    };
+
+    let file_source_index = source_index_fn(file_source);
+
+    let script_children = element
+        .children()
+        .iter()
+        .filter_map(|child| {
+            let child = child.as_any_html_content()?;
+            let child = child.as_html_embedded_content()?;
+
+            let content = child.value_token().ok()?;
+            let parse = parse_js_with_offset_and_cache(
+                content.text(),
+                content.text_range().start(),
+                file_source,
+                options.clone(),
+                cache,
+            );
+
+            Some(EmbeddedContent::new(
+                parse.into(),
+                child.range(),
+                content.text_range(),
+                content.text_range().start(),
+                file_source_index,
+            ))
+        })
+        .collect();
+    Some(script_children)
 }
 
-pub(crate) fn parse_embedded_style<F>(
-    element: HtmlSyntaxNode,
+pub(crate) fn parse_embedded_json(
+    element: HtmlElement,
+    cache: &mut NodeCache,
+    options: JsonParserOptions,
+    source_index_fn: impl Fn(JsonFileSource) -> usize,
+) -> Option<Vec<EmbeddedContent<JsonLanguage>>> {
+    let file_source_index = source_index_fn(JsonFileSource::json());
+
+    let script_children = element
+        .children()
+        .iter()
+        .filter_map(|child| {
+            let child = child.as_any_html_content()?;
+            let child = child.as_html_embedded_content()?;
+
+            let content = child.value_token().ok()?;
+            let parse = parse_json_with_offset_and_cache(
+                content.text(),
+                content.text_range().start(),
+                cache,
+                options,
+            );
+
+            Some(EmbeddedContent::new(
+                parse.into(),
+                child.range(),
+                content.text_range(),
+                content.text_range().start(),
+                file_source_index,
+            ))
+        })
+        .collect();
+    Some(script_children)
+}
+
+pub(crate) fn parse_embedded_style(
+    element: HtmlElement,
     cache: &mut NodeCache,
     options: CssParserOptions,
-    source_index_fn: F,
-) -> Option<Vec<EmbeddedCssContent>>
-where
-    F: Fn(CssFileSource) -> usize,
-{
-    let html_element = HtmlElement::cast(element)?;
+    source_index_fn: impl Fn(CssFileSource) -> usize,
+) -> Option<Vec<EmbeddedContent<CssLanguage>>> {
+    let file_source_index = source_index_fn(CssFileSource::css());
 
-    if html_element.is_style_tag().unwrap_or_default() {
-        Some(
-            html_element
-                .children()
-                .iter()
-                .filter_map(|child| child.as_any_html_content().cloned())
-                .filter_map(|child| child.as_html_embedded_content().cloned())
-                .filter_map(|child| {
-                    let content = child.value_token().ok()?;
-                    let parse = parse_css_with_offset_and_cache(
-                        content.text(),
-                        content.text_range().start(),
-                        cache,
-                        options,
-                    );
+    let style_children = element
+        .children()
+        .iter()
+        .filter_map(|child| {
+            let child = child.as_any_html_content()?;
+            let child = child.as_html_embedded_content()?;
 
-                    let file_source_index = source_index_fn(CssFileSource::css());
+            let content = child.value_token().ok()?;
+            let parse = parse_css_with_offset_and_cache(
+                content.text(),
+                content.text_range().start(),
+                cache,
+                options,
+            );
 
-                    Some(EmbeddedCssContent {
-                        parse: parse.into(),
-                        element_range: child.range(),
-                        content_range: content.text_range(),
-                        content_offset: content.text_range().start(),
-                        file_source_index,
-                    })
-                })
-                .collect::<Vec<_>>(),
-        )
-    } else {
-        None
-    }
+            Some(EmbeddedContent::new(
+                parse.into(),
+                child.range(),
+                content.text_range(),
+                content.text_range().start(),
+                file_source_index,
+            ))
+        })
+        .collect();
+    Some(style_children)
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
@@ -453,6 +476,34 @@ fn format_embedded(
                 let node = node.node.clone().root.into_node::<JsLanguage>();
                 let formatted =
                     biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
+                if indent_script_and_style {
+                    let elements = vec![
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Tag(Tag::StartIndent),
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Interned(Interned::new(
+                            formatted.into_document().into_elements(),
+                        )),
+                        FormatElement::Tag(Tag::EndIndent),
+                    ];
+
+                    Some(Document::new(elements))
+                } else {
+                    let elements = vec![
+                        FormatElement::Line(LineMode::Hard),
+                        FormatElement::Interned(Interned::new(
+                            formatted.into_document().into_elements(),
+                        )),
+                    ];
+                    Some(Document::new(elements))
+                }
+            }
+            DocumentFileSource::Json(_) => {
+                let json_options =
+                    settings.format_options::<JsonLanguage>(biome_path, &node.source);
+                let node = node.node.clone().root.into_node::<JsonLanguage>();
+                let formatted =
+                    biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
                 if indent_script_and_style {
                     let elements = vec![
                         FormatElement::Line(LineMode::Hard),

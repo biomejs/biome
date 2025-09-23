@@ -4,11 +4,13 @@
 mod generated;
 pub mod element_ext;
 mod file_source;
+mod script_type;
 mod syntax_node;
 
-pub use self::generated::*;
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use file_source::{HtmlFileSource, HtmlTextExpressions, HtmlVariant};
+pub use generated::*;
+pub use script_type::*;
 pub use syntax_node::*;
 
 use crate::HtmlSyntaxKind::{
