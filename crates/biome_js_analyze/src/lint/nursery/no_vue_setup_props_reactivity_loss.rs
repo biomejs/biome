@@ -256,7 +256,21 @@ fn find_setup_functions(component: &VueComponent) -> Vec<SetupFunction> {
         AnyVueComponent::Setup(_) => {}
     }
 
-    setup_functions
+    {
+        use std::collections::HashSet;
+        let mut seen: HashSet<TextRange> = HashSet::new();
+        let mut deduped = Vec::new();
+        for f in setup_functions {
+            let range = match &f {
+                SetupFunction::Function(func) => func.range(),
+                SetupFunction::Method(method) => method.range(),
+            };
+            if seen.insert(range) {
+                deduped.push(f);
+            }
+        }
+        deduped
+    }
 }
 
 fn extract_function_from_expression(expr: &AnyJsExpression) -> Option<AnyJsFunction> {
