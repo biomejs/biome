@@ -145,7 +145,7 @@ where
 ///   Example: `this.value;` as a standalone expression, or a read that is optimized away.
 ///   This is mostly for distinguishing "dead reads" from truly meaningful ones.
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
-enum AccessKind {
+pub enum AccessKind {
     Write,
     MeaningfulRead,
     TrivialRead,
@@ -897,32 +897,28 @@ fn get_read_access_kind(node: &AnyCandidateForUsedInExpressionNode) -> AccessKin
 /// Not limited to `this` references. Can be used for any node, but requires more work e.g.
 /// Returns `true` if the read is meaningful, `false` otherwise.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
-    let mut current = node.syntax().clone();
-
-    if let Some(parent) = current.parent() {
-        match parent.kind() {
+    node.syntax()
+        .ancestors()
+        .any(|ancestor| matches!(
+            ancestor.kind(),
             JsSyntaxKind::JS_RETURN_STATEMENT
-            | JsSyntaxKind::JS_CALL_ARGUMENTS
-            | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
-            | JsSyntaxKind::JS_LOGICAL_EXPRESSION
-            | JsSyntaxKind::JS_THROW_STATEMENT
-            | JsSyntaxKind::JS_AWAIT_EXPRESSION
-            | JsSyntaxKind::JS_YIELD_EXPRESSION
-            | JsSyntaxKind::JS_UNARY_EXPRESSION
-            | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
-            | JsSyntaxKind::JS_CALL_EXPRESSION // (callee)
-            | JsSyntaxKind::JS_NEW_EXPRESSION
-            | JsSyntaxKind::JS_IF_STATEMENT
-            | JsSyntaxKind::JS_SWITCH_STATEMENT
-            | JsSyntaxKind::JS_FOR_STATEMENT
-            | JsSyntaxKind::JS_FOR_IN_STATEMENT
-            | JsSyntaxKind::JS_FOR_OF_STATEMENT
-            | JsSyntaxKind::JS_BINARY_EXPRESSION => return true,
-            _ => current = parent,
-        }
-    }
-
-    false
+                | JsSyntaxKind::JS_CALL_ARGUMENTS
+                | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
+                | JsSyntaxKind::JS_LOGICAL_EXPRESSION
+                | JsSyntaxKind::JS_THROW_STATEMENT
+                | JsSyntaxKind::JS_AWAIT_EXPRESSION
+                | JsSyntaxKind::JS_YIELD_EXPRESSION
+                | JsSyntaxKind::JS_UNARY_EXPRESSION
+                | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
+                | JsSyntaxKind::JS_CALL_EXPRESSION
+                | JsSyntaxKind::JS_NEW_EXPRESSION
+                | JsSyntaxKind::JS_IF_STATEMENT
+                | JsSyntaxKind::JS_SWITCH_STATEMENT
+                | JsSyntaxKind::JS_FOR_STATEMENT
+                | JsSyntaxKind::JS_FOR_IN_STATEMENT
+                | JsSyntaxKind::JS_FOR_OF_STATEMENT
+                | JsSyntaxKind::JS_BINARY_EXPRESSION
+        ))
 }
 
 #[cfg(test)]
@@ -935,13 +931,13 @@ mod tests {
     struct TestCase<'a> {
         description: &'a str,
         code: &'a str,
-        expected_reads: Vec<(&'a str, Option<bool>)>, // (name, is_meaningful_read)
-        expected_writes: Vec<(&'a str, Option<bool>)>, // (name, is_meaningful_read)
+        expected_reads: Vec<(&'a str, AccessKind)>, // (name, is_meaningful_read)
+        expected_writes: Vec<(&'a str, AccessKind)>, // (name, is_meaningful_read)
     }
 
     fn assert_reads(
         reads: &FxHashSet<ClassMemberReference>,
-        expected: &[(&str, Option<bool>)],
+        expected: &[(&str, AccessKind)],
         description: &str,
     ) {
         for (expected_name, expected_meaningful) in expected {
@@ -965,7 +961,7 @@ mod tests {
 
     fn assert_writes(
         writes: &FxHashSet<ClassMemberReference>,
-        expected: &[(&str, Option<bool>)],
+        expected: &[(&str, AccessKind)],
         description: &str,
     ) {
         for (expected_name, expected_meaningful) in expected {
@@ -1019,7 +1015,10 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![("foo", Some(false)), ("bar", Some(false))],
+                expected_reads: vec![
+                    ("foo", AccessKind::TrivialRead),
+                    ("bar", AccessKind::TrivialRead),
+                ],
                 expected_writes: vec![],
             },
             TestCase {
@@ -1032,7 +1031,10 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![("baz", Some(false)), ("qux", Some(false))],
+                expected_reads: vec![
+                    ("baz", AccessKind::TrivialRead),
+                    ("qux", AccessKind::TrivialRead),
+                ],
                 expected_writes: vec![],
             },
         ];
@@ -1069,7 +1071,10 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![("foo", Some(true)), ("bar", Some(true))],
+                expected_reads: vec![
+                    ("foo", AccessKind::MeaningfulRead),
+                    ("bar", AccessKind::MeaningfulRead),
+                ],
                 expected_writes: vec![],
             },
             TestCase {
@@ -1083,7 +1088,10 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![("baz", Some(false)), ("qux", Some(false))],
+                expected_reads: vec![
+                    ("baz", AccessKind::TrivialRead),
+                    ("qux", AccessKind::TrivialRead),
+                ],
                 expected_writes: vec![],
             },
         ];
@@ -1130,8 +1138,12 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![("x", Some(true))], // x is read due to +=
-                expected_writes: vec![("x", None), ("y", None), ("z", None)],
+                expected_reads: vec![("x", AccessKind::MeaningfulRead)], // x is read due to +=
+                expected_writes: vec![
+                    ("x", AccessKind::Write),
+                    ("y", AccessKind::Write),
+                    ("z", AccessKind::Write),
+                ],
             },
             TestCase {
                 description: "assignment reads and writes with aliasForThis",
@@ -1146,8 +1158,12 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![("x", Some(true))],
-                expected_writes: vec![("x", None), ("y", None), ("z", None)],
+                expected_reads: vec![("x", AccessKind::MeaningfulRead)],
+                expected_writes: vec![
+                    ("x", AccessKind::Write),
+                    ("y", AccessKind::Write),
+                    ("z", AccessKind::Write),
+                ],
             },
         ];
 
@@ -1201,16 +1217,16 @@ mod tests {
                 }
             "#,
                 expected_reads: vec![
-                    ("count", Some(false)),
-                    ("total", Some(false)),
-                    ("inIfCondition", Some(true)),
-                    ("inReturn", Some(true)),
+                    ("count", AccessKind::TrivialRead),
+                    ("total", AccessKind::TrivialRead),
+                    ("inIfCondition", AccessKind::MeaningfulRead),
+                    ("inReturn", AccessKind::MeaningfulRead),
                 ],
                 expected_writes: vec![
-                    ("count", None),
-                    ("total", None),
-                    ("inIfCondition", None),
-                    ("inReturn", None),
+                    ("count", AccessKind::Write),
+                    ("total", AccessKind::Write),
+                    ("inIfCondition", AccessKind::Write),
+                    ("inReturn", AccessKind::Write),
                 ],
             },
             TestCase {
@@ -1228,14 +1244,14 @@ mod tests {
                 }
             "#,
                 expected_reads: vec![
-                    ("count", Some(false)),
-                    ("total", Some(false)),
-                    ("inReturnIncrement", Some(true)),
+                    ("count", AccessKind::TrivialRead),
+                    ("total", AccessKind::TrivialRead),
+                    ("inReturnIncrement", AccessKind::MeaningfulRead),
                 ],
                 expected_writes: vec![
-                    ("count", None),
-                    ("total", None),
-                    ("inReturnIncrement", None),
+                    ("count", AccessKind::Write),
+                    ("total", AccessKind::Write),
+                    ("inReturnIncrement", AccessKind::Write),
                 ],
             },
         ];
