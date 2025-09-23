@@ -223,7 +223,6 @@ fn find_setup_functions(component: &VueComponent) -> Vec<SetupFunction> {
             setup_functions.extend(
                 options_api
                     .iter_declaration_groups()
-                    .filter(|(name, _)| name.text() == "setup")
                     .filter_map(|(_, member)| extract_setup_from_object_member(&member)),
             );
         }
@@ -318,7 +317,25 @@ fn is_member_named_setup(name: &biome_js_syntax::AnyJsObjectMemberName) -> bool 
                 }
             })
         }
-        biome_js_syntax::AnyJsObjectMemberName::JsComputedMemberName(_) => false,
+        biome_js_syntax::AnyJsObjectMemberName::JsComputedMemberName(computed) => {
+            computed.expression().is_ok_and(|expr| {
+                let AnyJsExpression::AnyJsLiteralExpression(literal_expr) = expr else {
+                    return false;
+                };
+                let Some(string_literal) = literal_expr.as_js_string_literal_expression() else {
+                    return false;
+                };
+                string_literal.value_token().is_ok_and(|tok| {
+                    let text = tok.text_trimmed();
+                    if text.len() >= 2 {
+                        let inner = &text[1..text.len() - 1];
+                        inner == "setup"
+                    } else {
+                        false
+                    }
+                })
+            })
+        }
         biome_js_syntax::AnyJsObjectMemberName::JsMetavariable(_) => false,
     }
 }
