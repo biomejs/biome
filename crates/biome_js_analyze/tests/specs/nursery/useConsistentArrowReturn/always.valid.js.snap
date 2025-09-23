@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: always.valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const returnsSequenceArrow = (a, b) => {return (a, b)}
+
+const returnsAwaitArrow = async () => {return await fetchData()}
+
+
+```
