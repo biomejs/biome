@@ -143,7 +143,7 @@ where
 ///   The member is accessed, but its value is not used in a way that
 ///   meaningfully affects logic.
 ///   Example: `this.value;` as a standalone expression, or a read that is optimized away.
-///   This is mostly for distinguishing "dead reads" from truly meaningful ones.
+///   This is mostly for distinguishing "dead reads" from truly access_kind ones.
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub enum AccessKind {
     Write,
@@ -895,7 +895,7 @@ fn get_read_access_kind(node: &AnyCandidateForUsedInExpressionNode) -> AccessKin
 /// Checks if the given node is used in an expression context
 /// (e.g., return, call arguments, conditionals, binary expressions).
 /// Not limited to `this` references. Can be used for any node, but requires more work e.g.
-/// Returns `true` if the read is meaningful, `false` otherwise.
+/// Returns `true` if the read is access_kind, `false` otherwise.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
     node.syntax()
         .ancestors()
@@ -940,7 +940,7 @@ mod tests {
         expected: &[(&str, AccessKind)],
         description: &str,
     ) {
-        for (expected_name, expected_meaningful) in expected {
+        for (expected_name, expected_access_kind) in expected {
             let found = reads
                 .iter()
                 .find(|r| r.name.clone().text() == *expected_name)
@@ -952,8 +952,8 @@ mod tests {
                 });
 
             assert_eq!(
-                found.access_kind, *expected_meaningful,
-                "Case '{}' failed: read '{}' meaningful mismatch",
+                found.access_kind, *expected_access_kind,
+                "Case '{}' failed: read '{}' access_kind mismatch",
                 description, expected_name
             );
         }
@@ -964,7 +964,7 @@ mod tests {
         expected: &[(&str, AccessKind)],
         description: &str,
     ) {
-        for (expected_name, expected_meaningful) in expected {
+        for (expected_name, expected_access_kind) in expected {
             let found = writes
                 .iter()
                 .find(|r| r.name.clone().text() == *expected_name)
@@ -976,8 +976,8 @@ mod tests {
                 });
 
             assert_eq!(
-                found.access_kind, *expected_meaningful,
-                "Case '{}' failed: write '{}' meaningful mismatch",
+                found.access_kind, *expected_access_kind,
+                "Case '{}' failed: write '{}' access_kind mismatch",
                 description, expected_name
             );
         }
@@ -1354,7 +1354,7 @@ mod tests {
                     case.description
                 );
 
-                for (node, (expected_name, expected_meaningful)) in nodes.iter().zip(&case.expected)
+                for (node, (expected_name, expected_access_kind)) in nodes.iter().zip(&case.expected)
                 {
                     let meaningful_node =
                         AnyCandidateForUsedInExpressionNode::cast_ref(node.syntax())
@@ -1371,7 +1371,7 @@ mod tests {
                     // Compare is_meaningful_read
                     let actual_meaningful = is_used_in_expression_context(&meaningful_node);
                     assert_eq!(
-                        actual_meaningful, *expected_meaningful,
+                        actual_meaningful, *expected_access_kind,
                         "Meaningful read mismatch for node '{}' in test case: '{}'",
                         expected_name, case.description
                     );
