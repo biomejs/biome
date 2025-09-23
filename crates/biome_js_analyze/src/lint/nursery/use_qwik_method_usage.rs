@@ -1,7 +1,9 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
+use crate::services::semantic::Semantic;
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsFunction, JsCallExpression, JsVariableDeclarator};
+use biome_js_semantic::SemanticModel;
+use biome_js_syntax::{AnyJsFunction, JsCallExpression, JsImport, JsVariableDeclarator};
 use biome_rowan::AstNode;
 use biome_rule_options::use_qwik_method_usage::UseQwikMethodUsageOptions;
 declare_lint_rule! {
@@ -15,6 +17,8 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
+    /// import { useSignal } from "@builder.io/qwik";
+    ///
     /// export const Counter = () => {
     ///   const count = useSignal(0);
     /// };
@@ -23,6 +27,8 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```js
+    /// import { component$, useSignal } from "@builder.io/qwik";
+    ///
     /// export const Counter = component$(() => {
     ///   const count = useSignal(0);
     /// });
@@ -44,14 +50,15 @@ declare_lint_rule! {
 }
 
 impl Rule for UseQwikMethodUsage {
-    type Query = Ast<JsCallExpression>;
+    type Query = Semantic<JsCallExpression>;
     type State = biome_rowan::TextRange;
     type Signals = Option<Self::State>;
     type Options = UseQwikMethodUsageOptions;
 
     fn run(ctx: &biome_analyze::context::RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
-        let is_hook = is_qwik_hook(call)?;
+        let model = ctx.model();
+        let is_hook = is_qwik_hook(call, model)?;
         if !is_hook {
             return None;
         }
@@ -71,7 +78,7 @@ impl Rule for UseQwikMethodUsage {
             rule_category!(),
             range,
             markup! {
-                "Qwik hook detected outside of an allowed scope"
+                "Qwik hook detected outside of an allowed scope."
             },
         )
             .note(markup! {
@@ -86,15 +93,15 @@ impl Rule for UseQwikMethodUsage {
     }
 }
 
-fn is_qwik_hook(call: &JsCallExpression) -> Option<bool> {
-    let binding = call
-        .callee()
-        .ok()?
-        .as_js_reference_identifier()?
-        .value_token()
-        .ok()?;
-    let name = binding.text();
-    Some(is_qwik_hook_name(name))
+fn is_qwik_hook(call: &JsCallExpression, model: &SemanticModel) -> Option<bool> {
+    let ident = call.callee().ok()?.as_js_reference_identifier()?;
+    let token = ident.value_token().ok()?;
+    let name = token.text_trimmed();
+    if !is_qwik_hook_name(name) {
+        return Some(false);
+    }
+    let binding = model.binding(&ident)?;
+    Some(is_from_qwik(&binding))
 }
 
 fn is_inside_component_or_hook(call: &JsCallExpression) -> bool {
@@ -119,7 +126,7 @@ fn is_inside_component_or_hook(call: &JsCallExpression) -> bool {
                 .and_then(|callee| callee.as_js_reference_identifier())
                 .and_then(|ident| ident.value_token().ok())
         })
-        .is_some_and(|token| is_component_or_hook_name(token.text()))
+        .is_some_and(|token| is_component_or_hook_name(token.text_trimmed()))
 }
 
 /// Returns true if the given identifier name represents a Qwik hook name.
@@ -182,4 +189,13 @@ fn is_in_named_function(call: &JsCallExpression) -> bool {
         });
 
     function_name.is_some_and(|name| is_component_or_hook_name(name.text()))
+}
+
+fn is_from_qwik(binding: &biome_js_semantic::Binding) -> bool {
+    const QWIK_IMPORT_NAMES: [&str; 2] = ["@builder.io/qwik", "qwik"];
+    binding
+        .syntax()
+        .ancestors()
+        .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
+        .is_some_and(|source| QWIK_IMPORT_NAMES.contains(&source.text()))
 }

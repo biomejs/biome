@@ -8,23 +8,3 @@ export const Counter = () => {
   const count = useSignal(0);
 }; 
 ```
-
-# Diagnostics
-```
-invalid.jsx:2:17 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Qwik hook detected outside of an allowed scope
-  
-    1 │ export const Counter = () => {
-  > 2 │   const count = useSignal(0);
-      │                 ^^^^^^^^^^^^
-    3 │ };·
-  
-  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
-    - Used exclusively within `component$` functions
-    - Or encapsulated within other valid Qwik hooks
-  
-  i Check the Qwik documentation.
-  
-
-```
