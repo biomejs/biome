@@ -143,7 +143,7 @@ where
 ///   The member is accessed, but its value is not used in a way that
 ///   meaningfully affects logic.
 ///   Example: `this.value;` as a standalone expression, or a read that is optimized away.
-///   This is mostly for distinguishing "dead reads" from truly access_kind ones.
+///   This is mostly for distinguishing dead reads from truly meaningful ones.
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub enum AccessKind {
     Write,
