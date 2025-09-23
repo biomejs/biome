@@ -294,17 +294,8 @@ fn extract_setup_from_object_member(
 }
 
 fn is_member_named_setup(name: &biome_js_syntax::AnyJsObjectMemberName) -> bool {
-    // setup(props) {}  — identifier member name
-    if let Some(id) = name.as_js_identifier_member_name() {
-        return id
-            .value_token()
-            .is_ok_and(|tok| tok.text_trimmed() == "setup");
-    }
-    // "setup": (...) or "setup"() {} — literal member name
     if let Some(lit) = name.as_js_literal_member_name() {
-        return lit
-            .name()
-            .is_ok_and(|tok| tok.text_trimmed() == "setup");
+        return lit.value().is_ok_and(|tok| tok.text_trimmed() == "setup");
     }
     false
 }
