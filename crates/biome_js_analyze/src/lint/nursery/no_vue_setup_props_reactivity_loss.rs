@@ -304,10 +304,23 @@ fn extract_setup_from_object_member(
 }
 
 fn is_member_named_setup(name: &biome_js_syntax::AnyJsObjectMemberName) -> bool {
-    if let Some(lit) = name.as_js_literal_member_name() {
-        return lit.value().is_ok_and(|tok| tok.text_trimmed() == "setup");
+    match name {
+        biome_js_syntax::AnyJsObjectMemberName::JsLiteralMemberName(lit) => {
+            lit.value().is_ok_and(|tok| {
+                let text = tok.text_trimmed();
+                if (text.starts_with('"') && text.ends_with('"'))
+                    || (text.starts_with('\'') && text.ends_with('\''))
+                {
+                    let inner = &text[1..text.len() - 1];
+                    inner == "setup"
+                } else {
+                    text == "setup"
+                }
+            })
+        }
+        biome_js_syntax::AnyJsObjectMemberName::JsComputedMemberName(_) => false,
+        biome_js_syntax::AnyJsObjectMemberName::JsMetavariable(_) => false,
     }
-    false
 }
 fn get_function_first_parameter(func: &SetupFunction) -> Option<AnyJsBindingPattern> {
     match func {
