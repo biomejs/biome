@@ -1031,7 +1031,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     self.enabled_rules.insert(rule_filter);
 
                     self.analyzer_options
-                        .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
+                        .push_globals(domain.globals().iter().copied().map(Into::into));
                 }
             }
         }
@@ -1085,11 +1085,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                         self.enabled_rules.insert(rule_filter);
 
                         self.analyzer_options.push_globals(
-                            configured_domain
-                                .globals()
-                                .iter()
-                                .map(|s| Box::from(*s))
-                                .collect::<Vec<_>>(),
+                            configured_domain.globals().iter().copied().map(Into::into),
                         );
                     }
                     RuleDomainValue::None => {
@@ -1100,11 +1096,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                             self.enabled_rules.insert(rule_filter);
 
                             self.analyzer_options.push_globals(
-                                configured_domain
-                                    .globals()
-                                    .iter()
-                                    .map(|s| Box::from(*s))
-                                    .collect::<Vec<_>>(),
+                                configured_domain.globals().iter().copied().map(Into::into),
                             );
                         }
                     }

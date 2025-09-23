@@ -342,10 +342,7 @@ impl eslint_eslint::FlatConfigData {
                 } else {
                     let mut override_pat = biome_config::OverridePattern::default();
                     if let Some(language_options) = flat_config_object.language_options {
-                        let globals = language_options
-                            .globals
-                            .enabled()
-                            .collect::<rustc_hash::FxHashSet<_>>();
+                        let globals = language_options.globals.enabled().collect();
                         let js_config = biome_config::JsConfiguration {
                             globals: Some(globals),
                             ..Default::default()
