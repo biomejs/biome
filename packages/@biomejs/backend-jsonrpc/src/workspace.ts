@@ -8194,7 +8194,21 @@ export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export type UseAnchorHrefOptions = null;
-export interface UseConsistentArrowReturnOptions {}
+/**
+ * Options for the `useConsistentArrowReturn` rule.
+ */
+export interface UseConsistentArrowReturnOptions {
+	/**
+	* Determines whether the rule enforces a consistent style when the return value is an object literal.
+
+This option is only applicable when used in conjunction with the `asNeeded` option. 
+	 */
+	requireForObjectLiteral?: boolean;
+	/**
+	 * The style to enforce for arrow function return statements.
+	 */
+	style?: UseConsistentArrowReturnStyle;
+}
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
 }
@@ -8561,6 +8575,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
+export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 export type ConsistentTypeDefinition = "interface" | "type";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.

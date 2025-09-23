@@ -148,16 +148,12 @@ impl AnalyzerOptions {
         self
     }
 
-    pub fn push_globals(&mut self, globals: Vec<Box<str>>) {
+    pub fn push_globals(&mut self, globals: impl IntoIterator<Item = Box<str>>) {
         self.configuration.globals.extend(globals);
     }
 
-    pub fn globals(&self) -> Vec<&str> {
-        self.configuration
-            .globals
-            .iter()
-            .map(AsRef::as_ref)
-            .collect()
+    pub fn globals(&self) -> &[Box<str>] {
+        &self.configuration.globals
     }
 
     pub fn jsx_runtime(&self) -> Option<JsxRuntime> {

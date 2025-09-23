@@ -98,7 +98,7 @@ pub(crate) fn analyze_and_snap(
 
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
-    let options = create_analyzer_options(input_file, &mut diagnostics);
+    let options = create_analyzer_options::<GraphqlLanguage>(input_file, &mut diagnostics);
 
     let (_, errors) = biome_graphql_analyze::analyze(&root, filter, &options, |event| {
         if let Some(mut diag) = event.diagnostic() {

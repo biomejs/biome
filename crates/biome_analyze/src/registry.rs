@@ -412,7 +412,7 @@ impl<L: Language + Default> RegistryRule<L> {
                 &query_result,
                 params.root,
                 params.services,
-                &globals,
+                globals,
                 params.options.file_path.as_path(),
                 &options,
                 preferred_quote,

@@ -13,7 +13,7 @@ pub struct RuleContext<'a, R: Rule> {
     root: &'a RuleRoot<R>,
     bag: &'a ServiceBag,
     services: RuleServiceBag<R>,
-    globals: &'a [&'a str],
+    globals: &'a [Box<str>],
     file_path: &'a Utf8Path,
     options: &'a R::Options,
     preferred_quote: PreferredQuote,
@@ -32,7 +32,7 @@ where
         query_result: &'a RuleQueryResult<R>,
         root: &'a RuleRoot<R>,
         services: &'a ServiceBag,
-        globals: &'a [&'a str],
+        globals: &'a [Box<str>],
         file_path: &'a Utf8Path,
         options: &'a R::Options,
         preferred_quote: PreferredQuote,
@@ -157,7 +157,7 @@ where
 
     /// Checks whether the provided text belongs to globals
     pub fn is_global(&self, text: &str) -> bool {
-        self.globals.contains(&text)
+        self.globals.iter().any(|global| global.as_ref() == text)
     }
 
     /// Returns the source type of the current file
