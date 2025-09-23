@@ -294,11 +294,20 @@ fn extract_setup_from_object_member(
 }
 
 fn is_member_named_setup(name: &biome_js_syntax::AnyJsObjectMemberName) -> bool {
-    name.as_js_literal_member_name()
-        .and_then(|literal| literal.name().ok())
-        .is_some_and(|token| token.text() == "setup")
+    // setup(props) {}  — identifier member name
+    if let Some(id) = name.as_js_identifier_member_name() {
+        return id
+            .value_token()
+            .is_ok_and(|tok| tok.text_trimmed() == "setup");
+    }
+    // "setup": (...) or "setup"() {} — literal member name
+    if let Some(lit) = name.as_js_literal_member_name() {
+        return lit
+            .name()
+            .is_ok_and(|tok| tok.text_trimmed() == "setup");
+    }
+    false
 }
-
 fn get_function_first_parameter(func: &SetupFunction) -> Option<AnyJsBindingPattern> {
     match func {
         SetupFunction::Function(any_func) => get_any_js_function_first_parameter(any_func),
