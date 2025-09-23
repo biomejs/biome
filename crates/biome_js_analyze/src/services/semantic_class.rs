@@ -894,7 +894,7 @@ fn get_read_access_kind(node: &AnyCandidateForUsedInExpressionNode) -> AccessKin
 
 /// Checks if the given node is used in an expression context
 /// (e.g., return, call arguments, conditionals, binary expressions).
-/// Not limited to `this` references. Can be used for any node, but requires more work e.g.
+/// Not limited to `this` references. It can be used for any node; additional cases may require extending the context checks.
 /// Returns `true` if the read is access_kind, `false` otherwise.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
     node.syntax().ancestors().any(|ancestor| {
