@@ -206,19 +206,13 @@ impl Rule for UseConsistentArrowReturn {
                 let body = make::js_function_body(
                     make::token(T!['{']).with_trailing_trivia([
                         (biome_js_syntax::TriviaPieceKind::Newline, "\n"),
-                        (
-                            biome_js_syntax::TriviaPieceKind::Whitespace,
-                            body_indent.as_str(),
-                        ),
+                        (biome_js_syntax::TriviaPieceKind::Whitespace, &body_indent),
                     ]),
                     make::js_directive_list([]),
                     make::js_statement_list([AnyJsStatement::from(return_statement)]),
                     make::token(T!['}']).with_leading_trivia([
                         (biome_js_syntax::TriviaPieceKind::Newline, "\n"),
-                        (
-                            biome_js_syntax::TriviaPieceKind::Whitespace,
-                            base_indent.as_str(),
-                        ),
+                        (biome_js_syntax::TriviaPieceKind::Whitespace, &base_indent),
                     ]),
                 );
                 mutation.replace_node(old_body, AnyJsFunctionBody::from(body));

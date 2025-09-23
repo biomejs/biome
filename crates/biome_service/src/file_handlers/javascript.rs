@@ -275,9 +275,14 @@ impl ServiceLanguage for JsLanguage {
                 QuoteStyle::Double => PreferredQuote::Double,
             })
             .unwrap_or_default();
-        let preferred_indentation = global.languages.javascript.formatter.indent_style.map_or(
-            PreferredIndentation::default(),
-            |indent_style| match indent_style {
+        let preferred_indentation = {
+            let indent_style = global
+                .languages
+                .javascript
+                .formatter
+                .indent_style
+                .unwrap_or_else(|| global.formatter.indent_style.unwrap_or_default());
+            match indent_style {
                 IndentStyle::Tab => PreferredIndentation::Tab,
                 IndentStyle::Space => PreferredIndentation::Spaces(
                     global
@@ -285,11 +290,11 @@ impl ServiceLanguage for JsLanguage {
                         .javascript
                         .formatter
                         .indent_width
-                        .unwrap_or_default()
+                        .unwrap_or_else(|| global.formatter.indent_width.unwrap_or_default())
                         .value(),
                 ),
-            },
-        );
+            }
+        };
 
         let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
