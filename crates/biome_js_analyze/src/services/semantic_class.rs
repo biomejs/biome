@@ -1289,7 +1289,7 @@ mod tests {
     mod is_used_in_expression_context_tests {
         use super::*;
         use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
-        // WE n
+        
         fn extract_all_nodes(code: &str) -> Vec<AnyCandidateForUsedInExpressionNode> {
             let parsed = parse_ts(code);
             let root = parsed.syntax();
