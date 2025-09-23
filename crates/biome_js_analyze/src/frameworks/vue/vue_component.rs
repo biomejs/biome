@@ -710,7 +710,7 @@ declare_node_union! {
 impl VueDeclarationName for AnyVueSetupDeclaration {
     fn declaration_name(&self) -> Option<TokenText> {
         match self {
-            Self::JsIdentifierBinding(ident) => Some(ident.name_token().ok()?.token_text()),
+            Self::JsIdentifierBinding(ident) => Some(ident.name_token().ok()?.token_text_trimmed()),
             Self::JsFunctionDeclaration(function) => Some(
                 function
                     .id()
@@ -718,7 +718,7 @@ impl VueDeclarationName for AnyVueSetupDeclaration {
                     .as_js_identifier_binding()?
                     .name_token()
                     .ok()?
-                    .token_text(),
+                    .token_text_trimmed(),
             ),
             Self::JsPropertyObjectMember(property) => property.name().ok()?.name(),
         }
