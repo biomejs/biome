@@ -894,8 +894,8 @@ fn get_read_access_kind(node: &AnyCandidateForUsedInExpressionNode) -> AccessKin
 
 /// Checks if the given node is used in an expression context
 /// (e.g., return, call arguments, conditionals, binary expressions).
-/// Not limited to `this` references. It can be used for any node; additional cases may require extending the context checks.
-/// Returns `true` if the read is access_kind, `false` otherwise.
+/// Not limited to `this` references.
+/// It can be used for any node; additional cases may require extending the context checks.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
     node.syntax().ancestors().any(|ancestor| {
         matches!(
@@ -1289,7 +1289,7 @@ mod tests {
     mod is_used_in_expression_context_tests {
         use super::*;
         use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
-        
+
         fn extract_all_nodes(code: &str) -> Vec<AnyCandidateForUsedInExpressionNode> {
             let parsed = parse_ts(code);
             let root = parsed.syntax();
