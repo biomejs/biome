@@ -165,9 +165,6 @@ impl Rule for NoVueSetupPropsReactivityLoss {
                 violations.extend(check_plain_js_setup_functions(ctx.query(), ctx.model()));
             }
         }
-
-        violations.extend(check_additional_setup_patterns(ctx.query(), ctx.model()));
-
         violations
     }
 
@@ -745,23 +742,4 @@ fn extract_setup_violations_from_members(
         .filter_map(|member| extract_setup_from_object_member(&member))
         .flat_map(|setup_fn| check_setup_function(&setup_fn, model))
         .collect()
-}
-
-fn check_additional_setup_patterns(
-    potential_component: &AnyPotentialVueComponent,
-    model: &SemanticModel,
-) -> Vec<Violation> {
-    match potential_component {
-        AnyPotentialVueComponent::JsExportDefaultExpressionClause(export_clause) => {
-            let Ok(expr) = export_clause.expression() else {
-                return Vec::new();
-            };
-            let Some(func) = extract_function_from_expression(&expr) else {
-                return Vec::new();
-            };
-            let setup_func = SetupFunction::Function(func);
-            check_setup_function(&setup_func, model)
-        }
-        AnyPotentialVueComponent::JsCallExpression(_) => Vec::new(),
-    }
 }
