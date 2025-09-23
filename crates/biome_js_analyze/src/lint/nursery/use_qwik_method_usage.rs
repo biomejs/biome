@@ -129,28 +129,17 @@ fn is_inside_component_or_hook(call: &JsCallExpression) -> bool {
         .is_some_and(|token| is_component_or_hook_name(token.text_trimmed()))
 }
 
-/// Returns true if the given identifier name represents a Qwik hook name.
-///
-/// In Qwik, hooks are functions whose names start with `use` and where the
-/// first character after `use` is uppercase, for example `useSignal`.
+
 fn is_qwik_hook_name(name: &str) -> bool {
     name.starts_with("use") && name.chars().nth(3).is_some_and(|c| c.is_uppercase())
 }
 
-/// Returns true if the identifier name is either `component$` or a Qwik hook.
+
 fn is_component_or_hook_name(name: &str) -> bool {
     name == "component$" || is_qwik_hook_name(name)
 }
 
-/// Determines whether `call` is enclosed in a named function whose identifier
-/// designates a valid reactive context for Qwik hooks.
-///
-/// For this rule, a "named function" is any function with an explicit
-/// identifier (function declaration, named function expression, or a variable
-/// binding for an arrow/function expression). If that identifier is
-/// `component$` or another Qwik hook (a name matching `use[A-Z]...`), we treat
-/// the context as valid because hooks are allowed inside components or other
-/// hooks.
+
 fn is_in_named_function(call: &JsCallExpression) -> bool {
     let function_name = call
         .syntax()
