@@ -64,7 +64,7 @@ invalid-parameter-destructuring.js:5:9 lint/nursery/noVueSetupPropsReactivityLos
   
   i In Vue's Composition API, props must be accessed as properties to maintain reactivity.
   
-  i Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, 'key')' to maintain reactivity.
+  i Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, "key")' to maintain reactivity.
   
 
 ```
@@ -83,7 +83,7 @@ invalid-parameter-destructuring.js:33:9 lint/nursery/noVueSetupPropsReactivityLo
   
   i In Vue's Composition API, props must be accessed as properties to maintain reactivity.
   
-  i Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, 'key')' to maintain reactivity.
+  i Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, "key")' to maintain reactivity.
   
 
 ```

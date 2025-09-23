@@ -21,8 +21,7 @@ declare_lint_rule! {
     ///
     /// This rule reports:
     /// - Direct destructuring of props in setup function parameters
-    /// - Destructuring assignment of props in the root scope of setup (unless using `toRefs` or `toRef`)
-    ///
+    /// - Destructuring assignment of props in the root scope of setup (unless destructuring from `toRefs(props)`)
     /// Note: destructuring is allowed inside nested functions, callbacks, and
     /// returned render functions where the reactive context is preserved.
     ///
@@ -205,8 +204,8 @@ impl Rule for NoVueSetupPropsReactivityLoss {
                     "In Vue's Composition API, props must be accessed as properties to maintain reactivity."
                 })
                 .note(markup! {
-                    "Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, 'key')' to maintain reactivity."
-                }),
+                    "Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, \"key\")' to maintain reactivity."
+                })
         )
     }
 }
@@ -583,6 +582,41 @@ fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
             }
 
             let Ok(object) = member_expr.object() else {
+                return false;
+            };
+
+            is_vue_namespace_or_import(&object, model)
+        }
+        AnyJsExpression::JsComputedMemberExpression(computed_member_expr) => {
+            let Ok(member) = computed_member_expr.member() else {
+                return false;
+            };
+
+            let is_reactive_function = match &member {
+                AnyJsExpression::AnyJsLiteralExpression(literal_expr) => {
+                    let Some(string_literal) = literal_expr.as_js_string_literal_expression()
+                    else {
+                        return false;
+                    };
+                    let Ok(token) = string_literal.value_token() else {
+                        return false;
+                    };
+                    let text = token.text_trimmed();
+                    if text.len() >= 2 {
+                        let property_name = &text[1..text.len() - 1];
+                        property_name == "toRefs" || property_name == "toRef"
+                    } else {
+                        false
+                    }
+                }
+                _ => false,
+            };
+
+            if !is_reactive_function {
+                return false;
+            }
+
+            let Ok(object) = computed_member_expr.object() else {
                 return false;
             };
 

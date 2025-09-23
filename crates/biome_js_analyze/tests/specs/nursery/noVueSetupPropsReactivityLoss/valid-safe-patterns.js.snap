@@ -48,4 +48,15 @@ export default {
     return () => h('div', foo.value)
   }
 }
+
+// Using computed member expressions with Vue namespace
+import * as Vue from 'vue';
+
+const componentWithComputedMembers = {
+  setup(props) {
+    const { foo } = Vue["toRefs"](props);
+    const bar = Vue["toRef"](props, 'bar');
+    return () => h('div', foo.value + bar.value)
+  }
+}
 ```

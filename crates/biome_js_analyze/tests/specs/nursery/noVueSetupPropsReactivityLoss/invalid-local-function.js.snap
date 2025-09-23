@@ -40,7 +40,7 @@ invalid-local-function.js:8:11 lint/nursery/noVueSetupPropsReactivityLoss ━━
   
   i In Vue's Composition API, props must be accessed as properties to maintain reactivity.
   
-  i Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, 'key')' to maintain reactivity.
+  i Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, "key")' to maintain reactivity.
   
 
 ```
