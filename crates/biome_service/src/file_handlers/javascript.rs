@@ -307,12 +307,7 @@ impl ServiceLanguage for JsLanguage {
         };
         configuration = configuration.with_jsx_runtime(jsx_runtime);
 
-        globals.extend(
-            overrides
-                .override_js_globals(path, &global.languages.javascript.globals)
-                .into_iter()
-                .collect::<Vec<_>>(),
-        );
+        globals.extend(overrides.override_js_globals(path, &global.languages.javascript.globals));
 
         if let Some(filename) = path.file_name() {
             if filename.ends_with(".vue") {
