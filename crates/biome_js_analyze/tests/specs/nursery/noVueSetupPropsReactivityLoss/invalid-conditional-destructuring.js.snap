@@ -79,7 +79,7 @@ invalid-conditional-destructuring.js:7:13 lint/nursery/noVueSetupPropsReactivity
   
   i In Vue's Composition API, props must be accessed as properties to maintain reactivity.
   
-  i Use 'props.propertyName' or 'toRefs(props)' to maintain reactivity.
+  i Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, 'key')' to maintain reactivity.
   
 
 ```

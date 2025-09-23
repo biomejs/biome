@@ -68,7 +68,7 @@ invalid-typescript.ts:6:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━�
   
   i In Vue's Composition API, props must be accessed as properties to maintain reactivity.
   
-  i Use 'props.propertyName' or 'toRefs(props)' to maintain reactivity.
+  i Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, 'key')' to maintain reactivity.
   
 
 ```
@@ -96,7 +96,7 @@ invalid-typescript.ts:35:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━
   
   i In Vue's Composition API, props must be accessed as properties to maintain reactivity.
   
-  i Use 'props.propertyName' or 'toRefs(props)' to maintain reactivity.
+  i Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, 'key')' to maintain reactivity.
   
 
 ```

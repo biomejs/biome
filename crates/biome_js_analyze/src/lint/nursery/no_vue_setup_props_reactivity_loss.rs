@@ -205,7 +205,7 @@ impl Rule for NoVueSetupPropsReactivityLoss {
                     "In Vue's Composition API, props must be accessed as properties to maintain reactivity."
                 })
                 .note(markup! {
-                    "Use 'props.propertyName' or 'toRefs(props)' to maintain reactivity."
+                    "Use 'props.propertyName', 'toRefs(props)', or 'toRef(props, 'key')' to maintain reactivity."
                 }),
         )
     }
@@ -560,7 +560,7 @@ fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
                 return false;
             };
             let function_name = token.text_trimmed();
-            if function_name != "toRefs" {
+            if function_name != "toRefs" && function_name != "toRef" {
                 return false;
             }
 
@@ -578,7 +578,7 @@ fn is_reactive_api_call(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
                 return false;
             };
             let property_name = token.text_trimmed();
-            if property_name != "toRefs" {
+            if property_name != "toRefs" && property_name != "toRef" {
                 return false;
             }
 
