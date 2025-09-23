@@ -126,13 +126,36 @@ where
     }
 }
 
+/// Represents how a class member is accessed within the code.
+/// Variants:
+///
+/// - `Write`:
+///   The member is being assigned to or mutated.
+///   Example: `this.count = 10;`
+///   This indicates the member’s value/state changes at this point.
+///
+/// - `MeaningfulRead`:
+///   The member’s value is retrieved and used in a way that affects program logic.
+///   Example: `if (this.enabled) { ... }` or `let x = this.value + 1;`
+///   These reads influence control flow or computation.
+///
+/// - `TrivialRead`:
+///   The member is accessed, but its value is not used in a way that
+///   meaningfully affects logic.
+///   Example: `this.value;` as a standalone expression, or a read that is optimized away.
+///   This is mostly for distinguishing "dead reads" from truly meaningful ones.
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+enum AccessKind {
+    Write,
+    MeaningfulRead,
+    TrivialRead,
+}
+
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct ClassMemberReference {
     pub name: Text,
     pub range: TextRange,
-    /// Indicates if the read is meaningful (e.g. used in an expression) or not (e.g. part of a destructuring assignment).
-    /// `None` if not applicable (e.g. for write references).
-    pub is_meaningful_read: Option<bool>,
+    pub access_kind: AccessKind,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
@@ -359,9 +382,9 @@ impl ThisScopeReferences {
                     ClassMemberReference {
                         name: id.to_trimmed_text().clone(),
                         range: id.syntax().text_trimmed_range(),
-                        is_meaningful_read: Some(is_used_in_expression_context(
+                        access_kind: get_read_access_kind(
                             &AnyCandidateForUsedInExpressionNode::from(id),
-                        )),
+                        ),
                     }
                 })
             })
@@ -439,8 +462,7 @@ impl ThisPatternResolver {
                             Self::extract_this_member_reference(
                                 assignment.as_js_static_member_assignment(),
                                 scoped_this_references,
-                                // It is a write reference, so not applicable for meaningful read
-                                None,
+                                AccessKind::Write,
                             )
                         })
                 }
@@ -456,8 +478,7 @@ impl ThisPatternResolver {
                             Self::extract_this_member_reference(
                                 assignment.as_js_static_member_assignment(),
                                 scoped_this_references,
-                                // It is a write reference, so not applicable for meaningful read
-                                None,
+                                AccessKind::Write,
                             )
                         })
                 } else {
@@ -486,8 +507,7 @@ impl ThisPatternResolver {
                     return Self::extract_this_member_reference(
                         rest_params.target().ok()?.as_js_static_member_assignment(),
                         scoped_this_references,
-                        // It is a write reference, so not applicable for meaningful read
-                        None,
+                        AccessKind::Write,
                     );
                 }
                 if let Some(property) = prop
@@ -503,8 +523,7 @@ impl ThisPatternResolver {
                             .as_any_js_assignment()?
                             .as_js_static_member_assignment(),
                         scoped_this_references,
-                        // It is a write reference, so not applicable for meaningful read
-                        None,
+                        AccessKind::Write,
                     );
                 }
                 None
@@ -523,7 +542,7 @@ impl ThisPatternResolver {
     fn extract_this_member_reference(
         operand: Option<&JsStaticMemberAssignment>,
         scoped_this_references: &[FunctionThisReferences],
-        is_meaningful_read: Option<bool>,
+        access_kind: AccessKind,
     ) -> Option<ClassMemberReference> {
         operand.and_then(|assignment| {
             if let Ok(object) = assignment.object()
@@ -535,7 +554,7 @@ impl ThisPatternResolver {
                         .map(|name| ClassMemberReference {
                             name: name.to_trimmed_text(),
                             range: name.syntax().text_trimmed_range(),
-                            is_meaningful_read,
+                            access_kind: access_kind.clone(),
                         })
                         .or_else(|| {
                             member
@@ -543,7 +562,7 @@ impl ThisPatternResolver {
                                 .map(|private_name| ClassMemberReference {
                                     name: private_name.to_trimmed_text(),
                                     range: private_name.syntax().text_trimmed_range(),
-                                    is_meaningful_read,
+                                    access_kind,
                                 })
                         })
                 })
@@ -637,9 +656,7 @@ fn handle_object_binding_pattern(
                 reads.insert(ClassMemberReference {
                     name: declarator.clone().to_trimmed_text(),
                     range: declarator.clone().syntax().text_trimmed_range(),
-                    is_meaningful_read: Some(is_used_in_expression_context(
-                        &declarator.clone().into(),
-                    )),
+                    access_kind: get_read_access_kind(&declarator.clone().into()),
                 });
             }
         }
@@ -675,7 +692,7 @@ fn handle_static_member_expression(
         reads.insert(ClassMemberReference {
             name: member.to_trimmed_text(),
             range: member.syntax().text_trimmed_range(),
-            is_meaningful_read: Some(is_used_in_expression_context(&static_member.into())),
+            access_kind: get_read_access_kind(&static_member.into()),
         });
     }
 }
@@ -721,8 +738,7 @@ fn handle_assignment_expression(
             && let Some(name) = ThisPatternResolver::extract_this_member_reference(
                 operand.as_js_static_member_assignment(),
                 scoped_this_references,
-                // Nodes inside assignment expressions are considered meaningful reads e.g. this.x += 1;
-                Some(true),
+                AccessKind::MeaningfulRead,
             )
         {
             reads.insert(name.clone());
@@ -749,8 +765,7 @@ fn handle_assignment_expression(
             && let Some(name) = ThisPatternResolver::extract_this_member_reference(
                 assignment.as_js_static_member_assignment(),
                 scoped_this_references,
-                // It is a write reference, so not applicable for meaningful read
-                None,
+                AccessKind::Write,
             )
         {
             writes.insert(name.clone());
@@ -787,19 +802,15 @@ fn handle_pre_or_post_update_expression(
         && let Some(name) = ThisPatternResolver::extract_this_member_reference(
             operand.as_js_static_member_assignment(),
             scoped_this_references,
-            None,
+            AccessKind::Write,
         )
     {
-        writes.insert(ClassMemberReference {
-            name: name.name.clone(),
-            range: name.range,
-            is_meaningful_read: None,
-        });
+        writes.insert(name.clone());
         reads.insert(ClassMemberReference {
             name: name.name,
             range: name.range,
-            is_meaningful_read: Some(is_used_in_expression_context(
-                &AnyCandidateForUsedInExpressionNode::from(js_update_expression.clone()),
+            access_kind: get_read_access_kind(&AnyCandidateForUsedInExpressionNode::from(
+                js_update_expression.clone(),
             )),
         });
     }
@@ -842,8 +853,8 @@ fn collect_class_property_reads_from_static_member(
         reads.insert(ClassMemberReference {
             name,
             range: static_member.syntax().text_trimmed_range(),
-            is_meaningful_read: Some(is_used_in_expression_context(
-                &AnyCandidateForUsedInExpressionNode::from(static_member.clone()),
+            access_kind: get_read_access_kind(&AnyCandidateForUsedInExpressionNode::from(
+                static_member.clone(),
             )),
         });
     }
@@ -872,45 +883,45 @@ fn is_within_scope_without_shadowing(
     false
 }
 
+/// Determines the kind of read access for a given node.
+fn get_read_access_kind(node: &AnyCandidateForUsedInExpressionNode) -> AccessKind {
+    if is_used_in_expression_context(node) {
+        AccessKind::MeaningfulRead
+    } else {
+        AccessKind::TrivialRead
+    }
+}
+
 /// Checks if the given node is used in an expression context
 /// (e.g., return, call arguments, conditionals, binary expressions).
 /// Not limited to `this` references. Can be used for any node, but requires more work e.g.
 /// Returns `true` if the read is meaningful, `false` otherwise.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
-    let mut current: JsSyntaxNode =
-        if let Some(expression) = AnyJsExpression::cast(node.syntax().clone()) {
-            expression.syntax().clone() // get JsSyntaxNode
-        } else {
-            node.syntax().clone() // fallback to the node itself
-        };
+    let mut current = node.syntax().clone();
 
-    // Limit the number of parent traversals to avoid deep recursion
-    for _ in 0..8 {
-        if let Some(parent) = current.parent() {
-            match parent.kind() {
-                JsSyntaxKind::JS_RETURN_STATEMENT
-                | JsSyntaxKind::JS_CALL_ARGUMENTS
-                | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
-                | JsSyntaxKind::JS_LOGICAL_EXPRESSION
-                | JsSyntaxKind::JS_THROW_STATEMENT
-                | JsSyntaxKind::JS_AWAIT_EXPRESSION
-                | JsSyntaxKind::JS_YIELD_EXPRESSION
-                | JsSyntaxKind::JS_UNARY_EXPRESSION
-                | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
-                | JsSyntaxKind::JS_CALL_EXPRESSION // (callee)
-                | JsSyntaxKind::JS_NEW_EXPRESSION
-                | JsSyntaxKind::JS_IF_STATEMENT
-                | JsSyntaxKind::JS_SWITCH_STATEMENT
-                | JsSyntaxKind::JS_FOR_STATEMENT
-                | JsSyntaxKind::JS_FOR_IN_STATEMENT
-                | JsSyntaxKind::JS_FOR_OF_STATEMENT
-                | JsSyntaxKind::JS_BINARY_EXPRESSION => return true,
-                _ => current = parent,
-            }
-        } else {
-            break;
+    if let Some(parent) = current.parent() {
+        match parent.kind() {
+            JsSyntaxKind::JS_RETURN_STATEMENT
+            | JsSyntaxKind::JS_CALL_ARGUMENTS
+            | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
+            | JsSyntaxKind::JS_LOGICAL_EXPRESSION
+            | JsSyntaxKind::JS_THROW_STATEMENT
+            | JsSyntaxKind::JS_AWAIT_EXPRESSION
+            | JsSyntaxKind::JS_YIELD_EXPRESSION
+            | JsSyntaxKind::JS_UNARY_EXPRESSION
+            | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
+            | JsSyntaxKind::JS_CALL_EXPRESSION // (callee)
+            | JsSyntaxKind::JS_NEW_EXPRESSION
+            | JsSyntaxKind::JS_IF_STATEMENT
+            | JsSyntaxKind::JS_SWITCH_STATEMENT
+            | JsSyntaxKind::JS_FOR_STATEMENT
+            | JsSyntaxKind::JS_FOR_IN_STATEMENT
+            | JsSyntaxKind::JS_FOR_OF_STATEMENT
+            | JsSyntaxKind::JS_BINARY_EXPRESSION => return true,
+            _ => current = parent,
         }
     }
+
     false
 }
 
@@ -945,7 +956,7 @@ mod tests {
                 });
 
             assert_eq!(
-                found.is_meaningful_read, *expected_meaningful,
+                found.access_kind, *expected_meaningful,
                 "Case '{}' failed: read '{}' meaningful mismatch",
                 description, expected_name
             );
@@ -969,7 +980,7 @@ mod tests {
                 });
 
             assert_eq!(
-                found.is_meaningful_read, *expected_meaningful,
+                found.access_kind, *expected_meaningful,
                 "Case '{}' failed: write '{}' meaningful mismatch",
                 description, expected_name
             );
