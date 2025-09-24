@@ -46,8 +46,8 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         });
 
         let should_format_embedded_nodes = if f.context().should_delegate_fmt_embedded_nodes() {
-            // Only delegate for JS <script> or <style> content
-            node.is_javascript_tag()? || node.is_style_tag()?
+            // Only delegate for supported <script> or <style> content
+            node.is_supported_script_tag() || node.is_style_tag()
         } else {
             false
         };

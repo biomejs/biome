@@ -1450,7 +1450,7 @@ pub fn format_node<L: FormatLanguage>(
     language: L,
     delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<L::Context>> {
-    let (root, source_map) = match language.transform(&root.clone()) {
+    let (root, source_map) = match language.transform(root) {
         Some((transformed, source_map)) => {
             // we don't need to insert the node back if it has the same offset
             if &transformed == root {
@@ -1524,7 +1524,7 @@ pub fn format_node_with_offset<L: FormatLanguage>(
     language: L,
     delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<L::Context>> {
-    let (root, source_map) = match language.transform(&root.node.clone()) {
+    let (root, source_map) = match language.transform(&root.node) {
         Some((transformed, source_map)) => {
             // we don't need to insert the node back if it has the same offset
             if transformed == root.node {

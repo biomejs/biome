@@ -14,13 +14,14 @@ use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
     WorkspaceScannerBridge,
 };
+use crate::workspace::document::EmbeddedLanguageSnippets;
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
-use biome_css_syntax::{CssFileSource, CssLanguage};
+use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -30,10 +31,10 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
-use biome_html_syntax::HtmlRoot;
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, LanguageVariant, ModuleKind};
+use biome_html_syntax::{HtmlElement, HtmlRoot};
+use biome_js_syntax::{AnyJsRoot, JsLanguage, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::JsonFileSource;
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
@@ -363,31 +364,22 @@ impl WorkspaceServer {
         };
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
-        let (embedded_scripts, embedded_styles) = if let Some(DocumentFileSource::Html(_)) =
+        let embedded_snippets = if let Some(DocumentFileSource::Html(_)) =
             self.get_source(file_source_index)
             && let Some(Ok(any_parse)) = &syntax
             && let Some(html_root) = biome_html_syntax::HtmlRoot::cast(any_parse.syntax())
         {
             let mut node_cache = NodeCache::default();
-            let scripts = self.parse_embedded_scripts(
+            self.parse_embedded_language_snippets(
                 project_key,
                 &biome_path,
                 &source,
                 &html_root,
                 &mut node_cache,
-                |file_source| self.insert_source(file_source.into()),
-            )?;
-            let styles = self.parse_embedded_styles(
-                project_key,
-                &biome_path,
-                &source,
-                &html_root,
-                &mut node_cache,
-                |file_source| self.insert_source(file_source.into()),
-            )?;
-            (scripts, styles)
+                |file_source| self.insert_source(file_source),
+            )?
         } else {
-            (Vec::new(), Vec::new())
+            Default::default()
         };
 
         let is_indexed = if reason.is_index() {
@@ -428,8 +420,7 @@ impl WorkspaceServer {
                         version,
                         file_source_index,
                         syntax: syntax.clone(),
-                        embedded_scripts: embedded_scripts.clone(),
-                        embedded_styles: embedded_styles.clone(),
+                        embedded_snippets: embedded_snippets.clone(),
                     }
                 },
                 || Document {
@@ -437,8 +428,7 @@ impl WorkspaceServer {
                     version,
                     file_source_index,
                     syntax: syntax.clone(),
-                    embedded_scripts: embedded_scripts.clone(),
-                    embedded_styles: embedded_styles.clone(),
+                    embedded_snippets: embedded_snippets.clone(),
                 },
             );
 
@@ -465,8 +455,9 @@ impl WorkspaceServer {
     ///
     /// Returns an error if no file exists in the workspace with this path.
     fn get_parse(&self, path: &Utf8Path) -> Result<AnyParse, WorkspaceError> {
-        let documents = self.documents.pin();
-        let syntax = documents
+        let syntax = self
+            .documents
+            .pin()
             .get(path)
             .and_then(|doc| doc.syntax.clone())
             .transpose();
@@ -474,128 +465,106 @@ impl WorkspaceServer {
         match syntax {
             Ok(syntax) => match syntax {
                 None => Err(WorkspaceError::not_found()),
-                Some(syntax) => Ok(syntax.clone()),
+                Some(syntax) => Ok(syntax),
             },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
         }
     }
 
-    fn get_embedded_parse(&self, path: &Utf8Path) -> Vec<FormatEmbedNode> {
-        let documents = self.documents.pin();
-
-        documents
+    fn get_parse_with_embedded_format_nodes(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(AnyParse, Vec<FormatEmbedNode>), WorkspaceError> {
+        self.documents
+            .pin()
             .get(path)
-            .map(|doc| {
-                doc.embedded_scripts
-                    .clone()
-                    .iter()
-                    .map(|node| {
-                        let text_range = node.content_range;
-                        let parse = node.parse.clone();
-                        let file_source = self
-                            .get_source(node.file_source_index)
-                            .expect("Document source must exist");
-
-                        FormatEmbedNode {
-                            range: text_range,
-                            source: file_source,
-                            node: parse,
-                        }
-                    })
-                    .chain(doc.embedded_styles.clone().iter().map(|node| {
-                        let text_range = node.content_range;
-                        let parse = node.parse.clone();
-                        let file_source = self
-                            .get_source(node.file_source_index)
-                            .expect("Document source must exist");
-
-                        FormatEmbedNode {
-                            range: text_range,
-                            source: file_source,
-                            node: parse,
-                        }
-                    }))
-                    .collect::<Vec<_>>()
+            .ok_or_else(WorkspaceError::not_found)
+            .and_then(|doc| match &doc.syntax {
+                Some(syntax) => match syntax {
+                    Ok(syntax) => Ok((
+                        syntax.clone(),
+                        doc.embedded_snippets.get_format_nodes(|file_source_index| {
+                            self.get_source(file_source_index)
+                                .expect("Document source must exist")
+                        }),
+                    )),
+                    Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
+                },
+                None => Err(WorkspaceError::not_found()),
             })
-            .unwrap_or_default()
     }
 
-    /// Extracts embedded JavaScript content from HTML script elements.
+    /// Extracts embedded content from HTML elements containing foreign
+    /// languages.
     ///
-    /// This function walks the HTML syntax tree to find all `<script>` elements
-    /// and extracts their content for offset-aware JavaScript parsing.
-    ///
-    /// # Returns
-    /// A vector of `EmbeddedJsContent` containing parsed JavaScript with correct offsets
-    fn parse_embedded_scripts<F>(
+    /// This function walks the HTML syntax tree to find all `<script>` and
+    /// `<style>` elements and extracts their content for offset-aware
+    /// parsing.
+    fn parse_embedded_language_snippets(
         &self,
         project_key: ProjectKey,
         path: &BiomePath,
         source: &DocumentFileSource,
         html_root: &HtmlRoot,
         cache: &mut NodeCache,
-        source_index_fn: F,
-    ) -> Result<Vec<EmbeddedJsContent>, WorkspaceError>
-    where
-        F: Fn(JsFileSource) -> usize,
-    {
+        source_index_fn: impl Fn(DocumentFileSource) -> usize,
+    ) -> Result<EmbeddedLanguageSnippets, WorkspaceError> {
         let mut scripts = Vec::new();
-        let settings = self
-            .projects
-            .get_settings_based_on_path(project_key, path)
-            .ok_or_else(WorkspaceError::no_project)?;
-        let options = settings.parse_options::<JsLanguage>(path, source);
-
-        // Walk through all HTML elements looking for script tags
-        for element in html_root.syntax().descendants() {
-            let result = crate::file_handlers::html::extract_embedded_script(
-                element.clone(),
-                cache,
-                options.clone(),
-                &source_index_fn,
-            );
-            let Some(list) = result else {
-                continue;
-            };
-            scripts.extend(list);
-        }
-        Ok(scripts)
-    }
-
-    /// Extracts embedded CSS content from HTML style elements.
-    fn parse_embedded_styles<F>(
-        &self,
-        project_key: ProjectKey,
-        path: &BiomePath,
-        source: &DocumentFileSource,
-        html_root: &HtmlRoot,
-        cache: &mut NodeCache,
-        source_index_fn: F,
-    ) -> Result<Vec<EmbeddedCssContent>, WorkspaceError>
-    where
-        F: Fn(CssFileSource) -> usize,
-    {
+        let mut json = Vec::new();
         let mut styles = Vec::new();
+
         let settings = self
             .projects
             .get_settings_based_on_path(project_key, path)
             .ok_or_else(WorkspaceError::no_project)?;
-        let options = settings.parse_options::<CssLanguage>(path, source);
-
-        // Walk through all HTML elements looking for style tags
+        // Walk through all HTML elements looking for script and style tags
         for element in html_root.syntax().descendants() {
-            let Some(list) = crate::file_handlers::html::parse_embedded_style(
-                element.clone(),
-                cache,
-                options,
-                &source_index_fn,
-            ) else {
+            let Some(element) = HtmlElement::cast(element) else {
                 continue;
             };
-            styles.extend(list);
+
+            use crate::file_handlers::html::*;
+
+            if let Some(script_type) = element.get_script_type() {
+                if script_type.is_javascript() {
+                    let options = settings.parse_options::<JsLanguage>(path, source);
+
+                    if let Some(list) = parse_embedded_js_script(
+                        element,
+                        script_type,
+                        cache,
+                        options,
+                        |file_source| source_index_fn(file_source.into()),
+                    ) {
+                        scripts.extend(list)
+                    }
+                } else if script_type.is_json() {
+                    let options = settings.parse_options::<JsonLanguage>(path, source);
+
+                    if let Some(list) =
+                        parse_embedded_json(element, cache, options, |file_source| {
+                            source_index_fn(file_source.into())
+                        })
+                    {
+                        json.extend(list)
+                    }
+                }
+            } else if element.is_style_tag() {
+                let options = settings.parse_options::<CssLanguage>(path, source);
+
+                if let Some(list) = parse_embedded_style(element, cache, options, |file_source| {
+                    source_index_fn(file_source.into())
+                }) {
+                    styles.extend(list)
+                }
+            }
         }
 
-        Ok(styles)
+        Ok(EmbeddedLanguageSnippets {
+            scripts,
+            json,
+            styles,
+        })
     }
 
     fn parse(
@@ -1328,31 +1297,22 @@ impl Workspace for WorkspaceServer {
         let root = parsed.any_parse.root();
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
-        let (embedded_scripts, embedded_styles) = if let Some(file_source) = self.get_source(index)
+        let embedded_snippets = if let Some(file_source) = self.get_source(index)
             && matches!(file_source, DocumentFileSource::Html(_))
             && let Some(html_root) =
                 biome_html_syntax::HtmlRoot::cast(parsed.any_parse.syntax().clone())
         {
             let mut embedded_node_cache = NodeCache::default();
-            let scripts = self.parse_embedded_scripts(
+            self.parse_embedded_language_snippets(
                 project_key,
                 &path,
                 &file_source,
                 &html_root,
                 &mut embedded_node_cache,
-                |file_source| self.insert_source(file_source.into()),
-            )?;
-            let styles = self.parse_embedded_styles(
-                project_key,
-                &path,
-                &file_source,
-                &html_root,
-                &mut embedded_node_cache,
-                |file_source| self.insert_source(file_source.into()),
-            )?;
-            (scripts, styles)
+                |file_source| self.insert_source(file_source),
+            )?
         } else {
-            (Vec::new(), Vec::new())
+            Default::default()
         };
 
         let document = Document {
@@ -1360,8 +1320,7 @@ impl Workspace for WorkspaceServer {
             version: Some(version),
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
-            embedded_scripts,
-            embedded_styles,
+            embedded_snippets,
         };
 
         if persist_node_cache {
@@ -1580,14 +1539,14 @@ impl Workspace for WorkspaceServer {
             .get_settings_based_on_path(params.project_key, &params.path)
             .ok_or_else(WorkspaceError::no_project)?;
 
-        let parse = self.get_parse(&params.path)?;
-        let embedded_nodes = self.get_embedded_parse(&params.path);
+        let (parse, embedded_nodes) = self.get_parse_with_embedded_format_nodes(&params.path)?;
 
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && parse.has_errors()
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
+
         let document_file_source = self.get_file_source(&params.path);
         if !embedded_nodes.is_empty() {
             let format_embedded =
