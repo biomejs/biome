@@ -75,6 +75,7 @@ declare_lint_rule! {
     /// [].forEach(() => {
     ///     // No return value, which is correct
     /// });
+    /// ```
     ///
     /// ```js
     /// [].forEach(() => void null); // Void return value, which is correct
