@@ -1,7 +1,4 @@
-use crate::{
-    AnyHtmlElement, HtmlAttribute, HtmlElement, HtmlSelfClosingElement, ScriptType,
-    inner_string_text,
-};
+use crate::{AnyHtmlElement, HtmlAttribute, HtmlElement, HtmlSelfClosingElement, ScriptType};
 use biome_rowan::{AstNodeList, SyntaxResult};
 
 /// https://html.spec.whatwg.org/#void-elements
@@ -116,14 +113,9 @@ impl HtmlElement {
         let script_type = self
             .find_attribute_by_name("type")
             .and_then(|attribute| {
-                attribute
-                    .initializer()
-                    .and_then(|initializer| initializer.value().ok())
-                    .and_then(|value| {
-                        let value = value.as_html_string()?;
-                        let token = value.value_token().ok()?;
-                        Some(ScriptType::from_type_value(&inner_string_text(&token)))
-                    })
+                let initializer = attribute.initializer()?;
+                let value = initializer.value().ok()?.string_value()?;
+                Some(ScriptType::from_type_value(&value))
             })
             .unwrap_or_default();
         Some(script_type)

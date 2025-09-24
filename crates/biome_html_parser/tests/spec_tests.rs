@@ -74,6 +74,21 @@ fn test_is_javascript_tag() {
     assert!(element.is_javascript_tag());
     assert_eq!(element.get_script_type(), Some(ScriptType::Module));
 
+    // FIXME: Uncomment when the parser supports unquoted attribute values.
+    //let html = r#"
+    //    <script type=module></script>
+    //    "#;
+    //let syntax = parse_html(html, HtmlParseOptions::default());
+    //let element = syntax
+    //    .tree()
+    //    .syntax()
+    //    .descendants()
+    //    .find_map(HtmlElement::cast)
+    //    .unwrap();
+    //
+    //assert!(element.is_javascript_tag());
+    //assert_eq!(element.get_script_type(), Some(ScriptType::Module));
+
     let html = r#"
         <script></script>
         "#;

@@ -1,9 +1,10 @@
 #![deny(clippy::use_self)]
 
 #[macro_use]
-mod generated;
+mod attr_ext;
 pub mod element_ext;
 mod file_source;
+mod generated;
 mod script_type;
 mod syntax_node;
 
