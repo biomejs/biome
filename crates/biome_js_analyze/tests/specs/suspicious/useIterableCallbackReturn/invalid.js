@@ -36,6 +36,7 @@ Array.from([], function() {
     return;
 });
 Array.from([], () => void null);
+Array.from([], (a) => void a.fn());
 [].every(() => {
     return;
 });
@@ -84,6 +85,7 @@ Array.from([], () => void null);
     } finally {}
 });
 [].every(() => void null);
+[].every((a) => void a.fn());
 [].filter(() => {
     return;
 });
@@ -93,6 +95,7 @@ Array.from([], () => void null);
 [].filter(() => {});
 [].filter(function() {});
 [].filter(() => void null);
+[].filter((a) => void a.fn());
 [].find(() => {
     return;
 });
@@ -102,6 +105,7 @@ Array.from([], () => void null);
 [].find(() => {});
 [].find(function() {});
 [].find(() => void null);
+[].find((a) => void a.fn());
 [].findIndex(() => {
     return;
 });
@@ -111,6 +115,7 @@ Array.from([], () => void null);
 [].findIndex(() => {});
 [].findIndex(function() {});
 [].findIndex(() => void null);
+[].findIndex((a) => void a.fn());
 [].findLast(() => {
     return;
 });
@@ -120,6 +125,7 @@ Array.from([], () => void null);
 [].findLast(() => {});
 [].findLast(function() {});
 [].findLast(() => void null);
+[].findLast((a) => void a.fn());
 [].findLastIndex(() => {
     return;
 });
@@ -129,6 +135,7 @@ Array.from([], () => void null);
 [].findLastIndex(() => {});
 [].findLastIndex(function() {});
 [].findLastIndex(() => void null);
+[].findLastIndex((a) => void a.fn());
 [].some(() => {
     return;
 });
@@ -138,6 +145,7 @@ Array.from([], () => void null);
 [].some(() => {});
 [].some(function() {});
 [].some(() => void null);
+[].some((a) => void a.fn());
 [].flatMap(() => {
     return;
 });
@@ -147,6 +155,7 @@ Array.from([], () => void null);
 [].flatMap(() => {});
 [].flatMap(function() {});
 [].flatMap(() => void null);
+[].flatMap((a) => void a.fn());
 [].map(() => {
     return;
 });
@@ -156,6 +165,7 @@ Array.from([], () => void null);
 [].map(() => {});
 [].map(function() {});
 [].map(() => void null);
+[].map((a) => void a.fn());
 [].reduce((a, b) => {
     return;
 });
@@ -165,6 +175,7 @@ Array.from([], () => void null);
 [].reduce((a, b) => {});
 [].reduce(function(a, b) {});
 [].reduce(() => void null);
+[].reduce((a, b) => void a.fn());
 [].reduceRight((a, b) => {
     return;
 });
@@ -174,6 +185,7 @@ Array.from([], () => void null);
 [].reduceRight((a, b) => {});
 [].reduceRight(function(a, b) {});
 [].reduceRight(() => void null);
+[].reduceRight((a, b) => void a.fn());
 [].sort((a, b) => {
     return;
 });
@@ -183,6 +195,7 @@ Array.from([], () => void null);
 [].sort((a, b) => {});
 [].sort(function(a, b) {});
 [].sort(() => void null);
+[].sort((a, b) => void a.fn());
 [].toSorted((a, b) => {
     return;
 });
@@ -213,3 +226,4 @@ Array.from([], () => void null);
     }
 });
 [].toSorted(() => void null);
+[].toSorted((a) => void a.fn());

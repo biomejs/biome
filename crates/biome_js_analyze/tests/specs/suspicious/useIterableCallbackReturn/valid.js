@@ -23,6 +23,7 @@
     a.fn();
 });
 [].forEach(() => void null);
+[].forEach((a) => void a.fn());
 Array.from([], (a) => {
     return a + 1;
 });
