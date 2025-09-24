@@ -470,88 +470,48 @@ fn format_embedded(
         let mut iter = embedded_nodes.iter();
         let node = iter.find(|node| node.range == range)?;
 
+        let wrap_document = |document: Document| {
+            if indent_script_and_style {
+                let elements = vec![
+                    FormatElement::Line(LineMode::Hard),
+                    FormatElement::Tag(Tag::StartIndent),
+                    FormatElement::Line(LineMode::Hard),
+                    FormatElement::Interned(Interned::new(document.into_elements())),
+                    FormatElement::Tag(Tag::EndIndent),
+                ];
+
+                Document::new(elements)
+            } else {
+                let elements = vec![
+                    FormatElement::Line(LineMode::Hard),
+                    FormatElement::Interned(Interned::new(document.into_elements())),
+                ];
+                Document::new(elements)
+            }
+        };
+
         match node.source {
             DocumentFileSource::Js(_) => {
                 let js_options = settings.format_options::<JsLanguage>(biome_path, &node.source);
-                let node = node.node.clone().root.into_node::<JsLanguage>();
+                let node = node.node.root.clone().into_node::<JsLanguage>();
                 let formatted =
                     biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
-                if indent_script_and_style {
-                    let elements = vec![
-                        FormatElement::Line(LineMode::Hard),
-                        FormatElement::Tag(Tag::StartIndent),
-                        FormatElement::Line(LineMode::Hard),
-                        FormatElement::Interned(Interned::new(
-                            formatted.into_document().into_elements(),
-                        )),
-                        FormatElement::Tag(Tag::EndIndent),
-                    ];
-
-                    Some(Document::new(elements))
-                } else {
-                    let elements = vec![
-                        FormatElement::Line(LineMode::Hard),
-                        FormatElement::Interned(Interned::new(
-                            formatted.into_document().into_elements(),
-                        )),
-                    ];
-                    Some(Document::new(elements))
-                }
+                Some(wrap_document(formatted.into_document()))
             }
             DocumentFileSource::Json(_) => {
                 let json_options =
                     settings.format_options::<JsonLanguage>(biome_path, &node.source);
-                let node = node.node.clone().root.into_node::<JsonLanguage>();
+                let node = node.node.root.clone().into_node::<JsonLanguage>();
                 let formatted =
                     biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
-                if indent_script_and_style {
-                    let elements = vec![
-                        FormatElement::Line(LineMode::Hard),
-                        FormatElement::Tag(Tag::StartIndent),
-                        FormatElement::Line(LineMode::Hard),
-                        FormatElement::Interned(Interned::new(
-                            formatted.into_document().into_elements(),
-                        )),
-                        FormatElement::Tag(Tag::EndIndent),
-                    ];
-
-                    Some(Document::new(elements))
-                } else {
-                    let elements = vec![
-                        FormatElement::Line(LineMode::Hard),
-                        FormatElement::Interned(Interned::new(
-                            formatted.into_document().into_elements(),
-                        )),
-                    ];
-                    Some(Document::new(elements))
-                }
+                Some(wrap_document(formatted.into_document()))
             }
             DocumentFileSource::Css(_) => {
                 let css_options = settings.format_options::<CssLanguage>(biome_path, &node.source);
-                let node = node.node.clone().root.into_node::<CssLanguage>();
+                let node = node.node.root.clone().into_node::<CssLanguage>();
                 let formatted =
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
-                if indent_script_and_style {
-                    let elements = vec![
-                        FormatElement::Line(LineMode::Hard),
-                        FormatElement::Tag(Tag::StartIndent),
-                        FormatElement::Line(LineMode::Hard),
-                        FormatElement::Interned(Interned::new(
-                            formatted.into_document().into_elements(),
-                        )),
-                        FormatElement::Tag(Tag::EndIndent),
-                    ];
-                    let document = Document::new(elements);
-                    Some(document)
-                } else {
-                    let elements = vec![
-                        FormatElement::Line(LineMode::Hard),
-                        FormatElement::Interned(Interned::new(
-                            formatted.into_document().into_elements(),
-                        )),
-                    ];
-                    Some(Document::new(elements))
-                }
+                Some(wrap_document(formatted.into_document()))
             }
             _ => None,
         }
