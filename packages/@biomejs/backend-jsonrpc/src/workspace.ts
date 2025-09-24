@@ -1706,6 +1706,10 @@ export interface Nursery {
 	 */
 	noVueReservedProps?: RuleConfiguration_for_NoVueReservedPropsOptions;
 	/**
+	 * Disallow destructuring of props passed to setup in Vue projects.
+	 */
+	noVueSetupPropsReactivityLoss?: RuleConfiguration_for_NoVueSetupPropsReactivityLossOptions;
+	/**
 	 * Enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -3050,6 +3054,9 @@ export type RuleConfiguration_for_NoVueReservedKeysOptions =
 export type RuleConfiguration_for_NoVueReservedPropsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedPropsOptions;
+export type RuleConfiguration_for_NoVueSetupPropsReactivityLossOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoVueSetupPropsReactivityLossOptions;
 export type RuleConfiguration_for_UseAnchorHrefOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseAnchorHrefOptions;
@@ -5591,6 +5598,16 @@ export interface RuleWithOptions_for_NoVueReservedPropsOptions {
 	 * Rule's options
 	 */
 	options: NoVueReservedPropsOptions;
+}
+export interface RuleWithOptions_for_NoVueSetupPropsReactivityLossOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueSetupPropsReactivityLossOptions;
 }
 export interface RuleWithOptions_for_UseAnchorHrefOptions {
 	/**
@@ -8159,6 +8176,7 @@ export interface NoUselessUndefinedOptions {}
 export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
+export interface NoVueSetupPropsReactivityLossOptions {}
 export type UseAnchorHrefOptions = null;
 /**
  * Options for the `useConsistentArrowReturn` rule.
@@ -8910,6 +8928,7 @@ export type Category =
 	| "lint/nursery/noVueDataObjectDeclaration"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
+	| "lint/nursery/noVueSetupPropsReactivityLoss"
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
