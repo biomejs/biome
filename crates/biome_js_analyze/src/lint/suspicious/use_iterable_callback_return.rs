@@ -78,7 +78,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
-    /// [].forEach(() => void null); // Void return value, which is correct
+    /// [].forEach(() => void null); // Void return value, which doesn't trigger the rule
     /// ```
     pub UseIterableCallbackReturn {
         version: "2.0.0",
