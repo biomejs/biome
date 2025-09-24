@@ -1,7 +1,7 @@
 use crate::{
     AnyJsBinding, AnyJsCombinedSpecifier, AnyJsImportClause, AnyJsModuleSource,
-    AnyJsNamedImportSpecifier, JsCallExpression, JsDefaultImportSpecifier, JsImport,
-    JsImportAssertion, JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier,
+    AnyJsNamedImportSpecifier, JsCallArguments, JsCallExpression, JsDefaultImportSpecifier,
+    JsImport, JsImportAssertion, JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier,
     JsNamedImportSpecifiers, JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier,
     JsSyntaxKind, JsSyntaxToken, inner_string_text,
 };
@@ -473,6 +473,17 @@ impl AnyJsImportLike {
     pub fn is_static_import(&self) -> bool {
         matches!(self, Self::JsModuleSource(_))
     }
+
+    /// Returns the arguments of the import expression. If this type is [JsModuleSource], [None] is returned.
+    pub fn arguments(&self) -> Option<JsCallArguments> {
+        match self {
+            AnyJsImportLike::JsModuleSource(_) => None,
+            AnyJsImportLike::JsCallExpression(call_expression) => call_expression.arguments().ok(),
+            AnyJsImportLike::JsImportCallExpression(import_node) => import_node.arguments().ok(),
+        }
+    }
+
+    pub fn callee()
 }
 
 declare_node_union! {
