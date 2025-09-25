@@ -1162,6 +1162,25 @@ impl Settings {
             .unwrap_or_default()
             .into()
     }
+
+    /// Returns the maximum file size setting for the given `file_path`.
+    pub fn get_max_file_size(&self, file_path: &Utf8Path) -> usize {
+        let limit = self
+            .override_settings
+            .patterns
+            .iter()
+            .find_map(|pattern| {
+                if pattern.is_file_included(file_path) {
+                    pattern.files.max_size
+                } else {
+                    None
+                }
+            })
+            .or(self.files.max_size)
+            .unwrap_or_default();
+
+        usize::from(limit)
+    }
 }
 
 #[derive(Clone, Debug, Default)]
