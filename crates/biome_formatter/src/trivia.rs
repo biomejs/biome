@@ -24,8 +24,8 @@ use std::ops::Sub;
 /// comments must be kept immediately adjacent after formatting to preserve this behavior.
 ///
 /// There isn't much documentation about this behavior, but it is mentioned on the JSDoc repo
-/// for documentation: https://github.com/jsdoc/jsdoc.github.io/issues/40. Prettier also
-/// implements the same behavior: https://github.com/prettier/prettier/pull/13445/files#diff-3d5eaa2a1593372823589e6e55e7ca905f7c64203ecada0aa4b3b0cdddd5c3ddR160-R178
+/// for documentation: <https://github.com/jsdoc/jsdoc.github.io/issues/40>. Prettier also
+/// implements the same behavior: <https://github.com/prettier/prettier/pull/13445/files#diff-3d5eaa2a1593372823589e6e55e7ca905f7c64203ecada0aa4b3b0cdddd5c3ddR160-R178>
 pub fn should_nestle_adjacent_doc_comments<L: Language>(
     first_comment: &SourceComment<L>,
     second_comment: &SourceComment<L>,

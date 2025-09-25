@@ -157,7 +157,7 @@
 //!   called `"Unimplemented tokens/nodes"`; a test, in order to be valid, can't have that section;
 //!
 //! If removing a token is the actual behaviour (removing some parenthesis or a semicolon), then the correct way
-//! to do it by using the formatter API [biome_formatter::trivia::format_removed];
+//! to do it by using the formatter API [biome_formatter::trivia::FormatToken::format_removed];
 //! - the emitted code is not a valid program anymore, the test suite will parse again the emitted code and it will
 //!   fail if there are syntax errors;
 //! - the emitted code, when formatted again, differs from the original; this usually happens when removing/adding new
