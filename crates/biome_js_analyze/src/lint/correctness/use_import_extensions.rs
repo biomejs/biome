@@ -229,7 +229,6 @@ fn get_extensionless_import(
         (Some(_), _) if path.file_name()?.starts_with(resolved_path.file_name()?) => {
             return None; // For cases like `./foo.css` -> `./foo.css.ts`
         }
-        (None, Some(_)) => return None,
         _ => {}
     }
 
@@ -250,8 +249,17 @@ fn get_extensionless_import(
         resolved_extension?
     };
 
+    // Check if the existing extension matches the desired one.
+    if existing_extension.is_some_and(|ext| ext == extension) {
+        return None;
+    }
+
     let is_index_file = resolved_stem.is_some_and(|stem| stem == "index");
-    let import_path_ends_with_index = path.file_name().is_some_and(|name| name == "index");
+    let import_path_ends_with_index = path.file_name().is_some_and(|name| name == "index")
+        || path
+            .with_extension("")
+            .file_name()
+            .is_some_and(|name| name == "index");
 
     let new_path = if is_index_file && !import_path_ends_with_index {
         let mut path_parts = path.as_str().split('/');

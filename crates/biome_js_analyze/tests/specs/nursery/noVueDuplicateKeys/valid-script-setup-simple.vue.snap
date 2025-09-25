@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-script-setup-simple.vue
+---
+# Input
+```ts
+const message = ref('Hello Vue 3!')
+const count = ref(0)
+
+const doubleCount = computed(() => count.value * 2)
+
+function increment() {
+  count.value++
+}
+
+```

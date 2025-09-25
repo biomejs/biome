@@ -1,0 +1,24 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useConsistentArrowReturn": {
+					"level": "error",
+					"options": {
+						"style": "asNeeded",
+						"requireForObjectLiteral": true
+					}
+				}
+			}
+		}
+	},
+	"formatter": {
+		"indentStyle": "space"
+	},
+	"javascript": {
+		"formatter": {
+			"indentWidth": 4
+		}
+	}
+}

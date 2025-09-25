@@ -18,6 +18,14 @@ use crate::{
 
 use super::{ResolvedPath, collector::JsModuleInfoCollector};
 
+/// Extensions to try to resolve based on the extension in the import specifier.
+/// ref: https://www.typescriptlang.org/docs/handbook/modules/reference.html#the-moduleresolution-compiler-option
+const EXTENSION_ALIASES: &[(&str, &[&str])] = &[
+    ("js", &["ts", "tsx", "d.ts", "js", "jsx"]),
+    ("mjs", &["mts", "d.mts", "mjs"]),
+    ("cjs", &["cts", "d.cts", "cjs"]),
+];
+
 pub(crate) struct JsModuleVisitor<'a> {
     root: AnyJsRoot,
     directory: &'a Utf8Path,
@@ -401,7 +409,7 @@ impl<'a> JsModuleVisitor<'a> {
                             if let Ok(binding) = node.pattern() {
                                 self.visit_binding_pattern(
                                     binding,
-                                   collector,
+                                    collector,
                                 );
                             }
                         }
@@ -450,6 +458,7 @@ impl<'a> JsModuleVisitor<'a> {
             condition_names: &["types", "import", "default"],
             default_files: &["index"],
             extensions: SUPPORTED_EXTENSIONS,
+            extension_aliases: EXTENSION_ALIASES,
             resolve_node_builtins: true,
             resolve_types: true,
             ..Default::default()

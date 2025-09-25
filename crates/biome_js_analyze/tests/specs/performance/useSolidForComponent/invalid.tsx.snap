@@ -34,7 +34,7 @@ invalid.tsx:1:33 lint/performance/useSolidForComponent ━━━━━━━━�
     2 │ 
     3 │ let Component = (props) => <>{props.data.map(d => <li>{d.text}</li>)}</>;
   
-  i Use Solid's <Emphasis></Emphasis> component for efficiently rendering lists. See Solid docs for more details.
+  i Use Solid's <For /> component for efficiently rendering lists. See Solid docs for more details.
   
 
 ```
@@ -51,7 +51,7 @@ invalid.tsx:3:31 lint/performance/useSolidForComponent ━━━━━━━━�
     4 │ 
     5 │ let Component = (props) => <ol>{props.data.map(d => <li key={d.id}>{d.text}</li>)}</ol>;
   
-  i Use Solid's <Emphasis></Emphasis> component for efficiently rendering lists. See Solid docs for more details.
+  i Use Solid's <For /> component for efficiently rendering lists. See Solid docs for more details.
   
 
 ```
@@ -68,7 +68,7 @@ invalid.tsx:5:33 lint/performance/useSolidForComponent ━━━━━━━━�
     6 │ 
     7 │ function Component(props) {
   
-  i Use Solid's <Emphasis></Emphasis> component for efficiently rendering lists. See Solid docs for more details.
+  i Use Solid's <For /> component for efficiently rendering lists. See Solid docs for more details.
   
 
 ```
@@ -84,7 +84,7 @@ invalid.tsx:8:15 lint/performance/useSolidForComponent ━━━━━━━━�
      9 │ }
     10 │ 
   
-  i Use Solid's <Emphasis></Emphasis> component for efficiently rendering lists. See Solid docs for more details.
+  i Use Solid's <For /> component for efficiently rendering lists. See Solid docs for more details.
   
 
 ```
@@ -100,7 +100,7 @@ invalid.tsx:12:15 lint/performance/useSolidForComponent ━━━━━━━━
     13 │ }
     14 │ 
   
-  i Use Solid's <Emphasis></Emphasis> component for efficiently rendering lists. See Solid docs for more details.
+  i Use Solid's <For /> component for efficiently rendering lists. See Solid docs for more details.
   
 
 ```
@@ -117,7 +117,7 @@ invalid.tsx:15:33 lint/performance/useSolidForComponent ━━━━━━━━
     16 │ 
     17 │ let Component = (props) => <ol>{props.data.map((...args) => <li>{args[0].text}</li>)}</ol>;
   
-  i Use Solid's <Emphasis></Emphasis> component for efficiently rendering lists. See Solid docs for more details.
+  i Use Solid's <For /> component for efficiently rendering lists. See Solid docs for more details.
   
 
 ```
@@ -132,7 +132,7 @@ invalid.tsx:17:33 lint/performance/useSolidForComponent ━━━━━━━━
   > 17 │ let Component = (props) => <ol>{props.data.map((...args) => <li>{args[0].text}</li>)}</ol>;
        │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Use Solid's <Emphasis></Emphasis> component for efficiently rendering lists. See Solid docs for more details.
+  i Use Solid's <For /> component for efficiently rendering lists. See Solid docs for more details.
   
 
 ```

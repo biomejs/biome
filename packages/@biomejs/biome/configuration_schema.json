@@ -3999,6 +3999,16 @@
 			]
 		},
 		"NoReExportAllOptions": { "type": "object", "additionalProperties": false },
+		"NoReactForwardRefConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoReactForwardRefOptions" }
+			]
+		},
+		"NoReactForwardRefOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactPropAssignmentsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4924,6 +4934,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDuplicateKeysConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueDuplicateKeysOptions" }
+			]
+		},
+		"NoVueDuplicateKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5034,6 +5054,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactForwardRef": {
+					"description": "Replaces usages of forwardRef with passing ref as a prop.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoReactForwardRefConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSecrets": {
 					"description": "Disallow usage of sensitive data such as API keys and tokens.",
 					"anyOf": [
@@ -5087,6 +5114,13 @@
 					"description": "Enforce that Vue component data options are declared as functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoVueDataObjectDeclarationConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDuplicateKeys": {
+					"description": "Disallow duplicate keys in Vue component data, methods, computed properties, and other options.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueDuplicateKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8243,6 +8277,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoReactForwardRefOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoReactForwardRefOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoReactPropAssignmentsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9745,6 +9798,21 @@
 					"allOf": [
 						{ "$ref": "#/definitions/NoVueDataObjectDeclarationOptions" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoVueDuplicateKeysOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueDuplicateKeysOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -13616,8 +13684,40 @@
 			]
 		},
 		"UseConsistentArrowReturnOptions": {
+			"description": "Options for the `useConsistentArrowReturn` rule.",
 			"type": "object",
+			"properties": {
+				"requireForObjectLiteral": {
+					"description": "Determines whether the rule enforces a consistent style when the return value is an object literal.\n\nThis option is only applicable when used in conjunction with the `asNeeded` option.",
+					"default": false,
+					"type": "boolean"
+				},
+				"style": {
+					"description": "The style to enforce for arrow function return statements.",
+					"default": "asNeeded",
+					"allOf": [{ "$ref": "#/definitions/UseConsistentArrowReturnStyle" }]
+				}
+			},
 			"additionalProperties": false
+		},
+		"UseConsistentArrowReturnStyle": {
+			"oneOf": [
+				{
+					"description": "Enforces no braces where they can be omitted (default).",
+					"type": "string",
+					"enum": ["asNeeded"]
+				},
+				{
+					"description": "Enforces braces around the function body.",
+					"type": "string",
+					"enum": ["always"]
+				},
+				{
+					"description": "Enforces no braces around the function body (constrains arrow functions to the role of returning an expression).",
+					"type": "string",
+					"enum": ["never"]
+				}
+			]
 		},
 		"UseConsistentBuiltinInstantiationConfiguration": {
 			"anyOf": [
