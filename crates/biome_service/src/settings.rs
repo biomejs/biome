@@ -1169,6 +1169,7 @@ impl Settings {
             .override_settings
             .patterns
             .iter()
+            .rev()
             .find_map(|pattern| {
                 if pattern.is_file_included(file_path) {
                     pattern.files.max_size
