@@ -897,7 +897,7 @@ fn get_read_access_kind(node: &AnyCandidateForUsedInExpressionNode) -> AccessKin
 /// Not limited to `this` references.
 /// It can be used for any node; additional cases may require extending the context checks.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
-    node.syntax().ancestors().any(|ancestor| {
+    node.syntax().ancestors().skip(1).any(|ancestor| {
         matches!(
             ancestor.kind(),
             JsSyntaxKind::JS_RETURN_STATEMENT
