@@ -163,10 +163,12 @@ function component$() {
 }
 
 // 22. Edge case: Arrow function merely named component$
-const component$ = () => {
-  const signal = useSignal(0);
-  return signal;
-};
+{
+  const component$ = () => {
+    const signal = useSignal(0);
+    return signal;
+  };
+}
 
 // 23. Edge case: Import with alias from "qwik"
 const AliasedComponent = () => {
@@ -687,16 +689,16 @@ invalid.jsx:155:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:161:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:162:20 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Qwik hook detected outside of an allowed scope.
   
-    159 │ // 22. Edge case: Arrow function merely named component$
-    160 │ const component$ = () => {
-  > 161 │   const signal = useSignal(0);
-        │                  ^^^^^^^^^^^^
-    162 │   return signal;
-    163 │ };
+    160 │ {
+    161 │   const component$ = () => {
+  > 162 │     const signal = useSignal(0);
+        │                    ^^^^^^^^^^^^
+    163 │     return signal;
+    164 │   };
   
   i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
     - Used exclusively within `component$` functions
@@ -708,16 +710,16 @@ invalid.jsx:161:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:167:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:169:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Qwik hook detected outside of an allowed scope.
   
-    165 │ // 23. Edge case: Import with alias from "qwik"
-    166 │ const AliasedComponent = () => {
-  > 167 │   const signal = useQwikSignal(0);
+    167 │ // 23. Edge case: Import with alias from "qwik"
+    168 │ const AliasedComponent = () => {
+  > 169 │   const signal = useQwikSignal(0);
         │                  ^^^^^^^^^^^^^^^^
-    168 │   return signal;
-    169 │ };
+    170 │   return signal;
+    171 │ };
   
   i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
     - Used exclusively within `component$` functions
@@ -729,16 +731,16 @@ invalid.jsx:167:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:173:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:175:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Qwik hook detected outside of an allowed scope.
   
-    171 │ // 24. Edge case: Hook in function expression named component$
-    172 │ const myFunc = function component$() {
-  > 173 │   const signal = useSignal(0);
+    173 │ // 24. Edge case: Hook in function expression named component$
+    174 │ const myFunc = function component$() {
+  > 175 │   const signal = useSignal(0);
         │                  ^^^^^^^^^^^^
-    174 │   return signal;
-    175 │ };
+    176 │   return signal;
+    177 │ };
   
   i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
     - Used exclusively within `component$` functions

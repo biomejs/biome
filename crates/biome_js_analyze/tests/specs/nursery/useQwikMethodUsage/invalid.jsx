@@ -157,10 +157,12 @@ function component$() {
 }
 
 // 22. Edge case: Arrow function merely named component$
-const component$ = () => {
-  const signal = useSignal(0);
-  return signal;
-};
+{
+  const component$ = () => {
+    const signal = useSignal(0);
+    return signal;
+  };
+}
 
 // 23. Edge case: Import with alias from "qwik"
 const AliasedComponent = () => {
