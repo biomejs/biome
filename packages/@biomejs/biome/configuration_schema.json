@@ -4157,9 +4157,15 @@
 			]
 		},
 		"NoRethrowWithoutCauseOptions": {
+			"description": "Options for the `noRethrowWithoutCause` rule.",
 			"type": "object",
-			"required": ["requireCatchParameter"],
-			"properties": { "requireCatchParameter": { "type": "boolean" } },
+			"properties": {
+				"requireCatchParameter": {
+					"description": "When set to `true`, the rule requires that `catch` clauses have a parameter.",
+					"default": true,
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoSecretsConfiguration": {

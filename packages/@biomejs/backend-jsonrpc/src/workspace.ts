@@ -8175,8 +8175,14 @@ export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoQwikUseVisibleTaskOptions {}
 export interface NoReactForwardRefOptions {}
+/**
+ * Options for the `noRethrowWithoutCause` rule.
+ */
 export interface NoRethrowWithoutCauseOptions {
-	requireCatchParameter: boolean;
+	/**
+	 * When set to `true`, the rule requires that `catch` clauses have a parameter.
+	 */
+	requireCatchParameter?: boolean;
 }
 export interface NoSecretsOptions {
 	/**
