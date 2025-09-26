@@ -1,7 +1,8 @@
 use biome_css_syntax::{
-    CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector, CssDashedIdentifier,
-    CssDeclaration, CssGenericComponentValueList, CssIdentifier, CssMediaAtRule,
-    CssNestedQualifiedRule, CssQualifiedRule, CssRoot, CssSupportsAtRule,
+    CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector, CssContainerAtRule,
+    CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList, CssIdentifier,
+    CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssRoot, CssStartingStyleAtRule,
+    CssSupportsAtRule,
 };
 use biome_rowan::{
     AstNode, AstNodeList, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
@@ -167,7 +168,7 @@ impl Rule {
 }
 
 declare_node_union! {
-    pub AnyRuleStart = CssQualifiedRule | CssNestedQualifiedRule | CssMediaAtRule | CssSupportsAtRule
+    pub AnyRuleStart = CssQualifiedRule | CssNestedQualifiedRule | CssContainerAtRule | CssMediaAtRule | CssStartingStyleAtRule | CssSupportsAtRule
 }
 
 impl AnyRuleStart {
@@ -175,7 +176,9 @@ impl AnyRuleStart {
         match self {
             Self::CssQualifiedRule(node) => node.syntax().text_trimmed_range(),
             Self::CssNestedQualifiedRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssContainerAtRule(node) => node.syntax().text_trimmed_range(),
             Self::CssMediaAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::CssStartingStyleAtRule(node) => node.syntax().text_trimmed_range(),
             Self::CssSupportsAtRule(node) => node.syntax().text_trimmed_range(),
         }
     }

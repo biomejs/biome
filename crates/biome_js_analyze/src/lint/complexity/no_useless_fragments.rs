@@ -10,11 +10,12 @@ use biome_js_factory::make::{
     JsxExpressionChildBuilder, js_string_literal_expression, jsx_expression_attribute_value,
     jsx_expression_child, jsx_string, jsx_string_literal, jsx_tag_expression, token,
 };
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsLogicalExpression,
     JsParenthesizedExpression, JsSyntaxKind, JsxAttributeInitializerClause, JsxChildList,
-    JsxElement, JsxExpressionAttributeValue, JsxExpressionChild, JsxFragment, JsxTagExpression,
-    JsxText, T,
+    JsxElement, JsxExpressionAttributeValue, JsxExpressionChild, JsxFragment, JsxOpeningElement,
+    JsxTagExpression, JsxText, T,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutation, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_useless_fragments::NoUselessFragmentsOptions;
@@ -28,18 +29,6 @@ declare_lint_rule! {
     ///
     /// ```jsx,expect_diagnostic
     /// <>
-    /// foo
-    /// </>
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
-    /// <React.Fragment>
-    /// foo
-    /// </React.Fragment>
-    /// ```
-    ///
-    /// ```jsx,expect_diagnostic
-    /// <>
     ///     <>foo</>
     ///     <SomeComponent />
     /// </>
@@ -50,6 +39,18 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### Valid
+    ///
+    /// ```jsx
+    /// <>
+    /// foo
+    /// </>
+    /// ```
+    ///
+    /// ```jsx
+    /// <React.Fragment>
+    /// foo
+    /// </React.Fragment>
+    /// ```
     ///
     /// ```jsx
     /// <>
@@ -197,19 +198,8 @@ impl Rule for NoUselessFragments {
             NoUselessFragmentsQuery::JsxFragment(fragment) => fragment.children(),
             NoUselessFragmentsQuery::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;
-                let name = opening_element.name().ok()?;
-
-                let is_valid_react_fragment = match name {
-                    AnyJsxElementName::JsxMemberName(member_name) => {
-                        jsx_member_name_is_react_fragment(&member_name, model)?
-                    }
-                    AnyJsxElementName::JsxReferenceIdentifier(identifier) => {
-                        jsx_reference_identifier_is_fragment(&identifier, model)?
-                    }
-                    AnyJsxElementName::JsxName(_)
-                    | AnyJsxElementName::JsxNamespaceName(_)
-                    | AnyJsxElementName::JsMetavariable(_) => false,
-                };
+                let is_valid_react_fragment =
+                    is_jsx_element_valid_fragment(&opening_element, model)?;
 
                 if !is_valid_react_fragment {
                     return None;
@@ -275,9 +265,7 @@ impl Rule for NoUselessFragments {
                     let original_text = child.to_trimmed_text();
                     let trimmed_text = original_text.text().trim();
 
-                    if (in_jsx_expr || in_js_logical_expr)
-                        && contains_html_character_references(trimmed_text)
-                    {
+                    if in_jsx_expr || in_js_logical_expr {
                         children_where_fragments_must_preserved = true;
                         break;
                     }
@@ -308,7 +296,9 @@ impl Rule for NoUselessFragments {
             0 => Some(NoUselessFragmentsState::Empty),
             1 => {
                 if let Some(first) = first_significant_child {
-                    if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
+                    if JsxText::can_cast(first.syntax().kind())
+                        && (in_jsx_attr_expr || in_return_statement)
+                    {
                         None
                     } else if JsxElement::can_cast(first.syntax().kind()) {
                         Some(NoUselessFragmentsState::Child(first))
@@ -320,12 +310,30 @@ impl Rule for NoUselessFragments {
                             Some(NoUselessFragmentsState::Child(first))
                         }
                     } else {
-                        // Do not report the fragment as unnecessary if the only child is JsxText with an HTML reference
-                        // or if the fragment is the only child in a JSX expression (e.g. {<>Foo</>})
+                        // Do not report the fragment unless its great great grandparent SyntaxNode is a valid React fragment.
+                        // This works since the expected JS syntax kinds based on the AST would be:
+                        // JSX_TEXT = JSX_CHILD_LIST => (JSX_FRAGMENT || JSX_ELEMENT) => JSX_CHILD_LIST => (JSX_FRAGMENT || JSX_ELEMENT)
                         if let AnyJsxChild::JsxText(text) = &first {
-                            let value_token = text.value_token().ok()?;
-                            let value = value_token.token_text();
-                            if contains_html_character_references(value.as_ref()) {
+                            let great_great_grand_parent =
+                                text.syntax().grand_parent()?.grand_parent()?;
+
+                            let is_valid_fragment = match great_great_grand_parent.kind() {
+                                JsSyntaxKind::JSX_FRAGMENT => true,
+                                JsSyntaxKind::JSX_ELEMENT => {
+                                    if let Some(element) =
+                                        JsxElement::cast(great_great_grand_parent.clone())
+                                    {
+                                        let opening_element = element.opening_element().ok()?;
+
+                                        is_jsx_element_valid_fragment(&opening_element, model)?
+                                    } else {
+                                        false
+                                    }
+                                }
+                                _ => false,
+                            };
+
+                            if !is_valid_fragment {
                                 return None;
                             }
                         }
@@ -483,8 +491,23 @@ impl Rule for NoUselessFragments {
     }
 }
 
-fn contains_html_character_references(s: &str) -> bool {
-    let and = s.find('&');
-    let semi = s.find(';');
-    matches!((and, semi), (Some(and), Some(semi)) if and < semi)
+fn is_jsx_element_valid_fragment(
+    opening_element: &JsxOpeningElement,
+    model: &SemanticModel,
+) -> Option<bool> {
+    let name = opening_element.name().ok()?;
+
+    let is_valid_react_fragment = match name {
+        AnyJsxElementName::JsxMemberName(member_name) => {
+            jsx_member_name_is_react_fragment(&member_name, model)?
+        }
+        AnyJsxElementName::JsxReferenceIdentifier(identifier) => {
+            jsx_reference_identifier_is_fragment(&identifier, model)?
+        }
+        AnyJsxElementName::JsxName(_)
+        | AnyJsxElementName::JsxNamespaceName(_)
+        | AnyJsxElementName::JsMetavariable(_) => false,
+    };
+
+    Some(is_valid_react_fragment)
 }

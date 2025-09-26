@@ -47,7 +47,7 @@ impl ProjectLayout {
         path: &Utf8Path,
     ) -> Option<(Utf8PathBuf, PackageJson)> {
         let packages = self.0.pin();
-        path.ancestors().skip(1).find_map(|package_path| {
+        path.ancestors().find_map(|package_path| {
             packages
                 .get(package_path)
                 .and_then(|data| data.node_package.as_ref())
@@ -92,8 +92,8 @@ impl ProjectLayout {
         self.0.pin().update_or_insert_with(
             path,
             |data| {
-                let mut node_js_package = NodeJsPackage {
-                    manifest: Default::default(),
+                let node_js_package = NodeJsPackage {
+                    manifest: Some(manifest.clone()),
                     diagnostics: Default::default(),
                     tsconfig: data
                         .node_package
@@ -101,7 +101,6 @@ impl ProjectLayout {
                         .map(|package| package.tsconfig.clone())
                         .unwrap_or_default(),
                 };
-                node_js_package.manifest = Some(manifest.clone());
 
                 PackageData {
                     node_package: Some(node_js_package),
@@ -110,6 +109,40 @@ impl ProjectLayout {
             || {
                 let node_js_package = NodeJsPackage {
                     manifest: Some(manifest.clone()),
+                    ..Default::default()
+                };
+
+                PackageData {
+                    node_package: Some(node_js_package),
+                }
+            },
+        );
+    }
+
+    /// Inserts a `tsconfig.json` manifest for the package at the given `path`.
+    ///
+    /// `path` refers to the package directory, not the `package.json` file
+    /// itself.
+    pub fn insert_tsconfig(&self, path: Utf8PathBuf, tsconfig: TsConfigJson) {
+        self.0.pin().update_or_insert_with(
+            path,
+            |data| {
+                let node_js_package = NodeJsPackage {
+                    manifest: data
+                        .node_package
+                        .as_ref()
+                        .and_then(|package| package.manifest.clone()),
+                    diagnostics: Default::default(),
+                    tsconfig: Some(tsconfig.clone()),
+                };
+
+                PackageData {
+                    node_package: Some(node_js_package),
+                }
+            },
+            || {
+                let node_js_package = NodeJsPackage {
+                    tsconfig: Some(tsconfig.clone()),
                     ..Default::default()
                 };
 
@@ -134,8 +167,7 @@ impl ProjectLayout {
                     tsconfig: data
                         .node_package
                         .as_ref()
-                        .map(|package| package.tsconfig.clone())
-                        .unwrap_or_default(),
+                        .and_then(|package| package.tsconfig.clone()),
                 };
                 node_js_package.insert_serialized_manifest(&manifest.to_language_root());
 
@@ -204,6 +236,25 @@ impl ProjectLayout {
                     })
             })
             .unwrap_or_default()
+    }
+
+    /// Searches for the `tsconfig.json` file nearest to `path` and calls
+    /// `query` on it if found.
+    ///
+    /// Returns the result of `query` if it was executed.
+    pub fn query_tsconfig_for_path<F, R>(&self, path: &Utf8Path, query: F) -> Option<R>
+    where
+        F: Fn(&TsConfigJson) -> R,
+    {
+        let query = &query;
+        let packages = self.0.pin();
+        path.ancestors().find_map(|package_path| {
+            packages
+                .get(package_path)
+                .and_then(|data| data.node_package.as_ref())
+                .and_then(|node_package| node_package.tsconfig.as_ref())
+                .map(query)
+        })
     }
 
     /// Removes a `tsconfig.json` manifest from the package with the given

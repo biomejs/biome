@@ -126,8 +126,6 @@ fn should_index_on_create_and_unload_on_delete() {
 
         assert!(mock_bridge.watched_folders.pin().contains(project_path));
 
-        // It will take a while before the watcher become able to see events on Windows and macOS.
-        #[cfg(any(target_os = "windows", target_os = "macos"))]
         sleep(Duration::from_secs(1));
 
         fs::write(&file_path, "import 'foo';").expect("can create file");
