@@ -72,7 +72,10 @@ declare_lint_rule! {
         language: "js",
         severity: Severity::Warning,
         domains: &[RuleDomain::React],
-        sources: &[RuleSource::EslintReactXyz("no-forward-ref").same()],
+        sources: &[
+            RuleSource::EslintReactX("no-forward-ref").same(),
+            RuleSource::EslintReactXyz("no-forward-ref").same(),
+        ],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
