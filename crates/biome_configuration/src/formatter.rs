@@ -40,7 +40,7 @@ pub struct FormatterConfiguration {
     pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending.
-    #[bpaf(long("line-ending"), argument("lf|crlf|cr"))]
+    #[bpaf(long("line-ending"), argument("lf|crlf|cr|auto"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
