@@ -5200,6 +5200,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useQwikMethodUsage": {
+					"description": "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikMethodUsageConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikValidLexicalScope": {
+					"description": "Disallow unserializable expressions in Qwik dollar ($) scopes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikValidLexicalScopeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useReactFunctionComponents": {
 					"description": "Enforce that components are defined as functions and never as classes.",
 					"anyOf": [
@@ -11361,6 +11375,36 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseQwikMethodUsageOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikMethodUsageOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseQwikValidLexicalScopeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikValidLexicalScopeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseReactFunctionComponentsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -14433,6 +14477,26 @@
 			]
 		},
 		"UseQwikClasslistOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikMethodUsageConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikMethodUsageOptions" }
+			]
+		},
+		"UseQwikMethodUsageOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikValidLexicalScopeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikValidLexicalScopeOptions" }
+			]
+		},
+		"UseQwikValidLexicalScopeOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
