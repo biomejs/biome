@@ -1,4 +1,3 @@
-const foo = {};
 // chained members
 typeof foo != 'undefined' && foo.bar;
 typeof foo.bar != 'undefined' && foo.bar.baz;
