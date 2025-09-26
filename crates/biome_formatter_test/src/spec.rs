@@ -270,15 +270,15 @@ where
 
             let max_width = format_language.options().line_width().value() as usize;
 
-            // There are some logs that print different line endings, and we can't snapshot those
-            // otherwise we risk automatically having them replaced with LF by git.
-            //
-            // This is a workaround, and it might not work for all cases.
-            const CRLF_PATTERN: &str = "\r\n";
-            const CR_PATTERN: &str = "\r";
-            output_code = output_code
-                .replace(CRLF_PATTERN, "<CRLF>\n")
-                .replace(CR_PATTERN, "<CR>\n");
+            // Apply line ending normalization for options path, but not for AUTO line ending
+            // to preserve platform-specific behavior in snapshots
+            if !format_language.options().line_ending().is_auto() {
+                const CRLF_PATTERN: &str = "\r\n";
+                const CR_PATTERN: &str = "\r";
+                output_code = output_code
+                    .replace(CRLF_PATTERN, "<CRLF>\n")
+                    .replace(CR_PATTERN, "<CR>\n");
+            }
 
             snapshot_builder = snapshot_builder
                 .with_output_and_options(
