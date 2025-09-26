@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: requireCatchParameter.invalid.js
+---
+# Input
+```js
+// Invalid: catch parameter is missing, so original error can't be used as cause
+try {
+    foo();
+} catch {
+    throw new Error("fail");
+}
+
+// Invalid: catch parameter is missing, even if cause is attempted
+try {
+    foo();
+} catch {
+    throw new Error("fail", { cause: err });
+}
+```
