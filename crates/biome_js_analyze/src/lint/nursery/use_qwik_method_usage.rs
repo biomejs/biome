@@ -141,6 +141,7 @@ fn is_in_named_function(call: &JsCallExpression) -> bool {
     let function_name = call
         .syntax()
         .ancestors()
+        .skip(1)
         .find_map(AnyJsFunction::cast)
         .and_then(|func| match func {
             AnyJsFunction::JsFunctionDeclaration(decl) => decl
@@ -182,6 +183,7 @@ fn is_from_qwik(binding: &biome_js_semantic::Binding) -> bool {
     binding
         .syntax()
         .ancestors()
+        .skip(1)
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
         .is_some_and(|source| QWIK_IMPORT_NAMES.contains(&source.text()))
 }

@@ -4,7 +4,630 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
+import { useSignal, useTask$, useStore, useComputed$, useResource$, useWatch$ } from "@builder.io/qwik";
+
+// 1. useSignal in regular arrow function
 export const Counter = () => {
   const count = useSignal(0);
-}; 
+};
+
+// 2. useTask$ in regular function
+export function MyComponent() {
+  useTask$(() => {
+    console.log("invalid task");
+  });
+}
+
+// 3. useStore in module scope
+const globalStore = useStore({ count: 0 });
+
+// 4. useComputed$ in class method
+class MyClass {
+  method() {
+    const computed = useComputed$(() => {
+      return 42;
+    });
+  }
+}
+
+// 5. useResource$ in object method
+const myObject = {
+  method: function() {
+    const resource = useResource$(async () => {
+      return await fetch("/api/data");
+    });
+  }
+};
+
+// 6. useWatch$ in nested function
+export const ComponentWithNested = () => {
+  function nested() {
+    useWatch$(({ track }) => {
+      track(() => console.log("watching"));
+    });
+  }
+  return null;
+};
+
+// 7. Multiple hooks in invalid context
+const InvalidMultipleHooks = () => {
+  const signal = useSignal(0);
+  const store = useStore({ value: 0 });
+  useTask$(() => {
+    console.log(signal.value, store.value);
+  });
+};
+
+// 8. Hook in event handler
+export const ButtonComponent = () => {
+  const handleClick = () => {
+    const signal = useSignal(0);
+  };
+  return <button onClick={handleClick}>Click</button>;
+};
+
+// 9. Hook in async function
+async function fetchData() {
+  const signal = useSignal(null);
+  const data = await fetch("/api");
+  signal.value = data;
+}
+
+// 10. Hook in generator function
+function* generator() {
+  const signal = useSignal(0);
+  yield signal.value;
+}
+
+// 11. Hook in IIFE
+(function() {
+  const signal = useSignal(0);
+  console.log(signal.value);
+})();
+
+// 12. Hook in conditional
+export const ConditionalComponent = () => {
+  if (true) {
+    const signal = useSignal(0);
+  }
+  return null;
+};
+
+// 13. Hook in loop
+export const LoopComponent = () => {
+  for (let i = 0; i < 5; i++) {
+    const signal = useSignal(i);
+  }
+  return null;
+};
+
+// 14. Hook in try-catch
+export const TryCatchComponent = () => {
+  try {
+    const signal = useSignal(0);
+  } catch (e) {
+    console.error(e);
+  }
+  return null;
+};
+
+// 15. Hook in callback
+[1, 2, 3].map(() => {
+  const signal = useSignal(0);
+  return signal.value;
+});
+
+// 16. Hook in promise chain
+Promise.resolve().then(() => {
+  const signal = useSignal(0);
+  return signal.value;
+});
+
+// 17. Custom hook in invalid context (should not start with use)
+const myCustomHook = () => {
+  const signal = useSignal(0);
+  return signal;
+};
+
+// 18. Hook in exported default function
+export default function() {
+  const signal = useSignal(0);
+  return signal;
+}
+
+// 19. Hook after early return
+export const EarlyReturnComponent = () => {
+  if (true) {
+    return null;
+  }
+  const signal = useSignal(0);
+  return signal;
+};
+
+// 20. Hook in switch case
+export const SwitchComponent = () => {
+  switch (true) {
+    case true:
+      const signal = useSignal(0);
+      break;
+  }
+  return null;
+};
+```
+
+# Diagnostics
+```
+invalid.jsx:5:17 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    3 │ // 1. useSignal in regular arrow function
+    4 │ export const Counter = () => {
+  > 5 │   const count = useSignal(0);
+      │                 ^^^^^^^^^^^^
+    6 │ };
+    7 │ 
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:10:3 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+     8 │ // 2. useTask$ in regular function
+     9 │ export function MyComponent() {
+  > 10 │   useTask$(() => {
+       │   ^^^^^^^^^^^^^^^^
+  > 11 │     console.log("invalid task");
+  > 12 │   });
+       │   ^^
+    13 │ }
+    14 │ 
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:16:21 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    15 │ // 3. useStore in module scope
+  > 16 │ const globalStore = useStore({ count: 0 });
+       │                     ^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ // 4. useComputed$ in class method
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:21:22 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    19 │ class MyClass {
+    20 │   method() {
+  > 21 │     const computed = useComputed$(() => {
+       │                      ^^^^^^^^^^^^^^^^^^^^
+  > 22 │       return 42;
+  > 23 │     });
+       │     ^^
+    24 │   }
+    25 │ }
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:30:22 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    28 │ const myObject = {
+    29 │   method: function() {
+  > 30 │     const resource = useResource$(async () => {
+       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 31 │       return await fetch("/api/data");
+  > 32 │     });
+       │     ^^
+    33 │   }
+    34 │ };
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:39:5 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    37 │ export const ComponentWithNested = () => {
+    38 │   function nested() {
+  > 39 │     useWatch$(({ track }) => {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 40 │       track(() => console.log("watching"));
+  > 41 │     });
+       │     ^^
+    42 │   }
+    43 │   return null;
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:48:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    46 │ // 7. Multiple hooks in invalid context
+    47 │ const InvalidMultipleHooks = () => {
+  > 48 │   const signal = useSignal(0);
+       │                  ^^^^^^^^^^^^
+    49 │   const store = useStore({ value: 0 });
+    50 │   useTask$(() => {
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:49:17 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    47 │ const InvalidMultipleHooks = () => {
+    48 │   const signal = useSignal(0);
+  > 49 │   const store = useStore({ value: 0 });
+       │                 ^^^^^^^^^^^^^^^^^^^^^^
+    50 │   useTask$(() => {
+    51 │     console.log(signal.value, store.value);
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:50:3 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    48 │   const signal = useSignal(0);
+    49 │   const store = useStore({ value: 0 });
+  > 50 │   useTask$(() => {
+       │   ^^^^^^^^^^^^^^^^
+  > 51 │     console.log(signal.value, store.value);
+  > 52 │   });
+       │   ^^
+    53 │ };
+    54 │ 
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:58:20 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    56 │ export const ButtonComponent = () => {
+    57 │   const handleClick = () => {
+  > 58 │     const signal = useSignal(0);
+       │                    ^^^^^^^^^^^^
+    59 │   };
+    60 │   return <button onClick={handleClick}>Click</button>;
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:65:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    63 │ // 9. Hook in async function
+    64 │ async function fetchData() {
+  > 65 │   const signal = useSignal(null);
+       │                  ^^^^^^^^^^^^^^^
+    66 │   const data = await fetch("/api");
+    67 │   signal.value = data;
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:72:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    70 │ // 10. Hook in generator function
+    71 │ function* generator() {
+  > 72 │   const signal = useSignal(0);
+       │                  ^^^^^^^^^^^^
+    73 │   yield signal.value;
+    74 │ }
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:78:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    76 │ // 11. Hook in IIFE
+    77 │ (function() {
+  > 78 │   const signal = useSignal(0);
+       │                  ^^^^^^^^^^^^
+    79 │   console.log(signal.value);
+    80 │ })();
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:85:20 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    83 │ export const ConditionalComponent = () => {
+    84 │   if (true) {
+  > 85 │     const signal = useSignal(0);
+       │                    ^^^^^^^^^^^^
+    86 │   }
+    87 │   return null;
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:93:20 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    91 │ export const LoopComponent = () => {
+    92 │   for (let i = 0; i < 5; i++) {
+  > 93 │     const signal = useSignal(i);
+       │                    ^^^^^^^^^^^^
+    94 │   }
+    95 │   return null;
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:101:20 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+     99 │ export const TryCatchComponent = () => {
+    100 │   try {
+  > 101 │     const signal = useSignal(0);
+        │                    ^^^^^^^^^^^^
+    102 │   } catch (e) {
+    103 │     console.error(e);
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:110:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    108 │ // 15. Hook in callback
+    109 │ [1, 2, 3].map(() => {
+  > 110 │   const signal = useSignal(0);
+        │                  ^^^^^^^^^^^^
+    111 │   return signal.value;
+    112 │ });
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:116:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    114 │ // 16. Hook in promise chain
+    115 │ Promise.resolve().then(() => {
+  > 116 │   const signal = useSignal(0);
+        │                  ^^^^^^^^^^^^
+    117 │   return signal.value;
+    118 │ });
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:122:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    120 │ // 17. Custom hook in invalid context (should not start with use)
+    121 │ const myCustomHook = () => {
+  > 122 │   const signal = useSignal(0);
+        │                  ^^^^^^^^^^^^
+    123 │   return signal;
+    124 │ };
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:128:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    126 │ // 18. Hook in exported default function
+    127 │ export default function() {
+  > 128 │   const signal = useSignal(0);
+        │                  ^^^^^^^^^^^^
+    129 │   return signal;
+    130 │ }
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:137:18 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    135 │     return null;
+    136 │   }
+  > 137 │   const signal = useSignal(0);
+        │                  ^^^^^^^^^^^^
+    138 │   return signal;
+    139 │ };
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
+```
+
+```
+invalid.jsx:145:22 lint/nursery/useQwikMethodUsage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Qwik hook detected outside of an allowed scope.
+  
+    143 │   switch (true) {
+    144 │     case true:
+  > 145 │       const signal = useSignal(0);
+        │                      ^^^^^^^^^^^^
+    146 │       break;
+    147 │   }
+  
+  i Qwik's reactive hooks (functions starting with  use* followed by uppercase letter) must be:
+    - Used exclusively within `component$` functions
+    - Or encapsulated within other valid Qwik hooks
+  
+  i Check the Qwik documentation.
+  
+
 ```
