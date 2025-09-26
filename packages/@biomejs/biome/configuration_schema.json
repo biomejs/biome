@@ -4934,6 +4934,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDuplicateKeysConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueDuplicateKeysOptions" }
+			]
+		},
+		"NoVueDuplicateKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5104,6 +5114,13 @@
 					"description": "Enforce that Vue component data options are declared as functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoVueDataObjectDeclarationConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDuplicateKeys": {
+					"description": "Disallow duplicate keys in Vue component data, methods, computed properties, and other options.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueDuplicateKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9795,6 +9812,21 @@
 					"allOf": [
 						{ "$ref": "#/definitions/NoVueDataObjectDeclarationOptions" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoVueDuplicateKeysOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueDuplicateKeysOptions" }]
 				}
 			},
 			"additionalProperties": false

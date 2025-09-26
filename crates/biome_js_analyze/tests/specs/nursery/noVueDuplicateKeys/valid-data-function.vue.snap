@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-data-function.vue
+---
+# Input
+```ts
+export default {
+  props: ['foo'],
+  computed: {
+    bar () {}
+  },
+  data () {
+    return {
+      dat: null
+    }
+  },
+  data () {
+    return
+  },
+  methods: {
+    _foo () {},
+    test () {}
+  }
+}
+
+```

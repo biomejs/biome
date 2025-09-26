@@ -13,7 +13,7 @@ use biome_js_parser::{AnyJsRoot, JsFileSource, JsParserOptions};
 use biome_js_type_info::{TypeData, TypeResolver};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic, parse_json};
 use biome_module_graph::ModuleGraph;
-use biome_package::PackageJson;
+use biome_package::{PackageJson, TsConfigJson};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::file_handlers::DocumentFileSource;
@@ -203,12 +203,14 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
         .collect()
 }
 
-pub fn project_layout_with_node_manifest(
+pub fn project_layout_for_test_file(
     input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> Arc<ProjectLayout> {
-    let options_file = input_file.with_extension("package.json");
-    if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
+    let project_layout = ProjectLayout::default();
+
+    let package_json_file = input_file.with_extension("package.json");
+    if let Ok(json) = std::fs::read_to_string(&package_json_file) {
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
             json.as_str(),
             JsonParserOptions::default(),
@@ -220,12 +222,14 @@ pub fn project_layout_with_node_manifest(
                     .into_diagnostics()
                     .into_iter()
                     .map(|diagnostic| {
-                        diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
-                    })
-                    .collect::<Vec<_>>(),
+                        diagnostic_to_string(
+                            package_json_file.file_stem().unwrap(),
+                            &json,
+                            diagnostic,
+                        )
+                    }),
             );
         } else {
-            let project_layout = ProjectLayout::default();
             project_layout.insert_node_manifest(
                 input_file
                     .parent()
@@ -233,10 +237,39 @@ pub fn project_layout_with_node_manifest(
                     .unwrap_or_default(),
                 deserialized.into_deserialized().unwrap_or_default(),
             );
-            return Arc::new(project_layout);
         }
     }
-    Default::default()
+
+    let tsconfig_file = input_file.with_extension("tsconfig.json");
+    if let Ok(json) = std::fs::read_to_string(&tsconfig_file) {
+        let deserialized = biome_deserialize::json::deserialize_from_json_str::<TsConfigJson>(
+            json.as_str(),
+            JsonParserOptions::default()
+                .with_allow_comments()
+                .with_allow_trailing_commas(),
+            "",
+        );
+        if deserialized.has_errors() {
+            diagnostics.extend(
+                deserialized
+                    .into_diagnostics()
+                    .into_iter()
+                    .map(|diagnostic| {
+                        diagnostic_to_string(tsconfig_file.file_stem().unwrap(), &json, diagnostic)
+                    }),
+            );
+        } else {
+            project_layout.insert_tsconfig(
+                input_file
+                    .parent()
+                    .map(|dir_path| dir_path.to_path_buf())
+                    .unwrap_or_default(),
+                deserialized.into_deserialized().unwrap_or_default(),
+            );
+        }
+    }
+
+    Arc::new(project_layout)
 }
 
 pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {

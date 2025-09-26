@@ -82,6 +82,18 @@ impl TsConfigJson {
         }
         (tsconfig, diagnostics)
     }
+
+    /// Returns whether the given `path` matches a configured path alias.
+    pub fn matches_path_alias(&self, path: &str) -> bool {
+        self.compiler_options.paths.as_ref().is_some_and(|paths| {
+            paths
+                .keys()
+                .any(|alias_path| match alias_path.split_once('*') {
+                    Some((before, after)) => path.starts_with(before) && path.ends_with(after),
+                    None => path == alias_path,
+                })
+        })
+    }
 }
 
 #[derive(Clone, Debug, Default, Deserializable)]
