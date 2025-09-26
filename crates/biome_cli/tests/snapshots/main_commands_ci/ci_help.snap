@@ -30,7 +30,7 @@ The configuration that is contained inside the file `biome.json`
                               that doesn't know
         --indent-style=<tab|space>  The indent style.
         --indent-width=NUMBER  The size of the indentation, 2 by default
-        --line-ending=<lf|crlf|cr>  The type of line ending.
+        --line-ending=<lf|crlf|cr|auto>  The type of line ending.
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
         --attribute-position=<multiline|auto>  The attribute position style in HTML-ish languages.
                               Defaults to auto.

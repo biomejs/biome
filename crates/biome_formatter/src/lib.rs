@@ -162,9 +162,13 @@ impl LineEnding {
             Self::Cr => "\r",
             Self::Auto => {
                 #[cfg(windows)]
-                { "\r\n" }
+                {
+                    "\r\n"
+                }
                 #[cfg(not(windows))]
-                { "\n" }
+                {
+                    "\n"
+                }
             }
         }
     }
