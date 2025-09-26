@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
 expression: invalid_dynamic_access.ts
 ---
 # Input
@@ -21,6 +22,27 @@ export class Sample {
 ```
 
 # Diagnostics
+```
+invalid_dynamic_access.ts:2:11 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    1 │ export class Sample {
+  > 2 │   private member;
+      │           ^^^^^^
+    3 │   #prop;
+    4 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     1  1 │   export class Sample {
+     2    │ - ··private·member;
+     3  2 │     #prop;
+     4  3 │   
+  
+
+```
+
 ```
 invalid_dynamic_access.ts:3:3 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━
 
