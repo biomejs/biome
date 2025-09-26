@@ -62,7 +62,8 @@ impl Rule for UseQwikMethodUsage {
         if !is_hook {
             return None;
         }
-        let is_valid_context = is_inside_component_or_hook(call) || is_in_named_function(call);
+        let is_valid_context =
+            is_inside_component_or_hook(call) || is_inside_component_or_hook_name(call);
         if is_valid_context {
             None
         } else {
@@ -137,7 +138,7 @@ fn is_component_or_hook_name(name: &str) -> bool {
     name == "component$" || is_qwik_hook_name(name)
 }
 
-fn is_in_named_function(call: &JsCallExpression) -> bool {
+fn is_inside_component_or_hook_name(call: &JsCallExpression) -> bool {
     let function_name = call
         .syntax()
         .ancestors()
@@ -175,7 +176,7 @@ fn is_in_named_function(call: &JsCallExpression) -> bool {
                 .map(|token| token.token_text_trimmed()),
         });
 
-    function_name.is_some_and(|name| is_component_or_hook_name(name.text()))
+    function_name.is_some_and(|name| is_qwik_hook_name(name.text()))
 }
 
 fn is_from_qwik(binding: &biome_js_semantic::Binding) -> bool {

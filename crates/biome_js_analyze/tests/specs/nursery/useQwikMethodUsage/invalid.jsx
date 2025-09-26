@@ -1,4 +1,5 @@
 import { useSignal, useTask$, useStore, useComputed$, useResource$, useWatch$ } from "@builder.io/qwik";
+import { useSignal as useQwikSignal } from "qwik";
 
 // 1. useSignal in regular arrow function
 export const Counter = () => {
@@ -146,4 +147,28 @@ export const SwitchComponent = () => {
       break;
   }
   return null;
+};
+
+// 21. Edge case: Function merely named component$ (not called by component$)
+function component$() {
+  const signal = useSignal(0);
+  return signal;
+}
+
+// 22. Edge case: Arrow function merely named component$
+const component$ = () => {
+  const signal = useSignal(0);
+  return signal;
+};
+
+// 23. Edge case: Import with alias from "qwik"
+const AliasedComponent = () => {
+  const signal = useQwikSignal(0);
+  return signal;
+};
+
+// 24. Edge case: Hook in function expression named component$
+const myFunc = function component$() {
+  const signal = useSignal(0);
+  return signal;
 };
