@@ -148,15 +148,24 @@ pub enum LineEnding {
 
     /// Carriage Return character only (\r), used very rarely
     Cr,
+
+    /// Automatically use CRLF on Windows and LF on other platforms
+    Auto,
 }
 
 impl LineEnding {
     #[inline]
-    pub const fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         match self {
             Self::Lf => "\n",
             Self::Crlf => "\r\n",
             Self::Cr => "\r",
+            Self::Auto => {
+                #[cfg(windows)]
+                { "\r\n" }
+                #[cfg(not(windows))]
+                { "\n" }
+            }
         }
     }
 
@@ -174,6 +183,11 @@ impl LineEnding {
     pub const fn is_carriage_return(&self) -> bool {
         matches!(self, Self::Cr)
     }
+
+    /// Returns `true` if this is a [LineEnding::Auto].
+    pub const fn is_auto(&self) -> bool {
+        matches!(self, Self::Auto)
+    }
 }
 
 impl FromStr for LineEnding {
@@ -184,6 +198,7 @@ impl FromStr for LineEnding {
             "lf" => Ok(Self::Lf),
             "crlf" => Ok(Self::Crlf),
             "cr" => Ok(Self::Cr),
+            "auto" => Ok(Self::Auto),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for LineEnding"),
         }
@@ -196,6 +211,7 @@ impl std::fmt::Display for LineEnding {
             Self::Lf => std::write!(f, "LF"),
             Self::Crlf => std::write!(f, "CRLF"),
             Self::Cr => std::write!(f, "CR"),
+            Self::Auto => std::write!(f, "AUTO"),
         }
     }
 }
