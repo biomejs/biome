@@ -63,7 +63,7 @@ impl Rule for UseQwikMethodUsage {
             return None;
         }
         let is_valid_context =
-            is_inside_component_or_hook(call) || is_inside_component_or_hook_name(call);
+            is_inside_component_or_hook(call, model) || is_inside_component_or_hook_name(call);
         if is_valid_context {
             None
         } else {
@@ -105,7 +105,7 @@ fn is_qwik_hook(call: &JsCallExpression, model: &SemanticModel) -> Option<bool> 
     Some(is_from_qwik(&binding))
 }
 
-fn is_inside_component_or_hook(call: &JsCallExpression) -> bool {
+fn is_inside_component_or_hook(call: &JsCallExpression, model: &SemanticModel) -> bool {
     let outer_call = call
         .syntax()
         .ancestors()
@@ -119,15 +119,42 @@ fn is_inside_component_or_hook(call: &JsCallExpression) -> bool {
                 .find_map(JsCallExpression::cast)
         });
 
-    outer_call
-        .and_then(|call_expr| {
-            call_expr
-                .callee()
-                .ok()
-                .and_then(|callee| callee.as_js_reference_identifier())
-                .and_then(|ident| ident.value_token().ok())
-        })
-        .is_some_and(|token| is_component_or_hook_name(token.text_trimmed()))
+    if let Some(call_expr) = outer_call {
+        if let Ok(callee) = call_expr.callee() {
+            if let Some(ident) = callee.as_js_reference_identifier() {
+                // Check if this is component$ or a hook by name
+                if let Ok(token) = ident.value_token() {
+                    let name = token.text_trimmed();
+                    if is_component_or_hook_name(name) {
+                        return true;
+                    }
+                }
+
+                // Check if this identifier is bound to component$ from Qwik
+                // This handles aliased imports like: import { component$ as MyComponent } from "@builder.io/qwik"
+                if let Some(binding) = model.binding(&ident) {
+                    if is_from_qwik(&binding) {
+                        // Walk up to find the import specifier
+                        let mut current = binding.syntax().clone();
+                        while let Some(parent) = current.parent() {
+                            // Check if we've reached an import specifier that contains "component$"
+                            let text = parent.text_trimmed();
+                            if text.to_string().contains("component$") {
+                                return true;
+                            }
+                            // Stop at the import statement level
+                            if JsImport::can_cast(parent.kind()) {
+                                break;
+                            }
+                            current = parent;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    false
 }
 
 fn is_qwik_hook_name(name: &str) -> bool {
@@ -184,7 +211,14 @@ fn is_from_qwik(binding: &biome_js_semantic::Binding) -> bool {
     binding
         .syntax()
         .ancestors()
-        .skip(1)
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
-        .is_some_and(|source| QWIK_IMPORT_NAMES.contains(&source.text()))
+        .is_some_and(|source| {
+            let source_text = source.text();
+            let trimmed = source_text
+                .trim_start_matches('"')
+                .trim_end_matches('"')
+                .trim_start_matches('\'')
+                .trim_end_matches('\'');
+            QWIK_IMPORT_NAMES.contains(&trimmed)
+        })
 }

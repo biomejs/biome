@@ -142,9 +142,10 @@ export const EarlyReturnComponent = () => {
 // 20. Hook in switch case
 export const SwitchComponent = () => {
   switch (true) {
-    case true:
+    case true: {
       const signal = useSignal(0);
       break;
+    }
   }
   return null;
 };
@@ -172,3 +173,10 @@ const myFunc = function component$() {
   const signal = useSignal(0);
   return signal;
 };
+
+// 25. Edge case: import with single quotes
+// This test case requires a separate file or inline simulation since we can't have multiple imports of the same module
+
+// 26. Edge case: Import as namespace
+// import * as qwik from "qwik"; qwik.useSignal()
+// This test case would require separate file to avoid conflicts
