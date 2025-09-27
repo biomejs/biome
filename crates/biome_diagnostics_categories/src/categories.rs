@@ -388,6 +388,7 @@ define_categories! {
     "lint/suspicious/useStrictMode": "https://biomejs.dev/linter/rules/use-strict-mode",
     // end lint rules
     // start assist actions
+    "assist/source/useSortedInterfaceMembers": "https://biomejs.dev/assist/actions/use-sorted-interface-members",
     "assist/source/useSortedKeys": "https://biomejs.dev/assist/actions/use-sorted-keys",
     "assist/source/useSortedProperties": "https://biomejs.dev/assist/actions/use-sorted-properties",
     "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",
