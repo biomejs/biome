@@ -85,52 +85,48 @@ declare_node_union! {
 }
 
 impl AnyFunctionLike {
-    pub fn name_range(&self) -> Option<TextRange> {
+    pub fn parameter_range(&self) -> Option<TextRange> {
         match self {
             Self::JsFunctionDeclaration(func) => func
-                .id()
-                .ok()?
-                .as_js_identifier_binding()?
-                .name_token()
+                .parameters()
                 .ok()
-                .map(|token| token.text_range()),
+                .map(|params| params.range()),
             Self::JsFunctionExpression(func) => func
-                .id()?
-                .as_js_identifier_binding()?
-                .name_token()
+                .parameters()
                 .ok()
-                .map(|token| token.text_range()),
-            Self::JsArrowFunctionExpression(_) => {
-                // Arrow functions don't have names
-                None
-            }
-            Self::JsMethodClassMember(method) => method.name().ok().map(|name| name.range()),
-            Self::JsMethodObjectMember(method) => method.name().ok().map(|name| name.range()),
-            Self::JsConstructorClassMember(constructor) => {
-                constructor.name().ok().map(|name| name.range())
-            }
-            Self::TsDeclareFunctionDeclaration(decl) => {
-                decl.id().ok().and_then(|binding| match binding {
-                    biome_js_syntax::AnyJsBinding::JsIdentifierBinding(id) => {
-                        id.name_token().ok().map(|token| token.text_range())
-                    }
-                    biome_js_syntax::AnyJsBinding::JsMetavariable(meta) => {
-                        meta.value_token().ok().map(|token| token.text_range())
-                    }
-                    _ => None,
-                })
-            }
+                .map(|params| params.range()),
+            Self::JsArrowFunctionExpression(func) => func
+                .parameters()
+                .ok()
+                .map(|params| params.range()),
+            Self::JsMethodClassMember(method) => method
+                .parameters()
+                .ok()
+                .map(|params| params.range()),
+            Self::JsMethodObjectMember(method) => method
+                .parameters()
+                .ok()
+                .map(|params| params.range()),
+            Self::JsConstructorClassMember(constructor) => constructor
+                .parameters()
+                .ok()
+                .map(|params| params.range()),
+            Self::TsDeclareFunctionDeclaration(decl) => decl
+                .parameters()
+                .ok()
+                .map(|params| params.range()),
             Self::TsTypeAliasDeclaration(decl) => {
-                decl.binding_identifier()
-                    .ok()
-                    .and_then(|binding| match binding {
-                        biome_js_syntax::AnyTsIdentifierBinding::TsIdentifierBinding(id) => {
-                            id.name_token().ok().map(|token| token.text_range())
-                        }
-                        biome_js_syntax::AnyTsIdentifierBinding::JsMetavariable(meta) => {
-                            meta.value_token().ok().map(|token| token.text_range())
-                        }
-                    })
+                if let Ok(ty) = decl.ty() {
+                    match ty {
+                        biome_js_syntax::AnyTsType::TsFunctionType(func_type) => func_type
+                            .parameters()
+                            .ok()
+                            .map(|params| params.range()),
+                        _ => None,
+                    }
+                } else {
+                    None
+                }
             }
         }
     }
@@ -208,8 +204,8 @@ impl Rule for UseMaxParams {
         let node = ctx.query();
         let options = ctx.options();
 
-        // Use the function/method name's range if available, otherwise fall back to the whole node
-        let range = node.name_range().unwrap_or_else(|| node.range());
+        // Use the parameter list range if available, otherwise fall back to the whole node
+        let range = node.parameter_range().unwrap_or_else(|| node.range());
 
         Some(
             RuleDiagnostic::new(

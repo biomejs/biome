@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fix useMaxParams rule to only highlight function names instead of entire function bodies
+Fix useMaxParams rule to highlight parameter lists instead of entire function bodies
