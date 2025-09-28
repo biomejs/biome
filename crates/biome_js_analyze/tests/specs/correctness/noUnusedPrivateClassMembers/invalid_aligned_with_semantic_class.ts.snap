@@ -1,0 +1,625 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: invalid_aligned_with_semantic_class.ts
+---
+# Input
+```ts
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: invalid_aligned_with_semantic_class.ts
+---
+# Input
+```ts
+
+class UsedMember {
+	get #usedAccessor() {}
+	set #usedAccessor(value) {}
+
+	method() {
+		this.#usedAccessor = 42;
+	}
+}
+
+class UsedMember {
+	#usedInInnerClass;
+
+	method(a) {
+		return class {
+			// not really used, a is not reference to this scope
+			foo = a.#usedInInnerClass;
+		}
+	}
+}
+
+class UsedMember {
+	set #accessorUsedInMemberAccess(value) {} // <- unused
+
+	method(a) {
+		// there is no getter, so this is not a read at all
+		[this.#accessorUsedInMemberAccess] = a;
+	}
+}
+
+class UsedMember {
+	#usedInInnerClass;
+
+	method(a) {
+		return class {
+			foo = a.#usedInInnerClass;
+		}
+	}
+}
+
+class C {
+	set #x(value) { // <- unused
+		doSomething(value);
+	}
+
+	foo() {
+		this.#x = 1;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid_aligned_with_semantic_class.ts:3:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    2 │ class UsedMember {
+  > 3 │ 	get #usedAccessor() {}
+      │ 	    ^^^^^^^^^^^^^
+    4 │ 	set #usedAccessor(value) {}
+    5 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     1  1 │   
+     2  2 │   class UsedMember {
+     3    │ - → get·#usedAccessor()·{}
+     4  3 │   	set #usedAccessor(value) {}
+     5  4 │   
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:4:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    2 │ class UsedMember {
+    3 │ 	get #usedAccessor() {}
+  > 4 │ 	set #usedAccessor(value) {}
+      │ 	    ^^^^^^^^^^^^^
+    5 │ 
+    6 │ 	method() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     2  2 │   class UsedMember {
+     3  3 │   	get #usedAccessor() {}
+     4    │ - → set·#usedAccessor(value)·{}
+     5  4 │   
+     6  5 │   	method() {
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:12:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    11 │ class UsedMember {
+  > 12 │ 	#usedInInnerClass;
+       │ 	^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ 	method(a) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    10 10 │   
+    11 11 │   class UsedMember {
+    12    │ - → #usedInInnerClass;
+    13 12 │   
+    14 13 │   	method(a) {
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:23:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    22 │ class UsedMember {
+  > 23 │ 	set #accessorUsedInMemberAccess(value) {} // <- unused
+       │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ 	method(a) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    21 21 │   
+    22 22 │   class UsedMember {
+    23    │ - → set·#accessorUsedInMemberAccess(value)·{}·//·<-·unused
+    24 23 │   
+    25 24 │   	method(a) {
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:32:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    31 │ class UsedMember {
+  > 32 │ 	#usedInInnerClass;
+       │ 	^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ 	method(a) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    30 30 │   
+    31 31 │   class UsedMember {
+    32    │ - → #usedInInnerClass;
+    33 32 │   
+    34 33 │   	method(a) {
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:42:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    41 │ class C {
+  > 42 │ 	set #x(value) { // <- unused
+       │ 	    ^^
+    43 │ 		doSomething(value);
+    44 │ 	}
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    40 40 │   
+    41 41 │   class C {
+    42    │ - → set·#x(value)·{·//·<-·unused
+    43    │ - → → doSomething(value);
+    44    │ - → }
+    45 42 │   
+    46 43 │   	foo() {
+  
+
+```
+
+```
+
+# Diagnostics
+```
+invalid_aligned_with_semantic_class.ts:10:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+     9 │ class UsedMember {
+  > 10 │ 	get #usedAccessor() {}
+       │ 	    ^^^^^^^^^^^^^
+    11 │ 	set #usedAccessor(value) {}
+    12 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+      8   8 │   
+      9   9 │   class UsedMember {
+     10     │ - → get·#usedAccessor()·{}
+     11  10 │   	set #usedAccessor(value) {}
+     12  11 │   
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:11:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+     9 │ class UsedMember {
+    10 │ 	get #usedAccessor() {}
+  > 11 │ 	set #usedAccessor(value) {}
+       │ 	    ^^^^^^^^^^^^^
+    12 │ 
+    13 │ 	method() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+      9   9 │   class UsedMember {
+     10  10 │   	get #usedAccessor() {}
+     11     │ - → set·#usedAccessor(value)·{}
+     12  11 │   
+     13  12 │   	method() {
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:19:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    18 │ class UsedMember {
+  > 19 │ 	#usedInInnerClass;
+       │ 	^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ 	method(a) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     17  17 │   
+     18  18 │   class UsedMember {
+     19     │ - → #usedInInnerClass;
+     20  19 │   
+     21  20 │   	method(a) {
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:30:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    29 │ class UsedMember {
+  > 30 │ 	set #accessorUsedInMemberAccess(value) {} // <- unused
+       │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ 	method(a) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     28  28 │   
+     29  29 │   class UsedMember {
+     30     │ - → set·#accessorUsedInMemberAccess(value)·{}·//·<-·unused
+     31  30 │   
+     32  31 │   	method(a) {
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:39:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    38 │ class UsedMember {
+  > 39 │ 	#usedInInnerClass;
+       │ 	^^^^^^^^^^^^^^^^^
+    40 │ 
+    41 │ 	method(a) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     37  37 │   
+     38  38 │   class UsedMember {
+     39     │ - → #usedInInnerClass;
+     40  39 │   
+     41  40 │   	method(a) {
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:49:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    48 │ class C {
+  > 49 │ 	set #x(value) { // <- unused
+       │ 	    ^^
+    50 │ 		doSomething(value);
+    51 │ 	}
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     47  47 │   
+     48  48 │   class C {
+     49     │ - → set·#x(value)·{·//·<-·unused
+     50     │ - → → doSomething(value);
+     51     │ - → }
+     52  49 │   
+     53  50 │   	foo() {
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:67:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    66 │     2 │ class UsedMember {
+  > 67 │   > 3 │ 	get #usedAccessor() {}
+       │         	    ^^^^^^^^^^^^^
+    68 │       │ 	    ^^^^^^^^^^^^^
+    69 │     4 │ 	set #usedAccessor(value) {}
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    67 │ ··>·3·│·→ get·#usedAccessor()·{}
+       │               ------------------
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:69:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    67 │   > 3 │ 	get #usedAccessor() {}
+    68 │       │ 	    ^^^^^^^^^^^^^
+  > 69 │     4 │ 	set #usedAccessor(value) {}
+       │         	    ^^^^^^^^^^^^^
+    70 │     5 │·
+    71 │   
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    69 │ ····4·│·→ set·#usedAccessor(value)·{}
+       │               -----------------------
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:76:21 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    74 │      1  1 │···
+    75 │      2  2 │   class UsedMember {
+  > 76 │      3    │ - → get·#usedAccessor()·{}
+       │                     ^^^^^^^^^^^^^
+    77 │      4  3 │   	set #usedAccessor(value) {}
+    78 │      5  4 │···
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    76 │ ·····3····│·-·→·get·#usedAccessor()·{}
+       │                     ---------------   
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:89:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    88 │     2 │ class UsedMember {
+  > 89 │     3 │ 	get #usedAccessor() {}
+       │         	    ^^^^^^^^^^^^^
+    90 │   > 4 │ 	set #usedAccessor(value) {}
+    91 │       │ 	    ^^^^^^^^^^^^^
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    89 │ ····3·│·→ get·#usedAccessor()·{}
+       │               ------------------
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:90:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    88 │     2 │ class UsedMember {
+    89 │     3 │ 	get #usedAccessor() {}
+  > 90 │   > 4 │ 	set #usedAccessor(value) {}
+       │         	    ^^^^^^^^^^^^^
+    91 │       │ 	    ^^^^^^^^^^^^^
+    92 │     5 │·
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    90 │ ··>·4·│·→ set·#usedAccessor(value)·{}
+       │               -----------------------
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:98:20 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+     97 │      2  2 │   class UsedMember {
+   > 98 │      3  3 │   	get #usedAccessor() {}
+        │               	    ^^^^^^^^^^^^^
+     99 │      4    │ - → set·#usedAccessor(value)·{}
+    100 │      5  4 │···
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    98 │ ·····3··3·│···→ get·#usedAccessor()·{}
+       │                     ------------------
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:99:21 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+     97 │      2  2 │   class UsedMember {
+     98 │      3  3 │   	get #usedAccessor() {}
+   > 99 │      4    │ - → set·#usedAccessor(value)·{}
+        │                     ^^^^^^^^^^^^^
+    100 │      5  4 │···
+    101 │      6  5 │   	method() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    99 │ ·····4····│·-·→·set·#usedAccessor(value)·{}
+       │                     --------------------   
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:112:11 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    111 │     11 │ class UsedMember {
+  > 112 │   > 12 │ 	#usedInInnerClass;
+        │          	^^^^^^^^^^^^^^^^^
+    113 │        │ 	^^^^^^^^^^^^^^^^^
+    114 │     13 │·
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    112 │ ··>·12·│·→ #usedInInnerClass;
+        │            ------------------
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:121:17 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    119 │     10 10 │···
+    120 │     11 11 │   class UsedMember {
+  > 121 │     12    │ - → #usedInInnerClass;
+        │                 ^^^^^^^^^^^^^^^^^
+    122 │     13 12 │···
+    123 │     14 13 │   	method(a) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    121 │ ····12····│·-·→·#usedInInnerClass;
+        │                 ------------------
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:134:15 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    133 │     22 │ class UsedMember {
+  > 134 │   > 23 │ 	set #accessorUsedInMemberAccess(value) {} // <- unused
+        │          	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    135 │        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    136 │     24 │·
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    134 │ ··>·23·│·→ set·#accessorUsedInMemberAccess(value)·{}·//·<-·unused
+        │                --------------------------------------------------
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:143:21 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    141 │     21 21 │···
+    142 │     22 22 │   class UsedMember {
+  > 143 │     23    │ - → set·#accessorUsedInMemberAccess(value)·{}·//·<-·unused
+        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    144 │     24 23 │···
+    145 │     25 24 │   	method(a) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    143 │ ····23····│·-·→·set·#accessorUsedInMemberAccess(value)·{}·//·<-·unused
+        │                     ----------------------------------                
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:156:11 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    155 │     31 │ class UsedMember {
+  > 156 │   > 32 │ 	#usedInInnerClass;
+        │          	^^^^^^^^^^^^^^^^^
+    157 │        │ 	^^^^^^^^^^^^^^^^^
+    158 │     33 │·
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    156 │ ··>·32·│·→ #usedInInnerClass;
+        │            ------------------
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:165:17 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    163 │     30 30 │···
+    164 │     31 31 │   class UsedMember {
+  > 165 │     32    │ - → #usedInInnerClass;
+        │                 ^^^^^^^^^^^^^^^^^
+    166 │     33 32 │···
+    167 │     34 33 │   	method(a) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    165 │ ····32····│·-·→·#usedInInnerClass;
+        │                 ------------------
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:178:15 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    177 │     41 │ class C {
+  > 178 │   > 42 │ 	set #x(value) { // <- unused
+        │          	    ^^
+    179 │        │ 	    ^^
+    180 │     43 │ 		doSomething(value);
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    176 176 │     
+    177 177 │       41 │ class C {
+    178     │ - ··>·42·│·→ set·#x(value)·{·//·<-·unused
+    179     │ - ·······│·→ ····^^
+    180     │ - ····43·│·→ → doSomething(value);
+    181     │ - ····44·│·→ }
+        178 │ + ··>·42·│·→ set·
+    182 179 │     
+    183 180 │     i Unsafe fix: Remove unused declaration.
+  
+
+```
+
+```
+invalid_aligned_with_semantic_class.ts:187:21 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    185 │     40 40 │···
+    186 │     41 41 │   class C {
+  > 187 │     42    │ - → set·#x(value)·{·//·<-·unused
+        │                     ^^
+    188 │     43    │ - → → doSomething(value);
+    189 │     44    │ - → }
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    187 │ ····42····│·-·→·set·#x(value)·{·//·<-·unused
+        │                     ---------               
+
+```

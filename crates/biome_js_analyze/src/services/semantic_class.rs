@@ -5,10 +5,11 @@ use biome_analyze::{
 use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsClassMember, AnyJsExpression, AnyJsObjectBindingPatternMember,
     AnyJsRoot, JsArrayAssignmentPattern, JsArrowFunctionExpression, JsAssignmentExpression,
-    JsClassDeclaration, JsClassMemberList, JsConstructorClassMember, JsFunctionBody, JsLanguage,
-    JsObjectAssignmentPattern, JsObjectBindingPattern, JsPostUpdateExpression,
-    JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange,
+    JsClassDeclaration, JsClassMemberList, JsConstructorClassMember, JsFunctionBody,
+    JsGetterClassMember, JsLanguage, JsMethodClassMember, JsObjectAssignmentPattern,
+    JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember,
+    JsSetterClassMember, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind,
+    JsSyntaxNode, JsVariableDeclarator, TextRange, TsIndexSignatureClassMember,
     TsPropertyParameter,
 };
 use biome_rowan::{
@@ -16,6 +17,12 @@ use biome_rowan::{
 };
 use rustc_hash::FxHashSet;
 use std::option::Option;
+
+#[derive(Debug, Clone)]
+pub struct NamedClassMember {
+    pub name: Text,
+    pub range: TextRange,
+}
 
 #[derive(Clone)]
 pub struct SemanticClassServices {
@@ -31,9 +38,26 @@ impl SemanticClassServices {
 #[derive(Debug, Clone)]
 pub struct SemanticClassModel {}
 
+impl Default for SemanticClassModel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SemanticClassModel {
+    pub fn new() -> Self {
+        Self {}
+    }
+
     pub fn class_member_references(&self, members: &JsClassMemberList) -> ClassMemberReferences {
         class_member_references(members)
+    }
+
+    pub fn extract_named_member(
+        &self,
+        any_class_member: &AnyNamedClassMember,
+    ) -> Option<NamedClassMember> {
+        extract_named_member(any_class_member)
     }
 }
 
@@ -165,15 +189,76 @@ pub struct ClassMemberReferences {
 }
 
 declare_node_union! {
-    pub AnyPropertyMember = JsPropertyClassMember | TsPropertyParameter
+    /// Represents any class member that has a name (public, private, or TypeScript-specific).
+    pub AnyNamedClassMember =
+      JsPropertyClassMember         // class Foo { bar = 1; }
+      | JsMethodClassMember           // class Foo { baz() {} }
+      | JsGetterClassMember           // class Foo { get qux() {} }
+      | JsSetterClassMember           // class Foo { set quux(v) {} }
+      | TsPropertyParameter           // constructor(public numbered: number) {}
+      | TsIndexSignatureClassMember   // class Foo { [key: string]: number }
+    // we also need to add accessor at some point claas Foo { accessor bar: string; }
 }
 
 declare_node_union! {
-    pub AnyCandidateForUsedInExpressionNode = AnyJsUpdateExpression | AnyJsObjectBindingPatternMember | JsStaticMemberExpression | AnyJsBindingPattern
+    pub AnyCandidateForUsedInExpressionNode = AnyJsExpression | AnyJsUpdateExpression | AnyJsObjectBindingPatternMember | JsStaticMemberExpression | AnyJsBindingPattern | JsStaticMemberAssignment
 }
 
 declare_node_union! {
     pub AnyJsUpdateExpression = JsPreUpdateExpression | JsPostUpdateExpression
+}
+
+/// Extracts the name and range from a method, property, or constructor parameter.
+/// Returns `None` for index signatures, since they don’t have a traditional name.
+fn extract_named_member(any_class_member: &AnyNamedClassMember) -> Option<NamedClassMember> {
+    match any_class_member {
+        AnyNamedClassMember::JsMethodClassMember(member) => {
+            let name_node = member.name().ok()?;
+            Some(NamedClassMember {
+                name: name_node.to_trimmed_text(),
+                range: name_node.range(),
+            })
+        }
+
+        AnyNamedClassMember::JsGetterClassMember(getter) => {
+            let name_node = getter.name().ok()?;
+            Some(NamedClassMember {
+                name: name_node.to_trimmed_text(),
+                range: name_node.range(),
+            })
+        }
+
+        AnyNamedClassMember::JsSetterClassMember(setter) => {
+            let name_node = setter.name().ok()?;
+            Some(NamedClassMember {
+                name: name_node.to_trimmed_text(),
+                range: name_node.range(),
+            })
+        }
+
+        AnyNamedClassMember::JsPropertyClassMember(member) => {
+            let name_node = member.name().ok()?;
+            Some(NamedClassMember {
+                name: name_node.to_trimmed_text(),
+                range: name_node.range(),
+            })
+        }
+
+        AnyNamedClassMember::TsPropertyParameter(parameter) => {
+            let name_node = parameter
+                .formal_parameter()
+                .ok()?
+                .as_js_formal_parameter()?
+                .binding()
+                .ok()?;
+            Some(NamedClassMember {
+                name: name_node.to_trimmed_text(),
+                range: name_node.range(),
+            })
+        }
+
+        AnyNamedClassMember::TsIndexSignatureClassMember(_) => None,
+    }
 }
 
 /// Collects all `this` property references used within the members of a JavaScript class.
@@ -523,7 +608,7 @@ impl ThisPatternResolver {
                             .as_any_js_assignment()?
                             .as_js_static_member_assignment(),
                         scoped_this_references,
-                        AccessKind::Write,
+                        AccessKind::MeaningfulRead,
                     );
                 }
                 None
@@ -769,6 +854,21 @@ fn handle_assignment_expression(
             )
         {
             writes.insert(name.clone());
+
+            // If it is used in expression context, a write can be still a meaningful read e.g.
+            // class Used { this.#val; getVal() { return this.#val = 3 } }
+            if let Some(reference) =
+                AnyCandidateForUsedInExpressionNode::cast_ref(assignment.syntax())
+                && is_used_in_expression_context(&reference)
+            {
+                reads.insert({
+                    ClassMemberReference {
+                        name: name.name,
+                        range: name.range,
+                        access_kind: AccessKind::MeaningfulRead,
+                    }
+                });
+            }
         }
     }
 }
@@ -897,28 +997,87 @@ fn get_read_access_kind(node: &AnyCandidateForUsedInExpressionNode) -> AccessKin
 /// Not limited to `this` references.
 /// It can be used for any node; additional cases may require extending the context checks.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
-    node.syntax().ancestors().skip(1).any(|ancestor| {
-        matches!(
-            ancestor.kind(),
-            JsSyntaxKind::JS_RETURN_STATEMENT
-                | JsSyntaxKind::JS_CALL_ARGUMENTS
-                | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
-                | JsSyntaxKind::JS_LOGICAL_EXPRESSION
-                | JsSyntaxKind::JS_THROW_STATEMENT
-                | JsSyntaxKind::JS_AWAIT_EXPRESSION
-                | JsSyntaxKind::JS_YIELD_EXPRESSION
-                | JsSyntaxKind::JS_UNARY_EXPRESSION
-                | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
-                | JsSyntaxKind::JS_CALL_EXPRESSION
-                | JsSyntaxKind::JS_NEW_EXPRESSION
-                | JsSyntaxKind::JS_IF_STATEMENT
-                | JsSyntaxKind::JS_SWITCH_STATEMENT
-                | JsSyntaxKind::JS_FOR_STATEMENT
-                | JsSyntaxKind::JS_FOR_IN_STATEMENT
-                | JsSyntaxKind::JS_FOR_OF_STATEMENT
-                | JsSyntaxKind::JS_BINARY_EXPRESSION
-        )
+    node.syntax().ancestors().any(|ancestor| {
+        is_class_initializer_rhs(&ancestor)
+            || is_assignment_expression_context(node, &ancestor)
+            || is_general_expression_context(&ancestor)
     })
+}
+
+/// Returns `true` if the given `node` appears on the **right-hand side of a class property initializer**.
+///
+/// Example:
+/// ```js
+/// class Foo {
+///     #x = 42;
+///     y = this.#x; // RHS (`this.#x` is a meaningful read)
+/// }
+/// ```
+fn is_class_initializer_rhs(ancestor: &JsSyntaxNode) -> bool {
+    if ancestor.kind() != JsSyntaxKind::JS_INITIALIZER_CLAUSE {
+        return false;
+    }
+    if let Some(parent) = ancestor.parent() {
+        parent.kind() == JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER
+    } else {
+        false
+    }
+}
+
+/// Checks if the given `node` occurs in an assignment expression context
+/// where its value is meaningfully used.
+///
+/// - **RHS of an assignment** counts as a read (meaningful use).
+/// - **LHS inside an object destructuring pattern** also counts as a read.
+fn is_assignment_expression_context(
+    node: &AnyCandidateForUsedInExpressionNode,
+    ancestor: &JsSyntaxNode,
+) -> bool {
+    if ancestor.kind() != JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION {
+        return false;
+    }
+    let node_range = node.syntax().text_trimmed_range();
+    if let Some(assignment) = JsAssignmentExpression::cast(ancestor.clone()) {
+        if let Ok(rhs) = assignment.right()
+            && rhs.syntax().text_trimmed_range().contains_range(node_range)
+        {
+            return true;
+        }
+
+        if let Ok(lhs) = assignment.left()
+            && lhs.syntax().kind() == JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN
+            && lhs.syntax().text_trimmed_range().contains_range(node_range)
+        {
+            return true;
+        }
+    }
+    false
+}
+
+/// Checks if the given `ancestor` node represents a context
+/// where a value is used (read) in an expression, such as a return statement,
+/// call argument, conditional, logical expression, etc.
+fn is_general_expression_context(ancestor: &JsSyntaxNode) -> bool {
+    matches!(
+        ancestor.kind(),
+        JsSyntaxKind::JS_RETURN_STATEMENT
+            | JsSyntaxKind::JS_CALL_ARGUMENTS
+            | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
+            | JsSyntaxKind::JS_LOGICAL_EXPRESSION
+            | JsSyntaxKind::JS_THROW_STATEMENT
+            | JsSyntaxKind::JS_AWAIT_EXPRESSION
+            | JsSyntaxKind::JS_YIELD_EXPRESSION
+            | JsSyntaxKind::JS_UNARY_EXPRESSION
+            | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
+            | JsSyntaxKind::JS_CALL_EXPRESSION
+            | JsSyntaxKind::JS_NEW_EXPRESSION
+            | JsSyntaxKind::JS_IF_STATEMENT
+            | JsSyntaxKind::JS_SWITCH_STATEMENT
+            | JsSyntaxKind::JS_FOR_STATEMENT
+            | JsSyntaxKind::JS_FOR_IN_STATEMENT
+            | JsSyntaxKind::JS_FOR_OF_STATEMENT
+            | JsSyntaxKind::JS_BINARY_EXPRESSION
+    )
 }
 
 #[cfg(test)]
