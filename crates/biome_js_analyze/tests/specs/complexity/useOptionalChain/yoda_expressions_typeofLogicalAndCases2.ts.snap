@@ -5,6 +5,7 @@ expression: yoda_expressions_typeofLogicalAndCases2.ts
 ---
 # Input
 ```ts
+const foo = {};
 // chained members
 'undefined' != typeof foo && foo.bar;
 'undefined' != typeof foo.bar && foo.bar.baz;
@@ -63,47 +64,25 @@ expression: yoda_expressions_typeofLogicalAndCases2.ts
 
 # Diagnostics
 ```
-yoda_expressions_typeofLogicalAndCases2.ts:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
-
-  ! Change to an optional chain.
-  
-    1 │ // chained members
-  > 2 │ 'undefined' != typeof foo && foo.bar;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 'undefined' != typeof foo.bar && foo.bar.baz;
-    4 │ 'undefined' != typeof foo && foo();
-  
-  i Unsafe fix: Change to an optional chain.
-  
-     1  1 │   // chained members
-     2    │ - 'undefined'·!=·typeof·foo·&&·foo.bar;
-        2 │ + foo?.bar;
-     3  3 │   'undefined' != typeof foo.bar && foo.bar.baz;
-     4  4 │   'undefined' != typeof foo && foo();
-  
-
-```
-
-```
 yoda_expressions_typeofLogicalAndCases2.ts:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
 
   ! Change to an optional chain.
   
-    1 │ // chained members
-    2 │ 'undefined' != typeof foo && foo.bar;
-  > 3 │ 'undefined' != typeof foo.bar && foo.bar.baz;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ 'undefined' != typeof foo && foo();
-    5 │ 'undefined' != typeof foo.bar && foo.bar();
+    1 │ const foo = {};
+    2 │ // chained members
+  > 3 │ 'undefined' != typeof foo && foo.bar;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 'undefined' != typeof foo.bar && foo.bar.baz;
+    5 │ 'undefined' != typeof foo && foo();
   
   i Unsafe fix: Change to an optional chain.
   
-     1  1 │   // chained members
-     2  2 │   'undefined' != typeof foo && foo.bar;
-     3    │ - 'undefined'·!=·typeof·foo.bar·&&·foo.bar.baz;
-        3 │ + foo.bar?.baz;
-     4  4 │   'undefined' != typeof foo && foo();
-     5  5 │   'undefined' != typeof foo.bar && foo.bar();
+     1  1 │   const foo = {};
+     2  2 │   // chained members
+     3    │ - 'undefined'·!=·typeof·foo·&&·foo.bar;
+        3 │ + foo?.bar;
+     4  4 │   'undefined' != typeof foo.bar && foo.bar.baz;
+     5  5 │   'undefined' != typeof foo && foo();
   
 
 ```
@@ -113,21 +92,21 @@ yoda_expressions_typeofLogicalAndCases2.ts:4:1 lint/complexity/useOptionalChain 
 
   ! Change to an optional chain.
   
-    2 │ 'undefined' != typeof foo && foo.bar;
-    3 │ 'undefined' != typeof foo.bar && foo.bar.baz;
-  > 4 │ 'undefined' != typeof foo && foo();
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 'undefined' != typeof foo.bar && foo.bar();
-    6 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+    2 │ // chained members
+    3 │ 'undefined' != typeof foo && foo.bar;
+  > 4 │ 'undefined' != typeof foo.bar && foo.bar.baz;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 'undefined' != typeof foo && foo();
+    6 │ 'undefined' != typeof foo.bar && foo.bar();
   
   i Unsafe fix: Change to an optional chain.
   
-     2  2 │   'undefined' != typeof foo && foo.bar;
-     3  3 │   'undefined' != typeof foo.bar && foo.bar.baz;
-     4    │ - 'undefined'·!=·typeof·foo·&&·foo();
-        4 │ + foo?.();
-     5  5 │   'undefined' != typeof foo.bar && foo.bar();
-     6  6 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+     2  2 │   // chained members
+     3  3 │   'undefined' != typeof foo && foo.bar;
+     4    │ - 'undefined'·!=·typeof·foo.bar·&&·foo.bar.baz;
+        4 │ + foo.bar?.baz;
+     5  5 │   'undefined' != typeof foo && foo();
+     6  6 │   'undefined' != typeof foo.bar && foo.bar();
   
 
 ```
@@ -137,21 +116,21 @@ yoda_expressions_typeofLogicalAndCases2.ts:5:1 lint/complexity/useOptionalChain 
 
   ! Change to an optional chain.
   
-    3 │ 'undefined' != typeof foo.bar && foo.bar.baz;
-    4 │ 'undefined' != typeof foo && foo();
-  > 5 │ 'undefined' != typeof foo.bar && foo.bar();
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-    7 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+    3 │ 'undefined' != typeof foo && foo.bar;
+    4 │ 'undefined' != typeof foo.bar && foo.bar.baz;
+  > 5 │ 'undefined' != typeof foo && foo();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 'undefined' != typeof foo.bar && foo.bar();
+    7 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
   
   i Unsafe fix: Change to an optional chain.
   
-     3  3 │   'undefined' != typeof foo.bar && foo.bar.baz;
-     4  4 │   'undefined' != typeof foo && foo();
-     5    │ - 'undefined'·!=·typeof·foo.bar·&&·foo.bar();
-        5 │ + foo.bar?.();
-     6  6 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-     7  7 │   'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+     3  3 │   'undefined' != typeof foo && foo.bar;
+     4  4 │   'undefined' != typeof foo.bar && foo.bar.baz;
+     5    │ - 'undefined'·!=·typeof·foo·&&·foo();
+        5 │ + foo?.();
+     6  6 │   'undefined' != typeof foo.bar && foo.bar();
+     7  7 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
   
 
 ```
@@ -161,21 +140,21 @@ yoda_expressions_typeofLogicalAndCases2.ts:6:1 lint/complexity/useOptionalChain 
 
   ! Change to an optional chain.
   
-    4 │ 'undefined' != typeof foo && foo();
-    5 │ 'undefined' != typeof foo.bar && foo.bar();
-  > 6 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-    8 │ 
+    4 │ 'undefined' != typeof foo.bar && foo.bar.baz;
+    5 │ 'undefined' != typeof foo && foo();
+  > 6 │ 'undefined' != typeof foo.bar && foo.bar();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+    8 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
   
   i Unsafe fix: Change to an optional chain.
   
-     4  4 │   'undefined' != typeof foo && foo();
-     5  5 │   'undefined' != typeof foo.bar && foo.bar();
-     6    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
-        6 │ + foo?.bar?.baz?.buzz;
-     7  7 │   'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-     8  8 │   
+     4  4 │   'undefined' != typeof foo.bar && foo.bar.baz;
+     5  5 │   'undefined' != typeof foo && foo();
+     6    │ - 'undefined'·!=·typeof·foo.bar·&&·foo.bar();
+        6 │ + foo.bar?.();
+     7  7 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+     8  8 │   'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
   
 
 ```
@@ -185,44 +164,45 @@ yoda_expressions_typeofLogicalAndCases2.ts:7:1 lint/complexity/useOptionalChain 
 
   ! Change to an optional chain.
   
-    5 │ 'undefined' != typeof foo.bar && foo.bar();
-    6 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-  > 7 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ 
-    9 │ // case with a jump (i.e. a non-'undefined'ish prop)
+    5 │ 'undefined' != typeof foo && foo();
+    6 │ 'undefined' != typeof foo.bar && foo.bar();
+  > 7 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+    9 │ 
   
   i Unsafe fix: Change to an optional chain.
   
-     5  5 │   'undefined' != typeof foo.bar && foo.bar();
-     6  6 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-     7    │ - 'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
-        7 │ + foo.bar?.baz?.buzz;
-     8  8 │   
-     9  9 │   // case with a jump (i.e. a non-'undefined'ish prop)
+     5  5 │   'undefined' != typeof foo && foo();
+     6  6 │   'undefined' != typeof foo.bar && foo.bar();
+     7    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
+        7 │ + foo?.bar?.baz?.buzz;
+     8  8 │   'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+     9  9 │   
   
 
 ```
 
 ```
-yoda_expressions_typeofLogicalAndCases2.ts:10:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+yoda_expressions_typeofLogicalAndCases2.ts:8:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
 
   ! Change to an optional chain.
   
-     9 │ // case with a jump (i.e. a non-'undefined'ish prop)
-  > 10 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ 'undefined' != typeof foo.bar && foo.bar.baz.buzz;
-    12 │ 
+     6 │ 'undefined' != typeof foo.bar && foo.bar();
+     7 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+   > 8 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // case with a jump (i.e. a non-'undefined'ish prop)
   
   i Unsafe fix: Change to an optional chain.
   
-     8  8 │   
-     9  9 │   // case with a jump (i.e. a non-'undefined'ish prop)
-    10    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·foo.bar.baz.buzz;
-       10 │ + foo?.bar?.baz.buzz;
-    11 11 │   'undefined' != typeof foo.bar && foo.bar.baz.buzz;
-    12 12 │   
+     6  6 │   'undefined' != typeof foo.bar && foo.bar();
+     7  7 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+     8    │ - 'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
+        8 │ + foo.bar?.baz?.buzz;
+     9  9 │   
+    10 10 │   // case with a jump (i.e. a non-'undefined'ish prop)
   
 
 ```
@@ -232,44 +212,44 @@ yoda_expressions_typeofLogicalAndCases2.ts:11:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-     9 │ // case with a jump (i.e. a non-'undefined'ish prop)
-    10 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz;
-  > 11 │ 'undefined' != typeof foo.bar && foo.bar.baz.buzz;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ 
-    13 │ // case where for some reason there is a doubled up expression
+    10 │ // case with a jump (i.e. a non-'undefined'ish prop)
+  > 11 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 'undefined' != typeof foo.bar && foo.bar.baz.buzz;
+    13 │ 
   
   i Unsafe fix: Change to an optional chain.
   
-     9  9 │   // case with a jump (i.e. a non-'undefined'ish prop)
-    10 10 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz;
-    11    │ - 'undefined'·!=·typeof·foo.bar·&&·foo.bar.baz.buzz;
-       11 │ + foo.bar?.baz.buzz;
-    12 12 │   
-    13 13 │   // case where for some reason there is a doubled up expression
+     9  9 │   
+    10 10 │   // case with a jump (i.e. a non-'undefined'ish prop)
+    11    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·foo.bar.baz.buzz;
+       11 │ + foo?.bar?.baz.buzz;
+    12 12 │   'undefined' != typeof foo.bar && foo.bar.baz.buzz;
+    13 13 │   
   
 
 ```
 
 ```
-yoda_expressions_typeofLogicalAndCases2.ts:14:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+yoda_expressions_typeofLogicalAndCases2.ts:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
 
   ! Change to an optional chain.
   
-    13 │ // case where for some reason there is a doubled up expression
-  > 14 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-    16 │ 
+    10 │ // case with a jump (i.e. a non-'undefined'ish prop)
+    11 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz;
+  > 12 │ 'undefined' != typeof foo.bar && foo.bar.baz.buzz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // case where for some reason there is a doubled up expression
   
   i Unsafe fix: Change to an optional chain.
   
-    12 12 │   
-    13 13 │   // case where for some reason there is a doubled up expression
-    14    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·'undefined'·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
-       14 │ + foo?.bar?.baz?.buzz;
-    15 15 │   'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-    16 16 │   
+    10 10 │   // case with a jump (i.e. a non-'undefined'ish prop)
+    11 11 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz;
+    12    │ - 'undefined'·!=·typeof·foo.bar·&&·foo.bar.baz.buzz;
+       12 │ + foo.bar?.baz.buzz;
+    13 13 │   
+    14 14 │   // case where for some reason there is a doubled up expression
   
 
 ```
@@ -279,90 +259,90 @@ yoda_expressions_typeofLogicalAndCases2.ts:15:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    13 │ // case where for some reason there is a doubled up expression
-    14 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-  > 15 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+    14 │ // case where for some reason there is a doubled up expression
+  > 15 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+    17 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    13 13 │   
+    14 14 │   // case where for some reason there is a doubled up expression
+    15    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·'undefined'·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
+       15 │ + foo?.bar?.baz?.buzz;
+    16 16 │   'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+    17 17 │   
+  
+
+```
+
+```
+yoda_expressions_typeofLogicalAndCases2.ts:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    14 │ // case where for some reason there is a doubled up expression
+    15 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+  > 16 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    16 │ 
-    17 │ // chained members with element access
+    17 │ 
+    18 │ // chained members with element access
   
   i Unsafe fix: Change to an optional chain.
   
-    13 13 │   // case where for some reason there is a doubled up expression
-    14 14 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
-    15    │ - 'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·'undefined'·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
-       15 │ + foo.bar?.baz?.buzz;
-    16 16 │   
-    17 17 │   // chained members with element access
+    14 14 │   // case where for some reason there is a doubled up expression
+    15 15 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz;
+    16    │ - 'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·'undefined'·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
+       16 │ + foo.bar?.baz?.buzz;
+    17 17 │   
+    18 18 │   // chained members with element access
   
 
 ```
 
 ```
-yoda_expressions_typeofLogicalAndCases2.ts:18:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+yoda_expressions_typeofLogicalAndCases2.ts:19:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
 
   ! Change to an optional chain.
   
-    17 │ // chained members with element access
-  > 18 │ 'undefined' != typeof foo && 'undefined' != typeof foo[bar] && 'undefined' != typeof foo[bar].baz && foo[bar].baz.buzz;
+    18 │ // chained members with element access
+  > 19 │ 'undefined' != typeof foo && 'undefined' != typeof foo[bar] && 'undefined' != typeof foo[bar].baz && foo[bar].baz.buzz;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    19 │ 
-    20 │ // case with a jump (i.e. a non-'undefined'ish prop)
+    20 │ 
+    21 │ // case with a jump (i.e. a non-'undefined'ish prop)
   
   i Unsafe fix: Change to an optional chain.
   
-    16 16 │   
-    17 17 │   // chained members with element access
-    18    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo[bar]·&&·'undefined'·!=·typeof·foo[bar].baz·&&·foo[bar].baz.buzz;
-       18 │ + foo?.[bar]?.baz?.buzz;
-    19 19 │   
-    20 20 │   // case with a jump (i.e. a non-'undefined'ish prop)
+    17 17 │   
+    18 18 │   // chained members with element access
+    19    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo[bar]·&&·'undefined'·!=·typeof·foo[bar].baz·&&·foo[bar].baz.buzz;
+       19 │ + foo?.[bar]?.baz?.buzz;
+    20 20 │   
+    21 21 │   // case with a jump (i.e. a non-'undefined'ish prop)
   
 
 ```
 
 ```
-yoda_expressions_typeofLogicalAndCases2.ts:21:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+yoda_expressions_typeofLogicalAndCases2.ts:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
 
   ! Change to an optional chain.
   
-    20 │ // case with a jump (i.e. a non-'undefined'ish prop)
-  > 21 │ 'undefined' != typeof foo && 'undefined' != typeof foo[bar].baz && foo[bar].baz.buzz;
+    21 │ // case with a jump (i.e. a non-'undefined'ish prop)
+  > 22 │ 'undefined' != typeof foo && 'undefined' != typeof foo[bar].baz && foo[bar].baz.buzz;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    22 │ 
-    23 │ // chained calls
+    23 │ 
+    24 │ // chained calls
   
   i Unsafe fix: Change to an optional chain.
   
-    19 19 │   
-    20 20 │   // case with a jump (i.e. a non-'undefined'ish prop)
-    21    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo[bar].baz·&&·foo[bar].baz.buzz;
-       21 │ + foo?.[bar].baz?.buzz;
-    22 22 │   
-    23 23 │   // chained calls
-  
-
-```
-
-```
-yoda_expressions_typeofLogicalAndCases2.ts:24:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
-
-  ! Change to an optional chain.
-  
-    23 │ // chained calls
-  > 24 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    25 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
-    26 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
-  
-  i Unsafe fix: Change to an optional chain.
-  
-    22 22 │   
-    23 23 │   // chained calls
-    24    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz();
-       24 │ + foo?.bar?.baz?.buzz();
-    25 25 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
-    26 26 │   'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
+    20 20 │   
+    21 21 │   // case with a jump (i.e. a non-'undefined'ish prop)
+    22    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo[bar].baz·&&·foo[bar].baz.buzz;
+       22 │ + foo?.[bar].baz?.buzz;
+    23 23 │   
+    24 24 │   // chained calls
   
 
 ```
@@ -372,21 +352,20 @@ yoda_expressions_typeofLogicalAndCases2.ts:25:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    23 │ // chained calls
-    24 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz();
-  > 25 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    26 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
-    27 │ 
+    24 │ // chained calls
+  > 25 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
+    27 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
   
   i Unsafe fix: Change to an optional chain.
   
-    23 23 │   // chained calls
-    24 24 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz();
-    25    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·'undefined'·!=·typeof·foo.bar.baz.buzz·&&·foo.bar.baz.buzz();
-       25 │ + foo?.bar?.baz?.buzz?.();
-    26 26 │   'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
-    27 27 │   
+    23 23 │   
+    24 24 │   // chained calls
+    25    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz();
+       25 │ + foo?.bar?.baz?.buzz();
+    26 26 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
+    27 27 │   'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
   
 
 ```
@@ -396,44 +375,45 @@ yoda_expressions_typeofLogicalAndCases2.ts:26:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    24 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz();
-    25 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
-  > 26 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    27 │ 
-    28 │ // case with a jump (i.e. a non-'undefined'ish prop)
+    24 │ // chained calls
+    25 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz();
+  > 26 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
+    28 │ 
   
   i Unsafe fix: Change to an optional chain.
   
-    24 24 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz();
-    25 25 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
-    26    │ - 'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·'undefined'·!=·typeof·foo.bar.baz.buzz·&&·foo.bar.baz.buzz();
-       26 │ + foo.bar?.baz?.buzz?.();
-    27 27 │   
-    28 28 │   // case with a jump (i.e. a non-'undefined'ish prop)
+    24 24 │   // chained calls
+    25 25 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz();
+    26    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·'undefined'·!=·typeof·foo.bar.baz.buzz·&&·foo.bar.baz.buzz();
+       26 │ + foo?.bar?.baz?.buzz?.();
+    27 27 │   'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
+    28 28 │   
   
 
 ```
 
 ```
-yoda_expressions_typeofLogicalAndCases2.ts:29:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+yoda_expressions_typeofLogicalAndCases2.ts:27:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
 
   ! Change to an optional chain.
   
-    28 │ // case with a jump (i.e. a non-'undefined'ish prop)
-  > 29 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    30 │ 'undefined' != typeof foo.bar && foo.bar.baz.buzz();
-    31 │ 
+    25 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz();
+    26 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
+  > 27 │ 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ // case with a jump (i.e. a non-'undefined'ish prop)
   
   i Unsafe fix: Change to an optional chain.
   
-    27 27 │   
-    28 28 │   // case with a jump (i.e. a non-'undefined'ish prop)
-    29    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·foo.bar.baz.buzz();
-       29 │ + foo?.bar?.baz.buzz();
-    30 30 │   'undefined' != typeof foo.bar && foo.bar.baz.buzz();
-    31 31 │   
+    25 25 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && foo.bar.baz.buzz();
+    26 26 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
+    27    │ - 'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz·&&·'undefined'·!=·typeof·foo.bar.baz.buzz·&&·foo.bar.baz.buzz();
+       27 │ + foo.bar?.baz?.buzz?.();
+    28 28 │   
+    29 29 │   // case with a jump (i.e. a non-'undefined'ish prop)
   
 
 ```
@@ -443,89 +423,89 @@ yoda_expressions_typeofLogicalAndCases2.ts:30:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    28 │ // case with a jump (i.e. a non-'undefined'ish prop)
-    29 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz();
-  > 30 │ 'undefined' != typeof foo.bar && foo.bar.baz.buzz();
+    29 │ // case with a jump (i.e. a non-'undefined'ish prop)
+  > 30 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 'undefined' != typeof foo.bar && foo.bar.baz.buzz();
+    32 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    28 28 │   
+    29 29 │   // case with a jump (i.e. a non-'undefined'ish prop)
+    30    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·foo.bar.baz.buzz();
+       30 │ + foo?.bar?.baz.buzz();
+    31 31 │   'undefined' != typeof foo.bar && foo.bar.baz.buzz();
+    32 32 │   
+  
+
+```
+
+```
+yoda_expressions_typeofLogicalAndCases2.ts:31:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    29 │ // case with a jump (i.e. a non-'undefined'ish prop)
+    30 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz();
+  > 31 │ 'undefined' != typeof foo.bar && foo.bar.baz.buzz();
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    31 │ 
-    32 │ // case with a jump (i.e. a non-'undefined'ish prop)
+    32 │ 
+    33 │ // case with a jump (i.e. a non-'undefined'ish prop)
   
   i Unsafe fix: Change to an optional chain.
   
-    28 28 │   // case with a jump (i.e. a non-'undefined'ish prop)
-    29 29 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz();
-    30    │ - 'undefined'·!=·typeof·foo.bar·&&·foo.bar.baz.buzz();
-       30 │ + foo.bar?.baz.buzz();
-    31 31 │   
-    32 32 │   // case with a jump (i.e. a non-'undefined'ish prop)
+    29 29 │   // case with a jump (i.e. a non-'undefined'ish prop)
+    30 30 │   'undefined' != typeof foo && 'undefined' != typeof foo.bar && foo.bar.baz.buzz();
+    31    │ - 'undefined'·!=·typeof·foo.bar·&&·foo.bar.baz.buzz();
+       31 │ + foo.bar?.baz.buzz();
+    32 32 │   
+    33 33 │   // case with a jump (i.e. a non-'undefined'ish prop)
   
 
 ```
 
 ```
-yoda_expressions_typeofLogicalAndCases2.ts:33:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+yoda_expressions_typeofLogicalAndCases2.ts:34:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
 
   ! Change to an optional chain.
   
-    32 │ // case with a jump (i.e. a non-'undefined'ish prop)
-  > 33 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
+    33 │ // case with a jump (i.e. a non-'undefined'ish prop)
+  > 34 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar && 'undefined' != typeof foo.bar.baz.buzz && foo.bar.baz.buzz();
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    34 │ 
-    35 │ // case with a call expr inside the chain for some inefficient reason
+    35 │ 
+    36 │ // case with a call expr inside the chain for some inefficient reason
   
   i Unsafe fix: Change to an optional chain.
   
-    31 31 │   
-    32 32 │   // case with a jump (i.e. a non-'undefined'ish prop)
-    33    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz.buzz·&&·foo.bar.baz.buzz();
-       33 │ + foo?.bar?.baz.buzz?.();
-    34 34 │   
-    35 35 │   // case with a call expr inside the chain for some inefficient reason
+    32 32 │   
+    33 33 │   // case with a jump (i.e. a non-'undefined'ish prop)
+    34    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar·&&·'undefined'·!=·typeof·foo.bar.baz.buzz·&&·foo.bar.baz.buzz();
+       34 │ + foo?.bar?.baz.buzz?.();
+    35 35 │   
+    36 36 │   // case with a call expr inside the chain for some inefficient reason
   
 
 ```
 
 ```
-yoda_expressions_typeofLogicalAndCases2.ts:36:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+yoda_expressions_typeofLogicalAndCases2.ts:37:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
 
   ! Change to an optional chain.
   
-    35 │ // case with a call expr inside the chain for some inefficient reason
-  > 36 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar() && 'undefined' != typeof foo.bar().baz && 'undefined' != typeof foo.bar().baz.buzz && foo.bar().baz.buzz();
+    36 │ // case with a call expr inside the chain for some inefficient reason
+  > 37 │ 'undefined' != typeof foo && 'undefined' != typeof foo.bar() && 'undefined' != typeof foo.bar().baz && 'undefined' != typeof foo.bar().baz.buzz && foo.bar().baz.buzz();
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    37 │ 
+    38 │ 
   
   i Unsafe fix: Change to an optional chain.
   
-    34 34 │   
-    35 35 │   // case with a call expr inside the chain for some inefficient reason
-    36    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar()·&&·'undefined'·!=·typeof·foo.bar().baz·&&·'undefined'·!=·typeof·foo.bar().baz.buzz·&&·foo.bar().baz.buzz();
-       36 │ + foo?.bar()?.baz?.buzz?.();
-    37 37 │   
+    35 35 │   
+    36 36 │   // case with a call expr inside the chain for some inefficient reason
+    37    │ - 'undefined'·!=·typeof·foo·&&·'undefined'·!=·typeof·foo.bar()·&&·'undefined'·!=·typeof·foo.bar().baz·&&·'undefined'·!=·typeof·foo.bar().baz.buzz·&&·foo.bar().baz.buzz();
+       37 │ + foo?.bar()?.baz?.buzz?.();
     38 38 │   
-  
-
-```
-
-```
-yoda_expressions_typeofLogicalAndCases2.ts:40:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
-
-  ! Change to an optional chain.
-  
-    39 │ // chained members (double quotes)
-  > 40 │ "undefined" != typeof foo && foo.bar;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    41 │ "undefined" != typeof foo.bar && foo.bar.baz;
-    42 │ "undefined" != typeof foo && foo();
-  
-  i Unsafe fix: Change to an optional chain.
-  
-    38 38 │   
-    39 39 │   // chained members (double quotes)
-    40    │ - "undefined"·!=·typeof·foo·&&·foo.bar;
-       40 │ + foo?.bar;
-    41 41 │   "undefined" != typeof foo.bar && foo.bar.baz;
-    42 42 │   "undefined" != typeof foo && foo();
+    39 39 │   
   
 
 ```
@@ -535,21 +515,20 @@ yoda_expressions_typeofLogicalAndCases2.ts:41:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    39 │ // chained members (double quotes)
-    40 │ "undefined" != typeof foo && foo.bar;
-  > 41 │ "undefined" != typeof foo.bar && foo.bar.baz;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    42 │ "undefined" != typeof foo && foo();
-    43 │ "undefined" != typeof foo.bar && foo.bar();
+    40 │ // chained members (double quotes)
+  > 41 │ "undefined" != typeof foo && foo.bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ "undefined" != typeof foo.bar && foo.bar.baz;
+    43 │ "undefined" != typeof foo && foo();
   
   i Unsafe fix: Change to an optional chain.
   
-    39 39 │   // chained members (double quotes)
-    40 40 │   "undefined" != typeof foo && foo.bar;
-    41    │ - "undefined"·!=·typeof·foo.bar·&&·foo.bar.baz;
-       41 │ + foo.bar?.baz;
-    42 42 │   "undefined" != typeof foo && foo();
-    43 43 │   "undefined" != typeof foo.bar && foo.bar();
+    39 39 │   
+    40 40 │   // chained members (double quotes)
+    41    │ - "undefined"·!=·typeof·foo·&&·foo.bar;
+       41 │ + foo?.bar;
+    42 42 │   "undefined" != typeof foo.bar && foo.bar.baz;
+    43 43 │   "undefined" != typeof foo && foo();
   
 
 ```
@@ -559,21 +538,21 @@ yoda_expressions_typeofLogicalAndCases2.ts:42:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    40 │ "undefined" != typeof foo && foo.bar;
-    41 │ "undefined" != typeof foo.bar && foo.bar.baz;
-  > 42 │ "undefined" != typeof foo && foo();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    43 │ "undefined" != typeof foo.bar && foo.bar();
-    44 │ "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+    40 │ // chained members (double quotes)
+    41 │ "undefined" != typeof foo && foo.bar;
+  > 42 │ "undefined" != typeof foo.bar && foo.bar.baz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ "undefined" != typeof foo && foo();
+    44 │ "undefined" != typeof foo.bar && foo.bar();
   
   i Unsafe fix: Change to an optional chain.
   
-    40 40 │   "undefined" != typeof foo && foo.bar;
-    41 41 │   "undefined" != typeof foo.bar && foo.bar.baz;
-    42    │ - "undefined"·!=·typeof·foo·&&·foo();
-       42 │ + foo?.();
-    43 43 │   "undefined" != typeof foo.bar && foo.bar();
-    44 44 │   "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+    40 40 │   // chained members (double quotes)
+    41 41 │   "undefined" != typeof foo && foo.bar;
+    42    │ - "undefined"·!=·typeof·foo.bar·&&·foo.bar.baz;
+       42 │ + foo.bar?.baz;
+    43 43 │   "undefined" != typeof foo && foo();
+    44 44 │   "undefined" != typeof foo.bar && foo.bar();
   
 
 ```
@@ -583,21 +562,21 @@ yoda_expressions_typeofLogicalAndCases2.ts:43:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    41 │ "undefined" != typeof foo.bar && foo.bar.baz;
-    42 │ "undefined" != typeof foo && foo();
-  > 43 │ "undefined" != typeof foo.bar && foo.bar();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    44 │ "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
-    45 │ "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+    41 │ "undefined" != typeof foo && foo.bar;
+    42 │ "undefined" != typeof foo.bar && foo.bar.baz;
+  > 43 │ "undefined" != typeof foo && foo();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ "undefined" != typeof foo.bar && foo.bar();
+    45 │ "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
   
   i Unsafe fix: Change to an optional chain.
   
-    41 41 │   "undefined" != typeof foo.bar && foo.bar.baz;
-    42 42 │   "undefined" != typeof foo && foo();
-    43    │ - "undefined"·!=·typeof·foo.bar·&&·foo.bar();
-       43 │ + foo.bar?.();
-    44 44 │   "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
-    45 45 │   "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+    41 41 │   "undefined" != typeof foo && foo.bar;
+    42 42 │   "undefined" != typeof foo.bar && foo.bar.baz;
+    43    │ - "undefined"·!=·typeof·foo·&&·foo();
+       43 │ + foo?.();
+    44 44 │   "undefined" != typeof foo.bar && foo.bar();
+    45 45 │   "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
   
 
 ```
@@ -607,21 +586,21 @@ yoda_expressions_typeofLogicalAndCases2.ts:44:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    42 │ "undefined" != typeof foo && foo();
-    43 │ "undefined" != typeof foo.bar && foo.bar();
-  > 44 │ "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    45 │ "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
-    46 │ 
+    42 │ "undefined" != typeof foo.bar && foo.bar.baz;
+    43 │ "undefined" != typeof foo && foo();
+  > 44 │ "undefined" != typeof foo.bar && foo.bar();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+    46 │ "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
   
   i Unsafe fix: Change to an optional chain.
   
-    42 42 │   "undefined" != typeof foo && foo();
-    43 43 │   "undefined" != typeof foo.bar && foo.bar();
-    44    │ - "undefined"·!=·typeof·foo·&&·"undefined"·!=·typeof·foo.bar·&&·"undefined"·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
-       44 │ + foo?.bar?.baz?.buzz;
-    45 45 │   "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
-    46 46 │   
+    42 42 │   "undefined" != typeof foo.bar && foo.bar.baz;
+    43 43 │   "undefined" != typeof foo && foo();
+    44    │ - "undefined"·!=·typeof·foo.bar·&&·foo.bar();
+       44 │ + foo.bar?.();
+    45 45 │   "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+    46 46 │   "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
   
 
 ```
@@ -631,44 +610,45 @@ yoda_expressions_typeofLogicalAndCases2.ts:45:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    43 │ "undefined" != typeof foo.bar && foo.bar();
-    44 │ "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
-  > 45 │ "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    46 │ 
-    47 │ // chained members (backticks)
+    43 │ "undefined" != typeof foo && foo();
+    44 │ "undefined" != typeof foo.bar && foo.bar();
+  > 45 │ "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+    47 │ 
   
   i Unsafe fix: Change to an optional chain.
   
-    43 43 │   "undefined" != typeof foo.bar && foo.bar();
-    44 44 │   "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
-    45    │ - "undefined"·!=·typeof·foo.bar·&&·"undefined"·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
-       45 │ + foo.bar?.baz?.buzz;
-    46 46 │   
-    47 47 │   // chained members (backticks)
+    43 43 │   "undefined" != typeof foo && foo();
+    44 44 │   "undefined" != typeof foo.bar && foo.bar();
+    45    │ - "undefined"·!=·typeof·foo·&&·"undefined"·!=·typeof·foo.bar·&&·"undefined"·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
+       45 │ + foo?.bar?.baz?.buzz;
+    46 46 │   "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+    47 47 │   
   
 
 ```
 
 ```
-yoda_expressions_typeofLogicalAndCases2.ts:48:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+yoda_expressions_typeofLogicalAndCases2.ts:46:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
 
   ! Change to an optional chain.
   
-    47 │ // chained members (backticks)
-  > 48 │ `undefined` != typeof foo && foo.bar;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    49 │ `undefined` != typeof foo.bar && foo.bar.baz;
-    50 │ `undefined` != typeof foo && foo();
+    44 │ "undefined" != typeof foo.bar && foo.bar();
+    45 │ "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+  > 46 │ "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ 
+    48 │ // chained members (backticks)
   
   i Unsafe fix: Change to an optional chain.
   
-    46 46 │   
-    47 47 │   // chained members (backticks)
-    48    │ - `undefined`·!=·typeof·foo·&&·foo.bar;
-       48 │ + foo?.bar;
-    49 49 │   `undefined` != typeof foo.bar && foo.bar.baz;
-    50 50 │   `undefined` != typeof foo && foo();
+    44 44 │   "undefined" != typeof foo.bar && foo.bar();
+    45 45 │   "undefined" != typeof foo && "undefined" != typeof foo.bar && "undefined" != typeof foo.bar.baz && foo.bar.baz.buzz;
+    46    │ - "undefined"·!=·typeof·foo.bar·&&·"undefined"·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
+       46 │ + foo.bar?.baz?.buzz;
+    47 47 │   
+    48 48 │   // chained members (backticks)
   
 
 ```
@@ -678,21 +658,20 @@ yoda_expressions_typeofLogicalAndCases2.ts:49:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    47 │ // chained members (backticks)
-    48 │ `undefined` != typeof foo && foo.bar;
-  > 49 │ `undefined` != typeof foo.bar && foo.bar.baz;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    50 │ `undefined` != typeof foo && foo();
-    51 │ `undefined` != typeof foo.bar && foo.bar();
+    48 │ // chained members (backticks)
+  > 49 │ `undefined` != typeof foo && foo.bar;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ `undefined` != typeof foo.bar && foo.bar.baz;
+    51 │ `undefined` != typeof foo && foo();
   
   i Unsafe fix: Change to an optional chain.
   
-    47 47 │   // chained members (backticks)
-    48 48 │   `undefined` != typeof foo && foo.bar;
-    49    │ - `undefined`·!=·typeof·foo.bar·&&·foo.bar.baz;
-       49 │ + foo.bar?.baz;
-    50 50 │   `undefined` != typeof foo && foo();
-    51 51 │   `undefined` != typeof foo.bar && foo.bar();
+    47 47 │   
+    48 48 │   // chained members (backticks)
+    49    │ - `undefined`·!=·typeof·foo·&&·foo.bar;
+       49 │ + foo?.bar;
+    50 50 │   `undefined` != typeof foo.bar && foo.bar.baz;
+    51 51 │   `undefined` != typeof foo && foo();
   
 
 ```
@@ -702,21 +681,21 @@ yoda_expressions_typeofLogicalAndCases2.ts:50:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    48 │ `undefined` != typeof foo && foo.bar;
-    49 │ `undefined` != typeof foo.bar && foo.bar.baz;
-  > 50 │ `undefined` != typeof foo && foo();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    51 │ `undefined` != typeof foo.bar && foo.bar();
-    52 │ `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+    48 │ // chained members (backticks)
+    49 │ `undefined` != typeof foo && foo.bar;
+  > 50 │ `undefined` != typeof foo.bar && foo.bar.baz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ `undefined` != typeof foo && foo();
+    52 │ `undefined` != typeof foo.bar && foo.bar();
   
   i Unsafe fix: Change to an optional chain.
   
-    48 48 │   `undefined` != typeof foo && foo.bar;
-    49 49 │   `undefined` != typeof foo.bar && foo.bar.baz;
-    50    │ - `undefined`·!=·typeof·foo·&&·foo();
-       50 │ + foo?.();
-    51 51 │   `undefined` != typeof foo.bar && foo.bar();
-    52 52 │   `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+    48 48 │   // chained members (backticks)
+    49 49 │   `undefined` != typeof foo && foo.bar;
+    50    │ - `undefined`·!=·typeof·foo.bar·&&·foo.bar.baz;
+       50 │ + foo.bar?.baz;
+    51 51 │   `undefined` != typeof foo && foo();
+    52 52 │   `undefined` != typeof foo.bar && foo.bar();
   
 
 ```
@@ -726,21 +705,21 @@ yoda_expressions_typeofLogicalAndCases2.ts:51:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    49 │ `undefined` != typeof foo.bar && foo.bar.baz;
-    50 │ `undefined` != typeof foo && foo();
-  > 51 │ `undefined` != typeof foo.bar && foo.bar();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    52 │ `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
-    53 │ `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+    49 │ `undefined` != typeof foo && foo.bar;
+    50 │ `undefined` != typeof foo.bar && foo.bar.baz;
+  > 51 │ `undefined` != typeof foo && foo();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ `undefined` != typeof foo.bar && foo.bar();
+    53 │ `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
   
   i Unsafe fix: Change to an optional chain.
   
-    49 49 │   `undefined` != typeof foo.bar && foo.bar.baz;
-    50 50 │   `undefined` != typeof foo && foo();
-    51    │ - `undefined`·!=·typeof·foo.bar·&&·foo.bar();
-       51 │ + foo.bar?.();
-    52 52 │   `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
-    53 53 │   `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+    49 49 │   `undefined` != typeof foo && foo.bar;
+    50 50 │   `undefined` != typeof foo.bar && foo.bar.baz;
+    51    │ - `undefined`·!=·typeof·foo·&&·foo();
+       51 │ + foo?.();
+    52 52 │   `undefined` != typeof foo.bar && foo.bar();
+    53 53 │   `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
   
 
 ```
@@ -750,21 +729,21 @@ yoda_expressions_typeofLogicalAndCases2.ts:52:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    50 │ `undefined` != typeof foo && foo();
-    51 │ `undefined` != typeof foo.bar && foo.bar();
-  > 52 │ `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    53 │ `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
-    54 │ 
+    50 │ `undefined` != typeof foo.bar && foo.bar.baz;
+    51 │ `undefined` != typeof foo && foo();
+  > 52 │ `undefined` != typeof foo.bar && foo.bar();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+    54 │ `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
   
   i Unsafe fix: Change to an optional chain.
   
-    50 50 │   `undefined` != typeof foo && foo();
-    51 51 │   `undefined` != typeof foo.bar && foo.bar();
-    52    │ - `undefined`·!=·typeof·foo·&&·`undefined`·!=·typeof·foo.bar·&&·`undefined`·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
-       52 │ + foo?.bar?.baz?.buzz;
-    53 53 │   `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
-    54 54 │   
+    50 50 │   `undefined` != typeof foo.bar && foo.bar.baz;
+    51 51 │   `undefined` != typeof foo && foo();
+    52    │ - `undefined`·!=·typeof·foo.bar·&&·foo.bar();
+       52 │ + foo.bar?.();
+    53 53 │   `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+    54 54 │   `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
   
 
 ```
@@ -774,19 +753,43 @@ yoda_expressions_typeofLogicalAndCases2.ts:53:1 lint/complexity/useOptionalChain
 
   ! Change to an optional chain.
   
-    51 │ `undefined` != typeof foo.bar && foo.bar();
-    52 │ `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
-  > 53 │ `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    54 │ 
+    51 │ `undefined` != typeof foo && foo();
+    52 │ `undefined` != typeof foo.bar && foo.bar();
+  > 53 │ `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+    55 │ 
   
   i Unsafe fix: Change to an optional chain.
   
-    51 51 │   `undefined` != typeof foo.bar && foo.bar();
-    52 52 │   `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
-    53    │ - `undefined`·!=·typeof·foo.bar·&&·`undefined`·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
-       53 │ + foo.bar?.baz?.buzz;
-    54 54 │   
+    51 51 │   `undefined` != typeof foo && foo();
+    52 52 │   `undefined` != typeof foo.bar && foo.bar();
+    53    │ - `undefined`·!=·typeof·foo·&&·`undefined`·!=·typeof·foo.bar·&&·`undefined`·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
+       53 │ + foo?.bar?.baz?.buzz;
+    54 54 │   `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+    55 55 │   
+  
+
+```
+
+```
+yoda_expressions_typeofLogicalAndCases2.ts:54:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    52 │ `undefined` != typeof foo.bar && foo.bar();
+    53 │ `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+  > 54 │ `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ 
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    52 52 │   `undefined` != typeof foo.bar && foo.bar();
+    53 53 │   `undefined` != typeof foo && `undefined` != typeof foo.bar && `undefined` != typeof foo.bar.baz && foo.bar.baz.buzz;
+    54    │ - `undefined`·!=·typeof·foo.bar·&&·`undefined`·!=·typeof·foo.bar.baz·&&·foo.bar.baz.buzz;
+       54 │ + foo.bar?.baz?.buzz;
+    55 55 │   
   
 
 ```

@@ -1,4 +1,10 @@
-const foo = {};
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: global_typeofLogicalAndCases1.ts
+---
+# Input
+```ts
 // chained members
 typeof foo !== 'undefined' && foo.bar;
 typeof foo.bar !== 'undefined' && foo.bar.baz;
@@ -52,3 +58,5 @@ typeof foo !== `undefined` && foo();
 typeof foo.bar !== `undefined` && foo.bar();
 typeof foo !== `undefined` && typeof foo.bar !== `undefined` && typeof foo.bar.baz !== `undefined` && foo.bar.baz.buzz;
 typeof foo.bar !== `undefined` && typeof foo.bar.baz !== `undefined` && foo.bar.baz.buzz;
+
+```
