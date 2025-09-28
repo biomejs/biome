@@ -1,7 +1,7 @@
 interface Socket {
+	destroy(): void;
 	on(event: "data", fn: (data: Buffer) => void): void;
 	write(data: Buffer): void;
-	destroy(): void;
 }
 
 enum ReaderStateKind {
@@ -10,22 +10,22 @@ enum ReaderStateKind {
 }
 
 interface ReaderStateHeader {
-	readonly kind: ReaderStateKind.Header;
 	contentLength?: number;
 	contentType?: string;
+	readonly kind: ReaderStateKind.Header;
 }
 
 interface ReaderStateBody {
-	readonly kind: ReaderStateKind.Body;
 	readonly contentLength: number;
 	readonly contentType?: string;
+	readonly kind: ReaderStateKind.Body;
 }
 
 type ReaderState = ReaderStateHeader | ReaderStateBody;
 
 interface JsonRpcRequest {
-	jsonrpc: "2.0";
 	id: number;
+	jsonrpc: "2.0";
 	method: string;
 	params: unknown;
 }
@@ -92,8 +92,8 @@ function isJsonRpcMessage(message: unknown): message is JsonRpcMessage {
 }
 
 interface PendingRequest {
-	resolve(result: unknown): void;
 	reject(error: unknown): void;
+	resolve(result: unknown): void;
 }
 
 const MIME_JSONRPC = "application/vscode-jsonrpc";

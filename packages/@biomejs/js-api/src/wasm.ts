@@ -85,34 +85,34 @@ interface FixFileResult {
 }
 
 export interface DiagnosticPrinter<Diagnostic> {
+	finish(): string;
 	free(): void;
 	print_simple(diagnostic: Diagnostic): void;
 	print_verbose(diagnostic: Diagnostic): void;
-	finish(): string;
 }
 export interface Workspace<Configuration, Diagnostic> {
-	free(): void;
-	updateSettings(params: UpdateSettingsParams<Configuration>): void;
-	openProject(params: OpenProjectParams): OpenProjectResult;
-	openFile(params: OpenFileParams): void;
 	closeFile(params: CloseFileParams): void;
+	fixFile(params: FixFileParams): FixFileResult;
+	// biome-ignore lint: code generation is broken
+	formatFile(params: FormatFileParams): any;
+	// biome-ignore lint: code generation is broken
+	formatRange(params: FormatRangeParams): any;
+	free(): void;
+	getFormatterIr(params: GetFormatterIRParams): string;
+	openFile(params: OpenFileParams): void;
+	openProject(params: OpenProjectParams): OpenProjectResult;
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): PullDiagnosticsResult<Diagnostic>;
-	// biome-ignore lint: code generation is broken
-	formatRange(params: FormatRangeParams): any;
-	// biome-ignore lint: code generation is broken
-	formatFile(params: FormatFileParams): any;
-	getFormatterIr(params: GetFormatterIRParams): string;
-	fixFile(params: FixFileParams): FixFileResult;
+	updateSettings(params: UpdateSettingsParams<Configuration>): void;
 }
 
 export interface Module<Configuration, Diagnostic> {
-	main: () => void;
 	DiagnosticPrinter: new (
 		fileName: string,
 		fileSource: string,
 	) => DiagnosticPrinter<Diagnostic>;
+	main: () => void;
 	Workspace: new () => Workspace<Configuration, Diagnostic>;
 }
 
