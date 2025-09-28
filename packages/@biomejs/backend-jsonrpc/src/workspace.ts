@@ -1698,6 +1698,10 @@ export interface Nursery {
 	 */
 	noVueDataObjectDeclaration?: RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions;
 	/**
+	 * Disallow duplicate keys in Vue component data, methods, computed properties, and other options.
+	 */
+	noVueDuplicateKeys?: RuleConfiguration_for_NoVueDuplicateKeysOptions;
+	/**
 	 * Disallow reserved keys in Vue component data and computed properties.
 	 */
 	noVueReservedKeys?: RuleConfiguration_for_NoVueReservedKeysOptions;
@@ -3044,6 +3048,9 @@ export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 export type RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions;
+export type RuleConfiguration_for_NoVueDuplicateKeysOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoVueDuplicateKeysOptions;
 export type RuleConfiguration_for_NoVueReservedKeysOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedKeysOptions;
@@ -5571,6 +5578,16 @@ export interface RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions {
 	 * Rule's options
 	 */
 	options: NoVueDataObjectDeclarationOptions;
+}
+export interface RuleWithOptions_for_NoVueDuplicateKeysOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueDuplicateKeysOptions;
 }
 export interface RuleWithOptions_for_NoVueReservedKeysOptions {
 	/**
@@ -8157,10 +8174,25 @@ export interface NoUnusedExpressionsOptions {}
 export interface NoUselessCatchBindingOptions {}
 export interface NoUselessUndefinedOptions {}
 export interface NoVueDataObjectDeclarationOptions {}
+export interface NoVueDuplicateKeysOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export type UseAnchorHrefOptions = null;
-export interface UseConsistentArrowReturnOptions {}
+/**
+ * Options for the `useConsistentArrowReturn` rule.
+ */
+export interface UseConsistentArrowReturnOptions {
+	/**
+	* Determines whether the rule enforces a consistent style when the return value is an object literal.
+
+This option is only applicable when used in conjunction with the `asNeeded` option. 
+	 */
+	requireForObjectLiteral?: boolean;
+	/**
+	 * The style to enforce for arrow function return statements.
+	 */
+	style?: UseConsistentArrowReturnStyle;
+}
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
 }
@@ -8525,6 +8557,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
+export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 export type ConsistentTypeDefinition = "interface" | "type";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
@@ -8893,6 +8926,7 @@ export type Category =
 	| "lint/nursery/noUselessCatchBinding"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueDataObjectDeclaration"
+	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"

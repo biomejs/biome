@@ -37,8 +37,8 @@ impl GraphqlFileSource {
 
     /// Try to return the GraphQL file source corresponding to this file extension
     /// See the difference between .graphql and .graphqls files here:
-    /// https://www.apollographql.com/docs/kotlin/essentials/file-types#sdl-schemas-graphqls
-    /// https://graphql.com/learn/schema/#inspecting-the-schema
+    /// <https://www.apollographql.com/docs/kotlin/essentials/file-types#sdl-schemas-graphqls>
+    /// <https://graphql.com/learn/schema/#inspecting-the-schema>
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
         match extension {

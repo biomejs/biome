@@ -15,7 +15,7 @@ use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, module_graph_for_test_file, parse_test_path,
-    project_layout_with_node_manifest, register_leak_checker, scripts_from_json,
+    project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
 use camino::Utf8Path;
@@ -167,7 +167,7 @@ pub(crate) fn analyze_and_snap(
 ) {
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
-    let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
+    let project_layout = project_layout_for_test_file(input_file, &mut diagnostics);
 
     if let Some((_, manifest)) = project_layout.find_node_manifest_for_path(input_file)
         && manifest.r#type == Some(PackageType::CommonJs) &&
@@ -180,7 +180,7 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options.clone());
     let root = parsed.tree();
 
-    let options = create_analyzer_options(input_file, &mut diagnostics);
+    let options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
     let module_graph = if needs_module_graph {
