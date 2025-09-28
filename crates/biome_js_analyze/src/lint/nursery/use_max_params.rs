@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsConstructorParameters, JsFunctionDeclaration, JsFunctionExpression, JsMethodClassMember,
     JsMethodObjectMember, JsParameters, TsDeclareFunctionDeclaration, TsTypeAliasDeclaration,
 };
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::use_max_params::UseMaxParamsOptions;
 
 declare_lint_rule! {
@@ -84,6 +84,58 @@ declare_node_union! {
     pub AnyFunctionLike = JsFunctionDeclaration | JsFunctionExpression | JsArrowFunctionExpression | JsMethodClassMember | JsMethodObjectMember | JsConstructorClassMember | TsDeclareFunctionDeclaration | TsTypeAliasDeclaration
 }
 
+impl AnyFunctionLike {
+    pub fn name_range(&self) -> Option<TextRange> {
+        match self {
+            Self::JsFunctionDeclaration(func) => func
+                .id()
+                .ok()?
+                .as_js_identifier_binding()?
+                .name_token()
+                .ok()
+                .map(|token| token.text_range()),
+            Self::JsFunctionExpression(func) => func
+                .id()?
+                .as_js_identifier_binding()?
+                .name_token()
+                .ok()
+                .map(|token| token.text_range()),
+            Self::JsArrowFunctionExpression(_) => {
+                // Arrow functions don't have names
+                None
+            }
+            Self::JsMethodClassMember(method) => method.name().ok().map(|name| name.range()),
+            Self::JsMethodObjectMember(method) => method.name().ok().map(|name| name.range()),
+            Self::JsConstructorClassMember(constructor) => {
+                constructor.name().ok().map(|name| name.range())
+            }
+            Self::TsDeclareFunctionDeclaration(decl) => {
+                decl.id().ok().and_then(|binding| match binding {
+                    biome_js_syntax::AnyJsBinding::JsIdentifierBinding(id) => {
+                        id.name_token().ok().map(|token| token.text_range())
+                    }
+                    biome_js_syntax::AnyJsBinding::JsMetavariable(meta) => {
+                        meta.value_token().ok().map(|token| token.text_range())
+                    }
+                    _ => None,
+                })
+            }
+            Self::TsTypeAliasDeclaration(decl) => {
+                decl.binding_identifier()
+                    .ok()
+                    .and_then(|binding| match binding {
+                        biome_js_syntax::AnyTsIdentifierBinding::TsIdentifierBinding(id) => {
+                            id.name_token().ok().map(|token| token.text_range())
+                        }
+                        biome_js_syntax::AnyTsIdentifierBinding::JsMetavariable(meta) => {
+                            meta.value_token().ok().map(|token| token.text_range())
+                        }
+                    })
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct UseMaxParamsState {
     pub parameter_count: usize,
@@ -156,10 +208,13 @@ impl Rule for UseMaxParams {
         let node = ctx.query();
         let options = ctx.options();
 
+        // Use the function/method name's range if available, otherwise fall back to the whole node
+        let range = node.name_range().unwrap_or_else(|| node.range());
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                range,
                 markup! {
                     "Function has "{state.parameter_count}" parameters, but only "{options.max}" are allowed."
                 },
