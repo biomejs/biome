@@ -59,7 +59,7 @@ class C {
 }
 ```
 
-#### Valid examples
+#### Valid example (Previously invalid)
 
 ```js
 class Foo {
