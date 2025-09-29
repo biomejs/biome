@@ -1471,16 +1471,13 @@ mod tests {
 
             for descendant in root.descendants() {
                 // Static member: this.x or this.#y
-                if let Some(static_member) = JsStaticMemberExpression::cast_ref(&descendant) {
-                    if let Ok(object) = static_member.object() {
-                        if object.as_js_this_expression().is_some() {
-                            if let Some(node) = AnyCandidateForUsedInExpressionNode::cast_ref(
-                                static_member.syntax(),
-                            ) {
-                                nodes.push(node.clone());
-                            }
-                        }
-                    }
+                if let Some(static_member) = JsStaticMemberExpression::cast_ref(&descendant)
+                    && let Ok(object) = static_member.object()
+                    && object.as_js_this_expression().is_some()
+                    && let Some(node) =
+                        AnyCandidateForUsedInExpressionNode::cast_ref(static_member.syntax())
+                {
+                    nodes.push(node.clone());
                 }
             }
 
@@ -1614,7 +1611,7 @@ mod tests {
                 .find_map(JsClassDeclaration::cast)
                 .unwrap();
             let members: Vec<_> = class.members().iter().collect();
-            let first = members.get(0).unwrap(); // &JsClassMember
+            let first = members.first().unwrap();
 
             AnyNamedClassMember::cast((*first).clone().into()).unwrap()
         }
