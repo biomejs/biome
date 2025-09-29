@@ -148,7 +148,7 @@ impl Rule for NoUnusedPrivateClassMembers {
             if !unused_members.is_empty() {
                 unused_members = traverse_meaningful_read_members_usage(
                     &semantic_class,
-                    private_members,
+                    unused_members,
                     &class_member_references,
                 );
             }
