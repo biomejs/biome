@@ -119,37 +119,36 @@ fn is_inside_component_or_hook(call: &JsCallExpression, model: &SemanticModel) -
                 .find_map(JsCallExpression::cast)
         });
 
-    if let Some(call_expr) = outer_call {
-        if let Ok(callee) = call_expr.callee() {
-            if let Some(ident) = callee.as_js_reference_identifier() {
-                // Check if this is component$ or a hook by name
-                if let Ok(token) = ident.value_token() {
-                    let name = token.text_trimmed();
-                    if is_component_or_hook_name(name) {
-                        return true;
-                    }
-                }
+    if let Some(call_expr) = outer_call
+        && let Ok(callee) = call_expr.callee()
+        && let Some(ident) = callee.as_js_reference_identifier()
+    {
+        // Check if this is component$ or a hook by name
+        if let Ok(token) = ident.value_token() {
+            let name = token.text_trimmed();
+            if is_component_or_hook_name(name) {
+                return true;
+            }
+        }
 
-                // Check if this identifier is bound to component$ from Qwik
-                // This handles aliased imports like: import { component$ as MyComponent } from "@builder.io/qwik"
-                if let Some(binding) = model.binding(&ident) {
-                    if is_from_qwik(&binding) {
-                        // Walk up to find the import specifier
-                        let mut current = binding.syntax().clone();
-                        while let Some(parent) = current.parent() {
-                            // Check if we've reached an import specifier that contains "component$"
-                            let text = parent.text_trimmed();
-                            if text.to_string().contains("component$") {
-                                return true;
-                            }
-                            // Stop at the import statement level
-                            if JsImport::can_cast(parent.kind()) {
-                                break;
-                            }
-                            current = parent;
-                        }
-                    }
+        // Check if this identifier is bound to component$ from Qwik
+        // This handles aliased imports like: import { component$ as MyComponent } from "@builder.io/qwik"
+        if let Some(binding) = model.binding(&ident)
+            && is_from_qwik(&binding)
+        {
+            // Walk up to find the import specifier
+            let mut current = binding.syntax().clone();
+            while let Some(parent) = current.parent() {
+                // Check if we've reached an import specifier that contains "component$"
+                let text = parent.text_trimmed();
+                if text.to_string().contains("component$") {
+                    return true;
                 }
+                // Stop at the import statement level
+                if JsImport::can_cast(parent.kind()) {
+                    break;
+                }
+                current = parent;
             }
         }
     }
