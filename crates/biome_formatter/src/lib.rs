@@ -148,15 +148,38 @@ pub enum LineEnding {
 
     /// Carriage Return character only (\r), used very rarely
     Cr,
+
+    /// Automatically use CRLF on Windows and LF on other platforms
+    Auto,
 }
 
 impl LineEnding {
-    #[inline]
-    pub const fn as_str(&self) -> &'static str {
+    /// Get the string representation of this line ending variant.
+    ///
+    /// For `LineEnding::Auto`, this returns `"\r\n"` on Windows and `"\n"` on other platforms.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crate::LineEnding;
+    ///
+    /// assert_eq!(LineEnding::Lf.as_str(), "\n");
+    /// ```
+    pub fn as_str(&self) -> &'static str {
         match self {
             Self::Lf => "\n",
             Self::Crlf => "\r\n",
             Self::Cr => "\r",
+            Self::Auto => {
+                #[cfg(windows)]
+                {
+                    "\r\n"
+                }
+                #[cfg(not(windows))]
+                {
+                    "\n"
+                }
+            }
         }
     }
 
@@ -170,20 +193,66 @@ impl LineEnding {
         matches!(self, Self::Crlf)
     }
 
-    /// Returns `true` if this is a [LineEnding::Cr].
+    /// Checks whether the line ending is a carriage return (CR).
+    ///
+    /// Returns `true` if the variant is `LineEnding::Cr`, `false` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crate::LineEnding;
+    ///
+    /// let cr = LineEnding::Cr;
+    /// assert!(cr.is_carriage_return());
+    ///
+    /// let lf = LineEnding::Lf;
+    /// assert!(!lf.is_carriage_return());
+    /// ```
     pub const fn is_carriage_return(&self) -> bool {
         matches!(self, Self::Cr)
+    }
+
+    /// Checks whether the line ending is set to automatic selection.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crate::LineEnding;
+    ///
+    /// assert!(LineEnding::Auto.is_auto());
+    /// assert!(!LineEnding::Lf.is_auto());
+    /// ```
+    ///
+    /// @returns `true` if the variant is `LineEnding::Auto`, `false` otherwise.
+    pub const fn is_auto(&self) -> bool {
+        matches!(self, Self::Auto)
     }
 }
 
 impl FromStr for LineEnding {
     type Err = &'static str;
 
+    /// Parses a textual representation of a line ending into a `LineEnding`.
+    ///
+    /// Accepts the exact, lowercase strings: `"lf"`, `"crlf"`, `"cr"`, and `"auto"`.
+    /// The input is case-sensitive; other values produce an error.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err("Value not supported for LineEnding")` when the input does not match any supported value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let e: LineEnding = "auto".parse().unwrap();
+    /// assert_eq!(e, LineEnding::Auto);
+    /// ```
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "lf" => Ok(Self::Lf),
             "crlf" => Ok(Self::Crlf),
             "cr" => Ok(Self::Cr),
+            "auto" => Ok(Self::Auto),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for LineEnding"),
         }
@@ -191,11 +260,23 @@ impl FromStr for LineEnding {
 }
 
 impl std::fmt::Display for LineEnding {
+    /// Formats the `LineEnding` as its uppercase identifier.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crate::LineEnding;
+    /// assert_eq!(format!("{}", LineEnding::Lf), "LF");
+    /// assert_eq!(format!("{}", LineEnding::Crlf), "CRLF");
+    /// assert_eq!(format!("{}", LineEnding::Cr), "CR");
+    /// assert_eq!(format!("{}", LineEnding::Auto), "AUTO");
+    /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Lf => std::write!(f, "LF"),
             Self::Crlf => std::write!(f, "CRLF"),
             Self::Cr => std::write!(f, "CR"),
+            Self::Auto => std::write!(f, "AUTO"),
         }
     }
 }
