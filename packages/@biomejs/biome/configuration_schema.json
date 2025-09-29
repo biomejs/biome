@@ -2404,6 +2404,11 @@
 					"description": "Carriage Return character only (\\r), used very rarely",
 					"type": "string",
 					"enum": ["cr"]
+				},
+				{
+					"description": "Automatically use CRLF on Windows and LF on other platforms",
+					"type": "string",
+					"enum": ["auto"]
 				}
 			]
 		},
