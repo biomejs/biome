@@ -206,7 +206,7 @@ hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.23"
 indexmap             = { version = "2.10.0" }
 insta                = "1.43.2"
-libc                 = "0.2.175"
+libc                 = "0.2.176"
 mimalloc             = "0.1.48"
 papaya               = "0.2.3"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
