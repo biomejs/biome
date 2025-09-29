@@ -87,41 +87,31 @@ declare_node_union! {
 impl AnyFunctionLike {
     pub fn parameter_range(&self) -> Option<TextRange> {
         match self {
-            Self::JsFunctionDeclaration(func) => func
-                .parameters()
-                .ok()
-                .map(|params| params.range()),
-            Self::JsFunctionExpression(func) => func
-                .parameters()
-                .ok()
-                .map(|params| params.range()),
-            Self::JsArrowFunctionExpression(func) => func
-                .parameters()
-                .ok()
-                .map(|params| params.range()),
-            Self::JsMethodClassMember(method) => method
-                .parameters()
-                .ok()
-                .map(|params| params.range()),
-            Self::JsMethodObjectMember(method) => method
-                .parameters()
-                .ok()
-                .map(|params| params.range()),
-            Self::JsConstructorClassMember(constructor) => constructor
-                .parameters()
-                .ok()
-                .map(|params| params.range()),
-            Self::TsDeclareFunctionDeclaration(decl) => decl
-                .parameters()
-                .ok()
-                .map(|params| params.range()),
+            Self::JsFunctionDeclaration(func) => {
+                func.parameters().ok().map(|params| params.range())
+            }
+            Self::JsFunctionExpression(func) => func.parameters().ok().map(|params| params.range()),
+            Self::JsArrowFunctionExpression(func) => {
+                func.parameters().ok().map(|params| params.range())
+            }
+            Self::JsMethodClassMember(method) => {
+                method.parameters().ok().map(|params| params.range())
+            }
+            Self::JsMethodObjectMember(method) => {
+                method.parameters().ok().map(|params| params.range())
+            }
+            Self::JsConstructorClassMember(constructor) => {
+                constructor.parameters().ok().map(|params| params.range())
+            }
+            Self::TsDeclareFunctionDeclaration(decl) => {
+                decl.parameters().ok().map(|params| params.range())
+            }
             Self::TsTypeAliasDeclaration(decl) => {
                 if let Ok(ty) = decl.ty() {
                     match ty {
-                        biome_js_syntax::AnyTsType::TsFunctionType(func_type) => func_type
-                            .parameters()
-                            .ok()
-                            .map(|params| params.range()),
+                        biome_js_syntax::AnyTsType::TsFunctionType(func_type) => {
+                            func_type.parameters().ok().map(|params| params.range())
+                        }
                         _ => None,
                     }
                 } else {
