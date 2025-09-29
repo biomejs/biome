@@ -44,7 +44,7 @@ class C {
 	}
 
 	foo() {
-		// no retrn statement so not a meaningful read.
+    // no return statement so not a meaningful read.
 		this.#x = 1;
 	}
 }
