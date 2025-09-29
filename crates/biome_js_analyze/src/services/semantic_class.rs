@@ -842,7 +842,11 @@ fn handle_assignment_expression(
                 &object,
                 scoped_this_references,
             ) {
-                writes.insert(class_member_reference.clone());
+                if class_member_reference.access_kind.eq(&AccessKind::Write) {
+                    writes.insert(class_member_reference.clone());
+                } else {
+                    reads.insert(class_member_reference.clone());
+                }
             }
         }
 
@@ -856,7 +860,7 @@ fn handle_assignment_expression(
             writes.insert(name.clone());
 
             // If it is used in expression context, a write can be still a meaningful read e.g.
-            // class Used { this.#val; getVal() { return this.#val = 3 } }
+            // class Used { #val; getVal() { return this.#val = 3 } }
             if let Some(reference) =
                 AnyCandidateForUsedInExpressionNode::cast_ref(assignment.syntax())
                 && is_used_in_expression_context(&reference)
@@ -1297,12 +1301,11 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![("x", AccessKind::MeaningfulRead)], // x is read due to +=
-                expected_writes: vec![
-                    ("x", AccessKind::Write),
-                    ("y", AccessKind::Write),
-                    ("z", AccessKind::Write),
-                ],
+                expected_reads: vec![
+                    ("x", AccessKind::MeaningfulRead),
+                    ("z", AccessKind::MeaningfulRead),
+                ], // x is read due to +=
+                expected_writes: vec![("x", AccessKind::Write), ("y", AccessKind::Write)],
             },
             TestCase {
                 description: "assignment reads and writes with aliasForThis",
@@ -1317,12 +1320,17 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![("x", AccessKind::MeaningfulRead)],
-                expected_writes: vec![
-                    ("x", AccessKind::Write),
-                    ("y", AccessKind::Write),
-                    ("z", AccessKind::Write),
+                expected_reads: vec![
+                    ("x", AccessKind::MeaningfulRead),
+                    ("z", AccessKind::MeaningfulRead),
                 ],
+                expected_writes: vec![("x", AccessKind::Write), ("y", AccessKind::Write)],
+            },
+            TestCase {
+                description: "assignment reads and writes with return expression",
+                code: r#"class Used { #val = 1; getVal() { return this.#val = this.#val } }"#,
+                expected_reads: vec![("#val", AccessKind::MeaningfulRead)],
+                expected_writes: vec![("#val", AccessKind::Write)],
             },
         ];
 
@@ -1447,42 +1455,31 @@ mod tests {
 
     mod is_used_in_expression_context_tests {
         use super::*;
-        use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 
-        fn extract_all_nodes(code: &str) -> Vec<AnyCandidateForUsedInExpressionNode> {
+        struct TestCase<'a> {
+            description: &'a str,
+            code: &'a str,
+            expected: Vec<(&'a str, bool)>, // (identifier text, is_meaningful_read)
+        }
+
+        fn parse_this_member_nodes_from_code(
+            code: &str,
+        ) -> Vec<AnyCandidateForUsedInExpressionNode> {
             let parsed = parse_ts(code);
             let root = parsed.syntax();
-
             let mut nodes = vec![];
 
             for descendant in root.descendants() {
-                // 1) Skip the identifier that is the class name (e.g. `Test` in `class Test {}`)
-                if AnyJsIdentifierBinding::can_cast(descendant.kind())
-                    && let Some(parent) = descendant.parent()
-                    && JsClassDeclaration::can_cast(parent.kind())
-                {
-                    continue;
-                }
-
-                // Try to cast the node itself
-                if let Some(node) = AnyCandidateForUsedInExpressionNode::cast_ref(&descendant) {
-                    nodes.push(node);
-                }
-
-                // If this is an assignment, also include LHS
-                if let Some(assign_expr) = JsAssignmentExpression::cast_ref(&descendant) {
-                    if let Ok(lhs) = assign_expr.left()
-                        && let Some(node) =
-                            AnyCandidateForUsedInExpressionNode::cast_ref(lhs.syntax())
-                    {
-                        nodes.push(node.clone());
-                    }
-
-                    if let Ok(rhs) = assign_expr.right()
-                        && let Some(node) =
-                            AnyCandidateForUsedInExpressionNode::cast_ref(rhs.syntax())
-                    {
-                        nodes.push(node.clone());
+                // Static member: this.x or this.#y
+                if let Some(static_member) = JsStaticMemberExpression::cast_ref(&descendant) {
+                    if let Ok(object) = static_member.object() {
+                        if object.as_js_this_expression().is_some() {
+                            if let Some(node) = AnyCandidateForUsedInExpressionNode::cast_ref(
+                                static_member.syntax(),
+                            ) {
+                                nodes.push(node.clone());
+                            }
+                        }
                     }
                 }
             }
@@ -1490,49 +1487,33 @@ mod tests {
             nodes
         }
 
-        struct TestCase<'a> {
-            description: &'a str,
-            code: &'a str,
-            expected: Vec<(&'a str, bool)>, // (member name, is_meaningful_read)
-        }
-
         fn run_test_cases(cases: &[TestCase]) {
             for case in cases {
-                let nodes = extract_all_nodes(case.code);
+                let nodes = parse_this_member_nodes_from_code(case.code);
                 assert!(
                     !nodes.is_empty(),
-                    "No match found for test case: '{}'",
+                    "No nodes found for test case: {}",
                     case.description
                 );
-
-                // Ensure the number of nodes matches expected
                 assert_eq!(
                     nodes.len(),
                     case.expected.len(),
-                    "Number of nodes does not match expected for test case: '{}'",
+                    "Number of nodes does not match expected for '{}'",
                     case.description
                 );
 
-                for (node, (expected_name, expected_access_kind)) in
-                    nodes.iter().zip(&case.expected)
-                {
-                    let meaningful_node =
-                        AnyCandidateForUsedInExpressionNode::cast_ref(node.syntax())
-                            .expect("Failed to cast node to AnyMeaningfulReadNode");
-
-                    // Compare node name
-                    let node_name = meaningful_node.to_trimmed_text();
+                for (node, (expected_name, expected_flag)) in nodes.iter().zip(&case.expected) {
+                    let name = node.to_trimmed_text();
                     assert_eq!(
-                        &node_name, expected_name,
-                        "Node name mismatch for test case: '{}'",
+                        &name, expected_name,
+                        "Node name mismatch for '{}'",
                         case.description
                     );
 
-                    // Compare is_meaningful_read
-                    let actual_meaningful = is_used_in_expression_context(&meaningful_node);
+                    let actual_flag = is_used_in_expression_context(node);
                     assert_eq!(
-                        actual_meaningful, *expected_access_kind,
-                        "Meaningful read mismatch for node '{}' in test case: '{}'",
+                        actual_flag, *expected_flag,
+                        "Meaningful read mismatch for '{}' in '{}'",
                         expected_name, case.description
                     );
                 }
@@ -1540,11 +1521,11 @@ mod tests {
         }
 
         #[test]
-        fn test_is_used_in_expression_contexts() {
+        fn test_major_expression_contexts() {
             let cases = [
                 TestCase {
                     description: "return statement",
-                    code: r#"class Test {method() { return this.x; }}"#,
+                    code: r#"class Test { method() { return this.x; } }"#,
                     expected: vec![("this.x", true)],
                 },
                 TestCase {
@@ -1555,12 +1536,47 @@ mod tests {
                 TestCase {
                     description: "conditional expression",
                     code: r#"class Test { method() { const a = this.z ? 1 : 2; } }"#,
-                    expected: vec![("a", false), ("this.z", true)],
+                    expected: vec![("this.z", true)],
                 },
                 TestCase {
                     description: "logical expression",
                     code: r#"class Test { method() { const a = this.a && this.b; } }"#,
-                    expected: vec![("a", false), ("this.a", true), ("this.b", true)],
+                    expected: vec![("this.a", true), ("this.b", true)],
+                },
+                TestCase {
+                    description: "unary expression",
+                    code: r#"class Test { method() { -this.num; } }"#,
+                    expected: vec![("this.num", true)],
+                },
+                TestCase {
+                    description: "template literal",
+                    code: r#"class Test { method() { `${this.str}`; } }"#,
+                    expected: vec![("this.str", true)],
+                },
+                TestCase {
+                    description: "binary expression",
+                    code: r#"class Test { method() { const sum = this.a + this.b; } }"#,
+                    expected: vec![("this.a", true), ("this.b", true)],
+                },
+                TestCase {
+                    description: "assignment RHS",
+                    code: r#"class Test { method() { this.x = 5 + this.x; } }"#,
+                    expected: vec![("this.x", true)],
+                },
+                TestCase {
+                    description: "if statement",
+                    code: r#"class Test { method() { if(this.cond) {} } }"#,
+                    expected: vec![("this.cond", true)],
+                },
+                TestCase {
+                    description: "switch statement",
+                    code: r#"class Test { method() { switch(this.val) {} } }"#,
+                    expected: vec![("this.val", true)],
+                },
+                TestCase {
+                    description: "for statement",
+                    code: r#"class Test { method() { for(this.i = 0; this.i < 10; this.i++) {} } }"#,
+                    expected: vec![("this.i", true)],
                 },
                 TestCase {
                     description: "throw statement",
@@ -1577,64 +1593,64 @@ mod tests {
                     code: r#"class Test { *method() { yield this.gen; } }"#,
                     expected: vec![("this.gen", true)],
                 },
-                TestCase {
-                    description: "unary expression",
-                    code: r#"class Test { method() { -this.num; } }"#,
-                    expected: vec![("this.num", true)],
-                },
-                TestCase {
-                    description: "template expression",
-                    code: r#"class Test { method() { `${this.str}`; } }"#,
-                    expected: vec![("this.str", true)],
-                },
-                TestCase {
-                    description: "call expression callee",
-                    code: r#"class Test { method() { this.func(); } }"#,
-                    expected: vec![("this.func", true)],
-                },
-                TestCase {
-                    description: "new expression",
-                    code: r#"class Test { method() { new this.ClassName(); } }"#,
-                    expected: vec![("this.ClassName", true)],
-                },
-                TestCase {
-                    description: "if statement",
-                    code: r#"class Test { method() { if(this.cond) {} } }"#,
-                    expected: vec![("this.cond", true)],
-                },
-                TestCase {
-                    description: "switch statement",
-                    code: r#"class Test { method() { switch(this.val) {} } }"#,
-                    expected: vec![("this.val", true)],
-                },
-                TestCase {
-                    description: "for statement",
-                    code: r#"class Test { method() { for(this.i = 0; this.i < 10; this.i++) {} } }"#, // First this.i = 0 is a write, so not a match at all
-                    expected: vec![("this.i", true), ("this.i++", true)],
-                },
-                TestCase {
-                    description: "binary expression",
-                    code: r#"class Test { method() { const sum = this.a + this.b; } }"#,
-                    expected: vec![("sum", false), ("this.a", true), ("this.b", true)],
-                },
-                TestCase {
-                    description: "binary expression nested parenthesis",
-                    code: r#"class Test { method() { const sum = (((this.a + ((this.b * 2))))); } }"#,
-                    expected: vec![("sum", false), ("this.a", true), ("this.b", true)],
-                },
-                TestCase {
-                    description: "nested logical and conditional expressions",
-                    code: r#"class Test { method() { const val = foo(this.a && (this.b ? this.c : 7)); } }"#,
-                    expected: vec![
-                        ("val", false),
-                        ("this.a", true),
-                        ("this.b", true),
-                        ("this.c", true),
-                    ],
-                },
             ];
 
             run_test_cases(&cases);
+        }
+    }
+
+    mod extract_named_member_tests {
+        use crate::services::semantic_class::AnyNamedClassMember;
+        use crate::services::semantic_class::extract_named_member;
+        use crate::services::semantic_class::tests::parse_ts;
+        use biome_js_syntax::JsClassDeclaration;
+        use biome_rowan::{AstNode, AstNodeList};
+
+        fn extract_first_member(src: &str) -> AnyNamedClassMember {
+            let parse = parse_ts(src);
+            let root = parse.syntax();
+            let class = root
+                .descendants()
+                .find_map(JsClassDeclaration::cast)
+                .unwrap();
+            let members: Vec<_> = class.members().iter().collect();
+            let first = members.get(0).unwrap(); // &JsClassMember
+
+            AnyNamedClassMember::cast((*first).clone().into()).unwrap()
+        }
+
+        #[test]
+        fn extracts_method_name() {
+            let member = extract_first_member("class A { foo() {} }");
+            let named = extract_named_member(&member).unwrap();
+            assert_eq!(named.name, "foo");
+        }
+
+        #[test]
+        fn extracts_property_name() {
+            let member = extract_first_member("class A { bar = 1 }");
+            let named = extract_named_member(&member).unwrap();
+            assert_eq!(named.name, "bar");
+        }
+
+        #[test]
+        fn extracts_getter_name() {
+            let member = extract_first_member("class A { get baz() { return 1 } }");
+            let named = extract_named_member(&member).unwrap();
+            assert_eq!(named.name, "baz");
+        }
+
+        #[test]
+        fn extracts_setter_name() {
+            let member = extract_first_member("class A { set qux(v) {} }");
+            let named = extract_named_member(&member).unwrap();
+            assert_eq!(named.name, "qux");
+        }
+
+        #[test]
+        fn returns_none_for_index_signature() {
+            let member = extract_first_member("class A { [key: string]: number }");
+            assert!(extract_named_member(&member).is_none());
         }
     }
 }

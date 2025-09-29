@@ -1,5 +1,8 @@
 use crate::JsRuleAction;
-use crate::services::semantic_class::{AnyNamedClassMember, ClassMemberReference, ClassMemberReferences, NamedClassMember, SemanticClass};
+use crate::services::semantic_class::{
+    AnyNamedClassMember, ClassMemberReference, ClassMemberReferences, NamedClassMember,
+    SemanticClass,
+};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,8 +11,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsPropertyModifier,
     AnyTsPropertyParameterModifier, JsClassDeclaration, JsClassMemberList, JsFileSource,
-    JsSyntaxKind, JsSyntaxToken, TsAccessibilityModifier, TsPropertyParameter,
-    TsReadonlyModifier,
+    JsSyntaxKind, JsSyntaxToken, TsAccessibilityModifier, TsPropertyParameter, TsReadonlyModifier,
 };
 use biome_rowan::{
     AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutationExt, TriviaPiece,
@@ -155,19 +157,21 @@ impl Rule for UseReadonlyClassProperties {
                 }),
             )
             .filter_map(|prop_or_param| {
-                if writes
-                    .clone()
-                    .into_iter()
-                    .any(|ClassMemberReference { name: class_member_ref_name, .. }| {
-                        if let Some(NamedClassMember { name: member_name, .. }) =
-                            ctx.model.extract_named_member(&prop_or_param.clone())
+                if writes.clone().into_iter().any(
+                    |ClassMemberReference {
+                         name: class_member_ref_name,
+                         ..
+                     }| {
+                        if let Some(NamedClassMember {
+                            name: member_name, ..
+                        }) = ctx.model.extract_named_member(&prop_or_param.clone())
                         {
                             return class_member_ref_name.eq(&member_name);
                         }
 
                         false
-                    })
-                {
+                    },
+                ) {
                     None
                 } else {
                     Some(prop_or_param.clone())
@@ -178,7 +182,9 @@ impl Rule for UseReadonlyClassProperties {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        if let Some(NamedClassMember { name, range }) = ctx.model.extract_named_member(&node.clone()) {
+        if let Some(NamedClassMember { name, range }) =
+            ctx.model.extract_named_member(&node.clone())
+        {
             return Some(RuleDiagnostic::new(
                 rule_category!(),
                 range,
@@ -188,11 +194,10 @@ impl Rule for UseReadonlyClassProperties {
             ).note(markup! {
                 "Using "<Emphasis>"readonly"</Emphasis>" improves code safety, clarity, and helps prevent unintended mutations."
             }),
-            )
+            );
         }
 
         None
-
     }
 
     fn action(ctx: &RuleContext<Self>, node: &Self::State) -> Option<JsRuleAction> {
@@ -280,7 +285,7 @@ impl Rule for UseReadonlyClassProperties {
 fn collect_non_readonly_class_member_properties(
     members: &JsClassMemberList,
     private_only: bool,
-) -> impl Iterator<Item =AnyNamedClassMember> {
+) -> impl Iterator<Item = AnyNamedClassMember> {
     members.iter().filter_map(move |member| {
         let property_class_member = member.as_js_property_class_member()?;
 
