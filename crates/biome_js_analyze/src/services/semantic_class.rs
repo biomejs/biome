@@ -608,7 +608,7 @@ impl ThisPatternResolver {
                             .as_any_js_assignment()?
                             .as_js_static_member_assignment(),
                         scoped_this_references,
-                        AccessKind::MeaningfulRead,
+                        AccessKind::Write,
                     );
                 }
                 None
