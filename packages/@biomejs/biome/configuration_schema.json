@@ -12246,7 +12246,7 @@
 					]
 				},
 				"noDescendingSpecificity": {
-					"description": "Disallow a lower specificity selector from coming after a higher specificity selector.",
+					"description": "Disallow a lower specificity selector from coming after a higher specificity selector within the same layer.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDescendingSpecificityConfiguration" },
 						{ "type": "null" }

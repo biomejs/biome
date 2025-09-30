@@ -1853,7 +1853,7 @@ export interface Style {
 	 */
 	noDefaultExport?: RuleConfiguration_for_NoDefaultExportOptions;
 	/**
-	 * Disallow a lower specificity selector from coming after a higher specificity selector.
+	 * Disallow a lower specificity selector from coming after a higher specificity selector within the same layer.
 	 */
 	noDescendingSpecificity?: RuleConfiguration_for_NoDescendingSpecificityOptions;
 	/**
