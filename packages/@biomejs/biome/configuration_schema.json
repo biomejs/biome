@@ -5166,7 +5166,7 @@
 					]
 				},
 				"useDeprecatedDate": {
-					"description": "Succinct description of the rule.",
+					"description": "Require deletion date on @deprecated directive. Suggest removing deprecated things after deprecated date.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseDeprecatedDateConfiguration" },
 						{ "type": "null" }
@@ -13869,6 +13869,7 @@
 		},
 		"UseDeprecatedDateOptions": {
 			"type": "object",
+			"properties": { "argumentName": { "default": "", "type": "string" } },
 			"additionalProperties": false
 		},
 		"UseDeprecatedReasonConfiguration": {
