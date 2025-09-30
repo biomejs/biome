@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```css
+    /// ```css,expect_diagnostic
     /// @layer base {
     ///     b a { color: red; }
     ///     a { color: red; }
