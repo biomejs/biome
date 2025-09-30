@@ -1,3 +1,4 @@
+use biome_css_syntax::AnyCssLayer;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
@@ -13,7 +14,7 @@ use biome_rule_options::no_descending_specificity::NoDescendingSpecificityOption
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow a lower specificity selector from coming after a higher specificity selector.
+    /// Disallow a lower specificity selector from coming after a higher specificity selector within the same layer.
     ///
     /// Source order is important in CSS, and when two selectors have the same specificity, the one that occurs last will take priority.
     /// However, the situation is different when one of the selectors has a higher specificity.
@@ -52,6 +53,13 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```css
+    /// @layer base {
+    ///     b a { color: red; }
+    ///     a { color: red; }
+    /// }
+    /// ```
+    ///
     ///
     /// ### Valid
     ///
@@ -79,6 +87,20 @@ declare_lint_rule! {
     /// /* This selector is overwritten by the one above it, but this is not an error because the rule only evaluates it as a compound selector */
     /// :where(a) :is(b) {
     ///     color: blue;
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// @layer base, special;
+    /// @layer base {
+    ///     b a {
+    ///         color: red;
+    ///     }
+    /// }
+    /// @layer special {
+    ///     a {
+    ///         color: red;
+    ///     }
     /// }
     /// ```
     ///
@@ -128,7 +150,7 @@ fn find_descending_selector(
     rule: &CssSemanticRule,
     model: &SemanticModel,
     visited_rules: &mut FxHashSet<RuleId>,
-    visited_selectors: &mut FxHashMap<String, (TextRange, Specificity)>,
+    visited_selectors: &mut FxHashMap<String, (TextRange, Option<AnyCssLayer>, Specificity)>,
     descending_selectors: &mut Vec<DescendingSelector>,
 ) {
     if !visited_rules.insert(rule.id()) {
@@ -142,10 +164,10 @@ fn find_descending_selector(
         let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {
             continue;
         };
-
-        if let Some((last_text_range, last_specificity)) = visited_selectors.get(&tail_selector_str)
+        if let Some((last_text_range, last_layer, last_specificity)) =
+            visited_selectors.get(&tail_selector_str)
         {
-            if last_specificity > &selector.specificity() {
+            if last_specificity > &selector.specificity() && last_layer == &selector.layer() {
                 descending_selectors.push(DescendingSelector {
                     high: (*last_text_range, *last_specificity),
                     low: (selector.range(), selector.specificity()),
@@ -154,7 +176,7 @@ fn find_descending_selector(
         } else {
             visited_selectors.insert(
                 tail_selector_str,
-                (selector.range(), selector.specificity()),
+                (selector.range(), selector.layer(), selector.specificity()),
             );
         }
     }

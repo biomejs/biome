@@ -1,8 +1,8 @@
 use biome_css_syntax::{
-    CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector, CssContainerAtRule,
-    CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList, CssIdentifier,
-    CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssRoot, CssStartingStyleAtRule,
-    CssSupportsAtRule,
+    AnyCssLayer, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
+    CssContainerAtRule, CssDashedIdentifier, CssDeclaration, CssGenericComponentValueList,
+    CssIdentifier, CssMediaAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssRoot,
+    CssStartingStyleAtRule, CssSupportsAtRule,
 };
 use biome_rowan::{
     AstNode, AstNodeList, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
@@ -233,6 +233,15 @@ impl Selector {
 
     pub fn specificity(&self) -> Specificity {
         self.specificity
+    }
+
+    pub fn layer(&self) -> Option<AnyCssLayer> {
+        for ancestor in self.node.syntax().ancestors() {
+            if let Some(layer) = AnyCssLayer::cast(ancestor) {
+                return Some(layer);
+            }
+        }
+        None
     }
 }
 
