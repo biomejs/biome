@@ -53,8 +53,9 @@ Formatting options specific to the JavaScript files
                               its super languages) files.
         --javascript-formatter-indent-width=NUMBER  The size of the indentation applied to
                               JavaScript (and its super languages) files. Default to 2.
-        --javascript-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to
-                              JavaScript (and its super languages) files.
+        --javascript-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to
+                              JavaScript (and its super languages) files. `auto` uses CRLF on
+                              Windows and LF on other platforms.
         --javascript-formatter-line-width=NUMBER  What's the max width of a line applied to
                               JavaScript (and its super languages) files. Defaults to 80.
         --javascript-formatter-quote-style=<double|single>  The type of quotes used in JavaScript
@@ -143,8 +144,9 @@ Available options:
                               languages) files.
         --json-formatter-indent-width=NUMBER  The size of the indentation applied to JSON (and its
                               super languages) files. Default to 2.
-        --json-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to JSON (and its
-                              super languages) files.
+        --json-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to JSON (and
+                              its super languages) files. `auto` uses CRLF on Windows and LF on
+                              other platforms.
         --json-formatter-line-width=NUMBER  What's the max width of a line applied to JSON (and its
                               super languages) files. Defaults to 80.
         --json-formatter-trailing-commas=<none|all>  Print trailing commas wherever possible in
