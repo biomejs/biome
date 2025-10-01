@@ -179,8 +179,10 @@ fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
                         return Some(i);
                     }
                 }
-                // In template literals, $\{ is a valid escape for producing a literal ${
+                // Check the \{ sequence. This \ is only a valid escape in template literals
+                // when the preceding character is $ (i.e., `$\{`)
                 b'{' => {
+                    // Check for template literals and look backward for $
                     if !(quote == b'`' && i > 0 && str.as_bytes()[i - 1] == b'$') {
                         return Some(i);
                     }
