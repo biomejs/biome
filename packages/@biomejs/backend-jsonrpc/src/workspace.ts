@@ -1726,7 +1726,7 @@ export interface Nursery {
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
 	/**
-	 * Require deletion date on @deprecated directive. Suggest removing deprecated things after deprecated date.
+	 * Require the @deprecated directive to specify a deletion date.
 	 */
 	useDeprecatedDate?: RuleConfiguration_for_UseDeprecatedDateOptions;
 	/**
