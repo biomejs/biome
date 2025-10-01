@@ -11,6 +11,12 @@ query {
 }
 
 query {
+  member @deprecated(reason: "Use `members` instead", deletionDate: "invalid-date") {
+		id
+	}
+}
+
+query {
   member @deprecated(reason: "Use `members` instead", deletionDate: "1999-12-25") {
 		id
 	}
@@ -38,13 +44,31 @@ invalid.graphql:2:10 lint/nursery/useDeprecatedDate ━━━━━━━━━�
 ```
 invalid.graphql:8:10 lint/nursery/useDeprecatedDate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The deprecation has passed it's due date
+  i The `deletionDate` argument in the directive `@deprecated` has an invalid value.
   
      7 │ query {
-   > 8 │   member @deprecated(reason: "Use `members` instead", deletionDate: "1999-12-25") {
-       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 8 │   member @deprecated(reason: "Use `members` instead", deletionDate: "invalid-date") {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ 		id
     10 │ 	}
+  
+  i The argument must match the `YYYY-MM-DD` format.
+  
+
+```
+
+```
+invalid.graphql:14:10 lint/nursery/useDeprecatedDate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The deprecation has passed its due date.
+  
+    13 │ query {
+  > 14 │   member @deprecated(reason: "Use `members` instead", deletionDate: "1999-12-25") {
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 		id
+    16 │ 	}
+  
+  i Remove deprecated code or move deprecation date to the future.
   
 
 ```

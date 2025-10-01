@@ -5,10 +5,12 @@ use biome_console::markup;
 use biome_graphql_syntax::GraphqlDirective;
 use biome_rowan::AstNode;
 use biome_rule_options::use_deprecated_date::UseDeprecatedDateOptions;
-use jiff::Zoned;
+use jiff::{Timestamp, tz::TimeZone};
 
 declare_lint_rule! {
-    /// Require deletion date on `@deprecated` directive. Suggest removing deprecated things after deprecated date.
+    /// Require the `@deprecated` directive to specify a deletion date.
+    ///
+    /// Suggests removing deprecated code when the due date has been passed.
     ///
     /// ## Examples
     ///
@@ -81,15 +83,15 @@ impl Rule for UseDeprecatedDate {
         };
 
         let due_date_value = argument_string_value.inner_string_text().ok()?;
-        let due_date = due_date_value.to_string().parse();
+        let due_date = due_date_value.text().parse();
 
         if due_date.is_err() {
             return Some((DeprecatedDateIssue::Invalid, node.clone()));
         }
 
-        let now = Zoned::now();
+        let now = Timestamp::now().to_zoned(TimeZone::UTC).date();
 
-        if now.date() > due_date.ok()? {
+        if now > due_date.ok()? {
             return Some((DeprecatedDateIssue::Due, node.clone()));
         }
 
@@ -122,7 +124,7 @@ impl Rule for UseDeprecatedDate {
                     },
                 )
                 .note(markup! {
-                    "The argument must match the `YYYY-MM-DD` format"
+                    "The argument must match the `YYYY-MM-DD` format."
                 }),
             ),
             DeprecatedDateIssue::Due => Some(
@@ -130,9 +132,12 @@ impl Rule for UseDeprecatedDate {
                     rule_category!(),
                     span,
                     markup! {
-                        "The deprecation has passed it's due date"
+                        "The deprecation has passed its due date."
                     },
                 )
+                .note(markup! {
+                    "Remove deprecated code or move deprecation date to the future."
+                }),
             ),
         }
     }
