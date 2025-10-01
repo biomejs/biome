@@ -69,9 +69,10 @@ impl Rule for UseDeprecatedDate {
         let arguments = arguments.arguments();
         let argument_name = ctx.options().argument_name.clone();
         let Some(argument) = arguments.into_iter().find(|argument| {
-            argument
-                .name()
-                .is_ok_and(|name| name.to_trimmed_string() == argument_name)
+            argument.name().is_ok_and(|name| {
+                name.value_token()
+                    .is_ok_and(|token| token.text_trimmed() == argument_name)
+            })
         }) else {
             return Some((DeprecatedDateIssue::Missing, node.clone()));
         };
