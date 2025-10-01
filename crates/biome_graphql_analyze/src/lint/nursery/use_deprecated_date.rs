@@ -14,7 +14,7 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```graphql
+    /// ```graphql,expect_diagnostic
     /// query {
     ///   member @deprecated(reason: "Use `members` instead") {
     ///     id
@@ -65,12 +65,7 @@ impl Rule for UseDeprecatedDate {
             return Some((DeprecatedDateIssue::Missing, node.clone()));
         };
         let arguments = arguments.arguments();
-        let argument_name = ctx
-            .options()
-            .argument_name
-            .is_empty()
-            .then(|| "deletionDate".into())
-            .unwrap_or(ctx.options().argument_name.clone());
+        let argument_name = ctx.options().argument_name.clone();
         let Some(argument) = arguments.into_iter().find(|argument| {
             argument
                 .name()
@@ -103,12 +98,7 @@ impl Rule for UseDeprecatedDate {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let span = ctx.query().range();
-        let argument_name = ctx
-            .options()
-            .argument_name
-            .is_empty()
-            .then(|| "deletionDate".into())
-            .unwrap_or(ctx.options().argument_name.clone());
+        let argument_name = ctx.options().argument_name.clone();
 
         match state.0 {
             DeprecatedDateIssue::Missing => Some(
@@ -140,7 +130,7 @@ impl Rule for UseDeprecatedDate {
                     rule_category!(),
                     span,
                     markup! {
-                        "The deprecation has past it's due date"
+                        "The deprecation has passed it's due date"
                     },
                 )
             ),

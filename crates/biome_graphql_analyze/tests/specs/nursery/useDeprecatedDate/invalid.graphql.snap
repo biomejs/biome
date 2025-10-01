@@ -38,7 +38,7 @@ invalid.graphql:2:10 lint/nursery/useDeprecatedDate ━━━━━━━━━�
 ```
 invalid.graphql:8:10 lint/nursery/useDeprecatedDate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The deprecation has past it's due date
+  i The deprecation has passed it's due date
   
      7 │ query {
    > 8 │   member @deprecated(reason: "Use `members` instead", deletionDate: "1999-12-25") {

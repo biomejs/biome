@@ -117,12 +117,16 @@ impl TryFrom<GraphqlSyntaxKind> for TriviaPieceKind {
 
 /// Text of `token`, excluding all trivia and removing quotes if `token` is a string literal.
 pub fn inner_string_text(token: &GraphqlSyntaxToken) -> TokenText {
-    let mut text = token.token_text_trimmed();
-    if token.kind() == GraphqlSyntaxKind::GRAPHQL_STRING_LITERAL {
-        // remove string delimiters
-        // SAFETY: string literal token have a delimiters at the start and the end of the string
-        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
-        text = text.slice(range);
+    let text = token.token_text_trimmed();
+    if token.kind() != GraphqlSyntaxKind::GRAPHQL_STRING_LITERAL {
+        return text;
     }
-    text
+    // remove string delimiters
+    // SAFETY: string literal token have a delimiters at the start and the end of the string
+    let slice = if text.starts_with("\"\"\"") && text.ends_with("\"\"\"") {
+        TextRange::new(3.into(), text.len() - TextSize::from(3))
+    } else {
+        TextRange::new(1.into(), text.len() - TextSize::from(1))
+    };
+    text.slice(slice)
 }
