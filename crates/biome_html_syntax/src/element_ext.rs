@@ -144,4 +144,89 @@ impl HtmlElement {
 
         name_token.text_trimmed().eq_ignore_ascii_case("script")
     }
+
+    pub fn is_javascript_module(&self) -> SyntaxResult<bool> {
+        let is_script = self.is_script_tag()?;
+        let type_attribute = self.find_attribute_by_name("type");
+        let is_type_module = type_attribute.is_some_and(|attribute| {
+            attribute
+                .initializer()
+                .and_then(|initializer| initializer.value().ok())
+                .and_then(|value| value.as_html_string().cloned())
+                .and_then(|value| value.value_token().ok())
+                .is_some_and(|token| {
+                    let text = inner_string_text(&token);
+                    text.eq_ignore_ascii_case("module")
+                })
+        });
+
+        Ok(is_script && is_type_module)
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use biome_html_factory::syntax::HtmlElement;
+    use biome_html_parser::{HtmlParseOptions, parse_html};
+    use biome_rowan::AstNode;
+
+    #[test]
+    fn test_is_javascript_tag() {
+        let html = r#"
+        <script type="text/javascript">
+        </script>
+        "#;
+        let syntax = parse_html(html, HtmlParseOptions::default());
+        let element = syntax
+            .tree()
+            .syntax()
+            .descendants()
+            .find_map(HtmlElement::cast)
+            .unwrap();
+
+        assert!(element.is_javascript_tag().unwrap());
+
+        let html = r#"
+        <script type="application/javascript">
+        </script>
+        "#;
+        let syntax = parse_html(html, HtmlParseOptions::default());
+        let element = syntax
+            .tree()
+            .syntax()
+            .descendants()
+            .find_map(HtmlElement::cast)
+            .unwrap();
+
+        assert!(element.is_javascript_tag().unwrap());
+
+        let html = r#"
+        <script type="application/ecmascript">
+        </script>
+        "#;
+        let syntax = parse_html(html, HtmlParseOptions::default());
+        let element = syntax
+            .tree()
+            .syntax()
+            .descendants()
+            .find_map(HtmlElement::cast)
+            .unwrap();
+
+        assert!(element.is_javascript_tag().unwrap());
+
+        let html = r#"
+        <script type="module">
+        </script>
+        "#;
+        let syntax = parse_html(html, HtmlParseOptions::default());
+        let element = syntax
+            .tree()
+            .syntax()
+            .descendants()
+            .find_map(HtmlElement::cast)
+            .unwrap();
+
+        assert!(element.is_javascript_tag().unwrap());
+    }
 }

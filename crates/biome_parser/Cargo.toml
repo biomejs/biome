@@ -18,6 +18,7 @@ biome_unicode_table = { workspace = true }
 drop_bomb           = "0.1.5"
 enumflags2          = { workspace = true }
 unicode-bom         = { workspace = true }
+log = "0.4.26"
 
 [lints]
 workspace = true

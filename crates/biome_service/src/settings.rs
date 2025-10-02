@@ -595,14 +595,13 @@ impl From<HtmlConfiguration> for LanguageSettings<HtmlLanguage> {
             language_setting.parser = parser.into();
         }
 
-        // NOTE: uncomment once ready
-        // if let Some(linter) = html.linter {
-        //     language_setting.linter = linter.into();
-        // }
-        //
-        // if let Some(assist) = html.assist {
-        //     language_setting.assist = assist.into();
-        // }
+        if let Some(linter) = html.linter {
+            language_setting.linter = linter.into();
+        }
+
+        if let Some(assist) = html.assist {
+            language_setting.assist = assist.into();
+        }
 
         language_setting
     }

@@ -6,11 +6,13 @@ use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
 pub use crate::file_handlers::astro::{ASTRO_FENCE, AstroFileHandler};
 use crate::file_handlers::graphql::GraphqlFileHandler;
+use crate::file_handlers::ignore::IgnoreFileHandler;
 pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
 pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
 use crate::settings::Settings;
 use crate::workspace::{
-    FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult,
+    EmbeddedContent, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+    RenameResult,
     SendEmbeddedParse,
 };
 use biome_analyze::{
@@ -20,6 +22,7 @@ use biome_analyze::{
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
+use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
 use biome_console::fmt::Formatter;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
@@ -39,14 +42,11 @@ use biome_js_syntax::{
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_module_graph::ModuleGraph;
+use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrLikeExtension;
-
-use crate::file_handlers::ignore::IgnoreFileHandler;
-use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
-use biome_package::PackageJson;
 use camino::Utf8Path;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
@@ -370,6 +370,21 @@ impl DocumentFileSource {
             Self::Unknown => false,
         }
     }
+
+    /// Whether this file can contain embedded nodes
+    pub fn can_contain_embeds(path: &Utf8Path) -> bool {
+        let file_source = Self::from(path);
+        match file_source {
+            Self::Html(_) => true,
+            Self::Js(_)
+            | Self::Css(_)
+            | Self::Graphql(_)
+            | Self::Json(_)
+            | Self::Grit(_)
+            | Self::Ignore
+            | Self::Unknown => false,
+        }
+    }
 }
 
 impl std::fmt::Display for DocumentFileSource {
@@ -447,12 +462,19 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
-type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
+pub struct ParseEmbedResult {
+    pub(crate) nodes: Vec<(EmbeddedContent, DocumentFileSource)>,
+}
 
+type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
+type ParseEmbeddedNodes =
+    fn(&AnyParse, &BiomePath, &DocumentFileSource, &Settings, &mut NodeCache) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {
     /// Parse a file
     pub(crate) parse: Option<Parse>,
+
+    pub(crate) parse_embedded_nodes: Option<ParseEmbeddedNodes>,
 }
 
 type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
@@ -495,6 +517,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) enabled_selectors: Vec<AnalyzerSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) pull_code_actions: bool,
+    pub(crate) diagnostic_offset: Option<TextSize>,
 }
 
 pub(crate) struct LintResults {
@@ -510,6 +533,7 @@ pub(crate) struct ProcessLint<'a> {
     ignores_suppression_comment: bool,
     rules: Option<Cow<'a, Rules>>,
     pull_code_actions: bool,
+    diagnostic_offset: Option<TextSize>,
 }
 
 impl<'a> ProcessLint<'a> {
@@ -525,6 +549,7 @@ impl<'a> ProcessLint<'a> {
                 || !params.only.is_empty(),
             rules: params.settings.as_linter_rules(params.path.as_path()),
             pull_code_actions: params.pull_code_actions,
+            diagnostic_offset: params.diagnostic_offset,
         }
     }
 
@@ -564,6 +589,9 @@ impl<'a> ProcessLint<'a> {
                         diagnostic = diagnostic.add_code_suggestion(action.into());
                     }
                 }
+            }
+            if let Some(offset) = &self.diagnostic_offset {
+                diagnostic.add_diagnostic_offset(*offset);
             }
 
             let error = diagnostic.with_severity(severity);
@@ -661,12 +689,12 @@ type FormatEmbedded = fn(
     &DocumentFileSource,
     AnyParse,
     &Settings,
-    Vec<FormatEmbedNode>,
+    Vec<EmbeddedFormatParse>,
 ) -> Result<Printed, WorkspaceError>;
 
-pub(crate) struct FormatEmbedNode {
+pub(crate) struct EmbeddedFormatParse {
     pub(crate) range: TextRange,
-    pub(crate) node: SendEmbeddedParse,
+    pub(crate) node: AnyParse,
     pub(crate) source: DocumentFileSource,
 }
 

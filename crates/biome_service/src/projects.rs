@@ -222,7 +222,6 @@ impl Projects {
         let mut file_features = FeaturesSupported::default();
         file_features = file_features.with_capabilities(capabilities);
         file_features = file_features.with_settings_and_language(settings, path, capabilities);
-
         if settings.ignore_unknown_enabled() && language == DocumentFileSource::Unknown {
             file_features.ignore_not_supported();
         } else if path.file_name().is_some_and(|file_name| {

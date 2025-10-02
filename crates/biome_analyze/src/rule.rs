@@ -12,10 +12,11 @@ use biome_diagnostics::{
     Visit,
 };
 use biome_diagnostics::{Applicability, Severity};
-use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
+use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange, TextSize};
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
+use std::ops::Add;
 use std::str::FromStr;
 
 #[derive(Clone, Debug)]
@@ -1255,53 +1256,77 @@ pub trait Rule: RuleMeta + Sized {
 }
 
 /// Diagnostic object returned by a single analysis rule
-#[derive(Clone, Debug, Diagnostic)]
+#[derive(Clone, Debug)]
 pub struct RuleDiagnostic {
-    #[category]
     pub(crate) category: &'static Category,
     pub(crate) subcategory: Option<String>,
-    #[location(span)]
     pub(crate) span: Option<TextRange>,
-    #[message]
-    #[description]
     pub(crate) message: MessageAndDescription,
-    #[tags]
     pub(crate) tags: DiagnosticTags,
-    #[advice]
     pub(crate) rule_advice: RuleAdvice,
-    #[severity]
     pub(crate) severity: Severity,
+
+    advice_offset: Option<TextSize>,
 }
 
-#[derive(Clone, Debug, Default)]
-/// It contains possible advices to show when printing a diagnostic that belong to the rule
-pub struct RuleAdvice {
-    pub(crate) details: Vec<Detail>,
-    pub(crate) notes: Vec<(LogCategory, MarkupBuf)>,
-    pub(crate) suggestion_list: Option<SuggestionList>,
+impl RuleDiagnostic {
+    pub(crate) fn set_advice_offset(&mut self, offset: TextSize) {
+        self.advice_offset = Some(offset);
+    }
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct SuggestionList {
-    pub(crate) message: MarkupBuf,
-    pub(crate) list: Vec<MarkupBuf>,
+impl Diagnostic for RuleDiagnostic {
+    fn severity(&self) -> Severity {
+        self.severity
+    }
+
+    fn category(&self) -> Option<&'static Category> {
+        Some(self.category)
+    }
+
+    fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup! {{self.message}})
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(fmt, "{}", self.message)
+    }
+
+    fn tags(&self) -> DiagnosticTags {
+        self.tags
+    }
+
+    fn location(&self) -> Location<'_> {
+        Location::builder().span(&self.span).build()
+    }
+
+    fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        self.record(visitor)
+    }
 }
 
-impl Advices for RuleAdvice {
+impl Advices for RuleDiagnostic {
     fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
-        for detail in &self.details {
+        for detail in &self.rule_advice.details {
             visitor.record_log(
                 detail.log_category,
                 &markup! { {detail.message} }.to_owned(),
             )?;
-            visitor.record_frame(Location::builder().span(&detail.range).build())?;
+            if let (Some(span), Some(advice_offset)) = (detail.range, self.advice_offset) {
+                let span = span.add(advice_offset);
+                let location = Location::builder().span(&span).build();
+                visitor.record_frame(location)?;
+            } else {
+                let location = Location::builder().span(&detail.range).build();
+                visitor.record_frame(location)?;
+            };
         }
         // we then print notes
-        for (log_category, note) in &self.notes {
+        for (log_category, note) in &self.rule_advice.notes {
             visitor.record_log(*log_category, &markup! { {note} }.to_owned())?;
         }
 
-        if let Some(suggestion_list) = &self.suggestion_list {
+        if let Some(suggestion_list) = &self.rule_advice.suggestion_list {
             visitor.record_log(
                 LogCategory::Info,
                 &markup! { {suggestion_list.message} }.to_owned(),
@@ -1316,6 +1341,20 @@ impl Advices for RuleAdvice {
 
         Ok(())
     }
+}
+
+#[derive(Clone, Debug, Default)]
+/// It contains possible advices to show when printing a diagnostic that belong to the rule
+pub struct RuleAdvice {
+    pub(crate) details: Vec<Detail>,
+    pub(crate) notes: Vec<(LogCategory, MarkupBuf)>,
+    pub(crate) suggestion_list: Option<SuggestionList>,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct SuggestionList {
+    pub(crate) message: MarkupBuf,
+    pub(crate) list: Vec<MarkupBuf>,
 }
 
 #[derive(Clone, Debug)]
@@ -1338,6 +1377,7 @@ impl RuleDiagnostic {
             tags: DiagnosticTags::empty(),
             rule_advice: RuleAdvice::default(),
             severity: Severity::default(),
+            advice_offset: None,
         }
     }
 
@@ -1422,10 +1462,6 @@ impl RuleDiagnostic {
     #[inline]
     pub fn span(&self) -> Option<TextRange> {
         self.span
-    }
-
-    pub fn advices(&self) -> &RuleAdvice {
-        &self.rule_advice
     }
 
     pub fn subcategory(mut self, subcategory: String) -> Self {

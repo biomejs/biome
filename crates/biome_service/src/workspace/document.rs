@@ -1,32 +1,84 @@
 use std::marker::PhantomData;
-
 use biome_css_parser::CssOffsetParse;
+use crate::diagnostics::FileTooLarge;
 use biome_css_syntax::CssLanguage;
-use biome_js_parser::JsOffsetParse;
+use biome_diagnostics::Error;
+use biome_css_syntax::CssLanguage;
+use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
 use biome_js_syntax::JsLanguage;
 use biome_json_parser::JsonOffsetParse;
 use biome_json_syntax::JsonLanguage;
 use biome_parser::AnyParse;
-use biome_parser::diagnostic::ParseDiagnostic;
-use biome_rowan::{EmbeddedSendNode, SyntaxNodeWithOffset, TextRange, TextSize};
+use biome_rowan::{SyntaxNodeWithOffset, TextRange, TextSize};
 
-use crate::{
-    diagnostics::FileTooLarge, file_handlers::FormatEmbedNode, settings::ServiceLanguage,
-    workspace::DocumentFileSource,
-};
-
-#[derive(Clone, Debug)]
-pub struct SendEmbeddedParse {
-    pub(crate) root: EmbeddedSendNode,
-    #[expect(unused)]
-    pub(crate) diagnostics: Vec<ParseDiagnostic>,
+#[derive(Debug, Clone)]
+pub enum EmbeddedContent {
+    Js(EmbeddedJsContent),
+    Css(EmbeddedCssContent),
 }
 
-impl From<JsOffsetParse> for SendEmbeddedParse {
-    fn from(value: JsOffsetParse) -> Self {
-        Self {
-            root: value.syntax().clone().as_embedded_send(),
-            diagnostics: value.into_diagnostics(),
+impl From<EmbeddedJsContent> for EmbeddedContent {
+    fn from(content: EmbeddedJsContent) -> Self {
+        Self::Js(content)
+    }
+}
+
+impl From<EmbeddedCssContent> for EmbeddedContent {
+    fn from(content: EmbeddedCssContent) -> Self {
+        Self::Css(content)
+    }
+}
+
+impl EmbeddedContent {
+    pub const fn is_js(&self) -> bool {
+        matches!(self, Self::Js(..))
+    }
+
+    pub const fn is_css(&self) -> bool {
+        matches!(self, Self::Css(..))
+    }
+
+    pub fn as_js_embedded_content(&self) -> Option<EmbeddedJsContent> {
+        if let Self::Js(content) = self {
+            Some(content.clone())
+        } else {
+            None
+        }
+    }
+
+    pub fn as_css_embedded_content(&self) -> Option<EmbeddedCssContent> {
+        if let Self::Css(content) = self {
+            Some(content.clone())
+        } else {
+            None
+        }
+    }
+
+    pub fn content_range(&self) -> TextRange {
+        match self {
+            Self::Js(node) => node.content_range,
+            Self::Css(node) => node.content_range,
+        }
+    }
+
+    pub fn parse(&self) -> AnyParse {
+        match self {
+            Self::Js(node) => node.parse.clone(),
+            Self::Css(node) => node.parse.clone(),
+        }
+    }
+
+    pub fn file_source_index(&self) -> usize {
+        match self {
+            Self::Js(node) => node.file_source_index,
+            Self::Css(node) => node.file_source_index,
+        }
+    }
+
+    pub fn set_file_source_index(&mut self, index: usize) {
+        match self {
+            Self::Js(node) => node.file_source_index = index,
+            Self::Css(node) => node.file_source_index = index,
         }
     }
 }
@@ -103,7 +155,7 @@ impl EmbeddedLanguageSnippets {
 #[derive(Clone, Debug)]
 pub struct EmbeddedContent<L: ServiceLanguage + 'static> {
     /// The JavaScript source code extracted from the script element.
-    pub parse: SendEmbeddedParse,
+    pub parse: AnyParse,
 
     /// The range of the entire script element in the HTML document,
     /// including the opening and closing tags.
@@ -117,35 +169,74 @@ pub struct EmbeddedContent<L: ServiceLanguage + 'static> {
     /// This is used for offset-aware parsing.
     pub content_offset: TextSize,
 
-    /// The file source of the document.
+    /// The file source of the document
     pub file_source_index: usize,
-
-    _phantom: PhantomData<L>,
 }
 
-impl<L: ServiceLanguage + 'static> EmbeddedContent<L> {
-    /// Constructs new embedded content for a specific language.
-    pub fn new(
-        parse: SendEmbeddedParse,
-        element_range: TextRange,
-        content_range: TextRange,
-        content_offset: TextSize,
-        file_source_index: usize,
-    ) -> Self {
-        Self {
-            parse,
-            element_range,
-            content_range,
-            content_offset,
-            file_source_index,
-            _phantom: PhantomData,
-        }
+impl EmbeddedJsContent {
+    /// Returns a syntax node
+    pub fn node(&self) -> SyntaxNodeWithOffset<JsLanguage> {
+        self.parse
+            .unwrap_as_embedded_syntax_node()
+            .into_node::<JsLanguage>()
     }
 
-    /// Returns a syntax node.
-    pub fn node(&self) -> SyntaxNodeWithOffset<L> {
-        self.parse.root.clone().into_node::<L>()
+    /// This function transforms diagnostics coming from the parser into serializable diagnostics
+    pub fn into_diagnostics(self) -> Vec<SerdeDiagnostic> {
+        self.parse
+            .into_diagnostics()
+            .into_iter()
+            .map(|mut diagnostic| {
+                diagnostic.set_location_offset(self.content_offset);
+                SerdeDiagnostic::new(Error::from(diagnostic))
+            })
+            .collect::<Vec<_>>()
     }
+}
+
+impl EmbeddedCssContent {
+    /// Returns a syntax node
+    pub fn node(&self) -> SyntaxNodeWithOffset<CssLanguage> {
+        self.parse
+            .unwrap_as_embedded_syntax_node()
+            .into_node::<CssLanguage>()
+    }
+
+    /// This function transforms diagnostics coming from the parser into serializable diagnostics
+    pub fn into_diagnostics(self) -> Vec<SerdeDiagnostic> {
+        self.parse
+            .into_diagnostics()
+            .into_iter()
+            .map(|mut diagnostic| {
+                diagnostic.set_location_offset(self.content_offset);
+                SerdeDiagnostic::new(Error::from(diagnostic))
+            })
+            .collect::<Vec<_>>()
+    }
+
+/// Represents embedded CSS content extracted from HTML documents.
+///
+/// This struct stores parsing metadata and provides access to the parsed content
+/// with offset-aware positioning to maintain correct source locations.
+#[derive(Clone, Debug)]
+pub struct EmbeddedCssContent {
+    /// The CSS source code extracted from the style element.
+    pub parse: AnyParse,
+
+    /// The range of the entire style element in the HTML document,
+    /// including the opening and closing tags.
+    pub element_range: TextRange,
+
+    /// The range of just the CSS content within the style element,
+    /// excluding the style tags themselves.
+    pub content_range: TextRange,
+
+    /// The offset where the CSS content starts in the parent document.
+    /// This is used for offset-aware parsing.
+    pub content_offset: TextSize,
+
+    /// The file source of the embedded document
+    pub file_source_index: usize,
 }
 
 #[derive(Clone, Debug)]
@@ -173,6 +264,9 @@ pub(crate) struct Document {
     /// - `Result`: if the file is read, but the file is too large
     /// - `AnyParse`: the result of the parsed file
     pub(crate) syntax: Option<Result<AnyParse, FileTooLarge>>,
+
+    /// Embedded nodes content found in any document.
+    pub(crate) embedded_nodes: Vec<EmbeddedContent>,
 
     /// Embedded content for foreign language snippets.
     pub(crate) embedded_snippets: EmbeddedLanguageSnippets,

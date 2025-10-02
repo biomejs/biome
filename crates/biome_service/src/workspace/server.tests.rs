@@ -119,7 +119,7 @@ fn format_html_with_scripts_and_css() {
         <style>
             #id { background-color: red; }
         </style>
-        <script type="importmap">         
+        <script type="importmap">
             { "imports":{"circle": "https://example.com/shapes/circle.js","square":"./modules/shapes/square.js"} }
         </script>
         <script>
