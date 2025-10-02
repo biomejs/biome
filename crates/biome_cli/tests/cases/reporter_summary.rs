@@ -1,5 +1,5 @@
-use crate::{run_cli, run_cli_with_server_workspace};
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::{run_cli, run_cli_with_server_workspace};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -70,14 +70,14 @@ fn reports_diagnostics_summary_check_command() {
     let mut console = BufferConsole::default();
 
     let plugin_path = Utf8Path::new("plugin.grit");
-    fs.insert(plugin_path.into(), PLUGIN.as_bytes()); 
+    fs.insert(plugin_path.into(), PLUGIN.as_bytes());
 
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
-        file_path.into(), 
+        file_path.into(),
         br#"{
             "plugins": ["plugin.grit"]
-        }"#
+        }"#,
     );
 
     let file_path1 = Utf8Path::new("main.ts");
@@ -161,14 +161,14 @@ fn reports_diagnostics_summary_lint_command() {
     let mut console = BufferConsole::default();
 
     let plugin_path = Utf8Path::new("plugin.grit");
-    fs.insert(plugin_path.into(), PLUGIN.as_bytes()); 
+    fs.insert(plugin_path.into(), PLUGIN.as_bytes());
 
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
-        file_path.into(), 
+        file_path.into(),
         br#"{
             "plugins": ["plugin.grit"]
-        }"#
+        }"#,
     );
 
     let file_path1 = Utf8Path::new("main.ts");
