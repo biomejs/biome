@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsConstructorParameters, JsFunctionDeclaration, JsFunctionExpression, JsMethodClassMember,
     JsMethodObjectMember, JsParameters, TsDeclareFunctionDeclaration, TsTypeAliasDeclaration,
 };
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::use_max_params::UseMaxParamsOptions;
 
 declare_lint_rule! {
@@ -84,6 +84,44 @@ declare_node_union! {
     pub AnyFunctionLike = JsFunctionDeclaration | JsFunctionExpression | JsArrowFunctionExpression | JsMethodClassMember | JsMethodObjectMember | JsConstructorClassMember | TsDeclareFunctionDeclaration | TsTypeAliasDeclaration
 }
 
+impl AnyFunctionLike {
+    pub fn parameter_range(&self) -> Option<TextRange> {
+        match self {
+            Self::JsFunctionDeclaration(func) => {
+                func.parameters().ok().map(|params| params.range())
+            }
+            Self::JsFunctionExpression(func) => func.parameters().ok().map(|params| params.range()),
+            Self::JsArrowFunctionExpression(func) => {
+                func.parameters().ok().map(|params| params.range())
+            }
+            Self::JsMethodClassMember(method) => {
+                method.parameters().ok().map(|params| params.range())
+            }
+            Self::JsMethodObjectMember(method) => {
+                method.parameters().ok().map(|params| params.range())
+            }
+            Self::JsConstructorClassMember(constructor) => {
+                constructor.parameters().ok().map(|params| params.range())
+            }
+            Self::TsDeclareFunctionDeclaration(decl) => {
+                decl.parameters().ok().map(|params| params.range())
+            }
+            Self::TsTypeAliasDeclaration(decl) => {
+                if let Ok(ty) = decl.ty() {
+                    match ty {
+                        biome_js_syntax::AnyTsType::TsFunctionType(func_type) => {
+                            func_type.parameters().ok().map(|params| params.range())
+                        }
+                        _ => None,
+                    }
+                } else {
+                    None
+                }
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct UseMaxParamsState {
     pub parameter_count: usize,
@@ -156,10 +194,13 @@ impl Rule for UseMaxParams {
         let node = ctx.query();
         let options = ctx.options();
 
+        // Use the parameter list range if available, otherwise fall back to the whole node
+        let range = node.parameter_range().unwrap_or_else(|| node.range());
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                range,
                 markup! {
                     "Function has "{state.parameter_count}" parameters, but only "{options.max}" are allowed."
                 },
