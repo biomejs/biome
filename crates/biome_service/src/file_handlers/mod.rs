@@ -11,9 +11,8 @@ pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
 pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
 use crate::settings::Settings;
 use crate::workspace::{
-    EmbeddedContent, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+    EmbeddedSnippets, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
     RenameResult,
-    SendEmbeddedParse,
 };
 use biome_analyze::{
     AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal, ControlFlow,
@@ -463,7 +462,7 @@ pub struct ParseResult {
 }
 
 pub struct ParseEmbedResult {
-    pub(crate) nodes: Vec<(EmbeddedContent, DocumentFileSource)>,
+    pub(crate) nodes: Vec<(EmbeddedSnippets, DocumentFileSource)>,
 }
 
 type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
@@ -689,10 +688,10 @@ type FormatEmbedded = fn(
     &DocumentFileSource,
     AnyParse,
     &Settings,
-    Vec<EmbeddedFormatParse>,
+    Vec<FormatEmbedNode>,
 ) -> Result<Printed, WorkspaceError>;
 
-pub(crate) struct EmbeddedFormatParse {
+pub(crate) struct FormatEmbedNode {
     pub(crate) range: TextRange,
     pub(crate) node: AnyParse,
     pub(crate) source: DocumentFileSource,

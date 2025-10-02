@@ -85,7 +85,7 @@ pub(crate) struct TestCaseFile {
 
 impl TestCaseFile {
     pub(crate) fn parse(&self) -> Parse<AnyJsRoot> {
-        parse(&self.code, self.source_type, self.options.clone())
+        parse(&self.code, self.source_type, self.options)
     }
 
     pub(crate) fn name(&self) -> &str {

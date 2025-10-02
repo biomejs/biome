@@ -50,9 +50,7 @@ use std::fmt::{Debug, Display};
 use crate::builders::syntax_token_cow_slice;
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
-use crate::format_element::document::{Document, ElementTransformer};
-use crate::format_element::{Interned, LineMode};
-use crate::prelude::document::DocumentVisitor;
+use crate::format_element::document::Document;
 use crate::format_element::{Interned, LineMode};
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;

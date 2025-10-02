@@ -55,7 +55,7 @@ mod client;
 mod document;
 mod server;
 
-pub use document::{EmbeddedContent, EmbeddedCssContent, EmbeddedJsContent};
+pub use document::{EmbeddedLanguageContent, EmbeddedSnippets};
 use std::{
     borrow::Cow,
     fmt::{Debug, Display, Formatter},

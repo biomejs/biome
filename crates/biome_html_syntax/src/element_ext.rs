@@ -1,4 +1,7 @@
-use crate::{AnyHtmlElement, HtmlAttribute, HtmlElement, HtmlSelfClosingElement, ScriptType};
+use crate::{
+    AnyHtmlElement, HtmlAttribute, HtmlElement, HtmlSelfClosingElement, ScriptType,
+    inner_string_text,
+};
 use biome_rowan::{AstNodeList, SyntaxResult};
 
 /// https://html.spec.whatwg.org/#void-elements
@@ -146,7 +149,7 @@ impl HtmlElement {
     }
 
     pub fn is_javascript_module(&self) -> SyntaxResult<bool> {
-        let is_script = self.is_script_tag()?;
+        let is_script = self.is_script_tag();
         let type_attribute = self.find_attribute_by_name("type");
         let is_type_module = type_attribute.is_some_and(|attribute| {
             attribute
@@ -163,7 +166,6 @@ impl HtmlElement {
         Ok(is_script && is_type_module)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -185,7 +187,7 @@ mod tests {
             .find_map(HtmlElement::cast)
             .unwrap();
 
-        assert!(element.is_javascript_tag().unwrap());
+        assert!(element.is_javascript_tag());
 
         let html = r#"
         <script type="application/javascript">
@@ -199,7 +201,7 @@ mod tests {
             .find_map(HtmlElement::cast)
             .unwrap();
 
-        assert!(element.is_javascript_tag().unwrap());
+        assert!(element.is_javascript_tag());
 
         let html = r#"
         <script type="application/ecmascript">
@@ -213,7 +215,7 @@ mod tests {
             .find_map(HtmlElement::cast)
             .unwrap();
 
-        assert!(element.is_javascript_tag().unwrap());
+        assert!(element.is_javascript_tag());
 
         let html = r#"
         <script type="module">
@@ -227,6 +229,6 @@ mod tests {
             .find_map(HtmlElement::cast)
             .unwrap();
 
-        assert!(element.is_javascript_tag().unwrap());
+        assert!(element.is_javascript_tag());
     }
 }

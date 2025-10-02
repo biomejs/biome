@@ -184,7 +184,6 @@ fn should_format_indent_embedded_languages_with_language_options() {
     ));
 }
 
-
 #[test]
 fn should_pull_diagnostics_from_embedded_languages_when_formatting() {
     let fs = MemoryFileSystem::default();
@@ -196,7 +195,7 @@ fn should_pull_diagnostics_from_embedded_languages_when_formatting() {
         r#"<script>function () { return "ipsum" }</script>
 <style>#id .class div > { background-color: ; align: center; padding: 0; } </style>
 "#
-            .as_bytes(),
+        .as_bytes(),
     );
 
     fs.insert(
@@ -209,7 +208,7 @@ fn should_pull_diagnostics_from_embedded_languages_when_formatting() {
         }
     }
 }"#
-            .as_bytes(),
+        .as_bytes(),
     );
 
     let (fs, result) = run_cli(
@@ -240,7 +239,7 @@ fn should_pull_diagnostics_from_embedded_languages_when_linting() {
         r#"<script>debugger</script>
 <style>#id .class div { background-color: red; background-color: red;  } </style>
 "#
-            .as_bytes(),
+        .as_bytes(),
     );
 
     fs.insert(
@@ -256,7 +255,7 @@ fn should_pull_diagnostics_from_embedded_languages_when_linting() {
         }
     }
 }"#
-            .as_bytes(),
+        .as_bytes(),
     );
 
     let (fs, result) = run_cli(

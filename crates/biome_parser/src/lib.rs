@@ -690,6 +690,7 @@ pub struct NodeParse {
     pub(crate) root: SendNode,
     pub(crate) diagnostics: Vec<ParseDiagnostic>,
 }
+
 #[derive(Clone, Debug)]
 pub enum AnyParse {
     Node(NodeParse),
@@ -698,23 +699,23 @@ pub enum AnyParse {
 
 impl From<NodeParse> for AnyParse {
     fn from(node: NodeParse) -> Self {
-        AnyParse::Node(node)
+        Self::Node(node)
     }
 }
 
 impl From<EmbeddedNodeParse> for AnyParse {
     fn from(node: EmbeddedNodeParse) -> Self {
-        AnyParse::EmbeddedNode(node)
+        Self::EmbeddedNode(node)
     }
 }
 
 impl AnyParse {
     pub const fn is_node_parse(&self) -> bool {
-        matches!(self, AnyParse::Node(_))
+        matches!(self, Self::Node(_))
     }
 
     pub const fn is_embedded_node_parse(&self) -> bool {
-        matches!(self, AnyParse::EmbeddedNode(_))
+        matches!(self, Self::EmbeddedNode(_))
     }
 
     /// Get the diagnostics which occurred when parsing

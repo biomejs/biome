@@ -1,11 +1,10 @@
 use super::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, DocumentFileSource,
-    EmbeddedFormatParse, EnabledForPath, ExtensionHandler, FixAllParams, FormatEmbedNode, FormatterCapabilities,
-    LintParams,
-    LintResults, ParseEmbedResult, ParseResult, ParserCapabilities, SearchCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FormatEmbedNode, FormatterCapabilities,
+    LintParams, LintResults, ParseEmbedResult, ParseResult, ParserCapabilities, SearchCapabilities,
 };
 use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
-use crate::workspace::{EmbeddedCssContent, EmbeddedJsContent};
+use crate::workspace::EmbeddedLanguageContent;
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
@@ -34,7 +33,7 @@ use biome_html_formatter::{
     format_node,
 };
 use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
-use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode, ScriptType};
+use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_js_parser::{JsParserOptions, parse_js_with_offset_and_cache};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_json_parser::{JsonParserOptions, parse_json_with_offset_and_cache};
@@ -385,15 +384,24 @@ fn parse_embedded_nodes(
     let mut nodes = Vec::new();
     let html_root: HtmlRoot = root.tree();
 
-    let js_options = settings.parse_options::<JsLanguage>(biome_path, &file_source);
-    let css_options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+    let js_options = settings.parse_options::<JsLanguage>(biome_path, file_source);
+    let css_options = settings.parse_options::<CssLanguage>(biome_path, file_source);
+    let json_options = settings.parse_options::<JsonLanguage>(biome_path, file_source);
     // Walk through all HTML elements looking for script tags
     for element in html_root.syntax().descendants() {
-        let result = extract_embedded_script(element.clone(), cache, js_options.clone());
+        let Some(element) = HtmlElement::cast(element) else {
+            continue;
+        };
+
+        let result = parse_embedded_script(element.clone(), cache, js_options);
         if let Some((content, file_source)) = result {
             nodes.push((content.into(), file_source));
         }
-        let result = extract_embedded_style(element.clone(), cache, css_options.clone());
+        let result = parse_embedded_style(element.clone(), cache, css_options);
+        if let Some((content, file_source)) = result {
+            nodes.push((content.into(), file_source));
+        }
+        let result = parse_embedded_json(element.clone(), cache, json_options);
         if let Some((content, file_source)) = result {
             nodes.push((content.into(), file_source));
         }
@@ -401,15 +409,13 @@ fn parse_embedded_nodes(
     ParseEmbedResult { nodes }
 }
 
-pub(crate) fn extract_embedded_script(
-    element: HtmlSyntaxNode,
+pub(crate) fn parse_embedded_script(
+    element: HtmlElement,
     cache: &mut NodeCache,
     options: JsParserOptions,
-) -> Option<(EmbeddedJsContent, DocumentFileSource)> {
-    let html_element = HtmlElement::cast(element)?;
-
-    if html_element.is_javascript_tag() {
-        let is_modules = html_element.is_javascript_module().unwrap_or_default();
+) -> Option<(EmbeddedLanguageContent<JsLanguage>, DocumentFileSource)> {
+    if element.is_javascript_tag() {
+        let is_modules = element.is_javascript_module().unwrap_or_default();
         let file_source = if is_modules {
             JsFileSource::js_module()
         } else {
@@ -417,11 +423,11 @@ pub(crate) fn extract_embedded_script(
         };
 
         // This is likely an error
-        if html_element.children().len() > 1 {
+        if element.children().len() > 1 {
             return None;
         }
 
-        let embedded_content = html_element
+        let embedded_content = element
             .children()
             .iter()
             .next()
@@ -433,17 +439,16 @@ pub(crate) fn extract_embedded_script(
                     content.text(),
                     content.text_range().start(),
                     file_source,
-                    options.clone(),
+                    options,
                     cache,
                 );
 
-                Some(EmbeddedJsContent {
-                    parse: parse.into(),
-                    element_range: child.range(),
-                    content_range: content.text_range(),
-                    content_offset: content.text_range().start(),
-                    file_source_index: Default::default(),
-                })
+                Some(EmbeddedLanguageContent::new(
+                    parse.into(),
+                    child.range(),
+                    content.text_range(),
+                    content.text_range().start(),
+                ))
             })?;
         Some((embedded_content, file_source.into()))
     } else {
@@ -451,20 +456,18 @@ pub(crate) fn extract_embedded_script(
     }
 }
 
-pub(crate) fn extract_embedded_style(
-    element: HtmlSyntaxNode,
+pub(crate) fn parse_embedded_style(
+    element: HtmlElement,
     cache: &mut NodeCache,
     options: CssParserOptions,
-) -> Option<(EmbeddedCssContent, DocumentFileSource)> {
-    let html_element = HtmlElement::cast(element)?;
-
-    if html_element.is_style_tag() {
+) -> Option<(EmbeddedLanguageContent<CssLanguage>, DocumentFileSource)> {
+    if element.is_style_tag() {
         // This is probably an error
-        if html_element.children().len() > 1 {
+        if element.children().len() > 1 {
             return None;
         }
 
-        let content = html_element
+        let content = element
             .children()
             .iter()
             .next()
@@ -479,18 +482,49 @@ pub(crate) fn extract_embedded_style(
                     options,
                 );
 
-                Some(EmbeddedCssContent {
-                    parse: parse.into(),
-                    element_range: child.range(),
-                    content_range: content.text_range(),
-                    content_offset: content.text_range().start(),
-                    file_source_index: Default::default(),
-                })
+                Some(EmbeddedLanguageContent::new(
+                    parse.into(),
+                    child.range(),
+                    content.text_range(),
+                    content.text_range().start(),
+                ))
             })?;
         Some((content, CssFileSource::css().into()))
     } else {
         None
     }
+}
+
+pub(crate) fn parse_embedded_json(
+    element: HtmlElement,
+    cache: &mut NodeCache,
+    options: JsonParserOptions,
+) -> Option<(EmbeddedLanguageContent<JsonLanguage>, DocumentFileSource)> {
+    // This is probably an error
+    if element.children().len() > 1 {
+        return None;
+    }
+
+    let script_children = element.children().iter().next().and_then(|child| {
+        let child = child.as_any_html_content()?;
+        let child = child.as_html_embedded_content()?;
+
+        let content = child.value_token().ok()?;
+        let parse = parse_json_with_offset_and_cache(
+            content.text(),
+            content.text_range().start(),
+            cache,
+            options,
+        );
+
+        Some(EmbeddedLanguageContent::new(
+            parse.into(),
+            child.range(),
+            content.text_range(),
+            content.text_range().start(),
+        ))
+    })?;
+    Some((script_children, JsonFileSource::json().into()))
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
@@ -574,7 +608,7 @@ fn format_embedded(
         match node.source {
             DocumentFileSource::Js(_) => {
                 let js_options = settings.format_options::<JsLanguage>(biome_path, &node.source);
-                let node = node.node.root.clone().into_node::<JsLanguage>();
+                let node = node.node.clone().embedded_syntax::<JsLanguage>().clone();
                 let formatted =
                     biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
                 Some(wrap_document(formatted.into_document()))
@@ -582,14 +616,14 @@ fn format_embedded(
             DocumentFileSource::Json(_) => {
                 let json_options =
                     settings.format_options::<JsonLanguage>(biome_path, &node.source);
-                let node = node.node.root.clone().into_node::<JsonLanguage>();
+                let node = node.node.clone().embedded_syntax::<JsonLanguage>().clone();
                 let formatted =
                     biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
                 Some(wrap_document(formatted.into_document()))
             }
             DocumentFileSource::Css(_) => {
                 let css_options = settings.format_options::<CssLanguage>(biome_path, &node.source);
-                let node = node.node.root.clone().into_node::<CssLanguage>();
+                let node = node.node.clone().embedded_syntax::<CssLanguage>();
                 let formatted =
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
                 Some(wrap_document(formatted.into_document()))
