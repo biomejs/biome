@@ -32,6 +32,7 @@ env:
 jobs:
   bench:
     permissions:
+      contents: read
       pull-requests: write
     name: Bench
     runs-on: depot-ubuntu-24.04-arm-16
