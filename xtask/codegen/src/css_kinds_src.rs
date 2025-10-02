@@ -100,6 +100,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "historical-forms",
         "styleset",
         "character-variant",
+        "state",
         "swash",
         "ornaments",
         "annotation",

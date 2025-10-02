@@ -1,0 +1,6 @@
+custom-selector:state(checked) {}
+custom-selector:state( checked) {}
+custom-selector:state(    checked  ) {}
+custom-selector:state(
+checked
+) {}

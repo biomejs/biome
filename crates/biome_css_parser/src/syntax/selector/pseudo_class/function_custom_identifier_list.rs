@@ -12,7 +12,7 @@ use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, TokenSet, token_set};
 
 const PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![active_view_transition_type]];
+    token_set![T![active_view_transition_type], T![state]];
 
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_custom_identifier_list(p: &mut CssParser) -> bool {

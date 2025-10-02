@@ -112,6 +112,7 @@ postcss-nested-props.css:2:11 parse ━━━━━━━━━━━━━━�
   - any-link
   - local-link
   - scope
+  - state
   - current
   - past
   - future
