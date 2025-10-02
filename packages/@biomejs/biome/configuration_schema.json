@@ -1849,7 +1849,7 @@
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the assist for JSON (and its super languages) files.",
+					"description": "Control the assist for HTML (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},

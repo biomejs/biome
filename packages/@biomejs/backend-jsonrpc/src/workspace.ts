@@ -540,7 +540,7 @@ export interface GritLinterConfiguration {
  */
 export interface HtmlAssistConfiguration {
 	/**
-	 * Control the assist for JSON (and its super languages) files.
+	 * Control the assist for HTML (and its super languages) files.
 	 */
 	enabled?: Bool;
 }
