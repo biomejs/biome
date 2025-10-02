@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDeprecatedImports {
-        version: "next",
+        version: "2.2.5",
         name: "noDeprecatedImports",
         language: "js",
         sources: &[

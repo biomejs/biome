@@ -108,7 +108,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueDuplicateKeys {
-        version: "next",
+        version: "2.2.5",
         name: "noVueDuplicateKeys",
         language: "js",
         recommended: true,
