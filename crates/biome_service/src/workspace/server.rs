@@ -505,13 +505,7 @@ impl WorkspaceServer {
             .unwrap_or_default()
     }
 
-    /// Extracts embedded JavaScript content from HTML script elements.
-    ///
-    /// This function walks the HTML syntax tree to find all `<script>` elements
-    /// and extracts their content for offset-aware JavaScript parsing.
-    ///
-    /// # Returns
-    /// A vector of `EmbeddedJsContent` containing parsed JavaScript with correct offsets
+    /// Parses the language snippets if the current language implements the capability `parser.parse_embedded_nodes`
     fn parse_embedded_language_snippets(
         &self,
         project_key: ProjectKey,
@@ -1444,6 +1438,7 @@ impl Workspace for WorkspaceServer {
                     .iter()
                     .filter(|diag| diag.severity() <= Severity::Error)
                     .count();
+                errors += results.errors;
                 diagnostics.extend(this_diagnostics);
             }
 

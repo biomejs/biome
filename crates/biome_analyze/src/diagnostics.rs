@@ -141,8 +141,8 @@ impl AnalyzerDiagnostic {
             let diagnostic = rule_diagnostic.as_mut();
             if let Some(span) = &diagnostic.span {
                 diagnostic.span = Some(span.add(offset));
-                diagnostic.set_advice_offset(offset);
             }
+            diagnostic.set_advice_offset(offset);
         }
     }
 

@@ -150,7 +150,7 @@ pub struct HtmlLinterConfiguration {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct HtmlAssistConfiguration {
-    /// Control the assist for JSON (and its super languages) files.
+    /// Control the assist for HTML (and its super languages) files.
     #[bpaf(long("html-assist-enabled"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<HtmlAssistEnabled>,

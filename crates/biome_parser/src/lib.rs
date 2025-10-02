@@ -765,7 +765,7 @@ impl AnyParse {
     {
         match self {
             Self::Node(_) => {
-                panic!("Can't call embedded_syntax() on an embedded node. Use syntax() instead.")
+                panic!("Can't call embedded_syntax() on a non-embedded node. Use syntax() instead.")
             }
             Self::EmbeddedNode(node) => node.syntax(),
         }
@@ -780,7 +780,7 @@ impl AnyParse {
         if let Self::Node(node) = self {
             node.into_root()
         } else {
-            panic!("Calling unwrap_into_send_node on a embedded node isn't a valid operation")
+            panic!("Calling unwrap_into_send_node on an embedded node isn't a valid operation")
         }
     }
 
@@ -793,11 +793,11 @@ impl AnyParse {
         if let Self::Node(node) = self {
             node.clone().into_root()
         } else {
-            panic!("Calling unwrap_as_send_node on a embedded node isn't a valid operation")
+            panic!("Calling unwrap_as_send_node on an embedded node isn't a valid operation")
         }
     }
 
-    /// Returns a [EmbeddedSendNode] that can be sent across threads
+    /// Returns an [EmbeddedSendNode] that can be sent across threads
     ///
     /// ## Panic
     ///
@@ -806,7 +806,7 @@ impl AnyParse {
         if let Self::EmbeddedNode(node) = self {
             node.clone().into_root()
         } else {
-            panic!("Calling into_send_node on a node isn't a valid operation")
+            panic!("Calling into_send_node on a non-embedded node isn't a valid operation")
         }
     }
 
