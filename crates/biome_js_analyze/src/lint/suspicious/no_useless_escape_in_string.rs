@@ -40,7 +40,12 @@ declare_lint_rule! {
     /// const s = "\n";
     /// ```
     ///
-    /// Tagged string template are ignored:
+    /// In template literals, `\${` and `$\{` are valid escapes:
+    /// ```js
+    /// const s = `\${0}`;
+    /// ```
+    ///
+    /// Tagged string templates are ignored:
     ///
     /// ```js
     /// const s = tagged`\a`;
@@ -171,6 +176,14 @@ fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
                 b'$' => {
                     // Clone iterator to peek ahead without advancing, so other escapes like \${\a aren't missed
                     if !(quote == b'`' && (matches!(it.clone().next(), Some((_, b'{'))))) {
+                        return Some(i);
+                    }
+                }
+                // Check the \{ sequence. This \ is only a valid escape in template literals
+                // when the preceding character is $ (i.e., `$\{`)
+                b'{' => {
+                    // Check for template literals and look backward for $
+                    if !(quote == b'`' && i > 0 && str.as_bytes()[i - 1] == b'$') {
                         return Some(i);
                     }
                 }
