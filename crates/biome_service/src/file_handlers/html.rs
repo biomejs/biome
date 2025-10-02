@@ -387,23 +387,29 @@ fn parse_embedded_nodes(
     let js_options = settings.parse_options::<JsLanguage>(biome_path, file_source);
     let css_options = settings.parse_options::<CssLanguage>(biome_path, file_source);
     let json_options = settings.parse_options::<JsonLanguage>(biome_path, file_source);
-    // Walk through all HTML elements looking for script tags
+    // Walk through all HTML elements looking for script tags and style tags
     for element in html_root.syntax().descendants() {
         let Some(element) = HtmlElement::cast(element) else {
             continue;
         };
 
-        let result = parse_embedded_script(element.clone(), cache, js_options);
-        if let Some((content, file_source)) = result {
-            nodes.push((content.into(), file_source));
-        }
-        let result = parse_embedded_style(element.clone(), cache, css_options);
-        if let Some((content, file_source)) = result {
-            nodes.push((content.into(), file_source));
-        }
-        let result = parse_embedded_json(element.clone(), cache, json_options);
-        if let Some((content, file_source)) = result {
-            nodes.push((content.into(), file_source));
+        if let Some(script_type) = element.get_script_type() {
+            if script_type.is_javascript() {
+                let result = parse_embedded_script(element.clone(), cache, js_options);
+                if let Some((content, file_source)) = result {
+                    nodes.push((content.into(), file_source));
+                }
+            } else if script_type.is_json() {
+                let result = parse_embedded_json(element.clone(), cache, json_options);
+                if let Some((content, file_source)) = result {
+                    nodes.push((content.into(), file_source));
+                }
+            }
+        } else if element.is_style_tag() {
+            let result = parse_embedded_style(element.clone(), cache, css_options);
+            if let Some((content, file_source)) = result {
+                nodes.push((content.into(), file_source));
+            }
         }
     }
     ParseEmbedResult { nodes }

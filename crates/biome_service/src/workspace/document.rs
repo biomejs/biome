@@ -109,11 +109,11 @@ impl EmbeddedSnippets {
         }
     }
 
-    pub fn into_diagnostics(self) -> Vec<SerdeDiagnostic> {
+    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
         match self {
-            Self::Js(node) => node.into_diagnostics(),
-            Self::Css(node) => node.into_diagnostics(),
-            Self::Json(node) => node.into_diagnostics(),
+            Self::Js(node) => node.into_serde_diagnostics(),
+            Self::Css(node) => node.into_serde_diagnostics(),
+            Self::Json(node) => node.into_serde_diagnostics(),
         }
     }
 }
@@ -169,7 +169,7 @@ impl<L: ServiceLanguage + 'static> EmbeddedLanguageContent<L> {
     }
 
     /// This function transforms diagnostics coming from the parser into serializable diagnostics
-    pub fn into_diagnostics(self) -> Vec<SerdeDiagnostic> {
+    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
         self.parse
             .into_diagnostics()
             .into_iter()

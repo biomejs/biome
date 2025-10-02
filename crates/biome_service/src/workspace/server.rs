@@ -1439,7 +1439,7 @@ impl Workspace for WorkspaceServer {
                 diagnostics.extend(results.diagnostics);
                 skipped_diagnostics += results.skipped_diagnostics;
 
-                let this_diagnostics = embedded_node.into_diagnostics();
+                let this_diagnostics = embedded_node.into_serde_diagnostics();
                 errors += this_diagnostics
                     .iter()
                     .filter(|diag| diag.severity() <= Severity::Error)
@@ -1456,7 +1456,7 @@ impl Workspace for WorkspaceServer {
                 .count();
 
             for embedded_node in self.get_language_snippets(&path) {
-                let diagnostics = embedded_node.into_diagnostics();
+                let diagnostics = embedded_node.into_serde_diagnostics();
                 errors += diagnostics
                     .iter()
                     .filter(|diag| diag.severity() <= Severity::Error)

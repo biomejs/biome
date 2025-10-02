@@ -1352,7 +1352,6 @@ dependencies = [
  "biome_unicode_table",
  "drop_bomb",
  "enumflags2",
- "log",
  "unicode-bom",
 ]
 
