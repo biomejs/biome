@@ -34,78 +34,78 @@
 
 <br>
 
-**Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
+**Biome** to wydajny łańcuch narzędzi dla projektów webowych, którego celem jest dostarczenie narzędzi deweloperskich do utrzymania zdrowia tych projektów.
 
-**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ and _GraphQL_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome to [szybki formater](./benchmark#formatting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ i _GraphQL_, który osiąga **[97% kompatybilności z _Prettier_](https://console.algora.io/challenges/prettier)**.
 
-**Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, and _GraphQL_ that features **[more than 340 rules](https://biomejs.dev/linter/javascript/rules/)** from ESLint, typescript-eslint, and [other sources](https://github.com/biomejs/biome/discussions/3).
-It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
+**Biome to [wydajny linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** dla _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ i _GraphQL_, który zawiera **[ponad 340 reguł](https://biomejs.dev/linter/javascript/rules/)** z ESLint, typescript-eslint i [innych źródeł](https://github.com/biomejs/biome/discussions/3).
+**Wyprowadza szczegółowe i skontekstualizowane diagnostyki**, które pomagają Ci ulepszyć kod i zostać lepszym programistą!
 
-**Biome** is designed from the start to be used [interactively within an editor](https://biomejs.dev/guides/editors/first-party-extensions/).
-It can format and lint malformed code as you are writing it.
+**Biome** jest zaprojektowany od początku do używania [interaktywnie w edytorze](https://biomejs.dev/guides/editors/first-party-extensions/).
+Może formatować i sprawdzać błędny kod podczas jego pisania.
 
-### Installation
+### Instalacja
 
 ```shell
 npm install --save-dev --save-exact @biomejs/biome
 ```
 
-### Usage
+### Użycie
 
 ```shell
-# format files
+# formatuj pliki
 npx @biomejs/biome format --write
 
-# lint files and apply the safe fixes
+# sprawdź pliki i zastosuj bezpieczne poprawki
 npx @biomejs/biome lint --write
 
-# run format, lint, etc. and apply the safe fixes
+# uruchom formatowanie, linting itp. i zastosuj bezpieczne poprawki
 npx @biomejs/biome check --write
 
-# check all files against format, lint, etc. in CI environments
+# sprawdź wszystkie pliki pod kątem formatowania, lintingu itp. w środowiskach CI
 npx @biomejs/biome ci
 ```
 
-If you want to give Biome a run without installing it, use the [online playground](https://biomejs.dev/playground/), compiled to WebAssembly.
+Jeśli chcesz wypróbować Biome bez instalacji, użyj [online playground](https://biomejs.dev/playground/), skompilowanego do WebAssembly.
 
-## Documentation
+## Dokumentacja
 
-Check out our [homepage][biomejs] to learn more about Biome,
-or directly head to the [Getting Started guide][getting-started] to start using Biome.
+Sprawdź naszą [stronę główną][biomejs], aby dowiedzieć się więcej o Biome,
+lub przejdź bezpośrednio do [przewodnika Getting Started][getting-started], aby zacząć używać Biome.
 
-## More about Biome
+## Więcej o Biome
 
-**Biome** has sane defaults and it doesn't require configuration.
+**Biome** ma rozsądne domyślne ustawienia i nie wymaga konfiguracji.
 
-**Biome** aims to support [all main languages][language-support] of modern web development.
+**Biome** dąży do wspierania [wszystkich głównych języków][language-support] nowoczesnego rozwoju webowego.
 
-**Biome** [doesn't require Node.js](https://biomejs.dev/guides/manual-installation/) to function.
+**Biome** [nie wymaga Node.js](https://biomejs.dev/guides/manual-installation/) do funkcjonowania.
 
-**Biome** has first-class LSP support, with a sophisticated parser that represents the source text in full fidelity and top-notch error recovery.
+**Biome** ma wsparcie LSP pierwszej klasy, z zaawansowanym parserem, który reprezentuje tekst źródłowy z pełną wiernością i najwyższej jakości odzyskiwaniem błędów.
 
-**Biome** wants to offer a high-quality *Developer Experience*, with descriptive diagnostics and great performance.
+**Biome** chce oferować wysokiej jakości *Doświadczenie Deweloperskie*, z opisowymi diagnostykami i doskonałą wydajnością.
 
-**Biome** unifies functionalities that have previously been separate tools. Building upon a shared base allows us to provide a cohesive experience for processing code, displaying errors, parallelize work, caching, and configuration.
+**Biome** łączy funkcjonalności, które wcześniej były oddzielnymi narzędziami. Budowanie na wspólnej bazie pozwala nam zapewnić spójne doświadczenie w przetwarzaniu kodu, wyświetlaniu błędów, równoległej pracy, cachowaniu i konfiguracji.
 
-Read more about our [project philosophy][biome-philosophy].
+Przeczytaj więcej o naszej [filozofii projektu][biome-philosophy].
 
-**Biome** is [MIT licensed](https://github.com/biomejs/biome/tree/main/LICENSE-MIT) or [Apache 2.0 licensed](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
+**Biome** jest licencjonowany na [MIT](https://github.com/biomejs/biome/tree/main/LICENSE-MIT) lub [Apache 2.0](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE) i moderowany zgodnie z [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
 
-## Funding
+## Finansowanie
 
-You can fund the project in different ways
+Możesz finansować projekt na różne sposoby
 
-### Project sponsorship and funding
+### Sponsoring i finansowanie projektu
 
-You can sponsor or fund the project via [Open collective](https://opencollective.com/biome) or [GitHub sponsors](https://github.com/sponsors/biomejs)
+Możesz sponsorować lub finansować projekt przez [Open collective](https://opencollective.com/biome) lub [GitHub sponsors](https://github.com/sponsors/biomejs)
 
-Biome offers a simple sponsorship program that allows companies to get visibility and recognition among various developers.
+Biome oferuje prosty program sponsoringu, który pozwala firmom na uzyskanie widoczności i uznania wśród różnych deweloperów.
 
-Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Contributors can be employed to work on company-focused projects.
+Biome oferuje [wsparcie enterprise](https://biomejs.dev/enterprise), gdzie Core Contributors mogą być zatrudnieni do pracy nad projektami skupionymi na firmie.
 
-## Sponsors
+## Sponsorzy
 
-### Gold Sponsors
+### Złoci Sponsorzy
 
 <table>
   <tbody>
@@ -134,7 +134,7 @@ Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Co
   </tbody>
 </table>
 
-### Silver Sponsors
+### Srebrni Sponsorzy
 
 <table>
   <tbody>
@@ -152,7 +152,7 @@ Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Co
   </tbody>
 </table>
 
-### Bronze Sponsors
+### Brązowi Sponsorzy
 
 <table>
   <tbody>
