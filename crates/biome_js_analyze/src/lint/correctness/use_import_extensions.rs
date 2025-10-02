@@ -147,7 +147,7 @@ impl Rule for UseImportExtensions {
             .get_import_path_by_js_node(node)
             .and_then(JsImportPath::as_path)?;
 
-        get_extensionless_import(node, resolved_path, force_js_extensions)
+        get_extensionless_import(node, resolved_path, ctx, force_js_extensions)
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -169,7 +169,7 @@ impl Rule for UseImportExtensions {
         let mut mutation = ctx.root().begin();
 
         let (suggested_path, extension) = state.suggestion.clone()?;
-        let new_module_name = if ctx.as_preferred_quote().is_double() {
+        let new_module_name = if ctx.preferred_quote().is_double() {
             make::js_string_literal(&suggested_path)
         } else {
             make::js_string_literal_single_quotes(&suggested_path)
@@ -200,6 +200,7 @@ pub struct UseImportExtensionsState {
 fn get_extensionless_import(
     node: &AnyJsImportLike,
     resolved_path: &Utf8Path,
+    ctx: &RuleContext<UseImportExtensions>,
     force_js_extensions: bool,
 ) -> Option<UseImportExtensionsState> {
     let module_name_token = node.module_name_token()?;
@@ -212,7 +213,17 @@ fn get_extensionless_import(
         first_component,
         Utf8Component::CurDir | Utf8Component::ParentDir
     ) {
-        return None;
+        // TypeScript path aliases should still be considered.
+        // The same does *not* apply for `package.json` aliases, because
+        // extensions are not automatically applied to those.
+        let matches_path_alias = ctx
+            .project_layout()
+            .query_tsconfig_for_path(ctx.file_path(), |tsconfig| {
+                tsconfig.matches_path_alias(path.as_str())
+            })?;
+        if !matches_path_alias {
+            return None;
+        }
     }
 
     let resolved_stem = resolved_path.file_stem();
@@ -229,7 +240,6 @@ fn get_extensionless_import(
         (Some(_), _) if path.file_name()?.starts_with(resolved_path.file_name()?) => {
             return None; // For cases like `./foo.css` -> `./foo.css.ts`
         }
-        (None, Some(_)) => return None,
         _ => {}
     }
 
@@ -250,8 +260,17 @@ fn get_extensionless_import(
         resolved_extension?
     };
 
+    // Check if the existing extension matches the desired one.
+    if existing_extension.is_some_and(|ext| ext == extension) {
+        return None;
+    }
+
     let is_index_file = resolved_stem.is_some_and(|stem| stem == "index");
-    let import_path_ends_with_index = path.file_name().is_some_and(|name| name == "index");
+    let import_path_ends_with_index = path.file_name().is_some_and(|name| name == "index")
+        || path
+            .with_extension("")
+            .file_name()
+            .is_some_and(|name| name == "index");
 
     let new_path = if is_index_file && !import_path_ends_with_index {
         let mut path_parts = path.as_str().split('/');
@@ -283,7 +302,7 @@ fn get_extensionless_import(
         };
 
         if let Some(sub_ext) = sub_extension {
-            new_path.set_extension(format!("{sub_ext}.{extension}",));
+            new_path.set_extension(format!("{sub_ext}.{extension}"));
         } else {
             new_path.set_extension(extension);
         }

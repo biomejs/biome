@@ -99,10 +99,10 @@ pub enum RuleSource {
     Clippy(&'static str),
     /// Rules from [Eslint](https://eslint.org/)
     Eslint(&'static str),
-    /// Rules from [GraphQL-ESLint](https://github.com/dimaMachina/graphql-eslint)
+    /// Rules from [GraphQL-ESLint](https://github.com/graphql-hive/graphql-eslint)
     EslintGraphql(&'static str),
     /// Rules from [graphql-schema-linter](https://github.com/cjoudrey/graphql-schema-linter)
-    EslintGraphqlSchemaLinter(&'static str),
+    GraphqlSchemaLinter(&'static str),
     /// Rules from [Eslint Plugin Import](https://github.com/import-js/eslint-plugin-import)
     EslintImport(&'static str),
     /// Rules from [Eslint Plugin Import Access](https://github.com/uhyo/eslint-plugin-import-access)
@@ -121,6 +121,8 @@ pub enum RuleSource {
     EslintReactHooks(&'static str),
     /// Rules from [Eslint Plugin React Refresh](https://github.com/ArnaudBarre/eslint-plugin-react-refresh)
     EslintReactRefresh(&'static str),
+    /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
+    EslintReactX(&'static str),
     /// Rules from [eslint-react.xyz](https://eslint-react.xyz/)
     EslintReactXyz(&'static str),
     /// Rules from [Eslint Plugin React Prefer Function Component](https://github.com/tatethurston/eslint-plugin-react-prefer-function-component)
@@ -177,7 +179,7 @@ impl std::fmt::Display for RuleSource {
             Self::Clippy(_) => write!(f, "Clippy"),
             Self::Eslint(_) => write!(f, "ESLint"),
             Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
-            Self::EslintGraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
+            Self::GraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
             Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
             Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
@@ -187,6 +189,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintReact(_) => write!(f, "eslint-plugin-react"),
             Self::EslintReactHooks(_) => write!(f, "eslint-plugin-react-hooks"),
             Self::EslintReactRefresh(_) => write!(f, "eslint-plugin-react-refresh"),
+            Self::EslintReactX(_) => write!(f, "eslint-plugin-react-x"),
             Self::EslintReactXyz(_) => write!(f, "@eslint-react/eslint-plugin"),
             Self::ReactPreferFunctionComponent(_) => {
                 write!(f, "eslint-plugin-react-prefer-function-component")
@@ -260,7 +263,7 @@ impl RuleSource {
             Self::Clippy(rule_name)
             | Self::Eslint(rule_name)
             | Self::EslintGraphql(rule_name)
-            | Self::EslintGraphqlSchemaLinter(rule_name)
+            | Self::GraphqlSchemaLinter(rule_name)
             | Self::EslintImport(rule_name)
             | Self::EslintImportAccess(rule_name)
             | Self::EslintJest(rule_name)
@@ -270,6 +273,7 @@ impl RuleSource {
             | Self::EslintReact(rule_name)
             | Self::EslintReactHooks(rule_name)
             | Self::EslintReactRefresh(rule_name)
+            | Self::EslintReactX(rule_name)
             | Self::EslintReactXyz(rule_name)
             | Self::ReactPreferFunctionComponent(rule_name)
             | Self::EslintTypeScript(rule_name)
@@ -296,9 +300,10 @@ impl RuleSource {
 
     pub fn to_namespaced_rule_name(&self) -> String {
         match self {
-            Self::Clippy(rule_name) | Self::Eslint(rule_name) => (*rule_name).to_string(),
-            Self::EslintGraphql(rule_name) => format!("graphql/{rule_name}"),
-            Self::EslintGraphqlSchemaLinter(rule_name) => format!("graphql/{rule_name}"),
+            Self::Clippy(rule_name)
+            | Self::Eslint(rule_name)
+            | Self::GraphqlSchemaLinter(rule_name) => (*rule_name).to_string(),
+            Self::EslintGraphql(rule_name) => format!("@graphql-eslint/{rule_name}"),
             Self::EslintImport(rule_name) => format!("import/{rule_name}"),
             Self::EslintImportAccess(rule_name) => format!("import-access/{rule_name}"),
             Self::EslintJest(rule_name) => format!("jest/{rule_name}"),
@@ -308,6 +313,7 @@ impl RuleSource {
             Self::EslintReact(rule_name) => format!("react/{rule_name}"),
             Self::EslintReactHooks(rule_name) => format!("react-hooks/{rule_name}"),
             Self::EslintReactRefresh(rule_name) => format!("react-refresh/{rule_name}"),
+            Self::EslintReactX(rule_name) => format!("react-x/{rule_name}"),
             Self::EslintReactXyz(rule_name) => format!("@eslint-react/{rule_name}"),
             Self::ReactPreferFunctionComponent(rule_name) => {
                 format!("react-prefer-function-component/{rule_name}")
@@ -341,7 +347,7 @@ impl RuleSource {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
-            Self::EslintGraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
+            Self::GraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
@@ -351,6 +357,7 @@ impl RuleSource {
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
             Self::EslintReactRefresh(_) => "https://github.com/ArnaudBarre/eslint-plugin-react-refresh".to_string(),
+            Self::EslintReactX(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
             Self::EslintReactXyz(rule_name) => format!("https://eslint-react.xyz/docs/rules/{rule_name}"),
             Self::ReactPreferFunctionComponent(_) => "https://github.com/tatethurston/eslint-plugin-react-prefer-function-component".to_string(),
             Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),

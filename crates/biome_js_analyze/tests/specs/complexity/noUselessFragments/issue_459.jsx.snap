@@ -1,31 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue_459.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
 {'' != null && <>stuff</>}
-
-```
-
-# Diagnostics
-```
-issue_459.jsx:1:16 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This fragment is unnecessary.
-  
-  > 1 │ {'' != null && <>stuff</>}
-      │                ^^^^^^^^^^
-    2 │ 
-  
-  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
-  
-  i Unsafe fix: Remove the Fragment
-  
-    1   │ - {''·!=·null·&&·<>stuff</>}
-      1 │ + {''·!=·null·&&·"stuff"}
-    2 2 │   
-  
 
 ```

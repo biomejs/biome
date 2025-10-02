@@ -404,6 +404,7 @@ impl<L: Language + Default> RegistryRule<L> {
             let globals = params.options.globals();
             let preferred_quote = params.options.preferred_quote();
             let preferred_jsx_quote = params.options.preferred_jsx_quote();
+            let preferred_indentation = params.options.preferred_indentation();
             let jsx_runtime = params.options.jsx_runtime();
             let css_modules = params.options.css_modules();
             let options = params.options.rule_options::<R>().unwrap_or_default();
@@ -411,11 +412,12 @@ impl<L: Language + Default> RegistryRule<L> {
                 &query_result,
                 params.root,
                 params.services,
-                &globals,
+                globals,
                 params.options.file_path.as_path(),
                 &options,
                 preferred_quote,
                 preferred_jsx_quote,
+                preferred_indentation,
                 jsx_runtime,
                 css_modules,
             )?;

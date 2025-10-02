@@ -45,12 +45,12 @@ impl Drop for WatcherInstructionChannel {
     }
 }
 
-/// Watcher to keep the [WorkspaceServer] in sync with the filesystem state.
+/// Watcher to keep the [crate::WorkspaceServer] in sync with the filesystem state.
 ///
 /// Conceptually, it helps to think of the watcher as a helper to the scanner.
 /// The watcher watches the same directories as those scanned by the scanner, so
 /// the watcher is also instructed to watch folders that were scanned through
-/// `WorkspaceServer::scan_project()`.
+/// [crate::Workspace::scan_project].
 ///
 /// When watch events are received, they are handed back to the workspace. If
 /// this results in opening new documents, we say they were opened by the
@@ -191,7 +191,12 @@ impl Watcher {
                 // `RenameMode::Any` and `ModifyKind::Any` need to be included as a catch-all.
                 // Without it, we'll miss events on Windows or macOS.
                 ModifyKind::Data(_) | ModifyKind::Name(RenameMode::Any) | ModifyKind::Any => {
-                    Self::index_paths(workspace, paths)
+                    // It's possible to receive Modify(Data) event after the file is removed on macOS.
+                    if paths[0].exists() {
+                        Self::index_paths(workspace, paths)
+                    } else {
+                        Self::unload_paths(workspace, paths)
+                    }
                 }
                 _ => Ok(vec![]),
             },

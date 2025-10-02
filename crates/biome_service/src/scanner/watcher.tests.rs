@@ -56,6 +56,10 @@ fn should_index_on_write_but_not_on_read() {
 
         assert!(mock_bridge.watched_folders.pin().contains(project_path));
 
+        // It will take a while before the watcher become able to see events on Windows and macOS.
+        #[cfg(any(target_os = "windows", target_os = "macos"))]
+        sleep(Duration::from_secs(1));
+
         fs::read(&file_path).expect("can read file");
 
         // We'll try to test that a notification has _not_ been sent, so we need to
@@ -122,7 +126,7 @@ fn should_index_on_create_and_unload_on_delete() {
 
         assert!(mock_bridge.watched_folders.pin().contains(project_path));
 
-        thread::sleep(Duration::from_millis(200));
+        sleep(Duration::from_secs(1));
 
         fs::write(&file_path, "import 'foo';").expect("can create file");
 

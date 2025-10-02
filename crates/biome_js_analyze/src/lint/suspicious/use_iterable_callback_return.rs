@@ -76,6 +76,10 @@ declare_lint_rule! {
     ///     // No return value, which is correct
     /// });
     /// ```
+    ///
+    /// ```js
+    /// [].forEach(() => void null); // Void return value, which doesn't trigger the rule
+    /// ```
     pub UseIterableCallbackReturn {
         version: "2.0.0",
         name: "useIterableCallbackReturn",
@@ -266,21 +270,33 @@ struct FunctionReturnsInfo {
 /// the return statements. It also counts the number of blocks that do not have any return
 /// statements.
 fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
-    if let Some(arrow_expression) = JsArrowFunctionExpression::cast_ref(&cfg.node)
-        && let Ok(AnyJsFunctionBody::AnyJsExpression(expression)) = arrow_expression.body()
-    {
-        return FunctionReturnsInfo {
-            has_paths_without_returns: false,
-            returns_with_value: vec![expression.range()],
-            returns_without_value: Vec::new(),
-        };
-    }
-
     let mut function_returns_info = FunctionReturnsInfo {
         has_paths_without_returns: false,
         returns_with_value: Vec::new(),
         returns_without_value: Vec::new(),
     };
+
+    if let Some(arrow_expression) = JsArrowFunctionExpression::cast_ref(&cfg.node)
+        && let Ok(AnyJsFunctionBody::AnyJsExpression(expression)) = arrow_expression.body()
+    {
+        let is_void_expression = expression
+            .as_js_unary_expression()
+            .and_then(|unary| unary.is_void().ok())
+            .unwrap_or(false);
+
+        if is_void_expression {
+            function_returns_info
+                .returns_without_value
+                .push(expression.range())
+        } else {
+            function_returns_info
+                .returns_with_value
+                .push(expression.range())
+        }
+
+        return function_returns_info;
+    }
+
     // stack of blocks to process
     let mut block_stack = vec![ROOT_BLOCK_ID];
     let mut visited_blocks = RoaringBitmap::new();

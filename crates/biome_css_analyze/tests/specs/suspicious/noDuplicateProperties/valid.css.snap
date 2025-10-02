@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: valid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -34,6 +35,20 @@ a {
         &:hover {
             color: orange;
         }
+    }
+}
+
+a {
+    opacity: 1;
+    @starting-style {
+        opacity: 0;
+    }
+}
+
+a {
+    display: block;
+    @container (min-width: 600px) {
+        display: none;
     }
 }
 

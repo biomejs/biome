@@ -1616,6 +1616,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Restrict imports of deprecated exports.
+	 */
+	noDeprecatedImports?: RuleConfiguration_for_NoDeprecatedImportsOptions;
+	/**
 	 * Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
@@ -1648,6 +1652,10 @@ export interface Nursery {
 	 */
 	noQwikUseVisibleTask?: RuleConfiguration_for_NoQwikUseVisibleTaskOptions;
 	/**
+	 * Replaces usages of forwardRef with passing ref as a prop.
+	 */
+	noReactForwardRef?: RuleFixConfiguration_for_NoReactForwardRefOptions;
+	/**
 	 * Disallow usage of sensitive data such as API keys and tokens.
 	 */
 	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
@@ -1664,6 +1672,10 @@ export interface Nursery {
 	 */
 	noUnresolvedImports?: RuleConfiguration_for_NoUnresolvedImportsOptions;
 	/**
+	 * Disallow expression statements that are neither a function call nor an assignment.
+	 */
+	noUnusedExpressions?: RuleConfiguration_for_NoUnusedExpressionsOptions;
+	/**
 	 * Disallow unused catch bindings.
 	 */
 	noUselessCatchBinding?: RuleFixConfiguration_for_NoUselessCatchBindingOptions;
@@ -1675,6 +1687,10 @@ export interface Nursery {
 	 * Enforce that Vue component data options are declared as functions.
 	 */
 	noVueDataObjectDeclaration?: RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions;
+	/**
+	 * Disallow duplicate keys in Vue component data, methods, computed properties, and other options.
+	 */
+	noVueDuplicateKeys?: RuleConfiguration_for_NoVueDuplicateKeysOptions;
 	/**
 	 * Disallow reserved keys in Vue component data and computed properties.
 	 */
@@ -2968,6 +2984,9 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleConfiguration_for_NoDeprecatedImportsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoDeprecatedImportsOptions;
 export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
@@ -2992,6 +3011,9 @@ export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
 export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
+export type RuleFixConfiguration_for_NoReactForwardRefOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoReactForwardRefOptions;
 export type RuleConfiguration_for_NoSecretsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoSecretsOptions;
@@ -3004,6 +3026,9 @@ export type RuleConfiguration_for_NoUnnecessaryConditionsOptions =
 export type RuleConfiguration_for_NoUnresolvedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUnresolvedImportsOptions;
+export type RuleConfiguration_for_NoUnusedExpressionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUnusedExpressionsOptions;
 export type RuleFixConfiguration_for_NoUselessCatchBindingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoUselessCatchBindingOptions;
@@ -3013,6 +3038,9 @@ export type RuleFixConfiguration_for_NoUselessUndefinedOptions =
 export type RuleFixConfiguration_for_NoVueDataObjectDeclarationOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions;
+export type RuleConfiguration_for_NoVueDuplicateKeysOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoVueDuplicateKeysOptions;
 export type RuleConfiguration_for_NoVueReservedKeysOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoVueReservedKeysOptions;
@@ -5337,6 +5365,16 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 */
 	options: UseYieldOptions;
 }
+export interface RuleWithOptions_for_NoDeprecatedImportsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDeprecatedImportsOptions;
+}
 export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5425,6 +5463,20 @@ export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
 	 */
 	options: NoQwikUseVisibleTaskOptions;
 }
+export interface RuleWithFixOptions_for_NoReactForwardRefOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoReactForwardRefOptions;
+}
 export interface RuleWithOptions_for_NoSecretsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5464,6 +5516,16 @@ export interface RuleWithOptions_for_NoUnresolvedImportsOptions {
 	 * Rule's options
 	 */
 	options: NoUnresolvedImportsOptions;
+}
+export interface RuleWithOptions_for_NoUnusedExpressionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnusedExpressionsOptions;
 }
 export interface RuleWithFixOptions_for_NoUselessCatchBindingOptions {
 	/**
@@ -5506,6 +5568,16 @@ export interface RuleWithFixOptions_for_NoVueDataObjectDeclarationOptions {
 	 * Rule's options
 	 */
 	options: NoVueDataObjectDeclarationOptions;
+}
+export interface RuleWithOptions_for_NoVueDuplicateKeysOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoVueDuplicateKeysOptions;
 }
 export interface RuleWithOptions_for_NoVueReservedKeysOptions {
 	/**
@@ -8048,6 +8120,7 @@ export interface UseUniqueElementIdsOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
@@ -8074,6 +8147,7 @@ export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoQwikUseVisibleTaskOptions {}
+export interface NoReactForwardRefOptions {}
 export interface NoSecretsOptions {
 	/**
 	 * Set entropy threshold (default is 41).
@@ -8083,16 +8157,32 @@ export interface NoSecretsOptions {
 export interface NoShadowOptions {}
 export interface NoUnnecessaryConditionsOptions {}
 export interface NoUnresolvedImportsOptions {}
+export interface NoUnusedExpressionsOptions {}
 /**
  * Options for the `noUselessCatchBinding` rule. Currently empty; reserved for future extensions (e.g. allowlist of names).
  */
 export interface NoUselessCatchBindingOptions {}
 export interface NoUselessUndefinedOptions {}
 export interface NoVueDataObjectDeclarationOptions {}
+export interface NoVueDuplicateKeysOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
 export type UseAnchorHrefOptions = null;
-export interface UseConsistentArrowReturnOptions {}
+/**
+ * Options for the `useConsistentArrowReturn` rule.
+ */
+export interface UseConsistentArrowReturnOptions {
+	/**
+	* Determines whether the rule enforces a consistent style when the return value is an object literal.
+
+This option is only applicable when used in conjunction with the `asNeeded` option. 
+	 */
+	requireForObjectLiteral?: boolean;
+	/**
+	 * The style to enforce for arrow function return statements.
+	 */
+	style?: UseConsistentArrowReturnStyle;
+}
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
 }
@@ -8457,6 +8547,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
+export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 export type ConsistentTypeDefinition = "interface" | "type";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
@@ -8803,6 +8894,8 @@ export type Category =
 	| "lint/correctness/useValidTypeof"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
@@ -8812,15 +8905,18 @@ export type Category =
 	| "lint/nursery/noNextAsyncClientComponent"
 	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noQwikUseVisibleTask"
+	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noSecrets"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
+	| "lint/nursery/noUnusedExpressions"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCatchBinding"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noVueDataObjectDeclaration"
+	| "lint/nursery/noVueDuplicateKeys"
 	| "lint/nursery/noVueReservedKeys"
 	| "lint/nursery/noVueReservedProps"
 	| "lint/nursery/useAnchorHref"
@@ -8953,7 +9049,6 @@ export type Category =
 	| "lint/suspicious/noDuplicateCase"
 	| "lint/suspicious/noDuplicateClassMembers"
 	| "lint/suspicious/noDuplicateCustomProperties"
-	| "lint/nursery/noDuplicateDependencies"
 	| "lint/suspicious/noDuplicateElseIf"
 	| "lint/suspicious/noDuplicateFields"
 	| "lint/suspicious/noDuplicateFontNames"

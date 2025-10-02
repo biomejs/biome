@@ -33,7 +33,7 @@ declare_lint_rule! {
         name: "useGraphqlNamingConvention",
         language: "graphql",
         recommended: false,
-        sources: &[RuleSource::EslintGraphqlSchemaLinter("enum-values-all-caps").inspired()],
+        sources: &[RuleSource::GraphqlSchemaLinter("enum-values-all-caps").inspired()],
     }
 }
 

@@ -177,6 +177,9 @@ Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中�
       <td align="center" valign="middle">
         <a href="https://www.egstock.co.jp/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/egstock/b18c836/logo/256.png?height=256" width="80" alt="EGSTOCK, Inc. logo"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://www.convex.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/81530787?s=200&v=4" width="80" alt="Convex logo"></a>
+      </td>
     </tr>
   </tbody>
 </table>

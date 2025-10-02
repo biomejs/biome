@@ -63,7 +63,9 @@ impl SemanticEventExtractor {
             // allowing for proper scoping and inheritance of styles.
             kind if kind == CSS_QUALIFIED_RULE
                 || kind == CSS_NESTED_QUALIFIED_RULE
+                || kind == CSS_CONTAINER_AT_RULE
                 || kind == CSS_MEDIA_AT_RULE
+                || kind == CSS_STARTING_STYLE_AT_RULE
                 || kind == CSS_SUPPORTS_AT_RULE =>
             {
                 if let Some(start) = AnyRuleStart::cast(node.clone()) {
