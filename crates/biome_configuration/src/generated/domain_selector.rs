@@ -22,6 +22,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noUndeclaredDependencies"),
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
+        RuleFilter::Rule("nursery", "noDeprecatedImports"),
         RuleFilter::Rule("nursery", "noFloatingPromises"),
         RuleFilter::Rule("nursery", "noImportCycles"),
         RuleFilter::Rule("nursery", "noMisusedPromises"),
@@ -50,6 +51,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useHookAtTopLevel"),
         RuleFilter::Rule("correctness", "useJsxKeyInIterable"),
         RuleFilter::Rule("correctness", "useUniqueElementIds"),
+        RuleFilter::Rule("nursery", "noReactForwardRef"),
         RuleFilter::Rule("nursery", "useReactFunctionComponents"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtmlWithChildren"),
@@ -75,6 +77,7 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noVueDataObjectDeclaration"),
+        RuleFilter::Rule("nursery", "noVueDuplicateKeys"),
         RuleFilter::Rule("nursery", "noVueReservedKeys"),
         RuleFilter::Rule("nursery", "noVueReservedProps"),
         RuleFilter::Rule("nursery", "useVueMultiWordComponentNames"),

@@ -1844,14 +1844,38 @@
 			},
 			"additionalProperties": false
 		},
+		"HtmlAssistConfiguration": {
+			"description": "Options that changes how the HTML assist behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the assist for JSON (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"HtmlConfiguration": {
 			"description": "Options applied to HTML files",
 			"type": "object",
 			"properties": {
+				"assist": {
+					"anyOf": [
+						{ "$ref": "#/definitions/HtmlAssistConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"formatter": {
 					"description": "HTML formatter options",
 					"anyOf": [
 						{ "$ref": "#/definitions/HtmlFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"linter": {
+					"description": "HTML linter options",
+					"anyOf": [
+						{ "$ref": "#/definitions/HtmlLinterConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1923,6 +1947,17 @@
 						{ "$ref": "#/definitions/WhitespaceSensitivity" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"HtmlLinterConfiguration": {
+			"description": "Options that changes how the HTML linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for HTML (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2155,7 +2190,7 @@
 			"additionalProperties": false
 		},
 		"JsonAssistConfiguration": {
-			"description": "Linter options specific to the JSON linter",
+			"description": "Assist options specific to the JSON linter",
 			"type": "object",
 			"properties": {
 				"enabled": {
