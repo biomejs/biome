@@ -1,0 +1,9 @@
+engine biome(1.0)
+language css
+
+or {
+  CssClassSelector(),
+  CssIdSelector(),
+  CssTypeSelector(),
+  CssDeclaration()
+}

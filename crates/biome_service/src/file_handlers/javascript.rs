@@ -18,7 +18,7 @@ use crate::{
         RenameResult,
     },
 };
-use biome_analyze::options::PreferredQuote;
+use biome_analyze::options::{PreferredIndentation, PreferredQuote};
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
     RuleCategoriesBuilder, RuleError, RuleFilter,
@@ -285,12 +285,9 @@ impl ServiceLanguage for JsLanguage {
             .javascript
             .formatter
             .quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
+            .map(|quote_style: QuoteStyle| match quote_style {
+                QuoteStyle::Single => PreferredQuote::Single,
+                QuoteStyle::Double => PreferredQuote::Double,
             })
             .unwrap_or_default();
         let preferred_jsx_quote = global
@@ -298,14 +295,31 @@ impl ServiceLanguage for JsLanguage {
             .javascript
             .formatter
             .jsx_quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
+            .map(|quote_style: QuoteStyle| match quote_style {
+                QuoteStyle::Single => PreferredQuote::Single,
+                QuoteStyle::Double => PreferredQuote::Double,
             })
             .unwrap_or_default();
+        let preferred_indentation = {
+            let indent_style = global
+                .languages
+                .javascript
+                .formatter
+                .indent_style
+                .unwrap_or_else(|| global.formatter.indent_style.unwrap_or_default());
+            match indent_style {
+                IndentStyle::Tab => PreferredIndentation::Tab,
+                IndentStyle::Space => PreferredIndentation::Spaces(
+                    global
+                        .languages
+                        .javascript
+                        .formatter
+                        .indent_width
+                        .unwrap_or_else(|| global.formatter.indent_width.unwrap_or_default())
+                        .value(),
+                ),
+            }
+        };
 
         let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
@@ -323,12 +337,7 @@ impl ServiceLanguage for JsLanguage {
         };
         configuration = configuration.with_jsx_runtime(jsx_runtime);
 
-        globals.extend(
-            overrides
-                .override_js_globals(path, &global.languages.javascript.globals)
-                .into_iter()
-                .collect::<Vec<_>>(),
-        );
+        globals.extend(overrides.override_js_globals(path, &global.languages.javascript.globals));
 
         if let Some(filename) = path.file_name() {
             if filename.ends_with(".vue") {
@@ -374,7 +383,8 @@ impl ServiceLanguage for JsLanguage {
             .with_rules(to_analyzer_rules(global, path.as_path()))
             .with_globals(globals)
             .with_preferred_quote(preferred_quote)
-            .with_preferred_jsx_quote(preferred_jsx_quote);
+            .with_preferred_jsx_quote(preferred_jsx_quote)
+            .with_preferred_indentation(preferred_indentation);
 
         AnalyzerOptions::default()
             .with_file_path(path.as_path())

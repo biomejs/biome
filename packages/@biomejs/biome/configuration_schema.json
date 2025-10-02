@@ -2856,6 +2856,16 @@
 			]
 		},
 		"NoDeleteOptions": { "type": "object", "additionalProperties": false },
+		"NoDeprecatedImportsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoDeprecatedImportsOptions" }
+			]
+		},
+		"NoDeprecatedImportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDescendingSpecificityConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3994,6 +4004,16 @@
 			]
 		},
 		"NoReExportAllOptions": { "type": "object", "additionalProperties": false },
+		"NoReactForwardRefConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoReactForwardRefOptions" }
+			]
+		},
+		"NoReactForwardRefOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactPropAssignmentsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4564,6 +4584,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnusedExpressionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnusedExpressionsOptions" }
+			]
+		},
+		"NoUnusedExpressionsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnusedFunctionParametersConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4909,6 +4939,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDuplicateKeysConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueDuplicateKeysOptions" }
+			]
+		},
+		"NoVueDuplicateKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4954,6 +4994,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noDeprecatedImports": {
+					"description": "Restrict imports of deprecated exports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDeprecatedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateDependencies": {
 					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".",
 					"anyOf": [
@@ -5012,6 +5059,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactForwardRef": {
+					"description": "Replaces usages of forwardRef with passing ref as a prop.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoReactForwardRefConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSecrets": {
 					"description": "Disallow usage of sensitive data such as API keys and tokens.",
 					"anyOf": [
@@ -5040,6 +5094,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedExpressions": {
+					"description": "Disallow expression statements that are neither a function call nor an assignment.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoUnusedExpressionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessCatchBinding": {
 					"description": "Disallow unused catch bindings.",
 					"anyOf": [
@@ -5058,6 +5119,13 @@
 					"description": "Enforce that Vue component data options are declared as functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoVueDataObjectDeclarationConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDuplicateKeys": {
+					"description": "Disallow duplicate keys in Vue component data, methods, computed properties, and other options.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoVueDuplicateKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6446,6 +6514,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoDeleteOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoDeprecatedImportsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoDeprecatedImportsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -8199,6 +8282,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoReactForwardRefOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoReactForwardRefOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoReactPropAssignmentsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9056,6 +9158,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoUnusedExpressionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnusedExpressionsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoUnusedFunctionParametersOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -9686,6 +9803,21 @@
 					"allOf": [
 						{ "$ref": "#/definitions/NoVueDataObjectDeclarationOptions" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoVueDuplicateKeysOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoVueDuplicateKeysOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -13557,8 +13689,40 @@
 			]
 		},
 		"UseConsistentArrowReturnOptions": {
+			"description": "Options for the `useConsistentArrowReturn` rule.",
 			"type": "object",
+			"properties": {
+				"requireForObjectLiteral": {
+					"description": "Determines whether the rule enforces a consistent style when the return value is an object literal.\n\nThis option is only applicable when used in conjunction with the `asNeeded` option.",
+					"default": false,
+					"type": "boolean"
+				},
+				"style": {
+					"description": "The style to enforce for arrow function return statements.",
+					"default": "asNeeded",
+					"allOf": [{ "$ref": "#/definitions/UseConsistentArrowReturnStyle" }]
+				}
+			},
 			"additionalProperties": false
+		},
+		"UseConsistentArrowReturnStyle": {
+			"oneOf": [
+				{
+					"description": "Enforces no braces where they can be omitted (default).",
+					"type": "string",
+					"enum": ["asNeeded"]
+				},
+				{
+					"description": "Enforces braces around the function body.",
+					"type": "string",
+					"enum": ["always"]
+				},
+				{
+					"description": "Enforces no braces around the function body (constrains arrow functions to the role of returning an expression).",
+					"type": "string",
+					"enum": ["never"]
+				}
+			]
 		},
 		"UseConsistentBuiltinInstantiationConfiguration": {
 			"anyOf": [

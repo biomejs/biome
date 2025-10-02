@@ -1,0 +1,32 @@
+engine biome(1.0)
+language js
+
+or {
+  identifier(), // L1
+  variable_declaration(), // L1
+  string(), // L2
+  number(), // L3
+  object(), // L4
+  pair(), // L4
+  member_expression(), // L5
+  property_identifier(), // L5
+  array(), // L6
+  assignment_expression(), // L7
+  binary_expression(), // L8
+  conditional_expression(), // L9
+  arrow_function(), // L10
+  function_declaration(), // L11
+  call_expression(), // L12
+  if_statement(), // L13
+  for_statement(), // L14
+  while_statement(), // L15
+  return_statement(), // L16
+  expression_statement(), // L17
+
+  // Native Biome AST Patterns (PascalCase)
+  JsTemplateExpression(), // L20
+  JsArrowFunctionExpression(), // L21
+  JsCallExpression(), // L22
+  JsBinaryExpression(), // L23
+  JsConditionalExpression() // L24
+}
