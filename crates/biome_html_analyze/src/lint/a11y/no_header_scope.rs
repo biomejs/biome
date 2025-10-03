@@ -2,8 +2,8 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlElement, HtmlAttribute, HtmlAttributeList};
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_html_syntax::{AnyHtmlElement, HtmlAttribute};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::HtmlRuleAction;
 
@@ -58,15 +58,12 @@ impl Rule for NoHeaderScope {
         let element = ctx.query();
 
         // Check if element is NOT a th element and has a scope attribute
-        if is_th_element(element) {
+        if is_th_element(element)? {
             return None;
         }
 
         // Check if element has a scope attribute
-        let attributes = get_element_attributes(element)?;
-        let scope_attribute = find_attribute_by_name(&attributes, "scope")?;
-
-        Some(scope_attribute)
+        element.find_attribute_by_name("scope")
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -101,55 +98,19 @@ impl Rule for NoHeaderScope {
 }
 
 // Helper function to check if element is a th element
-fn is_th_element(element: &AnyHtmlElement) -> bool {
-    match element {
-        AnyHtmlElement::HtmlElement(el) => {
-            if let Ok(opening_element) = el.opening_element() {
-                if let Ok(name) = opening_element.name() {
-                    if let Ok(name_token) = name.value_token() {
-                        return name_token.text_trimmed() == "th";
-                    }
-                }
-            }
-            false
-        }
-        AnyHtmlElement::HtmlSelfClosingElement(el) => {
-            if let Ok(name) = el.name() {
-                if let Ok(name_token) = name.value_token() {
-                    return name_token.text_trimmed() == "th";
-                }
-            }
-            false
-        }
-        _ => false,
-    }
-}
-
-// Helper function to get element attributes
-fn get_element_attributes(element: &AnyHtmlElement) -> Option<HtmlAttributeList> {
+fn is_th_element(element: &AnyHtmlElement) -> Option<bool> {
     match element {
         AnyHtmlElement::HtmlElement(el) => {
             let opening_element = el.opening_element().ok()?;
-            Some(opening_element.attributes())
-        }
-        AnyHtmlElement::HtmlSelfClosingElement(el) => Some(el.attributes()),
-        _ => None,
-    }
-}
-
-// Helper function to find attribute by name
-fn find_attribute_by_name(
-    attributes: &HtmlAttributeList,
-    name_to_lookup: &str,
-) -> Option<HtmlAttribute> {
-    attributes.iter().find_map(|attribute| {
-        if let AnyHtmlAttribute::HtmlAttribute(attribute) = attribute {
-            let name = attribute.name().ok()?;
+            let name = opening_element.name().ok()?;
             let name_token = name.value_token().ok()?;
-            if name_token.text_trimmed() == name_to_lookup {
-                return Some(attribute);
-            }
+            Some(name_token.text_trimmed().eq_ignore_ascii_case("th"))
         }
-        None
-    })
+        AnyHtmlElement::HtmlSelfClosingElement(el) => {
+            let name = el.name().ok()?;
+            let name_token = name.value_token().ok()?;
+            Some(name_token.text_trimmed().eq_ignore_ascii_case("th"))
+        }
+        _ => Some(false),
+    }
 }
