@@ -29,7 +29,7 @@ The configuration that is contained inside the file `biome.json`
                               that doesn't know
         --indent-style=<tab|space>  The indent style.
         --indent-width=NUMBER  The size of the indentation, 2 by default
-        --line-ending=<lf|crlf|cr>  The type of line ending.
+        --line-ending=<lf|crlf|cr|auto>  The type of line ending.
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
         --attribute-position=<multiline|auto>  The attribute position style in HTML-ish languages.
                               Defaults to auto.
@@ -71,8 +71,9 @@ The configuration that is contained inside the file `biome.json`
                               its super languages) files.
         --javascript-formatter-indent-width=NUMBER  The size of the indentation applied to
                               JavaScript (and its super languages) files. Default to 2.
-        --javascript-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to
-                              JavaScript (and its super languages) files.
+        --javascript-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to
+                              JavaScript (and its super languages) files. `auto` uses CRLF on
+                              Windows and LF on other platforms.
         --javascript-formatter-line-width=NUMBER  What's the max width of a line applied to
                               JavaScript (and its super languages) files. Defaults to 80.
         --javascript-formatter-quote-style=<double|single>  The type of quotes used in JavaScript
@@ -103,8 +104,9 @@ The configuration that is contained inside the file `biome.json`
                               languages) files.
         --json-formatter-indent-width=NUMBER  The size of the indentation applied to JSON (and its
                               super languages) files. Default to 2.
-        --json-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to JSON (and its
-                              super languages) files.
+        --json-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to JSON (and
+                              its super languages) files. `auto` uses CRLF on Windows and LF on
+                              other platforms.
         --json-formatter-line-width=NUMBER  What's the max width of a line applied to JSON (and its
                               super languages) files. Defaults to 80.
         --json-formatter-trailing-commas=<none|all>  Print trailing commas wherever possible in
@@ -130,8 +132,9 @@ The configuration that is contained inside the file `biome.json`
                               languages) files.
         --css-formatter-indent-width=NUMBER  The size of the indentation applied to CSS (and its
                               super languages) files. Default to 2.
-        --css-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to CSS (and its
-                              super languages) files.
+        --css-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to CSS (and
+                              its super languages) files. `auto` uses CRLF on Windows and LF on
+                              other platforms.
         --css-formatter-line-width=NUMBER  What's the max width of a line applied to CSS (and its
                               super languages) files. Defaults to 80.
         --css-formatter-quote-style=<double|single>  The type of quotes used in CSS code. Defaults
@@ -142,8 +145,8 @@ The configuration that is contained inside the file `biome.json`
         --graphql-formatter-indent-style=<tab|space>  The indent style applied to GraphQL files.
         --graphql-formatter-indent-width=NUMBER  The size of the indentation applied to GraphQL
                               files. Default to 2.
-        --graphql-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to GraphQL
-                              files.
+        --graphql-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to
+                              GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.
         --graphql-formatter-line-width=NUMBER  What's the max width of a line applied to GraphQL
                               files. Defaults to 80.
         --graphql-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
@@ -165,8 +168,9 @@ The configuration that is contained inside the file `biome.json`
                               languages) files.
         --html-formatter-indent-width=NUMBER  The size of the indentation applied to HTML (and its
                               super languages) files. Default to 2.
-        --html-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to HTML (and its
-                              super languages) files.
+        --html-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to HTML (and
+                              its super languages) files. `auto` uses CRLF on Windows and LF on
+                              other platforms.
         --html-formatter-line-width=NUMBER  What's the max width of a line applied to HTML (and its
                               super languages) files. Defaults to 80.
         --html-formatter-attribute-position=<multiline|auto>  The attribute position style in HTML
