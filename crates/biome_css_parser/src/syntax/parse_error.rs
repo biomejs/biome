@@ -171,6 +171,7 @@ pub(crate) fn expected_any_pseudo_class(p: &CssParser, range: TextRange) -> Pars
             "any-link",
             "local-link",
             "scope",
+            "state",
             "current",
             "past",
             "future",

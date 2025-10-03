@@ -158,7 +158,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub NoUnusedExpressions {
-        version: "next",
+        version: "2.2.5",
         name: "noUnusedExpressions",
         language: "js",
         sources: &[RuleSource::Eslint("no-unused-expressions").same()],

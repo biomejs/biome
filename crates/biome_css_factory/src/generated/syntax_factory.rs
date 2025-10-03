@@ -2904,6 +2904,46 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST, children)
             }
+            CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssCustomIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER, children)
+            }
             CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();

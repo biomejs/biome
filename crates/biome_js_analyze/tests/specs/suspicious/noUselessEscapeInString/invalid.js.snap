@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -13,7 +14,11 @@ var s = {
     // https://github.com/biomejs/biome/issues/6039
     templateLiterals1: `\$x`,
     templateLiterals2: `\${\a`,
-    templateLiterals3: `\${} \a`
+    templateLiterals3: `\${} \a`,
+    // https://github.com/biomejs/biome/issues/7595
+    templateLiterals4: `a\{`,
+    templateLiterals5: `$\{\a`,
+    templateLiterals6: `$\{} \a`,
 };
 
 ```
@@ -179,7 +184,7 @@ invalid.js:8:26 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━�
    > 8 │     templateLiterals1: `\$x`,
        │                          ^
      9 │     templateLiterals2: `\${\a`,
-    10 │     templateLiterals3: `\${} \a`
+    10 │     templateLiterals3: `\${} \a`,
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
@@ -199,8 +204,8 @@ invalid.js:9:29 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━�
      8 │     templateLiterals1: `\$x`,
    > 9 │     templateLiterals2: `\${\a`,
        │                             ^
-    10 │     templateLiterals3: `\${} \a`
-    11 │ };
+    10 │     templateLiterals3: `\${} \a`,
+    11 │     // https://github.com/biomejs/biome/issues/7595
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
@@ -218,16 +223,79 @@ invalid.js:10:31 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━�
   
      8 │     templateLiterals1: `\$x`,
      9 │     templateLiterals2: `\${\a`,
-  > 10 │     templateLiterals3: `\${} \a`
+  > 10 │     templateLiterals3: `\${} \a`,
        │                               ^
-    11 │ };
-    12 │ 
+    11 │     // https://github.com/biomejs/biome/issues/7595
+    12 │     templateLiterals4: `a\{`,
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
   i Safe fix: Unescape the character.
   
-    10 │ ····templateLiterals3:·`\${}·\a`
-       │                              -  
+    10 │ ····templateLiterals3:·`\${}·\a`,
+       │                              -   
+
+```
+
+```
+invalid.js:12:27 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+    10 │     templateLiterals3: `\${} \a`,
+    11 │     // https://github.com/biomejs/biome/issues/7595
+  > 12 │     templateLiterals4: `a\{`,
+       │                           ^
+    13 │     templateLiterals5: `$\{\a`,
+    14 │     templateLiterals6: `$\{} \a`,
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    12 │ ····templateLiterals4:·`a\{`,
+       │                          -   
+
+```
+
+```
+invalid.js:13:29 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+    11 │     // https://github.com/biomejs/biome/issues/7595
+    12 │     templateLiterals4: `a\{`,
+  > 13 │     templateLiterals5: `$\{\a`,
+       │                             ^
+    14 │     templateLiterals6: `$\{} \a`,
+    15 │ };
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    13 │ ····templateLiterals5:·`$\{\a`,
+       │                            -   
+
+```
+
+```
+invalid.js:14:31 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+    12 │     templateLiterals4: `a\{`,
+    13 │     templateLiterals5: `$\{\a`,
+  > 14 │     templateLiterals6: `$\{} \a`,
+       │                               ^
+    15 │ };
+    16 │ 
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    14 │ ····templateLiterals6:·`$\{}·\a`,
+       │                              -   
 
 ```
