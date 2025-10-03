@@ -213,11 +213,6 @@ fn is_from_qwik(binding: &biome_js_semantic::Binding) -> bool {
         .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
         .is_some_and(|source| {
             let source_text = source.text();
-            let trimmed = source_text
-                .trim_start_matches('"')
-                .trim_end_matches('"')
-                .trim_start_matches('\'')
-                .trim_end_matches('\'');
-            QWIK_IMPORT_NAMES.contains(&trimmed)
+            QWIK_IMPORT_NAMES.contains(&source_text)
         })
 }
