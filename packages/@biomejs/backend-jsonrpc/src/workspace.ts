@@ -923,7 +923,7 @@ export type SeverityOrGroup_for_Performance =
 	| GroupPlainConfiguration
 	| Performance;
 export type SeverityOrGroup_for_Security = GroupPlainConfiguration | Security;
-export type SeverityOrGroup_for_Style = GroupPlainConfiguration | Style;
+export type SeverityOrGroup_for_Style = GroupPlainConfiguration | Style2;
 export type SeverityOrGroup_for_Suspicious =
 	| GroupPlainConfiguration
 	| Suspicious;
@@ -1726,7 +1726,7 @@ export interface Nursery {
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
 	/**
-	 * Succinct description of the rule.
+	 * Require all comments to follow the same style (either block or inline)
 	 */
 	useDescriptionStyle?: RuleConfiguration_for_UseDescriptionStyleOptions;
 	/**
@@ -1847,7 +1847,7 @@ export interface Security {
 /**
  * A list of rules that belong to this group
  */
-export interface Style {
+export interface Style2 {
 	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
@@ -8213,7 +8213,9 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
 }
-export interface UseDescriptionStyleOptions {}
+export interface UseDescriptionStyleOptions {
+	style?: Style;
+}
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
 export type UseImageSizeOptions = null;
@@ -8381,7 +8383,7 @@ export interface UseImportTypeOptions {
 	/**
 	 * The style to apply when import types. Default to "auto"
 	 */
-	style?: Style2;
+	style?: Style3;
 }
 export interface UseLiteralEnumMembersOptions {}
 /**
@@ -8577,6 +8579,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 }
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
 export type ConsistentTypeDefinition = "interface" | "type";
+export type Style = "block" | "inline";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -8592,7 +8595,7 @@ export type Regex = string;
 /**
  * Rule's options.
  */
-export type Style2 = "auto" | "inlineType" | "separatedType";
+export type Style3 = "auto" | "inlineType" | "separatedType";
 export interface Convention {
 	/**
 	 * String cases to enforce

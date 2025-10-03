@@ -5166,7 +5166,7 @@
 					]
 				},
 				"useDescriptionStyle": {
-					"description": "Succinct description of the rule.",
+					"description": "Require all comments to follow the same style (either block or inline)",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseDescriptionStyleConfiguration" },
 						{ "type": "null" }
@@ -12155,7 +12155,7 @@
 		"SeverityOrGroup_for_Style": {
 			"anyOf": [
 				{ "$ref": "#/definitions/GroupPlainConfiguration" },
-				{ "$ref": "#/definitions/Style" }
+				{ "$ref": "#/definitions/Style2" }
 			]
 		},
 		"SeverityOrGroup_for_Suspicious": {
@@ -12249,7 +12249,8 @@
 				}
 			]
 		},
-		"Style": {
+		"Style": { "type": "string", "enum": ["block", "inline"] },
+		"Style2": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
@@ -12765,7 +12766,7 @@
 			},
 			"additionalProperties": false
 		},
-		"Style2": {
+		"Style3": {
 			"description": "Rule's options.",
 			"oneOf": [
 				{
@@ -13879,6 +13880,12 @@
 		},
 		"UseDescriptionStyleOptions": {
 			"type": "object",
+			"properties": {
+				"style": {
+					"default": "block",
+					"allOf": [{ "$ref": "#/definitions/Style" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseEnumInitializersConfiguration": {
@@ -14198,7 +14205,7 @@
 				"style": {
 					"description": "The style to apply when import types. Default to \"auto\"",
 					"default": "auto",
-					"allOf": [{ "$ref": "#/definitions/Style2" }]
+					"allOf": [{ "$ref": "#/definitions/Style3" }]
 				}
 			},
 			"additionalProperties": false
