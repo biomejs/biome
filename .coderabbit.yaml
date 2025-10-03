@@ -31,6 +31,13 @@ reviews:
       enabled: false # We use our own Biome workflow :)
     clippy:
       enabled: false # Same for Clippy
+  instructions: |
+    Always check if user-facing changes require a changeset. 
+    Remind maintainers to run 'just new-changeset' if missing for:
+    - New features, bug fixes, breaking changes
+    - Rule changes or additions
+    - See https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#create-a-changeset
+    - to ensure it adheres to Biome's best practices.
 tone_instructions: "Please keep it short and to the point. Be patient, especially with new contributors. Feel free to be witty with maintainers."
 knowledge_base:
   code_guidelines:
