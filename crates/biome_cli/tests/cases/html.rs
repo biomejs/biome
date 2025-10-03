@@ -237,6 +237,7 @@ fn should_pull_diagnostics_from_embedded_languages_when_linting() {
     fs.insert(
         html_file.into(),
         r#"<script>debugger</script>
+<script>import z from "zod"</script>
 <style>#id .class div { background-color: red; background-color: red;  } </style>
 "#
         .as_bytes(),
@@ -269,6 +270,62 @@ fn should_pull_diagnostics_from_embedded_languages_when_linting() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_pull_diagnostics_from_embedded_languages_when_linting",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_apply_fixes_to_embedded_languages() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let html_file = Utf8Path::new("file.html");
+    fs.insert(
+        html_file.into(),
+        r#"<script type="module">import z from "zod"; import _ from "lodash";
+
+        debugger
+
+        let schema = z.object({}).optional().nullable();
+
+        </script>
+<style>#id .class div { background-color: red; background-color: red;  } </style>
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true,
+            "indentScriptAndStyle": true
+        },
+        "linter": {
+            "enabled": true
+        },
+        "assist": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_apply_fixes_to_embedded_languages",
         fs,
         console,
         result,

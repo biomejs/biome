@@ -148,6 +148,7 @@ impl HtmlElement {
         name_token.text_trimmed().eq_ignore_ascii_case("script")
     }
 
+    /// Returns `true` if the element is a `<script type="module">`
     pub fn is_javascript_module(&self) -> SyntaxResult<bool> {
         let is_script = self.is_script_tag();
         let type_attribute = self.find_attribute_by_name("type");
@@ -164,6 +165,24 @@ impl HtmlElement {
         });
 
         Ok(is_script && is_type_module)
+    }
+
+    /// Returns `true` if the element is a `<script lang="ts">`
+    pub fn is_typescript_lang(&self) -> SyntaxResult<bool> {
+        let is_script = self.is_script_tag();
+        let lang_attribute = self.find_attribute_by_name("lang");
+        let is_lang_typescript = lang_attribute.is_some_and(|attribute| {
+            attribute
+                .initializer()
+                .and_then(|initializer| initializer.value().ok())
+                .and_then(|value| value.as_html_string().cloned())
+                .and_then(|value| value.value_token().ok())
+                .is_some_and(|token| {
+                    let text = inner_string_text(&token);
+                    text.eq_ignore_ascii_case("ts")
+                })
+        });
+        Ok(is_script && is_lang_typescript)
     }
 }
 

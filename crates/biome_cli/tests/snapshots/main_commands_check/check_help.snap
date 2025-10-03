@@ -187,7 +187,7 @@ The configuration that is contained inside the file `biome.json`
                               self-closed. Defaults to never.
         --html-linter-enabled=<true|false>  Control the linter for HTML (and its super languages)
                               files.
-        --html-assist-enabled=<true|false>  Control the assist for JSON (and its super languages)
+        --html-assist-enabled=<true|false>  Control the assist for HTML (and its super languages)
                               files.
         --assist-enabled=<true|false>  Whether Biome should enable assist via LSP and CLI.
 
