@@ -67,7 +67,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoReactForwardRef {
-        version: "next",
+        version: "2.2.5",
         name: "noReactForwardRef",
         language: "js",
         severity: Severity::Warning,

@@ -1,5 +1,393 @@
 # @biomejs/biome
 
+## 2.2.5
+
+### Patch Changes
+
+- [#7597](https://github.com/biomejs/biome/pull/7597) [`5c3d542`](https://github.com/biomejs/biome/commit/5c3d542e65fee652dc4e52f3ec2de0441c3f3aec) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#6432](https://github.com/biomejs/biome/issues/6432): [`useImportExtensions`](https://biomejs.dev/linter/rules/use-import-extensions/) now works correctly with aliased paths.
+
+- [#7269](https://github.com/biomejs/biome/pull/7269) [`f18dac1`](https://github.com/biomejs/biome/commit/f18dac1d662c426d036894a59755eb26f5668aaf) Thanks [@CDGardner](https://github.com/CDGardner)! - Fixed [#6648](https://github.com/biomejs/biome/issues/6648), where Biome's `noUselessFragments` contained inconsistencies with ESLint for fragments only containing text.
+
+  Previously, Biome would report that fragments with only text were unnecessary under the `noUselessFragments` rule. Further analysis of ESLint's behavior towards these cases revealed that text-only fragments (`<>A</a>`, `<React.Fragment>B</React.Fragment>`, `<RenamedFragment>B</RenamedFragment>`) would not have `noUselessFragments` emitted for them.
+
+  On the Biome side, instances such as these would emit `noUselessFragments`, and applying the suggested fix would turn the text content into a proper JS string.
+
+  ```js
+  // Ended up as: - const t = "Text"
+  const t = <>Text</>
+
+  // Ended up as: - const e = t ? "Option A" : "Option B"
+  const e = t ? <>Option A</> : <>Option B</>
+
+  /* Ended up as:
+    function someFunc() {
+      return "Content desired to be a multi-line block of text."
+    }
+  */
+  function someFunc() {
+    return <>
+      Content desired to be a multi-line
+      block of text.
+    <>
+  }
+  ```
+
+  The proposed update was to align Biome's reaction to this rule with ESLint's; the aforementioned examples will now be supported from Biome's perspective, thus valid use of fragments.
+
+  ```js
+  // These instances are now valid and won't be called out by noUselessFragments.
+
+  const t = <>Text</>
+  const e = t ? <>Option A</> : <>Option B</>
+
+  function someFunc() {
+    return <>
+      Content desired to be a multi-line
+      block of text.
+    <>
+  }
+  ```
+
+- [#7498](https://github.com/biomejs/biome/pull/7498) [`002cded`](https://github.com/biomejs/biome/commit/002cded543e6aa5f5cf55f48312f40c83975a22f) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#6893](https://github.com/biomejs/biome/issues/6893): The [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) rule now correctly adds a dependency that is captured in a shorthand object member. For example:
+
+  ```jsx
+  useEffect(() => {
+    console.log({ firstId, secondId });
+  }, []);
+  ```
+
+  is now correctly fixed to:
+
+  ```jsx
+  useEffect(() => {
+    console.log({ firstId, secondId });
+  }, [firstId, secondId]);
+  ```
+
+- [#7509](https://github.com/biomejs/biome/pull/7509) [`1b61631`](https://github.com/biomejs/biome/commit/1b61631c63f161fa8163365571825c99aed3eaae) Thanks [@siketyan](https://github.com/siketyan)! - Added a new lint rule [`noReactForwardRef`](https://biomejs.dev/linter/rules/no-react-forward-ref/), which detects usages of `forwardRef` that is no longer needed and deprecated in React 19.
+
+  For example:
+
+  ```jsx
+  export const Component = forwardRef(function Component(props, ref) {
+    return <div ref={ref} />;
+  });
+  ```
+
+  will be fixed to:
+
+  ```jsx
+  export const Component = function Component({ ref, ...props }) {
+    return <div ref={ref} />;
+  };
+  ```
+
+  Note that the rule provides an unsafe fix, which may break the code. Don't forget to review the code after applying the fix.
+
+- [#7520](https://github.com/biomejs/biome/pull/7520) [`3f06e19`](https://github.com/biomejs/biome/commit/3f06e19c6eb8476ad9de4e3dac00c50a2d6f0aed) Thanks [@arendjr](https://github.com/arendjr)! - Added new nursery rule [`noDeprecatedImports`](https://biomejs.dev/linter/rules/no-deprecated-imports/) to flag imports of deprecated symbols.
+
+  #### Invalid example
+
+  ```js
+  // foo.js
+  import { oldUtility } from "./utils.js";
+  ```
+
+  ```js
+  // utils.js
+  /**
+   * @deprecated
+   */
+  export function oldUtility() {}
+  ```
+
+  #### Valid examples
+
+  ```js
+  // foo.js
+  import { newUtility, oldUtility } from "./utils.js";
+  ```
+
+  ```js
+  // utils.js
+  export function newUtility() {}
+
+  // @deprecated (this is not a JSDoc comment)
+  export function oldUtility() {}
+  ```
+
+- [#7457](https://github.com/biomejs/biome/pull/7457) [`9637f93`](https://github.com/biomejs/biome/commit/9637f9308fe39f7e94d42419cd430cc2a55d5473) Thanks [@kedevked](https://github.com/kedevked)! - Added `style` and `requireForObjectLiteral` options to the lint rule [`useConsistentArrowReturn`](https://biomejs.dev/linter/rules/use-consistent-arrow-return/).
+
+  This rule enforces a consistent return style for arrow functions. It can be configured with the following options:
+  - `style`: (default: `asNeeded`)
+    - `always`: enforces that arrow functions always have a block body.
+    - `never`: enforces that arrow functions never have a block body, when possible.
+    - `asNeeded`: enforces that arrow functions have a block body only when necessary (e.g. for object literals).
+
+  #### `style: "always"`
+
+  Invalid:
+
+  ```js
+  const f = () => 1;
+  ```
+
+  Valid:
+
+  ```js
+  const f = () => {
+    return 1;
+  };
+  ```
+
+  #### `style: "never"`
+
+  Invalid:
+
+  ```js
+  const f = () => {
+    return 1;
+  };
+  ```
+
+  Valid:
+
+  ```js
+  const f = () => 1;
+  ```
+
+  #### `style: "asNeeded"`
+
+  Invalid:
+
+  ```js
+  const f = () => {
+    return 1;
+  };
+  ```
+
+  Valid:
+
+  ```js
+  const f = () => 1;
+  ```
+
+  #### `style: "asNeeded"` and `requireForObjectLiteral: true`
+
+  Valid:
+
+  ```js
+  const f = () => {
+    return { a: 1 };
+  };
+  ```
+
+- [#7510](https://github.com/biomejs/biome/pull/7510) [`527cec2`](https://github.com/biomejs/biome/commit/527cec2ca10df23754e9958d17baefca6a559154) Thanks [@rriski](https://github.com/rriski)! - Implements [#7339](https://github.com/biomejs/biome/discussions/7339). GritQL patterns can now use native Biome AST nodes using their `PascalCase` names, in addition to the existing TreeSitter-compatible `snake_case` names.
+
+  ```grit
+  engine biome(1.0)
+  language js(typescript,jsx)
+
+  or {
+    // TreeSitter-compatible pattern
+    if_statement(),
+
+    // Native Biome AST node pattern
+    JsIfStatement()
+  } as $stmt where {
+    register_diagnostic(
+      span=$stmt,
+      message="Found an if statement"
+    )
+  }
+  ```
+
+- [#7574](https://github.com/biomejs/biome/pull/7574) [`47907e7`](https://github.com/biomejs/biome/commit/47907e7d9badbe0c41c6a23bdd962676de216db0) Thanks [@kedevked](https://github.com/kedevked)! - Fixed [7574](https://github.com/biomejs/biome/pull/7574). The diagnostic message for the rule `useSolidForComponent` now correctly emphasizes `<For />` and provides a working hyperlink to the Solid documentation.
+
+- [#7497](https://github.com/biomejs/biome/pull/7497) [`bd70f40`](https://github.com/biomejs/biome/commit/bd70f40cb933c1df0c171a9048b62da432093308) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#7320](https://github.com/biomejs/biome/issues/7320): The [`useConsistentCurlyBraces`](https://biomejs.dev/linter/rules/use-consistent-curly-braces/) rule now correctly detects a string literal including `"` inside a JSX attribute value.
+
+- [#7522](https://github.com/biomejs/biome/pull/7522) [`1af9931`](https://github.com/biomejs/biome/commit/1af993134ba2d9158f6824c2f002c90133c0e3f4) Thanks [@Netail](https://github.com/Netail)! - Added extra references to external rules to improve migration for the following rules: `noUselessFragments` & `noNestedComponentDefinitions`
+
+- [#7597](https://github.com/biomejs/biome/pull/7597) [`5c3d542`](https://github.com/biomejs/biome/commit/5c3d542e65fee652dc4e52f3ec2de0441c3f3aec) Thanks [@arendjr](https://github.com/arendjr)! - Fixed an issue where `package.json` manifests would not be correctly discovered
+  when evaluating files in the same directory.
+
+- [#7565](https://github.com/biomejs/biome/pull/7565) [`38d2098`](https://github.com/biomejs/biome/commit/38d2098bb3a81adaf73a19807c1e62d352405764) Thanks [@siketyan](https://github.com/siketyan)! - The resolver can now correctly resolve `.ts`, `.tsx`, `.d.ts`, `.js` files by `.js` extension if exists, based on [the file extension substitution in TypeScript](https://www.typescriptlang.org/docs/handbook/modules/reference.html#file-extension-substitution).
+
+  For example, the linter can now detect the floating promise in the following situation, if you have enabled the `noFloatingPromises` rule.
+
+  **`foo.ts`**
+
+  ```ts
+  export async function doSomething(): Promise<void> {}
+  ```
+
+  **`bar.ts`**
+
+  ```ts
+  import { doSomething } from "./foo.js"; // doesn't exist actually, but it is resolved to `foo.ts`
+
+  doSomething(); // floating promise!
+  ```
+
+- [#7542](https://github.com/biomejs/biome/pull/7542) [`cadad2c`](https://github.com/biomejs/biome/commit/cadad2cadbd3852873cbd3f721c26ae7ceb3f39a) Thanks [@mdevils](https://github.com/mdevils)! - Added the rule [`noVueDuplicateKeys`](https://biomejs.dev/linter/rules/no-vue-duplicate-keys/), which prevents duplicate keys in Vue component definitions.
+
+  This rule prevents the use of duplicate keys across different Vue component options such as `props`, `data`, `computed`, `methods`, and `setup`. Even if keys don't conflict in the script tag, they may cause issues in the template since Vue allows direct access to these keys.
+
+  ##### Invalid examples
+
+  ```vue
+  <script>
+  export default {
+    props: ["foo"],
+    data() {
+      return {
+        foo: "bar",
+      };
+    },
+  };
+  </script>
+  ```
+
+  ```vue
+  <script>
+  export default {
+    data() {
+      return {
+        message: "hello",
+      };
+    },
+    methods: {
+      message() {
+        console.log("duplicate key");
+      },
+    },
+  };
+  </script>
+  ```
+
+  ```vue
+  <script>
+  export default {
+    computed: {
+      count() {
+        return this.value * 2;
+      },
+    },
+    methods: {
+      count() {
+        this.value++;
+      },
+    },
+  };
+  </script>
+  ```
+
+  ##### Valid examples
+
+  ```vue
+  <script>
+  export default {
+    props: ["foo"],
+    data() {
+      return {
+        bar: "baz",
+      };
+    },
+    methods: {
+      handleClick() {
+        console.log("unique key");
+      },
+    },
+  };
+  </script>
+  ```
+
+  ```vue
+  <script>
+  export default {
+    computed: {
+      displayMessage() {
+        return this.message.toUpperCase();
+      },
+    },
+    methods: {
+      clearMessage() {
+        this.message = "";
+      },
+    },
+  };
+  </script>
+  ```
+
+- [#7546](https://github.com/biomejs/biome/pull/7546) [`a683acc`](https://github.com/biomejs/biome/commit/a683acc30bf85d1337760aa1500eb892ebc8e0ac) Thanks [@siketyan](https://github.com/siketyan)! - Internal data for Unicode strings have been updated to Unicode 17.0.
+
+- [#7497](https://github.com/biomejs/biome/pull/7497) [`bd70f40`](https://github.com/biomejs/biome/commit/bd70f40cb933c1df0c171a9048b62da432093308) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#7256](https://github.com/biomejs/biome/issues/7256): The [`useConsistentCurlyBraces`](https://biomejs.dev/linter/rules/use-consistent-curly-braces/) rule now correctly ignores a string literal with braces that contains only whitespaces. Previously, literals that contains single whitespace were only allowed.
+
+- [#7565](https://github.com/biomejs/biome/pull/7565) [`38d2098`](https://github.com/biomejs/biome/commit/38d2098bb3a81adaf73a19807c1e62d352405764) Thanks [@siketyan](https://github.com/siketyan)! - The [`useImportExtensions`](https://biomejs.dev/linter/rules/use-import-extensions/) rule now correctly detects imports with an invalid extension. For example, importing `.ts` file with `.js` extension is flagged by default. If you are using TypeScript with neither the `allowImportingTsExtensions` option nor the `rewriteRelativeImportExtensions` option, it's recommended to turn on the `forceJsExtensions` option of the rule.
+
+- [#7581](https://github.com/biomejs/biome/pull/7581) [`8653921`](https://github.com/biomejs/biome/commit/86539215dde0c29eae0a6975b442637048a8673b) Thanks [@lucasweng](https://github.com/lucasweng)! - Fixed [#7470](https://github.com/biomejs/biome/issues/7470): solved a false positive for [`noDuplicateProperties`](https://biomejs.dev/linter/rules/no-duplicate-properties/). Previously, declarations in `@container` and `@starting-style` at-rules were incorrectly flagged as duplicates of identical declarations at the root selector.
+
+  For example, the linter no longer flags the `display` declaration in `@container` or the `opacity` declaration in `@starting-style`.
+
+  ```css
+  a {
+    display: block;
+    @container (min-width: 600px) {
+      display: none;
+    }
+  }
+
+  [popover]:popover-open {
+    opacity: 1;
+    @starting-style {
+      opacity: 0;
+    }
+  }
+  ```
+
+- [#7529](https://github.com/biomejs/biome/pull/7529) [`fea905f`](https://github.com/biomejs/biome/commit/fea905f0af9fc992a17fe1dcdbc3e0e63fae9d65) Thanks [@qraqras](https://github.com/qraqras)! - Fixed [#7517](https://github.com/biomejs/biome/issues/7517): the [`useOptionalChain`](https://biomejs.dev/linter/rules/use-optional-chain/) rule no longer suggests changes for typeof checks on global objects.
+
+  ```ts
+  // ok
+  typeof window !== "undefined" && window.location;
+  ```
+
+- [#7476](https://github.com/biomejs/biome/pull/7476) [`c015765`](https://github.com/biomejs/biome/commit/c015765af2defb042285d96588fcb5f531eb8b6f) Thanks [@ematipico](https://github.com/ematipico)! - Fixed a bug where the suppression action for `noPositiveTabindex` didn't place the suppression comment in the correct position.
+
+- [#7511](https://github.com/biomejs/biome/pull/7511) [`a0039fd`](https://github.com/biomejs/biome/commit/a0039fd5457d0df18242feed5d21ff868ceb0693) Thanks [@arendjr](https://github.com/arendjr)! - Added nursery rule [`noUnusedExpressions`](https://biomejs.dev/linter/rules/no-unused-expressions/) to flag expressions used as a statement that is neither an assignment nor a function call.
+
+  #### Invalid examples
+
+  ```js
+  f; // intended to call `f()` instead
+  ```
+
+  ```js
+  function foo() {
+    0; // intended to `return 0` instead
+  }
+  ```
+
+  #### Valid examples
+
+  ```js
+  f();
+  ```
+
+  ```js
+  function foo() {
+    return 0;
+  }
+  ```
+
+- [#7564](https://github.com/biomejs/biome/pull/7564) [`40e515f`](https://github.com/biomejs/biome/commit/40e515f73275ad0023ec03e95551a3bbb79b84a1) Thanks [@turbocrime](https://github.com/turbocrime)! - Fixed [#6617](https://github.com/biomejs/biome/issues/6617): improved [`useIterableCallbackReturn`](https://biomejs.dev/linter/rules/use-iterable-callback-return/) to correctly handle arrow functions with a single-expression `void` body.
+
+  Now the following code doesn't trigger the rule anymore:
+
+  ```js
+  [].forEach(() => void null);
+  ```
+
 ## 2.2.4
 
 ### Patch Changes
@@ -1030,7 +1418,7 @@
 
   > [!WARNING]
   > **Breaking Change**: The
-  `noImportCycles` rule no longer detects import cycles that include one or more type-only imports by default.
+  > `noImportCycles` rule no longer detects import cycles that include one or more type-only imports by default.
   > To keep the old behaviour, you can turn off the `ignoreTypes` option explicitly:
   >
   > ```json
@@ -2835,8 +3223,7 @@
 
   The code action `quickfix.suppressRule` was removed in favour of two new code actions:
   - `quickfix.suppressRule.inline.biome`: a code action that adds a suppression comment for each violation.
-  -
-  `quickfix.suppressRule.topLevel.biome`: a code action that adds a suppression comment at the top of the file which suppresses a rule for the whole file.
+  - `quickfix.suppressRule.topLevel.biome`: a code action that adds a suppression comment at the top of the file which suppresses a rule for the whole file.
 
   Given the following code
 
@@ -4717,7 +5104,6 @@
   1. **Accessibility checks**:
 
      Now the rule correctly handles the following cases:
-
      - If an element is hidden from screen readers
      - If an element has the presentation role
      - If an element is interactive

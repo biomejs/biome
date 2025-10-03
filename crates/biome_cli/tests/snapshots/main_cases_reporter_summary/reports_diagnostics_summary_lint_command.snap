@@ -2,6 +2,14 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## `biome.json`
+
+```json
+{
+  "plugins": ["plugin.grit"]
+}
+```
+
 ## `index.css`
 
 ```css
@@ -64,6 +72,19 @@ let f;
 		let f;
 ```
 
+## `plugin.grit`
+
+```grit
+
+`debugger` as $dbg where {
+    register_diagnostic(
+        message = "Found debugger statement",
+        span = $dbg
+    )
+}
+
+```
+
 # Termination Message
 
 ```block
@@ -91,8 +112,8 @@ reporter/violations ━━━━━━━━━━━━━━━━━━━━
   i The following files have violations:
   
   - index.css (2 errors)
-  - index.ts (20 errors, 8 warnings)
-  - main.ts (20 errors, 8 warnings)
+  - index.ts (24 errors, 8 warnings)
+  - main.ts (24 errors, 8 warnings)
   
   i The following lint rules have violations:
   
@@ -103,11 +124,12 @@ reporter/violations ━━━━━━━━━━━━━━━━━━━━
   lint/suspicious/noDoubleEquals                   8 (8 errors)
   lint/suspicious/noRedeclare                      12 (12 errors)
   lint/suspicious/noDebugger                       8 (8 errors)
+  plugin                                           8 (8 errors)
 
 ```
 
 ```block
 Checked 3 files in <TIME>. No fixes applied.
-Found 43 errors.
+Found 51 errors.
 Found 16 warnings.
 ```

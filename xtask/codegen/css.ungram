@@ -226,6 +226,7 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionValueList
 	| CssPseudoClassFunctionNth
 	| CssPseudoClassFunctionCustomIdentifierList
+	| CssPseudoClassFunctionCustomIdentifier
 	| CssBogusPseudoClass
 
 CssPseudoClassIdentifier =
@@ -384,6 +385,14 @@ CssNthOffset =
 CssPseudoClassOfNthSelector =
 	'of'
 	selectors: CssSelectorList
+
+// :state(checked) { }
+//  ^^^^^^^^^^^^^^
+CssPseudoClassFunctionCustomIdentifier =
+	name: CssIdentifier
+	'('
+	ident: CssCustomIdentifier
+	')'
 
 // :active-view-transition-type(backwards forwards) { }
 //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

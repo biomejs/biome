@@ -113,6 +113,11 @@ pub fn kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
                 .iter()
                 .next()
         }
+        "CssPseudoClassFunctionCustomIdentifier" => {
+            lang::CssPseudoClassFunctionCustomIdentifier::KIND_SET
+                .iter()
+                .next()
+        }
         "CssPseudoClassFunctionIdentifier" => lang::CssPseudoClassFunctionIdentifier::KIND_SET
             .iter()
             .next(),

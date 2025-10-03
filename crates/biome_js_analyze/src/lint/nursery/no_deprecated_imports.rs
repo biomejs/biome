@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDeprecatedImports {
-        version: "next",
+        version: "2.2.5",
         name: "noDeprecatedImports",
         language: "js",
         sources: &[
@@ -102,9 +102,9 @@ impl Rule for NoDeprecatedImports {
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let message = if let Some(message) = &state.message {
-            markup! { "Deprecated import: "{message.to_string()} }
+            markup! { "Deprecated import: "{message.to_string()} }.to_owned()
         } else {
-            markup! { "Deprecated import." }
+            markup! { "Deprecated import." }.to_owned()
         };
         Some(
             RuleDiagnostic::new(rule_category!(), state.range, message)

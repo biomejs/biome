@@ -775,6 +775,7 @@ impl<'src> CssLexer<'src> {
             b"property" => PROPERTY_KW,
             b"container" => CONTAINER_KW,
             b"style" => STYLE_KW,
+            b"state" => STATE_KW,
             b"font-face" => FONT_FACE_KW,
             b"font-feature-values" => FONT_FEATURE_VALUES_KW,
             // font-feature-values items

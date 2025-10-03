@@ -24,19 +24,16 @@ type sum = (a: number, b: number, c: number, d: number, e: number) => number;
 
 # Diagnostics
 ```
-invalid.ts:5:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:5:23 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 6 parameters, but only 4 are allowed.
   
     3 │ }
     4 │ 
   > 5 │ function withThisParam(this: MyInterface, a: number, b: number, c: number, d: number, e: number): number {
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 6 │     return this.value + a + b + c + d + e;
-  > 7 │ }
-      │ ^
-    8 │ 
-    9 │ function tooManyParamsWithThis(this: MyInterface, a: number, b: number, c: number, d: number, e: number, f: number): number {
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     return this.value + a + b + c + d + e;
+    7 │ }
   
   i Functions with many parameters are hard to read and maintain.
   
@@ -46,19 +43,16 @@ invalid.ts:5:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:9:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:31 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 7 parameters, but only 4 are allowed.
   
      7 │ }
      8 │ 
    > 9 │ function tooManyParamsWithThis(this: MyInterface, a: number, b: number, c: number, d: number, e: number, f: number): number {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 10 │     return this.value + a + b + c + d + e + f;
-  > 11 │ }
-       │ ^
-    12 │ 
-    13 │ declare function makeDate(m: number, d: number, y: number, h: number, min: number, s: number): Date;
+       │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     return this.value + a + b + c + d + e + f;
+    11 │ }
   
   i Functions with many parameters are hard to read and maintain.
   
@@ -68,14 +62,14 @@ invalid.ts:9:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:13:9 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:26 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 6 parameters, but only 4 are allowed.
   
     11 │ }
     12 │ 
   > 13 │ declare function makeDate(m: number, d: number, y: number, h: number, min: number, s: number): Date;
-       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │ 
     15 │ type sum = (a: number, b: number, c: number, d: number, e: number) => number;
   
@@ -87,14 +81,14 @@ invalid.ts:13:9 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:15:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:15:12 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 5 parameters, but only 4 are allowed.
   
     13 │ declare function makeDate(m: number, d: number, y: number, h: number, min: number, s: number): Date;
     14 │ 
   > 15 │ type sum = (a: number, b: number, c: number, d: number, e: number) => number;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     16 │ 
   
   i Functions with many parameters are hard to read and maintain.

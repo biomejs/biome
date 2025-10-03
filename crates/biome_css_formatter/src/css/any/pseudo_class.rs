@@ -13,6 +13,7 @@ impl FormatRule<AnyCssPseudoClass> for FormatAnyCssPseudoClass {
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(node) => {
                 node.format().fmt(f)
             }
+            AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifier(node) => node.format().fmt(f),
             AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(node) => {
                 node.format().fmt(f)
             }
