@@ -14,6 +14,7 @@ use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{html,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{html,json,jsonc}", crate::run_suppression_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
@@ -181,4 +182,39 @@ fn check_code_action(
     // Re-parse the modified code and panic if the resulting tree has syntax errors
     let re_parse = parse_html(&output, HtmlParseOptions::default());
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
+}
+
+pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
+    register_leak_checker();
+
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
+    let input_code = read_to_string(input_file)
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+
+    let (group, rule) = parse_test_path(input_file);
+
+    let rule_filter = RuleFilter::Rule(group, rule);
+    let filter = AnalysisFilter {
+        enabled_rules: Some(slice::from_ref(&rule_filter)),
+        ..AnalysisFilter::default()
+    };
+
+    let mut snapshot = String::new();
+    analyze_and_snap(
+        &mut snapshot,
+        &input_code,
+        HtmlFileSource::html(),
+        filter,
+        file_name,
+        input_file,
+        CheckActionType::Suppression,
+    );
+
+    insta::with_settings!({
+        prepend_module_to_snapshot => false,
+        snapshot_path => input_file.parent().unwrap(),
+    }, {
+        insta::assert_snapshot!(file_name, snapshot, file_name);
+    });
 }
