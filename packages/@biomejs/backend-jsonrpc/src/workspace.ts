@@ -1722,13 +1722,13 @@ export interface Nursery {
 	 */
 	useConsistentArrowReturn?: RuleFixConfiguration_for_UseConsistentArrowReturnOptions;
 	/**
+	 * Require all descriptions to follow the same style (either block or inline)
+	 */
+	useConsistentGraphqlDescriptions?: RuleConfiguration_for_UseConsistentGraphqlDescriptionsOptions;
+	/**
 	 * Enforce type definitions to consistently use either interface or type.
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
-	/**
-	 * Require all descriptions to follow the same style (either block or inline)
-	 */
-	useDescriptionStyle?: RuleConfiguration_for_UseDescriptionStyleOptions;
 	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
@@ -3067,12 +3067,12 @@ export type RuleConfiguration_for_UseAnchorHrefOptions =
 export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentArrowReturnOptions;
+export type RuleConfiguration_for_UseConsistentGraphqlDescriptionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseConsistentGraphqlDescriptionsOptions;
 export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
-export type RuleConfiguration_for_UseDescriptionStyleOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_UseDescriptionStyleOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -5640,6 +5640,16 @@ export interface RuleWithFixOptions_for_UseConsistentArrowReturnOptions {
 	 */
 	options: UseConsistentArrowReturnOptions;
 }
+export interface RuleWithOptions_for_UseConsistentGraphqlDescriptionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseConsistentGraphqlDescriptionsOptions;
+}
 export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5653,16 +5663,6 @@ export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	 * Rule's options
 	 */
 	options: UseConsistentTypeDefinitionsOptions;
-}
-export interface RuleWithOptions_for_UseDescriptionStyleOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseDescriptionStyleOptions;
 }
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
@@ -8210,11 +8210,14 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 	 */
 	style?: UseConsistentArrowReturnStyle;
 }
+export interface UseConsistentGraphqlDescriptionsOptions {
+	/**
+	 * The description style to enforce. Default to "block"
+	 */
+	style?: Style;
+}
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
-}
-export interface UseDescriptionStyleOptions {
-	style?: Style;
 }
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
@@ -8578,8 +8581,8 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	stableResult?: StableHookResult;
 }
 export type UseConsistentArrowReturnStyle = "asNeeded" | "always" | "never";
-export type ConsistentTypeDefinition = "interface" | "type";
 export type Style = "block" | "inline";
+export type ConsistentTypeDefinition = "interface" | "type";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -8955,7 +8958,7 @@ export type Category =
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTypeDefinitions"
-	| "lint/nursery/useDescriptionStyle"
+	| "lint/nursery/useConsistentGraphqlDescriptions"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"

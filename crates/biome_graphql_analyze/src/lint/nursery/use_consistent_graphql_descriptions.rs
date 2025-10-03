@@ -4,14 +4,18 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlDescription;
 use biome_rowan::AstNode;
-use biome_rule_options::use_description_style::{Style, UseDescriptionStyleOptions};
+use biome_rule_options::use_consistent_graphql_descriptions::{
+    Style, UseConsistentGraphqlDescriptionsOptions,
+};
 
 declare_lint_rule! {
     /// Require all descriptions to follow the same style (either block or inline)
     ///
     /// ## Examples
     ///
-    /// ### Invalid
+    /// ### style: `block`
+    ///
+    /// #### Invalid
     ///
     /// ```graphql,expect_diagnostic
     /// enum EnumValue {
@@ -20,7 +24,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ### Valid
+    /// #### Valid
     ///
     /// ```graphql
     /// enum EnumValue {
@@ -31,20 +35,50 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub UseDescriptionStyle {
+    /// ### style: `inline`
+    ///
+    /// #### Invalid
+    ///
+    /// ```graphql,expect_diagnostic
+    /// enum EnumValue {
+    ///   """
+    ///   this is a description
+    ///   """
+    ///   DEFAULT
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```graphql
+    /// enum EnumValue {
+    ///   "this is a description"
+    ///   DEFAULT
+    /// }
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### style
+    ///
+    /// Use the `style` option to specify the required description style:
+    /// - `"block"` (default): Requires triple-quoted block descriptions (`"""..."""`)
+    /// - `"inline"`: Requires single-quoted inline descriptions (`"..."`)
+    ///
+    pub UseConsistentGraphqlDescriptions {
         version: "next",
-        name: "useDescriptionStyle",
+        name: "useConsistentGraphqlDescriptions",
         language: "graphql",
         sources: &[RuleSource::EslintGraphql("description-style").same()],
         recommended: false,
     }
 }
 
-impl Rule for UseDescriptionStyle {
+impl Rule for UseConsistentGraphqlDescriptions {
     type Query = Ast<GraphqlDescription>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UseDescriptionStyleOptions;
+    type Options = UseConsistentGraphqlDescriptionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

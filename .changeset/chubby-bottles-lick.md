@@ -2,9 +2,9 @@
 "@biomejs/biome": patch
 ---
 
-Added the rule [`useDescriptionStyle`](https://biomejs.dev/linter/rules/use-description-style/), requiring all descriptions to follow the same style (either block or inline).
+Added the nursery rule [`useConsistentGraphqlDescriptions`](https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions/), requiring all descriptions to follow the same style (either block or inline) inside GraphQL files.
 
-##### Invalid
+**Invalid example:**
 
 ```graphql
 enum EnumValue {
@@ -13,7 +13,7 @@ enum EnumValue {
 }
 ```
 
-##### Valid
+**Valid example:**
 
 ```graphql
 enum EnumValue {

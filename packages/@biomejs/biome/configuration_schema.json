@@ -5156,19 +5156,21 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentGraphqlDescriptions": {
+					"description": "Require all descriptions to follow the same style (either block or inline)",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentGraphqlDescriptionsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useConsistentTypeDefinitions": {
 					"description": "Enforce type definitions to consistently use either interface or type.",
 					"anyOf": [
 						{
 							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
 						},
-						{ "type": "null" }
-					]
-				},
-				"useDescriptionStyle": {
-					"description": "Require all descriptions to follow the same style (either block or inline)",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseDescriptionStyleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10286,6 +10288,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseConsistentGraphqlDescriptionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseConsistentGraphqlDescriptionsOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseConsistentMemberAccessibilityOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10445,21 +10464,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseDeprecatedReasonOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseDescriptionStyleOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseDescriptionStyleOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -12249,7 +12253,20 @@
 				}
 			]
 		},
-		"Style": { "type": "string", "enum": ["block", "inline"] },
+		"Style": {
+			"oneOf": [
+				{
+					"description": "Requires triple-quoted block descriptions (`\"\"\"...\"\"\"`)",
+					"type": "string",
+					"enum": ["block"]
+				},
+				{
+					"description": "Requires single-quoted inline descriptions (`\"...\"`)",
+					"type": "string",
+					"enum": ["inline"]
+				}
+			]
+		},
 		"Style2": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -13764,6 +13781,25 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseConsistentGraphqlDescriptionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithUseConsistentGraphqlDescriptionsOptions"
+				}
+			]
+		},
+		"UseConsistentGraphqlDescriptionsOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "The description style to enforce. Default to \"block\"",
+					"default": "block",
+					"allOf": [{ "$ref": "#/definitions/Style" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseConsistentMemberAccessibilityConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -13870,22 +13906,6 @@
 		},
 		"UseDeprecatedReasonOptions": {
 			"type": "object",
-			"additionalProperties": false
-		},
-		"UseDescriptionStyleConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseDescriptionStyleOptions" }
-			]
-		},
-		"UseDescriptionStyleOptions": {
-			"type": "object",
-			"properties": {
-				"style": {
-					"default": "block",
-					"allOf": [{ "$ref": "#/definitions/Style" }]
-				}
-			},
 			"additionalProperties": false
 		},
 		"UseEnumInitializersConfiguration": {
