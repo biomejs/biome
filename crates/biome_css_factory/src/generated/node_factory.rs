@@ -1424,6 +1424,22 @@ pub fn css_pseudo_class_function_compound_selector_list(
         ],
     ))
 }
+pub fn css_pseudo_class_function_custom_identifier(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    ident: CssCustomIdentifier,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionCustomIdentifier {
+    CssPseudoClassFunctionCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(ident.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_pseudo_class_function_custom_identifier_list(
     name: CssIdentifier,
     l_paren_token: SyntaxToken,

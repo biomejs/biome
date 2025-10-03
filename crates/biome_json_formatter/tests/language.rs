@@ -117,8 +117,3 @@ impl From<JsonSerializableFormatOptions> for JsonFormatOptions {
             )
     }
 }
-
-#[derive(Debug, Deserialize, Serialize)]
-struct TestOptions {
-    cases: Vec<JsonSerializableFormatOptions>,
-}

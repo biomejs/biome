@@ -1,4 +1,4 @@
-name: Benchmarks
+name: Benchmarks Configuration
 
 on:
   workflow_dispatch:
@@ -9,13 +9,7 @@ on:
       - next
     paths:
       - 'Cargo.lock'
-      - 'crates/**_analyze/**/*.rs'
-      - 'crates/**_formatter/**/*.rs'
-      - 'crates/**_parser/**/*.rs'
       - 'crates/biome_configuration/**/*.rs'
-      - 'crates/biome_grit_patterns/**/*.rs'
-      - 'crates/biome_module_graph/**/*.rs'
-      - 'crates/biome_package/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
   push:
     branches:
@@ -23,13 +17,7 @@ on:
       - next
     paths:
       - 'Cargo.lock'
-      - 'crates/**_analyze/**/*.rs'
-      - 'crates/**_formatter/**/*.rs'
-      - 'crates/**_parser/**/*.rs'
       - 'crates/biome_configuration/**/*.rs'
-      - 'crates/biome_grit_patterns/**/*.rs'
-      - 'crates/biome_module_graph/**/*.rs'
-      - 'crates/biome_package/**/*.rs'
       - 'crates/biome_rowan/**/*.rs'
 
 env:
@@ -38,27 +26,13 @@ env:
 jobs:
   bench:
     permissions:
+      contents: read
       pull-requests: write
     name: Bench
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
       matrix:
         package:
-          - biome_js_parser
-          - biome_js_formatter
-          - biome_js_analyze
-          - biome_css_parser
-          - biome_css_formatter
-          - biome_css_analyze
-          - biome_json_parser
-          - biome_json_formatter
-          - biome_json_analyze
-          - biome_graphql_parser
-          - biome_graphql_formatter
-          - biome_html_parser
-          - biome_html_formatter
-          - biome_module_graph
-          - biome_package
           - biome_configuration
 
     steps:
@@ -66,7 +40,7 @@ jobs:
       - name: Checkout PR Branch
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
         with:
-          ref: ${{ steps.sha.outputs.result }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2

@@ -4,6 +4,7 @@ Profile-*.json
 .vscode/*
 .idea
 .vs
+.zed/*
 # Release artifacts
 **/target
 # Ignore test files that contributors could create locally

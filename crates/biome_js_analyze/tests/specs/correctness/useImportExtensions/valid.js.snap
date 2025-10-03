@@ -25,6 +25,7 @@ require('./sub/foo.ts');
 import "./sub/styles.css.ts"
 import "./sub/component.svg.svelte.ts";
 import "./sub/component.svg.svelte.ts?query=string&query2#hash";
+import style from './sub/theme.css?inline'
 
 // If the import doesn't resolve at all, we don't report a diagnostic:
 // It means the import is broken beyond missing an extension.

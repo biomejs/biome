@@ -133,6 +133,7 @@ empty-lines.css:1:11 parse ━━━━━━━━━━━━━━━━━�
   - any-link
   - local-link
   - scope
+  - state
   - current
   - past
   - future
