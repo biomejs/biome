@@ -27,7 +27,7 @@ pub(crate) fn parse_pseudo_class_function_custom_identifier(p: &mut CssParser) -
     let m = p.start();
 
     parse_regular_identifier(p).ok();
-    p.bump(T!['(']);
+    p.expect(T!['(']);
 
     let kind = match parse_custom_identifier(p, CssLexContext::Regular) {
         Present(ident) => {
