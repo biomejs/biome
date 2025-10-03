@@ -31,16 +31,14 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@15..16 ":" [] [],
-                            class: CssPseudoClassFunctionCustomIdentifierList {
+                            class: CssPseudoClassFunctionCustomIdentifier {
                                 name: CssIdentifier {
                                     value_token: IDENT@16..21 "state" [] [],
                                 },
                                 l_paren_token: L_PAREN@21..22 "(" [] [],
-                                items: CssCustomIdentifierList [
-                                    CssCustomIdentifier {
-                                        value_token: IDENT@22..29 "checked" [] [],
-                                    },
-                                ],
+                                ident: CssCustomIdentifier {
+                                    value_token: IDENT@22..29 "checked" [] [],
+                                },
                                 r_paren_token: R_PAREN@29..31 ")" [] [Whitespace(" ")],
                             },
                         },
@@ -72,16 +70,14 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssPseudoClassSelector {
                                             colon_token: COLON@40..41 ":" [] [],
-                                            class: CssPseudoClassFunctionCustomIdentifierList {
+                                            class: CssPseudoClassFunctionCustomIdentifier {
                                                 name: CssIdentifier {
                                                     value_token: IDENT@41..46 "state" [] [],
                                                 },
                                                 l_paren_token: L_PAREN@46..47 "(" [] [],
-                                                items: CssCustomIdentifierList [
-                                                    CssCustomIdentifier {
-                                                        value_token: IDENT@47..54 "checked" [] [],
-                                                    },
-                                                ],
+                                                ident: CssCustomIdentifier {
+                                                    value_token: IDENT@47..54 "checked" [] [],
+                                                },
                                                 r_paren_token: R_PAREN@54..55 ")" [] [],
                                             },
                                         },
@@ -135,16 +131,14 @@ CssRoot {
                         },
                         CssPseudoClassSelector {
                             colon_token: COLON@99..100 ":" [] [],
-                            class: CssPseudoClassFunctionCustomIdentifierList {
+                            class: CssPseudoClassFunctionCustomIdentifier {
                                 name: CssIdentifier {
                                     value_token: IDENT@100..105 "state" [] [],
                                 },
                                 l_paren_token: L_PAREN@105..106 "(" [] [],
-                                items: CssCustomIdentifierList [
-                                    CssCustomIdentifier {
-                                        value_token: IDENT@106..113 "checked" [] [],
-                                    },
-                                ],
+                                ident: CssCustomIdentifier {
+                                    value_token: IDENT@106..113 "checked" [] [],
+                                },
                                 r_paren_token: R_PAREN@113..115 ")" [] [Whitespace(" ")],
                             },
                         },
@@ -179,13 +173,12 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@15..31
             0: CSS_PSEUDO_CLASS_SELECTOR@15..31
               0: COLON@15..16 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@16..31
+              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER@16..31
                 0: CSS_IDENTIFIER@16..21
                   0: IDENT@16..21 "state" [] []
                 1: L_PAREN@21..22 "(" [] []
-                2: CSS_CUSTOM_IDENTIFIER_LIST@22..29
-                  0: CSS_CUSTOM_IDENTIFIER@22..29
-                    0: IDENT@22..29 "checked" [] []
+                2: CSS_CUSTOM_IDENTIFIER@22..29
+                  0: IDENT@22..29 "checked" [] []
                 3: R_PAREN@29..31 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@31..33
         0: L_CURLY@31..32 "{" [] []
@@ -209,13 +202,12 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@40..55
                     0: CSS_PSEUDO_CLASS_SELECTOR@40..55
                       0: COLON@40..41 ":" [] []
-                      1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@41..55
+                      1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER@41..55
                         0: CSS_IDENTIFIER@41..46
                           0: IDENT@41..46 "state" [] []
                         1: L_PAREN@46..47 "(" [] []
-                        2: CSS_CUSTOM_IDENTIFIER_LIST@47..54
-                          0: CSS_CUSTOM_IDENTIFIER@47..54
-                            0: IDENT@47..54 "checked" [] []
+                        2: CSS_CUSTOM_IDENTIFIER@47..54
+                          0: IDENT@47..54 "checked" [] []
                         3: R_PAREN@54..55 ")" [] []
                 3: R_PAREN@55..56 ")" [] []
             1: CSS_PSEUDO_ELEMENT_SELECTOR@56..65
@@ -248,13 +240,12 @@ CssRoot {
                 3: R_PAREN@98..99 ")" [] []
             1: CSS_PSEUDO_CLASS_SELECTOR@99..115
               0: COLON@99..100 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST@100..115
+              1: CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER@100..115
                 0: CSS_IDENTIFIER@100..105
                   0: IDENT@100..105 "state" [] []
                 1: L_PAREN@105..106 "(" [] []
-                2: CSS_CUSTOM_IDENTIFIER_LIST@106..113
-                  0: CSS_CUSTOM_IDENTIFIER@106..113
-                    0: IDENT@106..113 "checked" [] []
+                2: CSS_CUSTOM_IDENTIFIER@106..113
+                  0: IDENT@106..113 "checked" [] []
                 3: R_PAREN@113..115 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_OR_RULE_BLOCK@115..117
         0: L_CURLY@115..116 "{" [] []

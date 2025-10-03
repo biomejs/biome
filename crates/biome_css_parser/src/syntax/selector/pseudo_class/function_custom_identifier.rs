@@ -1,5 +1,9 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
+use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::selector::{
+    eat_or_recover_selector_function_close_token, recover_selector_function_parameter,
+};
 use crate::syntax::{parse_custom_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -26,8 +30,18 @@ pub(crate) fn parse_pseudo_class_function_custom_identifier(p: &mut CssParser) -
     p.bump(T!['(']);
 
     let kind = match parse_custom_identifier(p, CssLexContext::Regular) {
-        Present(identifier) => CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER,
-        Absent => CSS_BOGUS_PSEUDO_CLASS,
+        Present(ident) => {
+            if eat_or_recover_selector_function_close_token(p, ident, expected_identifier) {
+                CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER
+            } else {
+                CSS_BOGUS_PSEUDO_CLASS
+            }
+        }
+        Absent => {
+            recover_selector_function_parameter(p, expected_identifier);
+            p.expect(T![')']);
+            CSS_BOGUS_PSEUDO_CLASS
+        }
     };
 
     Present(m.complete(p, kind))
