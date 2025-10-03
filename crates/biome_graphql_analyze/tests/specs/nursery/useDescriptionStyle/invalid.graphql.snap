@@ -19,7 +19,7 @@ enum EnumValue {
 ```
 invalid.graphql:2:2 lint/nursery/useDescriptionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected inline description
+  i Unexpected inline description style.
   
     1 │ enum EnumValue {
   > 2 │ 	"basic"
@@ -35,7 +35,7 @@ invalid.graphql:2:2 lint/nursery/useDescriptionStyle ━━━━━━━━━
 ```
 invalid.graphql:4:2 lint/nursery/useDescriptionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected inline description
+  i Unexpected inline description style.
   
     2 │ 	"basic"
     3 │ 	BASIC
@@ -52,7 +52,7 @@ invalid.graphql:4:2 lint/nursery/useDescriptionStyle ━━━━━━━━━
 ```
 invalid.graphql:6:2 lint/nursery/useDescriptionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected inline description
+  i Unexpected inline description style.
   
     4 │ 	"fluent"
     5 │ 	FLUENT

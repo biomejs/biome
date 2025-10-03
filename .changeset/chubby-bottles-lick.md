@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the rule [`useDescriptionStyle`](https://biomejs.dev/linter/rules/use-description-style/), require all comments to follow the same format (either block or inline)
+Added the rule [`useDescriptionStyle`](https://biomejs.dev/linter/rules/use-description-style/), requiring all descriptions to follow the same style (either block or inline).
 
 ##### Invalid
 

@@ -7,7 +7,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_description_style::{Style, UseDescriptionStyleOptions};
 
 declare_lint_rule! {
-    /// Require all comments to follow the same style (either block or inline)
+    /// Require all descriptions to follow the same style (either block or inline)
     ///
     /// ## Examples
     ///
@@ -56,6 +56,10 @@ impl Rule for UseDescriptionStyle {
             return Some(());
         }
 
+        if style == Style::Inline && value.is_block() {
+            return Some(());
+        }
+
         None
     }
 
@@ -68,7 +72,7 @@ impl Rule for UseDescriptionStyle {
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected "{if style == Style::Block { Style::Inline } else { Style::Block }}" description"
+                    "Unexpected "{if style == Style::Block { Style::Inline } else { Style::Block }}" description style."
                 },
             )
             .note(markup! {
