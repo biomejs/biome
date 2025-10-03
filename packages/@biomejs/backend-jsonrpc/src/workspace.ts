@@ -1754,6 +1754,10 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
 	/**
+	 * Sort interface members by key.
+	 */
+	useSortedInterfaceMembers?: RuleFixConfiguration_for_UseSortedInterfaceMembersOptions;
+	/**
 	 * Enforce multi-word component names in Vue components.
 	 */
 	useVueMultiWordComponentNames?: RuleConfiguration_for_UseVueMultiWordComponentNamesOptions;
@@ -3087,6 +3091,9 @@ export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 export type RuleFixConfiguration_for_UseSortedClassesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSortedClassesOptions;
+export type RuleFixConfiguration_for_UseSortedInterfaceMembersOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseSortedInterfaceMembersOptions;
 export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseVueMultiWordComponentNamesOptions;
@@ -5725,6 +5732,20 @@ export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	 */
 	options: UseSortedClassesOptions;
 }
+export interface RuleWithFixOptions_for_UseSortedInterfaceMembersOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseSortedInterfaceMembersOptions;
+}
 export interface RuleWithOptions_for_UseVueMultiWordComponentNamesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8217,6 +8238,7 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export interface UseSortedInterfaceMembersOptions {}
 export interface UseVueMultiWordComponentNamesOptions {
 	/**
 	 * Component names to ignore (allowed to be single-word).
@@ -8944,6 +8966,7 @@ export type Category =
 	| "lint/nursery/useQwikClasslist"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useSortedInterfaceMembers"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
@@ -9128,6 +9151,7 @@ export type Category =
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
+	| "assist/source/useSortedInterfaceMembers"
 	| "assist/source/useSortedKeys"
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedAttributes"

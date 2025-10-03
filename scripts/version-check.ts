@@ -231,14 +231,14 @@ interface CommitResponse extends PartialCommitResponse {
 }
 
 interface LocalCommit {
-	id: string;
-	message: string;
 	author: {
 		name: string;
 		email: string;
 	};
-	url: string;
 	distinct: boolean;
+	id: string;
+	message: string;
+	url: string;
 }
 
 function isLocalCommit(value: unknown): value is LocalCommit {
@@ -260,15 +260,33 @@ interface PackageObj {
 	version: string;
 }
 
-function isPackageObj(value): value is PackageObj {
-	return !!value && !!value.version;
+function isPackageObj(value: unknown): value is PackageObj {
+	return (
+		!!value && typeof value === "object" && value !== null && "version" in value
+	);
 }
 
 interface PartialCommitResponse {
-	url: string;
-	sha: string;
-	node_id: string;
-	html_url: string;
+	author: {
+		login: string;
+		id: number;
+		node_id: string;
+		avatar_url: string;
+		gravatar_id: string;
+		url: string;
+		html_url: string;
+		followers_url: string;
+		following_url: string;
+		gists_url: string;
+		starred_url: string;
+		subscriptions_url: string;
+		organizations_url: string;
+		repos_url: string;
+		events_url: string;
+		receive_events_url: string;
+		type: string;
+		site_admin: boolean;
+	};
 	comments_url: string;
 	commit: {
 		url: string;
@@ -295,26 +313,6 @@ interface PartialCommitResponse {
 			payload: object | null;
 		};
 	};
-	author: {
-		login: string;
-		id: number;
-		node_id: string;
-		avatar_url: string;
-		gravatar_id: string;
-		url: string;
-		html_url: string;
-		followers_url: string;
-		following_url: string;
-		gists_url: string;
-		starred_url: string;
-		subscriptions_url: string;
-		organizations_url: string;
-		repos_url: string;
-		events_url: string;
-		receive_events_url: string;
-		type: string;
-		site_admin: boolean;
-	};
 	committer: {
 		login: string;
 		id: number;
@@ -335,13 +333,17 @@ interface PartialCommitResponse {
 		type: string;
 		site_admin: boolean;
 	};
+	html_url: string;
+	node_id: string;
 	parents: {
 		url: string;
 		sha: string;
 	}[];
+	sha: string;
 	stats: {
 		additions: number;
 		deletions: number;
 		total: number;
 	};
+	url: string;
 }

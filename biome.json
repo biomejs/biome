@@ -77,7 +77,8 @@
       },
       "nursery": {
         "noFloatingPromises": "error",
-        "noImportCycles": "error"
+        "noImportCycles": "error",
+        "useSortedInterfaceMembers": "error"
       }
     }
   },
