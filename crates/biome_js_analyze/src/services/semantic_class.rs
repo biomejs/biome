@@ -1292,9 +1292,7 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![
-                    ("x", AccessKind::MeaningfulRead),
-                ], // x is read due to +=
+                expected_reads: vec![("x", AccessKind::MeaningfulRead)], // x is read due to +=
                 expected_writes: vec![("x", AccessKind::Write), ("y", AccessKind::Write)],
             },
             TestCase {
@@ -1310,9 +1308,7 @@ mod tests {
                 }
             }
         "#,
-                expected_reads: vec![
-                    ("x", AccessKind::MeaningfulRead),
-                ],
+                expected_reads: vec![("x", AccessKind::MeaningfulRead)],
                 expected_writes: vec![("x", AccessKind::Write), ("y", AccessKind::Write)],
             },
             TestCase {
