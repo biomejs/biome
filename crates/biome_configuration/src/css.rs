@@ -81,8 +81,8 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to CSS (and its super languages) files.
-    #[bpaf(long("css-formatter-line-ending"), argument("lf|crlf|cr"))]
+    /// The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+    #[bpaf(long("css-formatter-line-ending"), argument("lf|crlf|cr|auto"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
