@@ -134,7 +134,7 @@ pub struct JsonLinterConfiguration {
 }
 
 pub type JsonAssistEnabled = Bool<true>;
-/// Linter options specific to the JSON linter
+/// Assist options specific to the JSON linter
 #[derive(
     Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
 )]

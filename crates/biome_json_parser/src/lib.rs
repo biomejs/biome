@@ -6,8 +6,8 @@ use crate::parser::JsonParser;
 use crate::syntax::parse_root;
 use biome_json_factory::JsonSyntaxFactory;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
-use biome_parser::AnyParse;
 pub use biome_parser::prelude::*;
+use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
 use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
 pub use parser::JsonParserOptions;
 
@@ -63,8 +63,8 @@ impl JsonOffsetParse {
     }
 
     /// The offset-aware syntax node represented by this parse result.
-    pub fn syntax(&self) -> &SyntaxNodeWithOffset<JsonLanguage> {
-        &self.root
+    pub fn syntax(&self) -> SyntaxNodeWithOffset<JsonLanguage> {
+        self.root.clone()
     }
 
     /// Gets the diagnostics which occurred when parsing.
@@ -100,6 +100,19 @@ impl JsonOffsetParse {
     /// Convert back to the underlying parse result, discarding offset information.
     pub fn into_inner(self) -> JsonParse {
         JsonParse::new(self.root.into_inner(), self.diagnostics)
+    }
+}
+
+impl From<JsonOffsetParse> for AnyParse {
+    fn from(parse: JsonOffsetParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        EmbeddedNodeParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_embedded_send(),
+            diagnostics,
+        )
+        .into()
     }
 }
 
@@ -201,10 +214,11 @@ impl From<JsonParse> for AnyParse {
     fn from(parse: JsonParse) -> Self {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
-        Self::new(
+        NodeParse::new(
             // SAFETY: the parser should always return a root node
             root.as_send().unwrap(),
             diagnostics,
         )
+        .into()
     }
 }

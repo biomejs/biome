@@ -99,11 +99,21 @@ fn store_embedded_nodes_with_current_ranges() {
     assert!(document.is_some());
 
     let document = document.unwrap();
-    assert_eq!(document.embedded_snippets.scripts.len(), 1);
-    assert_eq!(document.embedded_snippets.styles.len(), 1);
+    let scripts: Vec<_> = document
+        .embedded_snippets
+        .iter()
+        .filter_map(|node| node.as_js_embedded_snippet())
+        .collect();
+    let styles: Vec<_> = document
+        .embedded_snippets
+        .iter()
+        .filter_map(|node| node.as_css_embedded_snippet())
+        .collect();
+    assert_eq!(scripts.len(), 1);
+    assert_eq!(styles.len(), 1);
 
-    let script = document.embedded_snippets.scripts.first().unwrap();
-    let style = document.embedded_snippets.styles.first().unwrap();
+    let script = scripts.first().unwrap();
+    let style = styles.first().unwrap();
 
     let script_node = script.node();
     assert!(script_node.text_range_with_trivia().start() > TextSize::from(0));
@@ -119,7 +129,7 @@ fn format_html_with_scripts_and_css() {
         <style>
             #id { background-color: red; }
         </style>
-        <script type="importmap">         
+        <script type="importmap">
             { "imports":{"circle": "https://example.com/shapes/circle.js","square":"./modules/shapes/square.js"} }
         </script>
         <script>

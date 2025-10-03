@@ -75,7 +75,10 @@ impl ExtensionHandler for AstroFileHandler {
                 linter: Some(javascript::linter_enabled),
             },
 
-            parser: ParserCapabilities { parse: Some(parse) },
+            parser: ParserCapabilities {
+                parse: Some(parse),
+                parse_embedded_nodes: None,
+            },
             debug: DebugCapabilities {
                 debug_syntax_tree: None,
                 debug_control_flow: None,

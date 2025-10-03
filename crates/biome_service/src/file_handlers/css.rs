@@ -344,7 +344,10 @@ pub(crate) struct CssFileHandler;
 impl ExtensionHandler for CssFileHandler {
     fn capabilities(&self) -> Capabilities {
         Capabilities {
-            parser: ParserCapabilities { parse: Some(parse) },
+            parser: ParserCapabilities {
+                parse: Some(parse),
+                parse_embedded_nodes: None,
+            },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
@@ -573,7 +576,7 @@ fn lint(params: LintParams) -> LintResults {
         |signal| process_lint.process_signal(signal),
     );
 
-    process_lint.into_result(params.parse.into_diagnostics(), analyze_diagnostics)
+    process_lint.into_result(params.parse.into_serde_diagnostics(), analyze_diagnostics)
 }
 
 #[tracing::instrument(level = "debug", skip(params))]

@@ -585,6 +585,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
                 return false;
             }
         };
+
         match self.execution.traversal_mode() {
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
                 file_features.supports_lint()

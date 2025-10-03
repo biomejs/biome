@@ -998,6 +998,10 @@ impl<Context> Formatted<Context> {
     pub fn into_document(self) -> Document {
         self.document
     }
+
+    pub fn swap_document(&mut self, document: Document) {
+        self.document = document;
+    }
 }
 
 impl<Context> Formatted<Context>

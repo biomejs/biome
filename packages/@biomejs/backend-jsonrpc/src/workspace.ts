@@ -244,10 +244,15 @@ export interface GritConfiguration {
  * Options applied to HTML files
  */
 export interface HtmlConfiguration {
+	assist?: HtmlAssistConfiguration;
 	/**
 	 * HTML formatter options
 	 */
 	formatter?: HtmlFormatterConfiguration;
+	/**
+	 * HTML linter options
+	 */
+	linter?: HtmlLinterConfiguration;
 	/**
 	 * HTML parsing options
 	 */
@@ -531,6 +536,15 @@ export interface GritLinterConfiguration {
 	enabled?: Bool;
 }
 /**
+ * Options that changes how the HTML assist behaves
+ */
+export interface HtmlAssistConfiguration {
+	/**
+	 * Control the assist for HTML (and its super languages) files.
+	 */
+	enabled?: Bool;
+}
+/**
  * Options that changes how the HTML formatter behaves
  */
 export interface HtmlFormatterConfiguration {
@@ -574,6 +588,15 @@ export interface HtmlFormatterConfiguration {
 	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
 	 */
 	whitespaceSensitivity?: WhitespaceSensitivity;
+}
+/**
+ * Options that changes how the HTML linter behaves
+ */
+export interface HtmlLinterConfiguration {
+	/**
+	 * Control the linter for HTML (and its super languages) files.
+	 */
+	enabled?: Bool;
 }
 /**
  * Options that changes how the HTML parser behaves
@@ -697,7 +720,7 @@ These decorators belong to an old proposal, and they are subject to change.
 	unsafeParameterDecoratorsEnabled?: Bool;
 }
 /**
- * Linter options specific to the JSON linter
+ * Assist options specific to the JSON linter
  */
 export interface JsonAssistConfiguration {
 	/**

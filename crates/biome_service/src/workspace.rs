@@ -55,7 +55,7 @@ mod client;
 mod document;
 mod server;
 
-pub use document::{EmbeddedContent, SendEmbeddedParse};
+pub use document::{EmbeddedLanguageContent, EmbeddedSnippets};
 use std::{
     borrow::Cow,
     fmt::{Debug, Display, Formatter},
@@ -86,9 +86,6 @@ use smallvec::SmallVec;
 use tokio::sync::watch;
 use tracing::debug;
 
-#[cfg(feature = "schema")]
-use schemars::{r#gen::SchemaGenerator, schema::Schema};
-
 pub use crate::{
     WorkspaceError,
     file_handlers::{Capabilities, DocumentFileSource},
@@ -96,6 +93,8 @@ pub use crate::{
     scanner::ScanKind,
     settings::Settings,
 };
+#[cfg(feature = "schema")]
+use schemars::{r#gen::SchemaGenerator, schema::Schema};
 
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use server::OpenFileReason;
@@ -353,11 +352,12 @@ impl Default for FeaturesSupported {
 
 impl Display for FeaturesSupported {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut dbg = f.debug_map();
         for (index, support_kind) in self.0.iter().enumerate() {
             let feature = FeatureKind::from_index(index);
-            write!(f, "{feature}: {support_kind}")?;
+            dbg.key(&feature).value(&support_kind);
         }
-        Ok(())
+        dbg.finish()
     }
 }
 

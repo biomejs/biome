@@ -336,7 +336,10 @@ impl ExtensionHandler for JsonFileHandler {
                 assist: Some(assist_enabled),
                 linter: Some(linter_enabled),
             },
-            parser: ParserCapabilities { parse: Some(parse) },
+            parser: ParserCapabilities {
+                parse: Some(parse),
+                parse_embedded_nodes: None,
+            },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
@@ -533,7 +536,7 @@ fn lint(params: LintParams) -> LintResults {
             process_lint.process_signal(signal)
         });
 
-    let mut diagnostics = params.parse.into_diagnostics();
+    let mut diagnostics = params.parse.into_serde_diagnostics();
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
     // malformed configuration
     if params.path.ends_with(ConfigName::biome_json())
