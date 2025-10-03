@@ -1651,10 +1651,6 @@ export interface Nursery {
 	 */
 	noFloatingPromises?: RuleFixConfiguration_for_NoFloatingPromisesOptions;
 	/**
-	 * The scope prop should be used only on \<th> elements.
-	 */
-	noHeaderScope?: RuleFixConfiguration_for_NoHeaderScopeOptions;
-	/**
 	 * Prevent import cycles.
 	 */
 	noImportCycles?: RuleConfiguration_for_NoImportCyclesOptions;

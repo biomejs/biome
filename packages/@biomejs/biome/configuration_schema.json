@@ -5055,13 +5055,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noHeaderScope": {
-					"description": "The scope prop should be used only on \\<th> elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoHeaderScopeConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noImportCycles": {
 					"description": "Prevent import cycles.",
 					"anyOf": [
