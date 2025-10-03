@@ -828,10 +828,10 @@ impl AnyParse {
     /// Panics if the current node is [AnyParse::EmbeddedNode]
     pub fn set_new_root(&mut self, new_root: SendNode) {
         match self {
-            AnyParse::Node(node) => {
+            Self::Node(node) => {
                 node.root = new_root;
             }
-            AnyParse::EmbeddedNode(_) => {
+            Self::EmbeddedNode(_) => {
                 panic!(
                     "Can't call set_new_root on an embedded node. Use set_new_embedded_root instead."
                 )
@@ -846,12 +846,12 @@ impl AnyParse {
     /// Panics if the current node is [AnyParse::Node]
     pub fn set_new_embedded_root(&mut self, new_root: EmbeddedSendNode) {
         match self {
-            AnyParse::Node(_) => {
+            Self::Node(_) => {
                 panic!(
                     "Can't call set_new_embedded_root on a non-embedded node. Use set_new_root instead."
                 )
             }
-            AnyParse::EmbeddedNode(node) => {
+            Self::EmbeddedNode(node) => {
                 node.root = new_root;
             }
         }

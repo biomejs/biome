@@ -231,7 +231,7 @@ fn get_extensionless_import(
     let resolved_path_sub_extension =
         resolved_stem.and_then(|stem| stem.rfind('.').map(|pos| &stem[pos + 1..]));
 
-    let existing_extension = path.extension();
+    let mut existing_extension = path.extension();
 
     match (resolved_path_sub_extension, existing_extension) {
         (Some("d"), Some("js")) if resolved_extension.is_some_and(|ext| ext == "ts") => {
@@ -244,14 +244,17 @@ fn get_extensionless_import(
     }
 
     let last_component = path_components.next_back().unwrap_or(first_component);
+    let query_or_hash = last_component
+        .as_str()
+        .find(['?', '#'])
+        .map(|index| &last_component.as_str()[index..]);
 
-    let has_query_or_hash =
-        last_component.as_str().contains('?') || last_component.as_str().contains('#');
-    if has_query_or_hash {
-        return Some(UseImportExtensionsState {
-            module_name_token,
-            suggestion: None,
-        });
+    if let Some(query_or_hash) = query_or_hash
+        && let Some(existing_extension) = existing_extension.as_mut()
+    {
+        *existing_extension = existing_extension
+            .strip_suffix(query_or_hash)
+            .unwrap_or(existing_extension);
     }
 
     let extension = if force_js_extensions {
@@ -311,7 +314,9 @@ fn get_extensionless_import(
     };
 
     Some(UseImportExtensionsState {
-        module_name_token: module_name_token.clone(),
-        suggestion: Some((new_path, extension.to_string())),
+        module_name_token,
+        suggestion: query_or_hash
+            .is_none()
+            .then(|| (new_path, extension.to_string())),
     })
 }

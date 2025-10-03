@@ -1524,6 +1524,39 @@ a"#,
     }
 
     #[test]
+    fn it_converts_line_endings_to_auto() {
+        let options = PrinterOptions {
+            line_ending: LineEnding::Auto,
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options(
+            &format_args![
+                text("function main() {"),
+                block_indent(&text("let x = `This is a multiline\nstring`;")),
+                text("}"),
+                hard_line_break()
+            ],
+            options,
+        );
+
+        #[cfg(windows)]
+        {
+            assert_eq!(
+                "function main() {\r\n\tlet x = `This is a multiline\r\nstring`;\r\n}\r\n",
+                result.as_code()
+            );
+        }
+        #[cfg(not(windows))]
+        {
+            assert_eq!(
+                "function main() {\n\tlet x = `This is a multiline\nstring`;\n}\n",
+                result.as_code()
+            );
+        }
+    }
+
+    #[test]
     fn it_breaks_a_group_if_a_string_contains_a_newline() {
         let result = format(&FormatArrayElements {
             items: vec![

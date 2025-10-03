@@ -1350,7 +1350,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to CSS (and its super languages) files.",
+					"description": "The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -1673,7 +1673,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to GraphQL files.",
+					"description": "The type of line ending applied to GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
@@ -1927,7 +1927,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to HTML (and its super languages) files.",
+					"description": "The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -2120,7 +2120,7 @@
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to JavaScript (and its super languages) files.",
+					"description": "The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -2262,7 +2262,7 @@
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
-					"description": "The type of line ending applied to JSON (and its super languages) files.",
+					"description": "The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
@@ -2439,6 +2439,11 @@
 					"description": "Carriage Return character only (\\r), used very rarely",
 					"type": "string",
 					"enum": ["cr"]
+				},
+				{
+					"description": "Automatically use CRLF on Windows and LF on other platforms",
+					"type": "string",
+					"enum": ["auto"]
 				}
 			]
 		},

@@ -74,8 +74,12 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to HTML (and its super languages) files.
-    #[bpaf(long("html-formatter-line-ending"), argument("lf|crlf|cr"), optional)]
+    /// The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+    #[bpaf(
+        long("html-formatter-line-ending"),
+        argument("lf|crlf|cr|auto"),
+        optional
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 

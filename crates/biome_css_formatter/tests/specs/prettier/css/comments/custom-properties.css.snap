@@ -121,6 +121,7 @@ custom-properties.css:4:12 parse ━━━━━━━━━━━━━━━�
   - any-link
   - local-link
   - scope
+  - state
   - current
   - past
   - future

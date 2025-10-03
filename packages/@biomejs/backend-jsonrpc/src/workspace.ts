@@ -395,7 +395,7 @@ export interface CssFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to CSS (and its super languages) files.
+	 * The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -443,7 +443,7 @@ export type BracketSpacing = boolean;
 export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
-export type LineEnding = "lf" | "crlf" | "cr";
+export type LineEnding = "lf" | "crlf" | "cr" | "auto";
 /**
 	* Validated value for the `line_width` formatter options
 
@@ -480,7 +480,7 @@ export interface GraphqlFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to GraphQL files.
+	 * The type of line ending applied to GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -573,7 +573,7 @@ export interface HtmlFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to HTML (and its super languages) files.
+	 * The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -657,7 +657,7 @@ export interface JsFormatterConfiguration {
 	 */
 	jsxQuoteStyle?: QuoteStyle;
 	/**
-	 * The type of line ending applied to JavaScript (and its super languages) files.
+	 * The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -750,7 +750,7 @@ export interface JsonFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to JSON (and its super languages) files.
+	 * The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
