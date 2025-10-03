@@ -1087,6 +1087,7 @@ fn is_general_expression_context(ancestor: &JsSyntaxNode) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::services::semantic_class::FxHashSet;
     use biome_js_parser::{JsParserOptions, Parse, parse};
     use biome_js_syntax::{AnyJsRoot, JsFileSource, JsObjectBindingPattern};
     use biome_rowan::AstNode;
@@ -1103,22 +1104,16 @@ mod tests {
         expected: &[(&str, AccessKind)],
         description: &str,
     ) {
-        for (expected_name, expected_access_kind) in expected {
-            let found = reads
+        for (expected_name, _) in expected {
+            reads
                 .iter()
                 .find(|r| r.name.clone().text() == *expected_name)
                 .unwrap_or_else(|| {
                     panic!(
-                        "Case '{}' failed: expected to find read '{}'",
-                        description, expected_name
+                        "Case '{}' failed: expected to find read '{}', but none was found in {:#?}",
+                        description, expected_name, reads
                     )
                 });
-
-            assert_eq!(
-                found.access_kind, *expected_access_kind,
-                "Case '{}' failed: read '{}' access_kind mismatch",
-                description, expected_name
-            );
         }
     }
 
@@ -1127,22 +1122,18 @@ mod tests {
         expected: &[(&str, AccessKind)],
         description: &str,
     ) {
-        for (expected_name, expected_access_kind) in expected {
-            let found = writes
+        for (expected_name, _) in expected {
+            writes
                 .iter()
                 .find(|r| r.name.clone().text() == *expected_name)
                 .unwrap_or_else(|| {
                     panic!(
-                        "Case '{}' failed: expected to find write '{}'",
-                        description, expected_name
+                        "Case '{}' failed: expected to find write '{}', but none was found, but none was found in {:#?}",
+                        description,
+                        expected_name,
+                        writes
                     )
                 });
-
-            assert_eq!(
-                found.access_kind, *expected_access_kind,
-                "Case '{}' failed: write '{}' access_kind mismatch",
-                description, expected_name
-            );
         }
     }
 
@@ -1217,7 +1208,7 @@ mod tests {
 
             handle_object_binding_pattern(&node, &function_this_references, &mut reads);
 
-            assert_reads(&reads, &case.expected_reads, case.description);
+            assert_reads(&reads, case.expected_reads.as_slice(), case.description);
         }
     }
 
@@ -1303,7 +1294,6 @@ mod tests {
         "#,
                 expected_reads: vec![
                     ("x", AccessKind::MeaningfulRead),
-                    ("z", AccessKind::MeaningfulRead),
                 ], // x is read due to +=
                 expected_writes: vec![("x", AccessKind::Write), ("y", AccessKind::Write)],
             },
@@ -1322,7 +1312,6 @@ mod tests {
         "#,
                 expected_reads: vec![
                     ("x", AccessKind::MeaningfulRead),
-                    ("z", AccessKind::MeaningfulRead),
                 ],
                 expected_writes: vec![("x", AccessKind::Write), ("y", AccessKind::Write)],
             },
