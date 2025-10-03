@@ -516,10 +516,10 @@ fn lint(params: LintParams) -> LintResults {
 
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&params.only)
-            .with_skip(&params.skip)
+            .with_only(params.only)
+            .with_skip(params.skip)
             .with_path(params.path.as_path())
-            .with_enabled_selectors(&params.enabled_selectors)
+            .with_enabled_selectors(params.enabled_selectors)
             .with_project_layout(params.project_layout.clone())
             .finish();
 
@@ -585,10 +585,10 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&only)
-            .with_skip(&skip)
+            .with_only(only)
+            .with_skip(skip)
             .with_path(path.as_path())
-            .with_enabled_selectors(&rules)
+            .with_enabled_selectors(rules)
             .with_project_layout(project_layout)
             .finish();
 
@@ -634,10 +634,10 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&params.only)
-            .with_skip(&params.skip)
+            .with_only(params.only)
+            .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
-            .with_enabled_selectors(&params.enabled_rules)
+            .with_enabled_selectors(params.enabled_rules)
             .with_project_layout(params.project_layout)
             .finish();
 

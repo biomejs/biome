@@ -27,7 +27,7 @@ use biome_formatter::{
     LineWidth, Printed,
 };
 use biome_fs::BiomePath;
-use biome_html_factory::make::{html_embedded_content, ident};
+use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
     HtmlFormatOptions,
@@ -455,30 +455,26 @@ pub(crate) fn parse_embedded_script(
             return None;
         }
 
-        let embedded_content = element
-            .children()
-            .iter()
-            .next()
-            .and_then(|child| child.as_any_html_content().cloned())
-            .and_then(|child| child.as_html_embedded_content().cloned())
-            .and_then(|child| {
-                let content = child.value_token().ok()?;
-                let options = settings.parse_options::<JsLanguage>(path, &document_file_source);
-                let parse = parse_js_with_offset_and_cache(
-                    content.text(),
-                    content.text_range().start(),
-                    file_source,
-                    options,
-                    cache,
-                );
+        let embedded_content = element.children().iter().next().and_then(|child| {
+            let child = child.as_any_html_content()?;
+            let child = child.as_html_embedded_content()?;
+            let content = child.value_token().ok()?;
+            let options = settings.parse_options::<JsLanguage>(path, &document_file_source);
+            let parse = parse_js_with_offset_and_cache(
+                content.text(),
+                content.text_range().start(),
+                file_source,
+                options,
+                cache,
+            );
 
-                Some(EmbeddedLanguageContent::new(
-                    parse.into(),
-                    child.range(),
-                    content.text_range(),
-                    content.text_range().start(),
-                ))
-            })?;
+            Some(EmbeddedLanguageContent::new(
+                parse.into(),
+                child.range(),
+                content.text_range(),
+                content.text_range().start(),
+            ))
+        })?;
         Some((embedded_content, file_source.into()))
     } else {
         None
@@ -498,29 +494,25 @@ pub(crate) fn parse_embedded_style(
         }
 
         let file_source = DocumentFileSource::Css(CssFileSource::css());
-        let content = element
-            .children()
-            .iter()
-            .next()
-            .and_then(|child| child.as_any_html_content().cloned())
-            .and_then(|child| child.as_html_embedded_content().cloned())
-            .and_then(|child| {
-                let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
-                let content = child.value_token().ok()?;
-                let parse = parse_css_with_offset_and_cache(
-                    content.text(),
-                    content.text_range().start(),
-                    cache,
-                    options,
-                );
+        let content = element.children().iter().next().and_then(|child| {
+            let child = child.as_any_html_content()?;
+            let child = child.as_html_embedded_content()?;
+            let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+            let content = child.value_token().ok()?;
+            let parse = parse_css_with_offset_and_cache(
+                content.text(),
+                content.text_range().start(),
+                cache,
+                options,
+            );
 
-                Some(EmbeddedLanguageContent::new(
-                    parse.into(),
-                    child.range(),
-                    content.text_range(),
-                    content.text_range().start(),
-                ))
-            })?;
+            Some(EmbeddedLanguageContent::new(
+                parse.into(),
+                child.range(),
+                content.text_range(),
+                content.text_range().start(),
+            ))
+        })?;
         Some((content, file_source))
     } else {
         None
@@ -741,10 +733,10 @@ pub(crate) fn update_snippets(
             continue;
         };
 
-        mutation.replace_node(
-            element.clone(),
-            html_embedded_content(ident(snippet.new_code.as_str())),
-        );
+        if let Ok(value_token) = element.value_token() {
+            let new_token = ident(snippet.new_code.as_str());
+            mutation.replace_token(value_token, new_token);
+        }
     }
 
     let root = mutation.commit();

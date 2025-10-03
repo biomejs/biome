@@ -45,25 +45,25 @@ impl EmbeddedSnippets {
         matches!(self, Self::Css(..))
     }
 
-    pub fn as_js_embedded_snippet(&self) -> Option<EmbeddedLanguageContent<JsLanguage>> {
+    pub fn as_js_embedded_snippet(&self) -> Option<&EmbeddedLanguageContent<JsLanguage>> {
         if let Self::Js(content) = self {
-            Some(content.clone())
+            Some(content)
         } else {
             None
         }
     }
 
-    pub fn as_css_embedded_snippet(&self) -> Option<EmbeddedLanguageContent<CssLanguage>> {
+    pub fn as_css_embedded_snippet(&self) -> Option<&EmbeddedLanguageContent<CssLanguage>> {
         if let Self::Css(content) = self {
-            Some(content.clone())
+            Some(content)
         } else {
             None
         }
     }
 
-    pub fn as_json_embedded_snippet(&self) -> Option<EmbeddedLanguageContent<JsonLanguage>> {
+    pub fn as_json_embedded_snippet(&self) -> Option<&EmbeddedLanguageContent<JsonLanguage>> {
         if let Self::Json(content) = self {
-            Some(content.clone())
+            Some(content)
         } else {
             None
         }
