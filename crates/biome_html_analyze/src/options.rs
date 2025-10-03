@@ -4,4 +4,4 @@
 
 use crate::lint;
 pub type NoHeaderScope =
-    <lint::nursery::no_header_scope::NoHeaderScope as biome_analyze::Rule>::Options;
+    <lint::a11y::no_header_scope::NoHeaderScope as biome_analyze::Rule>::Options;

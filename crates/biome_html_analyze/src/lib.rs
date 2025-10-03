@@ -9,7 +9,8 @@ pub use crate::registry::visit_registry;
 use crate::suppression_action::HtmlSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry, to_analyzer_suppressions,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    to_analyzer_suppressions,
 };
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
@@ -17,6 +18,8 @@ use biome_html_syntax::HtmlLanguage;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::LazyLock;
+
+pub(crate) type HtmlRuleAction = RuleAction<HtmlLanguage>;
 
 pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
     let mut metadata = MetadataRegistry::default();
@@ -144,7 +147,7 @@ mod tests {
 
         const SOURCE: &str = r#" "#;
 
-        let parsed = parse_html(SOURCE);
+        let parsed = parse_html(SOURCE, Default::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClass");
