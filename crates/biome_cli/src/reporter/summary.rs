@@ -122,7 +122,8 @@ impl ReporterVisitor for SummaryReporterVisitor<'_> {
                     && let Some(category) = category
                     && (category.name().starts_with("lint/")
                         || category.name().starts_with("suppressions/")
-                        || category.name().starts_with("assist/"))
+                        || category.name().starts_with("assist/")
+                        || category.name().starts_with("plugin"))
                 {
                     files_to_diagnostics.insert_rule_for_file(category.name(), severity, location);
                 }
