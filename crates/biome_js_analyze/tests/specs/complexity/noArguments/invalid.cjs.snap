@@ -1,9 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
 expression: invalid.cjs
 ---
 # Input
 ```cjs
+let arguments = 0;
 function f() {
     console.log(arguments);
 
@@ -12,23 +14,27 @@ function f() {
     }
 }
 
-function f() {
+function g() {
+    function h() {
+        console.log(arguments);
+    }
     let arguments = 1;
-    console.log(arguments);
 }
+
 ```
 
 # Diagnostics
 ```
-invalid.cjs:2:17 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.cjs:3:17 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
-    1 │ function f() {
-  > 2 │     console.log(arguments);
+    1 │ let arguments = 0;
+    2 │ function f() {
+  > 3 │     console.log(arguments);
       │                 ^^^^^^^^^
-    3 │ 
-    4 │     for(let i = 0;i < arguments.length; ++i) {
+    4 │ 
+    5 │     for(let i = 0;i < arguments.length; ++i) {
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
   
@@ -36,16 +42,16 @@ invalid.cjs:2:17 lint/complexity/noArguments ━━━━━━━━━━━�
 ```
 
 ```
-invalid.cjs:4:23 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.cjs:5:23 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
-    2 │     console.log(arguments);
-    3 │ 
-  > 4 │     for(let i = 0;i < arguments.length; ++i) {
+    3 │     console.log(arguments);
+    4 │ 
+  > 5 │     for(let i = 0;i < arguments.length; ++i) {
       │                       ^^^^^^^^^
-    5 │         console.log(arguments[i]);
-    6 │     }
+    6 │         console.log(arguments[i]);
+    7 │     }
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
   
@@ -53,15 +59,32 @@ invalid.cjs:4:23 lint/complexity/noArguments ━━━━━━━━━━━�
 ```
 
 ```
-invalid.cjs:5:21 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.cjs:6:21 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use the rest parameters instead of arguments.
   
-    4 │     for(let i = 0;i < arguments.length; ++i) {
-  > 5 │         console.log(arguments[i]);
+    5 │     for(let i = 0;i < arguments.length; ++i) {
+  > 6 │         console.log(arguments[i]);
       │                     ^^^^^^^^^
-    6 │     }
-    7 │ }
+    7 │     }
+    8 │ }
+  
+  i arguments does not have Array.prototype methods and can be inconvenient to use.
+  
+
+```
+
+```
+invalid.cjs:12:21 lint/complexity/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use the rest parameters instead of arguments.
+  
+    10 │ function g() {
+    11 │     function h() {
+  > 12 │         console.log(arguments);
+       │                     ^^^^^^^^^
+    13 │     }
+    14 │     let arguments = 1;
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
   

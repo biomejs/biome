@@ -288,6 +288,10 @@ enum ScopeHoisting {
 #[derive(Debug)]
 struct Scope {
     scope_id: ScopeId,
+    /// Range of this scope.
+    range: TextRange,
+    /// Kind of this scope.
+    kind: JsSyntaxKind,
     /// All bindings declared inside this scope.
     bindings: Vec<BindingName>,
     /// References that still needs to be bound and will be solved at the end of the scope.
@@ -333,6 +337,7 @@ impl SemanticEventExtractor {
             JS_MODULE => {
                 self.push_scope(
                     node.text_trimmed_range(),
+                    node.kind(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     ScopeOptions {
                         is_closure: false,
@@ -345,6 +350,7 @@ impl SemanticEventExtractor {
                 self.is_ambient_context = true;
                 self.push_scope(
                     node.text_trimmed_range(),
+                    node.kind(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     ScopeOptions {
                         is_closure: false,
@@ -356,6 +362,7 @@ impl SemanticEventExtractor {
             JS_SCRIPT => {
                 self.push_scope(
                     node.text_trimmed_range(),
+                    node.kind(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     ScopeOptions {
                         is_closure: false,
@@ -391,6 +398,7 @@ impl SemanticEventExtractor {
             | JS_SETTER_CLASS_MEMBER => {
                 self.push_scope(
                     node.text_trimmed_range(),
+                    node.kind(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     ScopeOptions {
                         is_closure: true,
@@ -408,6 +416,7 @@ impl SemanticEventExtractor {
             | JS_SETTER_OBJECT_MEMBER => {
                 self.push_scope(
                     node.text_trimmed_range(),
+                    node.kind(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     ScopeOptions {
                         is_closure: true,
@@ -419,6 +428,7 @@ impl SemanticEventExtractor {
             JS_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
                 self.push_scope(
                     node.text_trimmed_range(),
+                    node.kind(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     ScopeOptions {
                         is_closure: true,
@@ -430,6 +440,7 @@ impl SemanticEventExtractor {
             JS_FUNCTION_BODY => {
                 self.push_scope(
                     node.text_trimmed_range(),
+                    node.kind(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     ScopeOptions {
                         is_closure: false,
@@ -446,6 +457,7 @@ impl SemanticEventExtractor {
             | TS_ENUM_DECLARATION => {
                 self.push_scope(
                     node.text_trimmed_range(),
+                    node.kind(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     ScopeOptions {
                         is_closure: false,
@@ -468,6 +480,7 @@ impl SemanticEventExtractor {
                 self.is_ambient_context = true;
                 self.push_scope(
                     node.text_trimmed_range(),
+                    node.kind(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     ScopeOptions {
                         is_closure: false,
@@ -481,6 +494,7 @@ impl SemanticEventExtractor {
             | JS_SWITCH_STATEMENT | JS_CATCH_CLAUSE => {
                 self.push_scope(
                     node.text_trimmed_range(),
+                    node.kind(),
                     ScopeHoisting::HoistDeclarationsToParent,
                     ScopeOptions::default(),
                 );
@@ -499,6 +513,7 @@ impl SemanticEventExtractor {
         if node.in_conditional_true_type() {
             self.push_scope(
                 node.syntax().text_trimmed_range(),
+                node.syntax().kind(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 ScopeOptions {
                     is_closure: false,
@@ -518,6 +533,7 @@ impl SemanticEventExtractor {
         ) {
             self.push_scope(
                 node.text_trimmed_range(),
+                node.kind(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 ScopeOptions {
                     is_closure: false,
@@ -875,7 +891,7 @@ impl SemanticEventExtractor {
             | TS_TYPE_ALIAS_DECLARATION
             | TS_MODULE_DECLARATION
             | TS_EXTERNAL_MODULE_DECLARATION => {
-                self.pop_scope(node.text_trimmed_range());
+                self.pop_scope();
                 if let Some(current_scope) = self.scopes.last() {
                     self.is_ambient_context = current_scope.is_ambient;
                 }
@@ -893,7 +909,7 @@ impl SemanticEventExtractor {
 
     fn leave_any_type(&mut self, node: &AnyTsType) {
         if node.in_conditional_true_type() {
-            self.pop_scope(node.syntax().text_trimmed_range());
+            self.pop_scope();
             return;
         }
         let node = node.syntax();
@@ -903,7 +919,7 @@ impl SemanticEventExtractor {
                 | JsSyntaxKind::TS_FUNCTION_TYPE
                 | JsSyntaxKind::TS_MAPPED_TYPE
         ) {
-            self.pop_scope(node.text_trimmed_range());
+            self.pop_scope();
         }
         // FALLBACK
         // If the conditional type has a bogus true type,
@@ -940,7 +956,13 @@ impl SemanticEventExtractor {
         }
     }
 
-    fn push_scope(&mut self, range: TextRange, hoisting: ScopeHoisting, options: ScopeOptions) {
+    fn push_scope(
+        &mut self,
+        range: TextRange,
+        kind: JsSyntaxKind,
+        hoisting: ScopeHoisting,
+        options: ScopeOptions,
+    ) {
         let scope_id = ScopeId::new(self.scope_count);
         self.scope_count += 1;
         self.stash.push_back(SemanticEvent::ScopeStarted {
@@ -950,6 +972,8 @@ impl SemanticEventExtractor {
         });
         self.scopes.push(Scope {
             scope_id,
+            range,
+            kind,
             bindings: vec![],
             references: FxHashMap::default(),
             shadowed: vec![],
@@ -968,14 +992,67 @@ impl SemanticEventExtractor {
     /// 2 - Unmatched references are promoted to its parent scope or become [UnresolvedReference] events;
     /// 3 - All declarations of this scope are removed;
     /// 4 - All shadowed declarations are restored.
-    fn pop_scope(&mut self, scope_range: TextRange) {
+    fn pop_scope(&mut self) {
+        /// Checks if a scope kind represents a regular (non-arrow) function.
+        /// Regular functions provide an implicit `arguments` object, while arrow functions do not.
+        fn is_regular_function_kind(kind: &JsSyntaxKind) -> bool {
+            const REGULAR_FUNCTION_KINDS: &[JsSyntaxKind] = &[
+                JS_FUNCTION_DECLARATION,
+                JS_FUNCTION_EXPORT_DEFAULT_DECLARATION,
+                JS_FUNCTION_EXPRESSION,
+            ];
+            REGULAR_FUNCTION_KINDS.contains(kind)
+        }
+
+        /// Determines if an `arguments` reference should bind to a given declaration.
+        /// Returns true if the binding is within the enclosing function scope,
+        /// or if there's no enclosing function (arrow function or global context).
+        fn can_bind_arguments_reference(
+            name: &BindingName,
+            info: &BindingInfo,
+            enclosing_function_range: Option<TextRange>,
+        ) -> bool {
+            match name {
+                BindingName::Value(token) if token.text() == "arguments" => {
+                    if let Some(function_range) = enclosing_function_range {
+                        function_range.start() <= info.range_start
+                            && info.range_start <= function_range.end()
+                    } else {
+                        true
+                    }
+                }
+                _ => true,
+            }
+        }
+
+        /// Determines if an `arguments` reference should bind to a given declaration.
+        /// Returns true if the binding is within the enclosing function scope,
+        /// or if there's no enclosing function (arrow function or global context).
+        fn can_promote_arguments_reference(name: &BindingName, scope_kind: JsSyntaxKind) -> bool {
+            match name {
+                BindingName::Value(token) if token.text() == "arguments" => {
+                    !is_regular_function_kind(&scope_kind)
+                }
+                _ => true,
+            }
+        }
+
+        let enclosing_function_range = self
+            .scopes
+            .iter()
+            .rev()
+            .find(|scope| is_regular_function_kind(&scope.kind))
+            .map(|scope| scope.range);
+
         debug_assert!(!self.scopes.is_empty());
         let scope = self.scopes.pop().unwrap();
         let scope_id = scope.scope_id;
 
         // Bind references to declarations
         for (name, mut references) in scope.references {
-            if let Some(info) = self.bindings.get(&name) {
+            if let Some(info) = self.bindings.get(&name)
+                && can_bind_arguments_reference(&name, info, enclosing_function_range)
+            {
                 let declaration_at = info.range_start;
                 // We know the declaration of these reference.
                 for reference in references {
@@ -1104,7 +1181,9 @@ impl SemanticEventExtractor {
                         }
                     }
                 }
-            } else if let Some(parent) = self.scopes.last_mut() {
+            } else if let Some(parent) = self.scopes.last_mut()
+                && can_promote_arguments_reference(&name, scope.kind)
+            {
                 // Promote these references to the parent scope
                 let parent_references = parent.references.entry(name).or_default();
                 parent_references.append(&mut references);
@@ -1128,7 +1207,7 @@ impl SemanticEventExtractor {
         self.bindings.extend(scope.shadowed);
 
         self.stash
-            .push_back(SemanticEvent::ScopeEnded { range: scope_range });
+            .push_back(SemanticEvent::ScopeEnded { range: scope.range });
     }
 
     fn current_scope_mut(&mut self) -> &mut Scope {

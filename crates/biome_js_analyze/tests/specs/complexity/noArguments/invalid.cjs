@@ -1,3 +1,4 @@
+let arguments = 0;
 function f() {
     console.log(arguments);
 
@@ -6,7 +7,9 @@ function f() {
     }
 }
 
-function f() {
+function g() {
+    function h() {
+        console.log(arguments);
+    }
     let arguments = 1;
-    console.log(arguments);
 }

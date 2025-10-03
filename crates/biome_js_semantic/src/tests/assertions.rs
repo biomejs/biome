@@ -15,6 +15,15 @@ use std::collections::BTreeMap;
 /// the tree looking at tokens with trailing comments following a specifically patterns
 /// specifying if a scope has started or ended.
 ///
+/// ### Source Type Configuration
+///
+/// By default, tests are parsed as TSX. To parse as a script file, add a comment at the beginning:
+///
+/// ```js
+/// // @script
+/// var x = 1;
+/// ```
+///
 /// ### Available Patterns
 ///
 /// #### Declaration Assertion
@@ -106,7 +115,12 @@ use std::collections::BTreeMap;
 /// if(true) ;/*NOEVENT*/;
 /// ```
 pub fn assert(code: &str, test_name: &str) {
-    let r = biome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());
+    let file_source = if code.trim_start().starts_with("// @script") {
+        JsFileSource::js_script()
+    } else {
+        JsFileSource::tsx()
+    };
+    let r = biome_js_parser::parse(code, file_source, JsParserOptions::default());
 
     if r.has_errors() {
         let mut console = EnvConsole::default();

@@ -202,6 +202,45 @@ assert_semantics! {
                 console.log(arguments/*?*/[i]);
             }
         }"#,
+    ok_unresolved_reference_arguments_function_declaration,
+        r#"// @script
+        const arguments/*#A*/ = 1;
+        const foo/*#B*/ = 2;
+        function f() {
+            console.log(arguments/*?*/);
+            console.log(foo/*READ B*/);
+        }"#,
+    ok_unresolved_reference_arguments_function_expression,
+        r#"// @script
+        const arguments/*#A*/ = 1;
+        const foo/*#B*/ = 2;
+        const f = function() {
+            console.log(arguments/*?*/);
+            console.log(foo/*READ B*/);
+        }"#,
+    ok_resolved_reference_arguments_arrow_function_expression,
+        r#"// @script
+        const arguments/*#A*/ = 1;
+        const f = () => {
+            console.log(arguments/*READ A*/);
+        }"#,
+    ok_unresolved_reference_arguments_in_nested_function,
+        r#"// @script
+        function f() {
+            function g() {
+                console.log(arguments/*?*/);
+            }
+            const arguments/*#A*/ = 1;
+            g(arguments/*READ A*/);
+        }
+        const h = function() {
+            const i = function() {
+                console.log(arguments/*?*/);
+            }
+            const arguments/*#B*/ = 1;
+            i(arguments/*READ B*/);
+        }
+        "#,
 }
 
 // Exports
