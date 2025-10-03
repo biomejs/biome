@@ -1726,7 +1726,7 @@ export interface Nursery {
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
 	/**
-	 * Require all comments to follow the same style (either block or inline)
+	 * Require all descriptions to follow the same style (either block or inline)
 	 */
 	useDescriptionStyle?: RuleConfiguration_for_UseDescriptionStyleOptions;
 	/**

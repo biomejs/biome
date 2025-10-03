@@ -5166,7 +5166,7 @@
 					]
 				},
 				"useDescriptionStyle": {
-					"description": "Require all comments to follow the same style (either block or inline)",
+					"description": "Require all descriptions to follow the same style (either block or inline)",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseDescriptionStyleConfiguration" },
 						{ "type": "null" }
