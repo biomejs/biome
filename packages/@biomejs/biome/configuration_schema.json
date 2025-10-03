@@ -5165,6 +5165,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDescriptionStyle": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseDescriptionStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.",
 					"anyOf": [
@@ -10442,6 +10449,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseDescriptionStyleOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseDescriptionStyleOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseEnumInitializersOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13846,6 +13868,16 @@
 			]
 		},
 		"UseDeprecatedReasonOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDescriptionStyleConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseDescriptionStyleOptions" }
+			]
+		},
+		"UseDescriptionStyleOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
