@@ -200,6 +200,8 @@ define_categories! {
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
     "lint/nursery/useMaxParams": "https://biomejs.dev/linter/rules/use-max-params",
     "lint/nursery/useQwikClasslist": "https://biomejs.dev/linter/rules/use-qwik-classlist",
+    "lint/nursery/useQwikMethodUsage": "https://biomejs.dev/linter/rules/use-qwik-method-usage",
+    "lint/nursery/useQwikValidLexicalScope": "https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope",
     "lint/nursery/useReactFunctionComponents": "https://biomejs.dev/linter/rules/use-react-function-components",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useVueMultiWordComponentNames": "https://biomejs.dev/linter/rules/use-vue-multi-word-component-names",
