@@ -1,8 +1,7 @@
 ---
 "@biomejs/biome": patch
 ---
-
-Added the lint rule [`noRethrowWithoutCause`](https://biomejs.dev/linter/rules/no-rethrow-without-cause/).
+Added the lint rule `useErrorCause`.
 
 This rule enforces that errors caught in a `catch` clause are not rethrown without wrapping them in a new `Error` object and specifying the original error as the `cause`. This helps preserve the error’s stack trace and context for better debugging.
 

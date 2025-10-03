@@ -51,7 +51,7 @@ try {
 
 # Diagnostics
 ```
-invalid.js:12:3 lint/nursery/noRethrowWithoutCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
   
@@ -66,7 +66,7 @@ invalid.js:12:3 lint/nursery/noRethrowWithoutCause ━━━━━━━━━�
 ```
 
 ```
-invalid.js:19:3 lint/nursery/noRethrowWithoutCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
   
@@ -81,7 +81,7 @@ invalid.js:19:3 lint/nursery/noRethrowWithoutCause ━━━━━━━━━�
 ```
 
 ```
-invalid.js:34:2 lint/nursery/noRethrowWithoutCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:2 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is being discarded because the `catch` clause doesn't have a parameter.Specify an error object in the `catch` clause to access the original error.
   
@@ -96,7 +96,7 @@ invalid.js:34:2 lint/nursery/noRethrowWithoutCause ━━━━━━━━━�
 ```
 
 ```
-invalid.js:40:10 lint/nursery/noRethrowWithoutCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:40:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
   

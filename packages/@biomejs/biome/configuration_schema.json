@@ -4150,24 +4150,6 @@
 			},
 			"additionalProperties": false
 		},
-		"NoRethrowWithoutCauseConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoRethrowWithoutCauseOptions" }
-			]
-		},
-		"NoRethrowWithoutCauseOptions": {
-			"description": "Options for the `noRethrowWithoutCause` rule.",
-			"type": "object",
-			"properties": {
-				"requireCatchParameter": {
-					"description": "When set to `true`, the rule requires that `catch` clauses have a parameter.",
-					"default": true,
-					"type": "boolean"
-				}
-			},
-			"additionalProperties": false
-		},
 		"NoSecretsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5079,13 +5061,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noRethrowWithoutCause": {
-					"description": "Disallow rethrowing caught errors without wrapping them.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoRethrowWithoutCauseConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noSecrets": {
 					"description": "Disallow usage of sensitive data such as API keys and tokens.",
 					"anyOf": [
@@ -5187,6 +5162,13 @@
 						{
 							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"useErrorCause": {
+					"description": "Disallow rethrowing caught errors without wrapping them.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseErrorCauseConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8516,21 +8498,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoRethrowWithoutCauseOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoRethrowWithoutCauseOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithNoSecretsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -10511,6 +10478,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseEnumInitializersOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseErrorCauseOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseErrorCauseOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -13941,6 +13923,24 @@
 		},
 		"UseEnumInitializersOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseErrorCauseConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseErrorCauseOptions" }
+			]
+		},
+		"UseErrorCauseOptions": {
+			"description": "Options for the `useErrorCause` rule.",
+			"type": "object",
+			"properties": {
+				"requireCatchParameter": {
+					"description": "When set to `true`, the rule requires that `catch` clauses have a parameter.",
+					"default": true,
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseErrorMessageConfiguration": {

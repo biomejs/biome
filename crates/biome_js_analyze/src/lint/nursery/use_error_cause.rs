@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{AnyJsBindingPattern, JsCatchClause, JsThrowStatement};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
-use biome_rule_options::no_rethrow_without_cause::NoRethrowWithoutCauseOptions;
+use biome_rule_options::use_error_cause::UseErrorCauseOptions;
 
 declare_lint_rule! {
     /// Disallow rethrowing caught errors without wrapping them.
@@ -53,9 +53,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub NoRethrowWithoutCause {
+    pub UseErrorCause {
         version: "next",
-        name: "noRethrowWithoutCause",
+        name: "useErrorCause",
         language: "js",
         recommended: false,
         sources: &[RuleSource::Eslint("preserve-caught-error").same()],
@@ -69,11 +69,11 @@ pub enum State {
     DestructuringBinding(TextRange),
 }
 
-impl Rule for NoRethrowWithoutCause {
+impl Rule for UseErrorCause {
     type Query = Ast<JsThrowStatement>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = NoRethrowWithoutCauseOptions;
+    type Options = UseErrorCauseOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let throw_statement = ctx.query();

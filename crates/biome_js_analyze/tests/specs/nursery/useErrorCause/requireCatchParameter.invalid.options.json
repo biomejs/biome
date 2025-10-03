@@ -3,7 +3,7 @@
     "linter": {
         "rules": {
             "nursery": {
-                "noRethrowWithoutCause": {
+                "useErrorCause": {
                     "level": "error",
                     "options": {
                         "requireCatchParameter": false

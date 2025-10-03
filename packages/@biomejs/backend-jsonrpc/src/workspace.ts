@@ -1666,10 +1666,6 @@ export interface Nursery {
 	 */
 	noReactForwardRef?: RuleFixConfiguration_for_NoReactForwardRefOptions;
 	/**
-	 * Disallow rethrowing caught errors without wrapping them.
-	 */
-	noRethrowWithoutCause?: RuleConfiguration_for_NoRethrowWithoutCauseOptions;
-	/**
 	 * Disallow usage of sensitive data such as API keys and tokens.
 	 */
 	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
@@ -1729,6 +1725,10 @@ export interface Nursery {
 	 * Enforce type definitions to consistently use either interface or type.
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
+	/**
+	 * Disallow rethrowing caught errors without wrapping them.
+	 */
+	useErrorCause?: RuleConfiguration_for_UseErrorCauseOptions;
 	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
@@ -3036,9 +3036,6 @@ export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
 export type RuleFixConfiguration_for_NoReactForwardRefOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoReactForwardRefOptions;
-export type RuleConfiguration_for_NoRethrowWithoutCauseOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoRethrowWithoutCauseOptions;
 export type RuleConfiguration_for_NoSecretsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoSecretsOptions;
@@ -3081,6 +3078,9 @@ export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
 export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
+export type RuleConfiguration_for_UseErrorCauseOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseErrorCauseOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -5508,16 +5508,6 @@ export interface RuleWithFixOptions_for_NoReactForwardRefOptions {
 	 */
 	options: NoReactForwardRefOptions;
 }
-export interface RuleWithOptions_for_NoRethrowWithoutCauseOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoRethrowWithoutCauseOptions;
-}
 export interface RuleWithOptions_for_NoSecretsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5677,6 +5667,16 @@ export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	 * Rule's options
 	 */
 	options: UseConsistentTypeDefinitionsOptions;
+}
+export interface RuleWithOptions_for_UseErrorCauseOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseErrorCauseOptions;
 }
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
@@ -8209,15 +8209,6 @@ export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoQwikUseVisibleTaskOptions {}
 export interface NoReactForwardRefOptions {}
-/**
- * Options for the `noRethrowWithoutCause` rule.
- */
-export interface NoRethrowWithoutCauseOptions {
-	/**
-	 * When set to `true`, the rule requires that `catch` clauses have a parameter.
-	 */
-	requireCatchParameter?: boolean;
-}
 export interface NoSecretsOptions {
 	/**
 	 * Set entropy threshold (default is 41).
@@ -8255,6 +8246,15 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 }
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
+}
+/**
+ * Options for the `useErrorCause` rule.
+ */
+export interface UseErrorCauseOptions {
+	/**
+	 * When set to `true`, the rule requires that `catch` clauses have a parameter.
+	 */
+	requireCatchParameter?: boolean;
 }
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
@@ -8978,7 +8978,6 @@ export type Category =
 	| "lint/nursery/noNonNullAssertedOptionalChain"
 	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noReactForwardRef"
-	| "lint/nursery/noRethrowWithoutCause"
 	| "lint/nursery/noSecrets"
 	| "lint/nursery/noShadow"
 	| "lint/nursery/noUnnecessaryConditions"
@@ -8995,6 +8994,7 @@ export type Category =
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
+	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useExhaustiveSwitchCases"
