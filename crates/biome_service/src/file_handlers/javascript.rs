@@ -503,6 +503,7 @@ impl ExtensionHandler for JsFileHandler {
                 code_actions: Some(code_actions),
                 fix_all: Some(fix_all),
                 rename: Some(rename),
+                update_snippets: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -768,7 +769,12 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         |signal| process_lint.process_signal(signal),
     );
 
-    process_lint.into_result(params.parse.into_serde_diagnostics(), analyze_diagnostics)
+    process_lint.into_result(
+        params
+            .parse
+            .into_serde_diagnostics(params.diagnostic_offset),
+        analyze_diagnostics,
+    )
 }
 
 #[tracing::instrument(level = "debug", skip(params))]

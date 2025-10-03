@@ -77,6 +77,14 @@ impl EmbeddedSnippets {
         }
     }
 
+    pub fn element_range(&self) -> TextRange {
+        match self {
+            Self::Js(node) => node.element_range,
+            Self::Css(node) => node.element_range,
+            Self::Json(node) => node.element_range,
+        }
+    }
+
     pub fn parse(&self) -> AnyParse {
         match self {
             Self::Js(node) => node.parse.clone(),

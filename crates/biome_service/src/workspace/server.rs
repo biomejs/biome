@@ -8,7 +8,7 @@ use crate::configuration::{LoadedConfiguration, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, FormatEmbedNode,
-    LintParams, LintResults, ParseResult,
+    LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
 };
 use crate::projects::Projects;
 use crate::scanner::{
@@ -1432,19 +1432,12 @@ impl Workspace for WorkspaceServer {
 
                 diagnostics.extend(results.diagnostics);
                 skipped_diagnostics += results.skipped_diagnostics;
-
-                let this_diagnostics = embedded_node.into_serde_diagnostics();
-                errors += this_diagnostics
-                    .iter()
-                    .filter(|diag| diag.severity() <= Severity::Error)
-                    .count();
                 errors += results.errors;
-                diagnostics.extend(this_diagnostics);
             }
 
             (diagnostics, errors, skipped_diagnostics)
         } else {
-            let mut parse_diagnostics = parse.into_serde_diagnostics();
+            let mut parse_diagnostics = parse.into_serde_diagnostics(None);
             let mut errors = parse_diagnostics
                 .iter()
                 .filter(|diag| diag.severity() <= Severity::Error)
@@ -1688,13 +1681,15 @@ impl Workspace for WorkspaceServer {
             rule_categories,
             suppression_reason,
         } = params;
+
         let capabilities = self.get_file_capabilities(&path);
 
         let fix_all = capabilities
             .analyzer
             .fix_all
             .ok_or_else(self.build_capability_error(&path))?;
-        let parse = self.get_parse(&path)?;
+
+        let mut parse = self.get_parse(&path)?;
 
         let settings = self
             .projects
@@ -1712,7 +1707,55 @@ impl Workspace for WorkspaceServer {
         } else {
             Vec::new()
         };
-        let mut fix_result = fix_all(FixAllParams {
+
+        let mut errors = 0;
+        let mut actions = vec![];
+        let mut skipped_suggested_fixes = 0;
+
+        if let Some(update_snippets) = capabilities.analyzer.update_snippets {
+            let mut new_snippets = vec![];
+            for embedded_node in self.get_language_snippets(&path) {
+                let Some(document_file_source) = self.get_source(embedded_node.file_source_index())
+                else {
+                    continue;
+                };
+                let capabilities = self.features.get_capabilities(document_file_source);
+                let Some(fix_all) = capabilities.analyzer.fix_all else {
+                    continue;
+                };
+
+                let results = fix_all(FixAllParams {
+                    parse: embedded_node.parse(),
+                    fix_file_mode,
+                    settings: &settings,
+                    should_format,
+                    biome_path: &path,
+                    module_graph: self.module_graph.clone(),
+                    project_layout: self.project_layout.clone(),
+                    document_file_source,
+                    only: only.clone(),
+                    skip: skip.clone(),
+                    rule_categories,
+                    suppression_reason: suppression_reason.clone(),
+                    enabled_rules: enabled_rules.clone(),
+                    plugins: plugins.clone(),
+                })?;
+
+                actions.extend(results.actions);
+                errors += results.errors;
+                skipped_suggested_fixes += results.skipped_suggested_fixes;
+
+                new_snippets.push(UpdateSnippetsNodes {
+                    range: embedded_node.element_range(),
+                    new_code: results.code,
+                });
+            }
+
+            let new_root = update_snippets(parse.clone(), new_snippets)?;
+            parse.set_new_root(new_root);
+        }
+
+        let fix_result = fix_all(FixAllParams {
             parse,
             fix_file_mode,
             settings: &settings,
@@ -1729,39 +1772,16 @@ impl Workspace for WorkspaceServer {
             plugins: plugins.clone(),
         })?;
 
-        for embedded_node in self.get_language_snippets(&path) {
-            let Some(document_file_source) = self.get_source(embedded_node.file_source_index())
-            else {
-                continue;
-            };
-            let capabilities = self.features.get_capabilities(document_file_source);
-            let Some(fix_all) = capabilities.analyzer.fix_all else {
-                continue;
-            };
+        actions.extend(fix_result.actions);
+        errors += fix_result.errors;
+        skipped_suggested_fixes += fix_result.skipped_suggested_fixes;
 
-            let results = fix_all(FixAllParams {
-                parse: embedded_node.parse(),
-                fix_file_mode,
-                settings: &settings,
-                should_format,
-                biome_path: &path,
-                module_graph: self.module_graph.clone(),
-                project_layout: self.project_layout.clone(),
-                document_file_source,
-                only: only.clone(),
-                skip: skip.clone(),
-                rule_categories,
-                suppression_reason: suppression_reason.clone(),
-                enabled_rules: enabled_rules.clone(),
-                plugins: plugins.clone(),
-            })?;
-
-            fix_result.errors += results.errors;
-            fix_result.skipped_suggested_fixes += results.skipped_suggested_fixes;
-            fix_result.actions.extend(results.actions);
-        }
-
-        Ok(fix_result)
+        Ok(FixFileResult {
+            errors,
+            code: fix_result.code,
+            actions,
+            skipped_suggested_fixes,
+        })
     }
 
     fn rename(&self, params: super::RenameParams) -> Result<RenameResult, WorkspaceError> {

@@ -10,23 +10,7 @@ pub struct HtmlFileSource {
     variant: HtmlVariant,
 }
 
-impl HtmlFileSource {
-    pub const fn is_astro(&self) -> bool {
-        matches!(self.variant, HtmlVariant::Astro)
-    }
-
-    pub fn variant(&self) -> &HtmlVariant {
-        &self.variant
-    }
-
-    pub fn text_expressions(&self) -> Option<&HtmlTextExpressions> {
-        if let HtmlVariant::Standard(text_expressions) = &self.variant {
-            Some(text_expressions)
-        } else {
-            None
-        }
-    }
-}
+impl HtmlFileSource {}
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -66,8 +50,32 @@ impl HtmlFileSource {
 
     /// Returns `true` if the current file is `.html` and doesn't support
     /// any text expression capability
-    pub fn is_html(&self) -> bool {
-        self.variant == HtmlVariant::default()
+    pub const fn is_html(&self) -> bool {
+        matches!(self.variant, HtmlVariant::Standard(_))
+    }
+
+    pub const fn is_vue(&self) -> bool {
+        matches!(self.variant, HtmlVariant::Vue)
+    }
+
+    pub const fn is_svelte(&self) -> bool {
+        matches!(self.variant, HtmlVariant::Svelte)
+    }
+
+    pub const fn is_astro(&self) -> bool {
+        matches!(self.variant, HtmlVariant::Astro)
+    }
+
+    pub fn variant(&self) -> &HtmlVariant {
+        &self.variant
+    }
+
+    pub fn text_expressions(&self) -> Option<&HtmlTextExpressions> {
+        if let HtmlVariant::Standard(text_expressions) = &self.variant {
+            Some(text_expressions)
+        } else {
+            None
+        }
     }
 
     pub fn html_with_text_expressions() -> Self {
@@ -94,9 +102,12 @@ impl HtmlFileSource {
     }
 
     /// Try to return the HTML file source corresponding to this file name from well-known files
-    pub fn try_from_well_known(_: &Utf8Path) -> Result<Self, FileSourceError> {
-        // TODO: to be implemented
-        Err(FileSourceError::UnknownFileName)
+    pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
+        let Some(extension) = path.extension() else {
+            return Err(FileSourceError::MissingFileExtension);
+        };
+
+        Self::try_from_extension(extension)
     }
 
     /// Try to return the HTML file source corresponding to this file extension

@@ -726,10 +726,10 @@ impl AnyParse {
         }
     }
 
-    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
+    pub fn into_serde_diagnostics(self, offset: Option<TextSize>) -> Vec<SerdeDiagnostic> {
         match self {
-            Self::Node(node) => node.into_serde_diagnostics(),
-            Self::EmbeddedNode(node) => node.into_serde_diagnostics(),
+            Self::Node(node) => node.into_serde_diagnostics(offset),
+            Self::EmbeddedNode(node) => node.into_serde_diagnostics(offset),
         }
     }
 
@@ -820,6 +820,42 @@ impl AnyParse {
             Self::EmbeddedNode(node) => node.tree(),
         }
     }
+
+    /// Replaces the current [AnyParse::Node] with `new_root`
+    ///
+    /// ## Panic
+    ///
+    /// Panics if the current node is [AnyParse::EmbeddedNode]
+    pub fn set_new_root(&mut self, new_root: SendNode) {
+        match self {
+            AnyParse::Node(node) => {
+                node.root = new_root;
+            }
+            AnyParse::EmbeddedNode(_) => {
+                panic!(
+                    "Can't call set_new_root on an embedded node. Use set_new_embedded_root instead."
+                )
+            }
+        }
+    }
+
+    /// Replaces the current [AnyParse::EmbeddedNode] with `new_root`
+    ///
+    /// ## Panic
+    ///
+    /// Panics if the current node is [AnyParse::Node]
+    pub fn set_new_embedded_root(&mut self, new_root: EmbeddedSendNode) {
+        match self {
+            AnyParse::Node(_) => {
+                panic!(
+                    "Can't call set_new_embedded_root on a non-embedded node. Use set_new_root instead."
+                )
+            }
+            AnyParse::EmbeddedNode(node) => {
+                node.root = new_root;
+            }
+        }
+    }
 }
 
 impl From<SendNode> for AnyParse {
@@ -865,9 +901,15 @@ impl NodeParse {
     }
 
     /// This function transforms diagnostics coming from the parser into serializable diagnostics
-    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
+    pub fn into_serde_diagnostics(self, offset: Option<TextSize>) -> Vec<SerdeDiagnostic> {
         self.diagnostics
             .into_iter()
+            .map(|mut diag| {
+                if let Some(offset) = offset {
+                    diag.set_location_offset(offset)
+                }
+                diag
+            })
             .map(SerdeDiagnostic::new)
             .collect()
     }
@@ -904,9 +946,15 @@ impl EmbeddedNodeParse {
         &self.diagnostics
     }
 
-    pub fn into_serde_diagnostics(self) -> Vec<SerdeDiagnostic> {
+    pub fn into_serde_diagnostics(self, offset: Option<TextSize>) -> Vec<SerdeDiagnostic> {
         self.diagnostics
             .into_iter()
+            .map(|mut diag| {
+                if let Some(offset) = offset {
+                    diag.set_location_offset(offset)
+                }
+                diag
+            })
             .map(SerdeDiagnostic::new)
             .collect()
     }

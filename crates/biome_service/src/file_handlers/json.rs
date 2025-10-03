@@ -353,6 +353,7 @@ impl ExtensionHandler for JsonFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
+                update_snippets: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -536,7 +537,9 @@ fn lint(params: LintParams) -> LintResults {
             process_lint.process_signal(signal)
         });
 
-    let mut diagnostics = params.parse.into_serde_diagnostics();
+    let mut diagnostics = params
+        .parse
+        .into_serde_diagnostics(params.diagnostic_offset);
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
     // malformed configuration
     if params.path.ends_with(ConfigName::biome_json())

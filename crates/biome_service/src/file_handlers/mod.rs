@@ -44,7 +44,7 @@ use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{FileSourceError, NodeCache};
+use biome_rowan::{FileSourceError, NodeCache, SendNode};
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 use grit::GritFileHandler;
@@ -138,6 +138,9 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -649,10 +652,16 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) categories: RuleCategories,
 }
 
+pub(crate) struct UpdateSnippetsNodes {
+    pub(crate) range: TextRange,
+    pub(crate) new_code: String,
+}
+
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
+type UpdateSnippets = fn(AnyParse, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
 
 #[derive(Default)]
 pub struct AnalyzerCapabilities {
@@ -664,6 +673,8 @@ pub struct AnalyzerCapabilities {
     pub(crate) fix_all: Option<FixAll>,
     /// It renames a binding inside a file
     pub(crate) rename: Option<Rename>,
+    /// It updates the snippets contained in the original root
+    pub(crate) update_snippets: Option<UpdateSnippets>,
 }
 
 type Format =
