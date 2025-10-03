@@ -48,6 +48,7 @@ declare_lint_rule! {
     /// - `useDebugValue`
     /// - `useDeferredValue`
     /// - `useTransition`
+    /// - `useEffectEvent`
     ///
     /// If you want to add more hooks to the rule, check the [options](#options).
     ///
@@ -303,6 +304,7 @@ impl Default for HookConfigMaps {
                 true,
             ),
             StableReactHookConfiguration::new("useRef", StableHookResult::Identity, true),
+            StableReactHookConfiguration::new("useEffectEvent", StableHookResult::Identity, true),
         ]);
 
         Self {
