@@ -280,6 +280,10 @@ impl ParseSeparatedList for TsTypeParameterList {
     fn allow_trailing_separating_element(&self) -> bool {
         true
     }
+
+    fn allow_missing_elements(&self) -> bool {
+        false
+    }
 }
 
 // test_err ts type_parameter_modifier
@@ -2274,6 +2278,10 @@ impl ParseSeparatedList for TypeArgumentsList {
     }
 
     fn allow_trailing_separating_element(&self) -> bool {
+        false
+    }
+
+    fn allow_missing_elements(&self) -> bool {
         false
     }
 }
