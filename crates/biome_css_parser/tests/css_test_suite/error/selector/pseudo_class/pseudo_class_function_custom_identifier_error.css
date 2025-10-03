@@ -1,0 +1,6 @@
+:state() {}
+:state(checked {}
+:state checked) {}
+:state(first second) {}
+:state(123) {}
+:state("string") {}

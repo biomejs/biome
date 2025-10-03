@@ -1,0 +1,459 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+:state() {}
+:state(checked {}
+:state checked) {}
+:state(first second) {}
+:state(123) {}
+:state("string") {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@0..1 ":" [] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@1..6 "state" [] [],
+                                    },
+                                    L_PAREN@6..7 "(" [] [],
+                                    R_PAREN@7..9 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@9..10 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@10..11 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@11..13 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@13..18 "state" [] [],
+                                    },
+                                    L_PAREN@18..19 "(" [] [],
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@19..27 "checked" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@27..28 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@28..29 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@29..31 ":" [Newline("\n")] [],
+                                class: CssPseudoClassIdentifier {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@31..36 "state" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@36..37 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@37..44 "checked" [] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
+                        R_PAREN@44..46 ")" [] [Whitespace(" ")],
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@46..47 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@47..48 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@48..50 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@50..55 "state" [] [],
+                                    },
+                                    L_PAREN@55..56 "(" [] [],
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@56..62 "first" [] [Whitespace(" ")],
+                                    },
+                                    CssBogus {
+                                        items: [
+                                            IDENT@62..68 "second" [] [],
+                                        ],
+                                    },
+                                    R_PAREN@68..70 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@70..71 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@71..72 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@72..74 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@74..79 "state" [] [],
+                                    },
+                                    L_PAREN@79..80 "(" [] [],
+                                    CssBogus {
+                                        items: [
+                                            CSS_NUMBER_LITERAL@80..83 "123" [] [],
+                                        ],
+                                    },
+                                    R_PAREN@83..85 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@85..86 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@86..87 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@87..89 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@89..94 "state" [] [],
+                                    },
+                                    L_PAREN@94..95 "(" [] [],
+                                    CssBogus {
+                                        items: [
+                                            CSS_STRING_LITERAL@95..103 "\"string\"" [] [],
+                                        ],
+                                    },
+                                    R_PAREN@103..105 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@105..106 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@106..107 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@107..108 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..108
+  0: (empty)
+  1: CSS_RULE_LIST@0..107
+    0: CSS_QUALIFIED_RULE@0..11
+      0: CSS_SELECTOR_LIST@0..9
+        0: CSS_COMPOUND_SELECTOR@0..9
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..9
+            0: CSS_PSEUDO_CLASS_SELECTOR@0..9
+              0: COLON@0..1 ":" [] []
+              1: CSS_BOGUS_PSEUDO_CLASS@1..9
+                0: CSS_IDENTIFIER@1..6
+                  0: IDENT@1..6 "state" [] []
+                1: L_PAREN@6..7 "(" [] []
+                2: R_PAREN@7..9 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@9..11
+        0: L_CURLY@9..10 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@10..10
+        2: R_CURLY@10..11 "}" [] []
+    1: CSS_QUALIFIED_RULE@11..29
+      0: CSS_SELECTOR_LIST@11..27
+        0: CSS_COMPOUND_SELECTOR@11..27
+          0: CSS_NESTED_SELECTOR_LIST@11..11
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@11..27
+            0: CSS_PSEUDO_CLASS_SELECTOR@11..27
+              0: COLON@11..13 ":" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_CLASS@13..27
+                0: CSS_IDENTIFIER@13..18
+                  0: IDENT@13..18 "state" [] []
+                1: L_PAREN@18..19 "(" [] []
+                2: CSS_CUSTOM_IDENTIFIER@19..27
+                  0: IDENT@19..27 "checked" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@27..29
+        0: L_CURLY@27..28 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@28..28
+        2: R_CURLY@28..29 "}" [] []
+    2: CSS_QUALIFIED_RULE@29..48
+      0: CSS_SELECTOR_LIST@29..46
+        0: CSS_COMPLEX_SELECTOR@29..44
+          0: CSS_COMPOUND_SELECTOR@29..36
+            0: CSS_NESTED_SELECTOR_LIST@29..29
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@29..36
+              0: CSS_PSEUDO_CLASS_SELECTOR@29..36
+                0: COLON@29..31 ":" [Newline("\n")] []
+                1: CSS_PSEUDO_CLASS_IDENTIFIER@31..36
+                  0: CSS_IDENTIFIER@31..36
+                    0: IDENT@31..36 "state" [] []
+          1: CSS_SPACE_LITERAL@36..37 " " [] []
+          2: CSS_COMPOUND_SELECTOR@37..44
+            0: CSS_NESTED_SELECTOR_LIST@37..37
+            1: CSS_TYPE_SELECTOR@37..44
+              0: (empty)
+              1: CSS_IDENTIFIER@37..44
+                0: IDENT@37..44 "checked" [] []
+            2: CSS_SUB_SELECTOR_LIST@44..44
+        1: (empty)
+        2: CSS_BOGUS_SELECTOR@44..46
+          0: R_PAREN@44..46 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@46..48
+        0: L_CURLY@46..47 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@47..47
+        2: R_CURLY@47..48 "}" [] []
+    3: CSS_QUALIFIED_RULE@48..72
+      0: CSS_SELECTOR_LIST@48..70
+        0: CSS_COMPOUND_SELECTOR@48..70
+          0: CSS_NESTED_SELECTOR_LIST@48..48
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@48..70
+            0: CSS_PSEUDO_CLASS_SELECTOR@48..70
+              0: COLON@48..50 ":" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_CLASS@50..70
+                0: CSS_IDENTIFIER@50..55
+                  0: IDENT@50..55 "state" [] []
+                1: L_PAREN@55..56 "(" [] []
+                2: CSS_CUSTOM_IDENTIFIER@56..62
+                  0: IDENT@56..62 "first" [] [Whitespace(" ")]
+                3: CSS_BOGUS@62..68
+                  0: IDENT@62..68 "second" [] []
+                4: R_PAREN@68..70 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@70..72
+        0: L_CURLY@70..71 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@71..71
+        2: R_CURLY@71..72 "}" [] []
+    4: CSS_QUALIFIED_RULE@72..87
+      0: CSS_SELECTOR_LIST@72..85
+        0: CSS_COMPOUND_SELECTOR@72..85
+          0: CSS_NESTED_SELECTOR_LIST@72..72
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@72..85
+            0: CSS_PSEUDO_CLASS_SELECTOR@72..85
+              0: COLON@72..74 ":" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_CLASS@74..85
+                0: CSS_IDENTIFIER@74..79
+                  0: IDENT@74..79 "state" [] []
+                1: L_PAREN@79..80 "(" [] []
+                2: CSS_BOGUS@80..83
+                  0: CSS_NUMBER_LITERAL@80..83 "123" [] []
+                3: R_PAREN@83..85 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@85..87
+        0: L_CURLY@85..86 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@86..86
+        2: R_CURLY@86..87 "}" [] []
+    5: CSS_QUALIFIED_RULE@87..107
+      0: CSS_SELECTOR_LIST@87..105
+        0: CSS_COMPOUND_SELECTOR@87..105
+          0: CSS_NESTED_SELECTOR_LIST@87..87
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@87..105
+            0: CSS_PSEUDO_CLASS_SELECTOR@87..105
+              0: COLON@87..89 ":" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_CLASS@89..105
+                0: CSS_IDENTIFIER@89..94
+                  0: IDENT@89..94 "state" [] []
+                1: L_PAREN@94..95 "(" [] []
+                2: CSS_BOGUS@95..103
+                  0: CSS_STRING_LITERAL@95..103 "\"string\"" [] []
+                3: R_PAREN@103..105 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@105..107
+        0: L_CURLY@105..106 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@106..106
+        2: R_CURLY@106..107 "}" [] []
+  2: EOF@107..108 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+pseudo_class_function_custom_identifier_error.css:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ')'.
+  
+  > 1 │ :state() {}
+      │        ^
+    2 │ :state(checked {}
+    3 │ :state checked) {}
+  
+  i Expected an identifier here.
+  
+  > 1 │ :state() {}
+      │        ^
+    2 │ :state(checked {}
+    3 │ :state checked) {}
+  
+pseudo_class_function_custom_identifier_error.css:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+    1 │ :state() {}
+  > 2 │ :state(checked {}
+      │                ^
+    3 │ :state checked) {}
+    4 │ :state(first second) {}
+  
+  i Remove {
+  
+pseudo_class_function_custom_identifier_error.css:3:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    1 │ :state() {}
+    2 │ :state(checked {}
+  > 3 │ :state checked) {}
+      │               ^
+    4 │ :state(first second) {}
+    5 │ :state(123) {}
+  
+  i Remove )
+  
+pseudo_class_function_custom_identifier_error.css:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'first second'.
+  
+    2 │ :state(checked {}
+    3 │ :state checked) {}
+  > 4 │ :state(first second) {}
+      │        ^^^^^^^^^^^^
+    5 │ :state(123) {}
+    6 │ :state("string") {}
+  
+  i Expected an identifier here.
+  
+    2 │ :state(checked {}
+    3 │ :state checked) {}
+  > 4 │ :state(first second) {}
+      │        ^^^^^^^^^^^^
+    5 │ :state(123) {}
+    6 │ :state("string") {}
+  
+pseudo_class_function_custom_identifier_error.css:5:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '123'.
+  
+    3 │ :state checked) {}
+    4 │ :state(first second) {}
+  > 5 │ :state(123) {}
+      │        ^^^
+    6 │ :state("string") {}
+    7 │ 
+  
+  i Expected an identifier here.
+  
+    3 │ :state checked) {}
+    4 │ :state(first second) {}
+  > 5 │ :state(123) {}
+      │        ^^^
+    6 │ :state("string") {}
+    7 │ 
+  
+pseudo_class_function_custom_identifier_error.css:6:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '"string"'.
+  
+    4 │ :state(first second) {}
+    5 │ :state(123) {}
+  > 6 │ :state("string") {}
+      │        ^^^^^^^^
+    7 │ 
+  
+  i Expected an identifier here.
+  
+    4 │ :state(first second) {}
+    5 │ :state(123) {}
+  > 6 │ :state("string") {}
+      │        ^^^^^^^^
+    7 │ 
+  
+```
