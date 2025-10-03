@@ -1,6 +1,9 @@
-:state() {}
-:state(checked {}
-:state checked) {}
-:state(first second) {}
-:state(123) {}
-:state("string") {}
+custom-selector:state() {}
+custom-selector:state(checked {}
+custom-selector:state checked) {}
+custom-selector:state(first second) {}
+custom-selector:state(123) {}
+custom-selector:state("string") {}
+:host(:state(first second))::before {}
+:host(:state(123))::before {}
+:host(:state("string"))::before {}

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 211
 info: css/pseudo/pseudo_class_function_state.css
 ---
 # Input
@@ -37,17 +38,17 @@ Quote style: Double Quotes
 -----
 
 ```css
-custom-selector:state(checked) {
-}
-custom-selector:state(checked) {
-}
-custom-selector:state(checked) {
-}
-custom-selector:state(checked) {
-}
+custom-selector:state(checked) {}
+custom-selector:state( checked) {}
+custom-selector:state(    checked  ) {}
+custom-selector:state(
+checked
+) {}
 
-:host(:state(checked))::before {
-}
-:host(:state(checked))::before {
-}
+:host(
+:state(      checked
+))::before {  }
+:host(:state(      checked
+)
+			)::before {  }
 ```
