@@ -1762,6 +1762,10 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
 	/**
+	 * Succinct description of the rule.
+	 */
+	useSpread?: RuleConfiguration_for_UseSpreadOptions;
+	/**
 	 * Enforce multi-word component names in Vue components.
 	 */
 	useVueMultiWordComponentNames?: RuleConfiguration_for_UseVueMultiWordComponentNamesOptions;
@@ -3101,6 +3105,9 @@ export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 export type RuleFixConfiguration_for_UseSortedClassesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSortedClassesOptions;
+export type RuleConfiguration_for_UseSpreadOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseSpreadOptions;
 export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseVueMultiWordComponentNamesOptions;
@@ -5759,6 +5766,16 @@ export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	 */
 	options: UseSortedClassesOptions;
 }
+export interface RuleWithOptions_for_UseSpreadOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseSpreadOptions;
+}
 export interface RuleWithOptions_for_UseVueMultiWordComponentNamesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8253,6 +8270,7 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export interface UseSpreadOptions {}
 export interface UseVueMultiWordComponentNamesOptions {
 	/**
 	 * Component names to ignore (allowed to be single-word).
@@ -8982,6 +9000,7 @@ export type Category =
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useSpread"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
