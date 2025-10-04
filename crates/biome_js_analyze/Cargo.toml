@@ -53,7 +53,7 @@ biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
 biome_plugin_loader = { workspace = true }
 biome_service       = { workspace = true }
 biome_test_utils    = { path = "../biome_test_utils" }
-criterion           = { package = "codspeed-criterion-compat", version = "=3.0.3" }
+criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta               = { workspace = true, features = ["glob"] }
 tests_macros        = { path = "../tests_macros" }
 

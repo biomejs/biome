@@ -32,7 +32,7 @@ serde                    = { workspace = true }
 static_assertions        = { workspace = true }
 
 [dev-dependencies]
-divan        = { package = "codspeed-divan-compat", version = "*" }
+divan        = { package = "codspeed-divan-compat", version = "=3.0.3" }
 insta        = { workspace = true }
 tests_macros = { path = "../tests_macros" }
 

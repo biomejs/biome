@@ -28,7 +28,7 @@ rustc-hash         = { workspace = true }
 biome_json_parser = { path = "../biome_json_parser" }
 biome_test_utils  = { path = "../biome_test_utils" }
 camino            = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "=3.0.3" }
+criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true, features = ["glob"] }
 tests_macros      = { path = "../tests_macros" }
 

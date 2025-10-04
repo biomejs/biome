@@ -27,7 +27,7 @@ name = "serde"
 test = true
 
 [dependencies]
-backtrace                    = "0.3.75"
+backtrace                    = "0.3.76"
 biome_console                = { workspace = true, features = ["serde"] }
 biome_diagnostics_categories = { workspace = true, features = ["serde"] }
 biome_diagnostics_macros     = { workspace = true }
@@ -53,7 +53,7 @@ std    = []
 [dev-dependencies]
 insta      = { workspace = true }
 serde_json = { workspace = true }
-trybuild   = "=1.0.106"
+trybuild   = "=1.0.111"
 
 [lints]
 workspace = true
