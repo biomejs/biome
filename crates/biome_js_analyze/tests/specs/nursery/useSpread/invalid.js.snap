@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+
+foo.apply(null, args);
+foo.apply(undefined, args);
+obj.foo.apply(obj, args);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the spread operator instead of .apply().
+  
+  > 2 │ foo.apply(null, args);
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    3 │ foo.apply(undefined, args);
+    4 │ obj.foo.apply(obj, args);
+  
+  i Safe fix: Use the spread operator.
+  
+    1 1 │   
+    2   │ - foo.apply(null,·args);
+      2 │ + foo(...args);
+    3 3 │   foo.apply(undefined, args);
+    4 4 │   obj.foo.apply(obj, args);
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the spread operator instead of .apply().
+  
+    2 │ foo.apply(null, args);
+  > 3 │ foo.apply(undefined, args);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ obj.foo.apply(obj, args);
+    5 │ 
+  
+  i Safe fix: Use the spread operator.
+  
+    1 1 │   
+    2 2 │   foo.apply(null, args);
+    3   │ - foo.apply(undefined,·args);
+      3 │ + foo(...args);
+    4 4 │   obj.foo.apply(obj, args);
+    5 5 │   
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use the spread operator instead of .apply().
+  
+    2 │ foo.apply(null, args);
+    3 │ foo.apply(undefined, args);
+  > 4 │ obj.foo.apply(obj, args);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Safe fix: Use the spread operator.
+  
+    2 2 │   foo.apply(null, args);
+    3 3 │   foo.apply(undefined, args);
+    4   │ - obj.foo.apply(obj,·args);
+      4 │ + obj.foo(...args);
+    5 5 │   
+  
+
+```
