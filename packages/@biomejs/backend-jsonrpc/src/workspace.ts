@@ -1726,6 +1726,10 @@ export interface Nursery {
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
 	/**
+	 * Require the @deprecated directive to specify a deletion date.
+	 */
+	useDeprecatedDate?: RuleConfiguration_for_UseDeprecatedDateOptions;
+	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
 	useExhaustiveSwitchCases?: RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions;
@@ -3074,6 +3078,9 @@ export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
 export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
+export type RuleConfiguration_for_UseDeprecatedDateOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseDeprecatedDateOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -5661,6 +5668,16 @@ export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	 */
 	options: UseConsistentTypeDefinitionsOptions;
 }
+export interface RuleWithOptions_for_UseDeprecatedDateOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseDeprecatedDateOptions;
+}
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -8230,6 +8247,9 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
 }
+export interface UseDeprecatedDateOptions {
+	argumentName?: string;
+}
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
 export type UseImageSizeOptions = null;
@@ -8970,6 +8990,7 @@ export type Category =
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTypeDefinitions"
+	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"

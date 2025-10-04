@@ -273,6 +273,7 @@ pub mod use_date_now;
 pub mod use_default_parameter_last;
 pub mod use_default_switch_clause;
 pub mod use_default_switch_clause_last;
+pub mod use_deprecated_date;
 pub mod use_deprecated_reason;
 pub mod use_enum_initializers;
 pub mod use_error_message;
