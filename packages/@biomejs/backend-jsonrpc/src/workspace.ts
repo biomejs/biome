@@ -1762,9 +1762,9 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce the use of the spread operator over .apply().
 	 */
-	useSpread?: RuleConfiguration_for_UseSpreadOptions;
+	useSpread?: RuleFixConfiguration_for_UseSpreadOptions;
 	/**
 	 * Enforce multi-word component names in Vue components.
 	 */
@@ -3105,9 +3105,9 @@ export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 export type RuleFixConfiguration_for_UseSortedClassesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSortedClassesOptions;
-export type RuleConfiguration_for_UseSpreadOptions =
+export type RuleFixConfiguration_for_UseSpreadOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseSpreadOptions;
+	| RuleWithFixOptions_for_UseSpreadOptions;
 export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseVueMultiWordComponentNamesOptions;
@@ -5766,7 +5766,11 @@ export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	 */
 	options: UseSortedClassesOptions;
 }
-export interface RuleWithOptions_for_UseSpreadOptions {
+export interface RuleWithFixOptions_for_UseSpreadOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
