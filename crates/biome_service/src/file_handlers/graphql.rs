@@ -94,13 +94,27 @@ impl From<GraphqlAssistConfiguration> for GraphqlAssistSettings {
 impl ServiceLanguage for GraphqlLanguage {
     type FormatterSettings = GraphqlFormatterSettings;
     type LinterSettings = GraphqlLinterSettings;
+    type AssistSettings = GraphqlAssistSettings;
     type FormatOptions = GraphqlFormatOptions;
     type ParserSettings = ();
+    type ParserOptions = ();
+
     type EnvironmentSettings = ();
-    type AssistSettings = GraphqlAssistSettings;
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.graphql
+    }
+
+    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
+        None
+    }
+
+    fn resolve_parse_options(
+        _overrides: &OverrideSettings,
+        _language: &Self::ParserSettings,
+        _path: &BiomePath,
+        _file_source: &DocumentFileSource,
+    ) -> Self::ParserOptions {
     }
 
     fn resolve_format_options(
@@ -163,6 +177,33 @@ impl ServiceLanguage for GraphqlLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
+    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
+        let overrides_activity =
+            settings
+                .override_settings
+                .patterns
+                .iter()
+                .rev()
+                .find_map(|pattern| {
+                    check_override_feature_activity(
+                        pattern.languages.graphql.linter.enabled,
+                        pattern.linter.enabled,
+                    )
+                    .filter(|_| {
+                        // Then check whether the path satisfies
+                        pattern.is_file_included(path)
+                    })
+                });
+
+        overrides_activity
+            .or(check_feature_activity(
+                settings.languages.graphql.linter.enabled,
+                settings.linter.enabled,
+            ))
+            .unwrap_or_default()
+            .into()
+    }
+
     fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
         let overrides_activity =
             settings
@@ -216,37 +257,6 @@ impl ServiceLanguage for GraphqlLanguage {
             .unwrap_or_default()
             .into()
     }
-
-    fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
-        let overrides_activity =
-            settings
-                .override_settings
-                .patterns
-                .iter()
-                .rev()
-                .find_map(|pattern| {
-                    check_override_feature_activity(
-                        pattern.languages.graphql.linter.enabled,
-                        pattern.linter.enabled,
-                    )
-                    .filter(|_| {
-                        // Then check whether the path satisfies
-                        pattern.is_file_included(path)
-                    })
-                });
-
-        overrides_activity
-            .or(check_feature_activity(
-                settings.languages.graphql.linter.enabled,
-                settings.linter.enabled,
-            ))
-            .unwrap_or_default()
-            .into()
-    }
-
-    fn resolve_environment(_settings: &Settings) -> Option<&Self::EnvironmentSettings> {
-        None
-    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -261,7 +271,10 @@ impl ExtensionHandler for GraphqlFileHandler {
                 linter: Some(linter_enabled),
                 search: Some(search_enabled),
             },
-            parser: ParserCapabilities { parse: Some(parse) },
+            parser: ParserCapabilities {
+                parse: Some(parse),
+                parse_embedded_nodes: None,
+            },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
@@ -280,6 +293,7 @@ impl ExtensionHandler for GraphqlFileHandler {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
+                format_embedded: None,
             },
             search: SearchCapabilities { search: None },
         }
@@ -426,7 +440,7 @@ fn lint(params: LintParams) -> LintResults {
             .with_only(&params.only)
             .with_skip(&params.skip)
             .with_path(params.path.as_path())
-            .with_enabled_rules(&params.enabled_rules)
+            .with_enabled_selectors(&params.enabled_selectors)
             .with_project_layout(params.project_layout.clone())
             .finish();
 
@@ -443,7 +457,7 @@ fn lint(params: LintParams) -> LintResults {
         process_lint.process_signal(signal)
     });
 
-    process_lint.into_result(params.parse.into_diagnostics(), analyze_diagnostics)
+    process_lint.into_result(params.parse.into_serde_diagnostics(), analyze_diagnostics)
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
@@ -484,7 +498,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_only(&only)
             .with_skip(&skip)
             .with_path(path.as_path())
-            .with_enabled_rules(&rules)
+            .with_enabled_selectors(&rules)
             .with_project_layout(project_layout)
             .finish();
 
@@ -530,7 +544,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             .with_only(&params.only)
             .with_skip(&params.skip)
             .with_path(params.biome_path.as_path())
-            .with_enabled_rules(&params.enabled_rules)
+            .with_enabled_selectors(&params.enabled_rules)
             .with_project_layout(params.project_layout)
             .finish();
 

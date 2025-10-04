@@ -1,0 +1,49 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@source "../node_modules/@my-company/ui-lib";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwSourceAtRule {
+                source_token: SOURCE_KW@1..8 "source" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@8..44 "\"../node_modules/@my-company/ui-lib\"" [] [],
+                },
+                semicolon_token: SEMICOLON@44..45 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@45..46 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..46
+  0: (empty)
+  1: CSS_RULE_LIST@0..45
+    0: CSS_AT_RULE@0..45
+      0: AT@0..1 "@" [] []
+      1: TW_SOURCE_AT_RULE@1..45
+        0: SOURCE_KW@1..8 "source" [] [Whitespace(" ")]
+        1: CSS_STRING@8..44
+          0: CSS_STRING_LITERAL@8..44 "\"../node_modules/@my-company/ui-lib\"" [] []
+        2: SEMICOLON@44..45 ";" [] []
+  2: EOF@45..46 "" [Newline("\n")] []
+
+```

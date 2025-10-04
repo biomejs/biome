@@ -23,12 +23,6 @@ const hello  :      string      = "world";
 </script>
 <div></div>"#;
 
-const SVELTE_TS_CONTEXT_MODULE_FILE_FORMATTED: &str = r#"<script context="module" lang="ts">
-import Button from "./components/Button.svelte";
-const hello: string = "world";
-</script>
-<div></div>"#;
-
 const SVELTE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED: &str =
     "<script>\r\n  const a    = \"b\";\r\n</script>\r\n<div></div>";
 
@@ -175,12 +169,6 @@ fn format_svelte_ts_context_module_files_write() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(
-        &fs,
-        svelte_file_path,
-        SVELTE_TS_CONTEXT_MODULE_FILE_FORMATTED,
-    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

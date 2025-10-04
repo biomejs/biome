@@ -7,7 +7,7 @@ use biome_analyze::{
     ActionCategory, RuleCategoriesBuilder, SUPPRESSION_INLINE_ACTION_CATEGORY,
     SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY, SourceActionKind,
 };
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::{AnalyzerSelector, RuleSelector};
 use biome_diagnostics::Error;
 use biome_fs::BiomePath;
 use biome_line_index::LineIndex;
@@ -158,6 +158,7 @@ pub(crate) fn code_actions(
         enabled_rules: filters
             .iter()
             .filter_map(|filter| RuleSelector::from_lsp_filter(filter))
+            .map(AnalyzerSelector::from)
             .collect(),
         categories: categories.build(),
     }) {

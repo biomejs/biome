@@ -1,4 +1,5 @@
 #![expect(clippy::mutable_key_type)]
+
 use super::tag::Tag;
 use crate::format_element::tag::DedentMode;
 use crate::prelude::tag::GroupMode;
@@ -19,6 +20,10 @@ pub struct Document {
 }
 
 impl Document {
+    pub fn new(elements: Vec<FormatElement>) -> Self {
+        Self { elements }
+    }
+
     /// Sets [`expand`](tag::Group::expand) to [`GroupMode::Propagated`] if the group contains any of:
     /// * a group with [`expand`](tag::Group::expand) set to [GroupMode::Propagated] or [GroupMode::Expand].
     /// * a non-soft [line break](FormatElement::Line) with mode [LineMode::Hard], [LineMode::Empty], or [LineMode::Literal].
@@ -131,6 +136,61 @@ impl Document {
         let mut enclosing: Vec<Enclosing> = Vec::new();
         let mut interned = FxHashMap::default();
         propagate_expands(self, &mut enclosing, &mut interned);
+    }
+
+    pub fn into_elements(self) -> Vec<FormatElement> {
+        self.elements
+    }
+
+    pub fn as_elements(&self) -> &[FormatElement] {
+        &self.elements
+    }
+
+    /// Transforms the document by visiting every element, optionally replacing
+    /// them.
+    ///
+    /// Accepts a `visitor` that will be called to visit each element, and which
+    /// may optionally return a replacement.
+    ///
+    /// Elements that contain nested elements, such as [FormatElement::Interned]
+    /// and [FormatElement::BestFitting], have the visitor called on their
+    /// nested elements, but not on the elements themselves.
+    pub(crate) fn transform(
+        &mut self,
+        mut visitor: impl FnMut(&FormatElement) -> Option<FormatElement>,
+    ) {
+        transform_elements(&mut self.elements, &mut visitor);
+    }
+}
+
+/// Iterates over each of the given `elements` and optionally replaces each
+/// element with a new one.
+///
+/// Nested data structures such as [FormatElement::Interned] and
+/// [FormatElement::BestFitting] use recursion and call [transform_elements()]
+/// again. The visitor is *not* invoked on these elements.
+fn transform_elements(
+    elements: &mut [FormatElement],
+    visitor: &mut impl FnMut(&FormatElement) -> Option<FormatElement>,
+) {
+    for element in elements {
+        match element {
+            FormatElement::Interned(interned) => {
+                let mut nested_elements = interned.deref().to_vec();
+                transform_elements(&mut nested_elements, visitor);
+                *element = FormatElement::Interned(Interned::new(nested_elements));
+            }
+            FormatElement::BestFitting(best_fitting) => {
+                for variant in best_fitting.variants_mut() {
+                    transform_elements(variant, visitor);
+                }
+            }
+            _ => {
+                if let Some(replacement) = visitor(element) {
+                    *element = replacement;
+                }
+            }
+        }
     }
 }
 
@@ -530,6 +590,9 @@ impl Format<IrFormatContext> for &[FormatElement] {
                             write!(f, [text("fill(")])?;
                         }
 
+                        StartEmbedded(_) => {
+                            write!(f, [text("embedded(")])?;
+                        }
                         StartEntry => {
                             // handled after the match for all start tags
                         }
@@ -544,7 +607,8 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         | EndGroup
                         | EndLineSuffix
                         | EndDedent(_)
-                        | EndVerbatim => {
+                        | EndVerbatim
+                        | EndEmbedded => {
                             write!(f, [ContentArrayEnd, text(")")])?;
                         }
                     };

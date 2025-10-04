@@ -1,6 +1,6 @@
 ---
 source: crates/biome_grit_patterns/tests/spec_tests.rs
-expression: invalidQuery
+expression: missingQuote
 ---
 ErrorSnapshotResult {
     diagnostics: [
@@ -21,6 +21,7 @@ ErrorSnapshotResult {
                     ),
                 ],
             },
+            advice_offset: None,
         },
     ],
 }

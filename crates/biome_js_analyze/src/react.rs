@@ -121,7 +121,13 @@ pub enum ReactLibrary {
 impl ReactLibrary {
     pub const fn import_names(self) -> &'static [&'static str] {
         match self {
-            Self::React => &["react", "preact/compat", "preact/hooks"],
+            Self::React => &[
+                "react",
+                "preact/compat",
+                "preact/hooks",
+                "@rbxts/react",
+                "@rbxts-js/react",
+            ],
             Self::ReactDOM => &["react-dom"],
         }
     }

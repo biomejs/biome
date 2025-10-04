@@ -77,8 +77,8 @@ pub struct JsonFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to JSON (and its super languages) files.
-    #[bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr"))]
+    /// The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+    #[bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr|auto"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
@@ -134,7 +134,7 @@ pub struct JsonLinterConfiguration {
 }
 
 pub type JsonAssistEnabled = Bool<true>;
-/// Linter options specific to the JSON linter
+/// Assist options specific to the JSON linter
 #[derive(
     Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
 )]

@@ -497,7 +497,6 @@ dependencies = [
  "rustc-hash 2.1.1",
  "schemars",
  "serde",
- "tracing",
  "unicode-width 0.1.12",
 ]
 
@@ -814,6 +813,8 @@ dependencies = [
 name = "biome_html_syntax"
 version = "0.5.7"
 dependencies = [
+ "biome_html_factory",
+ "biome_html_parser",
  "biome_rowan",
  "biome_string_case",
  "camino",
@@ -1449,6 +1450,24 @@ dependencies = [
  "schemars",
  "serde",
  "smallvec",
+]
+
+[[package]]
+name = "biome_ruledoc_utils"
+version = "0.0.1"
+dependencies = [
+ "anyhow",
+ "biome_analyze",
+ "biome_configuration",
+ "biome_fs",
+ "biome_js_analyze",
+ "biome_js_parser",
+ "biome_json_parser",
+ "biome_module_graph",
+ "biome_project_layout",
+ "biome_service",
+ "biome_test_utils",
+ "camino",
 ]
 
 [[package]]
@@ -4037,8 +4056,8 @@ dependencies = [
  "biome_module_graph",
  "biome_project_layout",
  "biome_rowan",
+ "biome_ruledoc_utils",
  "biome_service",
- "biome_test_utils",
  "camino",
  "pulldown-cmark",
 ]

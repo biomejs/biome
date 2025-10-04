@@ -139,23 +139,9 @@ export type Extends = string[] | string;
  */
 export interface FilesConfiguration {
 	/**
-	* Set of file and folder names that should be unconditionally ignored by Biome's scanner.
+	* **Deprecated:** Please use _force-ignore syntax_ in `files.includes` instead: https://biomejs.dev/reference/configuration/#filesincludes
 
-Biome maintains an internal list of default ignore entries, which is based on user feedback and which may change in any release. This setting allows overriding this internal list completely.
-
-This is considered an advanced feature that users _should_ not need to tweak themselves, but they can as a last resort. This setting can only be configured in root configurations, and is ignored in nested configs.
-
-Entries must be file or folder *names*. Specific paths and globs are not supported.
-
-Examples where this may be useful:
-
-```jsonc { "files": { "experimentalScannerIgnores": [ // You almost certainly don't want to scan your `.git` // folder, which is why it's already ignored by default: ".git",
-
-// But the scanner does scan `node_modules` by default. If // you *really* don't want this, you can ignore it like // this: "node_modules",
-
-// But it's probably better to ignore a specific dependency. // For instance, one that happens to be particularly slow to // scan: "RedisCommander.d.ts", ], } } ```
-
-Please be aware that rules relying on the module graph or type inference information may be negatively affected if dependencies of your project aren't (fully) scanned. 
+Set of file and folder names that should be unconditionally ignored by Biome's scanner. 
 	 */
 	experimentalScannerIgnores?: string[];
 	/**
@@ -258,10 +244,15 @@ export interface GritConfiguration {
  * Options applied to HTML files
  */
 export interface HtmlConfiguration {
+	assist?: HtmlAssistConfiguration;
 	/**
 	 * HTML formatter options
 	 */
 	formatter?: HtmlFormatterConfiguration;
+	/**
+	 * HTML linter options
+	 */
+	linter?: HtmlLinterConfiguration;
 	/**
 	 * HTML parsing options
 	 */
@@ -404,7 +395,7 @@ export interface CssFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to CSS (and its super languages) files.
+	 * The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -437,6 +428,10 @@ export interface CssParserConfiguration {
 	 * Enables parsing of CSS Modules specific features.
 	 */
 	cssModules?: Bool;
+	/**
+	 * Enables parsing of Tailwind CSS 4.0 directives and functions.
+	 */
+	tailwindDirectives?: Bool;
 }
 export type MaxSize = number;
 export type AttributePosition = "auto" | "multiline";
@@ -448,7 +443,7 @@ export type BracketSpacing = boolean;
 export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
-export type LineEnding = "lf" | "crlf" | "cr";
+export type LineEnding = "lf" | "crlf" | "cr" | "auto";
 /**
 	* Validated value for the `line_width` formatter options
 
@@ -485,7 +480,7 @@ export interface GraphqlFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to GraphQL files.
+	 * The type of line ending applied to GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -541,6 +536,15 @@ export interface GritLinterConfiguration {
 	enabled?: Bool;
 }
 /**
+ * Options that changes how the HTML assist behaves
+ */
+export interface HtmlAssistConfiguration {
+	/**
+	 * Control the assist for HTML (and its super languages) files.
+	 */
+	enabled?: Bool;
+}
+/**
  * Options that changes how the HTML formatter behaves
  */
 export interface HtmlFormatterConfiguration {
@@ -569,7 +573,7 @@ export interface HtmlFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to HTML (and its super languages) files.
+	 * The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -584,6 +588,15 @@ export interface HtmlFormatterConfiguration {
 	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
 	 */
 	whitespaceSensitivity?: WhitespaceSensitivity;
+}
+/**
+ * Options that changes how the HTML linter behaves
+ */
+export interface HtmlLinterConfiguration {
+	/**
+	 * Control the linter for HTML (and its super languages) files.
+	 */
+	enabled?: Bool;
 }
 /**
  * Options that changes how the HTML parser behaves
@@ -644,7 +657,7 @@ export interface JsFormatterConfiguration {
 	 */
 	jsxQuoteStyle?: QuoteStyle;
 	/**
-	 * The type of line ending applied to JavaScript (and its super languages) files.
+	 * The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -707,7 +720,7 @@ These decorators belong to an old proposal, and they are subject to change.
 	unsafeParameterDecoratorsEnabled?: Bool;
 }
 /**
- * Linter options specific to the JSON linter
+ * Assist options specific to the JSON linter
  */
 export interface JsonAssistConfiguration {
 	/**
@@ -737,7 +750,7 @@ export interface JsonFormatterConfiguration {
 	 */
 	indentWidth?: IndentWidth;
 	/**
-	 * The type of line ending applied to JSON (and its super languages) files.
+	 * The type of line ending applied to JSON (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
 	 */
 	lineEnding?: LineEnding;
 	/**
@@ -9445,7 +9458,9 @@ export type JsonFileVariant = "standard" | "jsonc";
 /**
 	* The style of CSS contained in the file.
 
-Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
+Currently, Biome aims to be compatible with the latest Recommendation level standards.
+
+It also supports Tailwind CSS syntax additions, when the parser option is enabled. 
 	 */
 export type CssVariant = "standard";
 /**
@@ -9578,18 +9593,17 @@ export interface PullDiagnosticsParams {
 	/**
 	 * Rules to apply on top of the configuration
 	 */
-	enabledRules?: RuleCode[];
-	only?: RuleCode[];
+	enabledRules?: Selector[];
+	only?: Selector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	/**
 	 * When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
 	 */
 	pullCodeActions: boolean;
-	skip?: RuleCode[];
+	skip?: Selector[];
 }
 export type RuleCategories = RuleCategory[];
-export type RuleCode = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -9598,12 +9612,12 @@ export interface PullDiagnosticsResult {
 }
 export interface PullActionsParams {
 	categories?: RuleCategories;
-	enabledRules?: RuleCode[];
-	only?: RuleCode[];
+	enabledRules?: Selector[];
+	only?: Selector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	range?: TextRange;
-	skip?: RuleCode[];
+	skip?: Selector[];
 	suppressionReason?: string;
 }
 export interface PullActionsResult {
@@ -9698,14 +9712,14 @@ export interface FixFileParams {
 	/**
 	 * Rules to apply to the file
 	 */
-	enabledRules?: RuleCode[];
+	enabledRules?: Selector[];
 	fixFileMode: FixFileMode;
-	only?: RuleCode[];
+	only?: Selector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	ruleCategories: RuleCategories;
 	shouldFormat: boolean;
-	skip?: RuleCode[];
+	skip?: Selector[];
 	suppressionReason?: string;
 }
 /**

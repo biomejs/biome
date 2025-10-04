@@ -19,6 +19,9 @@ use xtask_codegen::{to_capitalized, update};
 #[derive(Default)]
 struct LintRulesVisitor {
     groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
+    /// Mapping from domain to group/rule
+    /// e.g next => (<group>/<rule>, <group>/<rule>)
+    domains: BTreeMap<&'static str, BTreeSet<(&'static str, &'static str)>>,
 }
 
 impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
@@ -36,6 +39,13 @@ impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
             .entry(<R::Group as RuleGroup>::NAME)
             .or_default()
             .insert(R::METADATA.name, R::METADATA);
+
+        for domain in R::METADATA.domains.iter() {
+            self.domains
+                .entry(domain.as_str())
+                .or_default()
+                .insert((<R::Group as RuleGroup>::NAME, R::METADATA.name));
+        }
     }
 }
 
@@ -264,6 +274,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         &mode,
         RuleCategory::Action,
     )?;
+
+    generate_for_domains(lint_visitor.domains, &mode)?;
 
     Ok(())
 }
@@ -1102,4 +1114,80 @@ fn generate_group_struct(
             }
         }
     }
+}
+
+fn generate_for_domains(
+    domains: BTreeMap<&'static str, BTreeSet<(&'static str, &'static str)>>,
+    mode: &Mode,
+) -> Result<()> {
+    let destination =
+        project_root().join("crates/biome_configuration/src/generated/domain_selector.rs");
+
+    let mut as_rule_filters_arms = vec![];
+    let mut match_rule_arms = vec![];
+    let mut lazy_locks = vec![];
+    for (domain_name, data) in domains {
+        let vector = data
+            .iter()
+            .map(|(group, rules)| {
+                quote! {
+                    RuleFilter::Rule(#group, #rules)
+                }
+            })
+            .collect::<Vec<_>>();
+        let domain_filters = Ident::new(
+            &format!("{}_FILTERS", domain_name.to_ascii_uppercase()),
+            Span::call_site(),
+        );
+
+        lazy_locks.push(quote! {
+            static #domain_filters: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+                vec![
+                    #( #vector ),*
+                ]
+            });
+        });
+
+        let domain_as_string = Literal::string(domain_name);
+        as_rule_filters_arms.push(quote! {
+            #domain_as_string => #domain_filters.clone()
+        });
+        match_rule_arms.push(quote! {
+            #domain_as_string => #domain_filters.iter().any(|filter| filter.match_rule::<R>())
+        });
+    }
+
+    let stream = quote! {
+        use std::sync::LazyLock;
+        use crate::analyzer::DomainSelector;
+        use biome_analyze::{Rule, RuleFilter};
+
+        #( #lazy_locks )*
+
+        impl DomainSelector {
+            pub fn as_rule_filters(&self) -> Vec<RuleFilter<'static>> {
+                match self.0 {
+                    #( #as_rule_filters_arms ),*,
+                    _ => unreachable!(
+                        "DomainFilter::as_rule_filters: domain {} not found",
+                        self.0
+                    )
+                }
+            }
+
+            pub fn match_rule<R>(&self) -> bool
+                where
+                    R: Rule,
+            {
+                match self.0 {
+                    #( #match_rule_arms ),*,
+                    _ => false,
+                }
+            }
+        }
+    };
+
+    update(destination.as_path(), &xtask::reformat(stream)?, mode)?;
+
+    Ok(())
 }

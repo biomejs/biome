@@ -90,3 +90,187 @@ fn should_not_error_when_interpolation_is_enabled() {
         result,
     ));
 }
+
+#[test]
+fn should_format_indent_embedded_languages() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let html_file = Utf8Path::new("file.html");
+    fs.insert(
+        html_file.into(),
+        r#"<script>function lorem() { return "ipsum" }</script>
+<style>#id .class div > p { background-color: red; align: center; padding: 0; } </style>
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true,
+            "indentScriptAndStyle": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_format_indent_embedded_languages",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_format_indent_embedded_languages_with_language_options() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let html_file = Utf8Path::new("file.html");
+    fs.insert(
+        html_file.into(),
+        r#"<script>function lorem() { return "ipsum" }</script>
+<style>#id .class div > p { background-color: red; align: center; padding: 0; } </style>
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true,
+            "indentScriptAndStyle": true
+        }
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single"
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_format_indent_embedded_languages_with_language_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_pull_diagnostics_from_embedded_languages_when_formatting() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let html_file = Utf8Path::new("file.html");
+    fs.insert(
+        html_file.into(),
+        r#"<script>function () { return "ipsum" }</script>
+<style>#id .class div > { background-color: ; align: center; padding: 0; } </style>
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true,
+            "indentScriptAndStyle": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_pull_diagnostics_from_embedded_languages_when_formatting",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_pull_diagnostics_from_embedded_languages_when_linting() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let html_file = Utf8Path::new("file.html");
+    fs.insert(
+        html_file.into(),
+        r#"<script>debugger</script>
+<style>#id .class div { background-color: red; background-color: red;  } </style>
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "html": {
+        "formatter": {
+            "enabled": true,
+            "indentScriptAndStyle": true
+        },
+        "linter": {
+            "enabled": true
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", html_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_pull_diagnostics_from_embedded_languages_when_linting",
+        fs,
+        console,
+        result,
+    ));
+}

@@ -20,12 +20,12 @@ expression: tsconfig.valid.paths.json
 ## Data structure
 
 TsConfigJson {
-    root: false,
-    path: "",
+    root: true,
+    path: "<PREFIX>/tsconfig/valid/tsconfig.valid.paths.json",
     extends: None,
     compiler_options: CompilerOptions {
         base_url: Some(
-            "src",
+            "<PREFIX>/tsconfig/valid/src",
         ),
         paths: Some(
             {
@@ -35,7 +35,7 @@ TsConfigJson {
                 ],
             },
         ),
-        paths_base: "",
+        paths_base: "<PREFIX>/tsconfig/valid/src",
         type_roots: None,
     },
     references: [],

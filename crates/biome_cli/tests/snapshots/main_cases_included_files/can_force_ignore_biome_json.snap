@@ -1,0 +1,81 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "files": { "includes": ["**/*.js", "!!nested/biome.json"] } }
+```
+
+## `nested/biome.json`
+
+```json
+{ "formatter": { "enabled": false } }
+```
+
+## `a.js`
+
+```js
+  statement(  )  
+```
+
+## `nested/a.js`
+
+```js
+  statement(  )  
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+a.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - ··statement(··)··
+      1 │ + statement();
+      2 │ + 
+  
+
+```
+
+```block
+biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - {·"files":·{·"includes":·["**/*.js",·"!!nested/biome.json"]·}·}
+      1 │ + {·"files":·{·"includes":·["**/*.js",·"!!nested/biome.json"]·}·}
+      2 │ + 
+  
+
+```
+
+```block
+nested/a.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - ··statement(··)··
+      1 │ + statement();
+      2 │ + 
+  
+
+```
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+Found 3 errors.
+```

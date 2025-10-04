@@ -117,6 +117,18 @@ impl HtmlParseOptions {
         self.frontmatter = true;
         self
     }
+
+    /// Toggle parsing of double-quoted text expressions.
+    ///
+    /// When `value` is `true`, enables [`TextExpressionKind::Double`].
+    /// When `false`, disables text expressions entirely (`None`).
+    /// Use [`HtmlParseOptions::with_single_text_expression`] to enable single-quoted mode.
+    pub fn set_double_text_expression(&mut self, value: bool) {
+        match value {
+            true => self.text_expression = Some(TextExpressionKind::Double),
+            false => self.text_expression = None,
+        }
+    }
 }
 
 impl From<&HtmlFileSource> for HtmlParseOptions {

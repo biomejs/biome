@@ -613,7 +613,7 @@ CssGenericDelimiter =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier
+AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'
@@ -650,6 +650,17 @@ AnyCssAtRule =
 	| CssValueAtRule
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
+	// Tailwind CSS 4.0 at rules
+	| TwThemeAtRule
+	| TwSourceAtRule
+	| TwUtilityAtRule
+	| TwVariantAtRule
+	| TwCustomVariantAtRule
+	| TwApplyAtRule
+	| TwReferenceAtRule
+	| TwConfigAtRule
+	| TwPluginAtRule
+	// Unknowns
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
 	| CssBogusAtRule
@@ -1682,6 +1693,7 @@ AnyCssValue =
 	| CssBracketedValue
 	| CssUnicodeRange
 	| CssMetavariable
+	| TwValueThemeReference
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1856,3 +1868,99 @@ CssUrlValueRaw = value: 'css_url_value_raw_literal'
 
 // https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-css/grammar.js
 CssMetavariable = value: 'grit_metavariable'
+
+
+// Tailwind
+
+// --value(--tab-size-*)
+TwValueThemeReference =
+	reference: CssDashedIdentifier
+	'-'
+	'*'
+
+// Enhanced @utility directive to support functional utilities
+// @utility tab-* { tab-size: --value([integer]); }
+// @utility tab-* { tab-size: --value("inherit", "initial", "unset"); }
+TwUtilityAtRule =
+  'utility'
+  name: AnyTwUtilityName
+  block: AnyCssDeclarationOrRuleBlock
+
+// Support both simple utility names and functional utility names
+AnyTwUtilityName =
+	CssIdentifier
+	| TwFunctionalUtilityName
+
+// Functional utility name: @utility tab-* { ... }
+TwFunctionalUtilityName =
+	identifier: CssIdentifier
+	'-'
+	'*'
+
+// Tailwind 4.0 @theme directive
+// @theme { --color-primary: #3b82f6; }
+TwThemeAtRule =
+  'theme'
+  name: CssIdentifier?
+  block: AnyCssDeclarationOrRuleBlock
+
+// Tailwind 4.0 @variant directive
+// @variant dark { background: black; }
+TwVariantAtRule =
+  'variant'
+  name: CssIdentifier
+  block: AnyCssDeclarationOrRuleBlock
+
+// Tailwind 4.0 @custom-variant directive
+// @custom-variant theme-midnight (&:where([data-theme="midnight"] *));
+TwCustomVariantAtRule =
+  'custom-variant'
+  name: CssIdentifier
+  selector: AnyTwCustomVariantSelector
+
+AnyTwCustomVariantSelector =
+	AnyCssRuleBlock
+	| TwCustomVariantShorthand
+
+TwCustomVariantShorthand =
+  '('
+  selector: AnyCssSelector
+  ')'
+  ';'
+
+// Tailwind 4.0 @apply directive (enhanced)
+// @apply text-lg font-bold;
+TwApplyAtRule =
+  'apply'
+  classes: TwApplyClassList
+  ';'
+
+TwApplyClassList = CssIdentifier*
+
+// Tailwind 4.0 @source directive
+// @source "../node_modules/@my-company/ui-lib";
+TwSourceAtRule =
+  'source'
+  path: CssString
+  ';'
+
+// Tailwind 4.0 @reference directive
+// @reference "../../app.css";
+TwReferenceAtRule =
+  'reference'
+  path: CssString
+  ';'
+
+// Tailwind 4.0 @config directive (compatibility)
+// @config "../../tailwind.config.js";
+TwConfigAtRule =
+  'config'
+  path: CssString
+  ';'
+
+// Tailwind 4.0 @plugin directive (compatibility)
+// @plugin "@tailwindcss/typography";
+TwPluginAtRule =
+  'plugin'
+  name: CssString
+  ';'
