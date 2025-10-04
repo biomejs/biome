@@ -56,6 +56,7 @@ impl CssFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "css" => Ok(Self::css()),
+            "tailwindcss" => Ok(Self::css()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }
