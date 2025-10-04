@@ -1,5 +1,7 @@
 ---
-"@biomejs/biome": patch
+"@biomejs/biome": minor
 ---
 
-Fix tailwindcss files not being formatted in VSCode
+Add support for TailwindCSS language identifier
+
+Biome now recognizes files with the "tailwindcss" language identifier (used by TailwindCSS Intellisense VS Code extension) and processes them using the CSS file handler.

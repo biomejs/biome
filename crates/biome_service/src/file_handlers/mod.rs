@@ -1547,3 +1547,12 @@ fn test_vue_script_lang() {
             .is_typescript()
     );
 }
+
+#[test]
+fn test_from_language_id_tailwindcss() {
+    let file_source = DocumentFileSource::from_language_id("tailwindcss");
+
+    assert!(file_source.is_css_like());
+    assert!(file_source.to_css_file_source().is_some());
+    assert_ne!(file_source, DocumentFileSource::Unknown);
+}
