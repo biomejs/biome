@@ -50,3 +50,23 @@ e {
 :where(#h) :is(h) {
     color: red;
 }
+
+@layer one, two;
+
+@layer one {
+    k j i {
+        color: red;
+    }
+}
+
+@layer two {
+    j i {
+        color: red;
+    }
+
+    @layer three {
+        i {
+            color: red;
+        }
+    }
+}
