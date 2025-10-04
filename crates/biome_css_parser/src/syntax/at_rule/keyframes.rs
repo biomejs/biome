@@ -229,33 +229,6 @@ impl ParseNodeList for KeyframesItemList {
     }
 }
 
-struct KeyframesItemBlockParseRecovery;
-
-impl ParseRecovery for KeyframesItemBlockParseRecovery {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_BLOCK;
-
-    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        // We need to recover the contents of an invalid block for the following cases:
-        // We have a declaration block, but it lacks a '{' token:
-        //    @keyframes name {
-        //      from
-        //          color: red;
-        //      } <----- here it's a recover point for the keyframes item block.
-        //   }
-        //
-        //    @keyframes name {
-        //      from
-        //          color: red;
-        //      to <----- here it's a recover point for the next keyframes item. {
-        //          color: blue;
-        //      }
-        //   }
-        p.at(T!['}']) || is_at_keyframes_item_selector(p)
-    }
-}
-
 #[inline]
 fn parse_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();

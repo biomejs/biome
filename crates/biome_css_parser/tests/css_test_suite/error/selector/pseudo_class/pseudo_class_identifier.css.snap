@@ -233,6 +233,7 @@ pseudo_class_identifier.css:1:3 parse ━━━━━━━━━━━━━━
   - any-link
   - local-link
   - scope
+  - state
   - current
   - past
   - future
@@ -291,6 +292,7 @@ pseudo_class_identifier.css:2:3 parse ━━━━━━━━━━━━━━
   - any-link
   - local-link
   - scope
+  - state
   - current
   - past
   - future
@@ -350,6 +352,7 @@ pseudo_class_identifier.css:3:9 parse ━━━━━━━━━━━━━━
   - any-link
   - local-link
   - scope
+  - state
   - current
   - past
   - future
@@ -407,6 +410,7 @@ pseudo_class_identifier.css:5:1 parse ━━━━━━━━━━━━━━
   - any-link
   - local-link
   - scope
+  - state
   - current
   - past
   - future
