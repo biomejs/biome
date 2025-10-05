@@ -239,6 +239,8 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
+    biome_html_analyze::visit_registry(&mut lint_visitor);
+    biome_html_analyze::visit_registry(&mut assist_visitor);
 
     let mut rule_names = BTreeSet::default();
     let mut lib_exports = vec![quote! {

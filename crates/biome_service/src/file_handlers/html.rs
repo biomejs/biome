@@ -768,7 +768,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    // We don't have analyzer rules yet
     let mut tree: HtmlRoot = params.parse.tree();
 
     // Compute final rules (taking `overrides` into account)

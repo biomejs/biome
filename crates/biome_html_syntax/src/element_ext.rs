@@ -51,6 +51,23 @@ impl AnyHtmlElement {
             Self::AnyHtmlContent(_) | Self::HtmlBogusElement(_) | Self::HtmlCdataSection(_) => None,
         }
     }
+
+    pub fn name(&self) -> Option<&str> {
+        match self {
+            AnyHtmlElement::HtmlElement(el) => {
+                let opening_element = el.opening_element().ok()?;
+                let name = opening_element.name().ok()?;
+                let name_token = name.value_token().ok()?;
+                Some(name_token.text_trimmed())
+            }
+            AnyHtmlElement::HtmlSelfClosingElement(el) => {
+                let name = el.name().ok()?;
+                let name_token = name.value_token().ok()?;
+                Some(name_token.text_trimmed())
+            }
+            _ => None,
+        }
+    }
 }
 
 impl HtmlSelfClosingElement {

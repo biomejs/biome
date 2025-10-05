@@ -99,18 +99,5 @@ impl Rule for NoHeaderScope {
 
 // Helper function to check if element is a th element
 fn is_th_element(element: &AnyHtmlElement) -> Option<bool> {
-    match element {
-        AnyHtmlElement::HtmlElement(el) => {
-            let opening_element = el.opening_element().ok()?;
-            let name = opening_element.name().ok()?;
-            let name_token = name.value_token().ok()?;
-            Some(name_token.text_trimmed().eq_ignore_ascii_case("th"))
-        }
-        AnyHtmlElement::HtmlSelfClosingElement(el) => {
-            let name = el.name().ok()?;
-            let name_token = name.value_token().ok()?;
-            Some(name_token.text_trimmed().eq_ignore_ascii_case("th"))
-        }
-        _ => Some(false),
-    }
+    Some(element.name()?.eq_ignore_ascii_case("th"))
 }

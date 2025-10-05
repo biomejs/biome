@@ -426,7 +426,6 @@ fn lint(params: LintParams) -> LintResults {
 
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    // We don't have analyzer rules yet
     let tree: GritRoot = params.parse.tree();
     let code = if params.should_format {
         format_node(
