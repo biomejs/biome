@@ -10,12 +10,14 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_semantic::ReferencesExtensions;
+use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsComputedMember, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsName, JsClassDeclaration, JsSyntaxNode, TsAccessibilityModifier,
-    TsPropertyParameter,
+    AnyJsFormalParameter, AnyJsName, AnyTsType, JsClassDeclaration, JsSyntaxNode,
+    TsAccessibilityModifier, TsPropertyParameter, TsReferenceType, TsStringLiteralType,
+    TsTypeAliasDeclaration, TsUnionType,
 };
+use biome_js_syntax::{JsFormalParameter, JsIdentifierExpression};
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Text, TextRange, declare_node_union,
 };
@@ -142,16 +144,24 @@ impl Rule for NoUnusedPrivateClassMembers {
             let class_member_references = semantic_class
                 .clone()
                 .class_member_references(&node.members());
-            let mut unused_members =
-                traverse_computed_members_usage(node.syntax(), private_members.clone());
+            let used_members = traverse_computed_members_usage(
+                ctx.model(),
+                &semantic_class,
+                node.syntax(),
+                private_members.clone(),
+            );
 
-            if !unused_members.is_empty() {
-                unused_members = traverse_meaningful_read_members_usage(
-                    &semantic_class,
-                    private_members,
-                    &class_member_references,
-                );
-            }
+            // Filter out members that are already used
+            let mut unused_members: Vec<_> = private_members
+                .into_iter()
+                .filter(|member| !used_members.contains(member))
+                .collect();
+
+            unused_members = traverse_meaningful_read_members_usage(
+                &semantic_class,
+                unused_members,
+                &class_member_references,
+            );
 
             for member in unused_members {
                 match &member {
@@ -316,38 +326,53 @@ fn traverse_meaningful_read_members_usage(
 /// ```
 /// After calling this function, `#sharpMember` remains; `tsMember` is removed.
 ///
-/// Returns only members not detected as used.
+/// Returns only used members.
 fn traverse_computed_members_usage(
+    model: &SemanticModel,
+    semantic_class_model: &SemanticClassModel,
     syntax: &JsSyntaxNode,
-    mut private_members: Vec<AnyMember>,
+    private_members: Vec<AnyMember>,
 ) -> Vec<AnyMember> {
-    // `true` is at least one member is a TypeScript private member like `private member`.
-    // The other private members are sharp members `#member`.
-    let mut ts_private_count = private_members
-        .iter()
-        .filter(|member| !member.is_private_sharp())
-        .count();
+    let mut used_members = Vec::new();
 
     for node in syntax.descendants() {
-        match AnyJsName::try_cast(node) {
-            Ok(_) => {}
-            Err(node) => {
-                if ts_private_count != 0
-                    && let Some(computed_member) = AnyJsComputedMember::cast(node)
-                    && matches!(
-                        computed_member.object(),
-                        Ok(AnyJsExpression::JsThisExpression(_))
-                    )
+        if !AnyJsName::can_cast(node.kind()) {
+            if let Some(computed_member) = AnyJsComputedMember::cast(node)
+                && matches!(
+                    computed_member.object(),
+                    Ok(AnyJsExpression::JsThisExpression(_))
+                )
+            {
+                if let Ok(member_expr) = computed_member.member()
+                    && let Some(id_expr) = JsIdentifierExpression::cast_ref(member_expr.syntax())
+                    && let Some(ty) = resolve_formal_param_type(model, &id_expr)
                 {
-                    // We consider that all TypeScript private members are used in expressions like `this[something]`.
-                    private_members.retain(|private_member| private_member.is_private_sharp());
-                    ts_private_count = 0;
+                    let ts_union_type = TsUnionType::cast(ty.syntax().clone())
+                        .or_else(|| resolve_reference_to_union(model, &ty));
+
+                    if let Some(ts_union_type) = ts_union_type {
+                        let items: Vec<_> = extract_literal_types(&ts_union_type);
+
+                        // Collect only members that match the computed member names
+                        used_members.extend(
+                            private_members
+                                .iter()
+                                .filter(|member| {
+                                    items
+                                        .iter()
+                                        .any(|name| member.matches_name(semantic_class_model, name))
+                                })
+                                .cloned(),
+                        );
+                    }
+
+                    continue;
                 }
             }
         }
     }
 
-    private_members
+    used_members
 }
 
 /// Check if a TsPropertyParameter is also unused as a function parameter
@@ -423,18 +448,6 @@ fn get_constructor_params(
 }
 
 impl AnyMember {
-    /// Returns `true` if it is a private property starting with `#`.
-    fn is_private_sharp(&self) -> bool {
-        if let Self::AnyJsClassMember(member) = self {
-            matches!(
-                member.name(),
-                Ok(Some(AnyJsClassMemberName::JsPrivateClassMemberName(_)))
-            )
-        } else {
-            false
-        }
-    }
-
     fn is_private(&self) -> Option<bool> {
         match self {
             Self::AnyJsClassMember(member) => {
@@ -497,4 +510,81 @@ impl AnyMember {
 
         false
     }
+}
+
+/// Extracts the immediate string literal types only from a union like `A | B | C`.
+/// Filters out any non string literal type.
+/// Does not recurse into nested unions.
+pub fn extract_literal_types(union: &TsUnionType) -> Vec<Text> {
+    extract_shallow_union_members(union)
+        .iter()
+        .filter_map(|item| {
+            if let Some(literal_type) = TsStringLiteralType::cast(item.syntax().clone()) {
+                return Some(Text::new_owned(Box::from(
+                    literal_type
+                        .to_trimmed_text()
+                        .trim_matches(&['"', '\''][..]),
+                )));
+            }
+
+            None
+        })
+        .collect()
+}
+
+/// Extracts the immediate types from a union like `A | B | C`.
+/// Does not recurse into nested unions.
+fn extract_shallow_union_members(union: &TsUnionType) -> Vec<AnyTsType> {
+    let mut members = Vec::new();
+
+    for elem in union.types() {
+        if let Ok(ty) = elem {
+            members.push(ty);
+        }
+    }
+
+    members
+}
+
+/// Attempts to resolve the type annotation of a formal parameter for the given identifier expression.
+/// - Looks up the binding for the identifier expression in the semantic model.
+/// - Checks if the binding corresponds to a `JsFormalParameter`.
+/// - If so, extracts and returns its type annotation.
+fn resolve_formal_param_type(
+    model: &SemanticModel,
+    id_expr: &JsIdentifierExpression,
+) -> Option<AnyTsType> {
+    // Get the reference identifier inside `id_expr`
+    let ref_ident = id_expr.name().ok()?;
+
+    // Find the binding
+    let binding = model.binding(&ref_ident)?;
+
+    // Look at the parent node of the binding
+    let parent = binding.syntax().parent()?;
+
+    // If the parent is a formal parameter, extract its type annotation
+    let js_param = JsFormalParameter::cast(parent)?;
+    let type_annotation = js_param.type_annotation()?;
+    type_annotation.ty().ok()
+}
+
+/// Resolves a type reference to its aliased union type, if the reference points to a union.
+fn resolve_reference_to_union(model: &SemanticModel, ty: &AnyTsType) -> Option<TsUnionType> {
+    let ts_reference_type = TsReferenceType::cast(ty.syntax().clone())?;
+    // Get the reference identifier
+    let ref_name = ts_reference_type.name().ok()?;
+    let ref_ident = ref_name.as_js_reference_identifier()?;
+
+    // Resolve the binding
+    let binding = model.binding(ref_ident)?;
+    let parent = binding.syntax().parent()?;
+
+    // If it's a type alias, get its type, anything else is ignored, since it can not lead to type union of strings
+    // names of class members are strings
+    let type_alias = TsTypeAliasDeclaration::cast(parent)?;
+    let ty = type_alias.ty().ok()?;
+
+    // See if that type is a union
+    TsUnionType::cast(ty.into_syntax())
 }
