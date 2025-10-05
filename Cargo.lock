@@ -1521,6 +1521,7 @@ dependencies = [
  "biome_grit_patterns",
  "biome_grit_syntax",
  "biome_html_analyze",
+ "biome_html_factory",
  "biome_html_formatter",
  "biome_html_parser",
  "biome_html_syntax",
