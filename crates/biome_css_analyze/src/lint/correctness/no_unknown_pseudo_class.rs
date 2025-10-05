@@ -1,9 +1,12 @@
 use crate::{
     keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
-    utils::{is_custom_selector, is_known_pseudo_class, is_page_pseudo_class, vendor_prefixed},
+    utils::{
+        is_css_module_pseudo_class, is_custom_selector, is_known_pseudo_class,
+        is_page_pseudo_class, vendor_prefixed,
+    },
 };
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_css_syntax::{
@@ -15,7 +18,7 @@ use biome_css_syntax::{
     CssSyntaxToken,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rowan::{declare_node_union, AstNode, TextRange};
 use biome_rule_options::no_unknown_pseudo_class::NoUnknownPseudoClassOptions;
 use biome_string_case::StrLikeExtension;
 
@@ -174,9 +177,7 @@ impl Rule for NoUnknownPseudoClass {
             }
         };
 
-        let is_valid_global = lower_name == "global" && is_css_modules;
-
-        if is_valid_class || is_valid_global {
+        if is_valid_class || is_css_modules && is_css_module_pseudo_class(lower_name) {
             None
         } else {
             Some(NoUnknownPseudoClassSelectorState {
