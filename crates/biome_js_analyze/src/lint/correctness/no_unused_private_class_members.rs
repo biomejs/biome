@@ -76,8 +76,9 @@ declare_lint_rule! {
     /// ```ts
     ///  class TsBioo {
     ///    private member: number;
+    ///    private anotherMember: number;
     ///
-    ///    set_with_name(name: string, value: number) {
+    ///    set_with_name(name: 'member' | 'anotherMember', value: number) {
     ///      this[name] = value;
     ///    }
     ///  }
@@ -148,7 +149,7 @@ impl Rule for NoUnusedPrivateClassMembers {
                 ctx.model(),
                 &semantic_class,
                 node.syntax(),
-                private_members.clone(),
+                private_members.as_slice(),
             );
 
             // Filter out members that are already used
@@ -331,44 +332,36 @@ fn traverse_computed_members_usage(
     model: &SemanticModel,
     semantic_class_model: &SemanticClassModel,
     syntax: &JsSyntaxNode,
-    private_members: Vec<AnyMember>,
+    private_members: &[AnyMember],
 ) -> Vec<AnyMember> {
     let mut used_members = Vec::new();
 
     for node in syntax.descendants() {
-        if !AnyJsName::can_cast(node.kind()) {
-            if let Some(computed_member) = AnyJsComputedMember::cast(node)
-                && matches!(
-                    computed_member.object(),
-                    Ok(AnyJsExpression::JsThisExpression(_))
-                )
-            {
-                if let Ok(member_expr) = computed_member.member()
-                    && let Some(id_expr) = JsIdentifierExpression::cast_ref(member_expr.syntax())
-                    && let Some(ty) = resolve_formal_param_type(model, &id_expr)
-                {
-                    let ts_union_type = TsUnionType::cast(ty.syntax().clone())
-                        .or_else(|| resolve_reference_to_union(model, &ty));
+        if !AnyJsName::can_cast(node.kind())
+            && let Some(computed_member) = AnyJsComputedMember::cast(node)
+            && matches!(
+                computed_member.object(),
+                Ok(AnyJsExpression::JsThisExpression(_))
+            )
+            && let Ok(member_expr) = computed_member.member()
+            && let Some(id_expr) = JsIdentifierExpression::cast_ref(member_expr.syntax())
+            && let Some(ty) = resolve_formal_param_type(model, &id_expr)
+            && let Some(ts_union_type) = TsUnionType::cast(ty.syntax().clone())
+                .or_else(|| resolve_reference_to_union(model, &ty))
+        {
+            let items: Vec<_> = extract_literal_types(&ts_union_type);
 
-                    if let Some(ts_union_type) = ts_union_type {
-                        let items: Vec<_> = extract_literal_types(&ts_union_type);
-
-                        // Collect only members that match the computed member names
-                        used_members.extend(
-                            private_members
-                                .iter()
-                                .filter(|member| {
-                                    items
-                                        .iter()
-                                        .any(|name| member.matches_name(semantic_class_model, name))
-                                })
-                                .cloned(),
-                        );
-                    }
-
-                    continue;
-                }
-            }
+            // Collect only members that match the computed member names
+            used_members.extend(
+                private_members
+                    .iter()
+                    .filter(|member| {
+                        items
+                            .iter()
+                            .any(|name| member.matches_name(semantic_class_model, name))
+                    })
+                    .cloned(),
+            );
         }
     }
 
@@ -537,10 +530,8 @@ pub fn extract_literal_types(union: &TsUnionType) -> Vec<Text> {
 fn extract_shallow_union_members(union: &TsUnionType) -> Vec<AnyTsType> {
     let mut members = Vec::new();
 
-    for elem in union.types() {
-        if let Ok(ty) = elem {
-            members.push(ty);
-        }
+    for ty in union.types().into_iter().flatten() {
+        members.push(ty);
     }
 
     members
