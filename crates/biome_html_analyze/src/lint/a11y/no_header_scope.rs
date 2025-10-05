@@ -99,5 +99,5 @@ impl Rule for NoHeaderScope {
 
 // Helper function to check if element is a th element
 fn is_th_element(element: &AnyHtmlElement) -> Option<bool> {
-    Some(element.name()?.eq_ignore_ascii_case("th"))
+    Some(element.name()?.text().eq_ignore_ascii_case("th"))
 }
