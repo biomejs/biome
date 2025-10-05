@@ -1,0 +1,21 @@
+/* Ignored */
+a {
+	grid-column-gap: 1px;
+}
+
+a {
+	grid-gap: 1px;
+}
+
+a {
+	grid-row-gap: 1px;
+}
+
+a {
+	word-wrap: break-word;
+}
+
+/* Not ignored */
+a {
+	-webkit-user-modify: read-only;
+}

@@ -43,6 +43,7 @@ pub mod no_debugger;
 pub mod no_default_export;
 pub mod no_delete;
 pub mod no_deprecated_imports;
+pub mod no_deprecated_properties;
 pub mod no_descending_specificity;
 pub mod no_distracting_elements;
 pub mod no_document_cookie;

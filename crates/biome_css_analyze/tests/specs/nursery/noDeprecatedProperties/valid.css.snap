@@ -1,0 +1,20 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+a {
+	clip-path: rect(0 0 0 0);
+}
+
+/* 'Accept `-webkit-box-orient` if its value is `vertical` */
+a {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+}
+
+```
