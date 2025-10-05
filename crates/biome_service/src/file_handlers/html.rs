@@ -815,6 +815,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
                 match params.fix_file_mode {
                     FixFileMode::SafeFixes => {
+                        if action.is_suppression() {
+                            continue;
+                        }
                         if action.applicability == Applicability::MaybeIncorrect {
                             skipped_suggested_fixes += 1;
                         }
@@ -833,7 +836,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         }
                     }
                     FixFileMode::ApplySuppressions => {
-                        // TODO: implement once a GraphQL suppression action is available
+                        if action.is_suppression() {
+                            return ControlFlow::Break(action);
+                        }
                     }
                 }
             }

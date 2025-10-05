@@ -2,7 +2,7 @@ use crate::{
     AnyHtmlElement, HtmlAttribute, HtmlElement, HtmlSelfClosingElement, ScriptType,
     inner_string_text,
 };
-use biome_rowan::{AstNodeList, SyntaxResult};
+use biome_rowan::{AstNodeList, SyntaxResult, TokenText};
 
 /// https://html.spec.whatwg.org/#void-elements
 const VOID_ELEMENTS: &[&str] = &[
@@ -52,18 +52,18 @@ impl AnyHtmlElement {
         }
     }
 
-    pub fn name(&self) -> Option<&str> {
+    pub fn name(&self) -> Option<TokenText> {
         match self {
             AnyHtmlElement::HtmlElement(el) => {
                 let opening_element = el.opening_element().ok()?;
                 let name = opening_element.name().ok()?;
                 let name_token = name.value_token().ok()?;
-                Some(name_token.text_trimmed())
+                Some(name_token.token_text())
             }
             AnyHtmlElement::HtmlSelfClosingElement(el) => {
                 let name = el.name().ok()?;
                 let name_token = name.value_token().ok()?;
-                Some(name_token.text_trimmed())
+                Some(name_token.token_text())
             }
             _ => None,
         }
