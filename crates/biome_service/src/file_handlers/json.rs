@@ -678,9 +678,6 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
 
                 match params.fix_file_mode {
                     FixFileMode::SafeFixes => {
-                        if action.is_suppression() {
-                            continue;
-                        }
                         if action.applicability == Applicability::MaybeIncorrect {
                             skipped_suggested_fixes += 1;
                         }
