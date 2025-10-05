@@ -12,31 +12,31 @@ use biome_rowan::{SyntaxNodeWithOffset, TextRange, TextSize};
 use std::marker::PhantomData;
 
 #[derive(Debug, Clone)]
-pub enum EmbeddedSnippets {
-    Js(EmbeddedLanguageContent<JsLanguage>),
-    Css(EmbeddedLanguageContent<CssLanguage>),
-    Json(EmbeddedLanguageContent<JsonLanguage>),
+pub enum AnyEmbeddedSnippet {
+    Js(EmbeddedSnippet<JsLanguage>),
+    Css(EmbeddedSnippet<CssLanguage>),
+    Json(EmbeddedSnippet<JsonLanguage>),
 }
 
-impl From<EmbeddedLanguageContent<JsLanguage>> for EmbeddedSnippets {
-    fn from(content: EmbeddedLanguageContent<JsLanguage>) -> Self {
+impl From<EmbeddedSnippet<JsLanguage>> for AnyEmbeddedSnippet {
+    fn from(content: EmbeddedSnippet<JsLanguage>) -> Self {
         Self::Js(content)
     }
 }
 
-impl From<EmbeddedLanguageContent<CssLanguage>> for EmbeddedSnippets {
-    fn from(content: EmbeddedLanguageContent<CssLanguage>) -> Self {
+impl From<EmbeddedSnippet<CssLanguage>> for AnyEmbeddedSnippet {
+    fn from(content: EmbeddedSnippet<CssLanguage>) -> Self {
         Self::Css(content)
     }
 }
 
-impl From<EmbeddedLanguageContent<JsonLanguage>> for EmbeddedSnippets {
-    fn from(content: EmbeddedLanguageContent<JsonLanguage>) -> Self {
+impl From<EmbeddedSnippet<JsonLanguage>> for AnyEmbeddedSnippet {
+    fn from(content: EmbeddedSnippet<JsonLanguage>) -> Self {
         Self::Json(content)
     }
 }
 
-impl EmbeddedSnippets {
+impl AnyEmbeddedSnippet {
     pub const fn is_js(&self) -> bool {
         matches!(self, Self::Js(..))
     }
@@ -45,7 +45,7 @@ impl EmbeddedSnippets {
         matches!(self, Self::Css(..))
     }
 
-    pub fn as_js_embedded_snippet(&self) -> Option<&EmbeddedLanguageContent<JsLanguage>> {
+    pub fn as_js_embedded_snippet(&self) -> Option<&EmbeddedSnippet<JsLanguage>> {
         if let Self::Js(content) = self {
             Some(content)
         } else {
@@ -53,7 +53,7 @@ impl EmbeddedSnippets {
         }
     }
 
-    pub fn as_css_embedded_snippet(&self) -> Option<&EmbeddedLanguageContent<CssLanguage>> {
+    pub fn as_css_embedded_snippet(&self) -> Option<&EmbeddedSnippet<CssLanguage>> {
         if let Self::Css(content) = self {
             Some(content)
         } else {
@@ -61,7 +61,7 @@ impl EmbeddedSnippets {
         }
     }
 
-    pub fn as_json_embedded_snippet(&self) -> Option<&EmbeddedLanguageContent<JsonLanguage>> {
+    pub fn as_json_embedded_snippet(&self) -> Option<&EmbeddedSnippet<JsonLanguage>> {
         if let Self::Json(content) = self {
             Some(content)
         } else {
@@ -131,7 +131,7 @@ impl EmbeddedSnippets {
 /// This struct stores parsing metadata and provides access to the parsed
 /// content with offset-aware positioning to maintain correct source locations.
 #[derive(Clone, Debug)]
-pub struct EmbeddedLanguageContent<L: ServiceLanguage + 'static> {
+pub struct EmbeddedSnippet<L: ServiceLanguage + 'static> {
     /// The JavaScript source code extracted from the script element.
     pub parse: AnyParse,
 
@@ -153,7 +153,7 @@ pub struct EmbeddedLanguageContent<L: ServiceLanguage + 'static> {
     _phantom: PhantomData<L>,
 }
 
-impl<L: ServiceLanguage + 'static> EmbeddedLanguageContent<L> {
+impl<L: ServiceLanguage + 'static> EmbeddedSnippet<L> {
     /// Constructs new embedded content for a specific language.
     pub fn new(
         parse: AnyParse,
@@ -220,7 +220,7 @@ pub(crate) struct Document {
     pub(crate) syntax: Option<Result<AnyParse, FileTooLarge>>,
 
     /// Embedded content for foreign language snippets.
-    pub(crate) embedded_snippets: Vec<EmbeddedSnippets>,
+    pub(crate) embedded_snippets: Vec<AnyEmbeddedSnippet>,
 }
 
 impl Document {

@@ -37,6 +37,7 @@ pub struct TraversalSummary {
     pub scanner_duration: Option<Duration>,
     pub errors: u32,
     pub warnings: u32,
+    pub infos: u32,
     pub skipped: usize,
     pub suggested_fixes_skipped: u32,
     pub diagnostics_not_printed: u32,

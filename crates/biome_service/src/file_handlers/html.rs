@@ -5,7 +5,7 @@ use super::{
     UpdateSnippetsNodes,
 };
 use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
-use crate::workspace::EmbeddedLanguageContent;
+use crate::workspace::EmbeddedSnippet;
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
@@ -427,9 +427,8 @@ pub(crate) fn parse_embedded_script(
     path: &BiomePath,
     html_file_source: &DocumentFileSource,
     settings: &Settings,
-) -> Option<(EmbeddedLanguageContent<JsLanguage>, DocumentFileSource)> {
+) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
     let html_file_source = html_file_source.to_html_file_source()?;
-
     if element.is_javascript_tag() {
         let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
             if element.is_typescript_lang().unwrap_or_default() {
@@ -468,7 +467,7 @@ pub(crate) fn parse_embedded_script(
                 cache,
             );
 
-            Some(EmbeddedLanguageContent::new(
+            Some(EmbeddedSnippet::new(
                 parse.into(),
                 child.range(),
                 content.text_range(),
@@ -486,7 +485,7 @@ pub(crate) fn parse_embedded_style(
     cache: &mut NodeCache,
     biome_path: &BiomePath,
     settings: &Settings,
-) -> Option<(EmbeddedLanguageContent<CssLanguage>, DocumentFileSource)> {
+) -> Option<(EmbeddedSnippet<CssLanguage>, DocumentFileSource)> {
     if element.is_style_tag() {
         // This is probably an error
         if element.children().len() > 1 {
@@ -506,7 +505,7 @@ pub(crate) fn parse_embedded_style(
                 options,
             );
 
-            Some(EmbeddedLanguageContent::new(
+            Some(EmbeddedSnippet::new(
                 parse.into(),
                 child.range(),
                 content.text_range(),
@@ -524,7 +523,7 @@ pub(crate) fn parse_embedded_json(
     cache: &mut NodeCache,
     biome_path: &BiomePath,
     settings: &Settings,
-) -> Option<(EmbeddedLanguageContent<JsonLanguage>, DocumentFileSource)> {
+) -> Option<(EmbeddedSnippet<JsonLanguage>, DocumentFileSource)> {
     // This is probably an error
     if element.children().len() > 1 {
         return None;
@@ -543,7 +542,7 @@ pub(crate) fn parse_embedded_json(
             options,
         );
 
-        Some(EmbeddedLanguageContent::new(
+        Some(EmbeddedSnippet::new(
             parse.into(),
             child.range(),
             content.text_range(),

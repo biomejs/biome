@@ -15,7 +15,7 @@ use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
     WorkspaceScannerBridge,
 };
-use crate::workspace::document::EmbeddedSnippets;
+use crate::workspace::document::AnyEmbeddedSnippet;
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
@@ -521,7 +521,7 @@ impl WorkspaceServer {
         root: &AnyParse,
         cache: &mut NodeCache,
         settings: &Settings,
-    ) -> Result<Vec<EmbeddedSnippets>, WorkspaceError> {
+    ) -> Result<Vec<AnyEmbeddedSnippet>, WorkspaceError> {
         let mut embedded_nodes = Vec::new();
         let capabilities = self.get_file_capabilities(path);
         let Some(parse_embedded) = capabilities.parser.parse_embedded_nodes else {

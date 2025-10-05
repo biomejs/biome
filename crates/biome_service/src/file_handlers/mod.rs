@@ -11,7 +11,7 @@ pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
 pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
 use crate::settings::Settings;
 use crate::workspace::{
-    EmbeddedSnippets, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+    AnyEmbeddedSnippet, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
     RenameResult,
 };
 use biome_analyze::{
@@ -465,7 +465,7 @@ pub struct ParseResult {
 }
 
 pub struct ParseEmbedResult {
-    pub(crate) nodes: Vec<(EmbeddedSnippets, DocumentFileSource)>,
+    pub(crate) nodes: Vec<(AnyEmbeddedSnippet, DocumentFileSource)>,
 }
 
 type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
