@@ -1371,7 +1371,7 @@ impl RegistryVisitor<HtmlLanguage> for LintVisitor<'_, '_> {
             + 'static,
     {
         self.push_rule::<R, <R::Query as Queryable>::Language>(
-            graphql_metadata
+            biome_html_analyze::METADATA
                 .find_rule(R::Group::NAME, R::METADATA.name)
                 .map(RuleFilter::from),
         )
