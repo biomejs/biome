@@ -58,13 +58,21 @@ impl SuppressionAction for HtmlSuppressionAction {
             .any(|trivia| trivia.is_whitespace());
 
         if token_has_trailing_comments {
-            new_token = new_token.with_trailing_trivia([
-                (
-                    TriviaPieceKind::MultiLineComment,
-                    format!("<!-- {suppression_text}: {suppression_reason} -->").as_str(),
-                ),
-                (TriviaPieceKind::Newline, "\n"),
-            ]);
+            let mut trailing: Vec<_> = new_token
+                .trailing_trivia()
+                .pieces()
+                .map(|piece| (piece.kind(), piece.text().to_owned()))
+                .collect();
+            trailing.push((
+                TriviaPieceKind::MultiLineComment,
+                format!("<!-- {suppression_text}: {suppression_reason} -->"),
+            ));
+            trailing.push((TriviaPieceKind::Newline, "\n".to_string()));
+            let trailing_refs: Vec<_> = trailing
+                .iter()
+                .map(|(kind, text)| (*kind, text.as_str()))
+                .collect();
+            new_token = new_token.with_trailing_trivia(trailing_refs);
         } else if has_leading_whitespace {
             let suppression_comment = format!("<!-- {suppression_text}: {suppression_reason} -->");
             let mut trivia = vec![
