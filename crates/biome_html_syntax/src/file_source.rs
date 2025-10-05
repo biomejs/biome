@@ -10,8 +10,6 @@ pub struct HtmlFileSource {
     variant: HtmlVariant,
 }
 
-impl HtmlFileSource {}
-
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
