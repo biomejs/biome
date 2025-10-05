@@ -1630,6 +1630,10 @@ export interface Nursery {
 	 */
 	noDeprecatedImports?: RuleConfiguration_for_NoDeprecatedImportsOptions;
 	/**
+	 * Disallow deprecated properties.
+	 */
+	noDeprecatedProperties?: RuleFixConfiguration_for_NoDeprecatedPropertiesOptions;
+	/**
 	 * Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
@@ -3005,6 +3009,9 @@ export type RuleConfiguration_for_UseYieldOptions =
 export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDeprecatedImportsOptions;
+export type RuleFixConfiguration_for_NoDeprecatedPropertiesOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoDeprecatedPropertiesOptions;
 export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
@@ -5398,6 +5405,20 @@ export interface RuleWithOptions_for_NoDeprecatedImportsOptions {
 	 * Rule's options
 	 */
 	options: NoDeprecatedImportsOptions;
+}
+export interface RuleWithFixOptions_for_NoDeprecatedPropertiesOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDeprecatedPropertiesOptions;
 }
 export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
 	/**
@@ -8165,6 +8186,9 @@ export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
 export interface NoDeprecatedImportsOptions {}
+export interface NoDeprecatedPropertiesOptions {
+	ignoreProperties?: string[];
+}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
@@ -8941,6 +8965,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDeprecatedImports"
+	| "lint/nursery/noDeprecatedProperties"
 	| "lint/nursery/noDuplicateDependencies"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"

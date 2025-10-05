@@ -2861,6 +2861,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDeprecatedPropertiesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoDeprecatedPropertiesOptions" }
+			]
+		},
+		"NoDeprecatedPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreProperties": {
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoDescendingSpecificityConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4996,6 +5013,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDeprecatedProperties": {
+					"description": "Disallow deprecated properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoDeprecatedPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateDependencies": {
 					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".",
 					"anyOf": [
@@ -6538,6 +6562,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoDeprecatedImportsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoDeprecatedPropertiesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoDeprecatedPropertiesOptions" }]
 				}
 			},
 			"additionalProperties": false

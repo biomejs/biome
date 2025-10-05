@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noDeprecatedProperties": {
+          "level": "on",
+          "options": {
+            "ignoreProperties": ["grid-column-gap", "grid-gap", "grid-row-gap", "word-wrap"]
+          }
+        }
+      }
+    }
+  }
+}

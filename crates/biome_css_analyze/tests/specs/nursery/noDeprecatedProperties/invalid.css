@@ -1,0 +1,17 @@
+a {
+	clip: rect(0, 0, 0, 0);
+}
+
+a {
+	/* comment */
+	clip: rect(0, 0, 0, 0);
+}
+
+a {
+	ime-mode: active;
+}
+
+a {
+	-moz-box-flex: revert;
+	-moz-box-pack: start;
+}

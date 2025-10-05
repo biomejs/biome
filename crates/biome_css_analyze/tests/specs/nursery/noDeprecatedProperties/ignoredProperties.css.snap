@@ -1,0 +1,47 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: ignoredProperties.css
+---
+# Input
+```css
+/* Ignored */
+a {
+	grid-column-gap: 1px;
+}
+
+a {
+	grid-gap: 1px;
+}
+
+a {
+	grid-row-gap: 1px;
+}
+
+a {
+	word-wrap: break-word;
+}
+
+/* Not ignored */
+a {
+	-webkit-user-modify: read-only;
+}
+
+```
+
+# Diagnostics
+```
+ignoredProperties.css:20:2 lint/nursery/noDeprecatedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Deprecated property -webkit-user-modify is not allowed.
+  
+    18 │ /* Not ignored */
+    19 │ a {
+  > 20 │ 	-webkit-user-modify: read-only;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ }
+    22 │ 
+  
+  i The property has been removed or deprecated in the CSS specification that were previously existed.
+  
+
+```

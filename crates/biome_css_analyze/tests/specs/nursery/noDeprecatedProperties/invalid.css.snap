@@ -1,0 +1,117 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a {
+	clip: rect(0, 0, 0, 0);
+}
+
+a {
+	/* comment */
+	clip: rect(0, 0, 0, 0);
+}
+
+a {
+	ime-mode: active;
+}
+
+a {
+	-moz-box-flex: revert;
+	-moz-box-pack: start;
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:2:2 lint/nursery/noDeprecatedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Deprecated property clip is not allowed.
+  
+    1 │ a {
+  > 2 │ 	clip: rect(0, 0, 0, 0);
+      │ 	^^^^^^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i The property has been removed or deprecated in the CSS specification that were previously existed.
+  
+
+```
+
+```
+invalid.css:7:2 lint/nursery/noDeprecatedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Deprecated property clip is not allowed.
+  
+    5 │ a {
+    6 │ 	/* comment */
+  > 7 │ 	clip: rect(0, 0, 0, 0);
+      │ 	^^^^^^^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i The property has been removed or deprecated in the CSS specification that were previously existed.
+  
+
+```
+
+```
+invalid.css:11:2 lint/nursery/noDeprecatedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Deprecated property ime-mode is not allowed.
+  
+    10 │ a {
+  > 11 │ 	ime-mode: active;
+       │ 	^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i The property has been removed or deprecated in the CSS specification that were previously existed.
+  
+
+```
+
+```
+invalid.css:15:2 lint/nursery/noDeprecatedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Deprecated property -moz-box-flex is not allowed.
+  
+    14 │ a {
+  > 15 │ 	-moz-box-flex: revert;
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    16 │ 	-moz-box-pack: start;
+    17 │ }
+  
+  i The property has been removed or deprecated in the CSS specification that were previously existed.
+  
+  i Unsafe fix: Replace it with a valid CSS property.
+  
+    13 13 │   
+    14 14 │   a {
+    15    │ - → -moz-box-flex:·revert;
+       15 │ + → flex-grow:·revert;
+    16 16 │   	-moz-box-pack: start;
+    17 17 │   }
+  
+
+```
+
+```
+invalid.css:16:2 lint/nursery/noDeprecatedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Deprecated property -moz-box-pack is not allowed.
+  
+    14 │ a {
+    15 │ 	-moz-box-flex: revert;
+  > 16 │ 	-moz-box-pack: start;
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i The property has been removed or deprecated in the CSS specification that were previously existed.
+  
+
+```
