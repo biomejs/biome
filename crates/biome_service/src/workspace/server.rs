@@ -476,7 +476,7 @@ impl WorkspaceServer {
     fn get_parse_with_snippets(
         &self,
         path: &Utf8Path,
-    ) -> Result<(AnyParse, Vec<EmbeddedSnippets>), WorkspaceError> {
+    ) -> Result<(AnyParse, Vec<AnyEmbeddedSnippet>), WorkspaceError> {
         self.documents
             .pin()
             .get(path)
