@@ -8,7 +8,7 @@ use crate::configuration::{LoadedConfiguration, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, FormatEmbedNode,
-    LintParams, LintResults, ParseResult,
+    LintParams, LintResults, ParseResult, UpdateSnippetsNodes,
 };
 use crate::projects::Projects;
 use crate::scanner::{
@@ -363,20 +363,19 @@ impl WorkspaceServer {
         };
         // Second-pass parsing for HTML files with embedded JavaScript and CSS
         // content.
-        let embedded_snippets = if DocumentFileSource::can_contain_embeds(path.as_path()) {
+        let embedded_snippets = if DocumentFileSource::can_contain_embeds(path.as_path())
+            && let Some(Ok(any_parse)) = &syntax
+        {
             // Second-pass parsing for HTML files with embedded JavaScript and CSS content
-            if let Some(Ok(any_parse)) = &syntax {
-                let mut node_cache = NodeCache::default();
-                self.parse_embedded_language_snippets(
-                    project_key,
-                    &biome_path,
-                    &source,
-                    any_parse,
-                    &mut node_cache,
-                )?
-            } else {
-                Default::default()
-            }
+
+            let mut node_cache = NodeCache::default();
+            self.parse_embedded_language_snippets(
+                &biome_path,
+                &source,
+                any_parse,
+                &mut node_cache,
+                &settings,
+            )?
         } else {
             Default::default()
         };
@@ -474,6 +473,23 @@ impl WorkspaceServer {
         }
     }
 
+    fn get_parse_with_snippets(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(AnyParse, Vec<AnyEmbeddedSnippet>), WorkspaceError> {
+        self.documents
+            .pin()
+            .get(path)
+            .ok_or_else(WorkspaceError::not_found)
+            .and_then(|doc| match &doc.syntax {
+                Some(syntax) => match syntax {
+                    Ok(syntax) => Ok((syntax.clone(), doc.embedded_snippets.clone())),
+                    Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
+                },
+                None => Err(WorkspaceError::not_found()),
+            })
+    }
+
     fn get_parse_with_embedded_format_nodes(
         &self,
         path: &Utf8Path,
@@ -497,33 +513,21 @@ impl WorkspaceServer {
             })
     }
 
-    fn get_language_snippets(&self, path: &Utf8Path) -> Vec<AnyEmbeddedSnippet> {
-        let documents = self.documents.pin();
-        documents
-            .get(path)
-            .map(|document| document.embedded_snippets.clone())
-            .unwrap_or_default()
-    }
-
     /// Parses the language snippets if the current language implements the capability `parser.parse_embedded_nodes`
     fn parse_embedded_language_snippets(
         &self,
-        project_key: ProjectKey,
         path: &BiomePath,
         source: &DocumentFileSource,
         root: &AnyParse,
         cache: &mut NodeCache,
+        settings: &Settings,
     ) -> Result<Vec<AnyEmbeddedSnippet>, WorkspaceError> {
         let mut embedded_nodes = Vec::new();
         let capabilities = self.get_file_capabilities(path);
         let Some(parse_embedded) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
-        let settings = self
-            .projects
-            .get_settings_based_on_path(project_key, path)
-            .ok_or_else(WorkspaceError::no_project)?;
-        let result = parse_embedded(root, path, source, &settings, cache);
+        let result = parse_embedded(root, path, source, settings, cache);
 
         for (mut content, file_source) in result.nodes {
             let index = self.insert_source(file_source);
@@ -1275,11 +1279,11 @@ impl Workspace for WorkspaceServer {
             // Second-pass parsing for HTML files with embedded JavaScript and CSS content
             let mut node_cache = NodeCache::default();
             self.parse_embedded_language_snippets(
-                project_key,
                 &path,
                 &document_source,
                 &parsed.any_parse,
                 &mut node_cache,
+                &settings,
             )?
         } else {
             vec![]
@@ -1361,7 +1365,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             pull_code_actions,
         } = params;
-        let parse = self.get_parse(&path)?;
+        let (parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
         let language = self.get_file_source(&path);
         let capabilities = self.features.get_capabilities(language);
         let (diagnostics, errors, skipped_diagnostics) = if (categories.is_lint()
@@ -1386,14 +1390,14 @@ impl Workspace for WorkspaceServer {
                 parse,
                 settings: &settings,
                 path: &path,
-                only: only.clone(),
-                skip: skip.clone(),
+                only: &only,
+                skip: &skip,
                 language,
                 categories,
                 module_graph: self.module_graph.clone(),
                 project_layout: self.project_layout.clone(),
                 suppression_reason: None,
-                enabled_selectors: enabled_rules.clone(),
+                enabled_selectors: &enabled_rules,
                 pull_code_actions,
                 plugins: plugins.clone(),
                 diagnostic_offset: None,
@@ -1404,7 +1408,7 @@ impl Workspace for WorkspaceServer {
                 mut errors,
                 mut skipped_diagnostics,
             } = results;
-            for embedded_node in self.get_language_snippets(&path) {
+            for embedded_node in embedded_snippets {
                 let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
                     continue;
                 };
@@ -1417,14 +1421,14 @@ impl Workspace for WorkspaceServer {
                     parse: embedded_node.parse().clone(),
                     settings: &settings,
                     path: &path,
-                    only: only.clone(),
-                    skip: skip.clone(),
+                    only: &only,
+                    skip: &skip,
                     language: file_source,
                     categories,
                     module_graph: self.module_graph.clone(),
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
-                    enabled_selectors: enabled_rules.clone(),
+                    enabled_selectors: &enabled_rules,
                     pull_code_actions,
                     plugins: plugins.clone(),
                     diagnostic_offset: Some(embedded_node.content_offset()),
@@ -1432,25 +1436,18 @@ impl Workspace for WorkspaceServer {
 
                 diagnostics.extend(results.diagnostics);
                 skipped_diagnostics += results.skipped_diagnostics;
-
-                let this_diagnostics = embedded_node.into_serde_diagnostics();
-                errors += this_diagnostics
-                    .iter()
-                    .filter(|diag| diag.severity() <= Severity::Error)
-                    .count();
                 errors += results.errors;
-                diagnostics.extend(this_diagnostics);
             }
 
             (diagnostics, errors, skipped_diagnostics)
         } else {
-            let mut parse_diagnostics = parse.into_serde_diagnostics();
+            let mut parse_diagnostics = parse.into_serde_diagnostics(None);
             let mut errors = parse_diagnostics
                 .iter()
                 .filter(|diag| diag.severity() <= Severity::Error)
                 .count();
 
-            for embedded_node in self.get_language_snippets(&path) {
+            for embedded_node in embedded_snippets {
                 let diagnostics = embedded_node.into_serde_diagnostics();
                 errors += diagnostics
                     .iter()
@@ -1509,7 +1506,7 @@ impl Workspace for WorkspaceServer {
             .code_actions
             .ok_or_else(self.build_capability_error(&path))?;
 
-        let parse = self.get_parse(&path)?;
+        let (parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
         let language = self.get_file_source(&path);
         let settings = self
             .projects
@@ -1523,16 +1520,16 @@ impl Workspace for WorkspaceServer {
             module_graph: self.module_graph.clone(),
             project_layout: self.project_layout.clone(),
             language,
-            only: only.clone(),
-            skip: skip.clone(),
+            only: &only,
+            skip: &skip,
             suppression_reason: None,
-            enabled_rules: enabled_rules.clone(),
+            enabled_rules: &enabled_rules,
             plugins: Vec::new(),
             categories,
         });
 
-        for embedded_node in self.get_language_snippets(&path) {
-            let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
+        for embedded_snippet in embedded_snippets {
+            let Some(file_source) = self.get_source(embedded_snippet.file_source_index()) else {
                 continue;
             };
             let capabilities = self.features.get_capabilities(file_source);
@@ -1541,17 +1538,17 @@ impl Workspace for WorkspaceServer {
             };
 
             let embedded_actions_result = code_actions(CodeActionsParams {
-                parse: embedded_node.parse(),
+                parse: embedded_snippet.parse(),
                 range,
                 settings: &settings,
                 path: &path,
                 module_graph: self.module_graph.clone(),
                 project_layout: self.project_layout.clone(),
                 language: file_source,
-                only: only.clone(),
-                skip: skip.clone(),
+                only: &only,
+                skip: &skip,
                 suppression_reason: None,
-                enabled_rules: enabled_rules.clone(),
+                enabled_rules: &enabled_rules,
                 plugins: Vec::new(),
                 categories,
             });
@@ -1688,13 +1685,15 @@ impl Workspace for WorkspaceServer {
             rule_categories,
             suppression_reason,
         } = params;
+
         let capabilities = self.get_file_capabilities(&path);
 
         let fix_all = capabilities
             .analyzer
             .fix_all
             .ok_or_else(self.build_capability_error(&path))?;
-        let parse = self.get_parse(&path)?;
+
+        let (mut parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
 
         let settings = self
             .projects
@@ -1712,7 +1711,56 @@ impl Workspace for WorkspaceServer {
         } else {
             Vec::new()
         };
-        let mut fix_result = fix_all(FixAllParams {
+
+        let mut errors = 0;
+        let mut actions = vec![];
+        let mut skipped_suggested_fixes = 0;
+
+        if let Some(update_snippets) = capabilities.analyzer.update_snippets {
+            let mut new_snippets = vec![];
+            for embedded_snippet in embedded_snippets {
+                let Some(document_file_source) =
+                    self.get_source(embedded_snippet.file_source_index())
+                else {
+                    continue;
+                };
+                let capabilities = self.features.get_capabilities(document_file_source);
+                let Some(fix_all) = capabilities.analyzer.fix_all else {
+                    continue;
+                };
+
+                let results = fix_all(FixAllParams {
+                    parse: embedded_snippet.parse(),
+                    fix_file_mode,
+                    settings: &settings,
+                    should_format,
+                    biome_path: &path,
+                    module_graph: self.module_graph.clone(),
+                    project_layout: self.project_layout.clone(),
+                    document_file_source,
+                    only: &only,
+                    skip: &skip,
+                    rule_categories,
+                    suppression_reason: suppression_reason.clone(),
+                    enabled_rules: &enabled_rules,
+                    plugins: plugins.clone(),
+                })?;
+
+                actions.extend(results.actions);
+                errors += results.errors;
+                skipped_suggested_fixes += results.skipped_suggested_fixes;
+
+                new_snippets.push(UpdateSnippetsNodes {
+                    range: embedded_snippet.element_range(),
+                    new_code: results.code,
+                });
+            }
+
+            let new_root = update_snippets(parse.clone(), new_snippets)?;
+            parse.set_new_root(new_root);
+        }
+
+        let fix_result = fix_all(FixAllParams {
             parse,
             fix_file_mode,
             settings: &settings,
@@ -1721,47 +1769,24 @@ impl Workspace for WorkspaceServer {
             module_graph: self.module_graph.clone(),
             project_layout: self.project_layout.clone(),
             document_file_source: language,
-            only: only.clone(),
-            skip: skip.clone(),
+            only: &only,
+            skip: &skip,
             rule_categories,
             suppression_reason: suppression_reason.clone(),
-            enabled_rules: enabled_rules.clone(),
+            enabled_rules: &enabled_rules,
             plugins: plugins.clone(),
         })?;
 
-        for embedded_node in self.get_language_snippets(&path) {
-            let Some(document_file_source) = self.get_source(embedded_node.file_source_index())
-            else {
-                continue;
-            };
-            let capabilities = self.features.get_capabilities(document_file_source);
-            let Some(fix_all) = capabilities.analyzer.fix_all else {
-                continue;
-            };
+        actions.extend(fix_result.actions);
+        errors += fix_result.errors;
+        skipped_suggested_fixes += fix_result.skipped_suggested_fixes;
 
-            let results = fix_all(FixAllParams {
-                parse: embedded_node.parse(),
-                fix_file_mode,
-                settings: &settings,
-                should_format,
-                biome_path: &path,
-                module_graph: self.module_graph.clone(),
-                project_layout: self.project_layout.clone(),
-                document_file_source,
-                only: only.clone(),
-                skip: skip.clone(),
-                rule_categories,
-                suppression_reason: suppression_reason.clone(),
-                enabled_rules: enabled_rules.clone(),
-                plugins: plugins.clone(),
-            })?;
-
-            fix_result.errors += results.errors;
-            fix_result.skipped_suggested_fixes += results.skipped_suggested_fixes;
-            fix_result.actions.extend(results.actions);
-        }
-
-        Ok(fix_result)
+        Ok(FixFileResult {
+            errors,
+            code: fix_result.code,
+            actions,
+            skipped_suggested_fixes,
+        })
     }
 
     fn rename(&self, params: super::RenameParams) -> Result<RenameResult, WorkspaceError> {

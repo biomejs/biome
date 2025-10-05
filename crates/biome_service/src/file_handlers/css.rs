@@ -361,6 +361,7 @@ impl ExtensionHandler for CssFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
+                update_snippets: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -552,10 +553,10 @@ fn lint(params: LintParams) -> LintResults {
 
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings, analyzer_options)
-            .with_only(&params.only)
-            .with_skip(&params.skip)
+            .with_only(params.only)
+            .with_skip(params.skip)
             .with_path(params.path.as_path())
-            .with_enabled_selectors(&params.enabled_selectors)
+            .with_enabled_selectors(params.enabled_selectors)
             .with_project_layout(params.project_layout.clone())
             .finish();
 
@@ -576,7 +577,12 @@ fn lint(params: LintParams) -> LintResults {
         |signal| process_lint.process_signal(signal),
     );
 
-    process_lint.into_result(params.parse.into_serde_diagnostics(), analyze_diagnostics)
+    process_lint.into_result(
+        params
+            .parse
+            .into_serde_diagnostics(params.diagnostic_offset),
+        analyze_diagnostics,
+    )
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
@@ -611,10 +617,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings, analyzer_options)
-            .with_only(&only)
-            .with_skip(&skip)
+            .with_only(only)
+            .with_skip(skip)
             .with_path(path.as_path())
-            .with_enabled_selectors(&rules)
+            .with_enabled_selectors(rules)
             .with_project_layout(project_layout)
             .finish();
 
@@ -657,10 +663,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&params.only)
-            .with_skip(&params.skip)
+            .with_only(params.only)
+            .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
-            .with_enabled_selectors(&params.enabled_rules)
+            .with_enabled_selectors(params.enabled_rules)
             .with_project_layout(params.project_layout)
             .finish();
 

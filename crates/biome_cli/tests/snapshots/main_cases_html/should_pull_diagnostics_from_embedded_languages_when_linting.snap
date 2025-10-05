@@ -22,6 +22,7 @@ expression: redactor(content)
 
 ```html
 <script>debugger</script>
+<script>import z from "zod"</script>
 <style>#id .class div { background-color: red; background-color: red;  } </style>
 
 ```
@@ -40,14 +41,34 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+file.html:2:16 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ <script>debugger</script>
+  > 2 │ <script>import z from "zod"</script>
+      │                ^
+    3 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
+    4 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·z·from·"zod"
+      │ -------------------
+
+```
+
+```block
 file.html:1:9 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This is an unexpected use of the debugger statement.
   
   > 1 │ <script>debugger</script>
       │         ^^^^^^^^
-    2 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
-    3 │ 
+    2 │ <script>import z from "zod"</script>
+    3 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
   
   i Unsafe fix: Remove debugger statement
   
@@ -57,21 +78,39 @@ file.html:1:9 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━�
 ```
 
 ```block
-file.html:2:48 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.html:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of an import declaration outside of a module
+  
+    1 │ <script>debugger</script>
+  > 2 │ <script>import z from "zod"</script>
+      │         ^^^^^^^^^^^^^^^^^^^
+    3 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
+    4 │ 
+  
+  i not allowed inside scripts
+  
+
+```
+
+```block
+file.html:3:48 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
     1 │ <script>debugger</script>
-  > 2 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
+    2 │ <script>import z from "zod"</script>
+  > 3 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
       │                                                ^^^^^^^^^^^^^^^^
-    3 │ 
+    4 │ 
   
   i background-color is already defined here.
   
     1 │ <script>debugger</script>
-  > 2 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
+    2 │ <script>import z from "zod"</script>
+  > 3 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
       │                         ^^^^^^^^^^^^^^^^
-    3 │ 
+    4 │ 
   
   i Remove or rename the duplicate property to ensure consistent styling.
   
@@ -80,5 +119,6 @@ file.html:2:48 lint/suspicious/noDuplicateProperties ━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 2 errors.
+Found 3 errors.
+Found 1 warning.
 ```

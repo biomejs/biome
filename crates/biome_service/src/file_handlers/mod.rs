@@ -44,7 +44,7 @@ use biome_module_graph::ModuleGraph;
 use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{FileSourceError, NodeCache};
+use biome_rowan::{FileSourceError, NodeCache, SendNode};
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 use grit::GritFileHandler;
@@ -138,6 +138,9 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -436,11 +439,11 @@ pub struct FixAllParams<'a> {
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
-    pub(crate) only: Vec<AnalyzerSelector>,
-    pub(crate) skip: Vec<AnalyzerSelector>,
+    pub(crate) only: &'a [AnalyzerSelector],
+    pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) rule_categories: RuleCategories,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<AnalyzerSelector>,
+    pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
 }
 
@@ -507,13 +510,13 @@ pub(crate) struct LintParams<'a> {
     pub(crate) settings: &'a Settings,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
-    pub(crate) only: Vec<AnalyzerSelector>,
-    pub(crate) skip: Vec<AnalyzerSelector>,
+    pub(crate) only: &'a [AnalyzerSelector],
+    pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_selectors: Vec<AnalyzerSelector>,
+    pub(crate) enabled_selectors: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) pull_code_actions: bool,
     pub(crate) diagnostic_offset: Option<TextSize>,
@@ -641,18 +644,24 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
-    pub(crate) only: Vec<AnalyzerSelector>,
-    pub(crate) skip: Vec<AnalyzerSelector>,
+    pub(crate) only: &'a [AnalyzerSelector],
+    pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<AnalyzerSelector>,
+    pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) categories: RuleCategories,
+}
+
+pub(crate) struct UpdateSnippetsNodes {
+    pub(crate) range: TextRange,
+    pub(crate) new_code: String,
 }
 
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
+type UpdateSnippets = fn(AnyParse, Vec<UpdateSnippetsNodes>) -> Result<SendNode, WorkspaceError>;
 
 #[derive(Default)]
 pub struct AnalyzerCapabilities {
@@ -664,6 +673,8 @@ pub struct AnalyzerCapabilities {
     pub(crate) fix_all: Option<FixAll>,
     /// It renames a binding inside a file
     pub(crate) rename: Option<Rename>,
+    /// It updates the snippets contained in the original root
+    pub(crate) update_snippets: Option<UpdateSnippets>,
 }
 
 type Format =

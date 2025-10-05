@@ -2,6 +2,7 @@ use super::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, DocumentFileSource,
     EnabledForPath, ExtensionHandler, FixAllParams, FormatEmbedNode, FormatterCapabilities,
     LintParams, LintResults, ParseEmbedResult, ParseResult, ParserCapabilities, SearchCapabilities,
+    UpdateSnippetsNodes,
 };
 use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
 use crate::workspace::EmbeddedSnippet;
@@ -16,7 +17,7 @@ use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
 };
-use biome_css_parser::{CssParserOptions, parse_css_with_offset_and_cache};
+use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::format_element::{Interned, LineMode};
@@ -26,6 +27,7 @@ use biome_formatter::{
     LineWidth, Printed,
 };
 use biome_fs::BiomePath;
+use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
     HtmlFormatOptions,
@@ -33,16 +35,16 @@ use biome_html_formatter::{
     format_node,
 };
 use biome_html_parser::{HtmlParseOptions, parse_html_with_cache};
-use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
-use biome_js_parser::{JsParserOptions, parse_js_with_offset_and_cache};
+use biome_html_syntax::{HtmlElement, HtmlEmbeddedContent, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::{JsFileSource, JsLanguage};
-use biome_json_parser::{JsonParserOptions, parse_json_with_offset_and_cache};
+use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, NodeCache};
+use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode};
 use camino::Utf8Path;
 use std::fmt::Debug;
-use tracing::debug_span;
+use tracing::instrument;
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -330,6 +332,7 @@ impl ExtensionHandler for HtmlFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
+                update_snippets: Some(update_snippets),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -384,9 +387,6 @@ fn parse_embedded_nodes(
     let mut nodes = Vec::new();
     let html_root: HtmlRoot = root.tree();
 
-    let js_options = settings.parse_options::<JsLanguage>(biome_path, file_source);
-    let css_options = settings.parse_options::<CssLanguage>(biome_path, file_source);
-    let json_options = settings.parse_options::<JsonLanguage>(biome_path, file_source);
     // Walk through all HTML elements looking for script tags and style tags
     for element in html_root.syntax().descendants() {
         let Some(element) = HtmlElement::cast(element) else {
@@ -395,18 +395,24 @@ fn parse_embedded_nodes(
 
         if let Some(script_type) = element.get_script_type() {
             if script_type.is_javascript() {
-                let result = parse_embedded_script(element.clone(), cache, js_options);
+                let result = parse_embedded_script(
+                    element.clone(),
+                    cache,
+                    biome_path,
+                    file_source,
+                    settings,
+                );
                 if let Some((content, file_source)) = result {
                     nodes.push((content.into(), file_source));
                 }
             } else if script_type.is_json() {
-                let result = parse_embedded_json(element.clone(), cache, json_options);
+                let result = parse_embedded_json(element.clone(), cache, biome_path, settings);
                 if let Some((content, file_source)) = result {
                     nodes.push((content.into(), file_source));
                 }
             }
         } else if element.is_style_tag() {
-            let result = parse_embedded_style(element.clone(), cache, css_options);
+            let result = parse_embedded_style(element.clone(), cache, biome_path, settings);
             if let Some((content, file_source)) = result {
                 nodes.push((content.into(), file_source));
             }
@@ -418,44 +424,56 @@ fn parse_embedded_nodes(
 pub(crate) fn parse_embedded_script(
     element: HtmlElement,
     cache: &mut NodeCache,
-    options: JsParserOptions,
+    path: &BiomePath,
+    html_file_source: &DocumentFileSource,
+    settings: &Settings,
 ) -> Option<(EmbeddedSnippet<JsLanguage>, DocumentFileSource)> {
+    let html_file_source = html_file_source.to_html_file_source()?;
     if element.is_javascript_tag() {
-        let is_modules = element.is_javascript_module().unwrap_or_default();
-        let file_source = if is_modules {
-            JsFileSource::js_module()
+        let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
+            if element.is_typescript_lang().unwrap_or_default() {
+                JsFileSource::ts()
+            } else {
+                JsFileSource::js_module()
+            }
+        } else if html_file_source.is_astro() {
+            JsFileSource::ts()
         } else {
-            JsFileSource::js_script()
+            let is_module = element.is_javascript_module().unwrap_or_default();
+            if is_module {
+                JsFileSource::js_module()
+            } else {
+                JsFileSource::js_script()
+            }
         };
+
+        let document_file_source = DocumentFileSource::Js(file_source);
 
         // This is likely an error
         if element.children().len() > 1 {
             return None;
         }
 
-        let embedded_content = element
-            .children()
-            .iter()
-            .next()
-            .and_then(|child| child.as_any_html_content().cloned())
-            .and_then(|child| child.as_html_embedded_content().cloned())
-            .and_then(|child| {
-                let content = child.value_token().ok()?;
-                let parse = parse_js_with_offset_and_cache(
-                    content.text(),
-                    content.text_range().start(),
-                    file_source,
-                    options,
-                    cache,
-                );
+        let embedded_content = element.children().iter().next().and_then(|child| {
+            let child = child.as_any_html_content()?;
+            let child = child.as_html_embedded_content()?;
+            let content = child.value_token().ok()?;
+            let options = settings.parse_options::<JsLanguage>(path, &document_file_source);
+            let parse = parse_js_with_offset_and_cache(
+                content.text(),
+                content.text_range().start(),
+                file_source,
+                options,
+                cache,
+            );
 
-                Some(EmbeddedSnippet::new(
-                    parse.into(),
-                    child.range(),
-                    content.text_range(),
-                    content.text_range().start(),
-                ))
-            })?;
+            Some(EmbeddedSnippet::new(
+                parse.into(),
+                child.range(),
+                content.text_range(),
+                content.text_range().start(),
+            ))
+        })?;
         Some((embedded_content, file_source.into()))
     } else {
         None
@@ -465,7 +483,8 @@ pub(crate) fn parse_embedded_script(
 pub(crate) fn parse_embedded_style(
     element: HtmlElement,
     cache: &mut NodeCache,
-    options: CssParserOptions,
+    biome_path: &BiomePath,
+    settings: &Settings,
 ) -> Option<(EmbeddedSnippet<CssLanguage>, DocumentFileSource)> {
     if element.is_style_tag() {
         // This is probably an error
@@ -473,29 +492,27 @@ pub(crate) fn parse_embedded_style(
             return None;
         }
 
-        let content = element
-            .children()
-            .iter()
-            .next()
-            .and_then(|child| child.as_any_html_content().cloned())
-            .and_then(|child| child.as_html_embedded_content().cloned())
-            .and_then(|child| {
-                let content = child.value_token().ok()?;
-                let parse = parse_css_with_offset_and_cache(
-                    content.text(),
-                    content.text_range().start(),
-                    cache,
-                    options,
-                );
+        let file_source = DocumentFileSource::Css(CssFileSource::css());
+        let content = element.children().iter().next().and_then(|child| {
+            let child = child.as_any_html_content()?;
+            let child = child.as_html_embedded_content()?;
+            let options = settings.parse_options::<CssLanguage>(biome_path, &file_source);
+            let content = child.value_token().ok()?;
+            let parse = parse_css_with_offset_and_cache(
+                content.text(),
+                content.text_range().start(),
+                cache,
+                options,
+            );
 
-                Some(EmbeddedSnippet::new(
-                    parse.into(),
-                    child.range(),
-                    content.text_range(),
-                    content.text_range().start(),
-                ))
-            })?;
-        Some((content, CssFileSource::css().into()))
+            Some(EmbeddedSnippet::new(
+                parse.into(),
+                child.range(),
+                content.text_range(),
+                content.text_range().start(),
+            ))
+        })?;
+        Some((content, file_source))
     } else {
         None
     }
@@ -504,18 +521,20 @@ pub(crate) fn parse_embedded_style(
 pub(crate) fn parse_embedded_json(
     element: HtmlElement,
     cache: &mut NodeCache,
-    options: JsonParserOptions,
+    biome_path: &BiomePath,
+    settings: &Settings,
 ) -> Option<(EmbeddedSnippet<JsonLanguage>, DocumentFileSource)> {
     // This is probably an error
     if element.children().len() > 1 {
         return None;
     }
 
+    let file_source = DocumentFileSource::Json(JsonFileSource::json());
     let script_children = element.children().iter().next().and_then(|child| {
         let child = child.as_any_html_content()?;
         let child = child.as_html_embedded_content()?;
-
         let content = child.value_token().ok()?;
+        let options = settings.parse_options::<JsonLanguage>(biome_path, &file_source);
         let parse = parse_json_with_offset_and_cache(
             content.text(),
             content.text_range().start(),
@@ -530,7 +549,7 @@ pub(crate) fn parse_embedded_json(
             content.text_range().start(),
         ))
     })?;
-    Some((script_children, JsonFileSource::json().into()))
+    Some((script_children, file_source))
 }
 
 fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
@@ -646,9 +665,9 @@ fn format_embedded(
 
 #[tracing::instrument(level = "debug", skip(params))]
 fn lint(params: LintParams) -> LintResults {
-    let _ = debug_span!("Linting HTML file", path =? params.path, language =? params.language)
-        .entered();
-    let diagnostics = params.parse.into_serde_diagnostics();
+    let diagnostics = params
+        .parse
+        .into_serde_diagnostics(params.diagnostic_offset);
 
     let diagnostic_count = diagnostics.len() as u32;
     let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
@@ -691,4 +710,35 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         actions: vec![],
         errors: 0,
     })
+}
+
+#[instrument(level = "debug", skip_all)]
+pub(crate) fn update_snippets(
+    root: AnyParse,
+    new_snippets: Vec<UpdateSnippetsNodes>,
+) -> Result<SendNode, WorkspaceError> {
+    let tree: HtmlRoot = root.tree();
+    let mut mutation = BatchMutation::new(tree.syntax().clone());
+    let iterator = tree
+        .syntax()
+        .descendants()
+        .filter_map(HtmlEmbeddedContent::cast);
+
+    for element in iterator {
+        let Some(snippet) = new_snippets
+            .iter()
+            .find(|snippet| snippet.range == element.range())
+        else {
+            continue;
+        };
+
+        if let Ok(value_token) = element.value_token() {
+            let new_token = ident(snippet.new_code.as_str());
+            mutation.replace_token(value_token, new_token);
+        }
+    }
+
+    let root = mutation.commit();
+
+    Ok(root.as_send().unwrap())
 }

@@ -38,6 +38,8 @@ static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useAnchorHref"),
         RuleFilter::Rule("nursery", "useImageSize"),
         RuleFilter::Rule("nursery", "useQwikClasslist"),
+        RuleFilter::Rule("nursery", "useQwikMethodUsage"),
+        RuleFilter::Rule("nursery", "useQwikValidLexicalScope"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
     ]
 });

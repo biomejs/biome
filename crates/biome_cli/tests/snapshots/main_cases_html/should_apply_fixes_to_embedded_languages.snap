@@ -1,0 +1,79 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": {
+      "enabled": true,
+      "indentScriptAndStyle": true
+    },
+    "linter": {
+      "enabled": true
+    },
+    "assist": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.html`
+
+```html
+<script type="module">
+	import z from "zod";
+
+	const _schema = z.object({}).optional().nullable();
+</script>
+<style>
+	#id .class div {
+		background-color: red;
+		background-color: red;
+	}
+</style>
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.html:7:48 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    6 │         </script>
+  > 7 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
+      │                                                ^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i background-color is already defined here.
+  
+    6 │         </script>
+  > 7 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
+      │                         ^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+Found 1 error.
+```

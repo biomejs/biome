@@ -106,6 +106,7 @@ impl ExtensionHandler for SvelteFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
+                update_snippets: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
