@@ -101,7 +101,6 @@ where
         METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
         parse_linter_suppression_comment,
-        // TODO: add suppression action
         Box::new(HtmlSuppressionAction),
         &mut emit_signal,
     );
