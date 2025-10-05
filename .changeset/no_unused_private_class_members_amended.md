@@ -4,11 +4,13 @@
 
 Changed [`noUnusedPrivateClassMembers`](https://biomejs.dev/linter/rules/no-unused-private-class-members/) to align more fully with meaningful reads.
 
-What’s a “meaningful read”?
+This rule now distinguishes more carefully between writes and reads of private class members.
 
-A meaningful read happens when a private class member is actually read in a way that affects program behavior, not just written to.
-For example, this.#x += 1 both reads and writes #x, so it counts as a meaningful read.
-Assigning to a setter without reading it (e.g., this.#x = 1 with no getter) is not a meaningful read.
+- A *meaningful read* is any access that affects program behavior.
+- For example, `this.#x += 1` both reads and writes `#x`, so it counts as usage.
+- Pure writes without a read (e.g. `this.#x = 1` with no getter) are no longer treated as usage.
+
+This change ensures that private members are only considered “used” when they are actually read in a way that influences execution.
 
 ***Invalid examples (previously valid)***
 
