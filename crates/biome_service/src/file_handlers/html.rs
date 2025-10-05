@@ -721,16 +721,15 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         plugins: _,
         categories,
     } = params;
-    let _ = debug_span!("Code actions GraphQL", range =? range, path =? path).entered();
+    let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parse.tree();
     let _ = trace_span!("Parsed file", tree =? tree).entered();
-    let Some(_) = language.to_graphql_file_source() else {
-        error!("Could not determine the file source of the file");
+    let Some(_) = language.to_html_file_source() else {
+        error!("Could not determine the HTML file source of the file");
         return PullActionsResult {
             actions: Vec::new(),
         };
     };
-
     let analyzer_options =
         settings.analyzer_options::<HtmlLanguage>(path, &language, suppression_reason.as_deref());
     let mut actions = Vec::new();
