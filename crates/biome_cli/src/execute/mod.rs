@@ -9,6 +9,7 @@ use crate::commands::MigrateSubCommand;
 use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::{TraverseResult, traverse};
+use crate::reporter::checkstyle::CheckstyleReporter;
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
@@ -246,7 +247,7 @@ pub enum ReportMode {
     Junit,
     /// Reports information in the [GitLab Code Quality](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool) format.
     GitLab,
-    /// Reports diagnostics in Checkstyle XML format
+    /// Reports diagnostics in [Checkstyle XML format](https://checkstyle.org/).
     Checkstyle,
 }
 
@@ -674,18 +675,6 @@ pub fn execute_mode(
                     {buffer}
                 });
             }
-            ReportMode::Checkstyle => {
-                let reporter = crate::reporter::checkstyle::CheckstyleReporter {
-                    summary,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
-                    execution: execution.clone(),
-                };
-                reporter.write(&mut crate::reporter::checkstyle::CheckstyleReporterVisitor::new(console))?;
-            }
         }
         ReportMode::GitHub => {
             let reporter = GithubReporter {
@@ -717,6 +706,17 @@ pub fn execute_mode(
                 working_directory: fs.working_directory().clone(),
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;
+        }
+        ReportMode::Checkstyle => {
+            let reporter = CheckstyleReporter {
+                summary,
+                diagnostics_payload,
+                execution: execution.clone(),
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+            reporter
+                .write(&mut crate::reporter::checkstyle::CheckstyleReporterVisitor::new(console))?;
         }
     }
 
