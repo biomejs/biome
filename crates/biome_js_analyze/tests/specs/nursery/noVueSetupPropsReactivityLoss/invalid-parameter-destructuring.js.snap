@@ -1,0 +1,89 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-parameter-destructuring.js
+---
+# Input
+```js
+// Parameter destructuring patterns that lose reactivity
+
+// Basic parameter destructuring
+export default {
+  setup({ foo, bar }) {
+    return () => h('div', foo + bar)
+  }
+}
+
+// Destructuring with default values  
+export default {
+  setup({ foo = 'default', bar }) {
+    return () => h('div', foo + bar)
+  }
+}
+
+// Destructuring with renaming
+export default {
+  setup({ foo: renamedFoo, bar }) {
+    return () => h('div', renamedFoo + bar)
+  }
+}
+
+// Destructuring with rest pattern
+export default {
+  setup({ foo, ...rest }) {
+    return () => h('div', foo + rest.bar)
+  }
+}
+
+// defineComponent with parameter destructuring
+export default defineComponent({
+  setup({ foo, bar }) {
+    return () => h('div', foo + bar)
+  }
+})
+
+// Named export with parameter destructuring  
+export const MyComponent = {
+  setup({ foo, bar }) {
+    return () => h('div', foo + bar)
+  }
+}
+```
+
+# Diagnostics
+```
+invalid-parameter-destructuring.js:5:9 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the `setup` function parameters loses reactivity.
+  
+    3 │ // Basic parameter destructuring
+    4 │ export default {
+  > 5 │   setup({ foo, bar }) {
+      │         ^^^^^^^^^^^^
+    6 │     return () => h('div', foo + bar)
+    7 │   }
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+  i Alternatively, use `toRefs(props)` or `toRef(props, 'key')` to create reactive refs.
+  
+
+```
+
+```
+invalid-parameter-destructuring.js:33:9 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the `setup` function parameters loses reactivity.
+  
+    31 │ // defineComponent with parameter destructuring
+    32 │ export default defineComponent({
+  > 33 │   setup({ foo, bar }) {
+       │         ^^^^^^^^^^^^
+    34 │     return () => h('div', foo + bar)
+    35 │   }
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+  i Alternatively, use `toRefs(props)` or `toRef(props, 'key')` to create reactive refs.
+  
+
+```

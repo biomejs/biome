@@ -5050,6 +5050,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueSetupPropsReactivityLossConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueSetupPropsReactivityLossOptions" }
+			]
+		},
+		"NoVueSetupPropsReactivityLossOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueVIfWithVForConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5299,6 +5309,13 @@
 					"description": "Disallow reserved names to be used as props.\nSee https://biomejs.dev/linter/rules/no-vue-reserved-props",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueReservedPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueSetupPropsReactivityLoss": {
+					"description": "Disallow destructuring of props passed to setup in Vue projects.\nSee https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueSetupPropsReactivityLossConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8359,6 +8376,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueReservedPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueSetupPropsReactivityLossOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueSetupPropsReactivityLossOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

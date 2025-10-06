@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-local-function.js
+---
+# Input
+```js
+// locally defined toRefs function should be invalid
+function toRefs(obj) {
+  return obj;
+}
+
+export default {
+  setup(props) {
+    const { baz } = toRefs(props);
+    return () => h('div', baz)
+  }
+}
+```
+
+# Diagnostics
+```
+invalid-local-function.js:8:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the root scope of `setup` loses reactivity.
+  
+     6 │ export default {
+     7 │   setup(props) {
+   > 8 │     const { baz } = toRefs(props);
+       │           ^^^^^^^
+     9 │     return () => h('div', baz)
+    10 │   }
+  
+  i The `props` parameter is defined here.
+  
+    6 │ export default {
+  > 7 │   setup(props) {
+      │         ^^^^^
+    8 │     const { baz } = toRefs(props);
+    9 │     return () => h('div', baz)
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+  i Alternatively, use `toRefs(props)` or `toRef(props, 'key')` to create reactive refs.
+  
+
+```

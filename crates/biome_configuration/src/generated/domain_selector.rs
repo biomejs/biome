@@ -90,6 +90,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noVueDuplicateKeys"),
         RuleFilter::Rule("nursery", "noVueReservedKeys"),
         RuleFilter::Rule("nursery", "noVueReservedProps"),
+        RuleFilter::Rule("nursery", "noVueSetupPropsReactivityLoss"),
         RuleFilter::Rule("nursery", "useVueDefineMacrosOrder"),
         RuleFilter::Rule("nursery", "useVueMultiWordComponentNames"),
     ]

@@ -1,0 +1,28 @@
+/* should not generate diagnostics */
+import { toRefs, toRef, reactive, defineComponent } from 'vue';
+
+// Valid TypeScript patterns
+
+// TypeScript with safe reactivity patterns
+export default {
+  setup(props: { foo: string; bar: number }) {
+    const { foo } = toRefs(props);
+    return () => h('div', foo.value + props.bar)
+  }
+}
+
+// Generic component with safe patterns
+export default {
+  setup<T extends { foo: string }>(props: T) {
+    const foo = toRef(props, 'foo');
+    return () => h('div', foo.value)
+  }
+}
+
+// defineComponent with safe TypeScript patterns
+export default defineComponent({
+  setup(props: { foo: string }) {
+    const reactiveProps = reactive(props);
+    return () => h('div', reactiveProps.foo)
+  }
+});
