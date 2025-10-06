@@ -186,7 +186,6 @@ pub(crate) fn run<'a>(
                 path: biome_path.clone(),
             })?;
             let output = printed.into_code();
-            dbg!(&output);
             if (mode.is_safe_fixes_enabled() || mode.is_safe_and_unsafe_fixes_enabled())
                 && output != new_content
             {
