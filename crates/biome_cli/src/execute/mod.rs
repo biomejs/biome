@@ -13,6 +13,7 @@ use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
+use crate::reporter::rdjson::{RdJsonReporter, RdJsonReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{
@@ -246,6 +247,8 @@ pub enum ReportMode {
     Junit,
     /// Reports information in the [GitLab Code Quality](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool) format.
     GitLab,
+    /// Reports information in [reviewdog JSON format](https://deepwiki.com/reviewdog/reviewdog/3.2-reviewdog-diagnostic-format)
+    RdJson,
 }
 
 impl Default for ReportMode {
@@ -268,6 +271,7 @@ impl From<CliReporter> for ReportMode {
             CliReporter::GitHub => Self::GitHub,
             CliReporter::Junit => Self::Junit,
             CliReporter::GitLab => Self::GitLab {},
+            CliReporter::RdJson => Self::RdJson,
         }
     }
 }
@@ -702,6 +706,15 @@ pub fn execute_mode(
                 working_directory: fs.working_directory().clone(),
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;
+        }
+        ReportMode::RdJson => {
+            let reporter = RdJsonReporter {
+                diagnostics_payload,
+                execution: execution.clone(),
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+            reporter.write(&mut RdJsonReporterVisitor(console))?;
         }
     }
 

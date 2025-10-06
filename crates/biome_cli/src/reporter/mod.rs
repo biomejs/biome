@@ -2,6 +2,7 @@ pub(crate) mod github;
 pub(crate) mod gitlab;
 pub(crate) mod json;
 pub(crate) mod junit;
+pub(crate) mod rdjson;
 pub(crate) mod summary;
 pub(crate) mod terminal;
 

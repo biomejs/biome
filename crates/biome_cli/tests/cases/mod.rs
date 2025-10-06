@@ -28,6 +28,7 @@ mod protected_files;
 mod reporter_github;
 mod reporter_gitlab;
 mod reporter_junit;
+mod reporter_rdjson;
 mod reporter_summary;
 mod reporter_terminal;
 mod rules_via_dependencies;
