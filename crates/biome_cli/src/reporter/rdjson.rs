@@ -91,8 +91,14 @@ fn diagnostic_to_rdjson<'a>(diagnostic: &'a Error) -> RdJsonDiagnostic<'a> {
     {
         if let Some(resource) = resource.as_file() {
             let source = SourceFile::new(source_code);
-            let start = source.location(span.start()).expect("Invalid span");
-            let end = source.location(span.end()).expect("Invalid span");
+            let start = match source.location(span.start()) {
+                Ok(s) => s,
+                Err(_) => return None,
+            };
+            let end = match source.location(span.end()) {
+                Ok(e) => e,
+                Err(_) => return None,
+            };
             Some(RdJsonLocation {
                 path: resource.to_string(),
                 range: Some(RdJsonRange {
@@ -115,12 +121,20 @@ fn diagnostic_to_rdjson<'a>(diagnostic: &'a Error) -> RdJsonDiagnostic<'a> {
 
     let suggestions = to_rdjson_suggetions(diagnostic);
 
-    let category = diagnostic.category().expect("Diagnostic has no category");
-    RdJsonDiagnostic {
-        code: RdJsonCode {
+    let code = if let Some(category) = diagnostic.category() {
+        RdJsonCode {
             url: category.link().map(String::from),
             value: category.name(),
-        },
+        }
+    } else {
+        RdJsonCode {
+            url: None,
+            value: "unknown",
+        }
+    };
+
+    RdJsonDiagnostic {
+        code,
         location,
         message,
         suggestions,
