@@ -1,3 +1,4 @@
+// should generate diagnostics
 
 foo.apply(null, args);
 foo.apply(null, [1, 2, 3]);
