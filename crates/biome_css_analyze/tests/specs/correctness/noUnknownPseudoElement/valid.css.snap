@@ -41,5 +41,6 @@ a::part(shadow-part) { }
 ::view-transition-new(*) {
 	position: absolute;
 }
+details::details-content {}
 
 ```

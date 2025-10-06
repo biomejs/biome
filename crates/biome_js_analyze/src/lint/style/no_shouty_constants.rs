@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsVariableDeclaratorList,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, SyntaxToken};
+use biome_rule_options::no_shouty_constants::NoShoutyConstantsOptions;
 
 declare_lint_rule! {
     /// Disallow the use of constants which its value is the upper-case version of its name.
@@ -91,7 +92,7 @@ impl Rule for NoShoutyConstants {
     type Query = Semantic<JsVariableDeclarator>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoShoutyConstantsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let declarator = ctx.query();
@@ -99,23 +100,22 @@ impl Rule for NoShoutyConstants {
             .parent::<JsVariableDeclaratorList>()?
             .parent::<JsVariableDeclaration>()?;
 
-        if declaration.is_const() {
-            if let Some((binding, literal)) = is_id_and_string_literal_inner_text_equal(declarator)
-            {
-                let model = ctx.model();
-                if model.is_exported(&binding) {
-                    return None;
-                }
-
-                if binding.all_references(model).count() > 1 {
-                    return None;
-                }
-
-                return Some(State {
-                    literal,
-                    reference: binding.all_references(model).next()?,
-                });
+        if declaration.is_const()
+            && let Some((binding, literal)) = is_id_and_string_literal_inner_text_equal(declarator)
+        {
+            let model = ctx.model();
+            if model.is_exported(&binding) {
+                return None;
             }
+
+            if binding.all_references(model).count() > 1 {
+                return None;
+            }
+
+            return Some(State {
+                literal,
+                reference: binding.all_references(model).next()?,
+            });
         }
 
         None

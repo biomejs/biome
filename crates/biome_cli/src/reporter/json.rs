@@ -1,5 +1,6 @@
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::Formatter;
+use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
 
 #[derive(Debug, Default, Serialize)]
@@ -32,12 +33,18 @@ pub struct JsonReporter {
     pub diagnostics: DiagnosticsPayload,
     pub summary: TraversalSummary,
     pub verbose: bool,
+    pub working_directory: Option<Utf8PathBuf>,
 }
 
 impl Reporter for JsonReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> std::io::Result<()> {
         visitor.report_summary(&self.execution, self.summary, self.verbose)?;
-        visitor.report_diagnostics(&self.execution, self.diagnostics, self.verbose)?;
+        visitor.report_diagnostics(
+            &self.execution,
+            self.diagnostics,
+            self.verbose,
+            self.working_directory.as_deref(),
+        )?;
 
         Ok(())
     }
@@ -61,6 +68,7 @@ impl ReporterVisitor for JsonReporterVisitor {
         _execution: &Execution,
         payload: DiagnosticsPayload,
         verbose: bool,
+        _working_directory: Option<&Utf8Path>,
     ) -> std::io::Result<()> {
         for diagnostic in payload.diagnostics {
             if diagnostic.severity() >= payload.diagnostic_level {

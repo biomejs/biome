@@ -23,12 +23,6 @@ const hello  :      string      = "world";
 </script>
 <div></div>"#;
 
-const SVELTE_TS_CONTEXT_MODULE_FILE_FORMATTED: &str = r#"<script context="module" lang="ts">
-import Button from "./components/Button.svelte";
-const hello: string = "world";
-</script>
-<div></div>"#;
-
 const SVELTE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED: &str =
     "<script>\r\n  const a    = \"b\";\r\n</script>\r\n<div></div>";
 
@@ -48,7 +42,7 @@ var foo: string = "";
 
 #[test]
 fn sorts_imports_check() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -86,7 +80,7 @@ fn sorts_imports_check() {
 
 #[test]
 fn sorts_imports_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -125,7 +119,7 @@ fn sorts_imports_write() {
 
 #[test]
 fn format_svelte_ts_context_module_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -159,7 +153,7 @@ fn format_svelte_ts_context_module_files() {
 
 #[test]
 fn format_svelte_ts_context_module_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -176,12 +170,6 @@ fn format_svelte_ts_context_module_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(
-        &fs,
-        svelte_file_path,
-        SVELTE_TS_CONTEXT_MODULE_FILE_FORMATTED,
-    );
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_ts_context_module_files_write",
@@ -193,7 +181,7 @@ fn format_svelte_ts_context_module_files_write() {
 
 #[test]
 fn format_svelte_carriage_return_line_feed_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");

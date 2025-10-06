@@ -1,7 +1,8 @@
 use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement,
-    JsAssignmentOperator, JsLanguage, JsLogicalOperator, JsSyntaxNode, JsSyntaxToken,
+    JsArrowFunctionExpression, JsAssignmentOperator, JsFunctionDeclaration, JsLanguage,
+    JsLogicalOperator, JsMethodClassMember, JsMethodObjectMember, JsSyntaxNode, JsSyntaxToken,
     JsUnaryOperator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TriviaPiece};
@@ -315,6 +316,37 @@ fn get_boolean_value(node: &AnyJsLiteralExpression) -> bool {
             .as_static_value()
             .is_some_and(|value| !value.is_falsy()),
     }
+}
+
+/// Checks if the given `JsExpressionStatement` is within an async function.
+///
+/// This function traverses up the syntax tree from the given expression node
+/// to find the nearest function and checks if it is an async function. It
+/// supports arrow functions, function declarations, class methods, and object
+/// methods.
+///
+/// # Arguments
+///
+/// * `node` - A reference to a `JsExpressionStatement` to check.
+///
+/// # Returns
+///
+/// * `true` if the expression is within an async function.
+/// * `false` otherwise.
+pub fn is_in_async_function(node: &JsSyntaxNode) -> bool {
+    for ancestor in node.ancestors() {
+        if let Some(func) = JsArrowFunctionExpression::cast_ref(&ancestor) {
+            return func.async_token().is_some();
+        } else if let Some(func) = JsFunctionDeclaration::cast_ref(&ancestor) {
+            return func.async_token().is_some();
+        } else if let Some(method) = JsMethodClassMember::cast_ref(&ancestor) {
+            return method.async_token().is_some();
+        } else if let Some(method) = JsMethodObjectMember::cast_ref(&ancestor) {
+            return method.async_token().is_some();
+        }
+    }
+
+    false
 }
 
 #[cfg(test)]

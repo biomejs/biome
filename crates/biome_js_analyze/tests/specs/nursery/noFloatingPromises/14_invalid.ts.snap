@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: 14_invalid.ts
+---
+# Input
+```ts
+const condition = Math.random() > -1; // Always true, but dynamic to linter
+condition ? Promise.reject("ternary bypass") : null;
+
+```
+
+# Diagnostics
+```
+14_invalid.ts:2:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    1 │ const condition = Math.random() > -1; // Always true, but dynamic to linter
+  > 2 │ condition ? Promise.reject("ternary bypass") : null;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```

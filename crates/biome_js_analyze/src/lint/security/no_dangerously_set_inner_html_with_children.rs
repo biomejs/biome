@@ -1,7 +1,7 @@
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
@@ -10,6 +10,7 @@ use biome_js_syntax::{
     JsxSelfClosingElement,
 };
 use biome_rowan::{AstNode, AstNodeList, TextRange, declare_node_union};
+use biome_rule_options::no_dangerously_set_inner_html_with_children::NoDangerouslySetInnerHtmlWithChildrenOptions;
 
 declare_lint_rule! {
     /// Report when a DOM element or a component uses both `children` and `dangerouslySetInnerHTML` prop.
@@ -39,7 +40,8 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDangerouslySetInnerHtmlWithChildren",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("no-danger-with-children")],
+        sources: &[RuleSource::EslintReact("no-danger-with-children").same()],
+        domains: &[RuleDomain::React],
         recommended: true,
         severity: Severity::Error,
     }
@@ -156,7 +158,7 @@ impl Rule for NoDangerouslySetInnerHtmlWithChildren {
     type Query = Semantic<AnyJsCreateElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDangerouslySetInnerHtmlWithChildrenOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

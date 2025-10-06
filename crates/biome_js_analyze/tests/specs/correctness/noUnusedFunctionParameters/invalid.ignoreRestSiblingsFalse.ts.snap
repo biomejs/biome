@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 134
+expression: invalid.ignoreRestSiblingsFalse.ts
+---
+# Input
+```ts
+function withObjectSpreadOneSibling({a, ...rest}) {
+	return rest;
+}
+
+function withObjectSpreadTwoSiblings({a, b, ...rest}) {
+	return rest;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ignoreRestSiblingsFalse.ts:1:38 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+  > 1 │ function withObjectSpreadOneSibling({a, ...rest}) {
+      │                                      ^
+    2 │ 	return rest;
+    3 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+```
+
+```
+invalid.ignoreRestSiblingsFalse.ts:5:39 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    3 │ }
+    4 │ 
+  > 5 │ function withObjectSpreadTwoSiblings({a, b, ...rest}) {
+      │                                       ^
+    6 │ 	return rest;
+    7 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+```
+
+```
+invalid.ignoreRestSiblingsFalse.ts:5:42 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    3 │ }
+    4 │ 
+  > 5 │ function withObjectSpreadTwoSiblings({a, b, ...rest}) {
+      │                                          ^
+    6 │ 	return rest;
+    7 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+```

@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::{Markup, markup};
 use biome_diagnostics::Severity;
@@ -21,6 +21,7 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union,
 };
+use biome_rule_options::use_explicit_type::UseExplicitTypeOptions;
 
 declare_lint_rule! {
     /// Enforce types in functions, methods, variables, and parameters.
@@ -326,8 +327,10 @@ declare_lint_rule! {
         language: "ts",
         recommended: false,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintTypeScript("explicit-function-return-type"), RuleSource::EslintTypeScript("explicit-module-boundary-types")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[
+            RuleSource::EslintTypeScript("explicit-function-return-type").inspired(),
+            RuleSource::EslintTypeScript("explicit-module-boundary-types").inspired(),
+        ],
     }
 }
 
@@ -360,7 +363,7 @@ pub enum ViolationKind {
 }
 
 impl ViolationKind {
-    fn as_message(&self) -> Markup {
+    fn as_message(&self) -> Markup<'_> {
         match self {
             Self::UntypedParameter => markup! {
                 "The parameter doesn't have a type defined."
@@ -383,7 +386,7 @@ impl ViolationKind {
         }
     }
 
-    fn as_advice(&self) -> Markup {
+    fn as_advice(&self) -> Markup<'_> {
         match self {
             Self::UntypedParameter => markup! {
                 "Add a type to the parameter."
@@ -413,7 +416,7 @@ impl Rule for UseExplicitType {
     type Query = Ast<AnyEntityWithTypes>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExplicitTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>().language();
@@ -660,10 +663,10 @@ fn can_inline_function(func: &AnyJsFunction) -> bool {
     };
 
     for ancestor in object_expression.syntax().ancestors() {
-        if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor) {
-            if declarator.variable_annotation().is_some() {
-                return true;
-            }
+        if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor)
+            && declarator.variable_annotation().is_some()
+        {
+            return true;
         }
 
         if JsCallExpression::can_cast(ancestor.kind()) {
@@ -704,16 +707,16 @@ fn is_function_inside_typed_return(func: &AnyJsFunction) -> bool {
     };
 
     for ancestor in return_statement.syntax().ancestors() {
-        if let Some(function_declaration) = JsFunctionDeclaration::cast_ref(&ancestor) {
-            if function_declaration.return_type_annotation().is_some() {
-                return true;
-            }
+        if let Some(function_declaration) = JsFunctionDeclaration::cast_ref(&ancestor)
+            && function_declaration.return_type_annotation().is_some()
+        {
+            return true;
         }
 
-        if let Some(function_expression) = JsArrowFunctionExpression::cast_ref(&ancestor) {
-            if function_expression.return_type_annotation().is_some() {
-                return true;
-            }
+        if let Some(function_expression) = JsArrowFunctionExpression::cast_ref(&ancestor)
+            && function_expression.return_type_annotation().is_some()
+        {
+            return true;
         }
     }
 

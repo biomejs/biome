@@ -1,3 +1,4 @@
+use crate::node_semver::{Range, VersionError};
 use crate::{LanguageRoot, Manifest};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{
@@ -7,11 +8,9 @@ use biome_deserialize::{
 use biome_diagnostics::Error;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_json_value::{JsonObject, JsonValue};
+use biome_json_value::JsonValue;
 use biome_text_size::TextRange;
 use camino::Utf8Path;
-use node_semver::{Range, SemverError};
-use std::panic::catch_unwind;
 use std::{ops::Deref, str::FromStr};
 
 /// Deserialized `package.json`.
@@ -36,7 +35,11 @@ pub struct PackageJson {
     pub optional_dependencies: Dependencies,
     pub license: Option<(Box<str>, TextRange)>,
 
-    pub(crate) raw_json: JsonObject,
+    pub author: Option<Box<str>>,
+    pub exports: Option<JsonValue>,
+    pub imports: Option<JsonValue>,
+    pub main: Option<Box<str>>,
+    pub types: Option<Box<str>>,
 }
 
 static_assertions::assert_impl_all!(PackageJson: Send, Sync);
@@ -58,9 +61,10 @@ impl PackageJson {
     }
 
     pub fn with_exports(self, exports: impl Into<JsonValue>) -> Self {
-        let mut raw_json = self.raw_json;
-        raw_json.insert("exports".into(), exports.into());
-        Self { raw_json, ..self }
+        Self {
+            exports: Some(exports.into()),
+            ..self
+        }
     }
 
     pub fn with_dependencies(self, dependencies: Dependencies) -> Self {
@@ -97,28 +101,15 @@ impl PackageJson {
 
         false
     }
-
-    pub fn get_value_by_path(&self, path: &[&str]) -> Option<&JsonValue> {
-        if path.is_empty() {
-            return None;
-        }
-
-        let mut value = self.raw_json.get(path[0])?;
-        for key in path.iter().skip(1) {
-            if let Some(inner_value) = value.as_object().and_then(|object| object.get(*key)) {
-                value = inner_value;
-            } else {
-                return None;
-            }
-        }
-        Some(value)
-    }
 }
 
 impl Manifest for PackageJson {
     type Language = JsonLanguage;
 
-    fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self> {
+    fn deserialize_manifest(
+        root: &LanguageRoot<Self::Language>,
+        _path: &Utf8Path,
+    ) -> Deserialized<Self> {
         deserialize_from_json_ast::<Self>(root, "")
     }
 
@@ -202,7 +193,7 @@ impl Dependencies {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Version {
-    SemVer(node_semver::Range),
+    SemVer(Range),
     Literal(String),
 }
 
@@ -211,7 +202,7 @@ impl Version {
         let range = Range::from_str(other_range);
         if let Ok(other_range) = range {
             match self {
-                Self::SemVer(range) => range.allows_any(&other_range),
+                Self::SemVer(range) => range.intersects(&other_range),
                 Self::Literal(_) => false,
             }
         } else {
@@ -298,11 +289,33 @@ impl DeserializationVisitor for PackageJsonVisitor {
                 "type" => {
                     result.r#type = Deserializable::deserialize(ctx, &value, &key_text);
                 }
-                _ => {
-                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
-                        result.raw_json.insert(key_text.into(), value);
+                "author" => {
+                    if let Some(value) = Deserializable::deserialize(ctx, &value, &key_text) {
+                        result.author = Some(value);
                     }
                 }
+                "exports" => {
+                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
+                        result.exports = Some(value);
+                    }
+                }
+
+                "imports" => {
+                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
+                        result.imports = Some(value);
+                    }
+                }
+                "types" => {
+                    if let Some(value) = Deserializable::deserialize(ctx, &value, &key_text) {
+                        result.types = Some(value);
+                    }
+                }
+                "main" => {
+                    if let Some(value) = Deserializable::deserialize(ctx, &value, &key_text) {
+                        result.main = Some(value);
+                    }
+                }
+                _ => {}
             }
         }
         Some(result)
@@ -342,9 +355,9 @@ impl PackageType {
     }
 }
 
-fn parse_range(range: &str) -> Result<Version, SemverError> {
-    match catch_unwind(|| Range::parse(range).map(Version::SemVer)) {
-        Ok(result) => result,
+fn parse_range(range: &str) -> Result<Version, VersionError> {
+    match Range::from_str(range).map(Version::SemVer) {
+        Ok(result) => Ok(result),
         Err(_) => Ok(Version::Literal(range.to_string())),
     }
 }
@@ -370,10 +383,7 @@ mod tests {
         assert!(errors.is_empty());
 
         let package_json = package_json.expect("parsing must have succeeded");
-        assert_eq!(
-            package_json.get_value_by_path(&["author"]),
-            Some(&JsonValue::String(Text::Static("Biome Team").into()))
-        );
+        assert_eq!(package_json.author, Some("Biome Team".into()));
     }
 
     #[test]

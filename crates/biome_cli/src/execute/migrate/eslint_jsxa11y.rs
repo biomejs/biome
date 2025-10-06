@@ -3,7 +3,7 @@
 ///
 /// Also, the module includes implementation to convert rule options to Biome's rule options.
 use biome_deserialize_macros::Deserializable;
-use biome_js_analyze::lint::a11y::use_valid_aria_role;
+use biome_rule_options::use_valid_aria_role;
 
 #[derive(Debug, Default, Deserializable)]
 pub(crate) struct AriaRoleOptions {
@@ -11,7 +11,7 @@ pub(crate) struct AriaRoleOptions {
     #[deserializable(rename = "ignoreNonDOM")]
     ignore_non_dom: bool,
 }
-impl From<AriaRoleOptions> for use_valid_aria_role::ValidAriaRoleOptions {
+impl From<AriaRoleOptions> for use_valid_aria_role::UseValidAriaRoleOptions {
     fn from(val: AriaRoleOptions) -> Self {
         Self {
             allow_invalid_roles: val.allowed_invalid_roles,

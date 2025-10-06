@@ -1,35 +1,27 @@
-use super::document::Document;
-use super::{
-    ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
-    CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams,
-    OpenProjectParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
-    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
-    RenameResult, ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams,
-    SearchResults, ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams,
-    UpdateSettingsResult,
-};
-use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
-use crate::diagnostics::FileTooLarge;
+use std::panic::RefUnwindSafe;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
+
+use super::{document::Document, *};
+use crate::Watcher;
+use crate::configuration::{LoadedConfiguration, read_config};
+use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
 use crate::file_handlers::{
-    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
-    ParseResult,
+    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, FormatEmbedNode,
+    LintParams, LintResults, ParseResult,
 };
 use crate::projects::Projects;
-use crate::settings::WorkspaceSettingsHandle;
-use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, GetRegisteredTypesParams, GetTypeInfoParams,
-    IsPathIgnoredParams, OpenProjectResult, RageEntry, RageParams, RageResult, ScanKind,
-    ServerInfo,
+use crate::scanner::{
+    IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
+    WorkspaceScannerBridge,
 };
-use crate::workspace_watcher::{OpenFileReason, WatcherSignalKind};
-use crate::{WatcherInstruction, Workspace, WorkspaceError};
+use crate::workspace::document::EmbeddedSnippets;
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
-use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::bool::Bool;
+use biome_configuration::max_size::MaxSize;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
+use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
@@ -38,12 +30,12 @@ use biome_diagnostics::{
     Diagnostic, DiagnosticExt, Severity, serde::Diagnostic as SerdeDiagnostic,
 };
 use biome_formatter::Printed;
-use biome_fs::{BiomePath, ConfigName};
+use biome_fs::{BiomePath, ConfigName, PathKind};
 use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
-use biome_js_syntax::{AnyJsRoot, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, LanguageVariant, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
-use biome_module_graph::ModuleGraph;
+use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
@@ -52,11 +44,8 @@ use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AstNode, NodeCache, SendNode};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
-use papaya::{Compute, HashMap, HashSet, Operation};
+use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use std::panic::RefUnwindSafe;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{info, instrument, warn};
@@ -67,7 +56,7 @@ pub struct WorkspaceServer {
 
     /// Open projects, including their settings, nested packages, and other
     /// metadata.
-    pub(super) projects: Projects,
+    projects: Projects,
 
     /// The layout of projects and their internal packages.
     project_layout: Arc<ProjectLayout>,
@@ -79,7 +68,7 @@ pub struct WorkspaceServer {
     plugin_caches: Arc<HashMap<Utf8PathBuf, PluginCache>>,
 
     /// Stores the document (text content + version number) associated with a URL
-    pub(super) documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
+    documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
 
     /// Stores the document sources used across the workspace
     file_sources: AppendOnlyVec<DocumentFileSource>,
@@ -105,19 +94,16 @@ pub struct WorkspaceServer {
     /// expected. For other documents, the performance degradation due to
     /// lock contention would not be worth the potential of faster reparsing
     /// that may never actually happen.
-    pub(super) node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
+    node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
+
+    /// Scanner instance.
+    pub(crate) scanner: Scanner,
 
     /// File system implementation.
-    pub(super) fs: Box<dyn FsWithResolverProxy>,
-
-    /// Channel sender for instructions to the [crate::WorkspaceWatcher].
-    watcher_tx: Sender<WatcherInstruction>,
-
-    /// Set containing all the watched folders.
-    watched_folders: HashSet<Utf8PathBuf>,
+    fs: Arc<dyn FsWithResolverProxy>,
 
     /// Channel sender for sending notifications of service data updates.
-    pub(super) notification_tx: watch::Sender<ServiceDataNotification>,
+    notification_tx: watch::Sender<ServiceNotification>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -131,9 +117,9 @@ impl RefUnwindSafe for WorkspaceServer {}
 impl WorkspaceServer {
     /// Creates a new [Workspace].
     pub fn new(
-        fs: Box<dyn FsWithResolverProxy>,
+        fs: Arc<dyn FsWithResolverProxy>,
         watcher_tx: Sender<WatcherInstruction>,
-        notification_tx: watch::Sender<ServiceDataNotification>,
+        notification_tx: watch::Sender<ServiceNotification>,
         threads: Option<usize>,
     ) -> Self {
         init_thread_pool(threads);
@@ -148,11 +134,17 @@ impl WorkspaceServer {
             file_sources: AppendOnlyVec::default(),
             patterns: Default::default(),
             node_cache: Default::default(),
+            scanner: Scanner::new(watcher_tx),
             fs,
-            watcher_tx,
-            watched_folders: Default::default(),
             notification_tx,
         }
+    }
+
+    /// Starts the watcher.
+    ///
+    /// This method will not return until the watcher stops.
+    pub fn start_watcher(&self, mut watcher: Watcher) {
+        watcher.run(&ScannerWatcherBridge::new((&self.scanner, self)));
     }
 
     /// Attempts to find the root of a project by searching upwards from the
@@ -163,12 +155,7 @@ impl WorkspaceServer {
     ///
     /// An error may be returned if no top-level `biome.json` can be found, or
     /// if there is an error opening a config file.
-    fn find_project_root(
-        &self,
-        path: BiomePath,
-        only_rules: Vec<RuleSelector>,
-        skip_rules: Vec<RuleSelector>,
-    ) -> Result<(Utf8PathBuf, ScanKind), WorkspaceError> {
+    fn find_project_root(&self, path: BiomePath) -> Result<Utf8PathBuf, WorkspaceError> {
         let path: Utf8PathBuf = path.into();
 
         for ancestor in path.ancestors() {
@@ -200,12 +187,7 @@ impl WorkspaceServer {
                 let found = configuration.root.is_none_or(|root| root.value());
                 // Found our root config!
                 if found {
-                    let scan_kind = ProjectScanComputer::new(
-                        &configuration,
-                        skip_rules.as_slice(),
-                        only_rules.as_slice(),
-                    );
-                    return Ok((ancestor.to_path_buf(), scan_kind.compute()));
+                    return Ok(ancestor.to_path_buf());
                 }
             }
         }
@@ -219,7 +201,7 @@ impl WorkspaceServer {
         for config_file in ConfigName::file_names() {
             let mut config_path = path.to_path_buf();
             config_path.push(config_file);
-            if self.fs().path_exists(&config_path) {
+            if self.fs.path_exists(&config_path) {
                 return Some(config_path);
             }
         }
@@ -283,83 +265,62 @@ impl WorkspaceServer {
             .unwrap_or_else(|| self.file_sources.push(document_file_source))
     }
 
-    /// Opens the file and marks it as opened by the scanner.
-    pub(super) fn open_file_during_initial_scan(
-        &self,
-        project_key: ProjectKey,
-        path: impl Into<BiomePath>,
-    ) -> Result<(), WorkspaceError> {
-        self.open_file_for_reason(project_key, path.into(), OpenFileReason::InitialScan)
-    }
-
-    /// Opens the file and marks it as opened by the scanner.
-    pub(super) fn open_file_by_watcher(
-        &self,
-        project_key: ProjectKey,
-        path: impl Into<BiomePath>,
-    ) -> Result<(), WorkspaceError> {
-        self.open_file_for_reason(project_key, path.into(), OpenFileReason::WatcherUpdate)
-    }
-
-    fn open_file_for_reason(
-        &self,
-        project_key: ProjectKey,
-        path: BiomePath,
-        reason: OpenFileReason,
-    ) -> Result<(), WorkspaceError> {
-        match self
-            .module_graph
-            .get_or_insert_path_info(&path, self.fs.as_ref())
-        {
-            Some(path_info) if path_info.is_symlink() => Ok(()),
-            Some(_) => self.open_file_internal(
-                reason,
-                OpenFileParams {
-                    project_key,
-                    path,
-                    content: FileContent::FromServer,
-                    document_file_source: None,
-                    persist_node_cache: false,
-                },
-            ),
-            None => Err(WorkspaceError::cant_read_file(path.to_string())),
-        }
-    }
-
+    #[instrument(
+        level = "debug",
+        skip(self, params),
+        fields(path = display(&params.path))
+    )]
     fn open_file_internal(
         &self,
         reason: OpenFileReason,
         params: OpenFileParams,
-    ) -> Result<(), WorkspaceError> {
+    ) -> Result<InternalOpenFileResult, WorkspaceError> {
         let OpenFileParams {
             project_key,
-            path,
+            path: biome_path,
             content,
             document_file_source,
             persist_node_cache,
         } = params;
-        let path: Utf8PathBuf = path.into();
+        let path: Utf8PathBuf = biome_path.clone().into();
 
         if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
-            return Ok(());
+            return Ok(Default::default());
         }
 
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
+
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
 
         if let DocumentFileSource::Js(js) = &mut source {
             match path.extension() {
                 Some("js") => {
                     let manifest = self.project_layout.find_node_manifest_for_path(&path);
-                    if let Some((_, manifest)) = manifest {
-                        if manifest.r#type == Some(PackageType::CommonJs) {
-                            js.set_module_kind(ModuleKind::Script);
-                        }
+                    if let Some((_, manifest)) = manifest
+                        && manifest.r#type == Some(PackageType::CommonJs)
+                    {
+                        js.set_module_kind(ModuleKind::Script);
                     }
                 }
                 Some("cjs") => {
                     js.set_module_kind(ModuleKind::Script);
                 }
                 _ => {}
+            }
+            if !js.is_typescript() && !js.is_jsx() {
+                let jsx_everywhere = settings
+                    .languages
+                    .javascript
+                    .parser
+                    .jsx_everywhere
+                    .unwrap_or_default()
+                    .into();
+                if jsx_everywhere {
+                    js.set_variant(LanguageVariant::Jsx);
+                }
             }
         }
 
@@ -368,10 +329,10 @@ impl WorkspaceServer {
             FileContent::FromServer => (self.fs.read_file_from_path(&path)?, None),
         };
 
-        let mut index = self.insert_source(source);
+        let mut file_source_index = self.insert_source(source);
 
         let size = content.len();
-        let limit = self.projects.get_max_file_size(project_key, path.as_path());
+        let limit = settings.get_max_file_size(&path);
 
         let syntax = if size > limit {
             Some(Err(FileTooLarge { size, limit }))
@@ -379,10 +340,16 @@ impl WorkspaceServer {
             None
         } else {
             let mut node_cache = NodeCache::default();
-            let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
+            let parsed = self.parse(
+                &path,
+                &content,
+                &settings,
+                file_source_index,
+                &mut node_cache,
+            )?;
 
             if let Some(language) = parsed.language {
-                index = self.insert_source(language);
+                file_source_index = self.insert_source(language);
             }
 
             if persist_node_cache {
@@ -394,95 +361,96 @@ impl WorkspaceServer {
 
             Some(Ok(parsed.any_parse))
         };
-        let root = syntax
-            .as_ref()
-            .and_then(|syntax| syntax.as_ref().ok())
-            .map(|parse| parse.root());
-
-        let opened_by_scanner = reason.is_opened_by_scanner();
-
-        let documents = self.documents.pin();
-        let result = documents.compute(path.clone(), |current| {
-            let biome_path = BiomePath::new(&path);
-            if biome_path.is_dependency() && biome_path.is_type_declaration() {
-                return if current.is_some() {
-                    Operation::Remove
-                } else {
-                    // The document isn't inside the current files, however we want
-                    // signal that it's a type declaration, and we want to update the module graph
-                    Operation::Abort(true)
-                };
+        // Second-pass parsing for HTML files with embedded JavaScript and CSS
+        // content.
+        let embedded_snippets = if DocumentFileSource::can_contain_embeds(path.as_path()) {
+            // Second-pass parsing for HTML files with embedded JavaScript and CSS content
+            if let Some(Ok(any_parse)) = &syntax {
+                let mut node_cache = NodeCache::default();
+                self.parse_embedded_language_snippets(
+                    project_key,
+                    &biome_path,
+                    &source,
+                    any_parse,
+                    &mut node_cache,
+                )?
+            } else {
+                Default::default()
             }
-            match current {
-                Some((_path, document)) => {
-                    let version = match (document.version, version) {
+        } else {
+            Default::default()
+        };
+
+        let is_indexed = if reason.is_index() {
+            // If the request is for indexing, we don't insert any document,
+            // we only care about updating the module graph.
+            true
+        } else {
+            self.documents.pin().update_or_insert_with(
+                path.clone(),
+                |current| {
+                    let version = match (current.version, version) {
                         (Some(current_version), Some(new_version)) => {
-                            // This is awkward. It most likely means we have two
-                            // clients independently specifying their own version,
-                            // with no way for us to distinguish them. Or it is a
-                            // bug.
-                            // The safest thing to do seems to use the _minimum_ of
-                            // the versions specified, so that updates coming from
-                            // either will be accepted.
+                            // This is awkward. It most likely means we have
+                            // two clients independently specifying their
+                            // own version, with no way for us to
+                            // distinguish them. Or it is a bug. The safest
+                            // thing to do seems to use the _minimum_ of the
+                            // versions specified, so that updates coming
+                            // from either will be accepted.
                             Some(current_version.min(new_version))
                         }
                         (Some(current_version), None) => {
-                            // It appears the document is open in a client, and the
-                            // scanner also wants to open/update the document. We
-                            // stick with the version from the client, and ignore
-                            // this request.
+                            // It appears the document is open in a client,
+                            // and the scanner also wants to open/update the
+                            // document. We stick with the version from the
+                            // client and ignore this request.
                             Some(current_version)
                         }
                         (None, new_version) => {
-                            // The document was only opened by the scanner, so
-                            // whatever's the new version will do.
+                            // The document was only opened by the scanner,
+                            // so whatever's the new version will do.
                             new_version
                         }
                     };
 
-                    // If the document already had a version, but the new
-                    // content is coming from the scanner, we keep the same
-                    // content that was already in the document. This means,
-                    // active clients are leading over the filesystem.
-                    let content = if document.version.is_some() && opened_by_scanner {
-                        document.content.clone()
-                    } else {
-                        content.clone()
-                    };
-
-                    Operation::Insert::<Document, bool>(Document {
-                        content,
+                    Document {
+                        content: content.clone(),
                         version,
-                        file_source_index: index,
+                        file_source_index,
                         syntax: syntax.clone(),
-                        opened_by_scanner: opened_by_scanner || document.opened_by_scanner,
-                    })
-                }
-                None => Operation::Insert(Document {
+                        embedded_snippets: embedded_snippets.clone(),
+                    }
+                },
+                || Document {
                     content: content.clone(),
                     version,
-                    file_source_index: index,
+                    file_source_index,
                     syntax: syntax.clone(),
-                    opened_by_scanner,
-                }),
-            }
-        });
+                    embedded_snippets: embedded_snippets.clone(),
+                },
+            );
 
-        let opened_by_scanner = match result {
-            Compute::Inserted(_, document)
-            | Compute::Updated {
-                new: (_, document), ..
-            } => document.opened_by_scanner,
-            Compute::Aborted(result) => result,
-            _ => false,
+            self.is_indexed(&path)
         };
 
-        if opened_by_scanner {
-            self.update_service_data(WatcherSignalKind::AddedOrChanged(reason), &path, root)
+        // Manifest files need to update the module graph
+        if is_indexed
+            && let Some(root) = syntax
+                .and_then(Result::ok)
+                .map(|node| node.unwrap_as_send_node())
+        {
+            let (dependencies, diagnostics) =
+                self.update_service_data(&path, UpdateKind::AddedOrChanged(reason, root))?;
+
+            Ok(InternalOpenFileResult {
+                dependencies,
+                diagnostics,
+            })
         } else {
             // If the document was never opened by the scanner, we don't care
             // about updating service data.
-            Ok(())
+            Ok(InternalOpenFileResult::default())
         }
     }
 
@@ -490,8 +458,9 @@ impl WorkspaceServer {
     ///
     /// Returns an error if no file exists in the workspace with this path.
     fn get_parse(&self, path: &Utf8Path) -> Result<AnyParse, WorkspaceError> {
-        let documents = self.documents.pin();
-        let syntax = documents
+        let syntax = self
+            .documents
+            .pin()
             .get(path)
             .and_then(|doc| doc.syntax.clone())
             .transpose();
@@ -499,17 +468,77 @@ impl WorkspaceServer {
         match syntax {
             Ok(syntax) => match syntax {
                 None => Err(WorkspaceError::not_found()),
-                Some(syntax) => Ok(syntax.clone()),
+                Some(syntax) => Ok(syntax),
             },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
         }
     }
 
-    fn parse(
+    fn get_parse_with_embedded_format_nodes(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(AnyParse, Vec<FormatEmbedNode>), WorkspaceError> {
+        self.documents
+            .pin()
+            .get(path)
+            .ok_or_else(WorkspaceError::not_found)
+            .and_then(|doc| match &doc.syntax {
+                Some(syntax) => match syntax {
+                    Ok(syntax) => Ok((
+                        syntax.clone(),
+                        doc.get_embedded_snippets_format_nodes(|file_source_index| {
+                            self.get_source(file_source_index)
+                                .expect("Document source must exist")
+                        }),
+                    )),
+                    Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
+                },
+                None => Err(WorkspaceError::not_found()),
+            })
+    }
+
+    fn get_language_snippets(&self, path: &Utf8Path) -> Vec<EmbeddedSnippets> {
+        let documents = self.documents.pin();
+        documents
+            .get(path)
+            .map(|document| document.embedded_snippets.clone())
+            .unwrap_or_default()
+    }
+
+    /// Parses the language snippets if the current language implements the capability `parser.parse_embedded_nodes`
+    fn parse_embedded_language_snippets(
         &self,
         project_key: ProjectKey,
+        path: &BiomePath,
+        source: &DocumentFileSource,
+        root: &AnyParse,
+        cache: &mut NodeCache,
+    ) -> Result<Vec<EmbeddedSnippets>, WorkspaceError> {
+        let mut embedded_nodes = Vec::new();
+        let capabilities = self.get_file_capabilities(path);
+        let Some(parse_embedded) = capabilities.parser.parse_embedded_nodes else {
+            return Ok(Default::default());
+        };
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let result = parse_embedded(root, path, source, &settings, cache);
+
+        for (mut content, file_source) in result.nodes {
+            let index = self.insert_source(file_source);
+            content.set_file_source_index(index);
+            embedded_nodes.push(content);
+        }
+
+        Ok(embedded_nodes)
+    }
+
+    fn parse(
+        &self,
         path: &Utf8Path,
         content: &str,
+        settings: &Settings,
         file_source_index: usize,
         node_cache: &mut NodeCache,
     ) -> Result<ParseResult, WorkspaceError> {
@@ -523,47 +552,14 @@ impl WorkspaceServer {
             .parse
             .ok_or_else(self.build_capability_error(path))?;
 
-        let settings = self
-            .projects
-            .get_settings_based_on_path(project_key, path)
-            .ok_or_else(WorkspaceError::no_project)?;
         let parsed = parse(
             &BiomePath::new(path),
             file_source,
             content,
-            settings.into(),
+            settings,
             node_cache,
         );
         Ok(parsed)
-    }
-
-    /// Checks whether a file is ignored in the top-level config's
-    /// `files.includes` or in the feature's `includes`.
-    fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
-        let file_name = path.file_name();
-        // Never ignore Biome's config file regardless of `includes`.
-        if file_name == Some(ConfigName::biome_json())
-            || file_name == Some(ConfigName::biome_jsonc())
-        {
-            return false;
-        };
-
-        // Apply top-level `includes`
-        self.is_ignored_by_top_level_config(project_key, path) ||
-                // Apply feature-level `includes`
-                !features.is_empty() && features.iter().all(|feature| self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature))
-    }
-
-    /// Checks whether a file is ignored in the top-level `files.includes`.
-    fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.projects
-            .is_ignored_by_top_level_config(project_key, path)
-    }
-
-    pub(super) fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.projects.is_ignored_by_scanner(project_key, path)
     }
 
     fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
@@ -573,7 +569,7 @@ impl WorkspaceServer {
         for plugin_config in plugins.iter() {
             match plugin_config {
                 PluginConfiguration::Path(plugin_path) => {
-                    match BiomePlugin::load(self.fs.as_ref(), plugin_path, base_path) {
+                    match BiomePlugin::load(self.fs.clone(), plugin_path, base_path) {
                         Ok((plugin, _)) => {
                             plugin_cache.insert_plugin(plugin_path.clone().into(), plugin);
                         }
@@ -601,21 +597,1362 @@ impl WorkspaceServer {
         }
     }
 
-    /// It updates the nested settings of the project assigned to the `project_key`.
+    /// Returns whether the given `path` that falls under the project with the
+    /// given `project_key` is ignored, assuming the given `scan_kind` and
+    /// `reason`.
+    fn is_ignored_by_scanner(
+        &self,
+        project_key: ProjectKey,
+        scan_kind: &ScanKind,
+        path: &Utf8Path,
+        request_kind: IndexRequestKind,
+    ) -> Result<bool, WorkspaceError> {
+        if self.projects.is_force_ignored(project_key, path) {
+            return Ok(true);
+        }
+
+        // Determine the ignore kind based on the kind of request.
+        let ignore_kind = match request_kind {
+            // For an initial scan, we don't descend into ignored folders.
+            // Therefore, we don't need to check if any of the ancestors of the
+            // given `path` are ignored. If they were, we wouldn't have been
+            // scanning them in the first place. So checking whether the path
+            // itself is ignored is enough.
+            IndexRequestKind::Explicit(IndexTrigger::InitialScan) => IgnoreKind::Path,
+
+            // For a (watcher) update, we can't rely on the above reasoning.
+            // Even though we only install watchers on folders that contain
+            // indexed files, such indexed files might've been indexed even
+            // though the folder they are in is ignored, as happens when we
+            // watch dependencies. Therefore, we take the following approach:
+            // - If the path is already indexed, we can assume it's not ignored.
+            //   This works for dependencies and non-dependencies alike.
+            // - Otherwise, we verify that none of the ancestor folders are
+            //   ignored, so we don't accidentally pick up on new files inside
+            //   ignored folders.
+            IndexRequestKind::Explicit(IndexTrigger::Update) if self.is_indexed(path) => {
+                return Ok(false);
+            }
+            IndexRequestKind::Explicit(IndexTrigger::Update) => IgnoreKind::Ancestors,
+
+            // If the path is a dependency of an indexed file, we accept them
+            // under the following conditions:
+            // - If the path is inside `node_modules`, we only care about
+            //   `package.json` and type declarations, to avoid accidentally
+            //   indexing minified files.
+            // - The path shouldn't be indexed yet, to avoid double indexing.
+            IndexRequestKind::Dependency(_) => {
+                let path = BiomePath::new(path);
+                if path.is_dependency() && !path.is_package_json() && !path.is_type_declaration() {
+                    return Ok(true);
+                }
+
+                return Ok(self.is_indexed(&path));
+            }
+        };
+
+        let path = BiomePath::new(path);
+        let is_ignored = match self.fs.symlink_path_kind(&path)? {
+            PathKind::Directory { .. } => {
+                if path.is_dependency() {
+                    // Every mode ignores dependencies, except project mode.
+                    return Ok(!scan_kind.is_project());
+                }
+
+                if self.projects.is_ignored_by_top_level_config(
+                    self.fs.as_ref(),
+                    project_key,
+                    &path,
+                    ignore_kind,
+                ) {
+                    return Ok(true); // Nobody cares about ignored paths.
+                }
+
+                if let ScanKind::TargetedKnownFiles {
+                    target_paths,
+                    descend_from_targets,
+                } = &scan_kind
+                    && !target_paths.iter().any(|target_path| {
+                        target_path.starts_with(path.as_path())
+                            || (*descend_from_targets && path.starts_with(target_path.as_path()))
+                    })
+                {
+                    return Ok(true); // Path is not being targeted.
+                }
+
+                false
+            }
+            PathKind::File { is_symlink } => {
+                if is_symlink {
+                    return Ok(true); // We never index symlinks.
+                }
+
+                match scan_kind {
+                    ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => match ignore_kind
+                    {
+                        IgnoreKind::Path => !path.is_required_during_scan(),
+                        IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
+                            self.projects.is_ignored_by_top_level_config(
+                                self.fs.as_ref(),
+                                project_key,
+                                folder_path,
+                                ignore_kind,
+                            )
+                        }),
+                    },
+                    ScanKind::Project => {
+                        if path.is_dependency() {
+                            // During the initial scan, we only care about
+                            // `package.json` files inside `node_modules`, so that
+                            // we can build the project layout and resolve
+                            // dependencies that lead there. The resolved
+                            // dependencies can then be scanned using
+                            // `IndexReason::InitialScanDependency`.
+                            //
+                            // For everything else, dependencies are ignored.
+                            request_kind.trigger() != IndexTrigger::InitialScan
+                                || !path.is_package_json()
+                        } else if path.is_required_during_scan() {
+                            match ignore_kind {
+                                IgnoreKind::Path => false,
+                                IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
+                                    self.projects.is_ignored_by_top_level_config(
+                                        self.fs.as_ref(),
+                                        project_key,
+                                        folder_path,
+                                        ignore_kind,
+                                    )
+                                }),
+                            }
+                        } else {
+                            self.projects.is_ignored_by_top_level_config(
+                                self.fs.as_ref(),
+                                project_key,
+                                &path,
+                                ignore_kind,
+                            )
+                        }
+                    }
+                    ScanKind::NoScanner => true,
+                }
+            }
+        };
+
+        Ok(is_ignored)
+    }
+
+    /// Updates the [ProjectLayout] for the given `path`.
+    #[instrument(level = "debug", skip(self))]
+    fn update_project_layout(
+        &self,
+        path: &Utf8Path,
+        update_kind: &UpdateKind,
+    ) -> Result<(), WorkspaceError> {
+        let filename = path.file_name();
+        if filename.is_some_and(|filename| filename == "package.json") {
+            let package_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .ok_or_else(WorkspaceError::not_found)?;
+
+            match update_kind {
+                UpdateKind::AddedOrChanged(_, root) => {
+                    self.project_layout
+                        .insert_serialized_node_manifest(package_path, root);
+                }
+                UpdateKind::Removed => {
+                    self.project_layout.remove_package(&package_path);
+                }
+            }
+        } else if filename.is_some_and(|filename| filename == "tsconfig.json") {
+            let package_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .ok_or_else(WorkspaceError::not_found)?;
+
+            match update_kind {
+                UpdateKind::AddedOrChanged(_, root) => {
+                    self.project_layout
+                        .insert_serialized_tsconfig(package_path, root);
+                }
+                UpdateKind::Removed => {
+                    self.project_layout
+                        .remove_tsconfig_from_package(&package_path);
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Updates the given `path` in the module graph.
     ///
-    /// If a configuration file contains errors, it's not processed and the project isn't updated.
+    /// Returns the module dependencies of the `path` if `update_kind` is
+    /// [`UpdateKind::AddedOrChanged`]. For other signal kinds, no dependencies
+    /// are determined.
+    #[tracing::instrument(level = "debug", skip(self))]
+    fn update_module_graph_internal(
+        &self,
+        path: &BiomePath,
+        update_kind: &UpdateKind,
+    ) -> (ModuleDependencies, Vec<ModuleDiagnostic>) {
+        let (added_or_changed_paths, removed_paths) = match update_kind {
+            UpdateKind::AddedOrChanged(_, root) => {
+                let Some(root) = SendNode::into_node(root.clone()).and_then(AnyJsRoot::cast) else {
+                    return Default::default();
+                };
+
+                (&[(path, root)] as &[_], &[] as &[_])
+            }
+            UpdateKind::Removed => (&[] as &[_], &[path] as &[_]),
+        };
+
+        self.module_graph.update_graph_for_js_paths(
+            self.fs.as_ref(),
+            &self.project_layout,
+            added_or_changed_paths,
+            removed_paths,
+        )
+    }
+
+    /// Updates the state of any services relevant to the given `path`.
     ///
-    /// It's the responsibility of the client to process the diagnostics and handle the errors emitted by the configuration.
+    /// Returns the module dependencies of the `path` if `update_kind` is
+    /// [`UpdateKind::AddedOrChanged`]. For other signal kinds, no dependencies
+    /// are determined.
+    fn update_service_data(
+        &self,
+        path: &Utf8Path,
+        update_kind: UpdateKind,
+    ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
+        let path = BiomePath::from(path);
+        if path.is_manifest() {
+            self.update_project_layout(&path, &update_kind)?;
+        }
+
+        let result = self.update_module_graph_internal(&path, &update_kind);
+
+        match update_kind {
+            UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan), _) => {
+                // We'll send a single signal at the end of the scan.
+            }
+            _ => {
+                let _ = self.notification_tx.send(ServiceNotification::IndexUpdated);
+            }
+        }
+
+        Ok(result)
+    }
+}
+
+impl Workspace for WorkspaceServer {
+    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
+        let path = if params.open_uninitialized {
+            let path = params.path.to_path_buf();
+            self.find_project_root(params.path).unwrap_or(path)
+        } else {
+            self.find_project_root(params.path)?
+        };
+
+        let project_key = self.projects.insert_project(path);
+
+        Ok(OpenProjectResult { project_key })
+    }
+
+    fn scan_project(
+        &self,
+        ScanProjectParams {
+            project_key,
+            watch,
+            force,
+            scan_kind,
+            verbose,
+        }: ScanProjectParams,
+    ) -> Result<ScanProjectResult, WorkspaceError> {
+        let mut diagnostics = Vec::new();
+        if scan_kind.is_none() {
+            let path = self
+                .projects
+                .get_project_path(project_key)
+                .ok_or_else(WorkspaceError::no_project)?;
+
+            let manifest = path.join("package.json");
+            if self.fs.path_exists(&manifest) {
+                let trigger = IndexTrigger::InitialScan;
+                let (_, _diagnostics) = self.index_file(project_key, manifest.clone(), trigger)?;
+                diagnostics.extend(
+                    _diagnostics
+                        .into_iter()
+                        .map(biome_diagnostics::serde::Diagnostic::new)
+                        .collect::<Vec<_>>(),
+                );
+            }
+            return Ok(ScanProjectResult {
+                diagnostics,
+                duration: Duration::from_millis(0),
+                configuration_files: vec![],
+            });
+        }
+
+        let scan_options = ScanOptions {
+            scan_kind,
+            force,
+            verbose,
+            watch,
+        };
+
+        let mut result = self
+            .scanner
+            .index_project(self, project_key, scan_options)?;
+
+        result.diagnostics.extend(diagnostics);
+
+        Ok(result)
+    }
+
+    /// Updates the global settings for this workspace.
     ///
-    /// ## Errors
+    /// ## Panics
+    /// This function may panic if the internal settings mutex has been poisoned
+    /// by another thread having previously panicked while holding the lock
+    #[tracing::instrument(level = "debug", skip_all)]
+    fn update_settings(
+        &self,
+        params: UpdateSettingsParams,
+    ) -> Result<UpdateSettingsResult, WorkspaceError> {
+        let UpdateSettingsParams {
+            workspace_directory,
+            configuration,
+            project_key,
+        } = params;
+        let mut diagnostics: Vec<biome_diagnostics::serde::Diagnostic> = vec![];
+        let workspace_directory = workspace_directory.map(|p| p.to_path_buf());
+        let is_root = configuration.is_root();
+        let extends_root = configuration.extends_root();
+        let mut settings = if !is_root {
+            if !self.projects.is_project_registered(project_key) {
+                return Err(WorkspaceError::no_project());
+            }
+
+            if let Some(workspace_directory) = &workspace_directory {
+                self.projects
+                    .get_nested_settings(project_key, workspace_directory.as_path())
+                    .unwrap_or_default()
+            } else {
+                return Err(WorkspaceError::no_workspace_directory());
+            }
+        } else {
+            self.projects
+                .get_root_settings(project_key)
+                .ok_or_else(WorkspaceError::no_project)?
+        };
+
+        settings.merge_with_configuration(configuration, workspace_directory.clone())?;
+
+        let loading_directory = if extends_root {
+            self.projects.get_project_path(project_key)
+        } else {
+            workspace_directory.clone()
+        };
+
+        let plugin_diagnostics = self.load_plugins(
+            &loading_directory.clone().unwrap_or_default(),
+            &settings.as_all_plugins(),
+        );
+
+        let has_errors = plugin_diagnostics
+            .iter()
+            .any(|d| d.severity() >= Severity::Error);
+
+        if has_errors {
+            return Err(WorkspaceError::plugin_errors(plugin_diagnostics));
+        }
+
+        diagnostics.extend(
+            plugin_diagnostics
+                .into_iter()
+                .map(Into::into)
+                .collect::<Vec<_>>(),
+        );
+
+        if !is_root {
+            self.projects.set_nested_settings(
+                project_key,
+                workspace_directory.unwrap_or_default(),
+                settings,
+            );
+        } else {
+            // If the configuration is a root one, we also load the ignore files
+            if settings.is_vcs_enabled() && settings.vcs_settings.should_use_ignore_file() {
+                let directory = workspace_directory.unwrap_or_default();
+                match settings.vcs_settings.client_kind {
+                    None => {}
+                    Some(VcsClientKind::Git) => {
+                        let gitignore = directory.join(".gitignore");
+                        let ignore = directory.join(".ignore");
+                        let result = self
+                            .fs
+                            .read_file_from_path(gitignore.as_ref())
+                            .ok()
+                            .or_else(|| self.fs.read_file_from_path(ignore.as_ref()).ok());
+                        let content = match result {
+                            Some(content) => content,
+                            None => {
+                                diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
+                                    VcsDiagnostic::NoIgnoreFileFound(NoIgnoreFileFound {
+                                        path: directory.to_string(),
+                                    }),
+                                ));
+                                return Ok(UpdateSettingsResult { diagnostics });
+                            }
+                        };
+
+                        let lines: Vec<_> = content.lines().collect();
+                        settings
+                            .vcs_settings
+                            .store_root_ignore_patterns(directory.as_ref(), lines.as_slice())?;
+                    }
+                }
+            }
+
+            self.projects.set_root_settings(project_key, settings);
+        }
+
+        Ok(UpdateSettingsResult { diagnostics })
+    }
+
+    fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
+        let project_path = self
+            .projects
+            .get_project_path(params.project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        self.projects.remove_project(params.project_key);
+        self.scanner
+            .unload_project(params.project_key, project_path.clone());
+
+        // Unload all the documents within the project folder.
+        let documents = self.documents.pin();
+        let mut node_cache = self.node_cache.lock().unwrap();
+        for path in documents.keys() {
+            if self
+                .projects
+                .path_belongs_only_to_project_with_path(path, &project_path)
+            {
+                documents.remove(path);
+                node_cache.remove(path.as_path());
+            }
+        }
+
+        self.module_graph.unload_path(&project_path);
+        self.project_layout.unload_folder(&project_path);
+
+        Ok(())
+    }
+
+    fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError> {
+        let diagnostics = self
+            .open_file_internal(OpenFileReason::ClientRequest, params)
+            .map(|result| {
+                result
+                    .diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect::<Vec<_>>()
+            })?;
+        Ok(OpenFileResult { diagnostics })
+    }
+
+    fn file_exists(&self, params: FileExitsParams) -> Result<bool, WorkspaceError> {
+        Ok(self
+            .documents
+            .pin()
+            .contains_key(params.file_path.as_path()))
+    }
+
+    fn file_features(
+        &self,
+        params: SupportsFeatureParams,
+    ) -> Result<FileFeaturesResult, WorkspaceError> {
+        let language = self.get_file_source(&params.path);
+        let capabilities = self.features.get_capabilities(language);
+
+        self.projects.get_file_features(
+            self.fs.as_ref(),
+            params.project_key,
+            &params.path,
+            params.features,
+            language,
+            &capabilities,
+        )
+    }
+
+    fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError> {
+        // Never ignore Biome's top-level config file regardless of `includes`.
+        if params.path.file_name().is_some_and(|file_name| {
+            file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
+        }) && params.path.parent().is_some_and(|dir_path| {
+            self.projects
+                .get_project_path(params.project_key)
+                .is_some_and(|project_path| dir_path == project_path)
+        }) {
+            return Ok(false);
+        };
+
+        Ok(self.projects.is_ignored(
+            self.fs.as_ref(),
+            params.project_key,
+            &params.path,
+            params.features,
+            params.ignore_kind,
+        ))
+    }
+
+    fn get_syntax_tree(
+        &self,
+        params: GetSyntaxTreeParams,
+    ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_syntax_tree = capabilities
+            .debug
+            .debug_syntax_tree
+            .ok_or_else(self.build_capability_error(&params.path))?;
+
+        // The feature name here can be any feature, in theory
+        let parse = self.get_parse(&params.path)?;
+        let printed = debug_syntax_tree(&params.path, parse);
+
+        Ok(printed)
+    }
+
+    fn get_control_flow_graph(
+        &self,
+        params: GetControlFlowGraphParams,
+    ) -> Result<String, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_control_flow = capabilities
+            .debug
+            .debug_control_flow
+            .ok_or_else(self.build_capability_error(&params.path))?;
+
+        let parse = self.get_parse(&params.path)?;
+        let printed = debug_control_flow(parse, params.cursor);
+
+        Ok(printed)
+    }
+
+    fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_formatter_ir = capabilities
+            .debug
+            .debug_formatter_ir
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let parse = self.get_parse(&params.path)?;
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
+        {
+            return Err(WorkspaceError::format_with_errors_disabled());
+        }
+        let document_file_source = self.get_file_source(&params.path);
+
+        debug_formatter_ir(&params.path, &document_file_source, parse, &settings)
+    }
+
+    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_type_info = capabilities
+            .debug
+            .debug_type_info
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let parse = self.get_parse(&params.path).ok();
+
+        debug_type_info(&params.path, parse, self.module_graph.clone())
+    }
+
+    fn get_registered_types(
+        &self,
+        params: GetRegisteredTypesParams,
+    ) -> Result<String, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_registered_types = capabilities
+            .debug
+            .debug_registered_types
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let parse = self.get_parse(&params.path)?;
+
+        debug_registered_types(&params.path, parse)
+    }
+
+    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let debug_semantic_model = capabilities
+            .debug
+            .debug_semantic_model
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let parse = self.get_parse(&params.path)?;
+
+        debug_semantic_model(&params.path, parse)
+    }
+
+    fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
+        self.documents
+            .pin()
+            .get(params.path.as_path())
+            .map(|document| document.content.clone())
+            .ok_or_else(WorkspaceError::not_found)
+    }
+
+    fn check_file_size(
+        &self,
+        params: CheckFileSizeParams,
+    ) -> Result<CheckFileSizeResult, WorkspaceError> {
+        let documents = self.documents.pin();
+        let Some(document) = documents.get(params.path.as_path()) else {
+            return Err(WorkspaceError::not_found());
+        };
+        let file_size = document.content.len();
+        let limit = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .map_or_else(
+                || MaxSize::default().into(),
+                |settings| settings.get_max_file_size(&params.path),
+            );
+        Ok(CheckFileSizeResult { file_size, limit })
+    }
+
+    /// Changes the content of an open file.
+    fn change_file(
+        &self,
+        ChangeFileParams {
+            project_key,
+            path,
+            content,
+            version,
+        }: ChangeFileParams,
+    ) -> Result<ChangeFileResult, WorkspaceError> {
+        let documents = self.documents.pin();
+        let (index, existing_version) = documents
+            .get(path.as_path())
+            .map(|document| (document.file_source_index, document.version))
+            .ok_or_else(WorkspaceError::not_found)?;
+
+        if existing_version.is_some_and(|existing_version| existing_version >= version) {
+            warn!(%version, %path, "outdated_file_change");
+            // Safely ignore older versions.
+            return Ok(ChangeFileResult {
+                diagnostics: Vec::new(),
+            });
+        }
+
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        // We remove the node cache for the document, if it exists.
+        // This is done so that we need to hold the lock as short as possible
+        // (it's released directly after the statement). The potential downside
+        // is that if two calls to `change_file()` happen concurrently, then the
+        // second would have a cache miss, and not update the cache either.
+        // This seems an unlikely scenario however, and the impact is small
+        // anyway, so this seems a worthwhile tradeoff.
+        let node_cache = self.node_cache.lock().unwrap().remove(path.as_path());
+
+        let persist_node_cache = node_cache.is_some();
+        let mut node_cache = node_cache.unwrap_or_default();
+
+        let parsed = self.parse(&path, &content, &settings, index, &mut node_cache)?;
+        let root = parsed.any_parse.unwrap_as_send_node();
+        let document_source = self.get_file_source(&path);
+
+        // Second-pass parsing for HTML files with embedded JavaScript and CSS content
+        let embedded_snippets = if DocumentFileSource::can_contain_embeds(path.as_path()) {
+            // Second-pass parsing for HTML files with embedded JavaScript and CSS content
+            let mut node_cache = NodeCache::default();
+            self.parse_embedded_language_snippets(
+                project_key,
+                &path,
+                &document_source,
+                &parsed.any_parse,
+                &mut node_cache,
+            )?
+        } else {
+            vec![]
+        };
+
+        let document = Document {
+            content,
+            version: Some(version),
+            file_source_index: index,
+            syntax: Some(Ok(parsed.any_parse)),
+            embedded_snippets,
+        };
+
+        if persist_node_cache {
+            self.node_cache
+                .lock()
+                .unwrap()
+                .insert(path.to_path_buf(), node_cache);
+        }
+
+        documents
+            .insert(path.clone().into(), document)
+            .ok_or_else(WorkspaceError::not_found)?;
+
+        let mut final_diagnostics = vec![];
+
+        if self.is_indexed(&path) {
+            let (dependencies, diagnostics) = self.update_service_data(
+                &path,
+                UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, root),
+            )?;
+            final_diagnostics.extend(
+                diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect::<Vec<_>>(),
+            );
+            if !dependencies.is_empty()
+                && let Some(project_path) = self.projects.get_project_path(project_key)
+            {
+                let diagnostics = self.scanner.index_dependencies(
+                    self,
+                    project_key,
+                    &project_path,
+                    dependencies,
+                    IndexTrigger::Update,
+                )?;
+                final_diagnostics.extend(diagnostics);
+            }
+        }
+
+        Ok(ChangeFileResult {
+            diagnostics: final_diagnostics,
+        })
+    }
+
+    /// Retrieves the list of diagnostics associated with a file
+    #[tracing::instrument(
+        level = "debug",
+        skip(self, params),
+        fields(
+            rule_categories = display(&params.categories),
+            path = display(&params.path),
+            project_key = debug(&params.project_key),
+            skip = debug(&params.skip),
+            only = debug(&params.only),
+        )
+    )]
+    fn pull_diagnostics(
+        &self,
+        params: PullDiagnosticsParams,
+    ) -> Result<PullDiagnosticsResult, WorkspaceError> {
+        let PullDiagnosticsParams {
+            project_key,
+            path,
+            categories,
+            only,
+            skip,
+            enabled_rules,
+            pull_code_actions,
+        } = params;
+        let parse = self.get_parse(&path)?;
+        let language = self.get_file_source(&path);
+        let capabilities = self.features.get_capabilities(language);
+        let (diagnostics, errors, skipped_diagnostics) = if (categories.is_lint()
+            || categories.is_assist())
+            && let Some(lint) = capabilities.analyzer.lint
+        {
+            let settings = self
+                .projects
+                .get_settings_based_on_path(project_key, &path)
+                .ok_or_else(WorkspaceError::no_project)?;
+
+            let plugins = if categories.is_lint() {
+                self.get_analyzer_plugins_for_project(
+                    settings.source_path().unwrap_or_default().as_path(),
+                    &settings.get_plugins_for_path(&path),
+                )
+                .map_err(WorkspaceError::plugin_errors)?
+            } else {
+                Vec::new()
+            };
+            let results = lint(LintParams {
+                parse,
+                settings: &settings,
+                path: &path,
+                only: only.clone(),
+                skip: skip.clone(),
+                language,
+                categories,
+                module_graph: self.module_graph.clone(),
+                project_layout: self.project_layout.clone(),
+                suppression_reason: None,
+                enabled_selectors: enabled_rules.clone(),
+                pull_code_actions,
+                plugins: plugins.clone(),
+                diagnostic_offset: None,
+            });
+
+            let LintResults {
+                mut diagnostics,
+                mut errors,
+                mut skipped_diagnostics,
+            } = results;
+            for embedded_node in self.get_language_snippets(&path) {
+                let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
+                    continue;
+                };
+                let capabilities = self.features.get_capabilities(file_source);
+                let Some(lint) = capabilities.analyzer.lint else {
+                    continue;
+                };
+
+                let results = lint(LintParams {
+                    parse: embedded_node.parse().clone(),
+                    settings: &settings,
+                    path: &path,
+                    only: only.clone(),
+                    skip: skip.clone(),
+                    language: file_source,
+                    categories,
+                    module_graph: self.module_graph.clone(),
+                    project_layout: self.project_layout.clone(),
+                    suppression_reason: None,
+                    enabled_selectors: enabled_rules.clone(),
+                    pull_code_actions,
+                    plugins: plugins.clone(),
+                    diagnostic_offset: Some(embedded_node.content_offset()),
+                });
+
+                diagnostics.extend(results.diagnostics);
+                skipped_diagnostics += results.skipped_diagnostics;
+
+                let this_diagnostics = embedded_node.into_serde_diagnostics();
+                errors += this_diagnostics
+                    .iter()
+                    .filter(|diag| diag.severity() <= Severity::Error)
+                    .count();
+                errors += results.errors;
+                diagnostics.extend(this_diagnostics);
+            }
+
+            (diagnostics, errors, skipped_diagnostics)
+        } else {
+            let mut parse_diagnostics = parse.into_serde_diagnostics();
+            let mut errors = parse_diagnostics
+                .iter()
+                .filter(|diag| diag.severity() <= Severity::Error)
+                .count();
+
+            for embedded_node in self.get_language_snippets(&path) {
+                let diagnostics = embedded_node.into_serde_diagnostics();
+                errors += diagnostics
+                    .iter()
+                    .filter(|diag| diag.severity() <= Severity::Error)
+                    .count();
+                parse_diagnostics.extend(diagnostics);
+            }
+
+            (parse_diagnostics, errors, 0)
+        };
+
+        info!(
+            "Pulled {:?} diagnostic(s), skipped {:?} diagnostic(s) from {}",
+            diagnostics.len(),
+            skipped_diagnostics,
+            path
+        );
+        Ok(PullDiagnosticsResult {
+            diagnostics: diagnostics
+                .into_iter()
+                .map(|diag| {
+                    let diag = diag.with_file_path(path.to_string());
+                    SerdeDiagnostic::new(diag)
+                })
+                .collect(),
+            errors,
+            skipped_diagnostics: skipped_diagnostics.into(),
+        })
+    }
+
+    /// Retrieves the list of code actions available for a given cursor
+    /// position within a file
+    #[tracing::instrument(
+        level = "debug",
+        skip_all,
+        fields(
+            only = debug(&params.only),
+            skip = debug(&params.skip),
+            range = debug(&params.range)
+        )
+    )]
+    fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
+        let PullActionsParams {
+            project_key,
+            path,
+            range,
+            suppression_reason: _,
+            only,
+            skip,
+            enabled_rules,
+            categories,
+        } = params;
+        let capabilities = self.get_file_capabilities(&path);
+        let code_actions = capabilities
+            .analyzer
+            .code_actions
+            .ok_or_else(self.build_capability_error(&path))?;
+
+        let parse = self.get_parse(&path)?;
+        let language = self.get_file_source(&path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let mut result = code_actions(CodeActionsParams {
+            parse,
+            range,
+            settings: &settings,
+            path: &path,
+            module_graph: self.module_graph.clone(),
+            project_layout: self.project_layout.clone(),
+            language,
+            only: only.clone(),
+            skip: skip.clone(),
+            suppression_reason: None,
+            enabled_rules: enabled_rules.clone(),
+            plugins: Vec::new(),
+            categories,
+        });
+
+        for embedded_node in self.get_language_snippets(&path) {
+            let Some(file_source) = self.get_source(embedded_node.file_source_index()) else {
+                continue;
+            };
+            let capabilities = self.features.get_capabilities(file_source);
+            let Some(code_actions) = capabilities.analyzer.code_actions else {
+                continue;
+            };
+
+            let embedded_actions_result = code_actions(CodeActionsParams {
+                parse: embedded_node.parse(),
+                range,
+                settings: &settings,
+                path: &path,
+                module_graph: self.module_graph.clone(),
+                project_layout: self.project_layout.clone(),
+                language: file_source,
+                only: only.clone(),
+                skip: skip.clone(),
+                suppression_reason: None,
+                enabled_rules: enabled_rules.clone(),
+                plugins: Vec::new(),
+                categories,
+            });
+
+            result.actions.extend(embedded_actions_result.actions);
+        }
+
+        Ok(result)
+    }
+
+    /// Runs the given file through the formatter using the provided options
+    /// and returns the resulting source code
+    #[instrument(
+        level = "debug",
+        skip_all,
+        fields(
+            path = display(&params.path),
+        )
+    )]
+    fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+
+        let format = capabilities
+            .formatter
+            .format
+            .ok_or_else(self.build_capability_error(&params.path))?;
+
+        let format_embedded = capabilities.formatter.format_embedded;
+
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        let (parse, embedded_nodes) = self.get_parse_with_embedded_format_nodes(&params.path)?;
+
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
+        {
+            return Err(WorkspaceError::format_with_errors_disabled());
+        }
+
+        let document_file_source = self.get_file_source(&params.path);
+        if !embedded_nodes.is_empty() {
+            let format_embedded =
+                format_embedded.ok_or_else(self.build_capability_error(&params.path))?;
+            return format_embedded(
+                &params.path,
+                &document_file_source,
+                parse,
+                &settings,
+                embedded_nodes,
+            );
+        }
+        format(&params.path, &document_file_source, parse, &settings)
+    }
+
+    #[instrument(level = "debug", skip(self, params))]
+    fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let format_range = capabilities
+            .formatter
+            .format_range
+            .ok_or_else(self.build_capability_error(&params.path))?;
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let parse = self.get_parse(&params.path)?;
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
+        {
+            return Err(WorkspaceError::format_with_errors_disabled());
+        }
+        let document_file_source = self.get_file_source(&params.path);
+        format_range(
+            &params.path,
+            &document_file_source,
+            parse,
+            &settings,
+            params.range,
+        )
+    }
+
+    #[instrument(level = "debug", skip(self, params))]
+    fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let format_on_type = capabilities
+            .formatter
+            .format_on_type
+            .ok_or_else(self.build_capability_error(&params.path))?;
+
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let parse = self.get_parse(&params.path)?;
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
+        {
+            return Err(WorkspaceError::format_with_errors_disabled());
+        }
+        let document_file_source = self.get_file_source(&params.path);
+
+        format_on_type(
+            &params.path,
+            &document_file_source,
+            parse,
+            &settings,
+            params.offset,
+        )
+    }
+
+    #[instrument(
+        level = "debug",
+        skip_all,
+        fields(
+            path = display(&params.path),
+            rule_categories = display(&params.rule_categories),
+            skip = debug(&params.skip),
+            only = debug(&params.only),
+            should_format = display(&params.should_format),
+        )
+    )]
+    fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
+        let FixFileParams {
+            project_key,
+            path,
+            fix_file_mode,
+            should_format,
+            only,
+            skip,
+            enabled_rules,
+            rule_categories,
+            suppression_reason,
+        } = params;
+        let capabilities = self.get_file_capabilities(&path);
+
+        let fix_all = capabilities
+            .analyzer
+            .fix_all
+            .ok_or_else(self.build_capability_error(&path))?;
+        let parse = self.get_parse(&path)?;
+
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let plugins = self
+            .get_analyzer_plugins_for_project(
+                settings.source_path().unwrap_or_default().as_path(),
+                &settings.get_plugins_for_path(&path),
+            )
+            .map_err(WorkspaceError::plugin_errors)?;
+        let language = self.get_file_source(&path);
+        let plugins = if rule_categories.contains(RuleCategory::Lint) {
+            plugins
+        } else {
+            Vec::new()
+        };
+        let mut fix_result = fix_all(FixAllParams {
+            parse,
+            fix_file_mode,
+            settings: &settings,
+            should_format,
+            biome_path: &path,
+            module_graph: self.module_graph.clone(),
+            project_layout: self.project_layout.clone(),
+            document_file_source: language,
+            only: only.clone(),
+            skip: skip.clone(),
+            rule_categories,
+            suppression_reason: suppression_reason.clone(),
+            enabled_rules: enabled_rules.clone(),
+            plugins: plugins.clone(),
+        })?;
+
+        for embedded_node in self.get_language_snippets(&path) {
+            let Some(document_file_source) = self.get_source(embedded_node.file_source_index())
+            else {
+                continue;
+            };
+            let capabilities = self.features.get_capabilities(document_file_source);
+            let Some(fix_all) = capabilities.analyzer.fix_all else {
+                continue;
+            };
+
+            let results = fix_all(FixAllParams {
+                parse: embedded_node.parse(),
+                fix_file_mode,
+                settings: &settings,
+                should_format,
+                biome_path: &path,
+                module_graph: self.module_graph.clone(),
+                project_layout: self.project_layout.clone(),
+                document_file_source,
+                only: only.clone(),
+                skip: skip.clone(),
+                rule_categories,
+                suppression_reason: suppression_reason.clone(),
+                enabled_rules: enabled_rules.clone(),
+                plugins: plugins.clone(),
+            })?;
+
+            fix_result.errors += results.errors;
+            fix_result.skipped_suggested_fixes += results.skipped_suggested_fixes;
+            fix_result.actions.extend(results.actions);
+        }
+
+        Ok(fix_result)
+    }
+
+    fn rename(&self, params: super::RenameParams) -> Result<RenameResult, WorkspaceError> {
+        let capabilities = self.get_file_capabilities(&params.path);
+        let rename = capabilities
+            .analyzer
+            .rename
+            .ok_or_else(self.build_capability_error(&params.path))?;
+
+        let parse = self.get_parse(&params.path)?;
+        let result = rename(&params.path, parse, params.symbol_at, params.new_name)?;
+
+        Ok(result)
+    }
+
+    /// Closes a file that is opened in the workspace.
     ///
-    /// - A nested configuration file si a root
-    /// - Biome can't read the file
-    pub(super) fn update_project_config_files(
+    /// This only unloads the document from the workspace if the file is NOT
+    /// indexed by the scanner. If the scanner has the file indexed, it may
+    /// still be required for multi-file analysis.
+    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
+        let path = params.path.as_path();
+
+        self.documents.pin().remove(path);
+        self.node_cache.lock().unwrap().remove(path);
+
+        if self.is_indexed(path) {
+            // This may look counter-intuitive, but we need to consider that the
+            // file may have gone out-of-sync between the client and the
+            // filesystem. So when the client closes it, and the scanner still
+            // wants to index it, we need to re-index it to make sure they're
+            // back in sync.
+            self.scanner.reindex_file(path.to_path_buf());
+        }
+
+        Ok(())
+    }
+
+    fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
+        let parsed = self.get_parse(params.path.as_path())?;
+        let update_kind = match params.update_kind {
+            super::UpdateKind::AddOrUpdate => UpdateKind::AddedOrChanged(
+                OpenFileReason::ClientRequest,
+                parsed.unwrap_into_send_node(),
+            ),
+            super::UpdateKind::Remove => UpdateKind::Removed,
+        };
+
+        self.update_module_graph_internal(&params.path, &update_kind);
+        Ok(())
+    }
+
+    fn fs(&self) -> &dyn FsWithResolverProxy {
+        self.fs.as_ref()
+    }
+
+    fn parse_pattern(
+        &self,
+        params: ParsePatternParams,
+    ) -> Result<ParsePatternResult, WorkspaceError> {
+        let options =
+            CompilePatternOptions::default().with_default_language(params.default_language);
+        let pattern = compile_pattern_with_options(&params.pattern, options)?;
+
+        let pattern_id = make_search_pattern_id();
+        self.patterns.pin().insert(pattern_id.clone(), pattern);
+        Ok(ParsePatternResult { pattern_id })
+    }
+
+    fn search_pattern(
+        &self,
+        SearchPatternParams {
+            project_key,
+            path,
+            pattern,
+        }: SearchPatternParams,
+    ) -> Result<SearchResults, WorkspaceError> {
+        let patterns = self.patterns.pin();
+        let query = patterns
+            .get(&pattern)
+            .ok_or_else(WorkspaceError::invalid_pattern)?;
+
+        let capabilities = self.get_file_capabilities(&path);
+        let search = capabilities
+            .search
+            .search
+            .ok_or_else(self.build_capability_error(&path))?;
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let parse = self.get_parse(&path)?;
+
+        let document_file_source = self.get_file_source(&path);
+        let matches = search(&path, &document_file_source, parse, query, &settings)?;
+
+        Ok(SearchResults { path, matches })
+    }
+
+    fn drop_pattern(&self, params: super::DropPatternParams) -> Result<(), WorkspaceError> {
+        self.patterns.pin().remove(&params.pattern);
+        Ok(())
+    }
+
+    fn rage(&self, _: RageParams) -> Result<RageResult, WorkspaceError> {
+        let entries = vec![
+            RageEntry::section("Workspace"),
+            RageEntry::pair("Open Documents", &format!("{}", self.documents.len())),
+        ];
+
+        Ok(RageResult { entries })
+    }
+
+    fn server_info(&self) -> Option<&ServerInfo> {
+        None
+    }
+
+    fn get_module_graph(
+        &self,
+        _params: GetModuleGraphParams,
+    ) -> Result<GetModuleGraphResult, WorkspaceError> {
+        let module_graph = self.module_graph.data();
+        let mut data = FxHashMap::default();
+
+        for (path, info) in module_graph.iter() {
+            data.insert(path.as_str().to_string(), info.dump());
+        }
+
+        Ok(GetModuleGraphResult { data })
+    }
+}
+
+impl WorkspaceScannerBridge for WorkspaceServer {
+    #[inline]
+    fn fs(&self) -> &dyn biome_fs::FileSystem {
+        self.fs.as_ref()
+    }
+
+    #[inline]
+    fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
+        self.projects.find_project_for_path(path)
+    }
+
+    #[inline]
+    fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
+        self.projects.get_project_path(project_key)
+    }
+
+    #[inline]
+    fn is_ignored(
+        &self,
+        project_key: ProjectKey,
+        scan_kind: &ScanKind,
+        path: &Utf8Path,
+        request_kind: IndexRequestKind,
+    ) -> Result<bool, WorkspaceError> {
+        self.is_ignored_by_scanner(project_key, scan_kind, path, request_kind)
+    }
+
+    #[inline]
+    fn is_indexed(&self, path: &Utf8Path) -> bool {
+        match path.file_name() {
+            Some("package.json" | "tsconfig.json") => self.project_layout.is_indexed(path),
+            _ => self.module_graph.contains(path),
+        }
+    }
+
+    fn index_file(
+        &self,
+        project_key: ProjectKey,
+        path: impl Into<BiomePath>,
+        trigger: IndexTrigger,
+    ) -> Result<(ModuleDependencies, Vec<ModuleDiagnostic>), WorkspaceError> {
+        self.open_file_internal(
+            OpenFileReason::Index(trigger),
+            OpenFileParams {
+                project_key,
+                path: path.into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+            },
+        )
+        .map(|result| (result.dependencies, result.diagnostics))
+    }
+
+    fn update_project_config_files(
         &self,
         project_key: ProjectKey,
         paths: &[BiomePath],
-    ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
+    ) -> Result<Vec<SerdeDiagnostic>, WorkspaceError> {
         let project_path = self
             .projects
             .get_project_path(project_key)
@@ -625,17 +1962,18 @@ impl WorkspaceServer {
 
         let filtered_paths = paths
             .iter()
+            // We remove the root configuration file from the list of paths
             // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
             .filter(|config_path| project_path != config_path.parent().unwrap().as_std_path());
 
         for filtered_path in filtered_paths {
             let config = read_config(
-                self.fs(),
+                self.fs.as_ref(),
                 ConfigurationPathHint::FromWorkspace(filtered_path.as_path().to_path_buf()),
                 false,
             )?;
             let loaded_nested_configuration =
-                LoadedConfiguration::try_from_payload(config, self.fs())?;
+                LoadedConfiguration::try_from_payload(config, self.fs.as_ref())?;
 
             let LoadedConfiguration {
                 directory_path: nested_directory_path,
@@ -694,20 +2032,15 @@ impl WorkspaceServer {
         Ok(returned_diagnostics)
     }
 
-    /// It accepts a list of ignore files. If the VCS integration is enabled, the files
-    /// are read and the [Settings] are updated.
-    ///
-    /// ## Errors
-    ///
-    /// - If the project doesn't exist
-    /// - If it's not possible to read the ignore file
-    /// - If the ignore file contains lines that contain incorrect globs
-    pub(super) fn update_project_ignore_files(
+    fn update_project_ignore_files(
         &self,
         project_key: ProjectKey,
         paths: &[BiomePath],
     ) -> Result<(), WorkspaceError> {
-        let project_path = self.projects.get_project_path(project_key);
+        let project_path = self
+            .projects
+            .get_project_path(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
         let mut settings = self
             .projects
             .get_root_settings(project_key)
@@ -715,18 +2048,17 @@ impl WorkspaceServer {
 
         let vcs_settings = &mut settings.vcs_settings;
 
-        if !vcs_settings.is_enabled() {
+        if !vcs_settings.is_enabled() || !vcs_settings.should_use_ignore_file() {
             return Ok(());
         }
 
-        if !vcs_settings.should_use_ignore_file() {
-            return Ok(());
-        }
-
-        for path in paths.iter().filter(|path| path.is_ignore()) {
-            let is_in_project_path = project_path
-                .as_ref()
-                .is_some_and(|project_path| path.starts_with(project_path));
+        let filtered_paths = paths.iter().filter(|path| path.is_ignore()).filter(|path| {
+            // We filter out the root ignore file, because it's stored when calling `update_settings`
+            // SAFETY: the paths received are files, so it's safe to assume they have a parent folder
+            project_path.as_path() != path.parent().unwrap()
+        });
+        for path in filtered_paths {
+            let is_in_project_path = path.starts_with(&project_path);
 
             // We need to pass the **directory** that contains the ignore file.
             let dir_ignore_file = path.parent().unwrap_or(path);
@@ -734,7 +2066,7 @@ impl WorkspaceServer {
             if vcs_settings.is_ignore_file(path) && is_in_project_path {
                 let content = self.fs.read_file_from_path(path)?;
                 let patterns = content.lines().collect::<Vec<_>>();
-                vcs_settings.store_ignore_patterns(dir_ignore_file, patterns.as_slice())?;
+                vcs_settings.store_nested_ignore_patterns(dir_ignore_file, patterns.as_slice())?;
             }
         }
 
@@ -743,965 +2075,82 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    /// Updates the [ProjectLayout] for the given `path`.
-    pub(super) fn update_project_layout(
-        &self,
-        signal_kind: WatcherSignalKind,
-        path: &Utf8Path,
-    ) -> Result<(), WorkspaceError> {
-        let filename = path.file_name();
-        if filename.is_some_and(|filename| filename == "package.json") {
-            let package_path = path
-                .parent()
-                .map(|parent| parent.to_path_buf())
-                .ok_or_else(WorkspaceError::not_found)?;
-
-            match signal_kind {
-                WatcherSignalKind::AddedOrChanged(_) => {
-                    let parsed = self.get_parse(path)?;
-                    self.project_layout
-                        .insert_serialized_node_manifest(package_path, parsed);
-                }
-                WatcherSignalKind::Removed => {
-                    self.project_layout.remove_package(&package_path);
-                }
-            }
-        } else if filename.is_some_and(|filename| filename == "tsconfig.json") {
-            let package_path = path
-                .parent()
-                .map(|parent| parent.to_path_buf())
-                .ok_or_else(WorkspaceError::not_found)?;
-
-            match signal_kind {
-                WatcherSignalKind::AddedOrChanged(_) => {
-                    let parsed = self.get_parse(path)?;
-                    self.project_layout
-                        .insert_serialized_tsconfig(package_path, parsed);
-                }
-                WatcherSignalKind::Removed => {
-                    self.project_layout
-                        .remove_tsconfig_from_package(&package_path);
-                }
-            }
-        }
-
-        Ok(())
+    fn notify(&self, notification: ServiceNotification) {
+        let _ = self.notification_tx.send(notification);
     }
 
-    /// Updates the [ModuleGraph] for the given `path` with an optional `root`.
-    #[tracing::instrument(level = "debug", skip(self, root))]
-    fn update_module_graph(
+    fn unload_file(
         &self,
-        signal_kind: WatcherSignalKind,
-        path: &BiomePath,
-        root: Option<SendNode>,
-    ) {
-        let (added_or_changed_paths, removed_paths) = match signal_kind {
-            WatcherSignalKind::AddedOrChanged(_) => {
-                let Some(root) = root.and_then(SendNode::into_node).and_then(AnyJsRoot::cast)
-                else {
-                    return;
-                };
-
-                (&[(path, root)] as &[_], &[] as &[_])
-            }
-            WatcherSignalKind::Removed => (&[] as &[_], &[path] as &[_]),
-        };
-
-        self.module_graph.update_graph_for_js_paths(
-            self.fs.as_ref(),
-            &self.project_layout,
-            added_or_changed_paths,
-            removed_paths,
-        );
+        path: &Utf8Path,
+    ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
+        self.update_service_data(path, UpdateKind::Removed)
+            .map(|(_, diagnostics)| {
+                diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect()
+            })
     }
 
-    /// Updates the state of any services relevant to the given `path`.
-    pub(super) fn update_service_data(
+    fn unload_path(
         &self,
-        signal_kind: WatcherSignalKind,
         path: &Utf8Path,
-        root: Option<SendNode>,
-    ) -> Result<(), WorkspaceError> {
-        let path = BiomePath::from(path);
-        if path.is_config() || path.is_manifest() {
-            self.update_project_layout(signal_kind, &path)?;
-        }
+    ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
+        // Note that we cannot check the kind of the path, because the watcher
+        // would only attempt to unload a file or folder after it has been
+        // removed. So asking the filesystem wouldn't work anymore. So we just
+        // pretend it's a folder and if it turns out the path didn't belong to a
+        // folder, the scanner will ignore it.
+        self.scanner.unload_folder(path.to_path_buf());
 
-        self.update_module_graph(signal_kind, &path, root);
+        // Unloads all descendants of the path.
+        self.module_graph.unload_path(path);
+        self.project_layout.unload_folder(path);
 
-        match signal_kind {
-            WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan) => {
-                // We'll send a single signal at the end of the scan.
-            }
-            _ => {
-                let _ = self.notification_tx.send(ServiceDataNotification::Updated);
-            }
-        }
-
-        Ok(())
+        // Finally unloads the path itself.
+        self.unload_file(path)
     }
 }
 
-impl Workspace for WorkspaceServer {
-    fn fs(&self) -> &dyn FsWithResolverProxy {
-        self.fs.as_ref()
-    }
+#[derive(Debug, Default)]
+pub(super) struct InternalOpenFileResult {
+    /// Dependencies we discovered of the opened file.
+    pub dependencies: ModuleDependencies,
 
-    fn check_file_size(
-        &self,
-        params: CheckFileSizeParams,
-    ) -> Result<CheckFileSizeResult, WorkspaceError> {
-        let documents = self.documents.pin();
-        let Some(document) = documents.get(params.path.as_path()) else {
-            return Err(WorkspaceError::not_found());
-        };
-        let file_size = document.content.len();
-        let limit = self
-            .projects
-            .get_max_file_size(params.project_key, params.path.as_path());
-        Ok(CheckFileSizeResult { file_size, limit })
-    }
-
-    fn file_features(
-        &self,
-        params: SupportsFeatureParams,
-    ) -> Result<FileFeaturesResult, WorkspaceError> {
-        let project_key = params.project_key;
-        let path = params.path.as_path();
-        let language = self.get_file_source(path);
-        let capabilities = self.features.get_capabilities(language);
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
-        let mut file_features = FileFeaturesResult::new();
-        let file_name = path.file_name();
-        file_features = file_features.with_capabilities(&capabilities);
-        file_features = file_features.with_settings_and_language(&handle, path, &capabilities);
-
-        let Some(settings) = handle.settings() else {
-            return Ok(file_features);
-        };
-        if settings.ignore_unknown_enabled()
-            && language == DocumentFileSource::Unknown
-            && self.get_file_source(&params.path) == DocumentFileSource::Unknown
-        {
-            file_features.ignore_not_supported();
-        } else if file_name == Some(ConfigName::biome_json())
-            || file_name == Some(ConfigName::biome_jsonc())
-        {
-            // Never ignore Biome's config file
-        } else if self.is_ignored_by_top_level_config(project_key, path) {
-            file_features.set_ignored_for_all_features();
-        } else {
-            for feature in params.features.iter() {
-                if self
-                    .projects
-                    .is_ignored_by_feature_config(project_key, path, feature)
-                {
-                    file_features.ignored(feature);
-                }
-            }
-        }
-        // If the file is not ignored by at least one feature, then check that the file is not protected.
-        //
-        // Protected files must be ignored.
-        if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path) {
-            file_features.set_protected_for_all_features();
-        }
-
-        Ok(file_features)
-    }
-
-    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        Ok(self.is_ignored(params.project_key, params.path.as_path(), params.features))
-    }
-
-    /// Updates the global settings for this workspace.
     ///
-    /// ## Panics
-    /// This function may panic if the internal settings mutex has been poisoned
-    /// by another thread having previously panicked while holding the lock
-    #[tracing::instrument(level = "debug", skip_all)]
-    fn update_settings(
-        &self,
-        params: UpdateSettingsParams,
-    ) -> Result<UpdateSettingsResult, WorkspaceError> {
-        let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
-        let is_root = params.configuration.is_root();
-        let extends_root = params.configuration.extends_root();
-        let mut settings = if !is_root {
-            if !self.projects.is_project_registered(params.project_key) {
-                return Err(WorkspaceError::no_project());
+    pub diagnostics: Vec<ModuleDiagnostic>,
+}
+
+/// Reports the reason why a file is being opened/indexed.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum OpenFileReason {
+    /// A workspace client has explicitly requested the file to be opened.
+    ClientRequest,
+
+    /// The file is being indexed by the scanner.
+    Index(IndexTrigger),
+}
+
+impl OpenFileReason {
+    pub const fn is_index(self) -> bool {
+        matches!(self, Self::Index(_))
+    }
+}
+
+/// Kind of update being performed.
+pub enum UpdateKind {
+    AddedOrChanged(OpenFileReason, SendNode),
+    Removed,
+}
+
+impl Debug for UpdateKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AddedOrChanged(reason, _) => {
+                f.debug_tuple("AddedOrChanged").field(reason).finish()
             }
-
-            if let Some(workspace_directory) = &workspace_directory {
-                self.projects
-                    .get_nested_settings(params.project_key, workspace_directory.as_path())
-                    .unwrap_or_default()
-            } else {
-                return Err(WorkspaceError::no_workspace_directory());
-            }
-        } else {
-            self.projects
-                .get_root_settings(params.project_key)
-                .ok_or_else(WorkspaceError::no_project)?
-        };
-
-        settings.merge_with_configuration(params.configuration, workspace_directory.clone())?;
-
-        let loading_directory = if extends_root {
-            self.projects.get_project_path(params.project_key)
-        } else {
-            workspace_directory.clone()
-        };
-
-        let diagnostics = self.load_plugins(
-            &loading_directory.clone().unwrap_or_default(),
-            &settings.as_all_plugins(),
-        );
-        let has_errors = diagnostics
-            .iter()
-            .any(|diagnostic| diagnostic.severity() >= Severity::Error);
-        if has_errors {
-            // Note we also pass non-error diagnostics here. Filtering them
-            // might be cleaner, but on the other hand, including them may
-            // sometimes give a hint as to why an error occurred?
-            return Err(WorkspaceError::plugin_errors(diagnostics));
+            Self::Removed => write!(f, "Removed"),
         }
-
-        if !is_root {
-            self.projects.set_nested_settings(
-                params.project_key,
-                workspace_directory.unwrap_or_default(),
-                settings,
-            );
-        } else {
-            self.projects
-                .set_root_settings(params.project_key, settings);
-        }
-
-        Ok(UpdateSettingsResult {
-            diagnostics: diagnostics.into_iter().map(Into::into).collect(),
-        })
-    }
-
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        self.open_file_internal(OpenFileReason::ClientRequest, params)
-    }
-
-    fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
-        let (path, scan_kind) = if params.open_uninitialized {
-            let path = params.path.to_path_buf();
-            self.find_project_root(
-                params.path,
-                params.only_rules.unwrap_or_default(),
-                params.skip_rules.unwrap_or_default(),
-            )
-            .unwrap_or((path, ScanKind::None))
-        } else {
-            self.find_project_root(
-                params.path,
-                params.only_rules.unwrap_or_default(),
-                params.skip_rules.unwrap_or_default(),
-            )?
-        };
-
-        let project_key = self.projects.insert_project(path);
-
-        Ok(OpenProjectResult {
-            project_key,
-            scan_kind,
-        })
-    }
-
-    fn scan_project_folder(
-        &self,
-        params: ScanProjectFolderParams,
-    ) -> Result<ScanProjectFolderResult, WorkspaceError> {
-        let path = params
-            .path
-            .map(Utf8PathBuf::from)
-            .or_else(|| self.projects.get_project_path(params.project_key))
-            .ok_or_else(WorkspaceError::no_project)?;
-
-        if params.scan_kind.is_none() {
-            let manifest = path.join("package.json");
-            if self.fs.path_exists(&manifest) {
-                self.open_file_during_initial_scan(params.project_key, manifest.clone())?;
-                self.update_project_layout(
-                    WatcherSignalKind::AddedOrChanged(OpenFileReason::InitialScan),
-                    &manifest,
-                )?;
-            }
-            return Ok(ScanProjectFolderResult {
-                diagnostics: Vec::new(),
-                duration: Duration::from_millis(0),
-                configuration_files: vec![],
-            });
-        }
-
-        let should_scan = params.force
-            || !self
-                .watched_folders
-                .pin()
-                .iter()
-                .any(|watched_folder| path.starts_with(watched_folder));
-        if !should_scan {
-            // No need to scan folders that are already being watched.
-            return Ok(ScanProjectFolderResult {
-                diagnostics: Vec::new(),
-                duration: Duration::from_millis(0),
-                configuration_files: vec![],
-            });
-        }
-
-        if params.watch {
-            self.watched_folders.pin().insert(path.clone());
-
-            let _ = self
-                .watcher_tx
-                .try_send(WatcherInstruction::WatchFolder(path.clone()));
-        }
-
-        let result = self.scan(params.project_key, &path, params.scan_kind)?;
-
-        let _ = self.notification_tx.send(ServiceDataNotification::Updated);
-
-        Ok(ScanProjectFolderResult {
-            diagnostics: result.diagnostics,
-            duration: result.duration,
-            configuration_files: result.configuration_files,
-        })
-    }
-
-    fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
-        let project_path = self
-            .projects
-            .get_project_path(params.project_key)
-            .ok_or_else(WorkspaceError::no_project)?;
-
-        self.watched_folders.pin().retain(|watched_folder| {
-            if watched_folder.starts_with(&project_path) {
-                let _ = self
-                    .watcher_tx
-                    .try_send(WatcherInstruction::UnwatchFolder(watched_folder.clone()));
-                false
-            } else {
-                true
-            }
-        });
-
-        // Limit the scope of the pin and the lock inside.
-        {
-            let documents = self.documents.pin();
-            let mut node_cache = self.node_cache.lock().unwrap();
-            for (path, document) in documents.iter() {
-                if document.opened_by_scanner
-                    && self
-                        .projects
-                        .path_belongs_only_to_project_with_path(path, &project_path)
-                {
-                    documents.remove(path);
-                    node_cache.remove(path.as_path());
-                }
-            }
-        }
-
-        self.projects.remove_project(params.project_key);
-
-        Ok(())
-    }
-
-    fn get_syntax_tree(
-        &self,
-        params: GetSyntaxTreeParams,
-    ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let debug_syntax_tree = capabilities
-            .debug
-            .debug_syntax_tree
-            .ok_or_else(self.build_capability_error(&params.path))?;
-
-        // The feature name here can be any feature, in theory
-        let parse = self.get_parse(&params.path)?;
-        let printed = debug_syntax_tree(&params.path, parse);
-
-        Ok(printed)
-    }
-
-    fn get_control_flow_graph(
-        &self,
-        params: GetControlFlowGraphParams,
-    ) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let debug_control_flow = capabilities
-            .debug
-            .debug_control_flow
-            .ok_or_else(self.build_capability_error(&params.path))?;
-
-        let parse = self.get_parse(&params.path)?;
-        let printed = debug_control_flow(parse, params.cursor);
-
-        Ok(printed)
-    }
-
-    fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let debug_formatter_ir = capabilities
-            .debug
-            .debug_formatter_ir
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
-        let parse = self.get_parse(&params.path)?;
-        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
-        {
-            return Err(WorkspaceError::format_with_errors_disabled());
-        }
-        let document_file_source = self.get_file_source(&params.path);
-
-        debug_formatter_ir(&params.path, &document_file_source, parse, handle)
-    }
-
-    fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let debug_type_info = capabilities
-            .debug
-            .debug_type_info
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let parse = self.get_parse(&params.path).ok();
-
-        debug_type_info(&params.path, parse, self.module_graph.clone())
-    }
-
-    fn get_registered_types(
-        &self,
-        params: GetRegisteredTypesParams,
-    ) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let debug_registered_types = capabilities
-            .debug
-            .debug_registered_types
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let parse = self.get_parse(&params.path)?;
-
-        debug_registered_types(&params.path, parse)
-    }
-
-    fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let debug_semantic_model = capabilities
-            .debug
-            .debug_semantic_model
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let parse = self.get_parse(&params.path)?;
-
-        debug_semantic_model(&params.path, parse)
-    }
-
-    fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
-        self.documents
-            .pin()
-            .get(params.path.as_path())
-            .map(|document| document.content.clone())
-            .ok_or_else(WorkspaceError::not_found)
-    }
-
-    /// Changes the content of an open file.
-    fn change_file(
-        &self,
-        ChangeFileParams {
-            project_key,
-            path,
-            content,
-            version,
-        }: ChangeFileParams,
-    ) -> Result<(), WorkspaceError> {
-        let documents = self.documents.pin();
-        let (index, opened_by_scanner, existing_version) = documents
-            .get(path.as_path())
-            .map(|document| {
-                (
-                    document.file_source_index,
-                    document.opened_by_scanner,
-                    document.version,
-                )
-            })
-            .ok_or_else(WorkspaceError::not_found)?;
-
-        if existing_version.is_some_and(|existing_version| existing_version >= version) {
-            warn!(%version, %path, "outdated_file_change");
-            return Ok(()); // Safely ignore older versions.
-        }
-
-        // We remove the node cache for the document, if it exists.
-        // This is done so that we need to hold the lock as short as possible
-        // (it's released directly after the statement). The potential downside
-        // is that if two calls to `change_file()` happen concurrently, then the
-        // second would have a cache miss, and not update the cache either.
-        // This seems an unlikely scenario however, and the impact is small
-        // anyway, so this seems a worthwhile tradeoff.
-        let node_cache = self.node_cache.lock().unwrap().remove(path.as_path());
-
-        let persist_node_cache = node_cache.is_some();
-        let mut node_cache = node_cache.unwrap_or_default();
-
-        let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
-        let root = parsed.any_parse.root();
-
-        let document = Document {
-            content,
-            version: Some(version),
-            file_source_index: index,
-            syntax: Some(Ok(parsed.any_parse)),
-            opened_by_scanner,
-        };
-
-        if persist_node_cache {
-            self.node_cache
-                .lock()
-                .unwrap()
-                .insert(path.to_path_buf(), node_cache);
-        }
-
-        let opened_by_scanner = document.opened_by_scanner;
-        documents
-            .insert(path.clone().into(), document)
-            .ok_or_else(WorkspaceError::not_found)?;
-
-        if opened_by_scanner {
-            self.update_service_data(
-                WatcherSignalKind::AddedOrChanged(OpenFileReason::ClientRequest),
-                &path,
-                Some(root),
-            )
-        } else {
-            Ok(())
-        }
-    }
-
-    /// Closes a file that is opened in the workspace.
-    ///
-    /// This only unloads the document from the workspace if the file is NOT
-    /// opened by the scanner as well. If the scanner has opened the file, it
-    /// may still be required for multi-file analysis.
-    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        let path = params.path.as_path();
-
-        let documents = self.documents.pin();
-        let result = documents.compute(path.to_path_buf(), |current| {
-            match current {
-                Some((_path, document)) if document.opened_by_scanner => {
-                    // If the scanner is still interested in the document, we
-                    // only unset the version and re-sync the content below.
-                    Operation::Insert(Document {
-                        version: None,
-                        ..document.clone()
-                    })
-                }
-                Some(_) => Operation::Remove,
-                None => Operation::Abort(()),
-            }
-        });
-
-        // The node cache can be cleared in any case.
-        self.node_cache.lock().unwrap().remove(path);
-
-        match result {
-            Compute::Inserted(_, _) => Ok(()), // should be unreachable
-            Compute::Updated { .. } => {
-                // This may look counter-intuitive, but we need to consider
-                // that the file may have gone out-of-sync between the client
-                // and the file system. So when the client closes it, and the
-                // scanner still wants it, we need to resync it to make sure
-                // they're back in sync.
-                let _ = self
-                    .watcher_tx
-                    .send(WatcherInstruction::ResyncFile(path.to_path_buf()));
-
-                Ok(())
-            }
-            Compute::Removed(_, _) => Ok(()),
-            Compute::Aborted(_) => Err(WorkspaceError::not_found()),
-        }
-    }
-
-    /// Retrieves the list of diagnostics associated with a file
-    #[tracing::instrument(
-        level = "debug",
-        skip(self, params),
-        fields(
-            rule_categories = display(&params.categories),
-            path = display(&params.path),
-            project_key = debug(&params.project_key),
-            skip = debug(&params.skip),
-            only = debug(&params.only),
-        )
-    )]
-    fn pull_diagnostics(
-        &self,
-        params: PullDiagnosticsParams,
-    ) -> Result<PullDiagnosticsResult, WorkspaceError> {
-        let PullDiagnosticsParams {
-            project_key,
-            path,
-            categories,
-            only,
-            skip,
-            enabled_rules,
-            pull_code_actions,
-        } = params;
-        let parse = self.get_parse(&path)?;
-        let language = self.get_file_source(&path);
-        let capabilities = self.features.get_capabilities(language);
-        let (diagnostics, errors, skipped_diagnostics) =
-            if let Some(lint) = capabilities.analyzer.lint {
-                let settings = self
-                    .projects
-                    .get_settings_based_on_path(project_key, &path)
-                    .ok_or_else(WorkspaceError::no_project)?;
-
-                let plugins = self
-                    .get_analyzer_plugins_for_project(
-                        settings.source_path().unwrap_or_default().as_path(),
-                        &settings.get_plugins_for_path(&path),
-                    )
-                    .map_err(WorkspaceError::plugin_errors)?;
-                let results = lint(LintParams {
-                    parse,
-                    workspace: &settings.into(),
-                    path: &path,
-                    only,
-                    skip,
-                    language,
-                    categories,
-                    module_graph: self.module_graph.clone(),
-                    project_layout: self.project_layout.clone(),
-                    suppression_reason: None,
-                    enabled_rules,
-                    pull_code_actions,
-                    plugins: if categories.contains(RuleCategory::Lint) {
-                        plugins
-                    } else {
-                        Vec::new()
-                    },
-                });
-
-                (
-                    results.diagnostics,
-                    results.errors,
-                    results.skipped_diagnostics,
-                )
-            } else {
-                let parse_diagnostics = parse.into_diagnostics();
-                let errors = parse_diagnostics
-                    .iter()
-                    .filter(|diag| diag.severity() <= Severity::Error)
-                    .count();
-
-                (parse_diagnostics, errors, 0)
-            };
-
-        info!(
-            "Pulled {:?} diagnostic(s), skipped {:?} diagnostic(s) from {}",
-            diagnostics.len(),
-            skipped_diagnostics,
-            path
-        );
-        Ok(PullDiagnosticsResult {
-            diagnostics: diagnostics
-                .into_iter()
-                .map(|diag| {
-                    let diag = diag.with_file_path(path.to_string());
-                    SerdeDiagnostic::new(diag)
-                })
-                .collect(),
-            errors,
-            skipped_diagnostics: skipped_diagnostics.into(),
-        })
-    }
-
-    /// Retrieves the list of code actions available for a given cursor
-    /// position within a file
-    #[tracing::instrument(
-        level = "debug",
-        skip_all,
-        fields(
-            only = debug(&params.only),
-            skip = debug(&params.skip),
-            range = debug(&params.range)
-        )
-    )]
-    fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
-        let PullActionsParams {
-            project_key,
-            path,
-            range,
-            suppression_reason: _,
-            only,
-            skip,
-            enabled_rules,
-            categories,
-        } = params;
-        let capabilities = self.get_file_capabilities(&path);
-        let code_actions = capabilities
-            .analyzer
-            .code_actions
-            .ok_or_else(self.build_capability_error(&path))?;
-
-        let parse = self.get_parse(&path)?;
-        let language = self.get_file_source(&path);
-        let settings = self
-            .projects
-            .get_settings_based_on_path(project_key, &path)
-            .ok_or_else(WorkspaceError::no_project)?;
-        Ok(code_actions(CodeActionsParams {
-            parse,
-            range,
-            workspace: &settings.into(),
-            path: &path,
-            module_graph: self.module_graph.clone(),
-            project_layout: self.project_layout.clone(),
-            language,
-            only,
-            skip,
-            suppression_reason: None,
-            enabled_rules,
-            plugins: Vec::new(),
-            categories,
-        }))
-    }
-
-    /// Runs the given file through the formatter using the provided options
-    /// and returns the resulting source code
-    #[instrument(
-        level = "debug",
-        skip_all,
-        fields(
-            path = display(&params.path),
-        )
-    )]
-    fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-
-        let format = capabilities
-            .formatter
-            .format
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
-
-        let parse = self.get_parse(&params.path)?;
-
-        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
-        {
-            return Err(WorkspaceError::format_with_errors_disabled());
-        }
-        let document_file_source = self.get_file_source(&params.path);
-        format(&params.path, &document_file_source, parse, handle)
-    }
-
-    #[instrument(level = "debug", skip(self, params))]
-    fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let format_range = capabilities
-            .formatter
-            .format_range
-            .ok_or_else(self.build_capability_error(&params.path))?;
-        let settings = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
-        let parse = self.get_parse(&params.path)?;
-        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
-            && parse.has_errors()
-        {
-            return Err(WorkspaceError::format_with_errors_disabled());
-        }
-        let document_file_source = self.get_file_source(&params.path);
-        format_range(
-            &params.path,
-            &document_file_source,
-            parse,
-            settings,
-            params.range,
-        )
-    }
-
-    #[instrument(level = "debug", skip(self, params))]
-    fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let format_on_type = capabilities
-            .formatter
-            .format_on_type
-            .ok_or_else(self.build_capability_error(&params.path))?;
-
-        let handle = WorkspaceSettingsHandle::from(
-            self.projects
-                .get_settings_based_on_path(params.project_key, &params.path)
-                .ok_or_else(WorkspaceError::no_project)?,
-        );
-        let parse = self.get_parse(&params.path)?;
-        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
-        {
-            return Err(WorkspaceError::format_with_errors_disabled());
-        }
-        let document_file_source = self.get_file_source(&params.path);
-
-        format_on_type(
-            &params.path,
-            &document_file_source,
-            parse,
-            handle,
-            params.offset,
-        )
-    }
-
-    #[instrument(
-        level = "debug",
-        skip_all,
-        fields(
-            rule_categories = display(&params.rule_categories),
-            skip = debug(&params.skip),
-            only = debug(&params.only),
-            should_format = display(&params.should_format),
-        )
-    )]
-    fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
-        let FixFileParams {
-            project_key,
-            path,
-            fix_file_mode,
-            should_format,
-            only,
-            skip,
-            enabled_rules,
-            rule_categories,
-            suppression_reason,
-        } = params;
-        let capabilities = self.get_file_capabilities(&path);
-
-        let fix_all = capabilities
-            .analyzer
-            .fix_all
-            .ok_or_else(self.build_capability_error(&path))?;
-        let parse = self.get_parse(&path)?;
-
-        let settings = self
-            .projects
-            .get_settings_based_on_path(project_key, &path)
-            .ok_or_else(WorkspaceError::no_project)?;
-        let plugins = self
-            .get_analyzer_plugins_for_project(
-                settings.source_path().unwrap_or_default().as_path(),
-                &settings.get_plugins_for_path(&path),
-            )
-            .map_err(WorkspaceError::plugin_errors)?;
-        let language = self.get_file_source(&path);
-        fix_all(FixAllParams {
-            parse,
-            fix_file_mode,
-            workspace: settings.into(),
-            should_format,
-            biome_path: &path,
-            module_graph: self.module_graph.clone(),
-            project_layout: self.project_layout.clone(),
-            document_file_source: language,
-            only,
-            skip,
-            rule_categories,
-            suppression_reason,
-            enabled_rules,
-            plugins: if rule_categories.contains(RuleCategory::Lint) {
-                plugins
-            } else {
-                Vec::new()
-            },
-        })
-    }
-
-    fn rename(&self, params: super::RenameParams) -> Result<RenameResult, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let rename = capabilities
-            .analyzer
-            .rename
-            .ok_or_else(self.build_capability_error(&params.path))?;
-
-        let parse = self.get_parse(&params.path)?;
-        let result = rename(&params.path, parse, params.symbol_at, params.new_name)?;
-
-        Ok(result)
-    }
-
-    fn rage(&self, _: RageParams) -> Result<RageResult, WorkspaceError> {
-        let entries = vec![
-            RageEntry::section("Workspace"),
-            RageEntry::pair("Open Documents", &format!("{}", self.documents.len())),
-        ];
-
-        Ok(RageResult { entries })
-    }
-
-    fn parse_pattern(
-        &self,
-        params: ParsePatternParams,
-    ) -> Result<ParsePatternResult, WorkspaceError> {
-        let options =
-            CompilePatternOptions::default().with_default_language(params.default_language);
-        let pattern = compile_pattern_with_options(&params.pattern, options)?;
-
-        let pattern_id = make_search_pattern_id();
-        self.patterns.pin().insert(pattern_id.clone(), pattern);
-        Ok(ParsePatternResult { pattern_id })
-    }
-
-    fn search_pattern(
-        &self,
-        SearchPatternParams {
-            project_key,
-            path,
-            pattern,
-        }: SearchPatternParams,
-    ) -> Result<SearchResults, WorkspaceError> {
-        let patterns = self.patterns.pin();
-        let query = patterns
-            .get(&pattern)
-            .ok_or_else(WorkspaceError::invalid_pattern)?;
-
-        let capabilities = self.get_file_capabilities(&path);
-        let search = capabilities
-            .search
-            .search
-            .ok_or_else(self.build_capability_error(&path))?;
-        let settings = self
-            .projects
-            .get_settings_based_on_path(project_key, &path)
-            .ok_or_else(WorkspaceError::no_project)?;
-        let parse = self.get_parse(&path)?;
-
-        let document_file_source = self.get_file_source(&path);
-        let matches = search(&path, &document_file_source, parse, query, settings.into())?;
-
-        Ok(SearchResults { path, matches })
-    }
-
-    fn drop_pattern(&self, params: super::DropPatternParams) -> Result<(), WorkspaceError> {
-        self.patterns.pin().remove(&params.pattern);
-        Ok(())
-    }
-
-    fn server_info(&self) -> Option<&ServerInfo> {
-        None
     }
 }
 

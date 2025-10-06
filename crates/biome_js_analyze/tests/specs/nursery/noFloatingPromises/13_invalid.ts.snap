@@ -1,0 +1,332 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: 13_invalid.ts
+---
+# Input
+```ts
+true && Promise.reject("logical operator bypass");
+false || Promise.reject("logical operator bypass");
+null ?? Promise.reject("logical operator bypass");
+"one" && 1 && Promise.reject("logical operator bypass");
+"" || 0 || Promise.reject("logical operator bypass");
+null ?? undefined ?? Promise.reject("logical operator bypass");
+
+type Truthy = 1 | "one";
+let truthy: Truthy = 1;
+truthy && Promise.reject("logical operator bypass");
+
+type Nullish = null | undefined;
+let nullish: Nullish = null;
+nullish || Promise.reject("logical operator bypass");
+nullish ?? Promise.reject("logical operator bypass");
+
+let either: Truthy | Nullish = 1;
+either && Promise.reject("logical operator bypass");
+either || Promise.reject("logical operator bypass");
+either ?? Promise.reject("logical operator bypass");
+
+interface Foo {}
+let foo: Foo;
+foo && Promise.reject("logical operator bypass");
+foo || Promise.reject("logical operator bypass");
+
+class C {}
+let c = new C;
+c && Promise.reject("logical operator bypass");
+
+let o: object;
+o && Promise.reject("logical operator bypass");
+
+type Params = {
+    option: boolean | Nullish;
+};
+
+function functionWithParams({ option }: Params) {
+    option ?? Promise.reject("logical operator bypass");
+}
+
+```
+
+# Diagnostics
+```
+13_invalid.ts:1:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+  > 1 │ true && Promise.reject("logical operator bypass");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ false || Promise.reject("logical operator bypass");
+    3 │ null ?? Promise.reject("logical operator bypass");
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:2:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    1 │ true && Promise.reject("logical operator bypass");
+  > 2 │ false || Promise.reject("logical operator bypass");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ null ?? Promise.reject("logical operator bypass");
+    4 │ "one" && 1 && Promise.reject("logical operator bypass");
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:3:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    1 │ true && Promise.reject("logical operator bypass");
+    2 │ false || Promise.reject("logical operator bypass");
+  > 3 │ null ?? Promise.reject("logical operator bypass");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ "one" && 1 && Promise.reject("logical operator bypass");
+    5 │ "" || 0 || Promise.reject("logical operator bypass");
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:4:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    2 │ false || Promise.reject("logical operator bypass");
+    3 │ null ?? Promise.reject("logical operator bypass");
+  > 4 │ "one" && 1 && Promise.reject("logical operator bypass");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ "" || 0 || Promise.reject("logical operator bypass");
+    6 │ null ?? undefined ?? Promise.reject("logical operator bypass");
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:5:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    3 │ null ?? Promise.reject("logical operator bypass");
+    4 │ "one" && 1 && Promise.reject("logical operator bypass");
+  > 5 │ "" || 0 || Promise.reject("logical operator bypass");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ null ?? undefined ?? Promise.reject("logical operator bypass");
+    7 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:6:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    4 │ "one" && 1 && Promise.reject("logical operator bypass");
+    5 │ "" || 0 || Promise.reject("logical operator bypass");
+  > 6 │ null ?? undefined ?? Promise.reject("logical operator bypass");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ type Truthy = 1 | "one";
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:10:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     8 │ type Truthy = 1 | "one";
+     9 │ let truthy: Truthy = 1;
+  > 10 │ truthy && Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ type Nullish = null | undefined;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:14:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    12 │ type Nullish = null | undefined;
+    13 │ let nullish: Nullish = null;
+  > 14 │ nullish || Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ nullish ?? Promise.reject("logical operator bypass");
+    16 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:15:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    13 │ let nullish: Nullish = null;
+    14 │ nullish || Promise.reject("logical operator bypass");
+  > 15 │ nullish ?? Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ let either: Truthy | Nullish = 1;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:18:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    17 │ let either: Truthy | Nullish = 1;
+  > 18 │ either && Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ either || Promise.reject("logical operator bypass");
+    20 │ either ?? Promise.reject("logical operator bypass");
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:19:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    17 │ let either: Truthy | Nullish = 1;
+    18 │ either && Promise.reject("logical operator bypass");
+  > 19 │ either || Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ either ?? Promise.reject("logical operator bypass");
+    21 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:20:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    18 │ either && Promise.reject("logical operator bypass");
+    19 │ either || Promise.reject("logical operator bypass");
+  > 20 │ either ?? Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ interface Foo {}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:24:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    22 │ interface Foo {}
+    23 │ let foo: Foo;
+  > 24 │ foo && Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ foo || Promise.reject("logical operator bypass");
+    26 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:25:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    23 │ let foo: Foo;
+    24 │ foo && Promise.reject("logical operator bypass");
+  > 25 │ foo || Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ class C {}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:29:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    27 │ class C {}
+    28 │ let c = new C;
+  > 29 │ c && Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ let o: object;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:32:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    31 │ let o: object;
+  > 32 │ o && Promise.reject("logical operator bypass");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ type Params = {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+13_invalid.ts:39:5 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    38 │ function functionWithParams({ option }: Params) {
+  > 39 │     option ?? Promise.reject("logical operator bypass");
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ }
+    41 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```

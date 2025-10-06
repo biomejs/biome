@@ -12,34 +12,14 @@ use biome_css_analyze::analyze;
 fn quick_test() {
     const FILENAME: &str = "dummyFile.css";
     const SOURCE: &str = r#"
-.foo {
-  position-anchor: --position-anchor;
-}
-
-.bar {
-  position-anchor: --position-anchor;
-  position: relative;
-  box-sizing: border-box;
-}
-
-.baz {
-  position: relative;
-  position-anchor: --position-anchor;
-  box-sizing: border-box;
-}
-
-.qux {
-  position: relative;
-  box-sizing: border-box;
-  position-anchor: --position-anchor;
-}
+d { font: 1em SF Mono, Liberation Mono, sans-serif; }
 "#;
 
     let parsed = parse_css(SOURCE, CssParserOptions::default());
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default();
-    let rule_filter = RuleFilter::Rule("source", "useSortedProperties");
+    let rule_filter = RuleFilter::Rule("suspicious", "noDuplicateFontNames");
 
     analyze(
         &parsed.tree(),

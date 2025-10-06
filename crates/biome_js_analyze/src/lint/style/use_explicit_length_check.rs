@@ -11,6 +11,7 @@ use biome_js_syntax::{
     is_in_boolean_context, is_negation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
+use biome_rule_options::use_explicit_length_check::UseExplicitLengthCheckOptions;
 
 use crate::JsRuleAction;
 
@@ -130,7 +131,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintUnicorn("explicit-length-check")],
+        sources: &[RuleSource::EslintUnicorn("explicit-length-check").same()],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -139,7 +140,7 @@ impl Rule for UseExplicitLengthCheck {
     type Query = Ast<JsStaticMemberExpression>;
     type State = UseExplicitLengthCheckState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExplicitLengthCheckOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let member_expr = ctx.query();

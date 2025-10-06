@@ -8,6 +8,7 @@ use biome_js_syntax::{
     JsStaticMemberExpression,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
+use biome_rule_options::no_accumulating_spread::NoAccumulatingSpreadOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -85,7 +86,7 @@ impl Rule for NoAccumulatingSpread {
     type Query = Semantic<AnySpread>;
     type State = FoundSpread;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoAccumulatingSpreadOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();

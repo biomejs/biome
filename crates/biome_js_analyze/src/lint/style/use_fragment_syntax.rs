@@ -10,6 +10,7 @@ use biome_js_factory::make::{
 };
 use biome_js_syntax::{AnyJsxElementName, JsxElement};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::use_fragment_syntax::UseFragmentSyntaxOptions;
 
 declare_lint_rule! {
     /// This rule enforces the use of `<>...</>` over `<Fragment>...</Fragment>`.
@@ -31,7 +32,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useFragmentSyntax",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-fragments")],
+        sources: &[RuleSource::EslintReact("jsx-fragments").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
@@ -42,7 +43,7 @@ impl Rule for UseFragmentSyntax {
     type Query = Semantic<JsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseFragmentSyntaxOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

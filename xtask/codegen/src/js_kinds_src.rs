@@ -130,6 +130,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "boolean",
         "constructor",
         "declare",
+        "defer",
         "get",
         "infer",
         "is",
@@ -143,6 +144,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "object",
         "set",
         "string",
+        "source",
         "symbol",
         "type",
         "undefined",
@@ -544,7 +546,7 @@ impl AstSrc {
         self.lists.insert(String::from(name), src);
     }
 
-    pub fn lists(&self) -> std::collections::btree_map::Iter<String, AstListSrc> {
+    pub fn lists(&self) -> std::collections::btree_map::Iter<'_, String, AstListSrc> {
         self.lists.iter()
     }
 
@@ -581,7 +583,6 @@ pub struct AstListSeparatorConfiguration {
 
 #[derive(Debug)]
 pub struct AstNodeSrc {
-    #[expect(dead_code)]
     pub documentation: Vec<String>,
     pub name: String,
     // pub traits: Vec<String>,
@@ -615,7 +616,6 @@ pub enum Field {
 
 #[derive(Debug, Clone)]
 pub struct AstEnumSrc {
-    #[expect(dead_code)]
     pub documentation: Vec<String>,
     pub name: String,
     // pub traits: Vec<String>,
@@ -693,10 +693,13 @@ impl Field {
                     ("~=", _) => "whitespace_like",
                     (",", _) => "comma",
                     ("---", LanguageKind::Yaml) => "dashdashdash",
+                    ("---", LanguageKind::Html) => "fence",
                     ("<!--", LanguageKind::Html) => "comment_start",
                     ("-->", LanguageKind::Html) => "comment_end",
                     ("<![CDATA[", LanguageKind::Html) => "cdata_start",
                     ("]]>", LanguageKind::Html) => "cdata_end",
+                    ("{{", LanguageKind::Html) => "l_double_curly",
+                    ("}}", LanguageKind::Html) => "r_double_curly",
                     _ => name,
                 };
 
@@ -705,7 +708,7 @@ impl Field {
                 // we need to replace "-" with "_" for the keywords
                 // e.g. we have `color-profile` in css but it's an invalid ident in rust code
                 if kind_source.keywords.contains(&name) {
-                    format_ident!("{}_token", name.replace('-', "_"))
+                    format_ident!("{}_token", name.replace('-', "_").trim_matches('_'))
                 } else {
                     format_ident!("{}_token", name)
                 }

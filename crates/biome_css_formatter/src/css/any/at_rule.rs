@@ -32,6 +32,15 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
             AnyCssAtRule::CssUnknownValueAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssValueAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssViewTransitionAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::TwApplyAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::TwConfigAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::TwCustomVariantAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::TwPluginAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::TwReferenceAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::TwSourceAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::TwThemeAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::TwUtilityAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::TwVariantAtRule(node) => node.format().fmt(f),
         }
     }
 }

@@ -1,0 +1,40 @@
+use crate::kind_src::KindsSrc;
+
+pub const TAILWIND_KINDS_SRC: KindsSrc = KindsSrc {
+    punct: &[
+        ("/", "SLASH"),
+        ("!", "BANG"),
+        ("-", "DASH"),
+        (":", "COLON"),
+        ("[", "L_BRACKET"),
+        ("]", "R_BRACKET"),
+        ("(", "L_PAREN"),
+        (")", "R_PAREN"),
+        (" ", "WHITESPACE"),
+    ],
+    literals: &["TW_BASE", "TW_VALUE", "TW_SELECTOR", "TW_PROPERTY"],
+    tokens: &["ERROR_TOKEN", "NEWLINE"],
+    keywords: &[],
+    nodes: &[
+        "TW_ROOT",
+        "TW_CANDIDATE_LIST",
+        "TW_FULL_CANDIDATE",
+        "TW_ARBITRARY_CANDIDATE",
+        "TW_STATIC_CANDIDATE",
+        "TW_FUNCTIONAL_CANDIDATE",
+        "TW_VARIANT_LIST",
+        "TW_ARBITRARY_VARIANT",
+        "TW_STATIC_VARIANT",
+        "TW_FUNCTIONAL_VARIANT",
+        "TW_NAMED_VALUE",
+        "TW_ARBITRARY_VALUE",
+        "TW_CSS_VARIABLE_VALUE",
+        "TW_MODIFIER",
+        // Bogus nodes
+        "TW_BOGUS",
+        "TW_BOGUS_CANDIDATE",
+        "TW_BOGUS_VARIANT",
+        "TW_BOGUS_MODIFIER",
+        "TW_BOGUS_VALUE",
+    ],
+};

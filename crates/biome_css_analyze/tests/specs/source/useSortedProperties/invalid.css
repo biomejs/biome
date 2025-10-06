@@ -69,7 +69,7 @@
 }
 
 .example-from-doc-comment {
-  transition: opactity 1s ease;
+  transition: opacity 1s ease;
   border: 1px solid black;
   pointer-events: none;
   color: black;

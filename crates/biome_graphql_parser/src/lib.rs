@@ -5,7 +5,7 @@
 use biome_graphql_factory::GraphqlSyntaxFactory;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
 pub use biome_parser::prelude::*;
-use biome_parser::{AnyParse, tree_sink::LosslessTreeSink};
+use biome_parser::{AnyParse, NodeParse};
 use biome_rowan::{AstNode, NodeCache};
 use parser::{GraphqlParser, parse_root};
 
@@ -100,11 +100,12 @@ impl From<GraphqlParse> for AnyParse {
     fn from(parse: GraphqlParse) -> Self {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
-        Self::new(
+        NodeParse::new(
             // SAFETY: the parser should always return a root node
             root.as_send().unwrap(),
             diagnostics,
         )
+        .into()
     }
 }
 

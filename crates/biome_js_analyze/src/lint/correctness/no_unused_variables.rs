@@ -13,29 +13,7 @@ use biome_js_syntax::{
     TsConditionalType, TsDeclarationModule, TsInferType,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
-use serde::{Deserialize, Serialize};
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    biome_deserialize_macros::Deserializable,
-    Eq,
-    PartialEq,
-    Serialize,
-    Default,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NoUnusedVariablesOptions {
-    /// Whether to ignore unused variables from an object destructuring with a spread.
-    #[serde(default = "ignore_rest_siblings")]
-    ignore_rest_siblings: bool,
-}
-
-const fn ignore_rest_siblings() -> bool {
-    true
-}
+use biome_rule_options::no_unused_variables::NoUnusedVariablesOptions;
 
 declare_lint_rule! {
     /// Disallow unused variables.
@@ -138,9 +116,9 @@ declare_lint_rule! {
         name: "noUnusedVariables",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-unused-vars"),
-            RuleSource::EslintTypeScript("no-unused-vars"),
-            RuleSource::EslintUnusedImports("no-unused-vars")
+            RuleSource::Eslint("no-unused-vars").same(),
+            RuleSource::EslintTypeScript("no-unused-vars").same(),
+            RuleSource::EslintUnusedImports("no-unused-vars").same(),
         ],
         recommended: true,
         severity: Severity::Warning,
@@ -300,20 +278,19 @@ impl Rule for NoUnusedVariables {
             .source_type::<JsFileSource>()
             .language()
             .is_definition_file();
-        if is_declaration_file {
-            if let Some(items) = binding
+        if is_declaration_file
+            && let Some(items) = binding
                 .syntax()
                 .ancestors()
                 .skip(1)
                 .find_map(JsModuleItemList::cast)
-            {
-                // A declaration file without top-level exports and imports is a global declaration file.
-                // All top-level types and variables are available in every files of the project.
-                // Thus, it is ok if top-level types are not used locally.
-                let is_top_level = items.parent::<TsDeclarationModule>().is_some();
-                if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
-                    return None;
-                }
+        {
+            // A declaration file without top-level exports and imports is a global declaration file.
+            // All top-level types and variables are available in every files of the project.
+            // Thus, it is ok if top-level types are not used locally.
+            let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+            if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                return None;
             }
         }
 
@@ -359,12 +336,12 @@ impl Rule for NoUnusedVariables {
         );
 
         // Check if this binding is part of an object pattern with a rest element
-        if let Some(decl) = binding.declaration() {
-            if is_rest_spread_sibling(&decl) {
-                diag = diag.note(
+        if let Some(decl) = binding.declaration()
+            && is_rest_spread_sibling(&decl)
+        {
+            diag = diag.note(
                     markup! {"You can use the "<Emphasis>"ignoreRestSiblings"</Emphasis>" option to ignore unused variables in an object destructuring with a spread."},
                 );
-            }
         }
 
         Some(diag)
@@ -395,7 +372,9 @@ impl Rule for NoUnusedVariables {
                 let new_name = format!("_{name_trimmed}");
 
                 let model = ctx.model();
-                mutation.rename_node_declaration(model, binding, &new_name);
+                if !mutation.rename_node_declaration(model, binding, &new_name) {
+                    return None;
+                }
 
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),

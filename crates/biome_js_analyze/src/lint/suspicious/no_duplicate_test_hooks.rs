@@ -1,11 +1,12 @@
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
-    RuleSourceKind, ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
+    ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use biome_rule_options::no_duplicate_test_hooks::NoDuplicateTestHooksOptions;
 
 declare_lint_rule! {
     /// A `describe` block should not contain duplicate hooks.
@@ -63,8 +64,10 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintJest("no-duplicate-hooks"), RuleSource::EslintVitest("no-duplicate-hooks")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[
+            RuleSource::EslintJest("no-duplicate-hooks").inspired(),
+            RuleSource::EslintVitest("no-duplicate-hooks").inspired(),
+        ],
         domains: &[RuleDomain::Test],
     }
 }
@@ -120,22 +123,21 @@ impl Visitor for DuplicateHooksVisitor {
                 // When the visitor enters a function node, push a new entry on the stack
                 if let Ok(callee) = node.callee() {
                     if callee.contains_a_test_pattern() == Ok(true) {
-                        if let Some(function_name) = callee.get_callee_object_name() {
-                            if function_name.text_trimmed() == "describe" {
-                                self.stack.push(HooksContext::default());
-                            }
+                        if let Some(function_name) = callee.get_callee_object_name()
+                            && function_name.text_trimmed() == "describe"
+                        {
+                            self.stack.push(HooksContext::default());
                         }
                     }
                     // describe.each has a different syntax
-                    else if let AnyJsExpression::JsCallExpression(call_expression) = callee {
-                        if let Ok(callee) = call_expression.callee() {
-                            if matches!(
-                                callee.to_trimmed_text().text(),
-                                "describe.each" | "describe.only.each" | "fdescribe.each"
-                            ) {
-                                self.stack.push(HooksContext::default());
-                            }
-                        }
+                    else if let AnyJsExpression::JsCallExpression(call_expression) = callee
+                        && let Ok(callee) = call_expression.callee()
+                        && matches!(
+                            callee.to_trimmed_text().text(),
+                            "describe.each" | "describe.only.each" | "fdescribe.each"
+                        )
+                    {
+                        self.stack.push(HooksContext::default());
                     }
                 }
 
@@ -163,16 +165,13 @@ impl Visitor for DuplicateHooksVisitor {
             WalkEvent::Leave(node) => {
                 // When the visitor exits a function, if it matches the node of the top-most
                 // entry of the stack and the `has_yield` flag is `false`, emit a query match
-                if let Some(node) = JsCallExpression::cast_ref(node) {
-                    if let Ok(callee) = node.callee() {
-                        if callee.contains_a_test_pattern() == Ok(true) {
-                            if let Some(function_name) = callee.get_callee_object_name() {
-                                if function_name.text_trimmed() == "describe" {
-                                    self.stack.pop();
-                                }
-                            }
-                        }
-                    }
+                if let Some(node) = JsCallExpression::cast_ref(node)
+                    && let Ok(callee) = node.callee()
+                    && callee.contains_a_test_pattern() == Ok(true)
+                    && let Some(function_name) = callee.get_callee_object_name()
+                    && function_name.text_trimmed() == "describe"
+                {
+                    self.stack.pop();
                 }
             }
         }
@@ -214,7 +213,7 @@ impl Rule for NoDuplicateTestHooks {
     type Query = DuplicateHooks;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDuplicateTestHooksOptions;
 
     fn run(_: &RuleContext<Self>) -> Self::Signals {
         Some(())

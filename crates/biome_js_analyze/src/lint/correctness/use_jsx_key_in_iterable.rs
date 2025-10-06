@@ -1,9 +1,8 @@
 use crate::react::{ReactLibrary, is_react_call_api};
 use crate::services::semantic::Semantic;
+use biome_analyze::RuleSource;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
-use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -13,13 +12,15 @@ use biome_js_syntax::{
     JsxTagExpression,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
-use serde::{Deserialize, Serialize};
+use biome_rule_options::use_jsx_key_in_iterable::UseJsxKeyInIterableOptions;
 
 declare_lint_rule! {
     /// Disallow missing key props in iterators/collection literals.
     ///
     /// Warn if an element that likely requires a key prop--namely, one present in an array literal or an arrow function expression.
     /// Check out React documentation for [explanation on the why does React need keys.](https://react.dev/learn/rendering-lists#why-does-react-need-keys)
+    ///
+    /// This rule is intended for use in both React and Qwik applications to prevent missing key props in JSX elements inside iterators.
     ///
     /// ## Examples
     ///
@@ -29,14 +30,14 @@ declare_lint_rule! {
     /// [<Hello />];
     /// ```
     /// ```jsx,expect_diagnostic
-    /// data.map((x) => <Hello>{x}</Hello>);
+    /// {items.map(item => <li>{item}</li>)}
     /// ```
     ///
     /// ### Valid
     ///
     /// ```jsx
     /// [<Hello key="first" />, <Hello key="second" />, <Hello key="third" />];
-    /// data.map((x) => <Hello key={x.id}>{x}</Hello>);
+    /// {items.map(item => <li key={item.id}>{item}</li>)}
     /// ```
     ///
     /// ## Options
@@ -61,11 +62,10 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "useJsxKeyInIterable",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("jsx-key")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintReact("jsx-key").same()],
         recommended: true,
         severity: Severity::Error,
-        domains: &[RuleDomain::React],
+        domains: &[RuleDomain::React, RuleDomain::Qwik],
     }
 }
 
@@ -75,14 +75,6 @@ declare_node_union! {
 
 declare_node_union! {
     pub ReactComponentExpression = JsxTagExpression | JsCallExpression
-}
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable, Eq, PartialEq)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseJsxKeyInIterableOptions {
-    /// Set to `true` to check shorthand fragments (`<></>`)
-    check_shorthand_fragments: bool,
 }
 
 impl Rule for UseJsxKeyInIterable {

@@ -36,14 +36,13 @@ pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> 
                         "{UNCYCLE_FUNCTION} console.log(JSON.stringify(uncycle(require('{specifier}'))))"
                     ))
                     .output();
-                if let Ok(output2) = output2 {
-                    if output2.stderr.is_empty() {
+                if let Ok(output2) = output2
+                    && output2.stderr.is_empty() {
                         return Ok(Resolution {
                             content: String::from_utf8_lossy(&output2.stdout).to_string(),
                             resolved_path,
                         });
                     }
-                }
                 let stderr = String::from_utf8_lossy(&output.stderr);
                 return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
                     reason: format!("`node` was invoked to resolve '{specifier}'. This invocation failed with the following error:\n{stderr}")

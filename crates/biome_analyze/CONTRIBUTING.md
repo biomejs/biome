@@ -4,7 +4,7 @@ The analyzer is a generic crate aimed to implement a visitor-like infrastructure
 it's possible to inspect a piece of AST and emit diagnostics or actions based on a
 static check.
 
-The analyzer allows implementors to create **four different** types of rules:
+The analyzer allows implementors to create **three different** types of rules:
 - **Syntax**: This rule checks the syntax according to the language specification and emits error diagnostics accordingly.
 - **Lint**: This rule performs static analysis of the source code to detect invalid or error-prone patterns, and emits diagnostics along with proposed fixes.
 - **Assist**: This rule detects refactoring opportunities and emits code action signals.
@@ -14,6 +14,7 @@ The analyzer allows implementors to create **four different** types of rules:
 
 - [Analyzer](#analyzer)
   * [Table of Contents](#table-of-contents)
+  * [Understanding Biome Linter](#understanding-biome-linter)
   * [Creating a Rule](#creating-a-rule)
     + [Guidelines](#guidelines)
       - [Naming Conventions for Rules](#naming-conventions-for-rules)
@@ -31,15 +32,17 @@ The analyzer allows implementors to create **four different** types of rules:
         * [Representing the rule options in Rust](#representing-the-rule-options-in-rust)
         * [Retrieving the rule options within a Rule](#retrieving-the-rule-options-within-a-rule)
         * [Implementing JSON deserialization/serialization support](#implementing-json-deserializationserialization-support)
-        * [Testing & Documenting Rule Options](#testing-documenting-rule-options)
+        * [Testing & Documenting Rule Options](#testing--documenting-rule-options)
       - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
       - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
-      - [Semantic Model](#semantic-model)
-        * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+      - [Services](#services)
+        - [Semantic Model](#semantic-model)
+          * [How to use the query `Semantic<>` in a lint rule](#how-to-use-the-query-semantic-in-a-lint-rule)
+        - [Using Multiple Services in a Rule](#using-multiple-services-in-a-rule)
       - [Multiple Signals](#multiple-signals)
       - [Code Actions](#code-actions)
       - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
-      - [Common Logic Mistakes](#common-logic-mistakes)
+      - [Common Mistakes](#common-mistakes)
         * [Not checking if a variable is global](#not-checking-if-a-variable-is-global)
     + [Testing the Rule](#testing-the-rule)
       - [Quick Test](#quick-test)
@@ -55,6 +58,15 @@ The analyzer allows implementors to create **four different** types of rules:
     + [Code generation](#code-generation)
     + [Committing your work](#committing-your-work)
     + [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
+
+## Understanding Biome Linter
+
+Biome linter is meant to work *across languages*, which means that a rule can work within multiple languages.
+That's why **it's important to choose a good name for your rule**. If the name of the rule is very generic, it means that
+it could potentially be implemented for multiple languages. However, if a rule is meant for a specific language, you should
+choose a name that is more specific.
+
+Understanding this is important because it might have repercussions on how rule options will be applied to different languages.
 
 ## Creating a Rule
 
@@ -97,6 +109,10 @@ _Biome_ follows a naming convention according to what the rule does:
 We also try to ensure consistency in the naming of rules.
 Please feel free to refer to existing rules for inspiration when naming new ones.
 Here is a non-exhaustive list of common names:
+
+- `use<Framework>...`
+
+  If a rule overwhelmingly applies to a specific framework, it should be named using the `use` or `no` prefix followed by the framework name, eg. `noVueReservedProps`
 
 - `noConstant<Concept>`
 
@@ -207,7 +223,7 @@ New rules **must** be placed inside the `nursery` group. This group is meant as 
 Let's say we want to create a new **lint** rule called `useMyRuleName`, follow these steps:
 
 1. **Generate the code for your rule** by running this command
-   _(Hint: Replace `useMyRuleName` with your custom name as recommended by the [naming convention](#guideline-naming-convention-for-rules))_:
+   _(Hint: Replace `useMyRuleName` with your custom name as recommended by the [naming convention](#naming-conventions-for-rules))_:
 
    ```shell
    # Example: Create a new JS lint rule
@@ -317,7 +333,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 
 6. Implement the `diagnostic` function to define what the user will see.
 
-   Follow the [guidelines & pillars](#explain-a-rule-to-the-user) when writing the messages.
+   Follow the [guidelines & pillars](#what-a-rule-should-say-to-the-user) when writing the messages.
    Please also keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
 
    ```rust
@@ -338,7 +354,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    }
    ```
 
-6. Optional: Implement the `action` function if your rule is able to provide a [code action](#code-actions):
+7. Optional: Implement the `action` function if your rule is able to provide a [code action](#code-actions):
 
    ```rust
    impl Rule for UseAwesomeTricks {
@@ -397,9 +413,12 @@ declare_lint_rule! {
 }
 ```
 
+> [!TIP]
+> The `version` field indicates what Biome version the rule was released in. The `version` field must be `next`. This allows us flexibility for what version the rule will actually be released in.
+
 ##### Biome lint rules inspired by other lint rules
 
-If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
+If a **lint** rule is ported from an existing rule from other ecosystems (ESLint, ESLint plugins, Clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
 
 If you're implementing a lint rule that matches the behavior of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
@@ -413,15 +432,15 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("no-debugger")],
+        sources: &[RuleSource::Eslint("no-debugger").same()],
     }
 }
 ```
 
-If the rule you're implementing has a different behavior or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
+If the rule you're implementing has a different behavior or option, you can use `.inspired()` instead of `.same()`.
 
 ```rust
-use biome_analyze::{declare_lint_rule, RuleSource, RuleSourceKind};
+use biome_analyze::{declare_lint_rule, RuleSource};
 
 declare_lint_rule! {
     /// Documentation
@@ -430,13 +449,11 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::Eslint("no-debugger")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::Eslint("no-debugger").inspired()],
     }
 }
 ```
 
-By default, `source_kind` is always `RuleSourceKind::SameLogic`.
 
 #### `rule_category!` macro
 
@@ -541,6 +558,12 @@ Some rules may allow customization [using per-rule options in `biome.json`](http
 >
 > If provided, options should follow our [technical philosophy](https://biomejs.dev/internals/philosophy/#technical).
 
+Rule options must be placed inside the crate `biome_rule_options`. If you run the command `just gen-analyzer`, the codegen
+should have created a new file inside the crate that has the name of your rule. For example, if the rule name is `useThisConvention`
+you should see a file `use_this_convention.rs` inside `biome_rule_options/lib`. Inside this file you'll see a struct called `UseThisConventionOptions`.
+
+Use this struct to add the options.
+
 ##### Options for our example rule
 
 Let's assume that the rule we want to implement supports the following options:
@@ -605,11 +628,13 @@ for you.
 With these types in place, you can set the associated type `Options` of the rule:
 
 ```rust
-impl Rule for MyRule {
+use biome_rule_options::use_my_rule::UseMyRuleOptions;
+
+impl Rule for UseMyRule {
     type Query = Semantic<JsCallExpression>;
     type State = Fix;
     type Signals = Vec<Self::State>;
-    type Options = MyRuleOptions;
+    type Options = UseMyRuleOptions;
 }
 ```
 
@@ -641,18 +666,19 @@ Also, we use other `serde` macros to adjust the JSON configuration:
 - `deny_unknown_fields`: it raises an error if the configuration contains extraneous fields.
 - `default`: it uses the `Default` value when the field is missing from `biome.json`. This macro makes the field optional.
 
-Because we use `schemars`to generate a JSON schema for `biome.json`, our options type must support the `schemars::JsonSchema` trait as well.
+Because we use `schemars` to generate a JSON schema for `biome.json`, our options type must support the `schemars::JsonSchema` trait as well.
 
 You can simply use the derive macros provided by `serde`, `biome_deserialize` and `schemars` to generate the necessary implementations automatically:
 
 ```rust
+// crates/biome_rule_options/lib/use_my_rule.rs
 use biome_deserialize_macros::Deserializable;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct MyRuleOptions {
+pub struct UseMyRuleOptions {
     #[serde(default, skip_serializing_if = "is_default")]
     main_behavior: Behavior,
 
@@ -661,13 +687,15 @@ pub struct MyRuleOptions {
 }
 
 #[derive(Debug, Default, Clone)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
 pub enum Behavior {
     #[default]
     A,
     B,
     C,
 }
+
+const fn is_default() -> bool { true }
 ```
 
 ##### Testing & Documenting Rule Options
@@ -714,12 +742,15 @@ When creating a new node like this, we internally prefix them with `Any*` and po
 
 The type `AnyFunctionLike` implements the trait `AstNode`, which means that it implements all methods such as `syntax`, `children`, etc.
 
-#### Semantic Model
+#### Services
+
+There are times when a rule requires quite advanced knowledge of the behavior of language, such as control flow or where bindings are declared. Biome provides "services" to provide this type of information, so it can be calculated once and reused across multiple rules.
+
+##### Semantic Model
 
 The semantic model provides information about the references of a binding (declaration) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
 
-
-##### How to use the query `Semantic<>` in a lint rule
+###### How to use the query `Semantic<>` in a lint rule
 
 We have a for loop that creates an index `i`, and we need to identify where this index is used inside the body of the loop
 
@@ -756,7 +787,7 @@ impl Rule for ForLoopCountReferences {
             .as_any_js_binding()?
             .as_js_identifier_binding()?;
 
-        // How many times this variable appers in the code
+        // How many times this variable appears in the code
         let count = binding.all_references(model).count();
 
         // Get all read references
@@ -768,6 +799,20 @@ impl Rule for ForLoopCountReferences {
 }
 ```
 
+##### Using Multiple Services in a Rule
+
+In some rare cases, a rule may require multiple services to be used together. In these cases, you don't need to pull in these services in the rule's `Query`. The rule context provides a `get_service` method to retrieve services by their type.
+
+However, you need to take into consideration that some services are created during a "second phase", for example `SemanticModel` and `ControlFlowGraph` services are created during this phase. If you pull these services when using the `Ast` query, those services won't be available. This means that you must use at least a query that runs during the second phase. The `Semantic` query, for example, runs during the second phase.
+
+```rust
+let is_root_service = ctx
+  .get_service::<IsRoot>()
+  .expect("IsRoot service not found.");
+```
+Where `IsRoot` is the name of the service you want to retrieve. The name of the service is the name of the Rust type that is stored when calling `.insert_service()`.
+
+Refer to the `src/lib.rs` file of the crate, and look at the `.insert_service()` function, and deduce the name of the service from there. Using an incorrect name will result in a panic error at runtime.
 #### Multiple Signals
 
 Some rules require you to find all possible cases upfront in `run` function.
@@ -958,9 +1003,9 @@ impl Rule for UseYield {
 }
 ```
 
-#### Common Logic Mistakes
+#### Common Mistakes
 
-There are some common mistakes that can lead to bugs or false positives in lint rules. These tips should help you avoid them and write more robust rules.
+There are some common mistakes that can lead to bugs or false positives in lint rules, or things that reviewers will always ask for. These tips should help you avoid them and write more robust rules.
 
 ##### Not checking if a variable is global
 
@@ -973,6 +1018,38 @@ console.log(); // <-- This should not be reported because `console` is redeclare
 ```
 
 To avoid this, you should consult the semantic model to check if the variable is global or not.
+
+##### Avoidable String Allocations
+
+Lots of rules require checking a string. It's tempting to call `to_string()` on something to get an owned string, but this always results in a heap allocation.
+
+Most of the time, you actually want to compare against a `&str`, or a `TokenText`. `TokenText` is most useful for those cases where you actually do need an owned value.
+
+##### Avoidable Deep Indentation
+
+Inherently, syntax trees are quite deeply nested. Biome's syntax data structures make heavy use of the `Result` and `Option` types to represent the absence of a value. It may be tempting to use `unwrap()` or `expect()` to avoid the `Result` and `Option` types, but this is not recommended because those panic. Sometimes, it's not convenient to use the `?` operator. Whatever the case may be, you might end up with something like this:
+
+```rust
+if let Ok(object_member_name) = property_object_member.name() {
+    if let Some(key_name) = object_member_name.name() {
+        if key_name.text().trim() == "data" {
+            if let Ok(value) = property_object_member.value() {
+                match value {
+...
+```
+
+Rust provides comprehensive helper functions to avoid things like this, such as `map`, `filter`, and `and_then`. Which allows you to write code that is more concise and easier to read.
+
+```rust
+property_object_member
+  .name()
+  .ok()
+  .and_then(|n| n.name())
+  .filter(|ident| ident.text().trim() == "data")
+  .and_then(|_| property_object_member.value().ok())
+  .and_then(|value| match value {
+...
+```
 
 ### Testing the Rule
 
@@ -1059,7 +1136,33 @@ The documentation needs to adhere to the following rules:
 - The next paragraphs can be used to further document the rule with as many details as you see fit.
 - The documentation must have a `## Examples` header, followed by two headers: `### Invalid` and `### Valid`.
   `### Invalid` must go first because we need to show when the rule is triggered.
-- Rule options if any, must be documented in the `## Options` section.
+- Rule options if any, must be documented in the `## Options` section, after the `## Examples` header.
+- Each option must have its own h3 header e.g. `### ignoreSiblings`, a description of what the option does, its
+  default value, a options block, and a code block where those options are applied. Depending on the option,
+  you might want to use the `expect_diagnostic` directive, or not. The final Markdown will look like this:
+  ``````md
+  ## Options
+
+  The following options are available
+
+  ### `ignoreSiblings`
+
+  This option will ignore the sibling of the spread operator.
+
+  Default: `false`
+
+  ```json,options
+  {
+    "options": {
+      "ignoreSiblings": true
+    }
+  }
+  ```
+
+  ```js,expect_diagnostic,use_options
+  const { ...sibling, id } = object;
+  ```
+  ``````
 
 #### Associated Language(s)
 
@@ -1100,25 +1203,51 @@ The documentation needs to adhere to the following rules:
 
 - **Hiding lines**
 
-  Although usually not necessary, it is possible to prevent code lines from being shown in the output by prefixing them with `# `.
+  Although usually not necessary, it is possible to prevent code lines from being shown in the output by prefixing them with `#`.
 
   You should usually prefer to show a concise but complete sample snippet instead.
 
+- **Multi-file snippets**
+
+  For rules that analyze relationships between multiple files (e.g., import cycles, cross-file dependencies), you can use the `file=<path>` property to create an in-memory file system for testing.
+
+  This is also useful to trigger type inference even for examples that only consist of individual files.
+
+  Files are organized by documentation section (Markdown headings), where all files in a section are collected before any tests run. This ensures each test has access to the complete file system regardless of definition order.
+
+  ````rust
+  /// ### Invalid
+  ///
+  /// ```js,expect_diagnostic,file=foo.js
+  /// import { bar } from "./bar.js";
+  /// export function foo() {
+  ///     return bar();
+  /// }
+  /// ```
+  ///
+  /// ```js,expect_diagnostic,file=bar.js
+  /// import { foo } from "./foo.js";
+  /// export function bar() {
+  ///     return foo();
+  /// }
+  /// ```
+  ````
+
 - **Ordering of code block properties**
 
-  In addition to the language, a code block can be tagged with a few additional properties like `expect_diagnostic`, `options`, `full_options`, `use_options` and/or `ignore`.
+  In addition to the language, a code block can be tagged with a few additional properties like `expect_diagnostic`, `options`, `full_options`, `use_options`, `ignore` and/or `file=<path>`.
 
   The parser does not care about the order, but for consistency, modifiers should always be ordered as follows:
 
   ````rust
-  /// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore]
+  /// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore][,file=path]
   /// ```
   ````
 
   e.g.
 
   ````rust
-  /// ```tsx,expect_diagnostic,use_options,ignore
+  /// ```tsx,expect_diagnostic,use_options,ignore,file=foobar.tsx
   /// ```
   ````
 

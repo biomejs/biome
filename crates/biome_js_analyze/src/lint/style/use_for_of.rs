@@ -11,11 +11,20 @@ use biome_js_syntax::{
     JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
+use biome_rule_options::use_for_of::UseForOfOptions;
 
 use crate::{services::semantic::Semantic, utils::is_node_equal};
 
 declare_lint_rule! {
-    /// This rule recommends a `for-of` loop when in a `for` loop, the index used to extract an item from the iterated array.
+    /// Prefer using `for...of` loops over standard `for` loops where possible.
+    ///
+    /// This rule recommends using a `for...of` loop in place of a `for` loop
+    /// when the loop index is solely used to read from the iterated array.
+    ///
+    /// ### Exceptions for Index Usage
+    /// When the loop index is declared within the outer scope or used anywhere within the loop body,
+    /// it is acceptable to use a `for` loop.
+    /// (`Array.entries()` can be used to a similar effect.)
     ///
     /// ## Examples
     ///
@@ -37,6 +46,7 @@ declare_lint_rule! {
     ///
     /// ```js
     /// for (let i = 0; i < array.length; i++) {
+    ///    // `i` is used, so for loop is OK
     ///    console.log(i, array[i]);
     ///  }
     /// ```
@@ -47,13 +57,20 @@ declare_lint_rule! {
     ///  }
     /// ```
     ///
+    /// ```js
+    /// let i = 0;
+    /// for (; i < array.length; i++) {
+    ///    console.log(array[i]);
+    ///  }
+    /// ```
+    ///
     pub UseForOf {
         version: "1.5.0",
         name: "useForOf",
         language: "js",
         sources: &[
-            RuleSource::EslintTypeScript("prefer-for-of"),
-            RuleSource::EslintUnicorn("no-for-loop"),
+            RuleSource::EslintTypeScript("prefer-for-of").same(),
+            RuleSource::EslintUnicorn("no-for-loop").same(),
         ],
         recommended: false,
         severity: Severity::Information,
@@ -72,7 +89,7 @@ impl Rule for UseForOf {
     type Query = Semantic<JsForStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseForOfOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

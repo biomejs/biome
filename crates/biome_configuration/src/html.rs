@@ -25,11 +25,21 @@ pub struct HtmlConfiguration {
     #[bpaf(external(html_formatter_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<HtmlFormatterConfiguration>,
+
+    /// HTML linter options
+    #[bpaf(external(html_linter_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub linter: Option<HtmlLinterConfiguration>,
+
+    #[bpaf(external(html_assist_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assist: Option<HtmlAssistConfiguration>,
 }
 
 pub type HtmlFormatterEnabled = Bool<false>; // Keep it disabled by default while experimental.
 pub type HtmlLinterEnabled = Bool<false>;
 pub type HtmlAssistEnabled = Bool<false>;
+pub type HtmlParseInterpolation = Bool<false>;
 
 /// Options that changes how the HTML parser behaves
 #[derive(
@@ -37,7 +47,10 @@ pub type HtmlAssistEnabled = Bool<false>;
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct HtmlParserConfiguration;
+pub struct HtmlParserConfiguration {
+    /// Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files
+    pub interpolation: Option<HtmlParseInterpolation>,
+}
 
 /// Options that changes how the HTML formatter behaves
 #[derive(
@@ -61,8 +74,12 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to HTML (and its super languages) files.
-    #[bpaf(long("html-formatter-line-ending"), argument("lf|crlf|cr"), optional)]
+    /// The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+    #[bpaf(
+        long("html-formatter-line-ending"),
+        argument("lf|crlf|cr|auto"),
+        optional
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
@@ -115,4 +132,30 @@ pub struct HtmlFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub self_close_void_elements: Option<SelfCloseVoidElements>,
+}
+
+/// Options that changes how the HTML linter behaves
+#[derive(
+    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct HtmlLinterConfiguration {
+    /// Control the linter for HTML (and its super languages) files.
+    #[bpaf(long("html-linter-enabled"), argument("true|false"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<HtmlLinterEnabled>,
+}
+
+/// Options that changes how the HTML assist behaves
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct HtmlAssistConfiguration {
+    /// Control the assist for HTML (and its super languages) files.
+    #[bpaf(long("html-assist-enabled"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<HtmlAssistEnabled>,
 }

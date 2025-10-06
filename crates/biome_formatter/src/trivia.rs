@@ -24,9 +24,9 @@ use std::ops::Sub;
 /// comments must be kept immediately adjacent after formatting to preserve this behavior.
 ///
 /// There isn't much documentation about this behavior, but it is mentioned on the JSDoc repo
-/// for documentation: https://github.com/jsdoc/jsdoc.github.io/issues/40. Prettier also
-/// implements the same behavior: https://github.com/prettier/prettier/pull/13445/files#diff-3d5eaa2a1593372823589e6e55e7ca905f7c64203ecada0aa4b3b0cdddd5c3ddR160-R178
-fn should_nestle_adjacent_doc_comments<L: Language>(
+/// for documentation: <https://github.com/jsdoc/jsdoc.github.io/issues/40>. Prettier also
+/// implements the same behavior: <https://github.com/prettier/prettier/pull/13445/files#diff-3d5eaa2a1593372823589e6e55e7ca905f7c64203ecada0aa4b3b0cdddd5c3ddR160-R178>
+pub fn should_nestle_adjacent_doc_comments<L: Language>(
     first_comment: &SourceComment<L>,
     second_comment: &SourceComment<L>,
 ) -> bool {
@@ -43,7 +43,7 @@ fn should_nestle_adjacent_doc_comments<L: Language>(
 /// Formats the leading comments of `node`
 pub const fn format_leading_comments<L: Language>(
     node: &SyntaxNode<L>,
-) -> FormatLeadingComments<L> {
+) -> FormatLeadingComments<'_, L> {
     FormatLeadingComments::Node(node)
 }
 
@@ -108,7 +108,7 @@ where
 /// Formats the trailing comments of `node`.
 pub const fn format_trailing_comments<L: Language>(
     node: &SyntaxNode<L>,
-) -> FormatTrailingComments<L> {
+) -> FormatTrailingComments<'_, L> {
     FormatTrailingComments::Node(node)
 }
 
@@ -207,7 +207,7 @@ where
 /// Formats the dangling comments of `node`.
 pub const fn format_dangling_comments<L: Language>(
     node: &SyntaxNode<L>,
-) -> FormatDanglingComments<L> {
+) -> FormatDanglingComments<'_, L> {
     FormatDanglingComments::Node {
         node,
         indent: DanglingIndentMode::None,
@@ -356,96 +356,184 @@ where
     }
 }
 
-/// Formats a token without its skipped token trivia
-///
-/// ## Warning
-/// It's your responsibility to format any skipped trivia.
-pub const fn format_trimmed_token<L: Language>(token: &SyntaxToken<L>) -> FormatTrimmedToken<L> {
-    FormatTrimmedToken { token }
-}
-
-#[derive(Debug, Eq, PartialEq, Copy, Clone)]
-pub struct FormatTrimmedToken<'a, L: Language> {
-    token: &'a SyntaxToken<L>,
-}
-
-impl<L: Language + 'static, C> Format<C> for FormatTrimmedToken<'_, L>
+pub trait FormatToken<L, C>
 where
+    L: Language,
     C: CstFormatContext<Language = L>,
 {
-    fn fmt(&self, f: &mut Formatter<C>) -> FormatResult<()> {
-        let trimmed_range = self.token.text_trimmed_range();
-        located_token_text(self.token, trimmed_range).fmt(f)
+    fn has_skipped(&self, token: &SyntaxToken<L>, f: &mut Formatter<C>) -> bool {
+        f.comments().has_skipped(token)
     }
-}
-/// Formats the skipped token trivia of a removed token and marks the token as tracked.
-pub const fn format_removed<L>(token: &SyntaxToken<L>) -> FormatRemoved<L>
-where
-    L: Language,
-{
-    FormatRemoved { token }
-}
+    fn format_removed(&self, token: &SyntaxToken<L>, f: &mut Formatter<C>) -> FormatResult<()> {
+        f.state_mut().track_token(token);
 
-/// Formats the trivia of a token that is present in the source text but should be omitted in the
-/// formatted output.
-pub struct FormatRemoved<'a, L>
-where
-    L: Language,
-{
-    token: &'a SyntaxToken<L>,
-}
-
-impl<C, L> Format<C> for FormatRemoved<'_, L>
-where
-    L: Language + 'static,
-    C: CstFormatContext<Language = L>,
-{
-    fn fmt(&self, f: &mut Formatter<C>) -> FormatResult<()> {
-        f.state_mut().track_token(self.token);
-
-        write!(f, [format_skipped_token_trivia(self.token)])
+        self.format_skipped_token_trivia(token, f)
     }
-}
 
-/// Print out a `token` from the original source with a different `content`.
-///
-/// This will print the skipped token trivia that belong to `token` to `content`;
-/// `token` is then marked as consumed by the formatter.
-pub fn format_replaced<'a, 'content, L, Context>(
-    token: &'a SyntaxToken<L>,
-    content: &'content impl Format<Context>,
-) -> FormatReplaced<'a, 'content, L, Context>
-where
-    L: Language,
-{
-    FormatReplaced {
-        token,
-        content: Argument::new(content),
+    /// Formats the skipped token trivia of `token`.
+    fn format_skipped_token_trivia(
+        &self,
+        token: &SyntaxToken<L>,
+        f: &mut Formatter<C>,
+    ) -> FormatResult<()> {
+        if f.comments().has_skipped(token) {
+            self.fmt_skipped(token, f)
+        } else {
+            Ok(())
+        }
     }
-}
 
-/// Formats a token's skipped token trivia but uses the provided content instead
-/// of the token in the formatted output.
-#[derive(Copy, Clone)]
-pub struct FormatReplaced<'a, 'content, L, C>
-where
-    L: Language,
-{
-    token: &'a SyntaxToken<L>,
-    content: Argument<'content, C>,
-}
+    /// Formats a token without its skipped token trivia
+    ///
+    /// ## Warning
+    /// It's your responsibility to format any skipped trivia.
+    fn format_trimmed_token_trivia(
+        &self,
+        token: &SyntaxToken<L>,
+        f: &mut Formatter<C>,
+    ) -> FormatResult<()> {
+        let trimmed_range = token.text_trimmed_range();
+        located_token_text(token, trimmed_range).fmt(f)
+    }
 
-impl<L, C> Format<C> for FormatReplaced<'_, '_, L, C>
-where
-    L: Language + 'static,
-    C: CstFormatContext<Language = L>,
-{
-    fn fmt(&self, f: &mut Formatter<C>) -> FormatResult<()> {
-        f.state_mut().track_token(self.token);
+    /// Print out a `token` from the original source with a different `content`.
+    ///
+    /// This will print the skipped token trivia that belong to `token` to `content`;
+    /// `token` is then marked as consumed by the formatter.
+    fn format_replaced(
+        &self,
+        token: &SyntaxToken<L>,
+        content: &impl Format<C>,
+        f: &mut Formatter<C>,
+    ) -> FormatResult<()> {
+        f.state_mut().track_token(token);
+        self.format_skipped_token_trivia(token, f)?;
+        f.write_fmt(Arguments::from(&Argument::new(content)))
+    }
 
-        write!(f, [format_skipped_token_trivia(self.token)])?;
+    #[cold]
+    fn fmt_skipped(&self, token: &SyntaxToken<L>, f: &mut Formatter<C>) -> FormatResult<()> {
+        // Lines/spaces before the next token/comment
+        let (mut lines, mut spaces) = match token.prev_token() {
+            Some(token) => {
+                let mut lines = 0u32;
+                let mut spaces = 0u32;
+                for piece in token.trailing_trivia().pieces().rev() {
+                    if piece.is_whitespace() {
+                        spaces += 1;
+                    } else if piece.is_newline() {
+                        spaces = 0;
+                        lines += 1;
+                    } else {
+                        break;
+                    }
+                }
 
-        f.write_fmt(Arguments::from(&self.content))
+                (lines, spaces)
+            }
+            None => (0, 0),
+        };
+
+        // The comments between the last skipped token trivia and the token
+        let mut dangling_comments = Vec::new();
+        let mut skipped_range: Option<TextRange> = None;
+
+        // Iterate over the remaining pieces to find the full range from the first to the last skipped token trivia.
+        // Extract the comments between the last skipped token trivia and the token.
+        for piece in token.leading_trivia().pieces() {
+            if piece.is_whitespace() {
+                spaces += 1;
+                continue;
+            }
+
+            if piece.is_newline() {
+                lines += 1;
+                spaces = 0;
+            } else if let Some(comment) = piece.as_comments() {
+                let source_comment = SourceComment {
+                    kind: C::Style::get_comment_kind(&comment),
+                    lines_before: lines,
+                    lines_after: 0,
+                    piece: comment,
+                    #[cfg(debug_assertions)]
+                    formatted: Cell::new(true),
+                };
+
+                dangling_comments.push(source_comment);
+
+                lines = 0;
+                spaces = 0;
+            } else if piece.is_skipped() {
+                skipped_range = Some(match skipped_range {
+                    Some(range) => range.cover(piece.text_range()),
+                    None => {
+                        if dangling_comments.is_empty() {
+                            match lines {
+                                0 if spaces == 0 => {
+                                    // Token had no space to previous token nor any preceding comment. Keep it that way
+                                }
+                                0 => write!(f, [space()])?,
+                                _ => write!(f, [hard_line_break()])?,
+                            };
+                        } else {
+                            match lines {
+                                0 => write!(f, [space()])?,
+                                1 => write!(f, [hard_line_break()])?,
+                                _ => write!(f, [empty_line()])?,
+                            };
+                        }
+
+                        piece.text_range()
+                    }
+                });
+
+                lines = 0;
+                spaces = 0;
+                dangling_comments.clear();
+            }
+        }
+
+        let skipped_range =
+            skipped_range.unwrap_or_else(|| TextRange::empty(token.text_range().start()));
+
+        f.write_element(FormatElement::Tag(Tag::StartVerbatim(
+            VerbatimKind::Verbatim {
+                length: skipped_range.len(),
+            },
+        )))?;
+        write!(f, [located_token_text(token, skipped_range)])?;
+        f.write_element(FormatElement::Tag(Tag::EndVerbatim))?;
+
+        // Write whitespace separator between skipped/last comment and token
+        if dangling_comments.is_empty() {
+            match lines {
+                0 if spaces == 0 => {
+                    // Don't write a space if there was non in the source document
+                    Ok(())
+                }
+                0 => write!(f, [space()]),
+                _ => write!(f, [hard_line_break()]),
+            }
+        } else {
+            match dangling_comments.first().unwrap().lines_before {
+                0 => write!(f, [space()])?,
+                1 => write!(f, [hard_line_break()])?,
+                _ => write!(f, [empty_line()])?,
+            }
+
+            write!(
+                f,
+                [FormatDanglingComments::Comments {
+                    comments: &dangling_comments,
+                    indent: DanglingIndentMode::None
+                }]
+            )?;
+
+            match lines {
+                0 => write!(f, [space()]),
+                _ => write!(f, [hard_line_break()]),
+            }
+        }
     }
 }
 
@@ -453,6 +541,7 @@ where
 pub fn format_only_if_breaks<'a, 'content, L, Content, Context>(
     token: &'a SyntaxToken<L>,
     content: &'content Content,
+    ok_skipped: fn(&'a SyntaxToken<L>, &mut Formatter<Context>) -> FormatResult<()>,
 ) -> FormatOnlyIfBreaks<'a, 'content, L, Context>
 where
     L: Language,
@@ -462,6 +551,7 @@ where
         token,
         content: Argument::new(content),
         group_id: None,
+        ok_skipped,
     }
 }
 
@@ -474,6 +564,7 @@ where
     token: &'a SyntaxToken<L>,
     content: Argument<'content, C>,
     group_id: Option<GroupId>,
+    ok_skipped: fn(&'a SyntaxToken<L>, &mut Formatter<C>) -> FormatResult<()>,
 }
 
 impl<L, C> FormatOnlyIfBreaks<'_, '_, L, C>
@@ -497,14 +588,13 @@ where
             [if_group_breaks(&Arguments::from(&self.content)).with_group_id(self.group_id),]
         )?;
 
+        let skipped = format_with(|f| (self.ok_skipped)(self.token, f));
+
         if f.comments().has_skipped(self.token) {
             // Print the trivia otherwise
             write!(
                 f,
-                [
-                    if_group_fits_on_line(&format_skipped_token_trivia(self.token))
-                        .with_group_id(self.group_id)
-                ]
+                [if_group_fits_on_line(&skipped).with_group_id(self.group_id)]
             )?;
         }
 
@@ -515,7 +605,7 @@ where
 /// Formats the skipped token trivia of `token`.
 pub const fn format_skipped_token_trivia<L: Language>(
     token: &SyntaxToken<L>,
-) -> FormatSkippedTokenTrivia<L> {
+) -> FormatSkippedTokenTrivia<'_, L> {
     FormatSkippedTokenTrivia { token }
 }
 

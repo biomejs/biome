@@ -2,7 +2,7 @@ use crate::CssFormatter;
 use crate::comments::CssComments;
 use crate::prelude::*;
 use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
-use biome_formatter::{CstFormatContext, write};
+use biome_formatter::{CstFormatContext, format_args, write};
 use biome_formatter::{FormatOptions, FormatResult};
 use biome_rowan::{AstNode, AstNodeList, TextSize};
 use biome_string_case::StrLikeExtension;
@@ -30,73 +30,83 @@ where
     };
 
     let values = format_with(|f: &mut Formatter<'_, CssFormatContext>| {
-        let mut fill = f.fill();
-        let mut at_group_boundary = false;
+        if node.len() == 1 {
+            let mut builder = f.join_nodes_with_soft_line();
 
-        for (element, formatted) in node.iter().zip(node.iter().formatted()) {
-            fill.entry(
-                &format_once(|f| {
-                    // If the current element is not a comma, insert a soft line break or a space.
-                    // Consider the CSS example: `font: first , second;`
-                    // The desired format is: `font: first, second;`
-                    // A separator should not be added before the comma because the comma acts as a `CssGenericDelimiter`.
-                    let token_kind = CssGenericDelimiter::cast_ref(element.syntax())
-                        .and_then(|node| node.value().ok())
-                        .map(|token| token.kind());
+            for (element, formatted) in node.iter().zip(node.iter().formatted()) {
+                builder.entry(element.syntax(), &formatted);
+            }
 
-                    let is_comma = matches!(token_kind, Some(CssSyntaxKind::COMMA));
+            builder.finish()
+        } else {
+            let mut fill = f.fill();
+            let mut at_group_boundary = false;
 
-                    if !is_comma {
-                        if matches!(
-                            layout,
-                            ValueListLayout::PreserveInline | ValueListLayout::OnePerLine
-                        ) {
-                            let has_leading_newline = element.syntax().has_leading_newline();
+            for (element, formatted) in node.iter().zip(node.iter().formatted()) {
+                fill.entry(
+                    &format_once(|f| {
+                        // If the current element is not a comma, insert a soft line break or a space.
+                        // Consider the CSS example: `font: first , second;`
+                        // The desired format is: `font: first, second;`
+                        // A separator should not be added before the comma because the comma acts as a `CssGenericDelimiter`.
+                        let token_kind = CssGenericDelimiter::cast_ref(element.syntax())
+                            .and_then(|node| node.value().ok())
+                            .map(|token| token.kind());
 
-                            if has_leading_newline {
+                        let is_comma = matches!(token_kind, Some(CssSyntaxKind::COMMA));
+
+                        if !is_comma {
+                            if matches!(
+                                layout,
+                                ValueListLayout::PreserveInline | ValueListLayout::OnePerLine
+                            ) {
+                                let has_leading_newline = element.syntax().has_leading_newline();
+
+                                if has_leading_newline {
+                                    write!(f, [hard_line_break()])?;
+                                } else {
+                                    write!(f, [space()])?;
+                                }
+                            } else if at_group_boundary {
                                 write!(f, [hard_line_break()])?;
                             } else {
-                                write!(f, [space()])?;
+                                write!(f, [soft_line_break_or_space()])?
                             }
-                        } else if at_group_boundary {
-                            write!(f, [hard_line_break()])?;
-                        } else {
-                            write!(f, [soft_line_break_or_space()])?
                         }
-                    }
 
-                    // If the layout is OneGroupPerLine, insert a hard line break as a `separator`
-                    // between two adjacent groups.
-                    //
-                    // Consider the CSS example: `font: group one, group_two, group 3;`
-                    // The desired format is:
-                    // font:
-                    //   group one,
-                    //   group_two,
-                    //   group 3;
-                    //
-                    // A hard line break is inserted between:
-                    // 1. `group one,` and `group_two,`
-                    // 2. `group_two,` and `group 3;`
-                    //
-                    // Caveat:
-                    // We also need to add a hard line break before the first group,
-                    // but `FillBuilder.entry` will ignore any `separator` for the first item in the list,
-                    // To address this, we prepend the hard line break after composing `values`.
-                    //
-                    // This is also why `at_group_boundary` is initialized to `false` even when
-                    // the layout is OneGroupPerLine: because the line break would be ignored
-                    // if `at_group_boundary` were set to `true` initially.
-                    at_group_boundary =
-                        is_comma && matches!(layout, ValueListLayout::OneGroupPerLine);
+                        // If the layout is OneGroupPerLine, insert a hard line break as a `separator`
+                        // between two adjacent groups.
+                        //
+                        // Consider the CSS example: `font: group one, group_two, group 3;`
+                        // The desired format is:
+                        // font:
+                        //   group one,
+                        //   group_two,
+                        //   group 3;
+                        //
+                        // A hard line break is inserted between:
+                        // 1. `group one,` and `group_two,`
+                        // 2. `group_two,` and `group 3;`
+                        //
+                        // Caveat:
+                        // We also need to add a hard line break before the first group,
+                        // but `FillBuilder.entry` will ignore any `separator` for the first item in the list,
+                        // To address this, we prepend the hard line break after composing `values`.
+                        //
+                        // This is also why `at_group_boundary` is initialized to `false` even when
+                        // the layout is OneGroupPerLine: because the line break would be ignored
+                        // if `at_group_boundary` were set to `true` initially.
+                        at_group_boundary =
+                            is_comma && matches!(layout, ValueListLayout::OneGroupPerLine);
 
-                    Ok(())
-                }),
-                &formatted,
-            );
+                        Ok(())
+                    }),
+                    &formatted,
+                );
+            }
+
+            fill.finish()
         }
-
-        fill.finish()
     });
 
     match layout {
@@ -112,7 +122,13 @@ where
             write!(f, [group(&indent(&content))])
         }
         ValueListLayout::Fill => {
-            write!(f, [group(&indent(&values))])
+            let with_line_break = format_with(|f| {
+                if should_preceded_by_softline(node) {
+                    write!(f, [soft_line_break()])?;
+                }
+                Ok(())
+            });
+            write!(f, [indent(&group(&format_args![with_line_break, &values]))])
         }
         ValueListLayout::SingleValue => {
             write!(f, [values])
@@ -207,6 +223,15 @@ pub(crate) enum ValueListLayout {
     /// These conditions are inherited from Prettier,
     /// see https://github.com/biomejs/biome/pull/5334 for a detailed explanation
     OneGroupPerLine,
+}
+
+fn should_preceded_by_softline<N, I>(node: &N) -> bool
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+{
+    node.iter()
+        .any(|element| CssGenericDelimiter::can_cast(element.syntax().kind()))
 }
 
 /// Returns the layout to use when printing the provided CssComponentValueList.

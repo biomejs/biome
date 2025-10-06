@@ -54,7 +54,7 @@ const REACT_COMPONENT_PARAMS_LIMIT: usize = 1;
 /// Represents information about a React component.
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct ReactComponentInfo {
-    /// Range of the component defintion start token.
+    /// Range of the component definition start token.
     /// This can be used for diagnostics in the absence of the names.
     pub(crate) start_range: TextRange,
     /// Name of the component.
@@ -180,25 +180,24 @@ impl ReactComponentInfo {
             result.name = Some(name);
             return Some(result);
         }
-        if let Some(export_default) = JsExportDefaultExpressionClause::cast_ref(syntax) {
-            if let Some(result) = Self::from_expression(export_default.expression().ok()?.syntax())
-            {
-                if let ReactComponentKind::Function(function_info) = &result.kind {
-                    // If the function is not wrapped in memo or forwardRef and has no name,
-                    // we can't be sure that it's a React component.
-                    if function_info.wrappers.is_empty() {
-                        return None;
-                    }
+        if let Some(export_default) = JsExportDefaultExpressionClause::cast_ref(syntax)
+            && let Some(result) = Self::from_expression(export_default.expression().ok()?.syntax())
+        {
+            if let ReactComponentKind::Function(function_info) = &result.kind {
+                // If the function is not wrapped in memo or forwardRef and has no name,
+                // we can't be sure that it's a React component.
+                if function_info.wrappers.is_empty() {
+                    return None;
                 }
-                return Some(result);
             }
+            return Some(result);
         }
         None
     }
 
     /// Creates a `ReactComponentInfo` from an expression.
     /// It is not guaranteed that the expression is a React component,
-    /// but if any reqiuirements are not met, it will return `None`.
+    /// but if any requirements are not met, it will return `None`.
     /// Never returns a name, can only return a name hint.
     pub(crate) fn from_expression(syntax: &SyntaxNode<JsLanguage>) -> Option<Self> {
         let any_expression = AnyJsExpression::cast_ref(syntax)?;
@@ -280,13 +279,13 @@ impl ReactComponentInfo {
         match exported {
             AnyJsExported::AnyJsExpression(expression) => {
                 let mut result = Self::from_expression(expression.syntax())?;
-                if let Some(ident) = item.identifier.as_ref() {
-                    if let Some(name) = ident.name_token() {
-                        if !is_react_component_name(name.text_trimmed()) {
-                            return None;
-                        }
-                        result.name = Some(name);
+                if let Some(ident) = item.identifier.as_ref()
+                    && let Some(name) = ident.name_token()
+                {
+                    if !is_react_component_name(name.text_trimmed()) {
+                        return None;
                     }
+                    result.name = Some(name);
                 }
                 Some(result)
             }
@@ -564,6 +563,7 @@ pub(crate) fn is_react_component_name(name: &str) -> bool {
 declare_node_union! {
     pub AnyPotentialReactComponentDeclaration =
         JsClassExportDefaultDeclaration
+        | JsClassDeclaration
         | JsFunctionExportDefaultDeclaration
         | JsFunctionDeclaration
         | JsVariableDeclarator
@@ -677,6 +677,35 @@ mod test {
         }
 
         source
+    }
+
+    #[test]
+    fn should_handle_unexported_class() {
+        let source = parse_jsx(
+            r#"
+            class Foo extends React.Component {
+              render() {
+                return <div>This is a class component.</div>;
+              }
+            }
+
+            class Foo extends React.PureComponent {
+              render() {
+                return <div>This is a class component.</div>;
+              }
+            }
+            "#,
+        );
+        let components = source
+            .syntax()
+            .descendants()
+            .filter_map(AnyPotentialReactComponentDeclaration::cast)
+            .filter_map(|component| ReactComponentInfo::from_declaration(component.syntax()))
+            .collect::<Vec<_>>();
+        for component in &components {
+            assert!(matches!(component.kind, ReactComponentKind::Class(_)))
+        }
+        assert_eq!(components.len(), 2);
     }
 
     mod from_expression {
@@ -841,10 +870,10 @@ mod test {
                 .syntax()
                 .descendants()
                 .filter_map(|syntax| {
-                    if let Some(expr) = AnyJsExpression::cast_ref(&syntax) {
-                        if expr.parent::<JsInitializerClause>().is_some() {
-                            return Some(expr);
-                        }
+                    if let Some(expr) = AnyJsExpression::cast_ref(&syntax)
+                        && expr.parent::<JsInitializerClause>().is_some()
+                    {
+                        return Some(expr);
                     }
                     None
                 })
@@ -983,10 +1012,10 @@ mod test {
                 .syntax()
                 .descendants()
                 .filter_map(|node| {
-                    if let Some(expr) = AnyJsExpression::cast(node.clone()) {
-                        if matches!(expr, AnyJsExpression::JsClassExpression(_)) {
-                            return Some(expr);
-                        }
+                    if let Some(expr) = AnyJsExpression::cast(node.clone())
+                        && matches!(expr, AnyJsExpression::JsClassExpression(_))
+                    {
+                        return Some(expr);
                     }
                     None
                 })
@@ -1101,7 +1130,7 @@ mod test {
             // Test each valid exported item
             for (index, item) in exported_items.iter().enumerate().take(4) {
                 let component_info = ReactComponentInfo::from_exported_item(item);
-                assert!(component_info.is_some(), "Failed on item {}", index);
+                assert!(component_info.is_some(), "Failed on item {index}");
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -1113,7 +1142,7 @@ mod test {
                         if let ReactComponentKind::Function(func_info) = &component_info.kind {
                             assert_eq!(func_info.wrappers.len(), 0);
                         } else {
-                            panic!("Expected function component for index {}", index);
+                            panic!("Expected function component for index {index}");
                         }
                     }
                     2 => {
@@ -2289,7 +2318,7 @@ mod test {
 
             for (index, property) in class_properties.iter().enumerate() {
                 let component_info = ReactComponentInfo::from_declaration(property.syntax());
-                assert!(component_info.is_some(), "Failed on property {}", index);
+                assert!(component_info.is_some(), "Failed on property {index}");
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -2322,7 +2351,7 @@ mod test {
                         _ => unreachable!(),
                     }
                 } else {
-                    panic!("Expected function component for property {}", index);
+                    panic!("Expected function component for property {index}",);
                 }
             }
         }
@@ -2417,7 +2446,7 @@ mod test {
 
             for (index, method) in class_methods.iter().enumerate() {
                 let component_info = ReactComponentInfo::from_declaration(method.syntax());
-                assert!(component_info.is_some(), "Failed on method {}", index);
+                assert!(component_info.is_some(), "Failed on method {index}");
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -2425,7 +2454,7 @@ mod test {
                 if let ReactComponentKind::Function(func_info) = &component_info.kind {
                     assert_eq!(func_info.wrappers.len(), 0);
                 } else {
-                    panic!("Expected function component for method {}", index);
+                    panic!("Expected function component for method {index}",);
                 }
             }
         }
@@ -2504,7 +2533,7 @@ mod test {
 
             for (index, property) in object_properties.iter().enumerate() {
                 let component_info = ReactComponentInfo::from_declaration(property.syntax());
-                assert!(component_info.is_some(), "Failed on property {}", index);
+                assert!(component_info.is_some(), "Failed on property {index}",);
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -2537,7 +2566,7 @@ mod test {
                         _ => unreachable!(),
                     }
                 } else {
-                    panic!("Expected function component for property {}", index);
+                    panic!("Expected function component for property {index}",);
                 }
             }
         }
@@ -2636,7 +2665,7 @@ mod test {
 
             for (index, method) in object_methods.iter().enumerate() {
                 let component_info = ReactComponentInfo::from_declaration(method.syntax());
-                assert!(component_info.is_some(), "Failed on method {}", index);
+                assert!(component_info.is_some(), "Failed on method {index}",);
 
                 let component_info = component_info.unwrap();
                 assert!(component_info.name.is_some());
@@ -2644,7 +2673,7 @@ mod test {
                 if let ReactComponentKind::Function(func_info) = &component_info.kind {
                     assert_eq!(func_info.wrappers.len(), 0);
                 } else {
-                    panic!("Expected function component for method {}", index);
+                    panic!("Expected function component for method {index}",);
                 }
             }
         }

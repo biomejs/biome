@@ -118,6 +118,15 @@ pub enum ColorsArg {
     Force,
 }
 
+impl ColorsArg {
+    pub fn is_enabled(&self) -> bool {
+        matches!(self, Self::Force)
+    }
+    pub fn is_disabled(&self) -> bool {
+        matches!(self, Self::Off)
+    }
+}
+
 impl FromStr for ColorsArg {
     type Err = String;
 

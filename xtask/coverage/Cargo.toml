@@ -17,7 +17,7 @@ biome_rowan        = { workspace = true }
 biome_string_case  = { workspace = true }
 camino             = { workspace = true }
 colored            = "3.0.0"
-indicatif          = { version = "0.17.11", features = ["improved_unicode"] }
+indicatif          = { version = "0.18.0", features = ["improved_unicode"] }
 pico-args          = { version = "0.5.0", features = ["eq-separator"] }
 regex              = { workspace = true }
 serde              = { workspace = true, features = ["derive"] }
@@ -25,7 +25,7 @@ serde_json         = { workspace = true }
 serde_yaml         = "0.9.34"
 tracing            = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "std"] }
-walkdir            = "2.5.0"
+walkdir            = { workspace = true }
 xtask              = { path = '../', version = "0.0" }
 yastl              = "0.1.2"
 

@@ -33,17 +33,7 @@ expression: redactor(content)
         "useConsistentArrayType": {
           "level": "error",
           "options": { "syntax": "shorthand" }
-        },
-        "noParameterAssign": "error",
-        "useAsConstAssertion": "error",
-        "useDefaultParameterLast": "error",
-        "useEnumInitializers": "error",
-        "useSelfClosingElements": "error",
-        "useSingleVarDeclarator": "error",
-        "noUnusedTemplateLiteral": "error",
-        "useNumberNamespace": "error",
-        "noInferrableTypes": "error",
-        "noUselessElse": "error"
+        }
       },
       "suspicious": {
         "noEmptyBlockStatements": "error"
@@ -54,7 +44,7 @@ expression: redactor(content)
   "vcs": {
     "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": true
+    "useIgnoreFile": false
   }
 }
 ```

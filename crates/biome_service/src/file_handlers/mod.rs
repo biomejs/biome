@@ -6,11 +6,13 @@ use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
 pub use crate::file_handlers::astro::{ASTRO_FENCE, AstroFileHandler};
 use crate::file_handlers::graphql::GraphqlFileHandler;
+use crate::file_handlers::ignore::IgnoreFileHandler;
 pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
 pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
-use crate::settings::{Settings, WorkspaceSettingsHandle};
+use crate::settings::Settings;
 use crate::workspace::{
-    FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult,
+    EmbeddedSnippets, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+    RenameResult,
 };
 use biome_analyze::{
     AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal, ControlFlow,
@@ -18,9 +20,9 @@ use biome_analyze::{
     RuleFilter, RuleGroup,
 };
 use biome_configuration::Rules;
-use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
+use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
+use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
 use biome_console::fmt::Formatter;
-use biome_console::markup;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, category};
@@ -39,14 +41,11 @@ use biome_js_syntax::{
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_module_graph::ModuleGraph;
+use biome_package::PackageJson;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrLikeExtension;
-
-use crate::file_handlers::ignore::IgnoreFileHandler;
-use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
-use biome_package::PackageJson;
 use camino::Utf8Path;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
@@ -332,6 +331,19 @@ impl DocumentFileSource {
         }
     }
 
+    /// Convert the file source from a JS file source into an HTML-like file source, if the file belongs to an HTML-like language.
+    pub fn to_htmlish(&self) -> Self {
+        match self {
+            Self::Js(js) => match js.as_embedding_kind() {
+                EmbeddingKind::Astro => Self::Html(HtmlFileSource::astro()),
+                EmbeddingKind::Vue => Self::Html(HtmlFileSource::vue()),
+                EmbeddingKind::Svelte => Self::Html(HtmlFileSource::svelte()),
+                EmbeddingKind::None => Self::Unknown,
+            },
+            _ => Self::Unknown,
+        }
+    }
+
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);
@@ -357,57 +369,78 @@ impl DocumentFileSource {
             Self::Unknown => false,
         }
     }
+
+    /// Whether this file can contain embedded nodes
+    pub fn can_contain_embeds(path: &Utf8Path) -> bool {
+        let file_source = Self::from(path);
+        match file_source {
+            Self::Html(_) => true,
+            Self::Js(_)
+            | Self::Css(_)
+            | Self::Graphql(_)
+            | Self::Json(_)
+            | Self::Grit(_)
+            | Self::Ignore
+            | Self::Unknown => false,
+        }
+    }
 }
 
-impl biome_console::fmt::Display for DocumentFileSource {
-    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+impl std::fmt::Display for DocumentFileSource {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Self::Js(js) => {
                 let is_jsx = js.is_jsx();
                 if js.is_typescript() {
                     if is_jsx {
-                        fmt.write_markup(markup! { "TSX" })
+                        write!(fmt, "TSX")
                     } else {
-                        fmt.write_markup(markup! { "TypeScript" })
+                        write!(fmt, "TypeScript")
                     }
                 } else if is_jsx {
-                    fmt.write_markup(markup! { "JSX" })
+                    write!(fmt, "JSX")
                 } else {
-                    fmt.write_markup(markup! { "JavaScript" })
+                    write!(fmt, "JavaScript")
                 }
             }
             Self::Json(json) => {
                 if json.allow_comments() {
-                    fmt.write_markup(markup! { "JSONC" })
+                    write!(fmt, "JSONC")
                 } else {
-                    fmt.write_markup(markup! { "JSON" })
+                    write!(fmt, "JSON")
                 }
             }
-            Self::Css(_) => fmt.write_markup(markup! { "CSS" }),
-            Self::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
-            Self::Html(_) => fmt.write_markup(markup! { "HTML" }),
-            Self::Grit(_) => fmt.write_markup(markup! { "Grit" }),
-            Self::Ignore => fmt.write_markup(markup! { "Ignore" }),
-            Self::Unknown => fmt.write_markup(markup! { "Unknown" }),
+            Self::Css(_) => write!(fmt, "CSS"),
+            Self::Graphql(_) => write!(fmt, "GraphQL"),
+            Self::Html(_) => write!(fmt, "HTML"),
+            Self::Grit(_) => write!(fmt, "Grit"),
+            Self::Ignore => write!(fmt, "Ignore"),
+            Self::Unknown => write!(fmt, "Unknown"),
         }
+    }
+}
+
+impl biome_console::fmt::Display for DocumentFileSource {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        fmt.write_fmt(format_args!("{self}"))
     }
 }
 
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) fix_file_mode: FixFileMode,
-    pub(crate) workspace: WorkspaceSettingsHandle,
+    pub(crate) settings: &'a Settings,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: Vec<AnalyzerSelector>,
+    pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) rule_categories: RuleCategories,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) enabled_rules: Vec<AnalyzerSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
 }
 
@@ -428,28 +461,25 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
-type Parse = fn(
-    &BiomePath,
-    DocumentFileSource,
-    &str,
-    WorkspaceSettingsHandle,
-    &mut NodeCache,
-) -> ParseResult;
+pub struct ParseEmbedResult {
+    pub(crate) nodes: Vec<(EmbeddedSnippets, DocumentFileSource)>,
+}
 
+type Parse = fn(&BiomePath, DocumentFileSource, &str, &Settings, &mut NodeCache) -> ParseResult;
+type ParseEmbeddedNodes =
+    fn(&AnyParse, &BiomePath, &DocumentFileSource, &Settings, &mut NodeCache) -> ParseEmbedResult;
 #[derive(Default)]
 pub struct ParserCapabilities {
     /// Parse a file
     pub(crate) parse: Option<Parse>,
+
+    pub(crate) parse_embedded_nodes: Option<ParseEmbeddedNodes>,
 }
 
 type DebugSyntaxTree = fn(&BiomePath, AnyParse) -> GetSyntaxTreeResult;
 type DebugControlFlow = fn(AnyParse, TextSize) -> String;
-type DebugFormatterIR = fn(
-    &BiomePath,
-    &DocumentFileSource,
-    AnyParse,
-    WorkspaceSettingsHandle,
-) -> Result<String, WorkspaceError>;
+type DebugFormatterIR =
+    fn(&BiomePath, &DocumentFileSource, AnyParse, &Settings) -> Result<String, WorkspaceError>;
 type DebugTypeInfo =
     fn(&BiomePath, Option<AnyParse>, Arc<ModuleGraph>) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes = fn(&BiomePath, AnyParse) -> Result<String, WorkspaceError>;
@@ -474,18 +504,19 @@ pub struct DebugCapabilities {
 #[derive(Debug)]
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) workspace: &'a WorkspaceSettingsHandle,
+    pub(crate) settings: &'a Settings,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: Vec<AnalyzerSelector>,
+    pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) categories: RuleCategories,
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) enabled_selectors: Vec<AnalyzerSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) pull_code_actions: bool,
+    pub(crate) diagnostic_offset: Option<TextSize>,
 }
 
 pub(crate) struct LintResults {
@@ -501,6 +532,7 @@ pub(crate) struct ProcessLint<'a> {
     ignores_suppression_comment: bool,
     rules: Option<Cow<'a, Rules>>,
     pull_code_actions: bool,
+    diagnostic_offset: Option<TextSize>,
 }
 
 impl<'a> ProcessLint<'a> {
@@ -514,12 +546,9 @@ impl<'a> ProcessLint<'a> {
             // - if a single rule is run.
             ignores_suppression_comment: !params.categories.contains(RuleCategory::Lint)
                 || !params.only.is_empty(),
-            rules: params
-                .workspace
-                .settings()
-                .as_ref()
-                .and_then(|settings| settings.as_linter_rules(params.path.as_path())),
+            rules: params.settings.as_linter_rules(params.path.as_path()),
             pull_code_actions: params.pull_code_actions,
+            diagnostic_offset: params.diagnostic_offset,
         }
     }
 
@@ -559,6 +588,9 @@ impl<'a> ProcessLint<'a> {
                         diagnostic = diagnostic.add_code_suggestion(action.into());
                     }
                 }
+            }
+            if let Some(offset) = &self.diagnostic_offset {
+                diagnostic.add_diagnostic_offset(*offset);
             }
 
             let error = diagnostic.with_severity(severity);
@@ -604,15 +636,15 @@ impl<'a> ProcessLint<'a> {
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) range: Option<TextRange>,
-    pub(crate) workspace: &'a WorkspaceSettingsHandle,
+    pub(crate) settings: &'a Settings,
     pub(crate) path: &'a BiomePath,
     pub(crate) module_graph: Arc<ModuleGraph>,
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: Vec<AnalyzerSelector>,
+    pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) enabled_rules: Vec<AnalyzerSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) categories: RuleCategories,
 }
@@ -634,26 +666,36 @@ pub struct AnalyzerCapabilities {
     pub(crate) rename: Option<Rename>,
 }
 
-type Format = fn(
-    &BiomePath,
-    &DocumentFileSource,
-    AnyParse,
-    WorkspaceSettingsHandle,
-) -> Result<Printed, WorkspaceError>;
+type Format =
+    fn(&BiomePath, &DocumentFileSource, AnyParse, &Settings) -> Result<Printed, WorkspaceError>;
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    WorkspaceSettingsHandle,
+    &Settings,
     TextRange,
 ) -> Result<Printed, WorkspaceError>;
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
-    WorkspaceSettingsHandle,
+    &Settings,
     TextSize,
 ) -> Result<Printed, WorkspaceError>;
+
+type FormatEmbedded = fn(
+    &BiomePath,
+    &DocumentFileSource,
+    AnyParse,
+    &Settings,
+    Vec<FormatEmbedNode>,
+) -> Result<Printed, WorkspaceError>;
+
+pub(crate) struct FormatEmbedNode {
+    pub(crate) range: TextRange,
+    pub(crate) node: AnyParse,
+    pub(crate) source: DocumentFileSource,
+}
 
 #[derive(Default)]
 pub(crate) struct FormatterCapabilities {
@@ -663,16 +705,18 @@ pub(crate) struct FormatterCapabilities {
     pub(crate) format_range: Option<FormatRange>,
     /// It formats a file while typing
     pub(crate) format_on_type: Option<FormatOnType>,
+    /// It formats a file with embedded nodes
+    pub(crate) format_embedded: Option<FormatEmbedded>,
 }
 
-type Enabled = fn(&Utf8Path, &WorkspaceSettingsHandle) -> bool;
+type Enabled = fn(&Utf8Path, &Settings) -> bool;
 
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
     AnyParse,
     &GritQuery,
-    WorkspaceSettingsHandle,
+    &Settings,
 ) -> Result<Vec<TextRange>, WorkspaceError>;
 
 #[derive(Default)]
@@ -831,7 +875,7 @@ pub(crate) fn search(
     _file_source: &DocumentFileSource,
     parse: AnyParse,
     query: &GritQuery,
-    _settings: WorkspaceSettingsHandle,
+    _settings: &Settings,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let result = query
         .execute(GritTargetFile::new(path.as_path(), parse))
@@ -973,9 +1017,9 @@ struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: FxHashSet<RuleFilter<'a>>,
     pub(crate) disabled_rules: FxHashSet<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
-    only: Option<&'b [RuleSelector]>,
-    skip: Option<&'b [RuleSelector]>,
-    settings: Option<&'b Settings>,
+    only: Option<&'b [AnalyzerSelector]>,
+    skip: Option<&'b [AnalyzerSelector]>,
+    settings: &'b Settings,
     path: Option<&'b Utf8Path>,
     package_json: Option<PackageJson>,
     analyzer_options: &'b mut AnalyzerOptions,
@@ -983,9 +1027,9 @@ struct LintVisitor<'a, 'b> {
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: Option<&'b [RuleSelector]>,
-        skip: Option<&'b [RuleSelector]>,
-        settings: Option<&'b Settings>,
+        only: Option<&'b [AnalyzerSelector]>,
+        skip: Option<&'b [AnalyzerSelector]>,
+        settings: &'b Settings,
         path: Option<&'b Utf8Path>,
         package_json: Option<PackageJson>,
         analyzer_options: &'b mut AnalyzerOptions,
@@ -1011,19 +1055,24 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         L: biome_rowan::Language,
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
+        let group = <R::Group as RuleGroup>::NAME;
+        // Nursery rules must be enabled only when they are enabled from the group
+        if group == "nursery" {
+            return;
+        }
+
         let path = self.path.expect("File path");
 
-        let recommended_enabled = self
-            .settings
-            .is_some_and(|settings| settings.linter_recommended_enabled());
-        if !recommended_enabled {
+        let is_recommended = R::METADATA.recommended;
+        let recommended_enabled = self.settings.linter_recommended_enabled();
+        if !is_recommended || !recommended_enabled {
             return;
         }
 
         let no_only = self.only.is_some_and(|only| only.is_empty());
         let no_domains = self
             .settings
-            .and_then(|settings| settings.as_linter_domains(path))
+            .as_linter_domains(path)
             .is_none_or(|d| d.is_empty());
         if !(no_only && no_domains) {
             return;
@@ -1040,7 +1089,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     self.enabled_rules.insert(rule_filter);
 
                     self.analyzer_options
-                        .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
+                        .push_globals(domain.globals().iter().copied().map(Into::into));
                 }
             }
         }
@@ -1057,14 +1106,18 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let no_only = self.only.is_some_and(|only| only.is_empty());
-
+        let group = <R::Group as RuleGroup>::NAME;
+        // Nursery rules must be enabled only when they are enabled from the group
+        if group == "nursery" {
+            return;
+        }
         if !no_only {
             return;
         }
 
         let domains = self
             .settings
-            .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")));
+            .as_linter_domains(self.path.expect("File path"));
 
         // no domains, no need to record the rule
         if domains.as_ref().is_none_or(|d| d.is_empty()) {
@@ -1090,11 +1143,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                         self.enabled_rules.insert(rule_filter);
 
                         self.analyzer_options.push_globals(
-                            configured_domain
-                                .globals()
-                                .iter()
-                                .map(|s| Box::from(*s))
-                                .collect::<Vec<_>>(),
+                            configured_domain.globals().iter().copied().map(Into::into),
                         );
                     }
                     RuleDomainValue::None => {
@@ -1105,11 +1154,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                             self.enabled_rules.insert(rule_filter);
 
                             self.analyzer_options.push_globals(
-                                configured_domain
-                                    .globals()
-                                    .iter()
-                                    .map(|s| Box::from(*s))
-                                    .collect::<Vec<_>>(),
+                                configured_domain.globals().iter().copied().map(Into::into),
                             );
                         }
                     }
@@ -1122,7 +1167,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
-            .and_then(|settings| settings.as_linter_rules(self.path.expect("Path to be set")))
+            .as_linter_rules(self.path.expect("Path to be set"))
             .unwrap_or_default();
         if !has_only_filter {
             self.enabled_rules.extend(rules.as_enabled_rules());
@@ -1136,13 +1181,13 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         L: biome_rowan::Language,
     {
-        if let Some(rule_filter) = rule_filter {
-            if rule_filter.match_rule::<R>() {
-                // first we want to register rules via "magic default"
-                self.record_rule_from_manifest::<R, L>(rule_filter);
-                // then we want to register rules
-                self.record_rule_from_domains::<R, L>(rule_filter);
-            }
+        if let Some(rule_filter) = rule_filter
+            && rule_filter.match_rule::<R>()
+        {
+            // first we want to register rules via "magic default"
+            self.record_rule_from_manifest::<R, L>(rule_filter);
+            // then we want to register rules
+            self.record_rule_from_domains::<R, L>(rule_filter);
         };
 
         // Do not report unused suppression comment diagnostics if:
@@ -1150,17 +1195,35 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         // - if a single rule is run.
         if let Some(only) = self.only {
             for selector in only {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
-                    self.enabled_rules.insert(filter);
+                match selector {
+                    AnalyzerSelector::Rule(selector) => {
+                        let filter = RuleFilter::from(selector);
+                        if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
+                            self.enabled_rules.insert(filter);
+                        }
+                    }
+                    AnalyzerSelector::Domain(selector) => {
+                        if selector.match_rule::<R>() {
+                            self.enabled_rules.extend(selector.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
         if let Some(skip) = self.skip {
             for selector in skip {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
-                    self.disabled_rules.insert(filter);
+                match selector {
+                    AnalyzerSelector::Rule(selector) => {
+                        let filter = RuleFilter::from(selector);
+                        if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
+                            self.disabled_rules.insert(filter);
+                        }
+                    }
+                    AnalyzerSelector::Domain(selector) => {
+                        if selector.match_rule::<R>() {
+                            self.disabled_rules.extend(selector.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
@@ -1262,19 +1325,19 @@ impl RegistryVisitor<GraphqlLanguage> for LintVisitor<'_, '_> {
 }
 
 struct AssistsVisitor<'a, 'b> {
-    settings: Option<&'b Settings>,
+    settings: &'b Settings,
     enabled_rules: Vec<RuleFilter<'a>>,
     disabled_rules: Vec<RuleFilter<'a>>,
-    only: Option<&'b [RuleSelector]>,
-    skip: Option<&'b [RuleSelector]>,
+    only: Option<&'b [AnalyzerSelector]>,
+    skip: Option<&'b [AnalyzerSelector]>,
     path: Option<&'b Utf8Path>,
 }
 
 impl<'a, 'b> AssistsVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: Option<&'b [RuleSelector]>,
-        skip: Option<&'b [RuleSelector]>,
-        settings: Option<&'b Settings>,
+        only: Option<&'b [AnalyzerSelector]>,
+        skip: Option<&'b [AnalyzerSelector]>,
+        settings: &'b Settings,
         path: Option<&'b Utf8Path>,
     ) -> Self {
         Self {
@@ -1301,18 +1364,36 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         // - if a single rule is run.
         if let Some(only) = self.only {
             for selector in only {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() {
-                    self.enabled_rules.push(filter)
+                match selector {
+                    AnalyzerSelector::Rule(rule) => {
+                        let filter = RuleFilter::from(rule);
+                        if filter.match_rule::<R>() {
+                            self.enabled_rules.push(filter)
+                        }
+                    }
+                    AnalyzerSelector::Domain(domain) => {
+                        if domain.match_rule::<R>() {
+                            self.enabled_rules.extend(domain.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
 
         if let Some(skip) = self.skip {
             for selector in skip {
-                let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() {
-                    self.disabled_rules.push(filter)
+                match selector {
+                    AnalyzerSelector::Rule(rule) => {
+                        let filter = RuleFilter::from(rule);
+                        if filter.match_rule::<R>() {
+                            self.disabled_rules.push(filter)
+                        }
+                    }
+                    AnalyzerSelector::Domain(domain) => {
+                        if domain.match_rule::<R>() {
+                            self.disabled_rules.extend(domain.as_rule_filters());
+                        }
+                    }
                 }
             }
         }
@@ -1322,7 +1403,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
-            .and_then(|settings| settings.as_assist_actions(self.path.expect("Path to be set")))
+            .as_assist_actions(self.path.expect("Path to be set"))
             .unwrap_or_default();
         if !has_only_filter {
             self.enabled_rules.extend(rules.as_enabled_rules());
@@ -1396,36 +1477,36 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'_, '_> {
 }
 
 pub(crate) struct AnalyzerVisitorBuilder<'a> {
-    settings: Option<&'a Settings>,
-    only: Option<&'a [RuleSelector]>,
-    skip: Option<&'a [RuleSelector]>,
+    settings: &'a Settings,
+    only: Option<&'a [AnalyzerSelector]>,
+    skip: Option<&'a [AnalyzerSelector]>,
     path: Option<&'a Utf8Path>,
-    enabled_rules: Option<&'a [RuleSelector]>,
+    enabled_selectors: Option<&'a [AnalyzerSelector]>,
     project_layout: Arc<ProjectLayout>,
     analyzer_options: AnalyzerOptions,
 }
 
 impl<'b> AnalyzerVisitorBuilder<'b> {
-    pub(crate) fn new(settings: Option<&'b Settings>, analyzer_options: AnalyzerOptions) -> Self {
+    pub(crate) fn new(settings: &'b Settings, analyzer_options: AnalyzerOptions) -> Self {
         Self {
             settings,
             only: None,
             skip: None,
             path: None,
-            enabled_rules: None,
+            enabled_selectors: None,
             project_layout: Default::default(),
             analyzer_options,
         }
     }
 
     #[must_use]
-    pub(crate) fn with_only(mut self, only: &'b [RuleSelector]) -> Self {
+    pub(crate) fn with_only(mut self, only: &'b [AnalyzerSelector]) -> Self {
         self.only = Some(only);
         self
     }
 
     #[must_use]
-    pub(crate) fn with_skip(mut self, skip: &'b [RuleSelector]) -> Self {
+    pub(crate) fn with_skip(mut self, skip: &'b [AnalyzerSelector]) -> Self {
         self.skip = Some(skip);
         self
     }
@@ -1437,8 +1518,8 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn with_enabled_rules(mut self, enabled_rules: &'b [RuleSelector]) -> Self {
-        self.enabled_rules = Some(enabled_rules);
+    pub(crate) fn with_enabled_selectors(mut self, enabled_rules: &'b [AnalyzerSelector]) -> Self {
+        self.enabled_selectors = Some(enabled_rules);
         self
     }
 
@@ -1452,15 +1533,20 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>, AnalyzerOptions) {
         let mut analyzer_options = self.analyzer_options;
         let mut disabled_rules = vec![];
-        let mut enabled_rules: Vec<_> = self
-            .enabled_rules
-            .map(|enabled_rules| {
-                enabled_rules
-                    .iter()
-                    .map(RuleFilter::from)
-                    .collect::<Vec<_>>()
-            })
-            .unwrap_or_default();
+        let mut enabled_rules = vec![];
+
+        if let Some(enabled_selectors) = self.enabled_selectors {
+            for selector in enabled_selectors {
+                match selector {
+                    AnalyzerSelector::Rule(rule) => {
+                        enabled_rules.push(RuleFilter::from(rule));
+                    }
+                    AnalyzerSelector::Domain(domain) => {
+                        enabled_rules.extend(domain.as_rule_filters())
+                    }
+                }
+            }
+        }
         let mut syntax = SyntaxVisitor::default();
 
         biome_js_analyze::visit_registry(&mut syntax);

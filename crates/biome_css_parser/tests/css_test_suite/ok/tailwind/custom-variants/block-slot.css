@@ -1,0 +1,5 @@
+@custom-variant theme-midnight {
+	&:where([data-theme="midnight"] *) {
+		@slot;
+	}
+}

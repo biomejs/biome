@@ -14,7 +14,7 @@ use biome_service::App;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::Settings;
 use biome_service::workspace::{
-    DocumentFileSource, FeaturesBuilder, OpenProjectParams, OpenProjectResult,
+    DocumentFileSource, FeaturesBuilder, FileFeaturesResult, OpenProjectParams, OpenProjectResult,
     SupportsFeatureParams, UpdateSettingsParams,
 };
 use camino::{Utf8Path, Utf8PathBuf};
@@ -50,13 +50,11 @@ impl<'a> SpecTestFile<'a> {
             "The input '{spec_input_file}' must exist and be a file.",
         );
 
-        let OpenProjectResult { project_key, .. } = app
+        let OpenProjectResult { project_key } = app
             .workspace
             .open_project(OpenProjectParams {
                 path: BiomePath::new(""),
                 open_uninitialized: true,
-                only_rules: None,
-                skip_rules: None,
             })
             .unwrap();
 
@@ -64,7 +62,9 @@ impl<'a> SpecTestFile<'a> {
             app.workspace.update_settings(settings).unwrap();
         }
         let mut input_file = BiomePath::new(file_path);
-        let can_format = app
+        let FileFeaturesResult {
+            features_supported: file_features,
+        } = app
             .workspace
             .file_features(SupportsFeatureParams {
                 project_key,
@@ -73,7 +73,7 @@ impl<'a> SpecTestFile<'a> {
             })
             .unwrap();
 
-        if can_format.supports_format() {
+        if file_features.supports_format() {
             let mut input_code = input_file.get_buffer_from_file();
 
             let (_, range_start_index, range_end_index) = strip_rome_placeholders(&mut input_code);
@@ -219,6 +219,24 @@ where
         (output_code, formatted)
     }
 
+    /// Generates and records snapshot outputs for the test file using the configured format language.
+    ///
+    /// This runs the formatter on the test file's input and adds one or two outputs to the snapshot:
+    /// - the default formatted output using the snapshot's `format_language` and associated checks (unimplemented markers and line-width violations),
+    /// - optionally, if an `options.json` exists next to the test file, a second formatted output produced with settings merged from that configuration (with the same checks).
+    ///
+    /// When an `options.json` is present and its `line_ending` option is not `Auto`, this method normalizes CRLF and CR occurrences in the generated output to `<CRLF>\n` and `<CR>\n` respectively to preserve platform-independent snapshot behavior; if `line_ending` is `Auto`, normalization is skipped to preserve platform-specific line endings.
+    ///
+    /// The final snapshot is written using the test file's relative path.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use crate::SpecSnapshot;
+    /// # fn run_example<L: crate::TestFormatLanguage>(snapshot: SpecSnapshot<'_, L>) {
+    /// snapshot.test();
+    /// # }
+    /// ```
     pub fn test(self) {
         let input_file = self.test_file().input_file().as_path();
 
@@ -270,15 +288,15 @@ where
 
             let max_width = format_language.options().line_width().value() as usize;
 
-            // There are some logs that print different line endings, and we can't snapshot those
-            // otherwise we risk automatically having them replaced with LF by git.
-            //
-            // This is a workaround, and it might not work for all cases.
-            const CRLF_PATTERN: &str = "\r\n";
-            const CR_PATTERN: &str = "\r";
-            output_code = output_code
-                .replace(CRLF_PATTERN, "<CRLF>\n")
-                .replace(CR_PATTERN, "<CR>\n");
+            // Apply line ending normalization for options path, but not for AUTO line ending
+            // to preserve platform-specific behavior in snapshots
+            if !format_language.options().line_ending().is_auto() {
+                const CRLF_PATTERN: &str = "\r\n";
+                const CR_PATTERN: &str = "\r";
+                output_code = output_code
+                    .replace(CRLF_PATTERN, "<CRLF>\n")
+                    .replace(CR_PATTERN, "<CR>\n");
+            }
 
             snapshot_builder = snapshot_builder
                 .with_output_and_options(
@@ -292,7 +310,7 @@ where
         snapshot_builder.finish(self.test_file.relative_file_name());
     }
 
-    fn test_file(&self) -> &SpecTestFile {
+    fn test_file(&self) -> &SpecTestFile<'_> {
         &self.test_file
     }
 }

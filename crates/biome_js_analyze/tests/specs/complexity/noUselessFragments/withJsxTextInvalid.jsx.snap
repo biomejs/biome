@@ -1,28 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withJsxTextInvalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
 <>foo</>
-```
-
-# Diagnostics
-```
-withJsxTextInvalid.jsx:1:1 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This fragment is unnecessary.
-  
-  > 1 │ <>foo</>
-      │ ^^^^^^^^
-  
-  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
-  
-  i Unsafe fix: Remove the Fragment
-  
-  - <>foo</>
-  + "foo"
-  
+<Fragment>foo</Fragment>
+<React.Fragment>foo</React.Fragment>
 
 ```

@@ -24,19 +24,17 @@
       "**/packages/@biomejs/**",
       "**/packages/tailwindcss-config-analyzer/**",
       "**/benchmark/**",
+      "plugins/*.js",
       "scripts/**",
-      "!**/crates/**",
-      "!**/dist/**",
+      "!**/crates",
+      "!**/dist",
       "!**/packages/@biomejs/backend-jsonrpc/src/workspace.ts",
       "!**/__snapshots__",
-      "!**/undefined/**",
-      "!**/benchmark/target/**",
-      "!**/benches/**"
-    ],
-    "experimentalScannerIgnores": [
-      ".cargo",
-      ".git",
-      "target"
+      "!**/undefined",
+      "!**/benchmark/target",
+      "!**/benches",
+      "!!**/target",
+      "!!.cargo"
     ]
   },
   "formatter": {

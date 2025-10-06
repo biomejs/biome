@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::HtmlSyntaxNode::kind(&node) {
+                $crate::HtmlSyntaxKind::ASTRO_FRONTMATTER_ELEMENT => {
+                    let $pattern = unsafe { $crate::AstroFrontmatterElement::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE => {
                     let $pattern = unsafe { $crate::HtmlAttribute::new_unchecked(node) };
                     $body
@@ -37,10 +41,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlClosingElement::new_unchecked(node) };
                     $body
                 }
-                $crate::HtmlSyntaxKind::HTML_COMMENT => {
-                    let $pattern = unsafe { $crate::HtmlComment::new_unchecked(node) };
-                    $body
-                }
                 $crate::HtmlSyntaxKind::HTML_CONTENT => {
                     let $pattern = unsafe { $crate::HtmlContent::new_unchecked(node) };
                     $body
@@ -49,8 +49,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlDirective::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_DOUBLE_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlDoubleTextExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_ELEMENT => {
                     let $pattern = unsafe { $crate::HtmlElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_EMBEDDED_CONTENT => {
+                    let $pattern = unsafe { $crate::HtmlEmbeddedContent::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_OPENING_ELEMENT => {
@@ -65,12 +73,24 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlSelfClosingElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlSingleTextExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_STRING => {
                     let $pattern = unsafe { $crate::HtmlString::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_TAG_NAME => {
                     let $pattern = unsafe { $crate::HtmlTagName::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlTextExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::ASTRO_BOGUS_FRONTMATTER => {
+                    let $pattern = unsafe { $crate::AstroBogusFrontmatter::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_BOGUS => {
@@ -83,6 +103,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_BOGUS_ELEMENT => {
                     let $pattern = unsafe { $crate::HtmlBogusElement::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_BOGUS_TEXT_EXPRESSION => {
+                    let $pattern = unsafe { $crate::HtmlBogusTextExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_LIST => {

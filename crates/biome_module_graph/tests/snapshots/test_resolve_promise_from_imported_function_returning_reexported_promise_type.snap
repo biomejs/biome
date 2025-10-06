@@ -56,11 +56,9 @@ Imports {
 ## Registered types
 
 ```
-Module TypeId(0) => Call Import Symbol: returnPromiseResult from "/src/returnPromiseResult.ts"(
-  No parameters
-)
+Module TypeId(0) => Import Symbol: returnPromiseResult from "/src/returnPromiseResult.ts"
 
-Module TypeId(1) => Import Symbol: returnPromiseResult from "/src/returnPromiseResult.ts"
+Module TypeId(1) => Call Module(0) TypeId(0)(No parameters)
 ```
 
 # `/src/promisedResult.ts` (Module 3)
@@ -109,8 +107,6 @@ Module TypeId(3) => Object {
 }
 
 Module TypeId(4) => instanceof Promise<Module(0) TypeId(3)>
-
-Module TypeId(5) => instanceof Promise<Module(0) TypeId(3)>
 ```
 
 # `/src/returnPromiseResult.ts` (Module 1)
@@ -149,7 +145,7 @@ Imports {
 ```
 BindingId(1) => JsBindingData {
   Name: returnPromiseResult,
-  Type: Module(0) TypeId(8),
+  Type: Module(0) TypeId(7),
   Declaration kind: HoistedValue
 }
 ```
@@ -157,84 +153,52 @@ BindingId(1) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => sync Function {
+Module TypeId(0) => Promise
+
+Module TypeId(1) => Module(0) TypeId(7)
+
+Module TypeId(2) => value: true
+
+Module TypeId(3) => Object {
+  prototype: No prototype
+  members: ["result": Module(0) TypeId(2)]
+}
+
+Module TypeId(4) => instanceof Import Symbol: PromisedResult from "/src/reexport.ts"
+
+Module TypeId(5) => sync Function {
   accepts: {
     params: [
-      required resolve: unknown reference (bindings: resolve:unknown reference)
+      required resolve: unknown
     ]
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(4)
 }
 
-Module TypeId(1) => instanceof Promise
+Module TypeId(6) => instanceof Module(0) TypeId(0)
 
-Module TypeId(2) => class "Promise" {
-  extends: none
-  implements: []
-  type_args: [T]
-}
-
-Module TypeId(3) => value: true
-
-Module TypeId(4) => Object {
-  prototype: No prototype
-  members: ["result": Module(0) TypeId(3)]
-}
-
-Module TypeId(5) => instanceof Import Symbol: PromisedResult from "/src/reexport.ts"
-
-Module TypeId(6) => sync Function "returnPromiseResult" {
+Module TypeId(7) => sync Function "returnPromiseResult" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(9)
-}
-
-Module TypeId(7) => instanceof Import Symbol: PromisedResult from "/src/reexport.ts"
-
-Module TypeId(8) => sync Function "returnPromiseResult" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(7)
-}
-
-Module TypeId(9) => instanceof Import Symbol: PromisedResult from "/src/reexport.ts"
-
-Module TypeId(10) => sync Function "returnPromiseResult" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(9)
+  returns: Module(0) TypeId(4)
 }
 ```
 
-# Scoped Type Resolver
+# Module Resolver
 
 ## Registered types
 
 ```
-Scope TypeId(0) => instanceof Promise<Module(3) TypeId(3)>
+Full TypeId(0) => namespace for ModuleId(1)
 
-Scope TypeId(1) => sync Function "returnPromiseResult" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(1) TypeId(7)
-}
+Full TypeId(1) => namespace for ModuleId(2)
 
-Scope TypeId(2) => instanceof Promise<Module(3) TypeId(3)>
+Full TypeId(2) => namespace for ModuleId(3)
 
-Scope TypeId(3) => sync Function "returnPromiseResult" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(1) TypeId(7)
-}
+Full TypeId(3) => Module(1) TypeId(7)
+
+Full TypeId(4) => instanceof Promise<Module(3) TypeId(3)>
 ```

@@ -1,14 +1,12 @@
 use biome_analyze::{
-    Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{
-    AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
-};
-use biome_module_graph::{JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
+use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
+use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph, SUPPORTED_EXTENSIONS};
 use biome_resolver::ResolveError;
-use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
+use biome_rowan::{AstNode, Text, TextRange, TokenText};
+use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::services::module_graph::ResolvedImports;
@@ -31,21 +29,22 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// **`foo.js`**
-    /// ```js
+    /// ```js,file=foo.js
     /// export function foo() {};
     /// ```
     ///
-    /// **`bar.js`**
-    /// ```js
+    /// ```js,expect_diagnostic,file=bar.js
     /// // Attempt to import symbol with a typo:
     /// import { fooo } from "./foo.js";
     /// ```
     ///
     /// ### Valid
     ///
-    /// **`bar.js`**
-    /// ```js
+    /// ```js,file=foo.js
+    /// export function foo() {};
+    /// ```
+    ///
+    /// ```js,file=bar.js
     /// // Fixed typo:
     /// import { foo } from "./foo.js";
     /// ```
@@ -53,10 +52,7 @@ declare_lint_rule! {
         version: "2.0.0",
         name: "noUnresolvedImports",
         language: "js",
-        sources: &[
-            RuleSource::EslintImport("named")
-        ],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintImport("named").inspired()],
         domains: &[RuleDomain::Project],
     }
 }
@@ -94,7 +90,7 @@ impl Rule for NoUnresolvedImports {
     type Query = ResolvedImports<AnyJsImportLike>;
     type State = NoUnresolvedImportsState;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = NoUnresolvedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let Some(module_info) = ctx.module_info_for_path(ctx.file_path()) else {
@@ -102,7 +98,8 @@ impl Rule for NoUnresolvedImports {
         };
 
         let node = ctx.query();
-        let Some(resolved_path) = module_info.get_import_path_by_js_node(node) else {
+        let Some(JsImportPath { resolved_path, .. }) = module_info.get_import_path_by_js_node(node)
+        else {
             return Vec::new();
         };
 
@@ -138,7 +135,7 @@ impl Rule for NoUnresolvedImports {
             target_info,
         };
 
-        let result = match node {
+        match node {
             AnyJsImportLike::JsModuleSource(node) => {
                 get_unresolved_imports_from_module_source(node, &options)
             }
@@ -146,10 +143,8 @@ impl Rule for NoUnresolvedImports {
             // TODO: require() and import() calls should also be handled here, but tracking the
             //       bindings to get the used symbol names is not easy. I think we can leave it
             //       for future opportunities.
-            _ => Ok(Vec::new()),
-        };
-
-        result.unwrap_or_default()
+            _ => Vec::new(),
+        }
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -246,89 +241,20 @@ struct GetUnresolvedImportsOptions<'a> {
 fn get_unresolved_imports_from_module_source(
     node: &JsModuleSource,
     options: &GetUnresolvedImportsOptions,
-) -> SyntaxResult<Vec<NoUnresolvedImportsState>> {
-    let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
-        Some(AnyJsImportClause::JsImportCombinedClause(node)) => {
-            let range = node.default_specifier()?.range();
-            (!has_exported_symbol(&Text::Static("default"), options))
-                .then(|| NoUnresolvedImportsState::UnresolvedSymbol {
-                    range,
-                    specifier: options.specifier.as_ref().into(),
-                    export_name: "default".into(),
-                })
-                .into_iter()
-                .chain(
-                    node.specifier()?
-                        .as_js_named_import_specifiers()
-                        .map(|specifiers| specifiers.specifiers())
-                        .into_iter()
-                        .flatten()
-                        .flatten()
-                        .filter_map(get_named_specifier_import_name)
-                        .filter_map(|name| {
-                            (!has_exported_symbol(
-                                &Text::Borrowed(name.token_text_trimmed()),
-                                options,
-                            ))
-                            .then(|| {
-                                NoUnresolvedImportsState::UnresolvedSymbol {
-                                    range: name.text_trimmed_range(),
-                                    specifier: options.specifier.as_ref().into(),
-                                    export_name: name.text_trimmed().into(),
-                                }
-                            })
-                        }),
-                )
-                .collect()
-        }
-        Some(AnyJsImportClause::JsImportDefaultClause(node)) => {
-            let range = node.default_specifier()?.range();
-            (!has_exported_symbol(&Text::Static("default"), options))
-                .then(|| NoUnresolvedImportsState::UnresolvedSymbol {
-                    range,
-                    specifier: options.specifier.as_ref().into(),
-                    export_name: "default".into(),
-                })
-                .into_iter()
-                .collect()
-        }
-        Some(AnyJsImportClause::JsImportNamedClause(node)) => {
-            node.named_specifiers()?
-                .specifiers()
-                .into_iter()
-                .flatten()
-                .filter_map(get_named_specifier_import_name)
-                .filter_map(|name| {
-                    (!has_exported_symbol(&Text::Borrowed(name.token_text_trimmed()), options))
-                        .then(|| NoUnresolvedImportsState::UnresolvedSymbol {
-                            range: name.text_trimmed_range(),
-                            specifier: options.specifier.as_ref().into(),
-                            export_name: name.text_trimmed().into(),
-                        })
-                })
-                .collect()
-        }
-        Some(
-            AnyJsImportClause::JsImportBareClause(_)
-            | AnyJsImportClause::JsImportNamespaceClause(_),
-        )
-        | None => Vec::new(),
+) -> Vec<NoUnresolvedImportsState> {
+    let Some(import_clause) = node.syntax().parent().and_then(AnyJsImportClause::cast) else {
+        return Vec::new();
     };
 
-    Ok(results)
-}
-
-fn get_named_specifier_import_name(specifier: AnyJsNamedImportSpecifier) -> Option<JsSyntaxToken> {
-    match specifier {
-        AnyJsNamedImportSpecifier::JsNamedImportSpecifier(specifier) => {
-            specifier.name().ok().and_then(|name| name.value().ok())
-        }
-        AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(specifier) => specifier
-            .local_name()
-            .ok()
-            .and_then(|binding| binding.as_js_identifier_binding()?.name_token().ok()),
-        _ => None,
-    }
+    import_clause.filter_map_all_imported_symbols(|imported_name, range| {
+        (!has_exported_symbol(&imported_name, options)).then(|| {
+            NoUnresolvedImportsState::UnresolvedSymbol {
+                range,
+                specifier: options.specifier.as_ref().into(),
+                export_name: imported_name.into(),
+            }
+        })
+    })
 }
 
 fn has_exported_symbol(import_name: &Text, options: &GetUnresolvedImportsOptions) -> bool {

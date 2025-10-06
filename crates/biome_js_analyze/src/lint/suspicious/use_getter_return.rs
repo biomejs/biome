@@ -5,6 +5,7 @@ use biome_control_flow::{ExceptionHandlerKind, InstructionKind, builder::ROOT_BL
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsGetterClassMember, JsGetterObjectMember, JsReturnStatement};
 use biome_rowan::{AstNode, NodeOrToken, TextRange};
+use biome_rule_options::use_getter_return::UseGetterReturnOptions;
 use roaring::RoaringBitmap;
 
 declare_lint_rule! {
@@ -62,7 +63,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useGetterReturn",
         language: "js",
-        sources: &[RuleSource::Eslint("getter-return")],
+        sources: &[RuleSource::Eslint("getter-return").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -72,7 +73,7 @@ impl Rule for UseGetterReturn {
     type Query = ControlFlowGraph;
     type State = InvalidGetterReturn;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = UseGetterReturnOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();
@@ -116,12 +117,11 @@ impl Rule for UseGetterReturn {
                     }
                     InstructionKind::Return => {
                         if let Some(NodeOrToken::Node(node)) = &instruction.node {
-                            if let Some(return_stmt) = JsReturnStatement::cast_ref(node) {
-                                if return_stmt.argument().is_none() {
-                                    invalid_returns.push(InvalidGetterReturn::EmptyReturn(
-                                        return_stmt.range(),
-                                    ));
-                                }
+                            if let Some(return_stmt) = JsReturnStatement::cast_ref(node)
+                                && return_stmt.argument().is_none()
+                            {
+                                invalid_returns
+                                    .push(InvalidGetterReturn::EmptyReturn(return_stmt.range()));
                             }
                         } else {
                             invalid_returns.push(InvalidGetterReturn::MissingReturn);

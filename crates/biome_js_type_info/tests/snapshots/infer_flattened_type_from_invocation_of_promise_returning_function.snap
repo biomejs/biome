@@ -22,7 +22,7 @@ instanceof unresolved reference "Promise"<number> (scope ID: 0)
 ## Registered types
 
 ```
-Module TypeId(0) => sync Function "returnsPromise" {
+Thin TypeId(0) => sync Function "returnsPromise" {
   accepts: {
     params: []
     type_args: []

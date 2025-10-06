@@ -69,7 +69,7 @@ pub struct JsonFormatOptions {
     expand: Expand,
     bracket_spacing: BracketSpacing,
     /// The kind of file
-    file_source: JsonFileSource,
+    _file_source: JsonFileSource,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
@@ -83,7 +83,7 @@ pub enum TrailingCommas {
     #[default]
     /// The formatter will remove the trailing commas.
     None,
-    /// The trailing commas are allowed and advised only in JSONC files. Trailing commas are removed from JSON files.
+    /// The trailing commas are allowed and advised in JSON and JSONC files.
     All,
 }
 
@@ -111,7 +111,7 @@ impl fmt::Display for TrailingCommas {
 impl JsonFormatOptions {
     pub fn new(file_source: JsonFileSource) -> Self {
         Self {
-            file_source,
+            _file_source: file_source,
             ..Default::default()
         }
     }
@@ -193,10 +193,6 @@ impl JsonFormatOptions {
             TrailingCommas::None => TrailingSeparator::Omit,
             TrailingCommas::All => TrailingSeparator::Allowed,
         }
-    }
-
-    pub(crate) fn file_source(&self) -> &JsonFileSource {
-        &self.file_source
     }
 }
 

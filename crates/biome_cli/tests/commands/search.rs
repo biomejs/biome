@@ -20,7 +20,7 @@ const JS_FILE_CONTENT: &str = r#"const a = 'foo';"#;
 
 #[test]
 fn search_css_pattern() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.css");
@@ -53,7 +53,7 @@ fn search_css_pattern() {
 
 #[test]
 fn search_css_pattern_shorthand() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.css");
@@ -78,7 +78,7 @@ fn search_css_pattern_shorthand() {
 
 #[test]
 fn search_js_pattern() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
@@ -103,7 +103,7 @@ fn search_js_pattern() {
 
 #[test]
 fn search_js_pattern_skips_css_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let js_file_path = Utf8Path::new("file.js");
@@ -137,7 +137,7 @@ fn search_js_pattern_skips_css_files() {
 
 #[test]
 fn search_css_pattern_skips_js_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let js_file_path = Utf8Path::new("file.js");

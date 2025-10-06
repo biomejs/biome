@@ -1,0 +1,7 @@
+@utility border-overlay-* {
+	position: relative;
+
+	&::after {
+		border-width: 1px;
+	}
+}

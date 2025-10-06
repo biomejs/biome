@@ -22,7 +22,7 @@ Call Module(0) TypeId(0)(No parameters)
 ## Registered types
 
 ```
-Module TypeId(0) => sync Function "returnsPromise" {
+Thin TypeId(0) => sync Function "returnsPromise" {
   accepts: {
     params: []
     type_args: []

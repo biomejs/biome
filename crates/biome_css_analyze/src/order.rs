@@ -498,8 +498,7 @@ mod tests {
             // assert this property is not in the set yet
             assert!(
                 !disallowed.contains(prop),
-                "{} must be ordered after any properties that may override it",
-                prop
+                "{prop} must be ordered after any properties that may override it"
             );
 
             // record disallowed properties
@@ -517,8 +516,7 @@ mod tests {
         for prop in PROPERTY_ORDER {
             assert!(
                 !vendor_prefixed(prop),
-                "{} should not have a vendor prefix",
-                prop
+                "{prop} should not have a vendor prefix"
             );
         }
     }
@@ -529,8 +527,7 @@ mod tests {
         for p in PROPERTY_ORDER.iter() {
             assert!(
                 !disallowed.contains(p),
-                "{} appears twice in the order array",
-                p
+                "{p} appears twice in the order array"
             );
             disallowed.insert(*p);
         }
@@ -547,7 +544,7 @@ mod tests {
                     continue 'outer;
                 }
             }
-            panic!("unknown property {}", prop)
+            panic!("unknown property {prop}")
         }
     }
 
@@ -558,9 +555,7 @@ mod tests {
                 let with_end = prop.replace("start", "end");
                 assert!(
                     PROPERTY_ORDER_MAP.get(prop) < PROPERTY_ORDER_MAP.get(with_end.as_str()),
-                    "{} should be before {}",
-                    prop,
-                    with_end
+                    "{prop} should be before {with_end}"
                 );
             }
         }

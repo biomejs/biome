@@ -50,8 +50,8 @@ pub struct GraphqlFormatterConfiguration {
     #[bpaf(long("graphql-formatter-indent-width"), argument("NUMBER"))]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to GraphQL files.
-    #[bpaf(long("graphql-formatter-line-ending"), argument("lf|crlf|cr"))]
+    /// The type of line ending applied to GraphQL files. `auto` uses CRLF on Windows and LF on other platforms.
+    #[bpaf(long("graphql-formatter-line-ending"), argument("lf|crlf|cr|auto"))]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to GraphQL files. Defaults to 80.

@@ -1,3 +1,5 @@
+use crate::fonts::is_function_keyword;
+use crate::utils::is_custom_function;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -5,8 +7,7 @@ use biome_console::markup;
 use biome_css_syntax::CssFunction;
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
-
-use crate::utils::{is_custom_function, is_function_keyword};
+use biome_rule_options::no_unknown_function::NoUnknownFunctionOptions;
 
 declare_lint_rule! {
     /// Disallow unknown CSS value functions.
@@ -38,7 +39,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("function-no-unknown")],
+        sources: &[RuleSource::Stylelint("function-no-unknown").same()],
     }
 }
 
@@ -51,7 +52,7 @@ impl Rule for NoUnknownFunction {
     type Query = Ast<CssFunction>;
     type State = NoUnknownFunctionState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnknownFunctionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

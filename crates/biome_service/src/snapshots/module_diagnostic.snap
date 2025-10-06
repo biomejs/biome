@@ -1,0 +1,25 @@
+---
+source: crates/biome_service/src/diagnostics.rs
+expression: content
+---
+example.js project  INTERNAL  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome encountered an unusually large amount of types which exceeded the limit of 200,000.
+    
+    Either you are analyzing very large files (did you make sure to exclude your build/ or dist/ folder?), or you've encountered a bug in Biome.
+    
+    Please follow these instructions to discover if you are accidentally analyzing large files and what to do about them in the relative guide.
+  
+  i In the meantime, you can force this file to be ignored using a `!!` pattern in the files.includes option in your configuration file.
+  
+  i Refer to the documentation for more information.
+  
+  i If you think this is a bug, please report it and include the following information:
+  
+  - source code of the file;
+  - how the file is imported in the project (by a test file, a dependency, etc.);
+  - if and how the file/folder is excluded.
+  
+  ! Failing to provide this information won't allow the team to fix the issue.
+  
+  ! This diagnostic was derived from an internal Biome error. Potential bug, please report it if necessary.

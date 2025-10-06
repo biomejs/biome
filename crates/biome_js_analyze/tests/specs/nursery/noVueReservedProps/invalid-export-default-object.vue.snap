@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-export-default-object.vue
+---
+# Input
+```ts
+export default {
+    props: {
+        ref: String,
+        key: String,
+        foo: String,
+    }
+};
+
+```
+
+# Diagnostics
+```
+invalid-export-default-object.vue:3:9 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ref is a reserved attribute and cannot be used as props.
+  
+    1 │ export default {
+    2 │     props: {
+  > 3 │         ref: String,
+      │         ^^^
+    4 │         key: String,
+    5 │         foo: String,
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```
+
+```
+invalid-export-default-object.vue:4:9 lint/nursery/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × key is a reserved attribute and cannot be used as props.
+  
+    2 │     props: {
+    3 │         ref: String,
+  > 4 │         key: String,
+      │         ^^^
+    5 │         foo: String,
+    6 │     }
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```

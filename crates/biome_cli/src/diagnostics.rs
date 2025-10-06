@@ -145,12 +145,13 @@ pub struct EmptyArguments;
     severity = Error,
     message(
         description = "Incompatible arguments {first_argument} and {second_argument}",
-        message("Incompatible arguments "<Emphasis>{self.first_argument}</Emphasis>" and "<Emphasis>{self.second_argument}</Emphasis>)
+        message("Incompatible arguments "<Emphasis>{self.first_argument}</Emphasis>" and "<Emphasis>{self.second_argument}</Emphasis>". "{self.reason})
     )
 )]
 pub struct IncompatibleArguments {
     first_argument: String,
     second_argument: String,
+    reason: String,
 }
 
 #[derive(Debug, Diagnostic)]
@@ -257,17 +258,6 @@ pub struct MigrationDiagnostic {
 }
 
 #[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "internalError/fs",
-    severity = Warning,
-    tags(DEPRECATED_CODE)
-)]
-pub struct DeprecatedArgument {
-    #[message]
-    pub message: MessageAndDescription,
-}
-
-#[derive(Debug, Diagnostic)]
 pub enum ReportDiagnostic {
     /// Emitted when trying to serialise the report
     Serialization(SerdeJsonError),
@@ -307,10 +297,12 @@ impl CliDiagnostic {
     pub fn incompatible_arguments(
         first_argument: impl Into<String>,
         second_argument: impl Into<String>,
+        reason: impl Into<String>,
     ) -> Self {
         Self::IncompatibleArguments(IncompatibleArguments {
             first_argument: first_argument.into(),
             second_argument: second_argument.into(),
+            reason: reason.into(),
         })
     }
 
@@ -503,7 +495,10 @@ impl Diagnostic for StdinDiagnostic {
     }
 
     fn severity(&self) -> Severity {
-        Severity::Error
+        match self {
+            Self::NotFormatted => Severity::Error,
+            Self::NoExtension => Severity::Warning,
+        }
     }
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
@@ -513,7 +508,7 @@ impl Diagnostic for StdinDiagnostic {
             },
             Self::NoExtension => {
                 fmt.write_markup(markup!{
-                    "The file passed via "<Emphasis>"--stdin-file-path"</Emphasis>" doesn't have an extension. Biome needs a file extension to know how handle the file."
+                    "The file passed via "<Emphasis>"--stdin-file-path"</Emphasis>" doesn't have an extension. Biome needs a file extension to know how to handle the file."
                 })
             }
         }

@@ -67,13 +67,13 @@ export const codes: {
 ```
 Exports {
   "CountryInfo" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(22))
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(18))
   }
   "SubdivisionInfo" => {
-    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(23))
+    ExportOwnExport => JsOwnExport::Type(Module(0) TypeId(19))
   }
-  "codes" => {
-    ExportOwnExport => JsOwnExport::Binding(18)
+  "subdivision" => {
+    ExportOwnExport => JsOwnExport::Binding(12)
   }
   "country" => {
     ExportOwnExport => JsOwnExport::Binding(15)
@@ -81,8 +81,8 @@ Exports {
   "data" => {
     ExportOwnExport => JsOwnExport::Binding(17)
   }
-  "subdivision" => {
-    ExportOwnExport => JsOwnExport::Binding(12)
+  "codes" => {
+    ExportOwnExport => JsOwnExport::Binding(18)
   }
 }
 Imports {
@@ -95,13 +95,13 @@ Imports {
 ```
 BindingId(12) => JsBindingData {
   Name: subdivision,
-  Type: Module(0) TypeId(18),
+  Type: Module(0) TypeId(14),
   Declaration kind: HoistedValue
 }
 
 BindingId(15) => JsBindingData {
   Name: country,
-  Type: Module(0) TypeId(21),
+  Type: Module(0) TypeId(17),
   Declaration kind: HoistedValue
 }
 
@@ -113,7 +113,7 @@ BindingId(17) => JsBindingData {
 
 BindingId(18) => JsBindingData {
   Name: codes,
-  Type: Module(0) TypeId(2),
+  Type: Module(0) TypeId(1),
   Declaration kind: Value
 }
 ```
@@ -121,138 +121,59 @@ BindingId(18) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof Module(0) TypeId(8)
+Module TypeId(0) => interface "Map" {
+  extends: []
+  type_args: []
+  members: [[string]: Module(0) TypeId(3)]
+}
 
 Module TypeId(1) => Object {
   prototype: No prototype
-  members: []
+  members: [[string]: string]
 }
 
-Module TypeId(2) => Object {
-  prototype: No prototype
-  members: []
-}
-
-Module TypeId(3) => Namespace {
-    path: [
-        Borrowed(
-            "CountryInfo",
-        ),
-    ],
-    members: [
-        TypeMember {
-            kind: Named(
-                Borrowed(
-                    "Partial",
-                ),
-            ),
-            is_static: true,
-            ty: Resolved(
-                Module(0) TypeId(5),
-            ),
-        },
-        TypeMember {
-            kind: Named(
-                Borrowed(
-                    "Full",
-                ),
-            ),
-            is_static: true,
-            ty: Resolved(
-                Module(0) TypeId(7),
-            ),
-        },
-        TypeMember {
-            kind: Named(
-                Borrowed(
-                    "Map",
-                ),
-            ),
-            is_static: true,
-            ty: Resolved(
-                Module(0) TypeId(8),
-            ),
-        },
-    ],
-}
-
-Module TypeId(4) => instanceof Module(0) TypeId(8)
-
-Module TypeId(5) => interface "Partial" {
+Module TypeId(2) => interface "Map" {
   extends: []
   type_args: []
-  members: ["name": string, "sub": Module(0) TypeId(4)]
+  members: [[string]: Module(0) TypeId(7)]
 }
 
-Module TypeId(6) => instanceof Module(0) TypeId(5)
+Module TypeId(3) => Module(0) TypeId(6) | Module(0) TypeId(4)
 
-Module TypeId(7) => interface "Full" {
-  extends: [Module(0) TypeId(6)]
+Module TypeId(4) => interface "Partial" {
+  extends: []
+  type_args: []
+  members: ["name": string, "sub": Module(0) TypeId(2)]
+}
+
+Module TypeId(5) => interface "Map" {
+  extends: []
+  type_args: []
+  members: [[string]: Module(0) TypeId(3)]
+}
+
+Module TypeId(6) => interface "Full" {
+  extends: [Module(0) TypeId(4)]
   type_args: []
   members: ["code": string]
 }
 
-Module TypeId(8) => interface "Map" {
-  extends: []
-  type_args: []
-  members: []
-}
+Module TypeId(7) => Module(0) TypeId(10) | Module(0) TypeId(8)
 
-Module TypeId(9) => instanceof Module(0) TypeId(7)
-
-Module TypeId(10) => Namespace {
-    path: [
-        Borrowed(
-            "SubdivisionInfo",
-        ),
-    ],
-    members: [
-        TypeMember {
-            kind: Named(
-                Borrowed(
-                    "Partial",
-                ),
-            ),
-            is_static: true,
-            ty: Resolved(
-                Module(0) TypeId(11),
-            ),
-        },
-        TypeMember {
-            kind: Named(
-                Borrowed(
-                    "Full",
-                ),
-            ),
-            is_static: true,
-            ty: Resolved(
-                Module(0) TypeId(13),
-            ),
-        },
-        TypeMember {
-            kind: Named(
-                Borrowed(
-                    "Map",
-                ),
-            ),
-            is_static: true,
-            ty: Resolved(
-                Module(0) TypeId(8),
-            ),
-        },
-    ],
-}
-
-Module TypeId(11) => interface "Partial" {
+Module TypeId(8) => interface "Partial" {
   extends: []
   type_args: []
   members: ["type": string, "name": string]
 }
 
-Module TypeId(12) => instanceof Module(0) TypeId(11)
+Module TypeId(9) => interface "Map" {
+  extends: []
+  type_args: []
+  members: [[string]: Module(0) TypeId(7)]
+}
 
-Module TypeId(13) => interface "Full" {
-  extends: [Module(0) TypeId(12)]
+Module TypeId(10) => interface "Full" {
+  extends: [Module(0) TypeId(8)]
   type_args: []
   members: [
     "countryName": string,
@@ -262,40 +183,98 @@ Module TypeId(13) => interface "Full" {
   ]
 }
 
-Module TypeId(14) => instanceof Module(0) TypeId(13)
+Module TypeId(11) => Namespace {
+    path: Identifier(
+        "SubdivisionInfo",
+    ),
+    members: [
+        TypeMember {
+            kind: NamedStatic(
+                "Partial",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(8),
+            ),
+        },
+        TypeMember {
+            kind: NamedStatic(
+                "Full",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(10),
+            ),
+        },
+        TypeMember {
+            kind: NamedStatic(
+                "Map",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(2),
+            ),
+        },
+    ],
+}
 
-Module TypeId(15) => instanceof Module(0) TypeId(10)
+Module TypeId(12) => null
 
-Module TypeId(16) => value: null
+Module TypeId(13) => Module(0) TypeId(11) | Module(0) TypeId(12)
 
-Module TypeId(17) => Module(0) TypeId(15) | Module(0) TypeId(16)
-
-Module TypeId(18) => sync Function "subdivision" {
+Module TypeId(14) => sync Function "subdivision" {
   accepts: {
     params: [
-      required countryCodeOrFullSubdivisionCode: string (bindings: countryCodeOrFullSubdivisionCode:string)
-      optional subdivisionCodeOrName: string (bindings: subdivisionCodeOrName:string)
+      required countryCodeOrFullSubdivisionCode: string
+      optional subdivisionCodeOrName: string
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(17)
+  returns: Module(0) TypeId(13)
 }
 
-Module TypeId(19) => instanceof Module(0) TypeId(3)
+Module TypeId(15) => Namespace {
+    path: Identifier(
+        "CountryInfo",
+    ),
+    members: [
+        TypeMember {
+            kind: NamedStatic(
+                "Partial",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(4),
+            ),
+        },
+        TypeMember {
+            kind: NamedStatic(
+                "Full",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(6),
+            ),
+        },
+        TypeMember {
+            kind: NamedStatic(
+                "Map",
+            ),
+            ty: Resolved(
+                Module(0) TypeId(0),
+            ),
+        },
+    ],
+}
 
-Module TypeId(20) => Module(0) TypeId(19) | Module(0) TypeId(16)
+Module TypeId(16) => Module(0) TypeId(15) | Module(0) TypeId(12)
 
-Module TypeId(21) => sync Function "country" {
+Module TypeId(17) => sync Function "country" {
   accepts: {
     params: [
-      required countryCodeOrName: string (bindings: countryCodeOrName:string)
+      required countryCodeOrName: string
     ]
     type_args: []
   }
-  returns: Module(0) TypeId(20)
+  returns: Module(0) TypeId(16)
 }
 
-Module TypeId(22) => (type: Module(0) TypeId(9), value: Module(0) TypeId(3), namespace: Module(0) TypeId(3))
+Module TypeId(18) => (type: Module(0) TypeId(6), value: Module(0) TypeId(15), namespace: Module(0) TypeId(15))
 
-Module TypeId(23) => (type: Module(0) TypeId(14), value: Module(0) TypeId(10), namespace: Module(0) TypeId(10))
+Module TypeId(19) => (type: Module(0) TypeId(10), value: Module(0) TypeId(11), namespace: Module(0) TypeId(11))
 ```

@@ -60,29 +60,35 @@ export * as renamed2 from "./renamed-reexports";
 
 ```
 Exports {
+  "foo" => {
+    ExportOwnExport => JsOwnExport::Binding(0)
+  }
+  "qux" => {
+    ExportOwnExport => JsOwnExport::Binding(4)
+  }
+  "bar" => {
+    ExportOwnExport => JsOwnExport::Binding(1)
+  }
+  "quz" => {
+    ExportOwnExport => JsOwnExport::Binding(2)
+  }
+  "baz" => {
+    ExportOwnExport => JsOwnExport::Binding(3)
+  }
   "a" => {
     ExportOwnExport => JsOwnExport::Binding(5)
   }
   "b" => {
     ExportOwnExport => JsOwnExport::Binding(6)
   }
-  "bar" => {
-    ExportOwnExport => JsOwnExport::Binding(1)
-  }
-  "baz" => {
-    ExportOwnExport => JsOwnExport::Binding(3)
-  }
   "d" => {
     ExportOwnExport => JsOwnExport::Binding(7)
-  }
-  "default" => {
-    ExportOwnExport => JsOwnExport::Binding(11)
   }
   "e" => {
     ExportOwnExport => JsOwnExport::Binding(8)
   }
-  "foo" => {
-    ExportOwnExport => JsOwnExport::Binding(0)
+  "default" => {
+    ExportOwnExport => JsOwnExport::Binding(11)
   }
   "oh\nno" => {
     ExportReexport => Reexport(
@@ -90,12 +96,6 @@ Exports {
       Resolved path: "/src/renamed-reexports.ts"
       Import Symbol: ohNo
     )
-  }
-  "qux" => {
-    ExportOwnExport => JsOwnExport::Binding(4)
-  }
-  "quz" => {
-    ExportOwnExport => JsOwnExport::Binding(2)
   }
   "renamed2" => {
     ExportReexport => Reexport(
@@ -118,7 +118,7 @@ Imports {
 ```
 BindingId(0) => JsBindingData {
   Name: foo,
-  Type: Module(0) TypeId(9),
+  Type: Module(0) TypeId(10),
   JSDoc comment: JsDoc(
     @returns {string}
   ),
@@ -127,7 +127,7 @@ BindingId(0) => JsBindingData {
 
 BindingId(1) => JsBindingData {
   Name: bar,
-  Type: Module(0) TypeId(10),
+  Type: Module(0) TypeId(11),
   JSDoc comment: JsDoc(
     @package
   ),
@@ -145,7 +145,7 @@ BindingId(2) => JsBindingData {
 
 BindingId(3) => JsBindingData {
   Name: baz,
-  Type: Module(0) TypeId(12),
+  Type: Module(0) TypeId(13),
   Declaration kind: HoistedValue
 }
 
@@ -181,7 +181,7 @@ BindingId(8) => JsBindingData {
 
 BindingId(11) => JsBindingData {
   Name: Component,
-  Type: Module(0) TypeId(22),
+  Type: Module(0) TypeId(17),
   JSDoc comment: JsDoc(
     @public
     @returns {JSX.Element}
@@ -200,17 +200,11 @@ Module TypeId(0) => Object {
 
 Module TypeId(1) => value: 1
 
-Module TypeId(2) => Object {
-  prototype: No prototype
-  members: ["a": string, "b": Module(0) TypeId(13), "c": Module(0) TypeId(17)]
-}
+Module TypeId(2) => Module(0) TypeId(15)
 
-Module TypeId(3) => sync Function "getObject" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(19)
+Module TypeId(3) => Object {
+  prototype: No prototype
+  members: ["a": string, "b": Module(0) TypeId(5), "c": Module(0) TypeId(6)]
 }
 
 Module TypeId(4) => string
@@ -221,24 +215,20 @@ Module TypeId(6) => Tuple(
     [
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(14),
+                Module(0) TypeId(7),
             ),
             name: Some(
-                Borrowed(
-                    "first",
-                ),
+                "first",
             ),
             is_optional: false,
             is_rest: false,
         },
         TupleElementType {
             ty: Resolved(
-                Module(0) TypeId(16),
+                Module(0) TypeId(8),
             ),
             name: Some(
-                Borrowed(
-                    "last",
-                ),
+                "last",
             ),
             is_optional: false,
             is_rest: false,
@@ -248,104 +238,55 @@ Module TypeId(6) => Tuple(
 
 Module TypeId(7) => boolean
 
-Module TypeId(8) => Module(0) TypeId(14) | Module(0) TypeId(15)
+Module TypeId(8) => Module(0) TypeId(7) | Module(0) TypeId(14)
 
-Module TypeId(9) => sync Function "foo" {
+Module TypeId(9) => void
+
+Module TypeId(10) => sync Function "foo" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(9)
 }
 
-Module TypeId(10) => sync Function "bar" {
+Module TypeId(11) => sync Function "bar" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(9)
 }
 
-Module TypeId(11) => instanceof Promise
+Module TypeId(12) => instanceof Promise<Module(0) TypeId(9)>
 
-Module TypeId(12) => async Function "baz" {
+Module TypeId(13) => async Function "baz" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(11)
+  returns: Module(0) TypeId(12)
 }
 
-Module TypeId(13) => instanceof Array<number>
+Module TypeId(14) => undefined
 
-Module TypeId(14) => boolean
-
-Module TypeId(15) => undefined
-
-Module TypeId(16) => Module(0) TypeId(14) | Module(0) TypeId(15)
-
-Module TypeId(17) => Tuple(
-    [
-        TupleElementType {
-            ty: Resolved(
-                Module(0) TypeId(14),
-            ),
-            name: Some(
-                Borrowed(
-                    "first",
-                ),
-            ),
-            is_optional: false,
-            is_rest: false,
-        },
-        TupleElementType {
-            ty: Resolved(
-                Module(0) TypeId(16),
-            ),
-            name: Some(
-                Borrowed(
-                    "last",
-                ),
-            ),
-            is_optional: false,
-            is_rest: false,
-        },
-    ],
-)
-
-Module TypeId(18) => Object {
-  prototype: No prototype
-  members: ["a": string, "b": Module(0) TypeId(13), "c": Module(0) TypeId(17)]
-}
-
-Module TypeId(19) => Object {
-  prototype: No prototype
-  members: ["a": string, "b": Module(0) TypeId(13), "c": Module(0) TypeId(17)]
-}
-
-Module TypeId(20) => sync Function "getObject" {
+Module TypeId(15) => sync Function "getObject" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(19)
+  returns: Module(0) TypeId(3)
 }
 
-Module TypeId(21) => instanceof unresolved reference "JSX.Element" (scope ID: 10)
+Module TypeId(16) => unknown
 
-Module TypeId(22) => sync Function "Component" {
+Module TypeId(17) => sync Function "Component" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(21)
+  returns: Module(0) TypeId(16)
 }
-
-Module TypeId(23) => instanceof Array<number>
-
-Module TypeId(24) => boolean
-
-Module TypeId(25) => Module(0) TypeId(14) | Module(0) TypeId(15)
 ```
 
 # `/src/renamed-reexports.ts`
@@ -374,7 +315,7 @@ Imports {
 ```
 BindingId(0) => JsBindingData {
   Name: ohNo,
-  Type: Module(0) TypeId(0),
+  Type: Module(0) TypeId(1),
   Declaration kind: HoistedValue
 }
 ```
@@ -382,12 +323,14 @@ BindingId(0) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => sync Function "ohNo" {
+Module TypeId(0) => void
+
+Module TypeId(1) => sync Function "ohNo" {
   accepts: {
     params: []
     type_args: []
   }
-  returns: unknown reference
+  returns: Module(0) TypeId(0)
 }
 ```
 

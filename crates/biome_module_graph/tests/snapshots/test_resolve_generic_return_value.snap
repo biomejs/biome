@@ -40,7 +40,7 @@ Imports {
 ```
 BindingId(4) => JsBindingData {
   Name: makePromise,
-  Type: Module(0) TypeId(1),
+  Type: Module(0) TypeId(6),
   Declaration kind: Value
 }
 
@@ -52,7 +52,7 @@ BindingId(5) => JsBindingData {
 
 BindingId(6) => JsBindingData {
   Name: promise,
-  Type: Module(0) TypeId(9),
+  Type: Module(0) TypeId(7),
   Declaration kind: Value
 }
 ```
@@ -60,138 +60,83 @@ BindingId(6) => JsBindingData {
 ## Registered types
 
 ```
-Module TypeId(0) => instanceof Promise
+Module TypeId(0) => instanceof Module(0) TypeId(9)
 
-Module TypeId(1) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(0)
-}
+Module TypeId(1) => Promise
 
-Module TypeId(2) => sync Function "Promise.resolve" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise
-}
+Module TypeId(2) => Promise.resolve
 
 Module TypeId(3) => value: 1
 
-Module TypeId(4) => instanceof Promise
+Module TypeId(4) => Module(0) TypeId(10)
 
-Module TypeId(5) => class "Promise" {
-  extends: none
-  implements: []
-  type_args: [T]
-}
+Module TypeId(5) => Module(0) TypeId(6)
 
 Module TypeId(6) => sync Function {
   accepts: {
     params: []
     type_args: []
   }
-  returns: Module(0) TypeId(0)
+  returns: Module(0) TypeId(7)
 }
 
-Module TypeId(7) => sync Function "useCallback" {
+Module TypeId(7) => instanceof Promise
+
+Module TypeId(8) => unknown
+
+Module TypeId(9) => T extends Module(0) TypeId(8)
+
+Module TypeId(10) => sync Function "useCallback" {
   accepts: {
     params: [
-      required callback: Module(0) TypeId(11) (bindings: callback:Module(0) TypeId(11))
-      required deps: Module(0) TypeId(12) (bindings: deps:Module(0) TypeId(12))
+      required callback: Module(0) TypeId(0)
+      required deps: Module(0) TypeId(8)
     ]
-    type_args: [Module(0) TypeId(14)]
-  }
-  returns: Module(0) TypeId(11)
-}
-
-Module TypeId(8) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
+    type_args: [Module(0) TypeId(9)]
   }
   returns: Module(0) TypeId(0)
-}
-
-Module TypeId(9) => instanceof Promise
-
-Module TypeId(10) => sync Function {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: Module(0) TypeId(0)
-}
-
-Module TypeId(11) => instanceof Module(0) TypeId(14)
-
-Module TypeId(12) => instanceof unresolved reference "DependencyList" (scope ID: 1)
-
-Module TypeId(13) => instanceof unresolved reference "Function" (scope ID: 1)
-
-Module TypeId(14) => T extends Module(0) TypeId(13)
-
-Module TypeId(15) => sync Function "useCallback" {
-  accepts: {
-    params: [
-      required callback: Module(0) TypeId(11) (bindings: callback:Module(0) TypeId(11))
-      required deps: Module(0) TypeId(12) (bindings: deps:Module(0) TypeId(12))
-    ]
-    type_args: [Module(0) TypeId(14)]
-  }
-  returns: Module(0) TypeId(11)
 }
 ```
 
-# Scoped Type Resolver
+# Module Resolver
 
 ## Registered types
 
 ```
-Scope TypeId(0) => instanceof Promise
+Full TypeId(0) => instanceof Module(0) TypeId(9)
 
-Scope TypeId(1) => sync Function {
+Full TypeId(1) => Promise
+
+Full TypeId(2) => Promise.resolve
+
+Full TypeId(3) => value: 1
+
+Full TypeId(4) => Module(0) TypeId(10)
+
+Full TypeId(5) => Module(0) TypeId(6)
+
+Full TypeId(6) => sync Function {
   accepts: {
     params: []
     type_args: []
+  }
+  returns: Module(0) TypeId(7)
+}
+
+Full TypeId(7) => instanceof Promise
+
+Full TypeId(8) => unknown
+
+Full TypeId(9) => T extends Module(0) TypeId(8)
+
+Full TypeId(10) => sync Function "useCallback" {
+  accepts: {
+    params: [
+      required callback: Module(0) TypeId(0)
+      required deps: Module(0) TypeId(8)
+    ]
+    type_args: [Module(0) TypeId(9)]
   }
   returns: Module(0) TypeId(0)
 }
-
-Scope TypeId(2) => sync Function "Promise.resolve" {
-  accepts: {
-    params: []
-    type_args: []
-  }
-  returns: instanceof Promise
-}
-
-Scope TypeId(3) => value: 1
-
-Scope TypeId(4) => class "Promise" {
-  extends: none
-  implements: []
-  type_args: [T]
-}
-
-Scope TypeId(5) => sync Function "useCallback" {
-  accepts: {
-    params: [
-      required callback: Module(0) TypeId(11) (bindings: callback:Module(0) TypeId(11))
-      required deps: Module(0) TypeId(12) (bindings: deps:Module(0) TypeId(12))
-    ]
-    type_args: [Module(0) TypeId(14)]
-  }
-  returns: Module(0) TypeId(11)
-}
-
-Scope TypeId(6) => instanceof Module(0) TypeId(14)
-
-Scope TypeId(7) => instanceof unresolved reference "DependencyList" (scope ID: 1)
-
-Scope TypeId(8) => instanceof unresolved reference "Function" (scope ID: 1)
-
-Scope TypeId(9) => T extends Module(0) TypeId(13)
 ```

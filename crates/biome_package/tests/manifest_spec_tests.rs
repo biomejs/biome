@@ -1,9 +1,8 @@
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_package::{NodeJsPackage, Package};
-use std::ffi::OsStr;
+use camino::{Utf8Component, Utf8Path, Utf8PathBuf};
 use std::fs::read_to_string;
-use std::path::Path;
 
 mod manifest {
     tests_macros::gen_tests! {"tests/manifest/invalid/*.{json}", crate::run_invalid_manifests, "module"}
@@ -15,16 +14,16 @@ mod tsconfig {
 }
 
 fn run_invalid_manifests(input: &'static str, _: &str, _: &str, _: &str) {
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let mut package = NodeJsPackage::default();
-    match input_file.extension().map(OsStr::as_encoded_bytes) {
+    match input_file.extension().map(str::as_bytes) {
         Some(b"json") => {
             let parsed = parse_json(input_code.as_str(), JsonParserOptions::default());
-            package.insert_serialized_manifest(&parsed.tree());
+            package.insert_serialized_manifest(&parsed.tree(), input_file);
         }
         _ => {
             panic!("Extension not supported");
@@ -69,19 +68,19 @@ fn run_invalid_manifests(input: &'static str, _: &str, _: &str, _: &str) {
 }
 
 fn run_invalid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let mut project = NodeJsPackage::default();
-    match input_file.extension().map(OsStr::as_encoded_bytes) {
+    match input_file.extension().map(str::as_bytes) {
         Some(b"json") => {
             let parsed = parse_json(
                 input_code.as_str(),
                 JsonParserOptions::default().with_allow_comments(),
             );
-            project.insert_serialized_tsconfig(&parsed.tree());
+            project.insert_serialized_tsconfig(&parsed.tree(), input_file);
         }
         _ => {
             panic!("Extension not supported");
@@ -126,19 +125,19 @@ fn run_invalid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
 }
 
 fn run_valid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let mut project = NodeJsPackage::default();
-    match input_file.extension().map(OsStr::as_encoded_bytes) {
+    match input_file.extension().map(str::as_bytes) {
         Some(b"json") => {
             let parsed = parse_json(
                 input_code.as_str(),
                 JsonParserOptions::default().with_allow_comments(),
             );
-            project.insert_serialized_tsconfig(&parsed.tree());
+            project.insert_serialized_tsconfig(&parsed.tree(), input_file);
         }
         _ => {
             panic!("Extension not supported");
@@ -154,11 +153,38 @@ fn run_valid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
 
     let mut snapshot_result = String::new();
 
+    let strip_prefix = |path: &mut Utf8PathBuf| {
+        if path.to_string().is_empty() {
+            return;
+        }
+
+        assert!(path.is_absolute());
+        let mut stripped_path = Utf8PathBuf::from("<PREFIX>");
+        let mut past_prefix = false;
+        for component in path.components() {
+            if past_prefix {
+                stripped_path.push(component);
+            } else if component == Utf8Component::Normal("tests") {
+                past_prefix = true;
+            }
+        }
+        *path = stripped_path;
+    };
+
+    let mut tsconfig = project.tsconfig.unwrap();
+    strip_prefix(&mut tsconfig.path);
+    strip_prefix(&mut tsconfig.compiler_options.paths_base);
+    tsconfig
+        .compiler_options
+        .base_url
+        .as_mut()
+        .map(strip_prefix);
+
     snapshot_result.push_str("## Input\n\n");
     snapshot_result.push_str(&input_code);
     snapshot_result.push_str("\n\n");
     snapshot_result.push_str("## Data structure\n\n");
-    snapshot_result.push_str(&format!("{:#?}", project.tsconfig.unwrap()));
+    snapshot_result.push_str(&format!("{tsconfig:#?}").replace("\\\\", "/"));
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,

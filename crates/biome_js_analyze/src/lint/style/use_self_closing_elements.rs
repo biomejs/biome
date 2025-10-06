@@ -1,17 +1,13 @@
+use crate::JsRuleAction;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxTag, JsSyntaxToken, JsxElement, JsxOpeningElementFields, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPiece};
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
-
-use crate::JsRuleAction;
+use biome_rule_options::use_self_closing_elements::UseSelfClosingElementsOptions;
 
 declare_lint_rule! {
     /// Prevent extra closing tags for components without children.
@@ -88,7 +84,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useSelfClosingElements",
         language: "js",
-        sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp")],
+        sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp").same()],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -99,7 +95,7 @@ impl Rule for UseSelfClosingElements {
     type Query = Ast<JsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = Box<UseSelfClosingElementsOptions>;
+    type Options = UseSelfClosingElementsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
@@ -184,13 +180,4 @@ impl Rule for UseSelfClosingElements {
             mutation,
         ))
     }
-}
-
-/// Options for the `useSelfClosingElements` rule.
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseSelfClosingElementsOptions {
-    // Whether or not to ignore checking native HTML elements. Default is false.
-    pub ignore_html_elements: bool,
 }

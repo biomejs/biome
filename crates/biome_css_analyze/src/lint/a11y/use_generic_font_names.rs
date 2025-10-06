@@ -1,3 +1,7 @@
+use crate::fonts::{
+    CssFontValue, find_font_family, is_font_family_keyword, is_system_family_name_keyword,
+};
+use crate::utils::is_css_variable;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,11 +12,8 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
+use biome_rule_options::use_generic_font_names::UseGenericFontNamesOptions;
 use biome_string_case::StrLikeExtension;
-
-use crate::utils::{
-    find_font_family, is_css_variable, is_font_family_keyword, is_system_family_name_keyword,
-};
 
 declare_lint_rule! {
     /// Disallow a missing generic family keyword within font families.
@@ -67,7 +68,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword")],
+        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same()],
     }
 }
 
@@ -75,7 +76,7 @@ impl Rule for UseGenericFontNames {
     type Query = Ast<CssGenericProperty>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseGenericFontNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
@@ -111,13 +112,16 @@ impl Rule for UseGenericFontNames {
             return None;
         }
 
-        if has_generic_font_family_property(&font_families) {
+        if has_generic_font_family_property(font_families.as_slice()) {
             return None;
         }
 
         // Ignore the last value if it's a CSS variable now.
         let last_value = font_families.last()?;
-        if is_css_variable(&last_value.to_trimmed_text()) {
+        if last_value
+            .to_string()
+            .is_some_and(|s| is_css_variable(s.as_ref()))
+        {
             return None;
         }
 
@@ -162,17 +166,28 @@ fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValue
             .any(|p| is_system_family_name_keyword(&p.to_trimmed_text()))
 }
 
-fn has_generic_font_family_property(nodes: &[AnyCssValue]) -> bool {
-    nodes
-        .iter()
-        .any(|n| is_font_family_keyword(&n.to_trimmed_text()))
+fn has_generic_font_family_property(nodes: &[CssFontValue]) -> bool {
+    nodes.iter().any(|value| {
+        match value {
+            // Multiple values won't match font families keywords
+            CssFontValue::MultipleValue(_) => false,
+            CssFontValue::SingleValue(value) => {
+                let text = value.to_trimmed_text();
+                is_font_family_keyword(text.text())
+            }
+        }
+    })
 }
 
-fn collect_font_family_properties(properties: CssGenericComponentValueList) -> Vec<AnyCssValue> {
+fn collect_font_family_properties(properties: CssGenericComponentValueList) -> Vec<CssFontValue> {
     properties
         .into_iter()
         .filter_map(|v| match v {
-            AnyCssGenericComponentValue::AnyCssValue(value) => Some(value),
+            AnyCssGenericComponentValue::AnyCssValue(value) => match value {
+                AnyCssValue::CssIdentifier(node) => Some(CssFontValue::SingleValue(node.into())),
+                AnyCssValue::CssString(node) => Some(CssFontValue::SingleValue(node.into())),
+                _ => None,
+            },
             _ => None,
         })
         .collect()

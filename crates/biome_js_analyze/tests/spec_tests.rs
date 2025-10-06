@@ -6,15 +6,16 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{AnyJsRoot, EmbeddingKind, JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, FileSourceError};
+use biome_service::file_handlers::VueFileHandler;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, module_graph_for_test_file, parse_test_path,
-    project_layout_with_node_manifest, register_leak_checker, scripts_from_json,
+    project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
 use camino::Utf8Path;
@@ -22,8 +23,9 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
@@ -111,12 +113,28 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             );
         }
     } else {
-        let Ok(source_type) = input_file.try_into() else {
+        let Ok(source_type): Result<JsFileSource, FileSourceError> = input_file.try_into() else {
             return;
         };
+
+        // TODO: Remove once we have full support of vue files
+        // This is needed to set the language to TypeScript for Vue files
+        // because we can't do it in <script> definition in the current implementation.
+        let source_type = if source_type.as_embedding_kind().is_vue() {
+            JsFileSource::ts().with_embedding_kind(EmbeddingKind::Vue)
+        } else {
+            source_type
+        };
+        let input_code = if source_type.as_embedding_kind().is_vue() {
+            VueFileHandler::input(&input_code)
+        } else {
+            input_code.as_str()
+        };
+
+        // if source_type.
         analyze_and_snap(
             &mut snapshot,
-            &input_code,
+            input_code,
             source_type,
             filter,
             file_name,
@@ -149,21 +167,20 @@ pub(crate) fn analyze_and_snap(
 ) {
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
-    let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
+    let project_layout = project_layout_for_test_file(input_file, &mut diagnostics);
 
-    if let Some((_, manifest)) = project_layout.find_node_manifest_for_path(input_file) {
-        if manifest.r#type == Some(PackageType::CommonJs) &&
+    if let Some((_, manifest)) = project_layout.find_node_manifest_for_path(input_file)
+        && manifest.r#type == Some(PackageType::CommonJs) &&
             // At the moment we treat JS and JSX at the same way
             (source_type.file_extension() == "js" || source_type.file_extension() == "jsx" )
-        {
-            source_type.set_module_kind(ModuleKind::Script)
-        }
+    {
+        source_type.set_module_kind(ModuleKind::Script)
     }
 
-    let parsed = parse(input_code, source_type, parser_options.clone());
+    let parsed = parse(input_code, source_type, parser_options);
     let root = parsed.tree();
 
-    let options = create_analyzer_options(input_file, &mut diagnostics);
+    let options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
     let module_graph = if needs_module_graph {
@@ -185,7 +202,7 @@ pub(crate) fn analyze_and_snap(
                                 input_code,
                                 source_type,
                                 &action,
-                                parser_options.clone(),
+                                parser_options,
                                 &root,
                             );
                             diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
@@ -196,7 +213,7 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parser_options,
                             &root,
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
@@ -215,7 +232,7 @@ pub(crate) fn analyze_and_snap(
                             input_code,
                             source_type,
                             &action,
-                            parser_options.clone(),
+                            parser_options,
                             &root,
                         );
                         code_fixes.push(code_fix_to_string(input_code, action));
@@ -226,7 +243,7 @@ pub(crate) fn analyze_and_snap(
                         input_code,
                         source_type,
                         &action,
-                        parser_options.clone(),
+                        parser_options,
                         &root,
                     );
                     code_fixes.push(code_fix_to_string(input_code, action));
@@ -257,7 +274,7 @@ pub(crate) fn analyze_and_snap(
         *snapshot = snapshot.replace('\\', "/");
     }
 
-    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics.len());
+    assert_diagnostics_expectation_comment(input_file, root.syntax(), diagnostics);
 }
 
 fn check_code_action(
@@ -268,6 +285,8 @@ fn check_code_action(
     options: JsParserOptions,
     root: &AnyJsRoot,
 ) {
+    assert!(!action.mutation.is_empty(), "Mutation must not be empty");
+
     let (new_tree, text_edit) = match action
         .mutation
         .clone()
@@ -352,6 +371,81 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
     });
 }
 
+pub(crate) fn run_multi_rule_test(input: &'static str, _: &str, _: &str, _: &str) {
+    register_leak_checker();
+
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
+    let source_type = match input_file.extension() {
+        Some("js" | "mjs" | "jsx") => JsFileSource::jsx(),
+        Some("cjs") => JsFileSource::js_script(),
+        Some("ts") => JsFileSource::ts(),
+        Some("mts" | "cts") => JsFileSource::ts_restricted(),
+        Some("tsx") => JsFileSource::tsx(),
+        _ => {
+            panic!("Unknown file extension: {:?}", input_file.extension());
+        }
+    };
+    let input_code = read_to_string(input_file)
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+
+    let rule_filters: Vec<_> = input_code
+        .lines()
+        .take_while(|line| line.is_empty() || line.starts_with("///!"))
+        .filter_map(|line| {
+            if line.is_empty() {
+                return None;
+            }
+            let prefix = "///! lint/";
+            if !line.starts_with(prefix) {
+                panic!("Rule enabling comments must be of shape `{prefix}{{group}}/{{rule}}");
+            }
+            let mut parts = line.trim_start_matches(prefix).split('/');
+            let group = parts.next().expect("Missing rule part in enable comment");
+            let rule = parts.next().expect("Missing rule part in enable comment");
+            if let Some(unused) = parts.next() {
+                panic!("Unrecognized enable comment suffix: {unused}");
+            }
+            if biome_js_analyze::METADATA
+                .deref()
+                .find_rule(group, rule)
+                .is_none()
+            {
+                panic!("could not find rule {group}/{rule}");
+            }
+            Some(RuleFilter::Rule(group, rule))
+        })
+        .collect();
+    if rule_filters.is_empty() {
+        panic!("At least one rule must be enabled with `///! lint/{{group}}/{{rule}}` comment");
+    }
+
+    let filter = AnalysisFilter {
+        enabled_rules: Some(&rule_filters),
+        ..AnalysisFilter::default()
+    };
+
+    let mut snapshot = String::new();
+    analyze_and_snap(
+        &mut snapshot,
+        &input_code,
+        source_type,
+        filter,
+        file_name,
+        input_file,
+        CheckActionType::Suppression,
+        JsParserOptions::default(),
+        &[],
+    );
+
+    insta::with_settings!({
+        prepend_module_to_snapshot => false,
+        snapshot_path => input_file.parent().unwrap(),
+    }, {
+        insta::assert_snapshot!(file_name, snapshot, file_name);
+    });
+}
+
 fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
@@ -368,7 +462,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     };
 
     // Enable at least 1 rule so that PhaseRunner will be called
-    // which is necessary to parse and store supression comments
+    // which is necessary to parse and store suppression comments
     let rule_filter = RuleFilter::Rule("nursery", "noCommonJs");
     let filter = AnalysisFilter {
         enabled_rules: Some(slice::from_ref(&rule_filter)),

@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -8,6 +8,7 @@ use biome_js_syntax::{
     JsThrowStatement,
 };
 use biome_rowan::AstNode;
+use biome_rule_options::use_throw_only_error::UseThrowOnlyErrorOptions;
 
 declare_lint_rule! {
     /// Disallow throwing non-`Error` values.
@@ -54,8 +55,10 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useThrowOnlyError",
         language: "js",
-        sources: &[RuleSource::Eslint("no-throw-literal"), RuleSource::EslintTypeScript("only-throw-error")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[
+            RuleSource::Eslint("no-throw-literal").inspired(),
+            RuleSource::EslintTypeScript("only-throw-error").inspired(),
+        ],
         recommended: false,
         severity: Severity::Warning,
     }
@@ -65,7 +68,7 @@ impl Rule for UseThrowOnlyError {
     type Query = Ast<JsThrowStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseThrowOnlyErrorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -132,10 +135,10 @@ fn is_invalid_throw_value(any_expr: &AnyJsExpression) -> Option<bool> {
         });
     }
 
-    if let Some(identifier) = any_expr.as_js_reference_identifier() {
-        if identifier.is_undefined() {
-            return Some(true);
-        }
+    if let Some(identifier) = any_expr.as_js_reference_identifier()
+        && identifier.is_undefined()
+    {
+        return Some(true);
     }
 
     None

@@ -1,0 +1,66 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@config "./tailwind.config.js";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    CONFIG_KW@1..8 "config" [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@8..30 "\"./tailwind.config.js\"" [] [],
+                    },
+                    SEMICOLON@30..31 ";" [] [],
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@31..32 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..32
+  0: (empty)
+  1: CSS_RULE_LIST@0..31
+    0: CSS_AT_RULE@0..31
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..31
+        0: CONFIG_KW@1..8 "config" [] [Whitespace(" ")]
+        1: CSS_STRING@8..30
+          0: CSS_STRING_LITERAL@8..30 "\"./tailwind.config.js\"" [] []
+        2: SEMICOLON@30..31 ";" [] []
+  2: EOF@31..32 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+config.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+  > 1 │ @config "./tailwind.config.js";
+      │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
+  
+```

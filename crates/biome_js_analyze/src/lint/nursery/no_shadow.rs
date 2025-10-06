@@ -5,10 +5,11 @@ use biome_console::markup;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     JsClassExpression, JsFunctionExpression, JsIdentifierBinding, JsParameterList,
-    JsVariableDeclarator, TsIdentifierBinding, TsTypeAliasDeclaration, TsTypeParameter,
-    TsTypeParameterName,
+    JsVariableDeclarator, TsIdentifierBinding, TsPropertySignatureTypeMember,
+    TsTypeAliasDeclaration, TsTypeParameter, TsTypeParameterName,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TokenText, declare_node_union};
+use biome_rule_options::no_shadow::NoShadowOptions;
 
 use crate::services::semantic::SemanticServices;
 
@@ -17,7 +18,7 @@ declare_lint_rule! {
     ///
     /// Shadowing is the process by which a local variable shares the same name as a variable in its containing scope. This can cause confusion while reading the code and make it impossible to access the global variable.
     ///
-    /// See also: [`noShadowRestrictedNames`](http://biome.dev/linter/rules/no-shadow-restricted-names)
+    /// See also: [`noShadowRestrictedNames`](http://biomejs.dev/linter/rules/no-shadow-restricted-names)
     ///
     /// ## Examples
     ///
@@ -63,7 +64,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[
-            RuleSource::Eslint("no-shadow"),
+            RuleSource::Eslint("no-shadow").same(),
             // uncomment when we can handle the test cases from typescript-eslint
             // RuleSource::EslintTypeScript("no-shadow"),
         ],
@@ -81,7 +82,7 @@ impl Rule for NoShadow {
     type Query = SemanticServices;
     type State = ShadowedBinding;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = NoShadowOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut shadowed_bindings = Vec::new();
@@ -134,14 +135,14 @@ fn check_shadowing(model: &SemanticModel, binding: Binding) -> Option<ShadowedBi
         .unwrap_or(binding.scope());
 
     for upper in binding_hoisted_scope.ancestors().skip(1) {
-        if let Some(upper_binding) = upper.get_binding(name.clone()) {
-            if evaluate_shadowing(model, &binding, &upper_binding) {
-                // we found a shadowed binding
-                return Some(ShadowedBinding {
-                    binding,
-                    shadowed_binding: upper_binding,
-                });
-            }
+        if let Some(upper_binding) = upper.get_binding(name.clone())
+            && evaluate_shadowing(model, &binding, &upper_binding)
+        {
+            // we found a shadowed binding
+            return Some(ShadowedBinding {
+                binding,
+                shadowed_binding: upper_binding,
+            });
         }
     }
     None
@@ -170,7 +171,9 @@ fn evaluate_shadowing(model: &SemanticModel, binding: &Binding, upper_binding: &
             // the shadowed binding must be declared before the shadowing one
             return false;
         }
-    } else if is_inside_function_parameters(binding) && is_inside_type_parameter(binding) {
+    } else if is_inside_function_parameters(binding)
+        && (is_inside_type_parameter(binding) || is_inside_type_member(binding))
+    {
         return false;
     }
     true
@@ -218,12 +221,10 @@ fn is_on_initializer(a: &Binding, b: &Binding) -> bool {
         .parent::<JsVariableDeclarator>()
         .and_then(|d| d.initializer())
         .and_then(|i| i.expression().ok())
+        && let Some(a_parent) = a.tree().parent::<AnyIdentifiableExpression>()
+        && a_parent.syntax() == b_initializer_expression.syntax()
     {
-        if let Some(a_parent) = a.tree().parent::<AnyIdentifiableExpression>() {
-            if a_parent.syntax() == b_initializer_expression.syntax() {
-                return true;
-            }
-        }
+        return true;
     }
 
     false
@@ -247,6 +248,13 @@ fn is_inside_type_parameter(binding: &Binding) -> bool {
         .syntax()
         .ancestors()
         .any(|ancestor| ancestor.cast::<TsTypeParameter>().is_some())
+}
+
+fn is_inside_type_member(binding: &Binding) -> bool {
+    binding
+        .syntax()
+        .ancestors()
+        .any(|ancestor| ancestor.cast::<TsPropertySignatureTypeMember>().is_some())
 }
 
 fn is_inside_function_parameters(binding: &Binding) -> bool {

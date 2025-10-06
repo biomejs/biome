@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::{JsFunctionDeclaration, JsIdentifierBinding};
 use biome_rowan::AstNode;
+use biome_rule_options::no_function_assign::NoFunctionAssignOptions;
 
 declare_lint_rule! {
     /// Disallow reassigning function declarations.
@@ -98,7 +99,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noFunctionAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-func-assign")],
+        sources: &[RuleSource::Eslint("no-func-assign").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -113,7 +114,7 @@ impl Rule for NoFunctionAssign {
     type Query = Semantic<JsFunctionDeclaration>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoFunctionAssignOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let declaration = ctx.query();

@@ -2,9 +2,10 @@ use crate::globals::global_type_name;
 use crate::{
     CallArgumentType, Class, DestructureField, Function, FunctionParameter,
     FunctionParameterBinding, GenericTypeParameter, ImportSymbol, Interface, Literal,
-    MergedReference, NUM_PREDEFINED_TYPES, Object, ObjectLiteral, ReturnType, Type, TypeData,
-    TypeId, TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
-    TypeReferenceQualifier, TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
+    MergedReference, NUM_PREDEFINED_TYPES, NamedFunctionParameter, Object, ObjectLiteral,
+    PatternFunctionParameter, ReturnType, Type, TypeData, TypeId, TypeImportQualifier,
+    TypeInstance, TypeMember, TypeMemberKind, TypeReference, TypeReferenceQualifier,
+    TypeResolverLevel, TypeofAwaitExpression, TypeofExpression, Union,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -92,6 +93,14 @@ impl Format<FormatTypeContext> for TypeData {
             Self::String => write!(f, [text("string")]),
             Self::Symbol => write!(f, [text("symbol")]),
             Self::Undefined => write!(f, [text("undefined")]),
+            Self::Conditional => write!(f, [text("conditional")]),
+            Self::ImportNamespace(module_id) => write!(
+                f,
+                [dynamic_text(
+                    &std::format!("namespace for {module_id:?}"),
+                    TextSize::default()
+                )]
+            ),
             Self::Class(class) => write!(f, [&class.as_ref()]),
             Self::Constructor(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::Function(function) => write!(f, [&function.as_ref()]),
@@ -235,6 +244,38 @@ impl Format<FormatTypeContext> for ReturnType {
 
 impl Format<FormatTypeContext> for FunctionParameter {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        match self {
+            Self::Named(named) => write!(f, [named]),
+            Self::Pattern(pattern) => write!(f, [pattern]),
+        }
+    }
+}
+
+impl Format<FormatTypeContext> for NamedFunctionParameter {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        let optional = format_with(|f| {
+            if self.is_optional {
+                write!(f, [&format_args![text("optional")]])
+            } else {
+                write!(f, [&format_args![text("required")]])
+            }
+        });
+        write!(
+            f,
+            [&group(&block_indent(&format_args![
+                optional,
+                space(),
+                self.name,
+                text(":"),
+                space(),
+                &self.ty,
+            ]))]
+        )
+    }
+}
+
+impl Format<FormatTypeContext> for PatternFunctionParameter {
+    fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
         let bindings = format_with(|f| {
             if !self.bindings.is_empty() {
                 write!(
@@ -256,11 +297,10 @@ impl Format<FormatTypeContext> for FunctionParameter {
                 f,
                 [&group(&format_args![
                     text("..."),
-                    self.name.as_ref().unwrap_or(&Text::Static("(unnamed)")),
+                    bindings,
                     text(":"),
                     space(),
                     &self.ty,
-                    bindings
                 ])]
             )
         } else {
@@ -276,11 +316,10 @@ impl Format<FormatTypeContext> for FunctionParameter {
                 [&group(&block_indent(&format_args![
                     optional,
                     space(),
-                    self.name.as_ref().unwrap_or(&Text::Static("(unnamed)")),
+                    bindings,
                     text(":"),
                     space(),
-                    &self.ty,
-                    bindings
+                    &self.ty
                 ]))]
             )
         }
@@ -289,18 +328,9 @@ impl Format<FormatTypeContext> for FunctionParameter {
 
 impl Format<FormatTypeContext> for TypeMember {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
-        let format_static = format_with(|f| {
-            if self.is_static() {
-                write!(f, [text("static"), space()])
-            } else {
-                Ok(())
-            }
-        });
-
         write!(
             f,
             [&format_args![
-                format_static,
                 &self.kind,
                 text(":"),
                 space(),
@@ -315,8 +345,19 @@ impl Format<FormatTypeContext> for TypeMemberKind {
         match self {
             Self::CallSignature => write!(f, [text("()")]),
             Self::Constructor => write!(f, [text("constructor")]),
+            Self::Getter(name) => {
+                let quoted = std::format!("get \"{name}\"");
+                write!(f, [dynamic_text(&quoted, TextSize::default())])
+            }
+            Self::IndexSignature(ty) => {
+                write!(f, [text("["), ty, text("]")])
+            }
             Self::Named(name) => {
                 let quoted = std::format!("\"{name}\"");
+                write!(f, [dynamic_text(&quoted, TextSize::default())])
+            }
+            Self::NamedStatic(name) => {
+                let quoted = std::format!("static \"{name}\"");
                 write!(f, [dynamic_text(&quoted, TextSize::default())])
             }
         }
@@ -341,7 +382,18 @@ impl Format<FormatTypeContext> for TypeofExpression {
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
         match self {
-            Self::Addition(_) => todo!(),
+            Self::Addition(addition) => {
+                write!(
+                    f,
+                    [&group(&format_args![
+                        &addition.left,
+                        soft_line_break_or_space(),
+                        text("+"),
+                        soft_line_break_or_space(),
+                        &addition.right,
+                    ])]
+                )
+            }
             Self::Await(await_expression) => {
                 write!(
                     f,
@@ -367,6 +419,22 @@ impl Format<FormatTypeContext> for TypeofExpression {
                         group(&soft_block_indent(&FmtCallArgumentType(&call.arguments))),
                         text(")")
                     ]]
+                )
+            }
+            Self::Conditional(conditional) => {
+                write!(
+                    f,
+                    [&group(&format_args![
+                        &conditional.test,
+                        soft_line_break_or_space(),
+                        text("?"),
+                        soft_line_break_or_space(),
+                        &conditional.consequent,
+                        soft_line_break_or_space(),
+                        text(":"),
+                        soft_line_break_or_space(),
+                        &conditional.alternate
+                    ])]
                 )
             }
             Self::Destructure(destructure) => match &destructure.destructure_field {
@@ -409,8 +477,63 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     )
                 }
             },
+            Self::Index(expr) => {
+                write!(
+                    f,
+                    [&format_args![
+                        &expr.object,
+                        dynamic_text(&std::format!("[{}]", expr.index), TextSize::default()),
+                    ]]
+                )
+            }
+            Self::IterableValueOf(expr) => {
+                write!(
+                    f,
+                    [&format_args![&group(&format_args![
+                        text("iterable_value_of"),
+                        soft_line_break_or_space(),
+                        &expr.ty
+                    ])]]
+                )
+            }
+            Self::LogicalAnd(expr) => {
+                write!(
+                    f,
+                    [&format_args![&group(&format_args![
+                        &expr.left,
+                        soft_line_break_or_space(),
+                        text("&&"),
+                        soft_line_break_or_space(),
+                        &expr.right
+                    ])]]
+                )
+            }
+            Self::LogicalOr(expr) => {
+                write!(
+                    f,
+                    [&format_args![&group(&format_args![
+                        &expr.left,
+                        soft_line_break_or_space(),
+                        text("||"),
+                        soft_line_break_or_space(),
+                        &expr.right
+                    ])]]
+                )
+            }
             Self::New(expr) => {
                 write!(f, [&format_args![text("new"), space(), &expr.callee]])
+            }
+            Self::NullishCoalescing(expr) => {
+                write!(
+                    f,
+                    [&format_args![&group(&format_args![
+                        &expr.left,
+                        soft_line_break_or_space(),
+                        text("??"),
+                        soft_line_break_or_space(),
+                        &expr.right
+                    ])]]
+                )
             }
             Self::StaticMember(expr) => {
                 write!(f, [&format_args![&expr.object, text("."), &expr.member]])
@@ -488,7 +611,7 @@ impl Format<FormatTypeContext> for TypeReference {
                             ]]
                         )
                     }
-                } else if level == TypeResolverLevel::Module {
+                } else if level == TypeResolverLevel::Thin {
                     let module_id = resolved.module_id().index();
                     write!(
                         f,
@@ -510,7 +633,6 @@ impl Format<FormatTypeContext> for TypeReference {
                 }
             }
             Self::Import(import) => write!(f, [import.as_ref()]),
-            Self::Unknown => write!(f, [text("unknown reference")]),
         }
     }
 }
@@ -604,7 +726,7 @@ impl Format<FormatTypeContext> for Class {
                 write!(
                     f,
                     [dynamic_text(
-                        &std::format!("\"{}\"", name),
+                        &std::format!("\"{name}\""),
                         TextSize::default()
                     )]
                 )
@@ -688,7 +810,6 @@ impl Format<FormatTypeContext> for Literal {
                     TextSize::default()
                 )]
             ),
-            Self::Null => write!(f, [text("null")]),
             Self::Number(lit) => {
                 write!(f, [dynamic_text(lit.as_str(), TextSize::default())])
             }
@@ -823,7 +944,7 @@ impl Format<FormatTypeContext> for FmtFunctionParameterBindings<'_> {
                 format_with(|f| write!(f, [&format_args![text(","), soft_line_break_or_space()]]));
             let mut joiner = f.join_with(separator);
             for part in self.0 {
-                joiner.entry(&format_args![&part.name, text(":"), &part.ty]);
+                joiner.entry(&format_args![&part.name, text(":"), space(), &part.ty]);
             }
             joiner.finish()
         });

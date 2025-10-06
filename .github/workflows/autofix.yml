@@ -1,0 +1,56 @@
+name: autofix.ci # needed to securely identify the workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+      - next
+    paths: # Only run when changes are made to rust code or root Cargo
+      - "crates/**"
+      - "fuzz/**"
+      - "xtask/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - "rustfmt.toml"
+permissions:
+  contents: read
+
+jobs:
+  autofix:
+    runs-on: depot-ubuntu-24.04-arm-16
+    if: ${{ github.actor != 'autofix-ci[bot]' }}
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          components: rustfmt
+          bins: taplo-cli
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Run all the codegen
+      - name: Run the grammar codegen
+        run: cargo codegen grammar
+      - name: Run the analyzer codegen
+        run: cargo codegen analyzer
+      - name: Run the configuration codegen
+        run: cargo codegen-configuration
+      - name: Run the schema codegen
+        run: cargo codegen-schema
+      - name: Run the bindings codegen
+        run: cargo codegen-bindings
+      - name: Run the migrate codegen
+        run: cargo codegen-migrate
+
+      # Format Rust and TOML files
+      - name: Run format
+        run: |
+          cargo fmt --all
+          taplo format
+
+      - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27

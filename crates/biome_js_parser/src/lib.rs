@@ -109,3 +109,6 @@ impl SyntaxFeature for JsSyntaxFeature {
 
 pub(crate) type JsLosslessTreeSink<'source> =
     LosslessTreeSink<'source, JsLanguage, JsSyntaxFactory>;
+
+pub(crate) type JsOffsetLosslessTreeSink<'source> =
+    biome_parser::tree_sink::OffsetLosslessTreeSink<'source, JsLanguage, JsSyntaxFactory>;

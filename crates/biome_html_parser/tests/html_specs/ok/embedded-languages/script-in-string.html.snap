@@ -15,6 +15,7 @@ expression: snapshot
 ```
 HtmlRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
@@ -27,7 +28,7 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@7..8 ">" [] [],
             },
             children: HtmlElementList [
-                HtmlContent {
+                HtmlEmbeddedContent {
                     value_token: HTML_LITERAL@8..97 "window.jQuery || document.write('<script src=\"js/vendor/jquery-3.3.1.min.js\"><\\/script>')" [] [],
                 },
             ],
@@ -51,7 +52,8 @@ HtmlRoot {
 0: HTML_ROOT@0..107
   0: (empty)
   1: (empty)
-  2: HTML_ELEMENT_LIST@0..106
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..106
     0: HTML_ELEMENT@0..106
       0: HTML_OPENING_ELEMENT@0..8
         0: L_ANGLE@0..1 "<" [] []
@@ -60,7 +62,7 @@ HtmlRoot {
         2: HTML_ATTRIBUTE_LIST@7..7
         3: R_ANGLE@7..8 ">" [] []
       1: HTML_ELEMENT_LIST@8..97
-        0: HTML_CONTENT@8..97
+        0: HTML_EMBEDDED_CONTENT@8..97
           0: HTML_LITERAL@8..97 "window.jQuery || document.write('<script src=\"js/vendor/jquery-3.3.1.min.js\"><\\/script>')" [] []
       2: HTML_CLOSING_ELEMENT@97..106
         0: L_ANGLE@97..98 "<" [] []
@@ -68,6 +70,6 @@ HtmlRoot {
         2: HTML_TAG_NAME@99..105
           0: HTML_LITERAL@99..105 "script" [] []
         3: R_ANGLE@105..106 ">" [] []
-  3: EOF@106..107 "" [Newline("\n")] []
+  4: EOF@106..107 "" [Newline("\n")] []
 
 ```

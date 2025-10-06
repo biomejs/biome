@@ -4,7 +4,7 @@ use crate::file_handlers::{
     ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, javascript,
 };
-use crate::settings::WorkspaceSettingsHandle;
+use crate::settings::Settings;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
@@ -44,7 +44,7 @@ impl AstroFileHandler {
         ASTRO_FENCE.find_iter(input).next().map(|m| m.end() as u32)
     }
 
-    fn matches(input: &str) -> Matches {
+    fn matches(input: &str) -> Matches<'_, '_> {
         ASTRO_FENCE.find_iter(input)
     }
 
@@ -75,7 +75,10 @@ impl ExtensionHandler for AstroFileHandler {
                 linter: Some(javascript::linter_enabled),
             },
 
-            parser: ParserCapabilities { parse: Some(parse) },
+            parser: ParserCapabilities {
+                parse: Some(parse),
+                parse_embedded_nodes: None,
+            },
             debug: DebugCapabilities {
                 debug_syntax_tree: None,
                 debug_control_flow: None,
@@ -94,6 +97,7 @@ impl ExtensionHandler for AstroFileHandler {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
+                format_embedded: None,
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
@@ -105,7 +109,7 @@ fn parse(
     _rome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _settings: WorkspaceSettingsHandle,
+    _settings: &Settings,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let frontmatter = AstroFileHandler::input(text);
@@ -129,7 +133,7 @@ fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: WorkspaceSettingsHandle,
+    settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format(biome_path, document_file_source, parse, settings)
 }
@@ -137,7 +141,7 @@ pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: WorkspaceSettingsHandle,
+    settings: &Settings,
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format_range(biome_path, document_file_source, parse, settings, range)
@@ -147,7 +151,7 @@ pub(crate) fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
     parse: AnyParse,
-    settings: WorkspaceSettingsHandle,
+    settings: &Settings,
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)

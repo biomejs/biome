@@ -1307,13 +1307,13 @@ impl CssPageSelectorBuilder {
 }
 pub fn css_page_selector_pseudo(
     colon_token: SyntaxToken,
-    selector_token: SyntaxToken,
+    selector: CssIdentifier,
 ) -> CssPageSelectorPseudo {
     CssPageSelectorPseudo::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PAGE_SELECTOR_PSEUDO,
         [
             Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Token(selector_token)),
+            Some(SyntaxElement::Node(selector.into_syntax())),
         ],
     ))
 }
@@ -1393,7 +1393,7 @@ pub fn css_property_at_rule(
     ))
 }
 pub fn css_pseudo_class_function_compound_selector(
-    name_token: SyntaxToken,
+    name: CssIdentifier,
     l_paren_token: SyntaxToken,
     selector: AnyCssCompoundSelector,
     r_paren_token: SyntaxToken,
@@ -1401,7 +1401,7 @@ pub fn css_pseudo_class_function_compound_selector(
     CssPseudoClassFunctionCompoundSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR,
         [
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(selector.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
@@ -1409,7 +1409,7 @@ pub fn css_pseudo_class_function_compound_selector(
     ))
 }
 pub fn css_pseudo_class_function_compound_selector_list(
-    name_token: SyntaxToken,
+    name: CssIdentifier,
     l_paren_token: SyntaxToken,
     compound_selectors: CssCompoundSelectorList,
     r_paren_token: SyntaxToken,
@@ -1417,15 +1417,47 @@ pub fn css_pseudo_class_function_compound_selector_list(
     CssPseudoClassFunctionCompoundSelectorList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST,
         [
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(compound_selectors.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
 }
+pub fn css_pseudo_class_function_custom_identifier(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    ident: CssCustomIdentifier,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionCustomIdentifier {
+    CssPseudoClassFunctionCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(ident.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_class_function_custom_identifier_list(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    items: CssCustomIdentifierList,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionCustomIdentifierList {
+    CssPseudoClassFunctionCustomIdentifierList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_pseudo_class_function_identifier(
-    name_token: SyntaxToken,
+    name: CssIdentifier,
     l_paren_token: SyntaxToken,
     ident: CssIdentifier,
     r_paren_token: SyntaxToken,
@@ -1433,7 +1465,7 @@ pub fn css_pseudo_class_function_identifier(
     CssPseudoClassFunctionIdentifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER,
         [
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(ident.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
@@ -1441,7 +1473,7 @@ pub fn css_pseudo_class_function_identifier(
     ))
 }
 pub fn css_pseudo_class_function_nth(
-    name_token: SyntaxToken,
+    name: CssIdentifier,
     l_paren_token: SyntaxToken,
     selector: AnyCssPseudoClassNthSelector,
     r_paren_token: SyntaxToken,
@@ -1449,7 +1481,7 @@ pub fn css_pseudo_class_function_nth(
     CssPseudoClassFunctionNth::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_NTH,
         [
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(selector.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
@@ -1457,7 +1489,7 @@ pub fn css_pseudo_class_function_nth(
     ))
 }
 pub fn css_pseudo_class_function_relative_selector_list(
-    name_token: SyntaxToken,
+    name: CssIdentifier,
     l_paren_token: SyntaxToken,
     relative_selectors: CssRelativeSelectorList,
     r_paren_token: SyntaxToken,
@@ -1465,7 +1497,7 @@ pub fn css_pseudo_class_function_relative_selector_list(
     CssPseudoClassFunctionRelativeSelectorList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST,
         [
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(relative_selectors.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
@@ -1473,7 +1505,7 @@ pub fn css_pseudo_class_function_relative_selector_list(
     ))
 }
 pub fn css_pseudo_class_function_selector(
-    name_token: SyntaxToken,
+    name: CssIdentifier,
     l_paren_token: SyntaxToken,
     selector: AnyCssSelector,
     r_paren_token: SyntaxToken,
@@ -1481,7 +1513,7 @@ pub fn css_pseudo_class_function_selector(
     CssPseudoClassFunctionSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_SELECTOR,
         [
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(selector.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
@@ -1489,7 +1521,7 @@ pub fn css_pseudo_class_function_selector(
     ))
 }
 pub fn css_pseudo_class_function_selector_list(
-    name_token: SyntaxToken,
+    name: CssIdentifier,
     l_paren_token: SyntaxToken,
     selectors: CssSelectorList,
     r_paren_token: SyntaxToken,
@@ -1497,7 +1529,7 @@ pub fn css_pseudo_class_function_selector_list(
     CssPseudoClassFunctionSelectorList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST,
         [
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(selectors.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
@@ -1505,7 +1537,7 @@ pub fn css_pseudo_class_function_selector_list(
     ))
 }
 pub fn css_pseudo_class_function_value_list(
-    name_token: SyntaxToken,
+    name: CssIdentifier,
     l_paren_token: SyntaxToken,
     values: CssPseudoValueList,
     r_paren_token: SyntaxToken,
@@ -1513,7 +1545,7 @@ pub fn css_pseudo_class_function_value_list(
     CssPseudoClassFunctionValueList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST,
         [
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(values.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
@@ -1650,16 +1682,32 @@ pub fn css_pseudo_class_selector(
         ],
     ))
 }
-pub fn css_pseudo_element_function_identifier(
-    name_token: SyntaxToken,
+pub fn css_pseudo_element_function(
+    name: CssIdentifier,
     l_paren_token: SyntaxToken,
-    ident: CssIdentifier,
+    items: CssPseudoElementFunctionParameterList,
     r_paren_token: SyntaxToken,
-) -> CssPseudoElementFunctionIdentifier {
-    CssPseudoElementFunctionIdentifier::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER,
+) -> CssPseudoElementFunction {
+    CssPseudoElementFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION,
         [
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_pseudo_element_function_custom_identifier(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    ident: CssCustomIdentifier,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoElementFunctionCustomIdentifier {
+    CssPseudoElementFunctionCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_CUSTOM_IDENTIFIER,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(ident.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
@@ -1957,7 +2005,7 @@ pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
 }
 pub fn css_starting_style_at_rule(
     starting_style_token: SyntaxToken,
-    block: AnyCssStartingStyleBlock,
+    block: AnyCssConditionalBlock,
 ) -> CssStartingStyleAtRule {
     CssStartingStyleAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE,
@@ -2332,6 +2380,194 @@ pub fn css_view_transition_at_rule(
         ],
     ))
 }
+pub fn tw_apply_at_rule(
+    apply_token: SyntaxToken,
+    classes: TwApplyClassList,
+    semicolon_token: SyntaxToken,
+) -> TwApplyAtRule {
+    TwApplyAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_APPLY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(apply_token)),
+            Some(SyntaxElement::Node(classes.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_config_at_rule(
+    config_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwConfigAtRule {
+    TwConfigAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_CONFIG_AT_RULE,
+        [
+            Some(SyntaxElement::Token(config_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_custom_variant_at_rule(
+    custom_variant_token: SyntaxToken,
+    name: CssIdentifier,
+    selector: AnyTwCustomVariantSelector,
+) -> TwCustomVariantAtRule {
+    TwCustomVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_CUSTOM_VARIANT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(custom_variant_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+        ],
+    ))
+}
+pub fn tw_custom_variant_shorthand(
+    l_paren_token: SyntaxToken,
+    selector: AnyCssSelector,
+    r_paren_token: SyntaxToken,
+    semicolon_token: SyntaxToken,
+) -> TwCustomVariantShorthand {
+    TwCustomVariantShorthand::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_CUSTOM_VARIANT_SHORTHAND,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_functional_utility_name(
+    identifier: CssIdentifier,
+    minus_token: SyntaxToken,
+    star_token: SyntaxToken,
+) -> TwFunctionalUtilityName {
+    TwFunctionalUtilityName::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_FUNCTIONAL_UTILITY_NAME,
+        [
+            Some(SyntaxElement::Node(identifier.into_syntax())),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Token(star_token)),
+        ],
+    ))
+}
+pub fn tw_plugin_at_rule(
+    plugin_token: SyntaxToken,
+    name: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwPluginAtRule {
+    TwPluginAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_PLUGIN_AT_RULE,
+        [
+            Some(SyntaxElement::Token(plugin_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_reference_at_rule(
+    reference_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwReferenceAtRule {
+    TwReferenceAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_REFERENCE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(reference_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_source_at_rule(
+    source_token: SyntaxToken,
+    path: CssString,
+    semicolon_token: SyntaxToken,
+) -> TwSourceAtRule {
+    TwSourceAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_SOURCE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(source_token)),
+            Some(SyntaxElement::Node(path.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn tw_theme_at_rule(
+    theme_token: SyntaxToken,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> TwThemeAtRuleBuilder {
+    TwThemeAtRuleBuilder {
+        theme_token,
+        block,
+        name: None,
+    }
+}
+pub struct TwThemeAtRuleBuilder {
+    theme_token: SyntaxToken,
+    block: AnyCssDeclarationOrRuleBlock,
+    name: Option<CssIdentifier>,
+}
+impl TwThemeAtRuleBuilder {
+    pub fn with_name(mut self, name: CssIdentifier) -> Self {
+        self.name = Some(name);
+        self
+    }
+    pub fn build(self) -> TwThemeAtRule {
+        TwThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::TW_THEME_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.theme_token)),
+                self.name
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn tw_utility_at_rule(
+    utility_token: SyntaxToken,
+    name: AnyTwUtilityName,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> TwUtilityAtRule {
+    TwUtilityAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_UTILITY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(utility_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn tw_value_theme_reference(
+    reference: CssDashedIdentifier,
+    minus_token: SyntaxToken,
+    star_token: SyntaxToken,
+) -> TwValueThemeReference {
+    TwValueThemeReference::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_VALUE_THEME_REFERENCE,
+        [
+            Some(SyntaxElement::Node(reference.into_syntax())),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Token(star_token)),
+        ],
+    ))
+}
+pub fn tw_variant_at_rule(
+    variant_token: SyntaxToken,
+    name: CssIdentifier,
+    block: AnyCssDeclarationOrRuleBlock,
+) -> TwVariantAtRule {
+    TwVariantAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_VARIANT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(variant_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_bracketed_value_list<I>(items: I) -> CssBracketedValueList
 where
     I: IntoIterator<Item = AnyCssCustomIdentifier>,
@@ -2403,7 +2639,7 @@ where
 }
 pub fn css_declaration_list<I>(items: I) -> CssDeclarationList
 where
-    I: IntoIterator<Item = CssDeclarationWithSemicolon>,
+    I: IntoIterator<Item = AnyCssDeclaration>,
     I::IntoIter: ExactSizeIterator,
 {
     CssDeclarationList::unwrap_cast(SyntaxNode::new_detached(
@@ -2677,6 +2913,20 @@ where
         }),
     ))
 }
+pub fn css_pseudo_element_function_parameter_list<I>(
+    items: I,
+) -> CssPseudoElementFunctionParameterList
+where
+    I: IntoIterator<Item = CssIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssPseudoElementFunctionParameterList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_ELEMENT_FUNCTION_PARAMETER_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_pseudo_value_list<I, S>(items: I, separators: S) -> CssPseudoValueList
 where
     I: IntoIterator<Item = AnyCssPseudoValue>,
@@ -2819,6 +3069,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn tw_apply_class_list<I>(items: I) -> TwApplyClassList
+where
+    I: IntoIterator<Item = CssIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    TwApplyClassList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_APPLY_CLASS_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_bogus<I>(slots: I) -> CssBogus

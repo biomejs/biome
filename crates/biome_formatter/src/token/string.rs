@@ -48,7 +48,7 @@ pub fn normalize_string(
     raw_content: &str,
     preferred_quote: Quote,
     quotes_will_change: bool,
-) -> Cow<str> {
+) -> Cow<'_, str> {
     let alternate_quote = preferred_quote.other().as_byte();
     let preferred_quote = preferred_quote.as_byte();
     let mut reduced_string = String::new();

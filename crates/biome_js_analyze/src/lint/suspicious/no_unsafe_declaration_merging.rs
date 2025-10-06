@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{TsInterfaceDeclaration, binding_ext::AnyJsBindingDeclaration};
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::no_unsafe_declaration_merging::NoUnsafeDeclarationMergingOptions;
 
 declare_lint_rule! {
     /// Disallow unsafe declaration merging between interfaces and classes.
@@ -45,7 +46,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnsafeDeclarationMerging",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-unsafe-declaration-merging")],
+        sources: &[RuleSource::EslintTypeScript("no-unsafe-declaration-merging").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -55,7 +56,7 @@ impl Rule for NoUnsafeDeclarationMerging {
     type Query = Semantic<TsInterfaceDeclaration>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnsafeDeclarationMergingOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let ts_interface = ctx.query();
@@ -71,16 +72,13 @@ impl Rule for NoUnsafeDeclarationMerging {
                 binding.tree().declaration()
             {
                 // This is not unsafe of merging an interface and an ambient class.
-                if !class.is_ambient() {
-                    if let Ok(id) = class.id() {
-                        if let Some(id) = id.as_js_identifier_binding() {
-                            if let Ok(name) = id.name_token() {
-                                if name.text() == interface_name.text() {
-                                    return Some(name.text_trimmed_range());
-                                }
-                            }
-                        }
-                    }
+                if !class.is_ambient()
+                    && let Ok(id) = class.id()
+                    && let Some(id) = id.as_js_identifier_binding()
+                    && let Ok(name) = id.name_token()
+                    && name.text() == interface_name.text()
+                {
+                    return Some(name.text_trimmed_range());
                 }
             }
         }

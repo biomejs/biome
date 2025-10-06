@@ -61,6 +61,8 @@ pub(crate) struct PrettierConfiguration {
     end_of_line: EndOfLine,
     /// https://prettier.io/docs/options#object-wrap
     object_wrap: ObjectWrap,
+    /// https://prettier.io/docs/options#vue-files-script-and-style-tags-indentation
+    vue_indent_script_and_style: bool,
     /// https://prettier.io/docs/en/configuration.html#configuration-overrides
     overrides: Vec<Override>,
 }
@@ -81,6 +83,7 @@ impl Default for PrettierConfiguration {
             arrow_parens: ArrowParens::default(),
             end_of_line: EndOfLine::default(),
             object_wrap: ObjectWrap::default(),
+            vue_indent_script_and_style: false,
             overrides: vec![],
         }
     }
@@ -274,6 +277,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             bracket_spacing: Some(value.bracket_spacing.into()),
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
+            operator_linebreak: None,
         };
         let js_config = biome_configuration::JsConfiguration {
             formatter: Some(js_formatter),
@@ -281,6 +285,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
         };
         let html_formatter_config = HtmlFormatterConfiguration {
             self_close_void_elements: Some(SelfCloseVoidElements::Always),
+            indent_script_and_style: Some(value.vue_indent_script_and_style.into()),
             ..Default::default()
         };
 

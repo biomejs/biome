@@ -1,11 +1,12 @@
 use crate::react::ReactCreateElementCall;
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
 use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rule_options::no_dangerously_set_inner_html::NoDangerouslySetInnerHtmlOptions;
 
 declare_lint_rule! {
     /// Prevent the usage of dangerous JSX props
@@ -30,7 +31,8 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDangerouslySetInnerHtml",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("no-danger")],
+        sources: &[RuleSource::EslintReact("no-danger").same()],
+        domains: &[RuleDomain::React],
         recommended: true,
         severity: Severity::Error,
     }
@@ -57,7 +59,7 @@ impl Rule for NoDangerouslySetInnerHtml {
     type Query = Semantic<AnyJsCreateElement>;
     type State = NoDangerState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoDangerouslySetInnerHtmlOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

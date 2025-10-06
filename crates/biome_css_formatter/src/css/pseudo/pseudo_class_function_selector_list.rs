@@ -1,3 +1,4 @@
+use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
 use biome_css_syntax::{
     CssPseudoClassFunctionSelectorList, CssPseudoClassFunctionSelectorListFields,
@@ -24,7 +25,8 @@ impl FormatNodeRule<CssPseudoClassFunctionSelectorList>
         write!(
             f,
             [
-                name.format(),
+                name.format()?
+                    .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent(&selectors.format()),

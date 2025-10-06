@@ -1,24 +1,17 @@
+use crate::services::module_graph::ResolvedImports;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::{fmt::Display, markup};
-use biome_deserialize_macros::Deserializable;
+use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_fs::BiomePath;
-use biome_js_syntax::{
-    AnyJsImportClause, AnyJsImportLike, AnyJsNamedImportSpecifier, JsModuleSource, JsSyntaxToken,
-};
+use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_jsdoc_comment::JsdocComment;
-use biome_module_graph::{JsModuleInfo, ModuleGraph, ResolvedPath};
-use biome_rowan::{AstNode, SyntaxResult, Text, TextRange};
+use biome_module_graph::{JsImportPath, JsModuleInfo, ModuleGraph};
+use biome_rowan::{AstNode, Text, TextRange};
+use biome_rule_options::no_private_imports::{NoPrivateImportsOptions, Visibility};
 use camino::{Utf8Path, Utf8PathBuf};
-use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
-
-use crate::services::module_graph::ResolvedImports;
 
 const INDEX_BASENAMES: &[&str] = &["index", "mod"];
 
@@ -94,16 +87,14 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// **`sub/foo.js`**
-    /// ```js
+    /// ```js,file=sub/foo.js
     /// /**
     ///  * @package
     ///  */
     /// export const fooPackageVariable = 1;
     /// ```
     ///
-    /// **`bar.js`**
-    /// ```js
+    /// ```js,expect_diagnostic,file=bar.js
     /// // Attempt to import package private variable from `sub/foo.js` from
     /// // outside its `sub` module:
     /// import { fooPackageVariable } from "./sub/foo.js";
@@ -114,18 +105,16 @@ declare_lint_rule! {
     /// export function getTestStuff() {}
     /// ```
     ///
-    /// **`bar.test.js`** // Attempt to import a private export. To allow this,
-    /// you probably want // to configure an `override` to disable this rule in
-    /// test files. // See:
-    /// https://biomejs.dev/reference/configuration/#overrides
-    /// ```js
+    /// ```js,expect_diagnostic,file=bar.test.js
+    /// // Attempt to import a private export. To allow this, you probably want
+    /// // to configure an `override` to disable this rule in test files.
+    /// // See: https://biomejs.dev/reference/configuration/#overrides
     /// import { getTestStuff } from "./bar.js";
     /// ```
     ///
     /// ### Valid
     ///
-    /// **`sub/index.js`**
-    /// ```js
+    /// ```js,file=sub/index.js
     /// // Package-private exports can be imported from inside the same module.
     /// import { fooPackageVariable } from "./foo.js";
     ///
@@ -136,8 +125,7 @@ declare_lint_rule! {
     /// export const subPrivateVariable = 2;
     /// ```
     ///
-    /// **`sub/deep/index.js`**
-    /// ```js
+    /// ```js,file=sub/deep/index.js
     /// // Private exports are accessible within the same module only, but
     /// // modules can be nested. So the following works because you can always
     /// // import from the index file of a parent module:
@@ -148,55 +136,11 @@ declare_lint_rule! {
         name: "noPrivateImports",
         language: "js",
         sources: &[
-            RuleSource::EslintImportAccess("eslint-plugin-import-access")
+            RuleSource::EslintImportAccess("eslint-plugin-import-access").same()
         ],
         recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Project],
-    }
-}
-
-/// Options for the rule `noPrivateImports`.
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoPrivateImportsOptions {
-    /// The default visibility to assume for symbols without visibility tag.
-    ///
-    /// Default: **public**.
-    pub default_visibility: Visibility,
-}
-
-#[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub enum Visibility {
-    #[default]
-    Public,
-    Package,
-    Private,
-}
-
-impl Display for Visibility {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        match self {
-            Self::Public => fmt.write_str("public"),
-            Self::Package => fmt.write_str("package"),
-            Self::Private => fmt.write_str("private"),
-        }
-    }
-}
-
-impl FromStr for Visibility {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "public" => Ok(Self::Public),
-            "package" => Ok(Self::Package),
-            "private" => Ok(Self::Private),
-            _ => Err(()),
-        }
     }
 }
 
@@ -205,7 +149,7 @@ pub struct NoPrivateImportsState {
     range: TextRange,
 
     /// The path where the visibility of the imported symbol is defined.
-    path: Box<str>,
+    path: String,
 
     /// The visibility of the offending symbol.
     visibility: Visibility,
@@ -229,7 +173,7 @@ impl Rule for NoPrivateImports {
             .then(|| node.inner_string_text())
             .flatten()
             .and_then(|specifier| module_info.static_import_paths.get(specifier.text()))
-            .and_then(ResolvedPath::as_path)
+            .and_then(JsImportPath::as_path)
             .filter(|path| !BiomePath::new(path).is_dependency())
         else {
             return Vec::new();
@@ -247,7 +191,7 @@ impl Rule for NoPrivateImports {
             default_visibility: ctx.options().default_visibility,
         };
 
-        let result = match node {
+        match node {
             AnyJsImportLike::JsModuleSource(node) => {
                 get_restricted_imports_from_module_source(node, &options)
             }
@@ -255,10 +199,8 @@ impl Rule for NoPrivateImports {
             // TODO: require() and import() calls should also be handled here, but tracking the
             //       bindings to get the used symbol names is not easy. I think we can leave it
             //       for future opportunities.
-            _ => Ok(Vec::new()),
-        };
-
-        result.unwrap_or_default()
+            _ => Vec::new(),
+        }
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -324,91 +266,20 @@ impl GetRestrictedImportOptions<'_> {
 fn get_restricted_imports_from_module_source(
     node: &JsModuleSource,
     options: &GetRestrictedImportOptions,
-) -> SyntaxResult<Vec<NoPrivateImportsState>> {
-    let path: Box<str> = options.target_path.as_str().into();
-
-    let results = match node.syntax().parent().and_then(AnyJsImportClause::cast) {
-        Some(AnyJsImportClause::JsImportCombinedClause(node)) => {
-            let range = node.default_specifier()?.range();
-            get_restricted_import_visibility(&Text::Static("default"), options)
-                .map(|visibility| NoPrivateImportsState {
-                    range,
-                    path: path.clone(),
-                    visibility,
-                })
-                .into_iter()
-                .chain(
-                    node.specifier()?
-                        .as_js_named_import_specifiers()
-                        .map(|specifiers| specifiers.specifiers())
-                        .into_iter()
-                        .flatten()
-                        .flatten()
-                        .filter_map(get_named_specifier_import_name)
-                        .filter_map(|name| {
-                            get_restricted_import_visibility(
-                                &Text::Borrowed(name.token_text_trimmed()),
-                                options,
-                            )
-                            .map(|visibility| NoPrivateImportsState {
-                                range: name.text_trimmed_range(),
-                                path: path.clone(),
-                                visibility,
-                            })
-                        }),
-                )
-                .collect()
-        }
-        Some(AnyJsImportClause::JsImportDefaultClause(node)) => {
-            let range = node.default_specifier()?.range();
-            get_restricted_import_visibility(&Text::Static("default"), options)
-                .map(|visibility| NoPrivateImportsState {
-                    range,
-                    path,
-                    visibility,
-                })
-                .into_iter()
-                .collect()
-        }
-        Some(AnyJsImportClause::JsImportNamedClause(node)) => node
-            .named_specifiers()?
-            .specifiers()
-            .into_iter()
-            .flatten()
-            .filter_map(get_named_specifier_import_name)
-            .filter_map(|name| {
-                get_restricted_import_visibility(
-                    &Text::Borrowed(name.token_text_trimmed()),
-                    options,
-                )
-                .map(|visibility| NoPrivateImportsState {
-                    range: name.text_trimmed_range(),
-                    path: path.clone(),
-                    visibility,
-                })
-            })
-            .collect(),
-        Some(
-            AnyJsImportClause::JsImportBareClause(_)
-            | AnyJsImportClause::JsImportNamespaceClause(_),
-        )
-        | None => Vec::new(),
+) -> Vec<NoPrivateImportsState> {
+    let Some(import_clause) = node.syntax().parent().and_then(AnyJsImportClause::cast) else {
+        return Vec::new();
     };
 
-    Ok(results)
-}
-
-fn get_named_specifier_import_name(specifier: AnyJsNamedImportSpecifier) -> Option<JsSyntaxToken> {
-    match specifier {
-        AnyJsNamedImportSpecifier::JsNamedImportSpecifier(specifier) => {
-            specifier.name().ok().and_then(|name| name.value().ok())
-        }
-        AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(specifier) => specifier
-            .local_name()
-            .ok()
-            .and_then(|binding| binding.as_js_identifier_binding()?.name_token().ok()),
-        _ => None,
-    }
+    import_clause.filter_map_all_imported_symbols(|imported_name, range| {
+        get_restricted_import_visibility(&imported_name, options).map(|visibility| {
+            NoPrivateImportsState {
+                range,
+                path: options.target_path.to_string(),
+                visibility,
+            }
+        })
+    })
 }
 
 /// Returns the visibility of the symbol exported as the given `import_name`,

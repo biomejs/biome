@@ -1,10 +1,11 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::JsImportNamespaceClause;
 use biome_rowan::AstNode;
+use biome_rule_options::no_namespace_import::NoNamespaceImportOptions;
 
 declare_lint_rule! {
     /// Disallow the use of namespace imports.
@@ -35,8 +36,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Warning,
-        sources: &[RuleSource::EslintBarrelFiles("avoid-namespace-import")],
-        source_kind: RuleSourceKind::SameLogic,
+        sources: &[RuleSource::EslintBarrelFiles("avoid-namespace-import").same()],
     }
 }
 
@@ -44,7 +44,7 @@ impl Rule for NoNamespaceImport {
     type Query = Ast<JsImportNamespaceClause>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoNamespaceImportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let import_namespace_clause = ctx.query();

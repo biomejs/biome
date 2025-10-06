@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsStaticMemberExpression, global_identifier};
 use biome_rowan::AstNode;
+use biome_rule_options::no_process_env::NoProcessEnvOptions;
 
 use crate::services::semantic::Semantic;
 
@@ -40,7 +41,7 @@ declare_lint_rule! {
         version: "1.9.1",
         name: "noProcessEnv",
         language: "js",
-        sources: &[RuleSource::EslintN("no-process-env")],
+        sources: &[RuleSource::EslintN("no-process-env").same()],
         recommended: false,
         severity: Severity::Information,
     }
@@ -50,7 +51,7 @@ impl Rule for NoProcessEnv {
     type Query = Semantic<JsStaticMemberExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoProcessEnvOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let static_member_expr = ctx.query();

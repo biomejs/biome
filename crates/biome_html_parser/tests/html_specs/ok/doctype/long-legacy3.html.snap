@@ -16,6 +16,7 @@ expression: snapshot
 ```
 HtmlRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     directive: HtmlDirective {
         l_angle_token: L_ANGLE@0..1 "<" [] [],
         excl_token: BANG@1..2 "!" [] [],
@@ -36,7 +37,8 @@ HtmlRoot {
 ```
 0: HTML_ROOT@0..104
   0: (empty)
-  1: HTML_DIRECTIVE@0..103
+  1: (empty)
+  2: HTML_DIRECTIVE@0..103
     0: L_ANGLE@0..1 "<" [] []
     1: BANG@1..2 "!" [] []
     2: DOCTYPE_KW@2..10 "DOCTYPE" [] [Whitespace(" ")]
@@ -45,7 +47,7 @@ HtmlRoot {
     5: HTML_STRING_LITERAL@22..58 "\"-//W3C//DTD HTML 4.01 Frameset//EN\"" [] []
     6: HTML_STRING_LITERAL@58..102 "\"http://www.w3.org/TR/html4/frameset.dtd\"" [Newline("\n"), Whitespace("  ")] []
     7: R_ANGLE@102..103 ">" [] []
-  2: HTML_ELEMENT_LIST@103..103
-  3: EOF@103..104 "" [Newline("\n")] []
+  3: HTML_ELEMENT_LIST@103..103
+  4: EOF@103..104 "" [Newline("\n")] []
 
 ```

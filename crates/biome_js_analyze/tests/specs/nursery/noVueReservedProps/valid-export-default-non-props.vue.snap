@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-export-default-non-props.vue
+---
+# Input
+```ts
+export default {
+    data: {
+        ref: ''
+    }
+};
+
+```

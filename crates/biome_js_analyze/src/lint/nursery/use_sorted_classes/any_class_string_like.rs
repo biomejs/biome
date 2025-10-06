@@ -1,10 +1,10 @@
-use super::UtilityClassSortingOptions;
 use biome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsLiteralMemberName,
     JsStringLiteralExpression, JsSyntaxNode, JsTemplateChunkElement, JsTemplateExpression,
     JsxAttribute, JsxString,
 };
 use biome_rowan::{AstNode, TokenText, declare_node_union};
+use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 
 fn get_callee_name(call_expression: &JsCallExpression) -> Option<TokenText> {
     call_expression
@@ -19,7 +19,7 @@ fn get_callee_name(call_expression: &JsCallExpression) -> Option<TokenText> {
 
 fn is_call_expression_of_target_function(
     call_expression: &JsCallExpression,
-    options: &UtilityClassSortingOptions,
+    options: &UseSortedClassesOptions,
 ) -> bool {
     get_callee_name(call_expression).is_some_and(|name| options.has_function(name.text()))
 }
@@ -41,10 +41,7 @@ declare_node_union! {
     pub AnyClassStringLike = JsStringLiteralExpression | JsxString | JsTemplateChunkElement | JsLiteralMemberName
 }
 
-fn inspect_string_literal(
-    node: &JsSyntaxNode,
-    options: &UtilityClassSortingOptions,
-) -> Option<bool> {
+fn inspect_string_literal(node: &JsSyntaxNode, options: &UseSortedClassesOptions) -> Option<bool> {
     let mut in_arguments = false;
     let mut in_function = false;
     for ancestor in node.ancestors().skip(1) {
@@ -72,7 +69,7 @@ fn inspect_string_literal(
 }
 
 impl AnyClassStringLike {
-    pub(crate) fn should_visit(&self, options: &UtilityClassSortingOptions) -> Option<bool> {
+    pub(crate) fn should_visit(&self, options: &UseSortedClassesOptions) -> Option<bool> {
         match self {
             Self::JsStringLiteralExpression(string_literal) => {
                 inspect_string_literal(string_literal.syntax(), options)
@@ -106,10 +103,9 @@ impl AnyClassStringLike {
                         }
                         if let Some(AnyJsExpression::JsStaticMemberExpression(tag)) =
                             template_expression.tag()
+                            && options.match_function(tag.to_string().as_ref())
                         {
-                            if options.match_function(tag.to_string().as_ref()) {
-                                return Some(true);
-                            }
+                            return Some(true);
                         }
                     } else if let Some(jsx_attribute) = JsxAttribute::cast_ref(&ancestor) {
                         let attribute_name = get_attribute_name(&jsx_attribute)?;

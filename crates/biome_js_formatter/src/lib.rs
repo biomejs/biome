@@ -157,7 +157,7 @@
 //!   called `"Unimplemented tokens/nodes"`; a test, in order to be valid, can't have that section;
 //!
 //! If removing a token is the actual behaviour (removing some parenthesis or a semicolon), then the correct way
-//! to do it by using the formatter API [biome_formatter::trivia::format_removed];
+//! to do it by using the formatter API [biome_formatter::trivia::FormatToken::format_removed];
 //! - the emitted code is not a valid program anymore, the test suite will parse again the emitted code and it will
 //!   fail if there are syntax errors;
 //! - the emitted code, when formatted again, differs from the original; this usually happens when removing/adding new
@@ -179,16 +179,19 @@ pub mod context;
 mod parentheses;
 pub(crate) mod separated;
 mod syntax_rewriter;
+pub(crate) mod trivia;
+mod verbatim;
 
 use biome_formatter::format_element::tag::Label;
 use biome_formatter::prelude::*;
+use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
 use biome_formatter::{
-    CstFormatContext, Format, FormatLanguage, FormatToken, TransformSourceMap, comments::Comments,
-    write,
+    CstFormatContext, Format, FormatLanguage, TransformSourceMap, comments::Comments, write,
 };
 use biome_js_syntax::{
-    AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxNodeWithOffset, JsSyntaxToken,
 };
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, SyntaxNode};
@@ -197,6 +200,8 @@ use crate::comments::JsCommentStyle;
 use crate::context::{JsFormatContext, JsFormatOptions};
 use crate::cst::FormatJsSyntaxNode;
 use crate::syntax_rewriter::transform;
+use crate::trivia::*;
+use crate::verbatim::{format_bogus_node, format_or_verbatim, format_suppressed_node};
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
@@ -435,13 +440,37 @@ where
 }
 
 /// Format implementation specific to JavaScript tokens.
-pub(crate) type FormatJsSyntaxToken = FormatToken<JsFormatContext>;
+#[derive(Debug, Default)]
+pub(crate) struct FormatJsSyntaxToken;
+
+impl FormatRule<JsSyntaxToken> for FormatJsSyntaxToken {
+    type Context = JsFormatContext;
+
+    fn fmt(&self, token: &JsSyntaxToken, f: &mut Formatter<Self::Context>) -> FormatResult<()> {
+        f.state_mut().track_token(token);
+
+        self.format_skipped_token_trivia(token, f)?;
+        self.format_trimmed_token_trivia(token, f)?;
+
+        Ok(())
+    }
+}
+
+impl FormatToken<JsLanguage, JsFormatContext> for FormatJsSyntaxToken {
+    fn format_skipped_token_trivia(
+        &self,
+        token: &JsSyntaxToken,
+        f: &mut Formatter<JsFormatContext>,
+    ) -> FormatResult<()> {
+        format_skipped_token_trivia(token).fmt(f)
+    }
+}
 
 impl AsFormat<JsFormatContext> for JsSyntaxToken {
     type Format<'a> = FormatRefWithRule<'a, Self, FormatJsSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, FormatJsSyntaxToken::default())
+        FormatRefWithRule::new(self, FormatJsSyntaxToken)
     }
 }
 
@@ -449,7 +478,7 @@ impl IntoFormat<JsFormatContext> for JsSyntaxToken {
     type Format = FormatOwnedWithRule<Self, FormatJsSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, FormatJsSyntaxToken::default())
+        FormatOwnedWithRule::new(self, FormatJsSyntaxToken)
     }
 }
 
@@ -499,6 +528,7 @@ impl FormatLanguage for JsFormatLanguage {
         self,
         root: &JsSyntaxNode,
         source_map: Option<TransformSourceMap>,
+        _delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &JsCommentStyle, source_map.as_ref());
         JsFormatContext::new(self.options, comments).with_source_map(source_map)
@@ -531,7 +561,17 @@ pub fn format_node(
     options: JsFormatOptions,
     root: &JsSyntaxNode,
 ) -> FormatResult<Formatted<JsFormatContext>> {
-    biome_formatter::format_node(root, JsFormatLanguage::new(options))
+    biome_formatter::format_node(root, JsFormatLanguage::new(options), false)
+}
+
+/// Formats a JavaScript (and its super languages) file based on its features.
+///
+/// It returns a [Formatted] result, which the user can use to override a file.
+pub fn format_node_with_offset(
+    options: JsFormatOptions,
+    root: &JsSyntaxNodeWithOffset,
+) -> FormatResult<Formatted<JsFormatContext>> {
+    biome_formatter::format_node_with_offset(root, JsFormatLanguage::new(options), false)
 }
 
 /// Formats a single node within a file, supported by Biome.

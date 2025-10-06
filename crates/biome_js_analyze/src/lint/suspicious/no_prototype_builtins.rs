@@ -11,6 +11,7 @@ use biome_js_syntax::{
     TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rule_options::no_prototype_builtins::NoPrototypeBuiltinsOptions;
 
 declare_lint_rule! {
     /// Disallow direct use of `Object.prototype` builtins.
@@ -57,8 +58,8 @@ declare_lint_rule! {
         name: "noPrototypeBuiltins",
         language: "js",
         sources: &[
-            RuleSource::Eslint("no-prototype-builtins"),
-            RuleSource::Eslint("prefer-object-has-own")
+            RuleSource::Eslint("no-prototype-builtins").same(),
+            RuleSource::Eslint("prefer-object-has-own").same(),
         ],
         recommended: true,
         severity: Severity::Warning,
@@ -76,7 +77,7 @@ impl Rule for NoPrototypeBuiltins {
     type Query = Semantic<JsCallExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoPrototypeBuiltinsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();
@@ -240,10 +241,10 @@ fn has_left_hand_object(member_expr: &AnyJsMemberExpression) -> Option<bool> {
         _ => object,
     };
 
-    if let AnyJsExpression::JsIdentifierExpression(id_expr) = &node {
-        if id_expr.name().ok()?.syntax().text_trimmed() == "Object" {
-            return Some(true);
-        }
+    if let AnyJsExpression::JsIdentifierExpression(id_expr) = &node
+        && id_expr.name().ok()?.syntax().text_trimmed() == "Object"
+    {
+        return Some(true);
     }
 
     Some(false)

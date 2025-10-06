@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
+use biome_rule_options::no_useless_escape_in_regex::NoUselessEscapeInRegexOptions;
 
 use crate::JsRuleAction;
 
@@ -43,7 +44,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "noUselessEscapeInRegex",
         language: "js",
-        sources: &[RuleSource::Eslint("no-useless-escape")],
+        sources: &[RuleSource::Eslint("no-useless-escape").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -54,7 +55,7 @@ impl Rule for NoUselessEscapeInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessEscapeInRegexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

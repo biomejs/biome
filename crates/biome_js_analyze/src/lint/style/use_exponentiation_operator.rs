@@ -14,6 +14,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, SyntaxResult, chain_trivia_pieces,
     trim_leading_trivia_pieces,
 };
+use biome_rule_options::use_exponentiation_operator::UseExponentiationOperatorOptions;
 
 declare_lint_rule! {
     /// Disallow the use of `Math.pow` in favor of the `**` operator.
@@ -57,7 +58,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useExponentiationOperator",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-exponentiation-operator")],
+        sources: &[RuleSource::Eslint("prefer-exponentiation-operator").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -68,7 +69,7 @@ impl Rule for UseExponentiationOperator {
     type Query = Semantic<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExponentiationOperatorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -150,12 +151,7 @@ impl Rule for UseExponentiationOperator {
             make::token_decorated_with_space(T![**]),
             exponent,
         ));
-        let new_node = if let Some((needs_parens, parent)) =
-            does_exponentiation_expression_need_parens(node)
-        {
-            if needs_parens && parent.is_some() {
-                mutation.replace_node(parent.clone()?, make::parenthesized(parent?).into());
-            }
+        let new_node = if let Some(true) = does_exponentiation_expression_need_parens(node) {
             make::parenthesized(new_node).into()
         } else {
             new_node
@@ -175,21 +171,19 @@ impl Rule for UseExponentiationOperator {
 }
 
 /// Determines whether the given parent node needs parens if used as the exponent in an exponentiation binary expression.
-fn does_exponentiation_expression_need_parens(
-    node: &JsCallExpression,
-) -> Option<(bool, Option<AnyJsExpression>)> {
+fn does_exponentiation_expression_need_parens(node: &JsCallExpression) -> Option<bool> {
     if let Some(parent) = node.parent::<AnyJsExpression>() {
         if does_expression_need_parens(node, &parent)? {
-            return Some((true, Some(parent)));
+            return Some(true);
         }
     } else if let Some(extends_clause) = node.parent::<JsExtendsClause>() {
         if extends_clause.parent::<JsClassDeclaration>().is_some() {
-            return Some((true, None));
+            return Some(true);
         }
         if let Some(class_expr) = extends_clause.parent::<JsClassExpression>() {
             let class_expr = AnyJsExpression::from(class_expr);
             if does_expression_need_parens(node, &class_expr)? {
-                return Some((true, Some(class_expr)));
+                return Some(true);
             }
         }
     }

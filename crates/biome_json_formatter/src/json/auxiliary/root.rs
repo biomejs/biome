@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::verbatim::format_json_verbatim_node;
 use biome_formatter::write;
 use biome_json_syntax::{JsonRoot, JsonRootFields};
 
@@ -27,7 +28,7 @@ impl FormatNodeRule<JsonRoot> for FormatJsonRoot {
             }
             // Don't fail formatting if the root contains no root value
             Err(_) => {
-                write!(f, [format_verbatim_node(node.syntax())])
+                write!(f, [format_json_verbatim_node(node.syntax())])
             }
         }
     }

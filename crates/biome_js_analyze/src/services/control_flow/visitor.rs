@@ -5,6 +5,7 @@ use biome_js_syntax::{
     AnyJsFunction, JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
     JsMethodClassMember, JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember,
     JsSetterObjectMember, JsStaticInitializationBlockClassMember, TsModuleDeclaration,
+    TsPropertySignatureTypeMember,
 };
 use biome_rowan::{AstNode, SyntaxError, SyntaxResult, declare_node_union};
 
@@ -171,6 +172,7 @@ declare_node_union! {
         | JsSetterClassMember
         | JsStaticInitializationBlockClassMember
         | TsModuleDeclaration
+        | TsPropertySignatureTypeMember
 }
 
 impl biome_analyze::NodeVisitor<ControlFlowVisitor> for FunctionVisitor {
@@ -262,10 +264,10 @@ where
             None => return,
         };
 
-        if let Some(builder) = visitor.builder.as_mut() {
-            if state.exit(node, builder, stack).is_err() {
-                visitor.builder.take();
-            }
+        if let Some(builder) = visitor.builder.as_mut()
+            && state.exit(node, builder, stack).is_err()
+        {
+            visitor.builder.take();
         }
     }
 }

@@ -53,7 +53,7 @@ impl BenchCase {
         let content = std::fs::read_to_string(&path)
             .map_err(err_to_string)
             .or_else(|_| {
-                println!("[{}] - Downloading [{}] to [{}]", filename, file_url, path);
+                println!("[{filename}] - Downloading [{file_url}] to [{path}]");
                 match ureq::get(file_url).call() {
                     Ok(response) => {
                         let mut reader = response.into_body().into_reader();

@@ -1,5 +1,7 @@
+use std::collections::BTreeMap;
 use std::num::NonZeroU64;
 use std::str::FromStr;
+use std::sync::Arc;
 
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::{RuleGroup, RuleSelector};
@@ -19,19 +21,17 @@ use crate::{Workspace, WorkspaceError};
 
 use super::{
     CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
-    GetFileContentParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectFolderParams,
-    UpdateSettingsParams, server,
+    GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
+    OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams, UpdateKind,
+    UpdateModuleGraphParams, UpdateSettingsParams, server,
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
-    let workspace = server(Box::new(MemoryFileSystem::default()), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let workspace = server(Arc::new(MemoryFileSystem::default()), None);
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: Default::default(),
             open_uninitialized: true,
-            only_rules: None,
-            skip_rules: None,
         })
         .unwrap();
 
@@ -273,10 +273,7 @@ fn correctly_pulls_lint_diagnostics() {
     .unwrap();
     let result = graphql_file.pull_diagnostics(
         RuleCategories::all(),
-        vec![RuleSelector::Rule(
-            RuleGroup::Style.as_str(),
-            "useDeprecatedReason",
-        )],
+        vec![RuleSelector::Rule(RuleGroup::Style.as_str(), "useDeprecatedReason").into()],
         vec![],
         true,
     );
@@ -316,45 +313,48 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
     const FILE_A_CONTENT: &[u8] = b"import { bar } from './b.ts';\nfunction foo() {}";
     const FILE_B_CONTENT: &[u8] = b"import { foo } from './a.ts';\nfunction bar() {}";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_A_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/b.ts"), FILE_B_CONTENT);
 
-    let workspace = server(Box::new(fs), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
-            only_rules: None,
-            skip_rules: None,
         })
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
-    macro_rules! assert_file_a_content {
-        () => {
+    macro_rules! assert_file_a_index {
+        () => {{
+            let module_graph = workspace
+                .get_module_graph(GetModuleGraphParams {})
+                .expect("can get module graph");
+
             assert_eq!(
-                workspace
-                    .get_file_content(GetFileContentParams {
-                        project_key,
-                        path: BiomePath::new("/project/a.ts"),
-                    })
-                    .unwrap(),
-                String::from_utf8(FILE_A_CONTENT.to_vec()).unwrap(),
+                module_graph
+                    .data
+                    .get("/project/a.ts")
+                    .map(|module_info| module_info.static_import_paths.clone()),
+                Some(BTreeMap::from([(
+                    "./b.ts".to_string(),
+                    "/project/b.ts".replace('/', std::path::MAIN_SEPARATOR_STR),
+                )])),
             );
-        };
+        }};
     }
 
-    assert_file_a_content!();
+    assert_file_a_index!();
 
     workspace
         .open_file(OpenFileParams {
@@ -366,7 +366,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
         })
         .unwrap();
 
-    assert_file_a_content!();
+    assert_file_a_index!();
 
     workspace
         .close_file(CloseFileParams {
@@ -375,36 +375,31 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
         })
         .unwrap();
 
-    assert_file_a_content!();
+    assert_file_a_index!();
 
     workspace
         .close_project(CloseProjectParams { project_key })
         .unwrap();
 
-    assert!(
-        workspace
-            .get_file_content(GetFileContentParams {
-                project_key,
-                path: BiomePath::new("/project/a.ts"),
-            })
-            .is_err_and(|error| matches!(error, WorkspaceError::NotFound(_)))
-    );
+    let module_graph = workspace
+        .get_module_graph(GetModuleGraphParams {})
+        .expect("can get module graph");
+
+    assert!(!module_graph.data.contains_key("/project/a.ts"));
 }
 
 #[test]
 fn too_large_files_are_tracked_but_not_parsed() {
     const FILE_CONTENT: &[u8] = b"console.log(`I'm YUUUGE!`);";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
-            only_rules: None,
-            skip_rules: None,
         })
         .unwrap();
 
@@ -423,12 +418,12 @@ fn too_large_files_are_tracked_but_not_parsed() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .open_file(OpenFileParams {
             project_key,
-            path: None,
-            watch: false,
-            force: false,
-            scan_kind: ScanKind::Project,
+            path: BiomePath::new("/project/a.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
         })
         .unwrap();
 
@@ -455,17 +450,15 @@ fn plugins_are_loaded_and_used_during_analysis() {
 
     const FILE_CONTENT: &[u8] = b"const a = Object.assign({ foo: 'bar' });";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
-            only_rules: None,
-            skip_rules: None,
         })
         .unwrap();
 
@@ -483,12 +476,12 @@ fn plugins_are_loaded_and_used_during_analysis() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .open_file(OpenFileParams {
             project_key,
-            path: None,
-            watch: false,
-            force: false,
-            scan_kind: ScanKind::Project,
+            path: BiomePath::new("/project/a.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
         })
         .unwrap();
 
@@ -524,17 +517,15 @@ language css;
 
     const FILE_CONTENT: &[u8] = b"p { color: red }";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/a.css"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
-            only_rules: None,
-            skip_rules: None,
         })
         .unwrap();
 
@@ -552,12 +543,12 @@ language css;
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .open_file(OpenFileParams {
             project_key,
-            path: None,
-            watch: false,
-            force: false,
-            scan_kind: ScanKind::Project,
+            path: BiomePath::new("/project/a.css"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
         })
         .unwrap();
 
@@ -589,17 +580,15 @@ fn plugins_may_use_invalid_span() {
 
     const FILE_CONTENT: &[u8] = b"const a = Object.assign({ foo: 'bar' });";
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
-    let workspace = server(Box::new(fs), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
-            only_rules: None,
-            skip_rules: None,
         })
         .unwrap();
 
@@ -617,12 +606,12 @@ fn plugins_may_use_invalid_span() {
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .open_file(OpenFileParams {
             project_key,
-            path: None,
-            watch: false,
-            force: false,
-            scan_kind: ScanKind::Project,
+            path: BiomePath::new("/project/a.ts"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
         })
         .unwrap();
 
@@ -687,18 +676,16 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
     ),
 ];
 
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     for (path, content) in files {
         fs.insert(Utf8PathBuf::from(*path), *content);
     }
 
-    let workspace = server(Box::new(fs), None);
-    let OpenProjectResult { project_key, .. } = workspace
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: Utf8PathBuf::from("/project").into(),
             open_uninitialized: true,
-            only_rules: Some(Vec::new()),
-            skip_rules: None,
         })
         .unwrap();
 
@@ -736,16 +723,26 @@ const hasOwn = Object.hasOwn({ foo: 'bar' }, 'foo');"#,
         .unwrap();
 
     workspace
-        .scan_project_folder(ScanProjectFolderParams {
+        .scan_project(ScanProjectParams {
             project_key,
-            path: None,
             watch: false,
             force: false,
             scan_kind: ScanKind::Project,
+            verbose: false,
         })
         .unwrap();
 
     for (path, expect_diagnosis_count) in [("/project/a.ts", 1), ("/project/lib/b.ts", 2)] {
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(path),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+            })
+            .unwrap();
+
         let result = workspace
             .pull_diagnostics(PullDiagnosticsParams {
                 project_key,
@@ -876,4 +873,91 @@ class Person {
     let result = file.get_semantic_model();
     assert!(result.is_ok());
     assert_snapshot!(result.unwrap());
+}
+
+#[test]
+fn debug_module_graph() {
+    let fs = MemoryFileSystem::default();
+
+    let workspace = server(Arc::new(fs), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.js"),
+            content: FileContent::from_client(
+                r#"
+import { filter, debounce } from "./utils.js";
+
+async function test() {
+    const {squash} = import("./dynamic.js");
+}
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/utils.js"),
+
+            content: FileContent::from_client(
+                r#"
+export const filter = function filter() {};
+
+export const debounce = function debounce() {};
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/dynamic.js"),
+
+            content: FileContent::from_client(
+                r#"
+export const squash = function squash() {};
+"#,
+            ),
+            document_file_source: None,
+            persist_node_cache: false,
+        })
+        .unwrap();
+
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/file.js"),
+            update_kind: UpdateKind::AddOrUpdate,
+        })
+        .unwrap();
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/utils.js"),
+            update_kind: UpdateKind::AddOrUpdate,
+        })
+        .unwrap();
+
+    workspace
+        .update_module_graph(UpdateModuleGraphParams {
+            path: BiomePath::new("/project/dynamic.js"),
+            update_kind: UpdateKind::AddOrUpdate,
+        })
+        .unwrap();
+
+    let result = workspace.get_module_graph(GetModuleGraphParams {}).unwrap();
+
+    assert_debug_snapshot!(result)
 }

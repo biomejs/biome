@@ -1,4 +1,7 @@
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
+use biome_analyze::options::JsxRuntime;
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleFilter,
+};
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_fs::TemporaryFs;
@@ -26,37 +29,30 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 #[test]
 fn quick_test() {
     const FILENAME: &str = "dummyFile.ts";
-    const SOURCE: &str = r#"type Props = {
-	a: string;
-	returnsPromise: () => Promise<void>;
-};
-async function testDestructuringAndCallingReturnsPromiseFromRest({
-	a,
-	...rest
-}: Props) {
-	rest
-		.returnsPromise()
-		.then(() => {})
-		.finally(() => {});
+    const SOURCE: &str = r#"import * as postcssModules from "postcss-modules"
+
+type PostcssOptions = Parameters<postcssModules>[0]
+
+export function f(options: PostcssOptions) {
+	console.log(options)
 }
 "#;
 
     let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
     let mut fs = TemporaryFs::new("quick_test");
+    fs.create_file("sleep.ts", "export const sleep = async (ms = 1000): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));");
     fs.create_file(FILENAME, SOURCE);
-    fs.create_file(
-        "returnPromiseResult.ts",
-        r#"export function returnPromiseResult(): Promise<{ result: true | false }> {
-  return new Promise(resolve => resolve({ result: true }));
-}
-"#,
-    );
+
     let file_path = Utf8PathBuf::from(format!("{}/{FILENAME}", fs.cli_path()));
 
     let mut error_ranges: Vec<TextRange> = Vec::new();
-    let options = AnalyzerOptions::default().with_file_path(file_path.clone());
-    let rule_filter = RuleFilter::Rule("nursery", "noFloatingPromises");
+    let options = AnalyzerOptions::default()
+        .with_file_path(file_path.clone())
+        .with_configuration(
+            AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
+        );
+    let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 

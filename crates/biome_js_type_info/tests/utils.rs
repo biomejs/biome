@@ -1,11 +1,14 @@
 #![allow(unused)]
 
 use std::borrow::Cow;
+use std::sync::Arc;
 
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{AnyJsExpression, JsVariableDeclaration, TsInterfaceDeclaration};
+use biome_js_syntax::{
+    AnyJsExpression, JsVariableDeclaration, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+};
 use biome_js_syntax::{
     AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFileSource, JsFunctionDeclaration,
 };
@@ -18,7 +21,7 @@ use biome_test_utils::dump_registered_types;
 
 pub fn assert_type_data_snapshot(
     source_code: &str,
-    ty: TypeData,
+    ty: &TypeData,
     resolver: &dyn TypeResolver,
     test_name: &str,
 ) {
@@ -119,7 +122,7 @@ impl HardcodedSymbolResolver {
         while i < self.types.len() {
             // First take the type to satisfy the borrow checker:
             let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.resolved(self);
+            self.types[i] = ty.resolved(self).unwrap_or(ty);
             i += 1;
         }
     }
@@ -129,7 +132,7 @@ impl HardcodedSymbolResolver {
         while i < self.types.len() {
             // First take the type to satisfy the borrow checker:
             let ty = std::mem::take(&mut self.types[i]);
-            self.types[i] = ty.flattened(self);
+            self.types[i] = ty.flattened(self).unwrap_or(ty);
             i += 1;
         }
     }
@@ -137,7 +140,7 @@ impl HardcodedSymbolResolver {
 
 impl TypeResolver for HardcodedSymbolResolver {
     fn level(&self) -> TypeResolverLevel {
-        TypeResolverLevel::Module
+        TypeResolverLevel::Thin
     }
 
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
@@ -151,12 +154,12 @@ impl TypeResolver for HardcodedSymbolResolver {
         &self.types[id.index()]
     }
 
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData> {
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>> {
         match id.level() {
-            TypeResolverLevel::Scope => {
+            TypeResolverLevel::Full => {
                 panic!("Ad-hoc references unsupported by resolver")
             }
-            TypeResolverLevel::Module => Some((id, self.get_by_id(id.id())).into()),
+            TypeResolverLevel::Thin => Some((id, self.get_by_id(id.id())).into()),
             TypeResolverLevel::Import => {
                 panic!("Import references unsupported by resolver")
             }
@@ -186,12 +189,11 @@ impl TypeResolver for HardcodedSymbolResolver {
             TypeReference::Import(_import) => {
                 panic!("Project-level references unsupported by resolver")
             }
-            TypeReference::Unknown => None,
         }
     }
 
     fn resolve_qualifier(&self, qualifier: &TypeReferenceQualifier) -> Option<ResolvedTypeId> {
-        if qualifier.path.len() == 1 && qualifier.path[0] == self.name {
+        if qualifier.path.is_identifier(self.name) {
             Some(ResolvedTypeId::new(self.level(), TypeId::new(0)))
         } else {
             self.globals.resolve_qualifier(qualifier)
@@ -202,7 +204,11 @@ impl TypeResolver for HardcodedSymbolResolver {
         self.globals.resolve_type_of(identifier, scope_id)
     }
 
-    fn resolve_expression(&mut self, scope_id: ScopeId, expr: &AnyJsExpression) -> Cow<TypeData> {
+    fn resolve_expression(
+        &mut self,
+        scope_id: ScopeId,
+        expr: &AnyJsExpression,
+    ) -> Cow<'_, TypeData> {
         Cow::Owned(TypeData::from_any_js_expression(self, scope_id, expr))
     }
 
@@ -210,8 +216,8 @@ impl TypeResolver for HardcodedSymbolResolver {
         Some(&self.globals)
     }
 
-    fn registered_types(&self) -> &[TypeData] {
-        &self.types
+    fn registered_types(&self) -> Vec<&TypeData> {
+        self.types.iter().collect()
     }
 }
 

@@ -575,7 +575,7 @@ impl Format<JsFormatContext> for ArrowChain {
                     let formatted_signature = format_with(|f: &mut JsFormatter| {
                         if should_format_comments {
                             // A grouped layout implies that the arrow chain is trying to be rendered
-                            // in a condensend, single-line format (at least the signatures, not
+                            // in a condensed, single-line format (at least the signatures, not
                             // necessarily the body). In that case, we _need_ to prevent the leading
                             // comments from inserting line breaks. But if it's _not_ a grouped layout,
                             // then we want to _force_ the line break so that the leading comments

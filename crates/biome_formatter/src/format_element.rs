@@ -126,7 +126,7 @@ impl PrintMode {
 pub struct Interned(Rc<[FormatElement]>);
 
 impl Interned {
-    pub(super) fn new(content: Vec<FormatElement>) -> Self {
+    pub fn new(content: Vec<FormatElement>) -> Self {
         Self(content.into())
     }
 }
@@ -168,7 +168,7 @@ pub const LINE_TERMINATORS: [char; 3] = ['\r', LINE_SEPARATOR, PARAGRAPH_SEPARAT
 
 /// Replace the line terminators matching the provided list with "\n"
 /// since its the only line break type supported by the printer
-pub fn normalize_newlines<const N: usize>(text: &str, terminators: [char; N]) -> Cow<str> {
+pub fn normalize_newlines<const N: usize>(text: &str, terminators: [char; N]) -> Cow<'_, str> {
     let mut result = String::new();
     let mut last_end = 0;
 
@@ -315,6 +315,10 @@ impl BestFittingElement {
 
     pub fn variants(&self) -> &[Box<[FormatElement]>] {
         &self.variants
+    }
+
+    pub(crate) fn variants_mut(&mut self) -> &mut [Box<[FormatElement]>] {
+        &mut self.variants
     }
 
     /// Returns the least expanded variant

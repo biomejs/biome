@@ -7,6 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsSyntaxToken, JsxAttribute, TextRange};
 use biome_rowan::AstNode;
+use biome_rule_options::use_valid_aria_values::UseValidAriaValuesOptions;
 
 declare_lint_rule! {
     /// Enforce that ARIA state and property values are valid.
@@ -52,7 +53,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidAriaValues",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("aria-proptypes")],
+        sources: &[RuleSource::EslintJsxA11y("aria-proptypes").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -68,7 +69,7 @@ impl Rule for UseValidAriaValues {
     type Query = Ast<JsxAttribute>;
     type State = UseValidAriaValuesState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseValidAriaValuesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

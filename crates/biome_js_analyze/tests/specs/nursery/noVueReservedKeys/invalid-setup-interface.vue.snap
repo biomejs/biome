@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-interface.vue
+---
+# Input
+```ts
+; // this is a hack because vue files are still parsed as js/ts files.
+interface Props {
+    $el: string
+}
+defineProps<Props>();
+
+```
+
+# Diagnostics
+```
+invalid-setup-interface.vue:3:5 lint/nursery/noVueReservedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key $el is reserved in Vue.
+  
+    1 │ ; // this is a hack because vue files are still parsed as js/ts files.
+    2 │ interface Props {
+  > 3 │     $el: string
+      │     ^^^
+    4 │ }
+    5 │ defineProps<Props>();
+  
+  i Rename the key to avoid conflicts with Vue reserved keys.
+  
+
+```

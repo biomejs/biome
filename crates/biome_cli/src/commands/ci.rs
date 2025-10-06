@@ -82,6 +82,13 @@ impl CommandRunner for CiCommandPayload {
                 // configuration.
                 linter.rules = None;
             }
+            if let Some(assist) = conf.assist.as_mut() {
+                // Don't overwrite actions from the CLI configuration.
+                // Otherwise, actions that are disabled in the config file might
+                // become re-enabled due to the defaults included in the CLI
+                // configuration.
+                assist.actions = None
+            }
             configuration.merge_with(conf);
         }
 
@@ -132,7 +139,11 @@ impl CommandRunner for CiCommandPayload {
             ));
         }
         if self.since.is_some() && !self.changed {
-            return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+            return Err(CliDiagnostic::incompatible_arguments(
+                "--since",
+                "--changed",
+                "In order to use --since, you must also use --changed.",
+            ));
         }
         Ok(())
     }

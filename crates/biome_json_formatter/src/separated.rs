@@ -30,10 +30,11 @@ where
     }
 }
 
-type JsonFormatSeparatedIter<Node> = FormatSeparatedIter<
+type JsonFormatSeparatedIter<Node, C> = FormatSeparatedIter<
     AstSeparatedListElementsIterator<JsonLanguage, Node>,
     Node,
     JsonFormatSeparatedElementRule<Node>,
+    C,
 >;
 
 /// AST Separated list formatting extension methods
@@ -50,11 +51,13 @@ pub(crate) trait FormatAstSeparatedListExtension:
         &self,
         separator: &'static str,
         trailing_separator: TrailingSeparator,
-    ) -> JsonFormatSeparatedIter<Self::Node> {
+    ) -> JsonFormatSeparatedIter<Self::Node, JsonFormatContext> {
         JsonFormatSeparatedIter::new(
             self.elements(),
             separator,
             JsonFormatSeparatedElementRule { node: PhantomData },
+            on_skipped,
+            on_removed,
         )
         .with_trailing_separator(trailing_separator)
     }

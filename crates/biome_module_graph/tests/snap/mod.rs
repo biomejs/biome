@@ -5,16 +5,16 @@ use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
-use biome_module_graph::{JsExport, JsOwnExport, ModuleGraph, ScopedResolver};
+use biome_module_graph::{JsExport, JsOwnExport, ModuleGraph, ModuleResolver};
 use biome_resolver::ResolvedPath;
 use biome_rowan::AstNode;
-use biome_test_utils::dump_registered_types;
+use biome_test_utils::{dump_registered_module_types, dump_registered_types};
 use camino::Utf8PathBuf;
 
 pub struct ModuleGraphSnapshot<'a> {
     module_graph: &'a ModuleGraph,
     fs: &'a MemoryFileSystem,
-    resolver: Option<&'a ScopedResolver>,
+    resolver: Option<&'a ModuleResolver>,
 }
 
 impl<'a> ModuleGraphSnapshot<'a> {
@@ -26,7 +26,7 @@ impl<'a> ModuleGraphSnapshot<'a> {
         }
     }
 
-    pub fn with_resolver(self, resolver: &'a ScopedResolver) -> Self {
+    pub fn with_resolver(self, resolver: &'a ModuleResolver) -> Self {
         Self {
             resolver: Some(resolver),
             ..self
@@ -113,12 +113,12 @@ impl<'a> ModuleGraphSnapshot<'a> {
                     content.push_str("```\n\n");
                 }
 
-                dump_registered_types(&mut content, data.as_resolver());
+                dump_registered_module_types(&mut content, &data.types());
             }
         }
 
         if let Some(resolver) = self.resolver {
-            content.push_str("\n# Scoped Type Resolver\n\n");
+            content.push_str("\n# Module Resolver\n\n");
             dump_registered_types(&mut content, resolver);
         }
 

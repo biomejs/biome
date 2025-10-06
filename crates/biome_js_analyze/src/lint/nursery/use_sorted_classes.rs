@@ -1,12 +1,16 @@
 mod any_class_string_like;
 mod class_info;
 mod class_lexer;
-mod options;
 mod presets;
 mod sort;
 mod sort_config;
 mod tailwind_preset;
 
+use self::{
+    any_class_string_like::AnyClassStringLike, presets::UseSortedClassesPreset,
+    sort::get_sort_class_name_range, sort::sort_class_name, sort_config::SortConfig,
+};
+use crate::JsRuleAction;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make::{
@@ -14,17 +18,9 @@ use biome_js_factory::make::{
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 use presets::get_config_preset;
 use std::sync::LazyLock;
-
-use crate::JsRuleAction;
-
-pub use self::options::UtilityClassSortingOptions;
-use self::{
-    any_class_string_like::AnyClassStringLike, presets::UseSortedClassesPreset,
-    sort::get_sort_class_name_range, sort::should_ignore_postfix, sort::should_ignore_prefix,
-    sort::sort_class_name, sort_config::SortConfig,
-};
 
 declare_lint_rule! {
     /// Enforce the sorting of CSS utility classes.
@@ -64,7 +60,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div class="hover:focus:m-2 foo hover:px-2 p-4">
+    /// <div class="hover:focus:m-2 foo hover:px-2 p-4" />
     /// ```
     ///
     /// ## Options
@@ -170,25 +166,22 @@ impl Rule for UseSortedClasses {
     type Query = Ast<AnyClassStringLike>;
     type State = Box<str>;
     type Signals = Option<Self::State>;
-    type Options = Box<UtilityClassSortingOptions>;
+    type Options = UseSortedClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let options = ctx.options();
         let node = ctx.query();
 
-        if node.should_visit(options)? {
-            if let Some(value) = node.value() {
-                // Check if the class should be ignored.
-                let ignore_prefix = should_ignore_prefix(node);
-                let ignore_postfix = should_ignore_postfix(node);
-                let sorted_value =
-                    sort_class_name(&value, &SORT_CONFIG, ignore_prefix, ignore_postfix);
-                if sorted_value.is_empty() {
-                    return None;
-                }
-                if value.text() != sorted_value {
-                    return Some(sorted_value.into());
-                }
+        if node.should_visit(options)?
+            && let Some(value) = node.value()
+        {
+            let template_ctx = sort::get_template_literal_space_context(node);
+            let sorted_value: String = sort_class_name(&value, &SORT_CONFIG, &template_ctx);
+            if sorted_value.is_empty() {
+                return None;
+            }
+            if value.text() != sorted_value {
+                return Some(sorted_value.into());
             }
         }
         None
@@ -200,10 +193,8 @@ impl Rule for UseSortedClasses {
         // Calculate the range offset to account for the ignored prefix and postfix.
         let sort_range = if let Some(value) = node.value() {
             let range = node.range();
-            let ignore_prefix = should_ignore_prefix(node);
-            let ignore_postfix = should_ignore_postfix(node);
-            let real_sort_range =
-                get_sort_class_name_range(&value, &range, ignore_prefix, ignore_postfix);
+            let template_ctx = sort::get_template_literal_space_context(node);
+            let real_sort_range = get_sort_class_name_range(&value, &range, &template_ctx);
             real_sort_range.unwrap_or(range)
         } else {
             node.range()
@@ -220,16 +211,19 @@ impl Rule for UseSortedClasses {
         let mut mutation = ctx.root().begin();
         match ctx.query() {
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
-                let replacement =
-                    js_string_literal_expression(if ctx.as_preferred_quote().is_double() {
-                        js_string_literal(state)
-                    } else {
-                        js_string_literal_single_quotes(state)
-                    });
+                let is_double_quote = string_literal
+                    .value_token()
+                    .map(|token| token.text_trimmed().starts_with('"'))
+                    .unwrap_or(ctx.preferred_quote().is_double());
+                let replacement = js_string_literal_expression(if is_double_quote {
+                    js_string_literal(state)
+                } else {
+                    js_string_literal_single_quotes(state)
+                });
                 mutation.replace_node(string_literal.clone(), replacement);
             }
             AnyClassStringLike::JsLiteralMemberName(string_literal) => {
-                let replacement = js_literal_member_name(if ctx.as_preferred_quote().is_double() {
+                let replacement = js_literal_member_name(if ctx.preferred_quote().is_double() {
                     js_string_literal(state)
                 } else {
                     js_string_literal_single_quotes(state)
@@ -240,7 +234,7 @@ impl Rule for UseSortedClasses {
                 let is_double_quote = jsx_string_node
                     .value_token()
                     .map(|token| token.text_trimmed().starts_with('"'))
-                    .unwrap_or(ctx.as_preferred_jsx_quote().is_double());
+                    .unwrap_or(ctx.preferred_jsx_quote().is_double());
                 let replacement = jsx_string(if is_double_quote {
                     js_string_literal(state)
                 } else {

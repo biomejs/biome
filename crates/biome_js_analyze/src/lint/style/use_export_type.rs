@@ -1,7 +1,6 @@
 use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -14,6 +13,7 @@ use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, chain_trivia_pieces,
     declare_node_union, trim_leading_trivia_pieces,
 };
+use biome_rule_options::use_export_type::UseExportTypeOptions;
 
 declare_lint_rule! {
     /// Promotes the use of `export type` for types.
@@ -65,8 +65,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "useExportType",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("consistent-type-exports")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintTypeScript("consistent-type-exports").inspired()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -77,7 +76,7 @@ impl Rule for UseExportType {
     type Query = Semantic<AnyJsExportNamedClause>;
     type State = ExportTypeFix;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseExportTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>();

@@ -39,7 +39,7 @@ typeof foo
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_flattened_type_of_typeof_expression",
     )
@@ -59,7 +59,7 @@ fn infer_flattened_type_of_promise_returning_function() {
 
     assert_type_data_snapshot(
         CODE,
-        ty,
+        &ty,
         &resolver,
         "infer_flattened_type_of_promise_returning_function",
     )
@@ -79,7 +79,7 @@ fn infer_flattened_type_of_async_function() {
 
     assert_type_data_snapshot(
         CODE,
-        ty,
+        &ty,
         &resolver,
         "infer_flattened_type_of_async_function",
     )
@@ -106,7 +106,7 @@ returnsPromise()"#;
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_flattened_type_from_invocation_of_promise_returning_function",
     )
@@ -135,7 +135,7 @@ returnsPromise().then(() => {})"#;
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_flattened_type_from_chained_invocation_of_promise_returning_function",
     )
@@ -164,7 +164,7 @@ returnsPromise().then(() => {}).finally(() => {})"#;
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_flattened_type_from_double_chained_invocation_of_promise_returning_function",
     )
@@ -182,7 +182,7 @@ fn infer_flattened_type_from_direct_promise_instance() {
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_flattened_type_from_direct_promise_instance",
     )
@@ -202,7 +202,7 @@ fn infer_flattened_type_from_static_promise_function() {
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_flattened_type_from_static_promise_function",
     )
@@ -257,7 +257,7 @@ function bar({ foo }: Foo) {
 
     assert_type_data_snapshot(
         CODE,
-        expr_ty,
+        &expr_ty,
         &resolver,
         "infer_flattened_type_of_destructured_interface_field",
     )

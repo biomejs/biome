@@ -26,6 +26,8 @@ pub use resolver_fs_proxy::*;
 ///
 /// A more detailed version of the spec can be found here:
 ///   https://nodejs.org/api/esm.html#resolution-algorithm
+///
+/// See [`ResolveOptions`] for the options that can be passed to the resolver.
 pub fn resolve(
     specifier: &str,
     base_dir: &Utf8Path,
@@ -39,7 +41,11 @@ pub fn resolve(
     }
 
     if specifier.starts_with('/') {
-        return resolve_absolute_path(Utf8PathBuf::from(specifier), fs, options);
+        return resolve_absolute_path_with_extension_aliases(
+            Utf8PathBuf::from(specifier),
+            fs,
+            options,
+        );
     }
 
     if is_relative_specifier(specifier) {
@@ -56,6 +62,38 @@ pub fn resolve(
     resolve_module(specifier, base_dir, fs, options)
 }
 
+/// Resolves the given absolute `path` with the extension aliases specified in the options.
+fn resolve_absolute_path_with_extension_aliases(
+    path: Utf8PathBuf,
+    fs: &dyn ResolverFsProxy,
+    options: &ResolveOptions,
+) -> Result<Utf8PathBuf, ResolveError> {
+    // Skip if no extension is in the path.
+    let Some(extension) = path.extension() else {
+        return resolve_absolute_path(path, fs, options);
+    };
+
+    // Skip if no extension alias is configured.
+    let Some(&(_, aliases)) = options
+        .extension_aliases
+        .iter()
+        .find(|(ext, _)| *ext == extension)
+    else {
+        return resolve_absolute_path(path, fs, options);
+    };
+
+    // Try to resolve the path for each extension alias.
+    for alias in aliases {
+        match resolve_absolute_path(path.with_extension(alias), fs, options) {
+            Ok(path) => return Ok(path),
+            Err(ResolveError::NotFound) => { /* continue */ }
+            Err(error) => return Err(error),
+        }
+    }
+
+    Err(ResolveError::NotFound)
+}
+
 /// Resolves the given absolute `path`.
 ///
 /// Absolute paths are those starting with `/` or a Windows prefix/root.
@@ -67,9 +105,17 @@ fn resolve_absolute_path(
     let path = normalize_owned_absolute_path(path);
 
     let try_extensions_with_fallback_error = |error: ResolveError| {
+        // Try to reuse a single allocation of `path` for all the extension
+        // variants:
+        let mut path = path.to_string();
+        path.push('.');
+        let base_path_len = path.len();
+
         for extension in options.extensions {
-            let path_with_extension = Utf8PathBuf::from(format!("{path}.{extension}"));
-            match resolve_path_info(path_with_extension, fs) {
+            path.truncate(base_path_len);
+            path.push_str(extension);
+
+            match resolve_path_info(Cow::Borrowed(Utf8Path::new(&path)), fs, options) {
                 Ok((ResolvedPathInfo::Directory, _)) => {
                     // Adding an extension yielded a directory? No, thanks.
                 }
@@ -82,7 +128,7 @@ fn resolve_absolute_path(
         Err(error)
     };
 
-    match resolve_path_info(path.clone(), fs) {
+    match resolve_path_info(Cow::Borrowed(&path), fs, options) {
         Ok((ResolvedPathInfo::Directory, realpath)) => {
             resolve_directory(&realpath, fs, options).or_else(try_extensions_with_fallback_error)
         }
@@ -101,7 +147,7 @@ fn resolve_relative_path(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    resolve_absolute_path(base_dir.join(path), fs, options)
+    resolve_absolute_path_with_extension_aliases(base_dir.join(path), fs, options)
 }
 
 /// Resolve the directory `dir_path`.
@@ -114,9 +160,17 @@ fn resolve_directory(
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
     for default_file in options.default_files {
+        // Try to reuse a single allocation of `path` for all the extension
+        // variants:
+        let mut path = dir_path.join(default_file).to_string();
+        path.push('.');
+        let base_path_len = path.len();
+
         for extension in options.extensions {
-            let default_file_path = dir_path.join(format!("{default_file}.{extension}"));
-            match resolve_path_info(default_file_path, fs) {
+            path.truncate(base_path_len);
+            path.push_str(extension);
+
+            match resolve_path_info(Cow::Borrowed(Utf8Path::new(&path)), fs, options) {
                 Ok((ResolvedPathInfo::Directory, _)) => {
                     // An index file that's a directory?
                     // Not going to fall for that...
@@ -165,25 +219,28 @@ fn resolve_module_with_package_json(
 ) -> Result<Utf8PathBuf, ResolveError> {
     // `tsconfig.json` may only be found in directories containing a
     // `package.json`, so this is the only place we need to attempt to use it.
-    let tsconfig = fs.read_tsconfig_json(&package_path.join("tsconfig.json"));
-    if let Some(path) = tsconfig.as_ref().ok().and_then(|ts_config| {
-        resolve_paths_mapping(specifier, ts_config, package_path, fs, options).ok()
+    let tsconfig = match &options.tsconfig {
+        DiscoverableManifest::Auto => fs
+            .read_tsconfig_json(&package_path.join("tsconfig.json"))
+            .map(Cow::Owned),
+        DiscoverableManifest::Explicit { manifest, .. } => Ok(Cow::Borrowed(*manifest)),
+        DiscoverableManifest::Off => Err(ResolveError::NotFound),
+    };
+    if let Some(path) = tsconfig.as_ref().ok().and_then(|tsconfig| {
+        resolve_paths_mapping(specifier, tsconfig, package_path, fs, options).ok()
     }) {
         return Ok(path);
     }
 
     // Initialise `type_roots` from the `tsconfig.json` if we have one.
     let initialise_type_roots = options.resolve_types && options.type_roots.is_auto();
-    let type_roots: Option<Vec<&str>> = match initialise_type_roots {
-        true => tsconfig
-            .as_ref()
-            .ok()
-            .and_then(|tsconfig| tsconfig.compiler_options.type_roots.as_ref())
-            .map(|type_roots| type_roots.iter().map(String::as_str).collect()),
-        false => None,
-    };
     let options = match initialise_type_roots {
-        true => &options.with_type_roots(TypeRoots::from_optional_slice(type_roots.as_deref())),
+        true => &options.with_type_roots_and_without_manifests(TypeRoots::from_optional_slice(
+            tsconfig
+                .as_ref()
+                .ok()
+                .and_then(|tsconfig| tsconfig.compiler_options.type_roots.as_deref()),
+        )),
         false => options,
     };
 
@@ -191,20 +248,30 @@ fn resolve_module_with_package_json(
         return resolve_import_alias(specifier, package_path, package_json, fs, options);
     }
 
-    if let Some(package_name) = &package_json.name {
-        if specifier.starts_with(package_name.as_ref())
-            && specifier
-                .as_bytes()
-                .get(package_name.len())
-                .is_some_and(|c| *c == b'/')
-        {
-            return resolve_export(
-                &specifier[package_name.len() + 1..],
-                package_path,
-                package_json,
-                fs,
-                options,
-            );
+    if let Some(package_name) = &package_json.name
+        && specifier.starts_with(package_name.as_ref())
+        && specifier
+            .as_bytes()
+            .get(package_name.len())
+            .is_some_and(|c| *c == b'/')
+    {
+        return resolve_export(
+            &specifier[package_name.len() + 1..],
+            package_path,
+            package_json,
+            fs,
+            options,
+        );
+    }
+
+    if let Some(base_url) = tsconfig
+        .as_ref()
+        .ok()
+        .and_then(|tsconfig| tsconfig.compiler_options.base_url.as_ref())
+    {
+        match resolve_relative_path(specifier, base_url, fs, options) {
+            Err(ResolveError::NotFound) => { /* continue below */ }
+            result => return result,
         }
     }
 
@@ -222,7 +289,8 @@ fn resolve_import_alias(
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
     let imports = package_json
-        .get_value_by_path(&["imports"])
+        .imports
+        .as_ref()
         .ok_or(ResolveError::NotFound)?;
     let imports = imports
         .as_object()
@@ -240,9 +308,7 @@ fn resolve_export(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    let exports = package_json
-        .get_value_by_path(&["exports"])
-        .ok_or(ResolveError::NotFound)?;
+    let exports = &package_json.exports.clone().ok_or(ResolveError::NotFound)?;
 
     match exports {
         JsonValue::Object(mapping) => {
@@ -327,12 +393,12 @@ fn resolve_paths_mapping(
 
     let resolve_specifier = |specifier: &str| {
         if is_relative_specifier(specifier) {
-            let base_dir = match &tsconfig_json.compiler_options.base_url {
-                Some(base_url) => base_url.as_path(),
-                None => package_path,
-            };
-
-            resolve_relative_path(specifier, base_dir, fs, options)
+            resolve_relative_path(
+                specifier,
+                &tsconfig_json.compiler_options.paths_base,
+                fs,
+                options,
+            )
         } else {
             resolve_dependency(specifier, package_path, fs, options)
         }
@@ -428,6 +494,12 @@ fn resolve_target_value(
             }
             None => resolve_string(target.as_str()),
         },
+        JsonValue::Array(targets) => targets
+            .iter()
+            .find_map(|target| {
+                resolve_target_value(target, glob_replacement, package_path, fs, options).ok()
+            })
+            .ok_or(ResolveError::NotFound),
         _ => Err(ResolveError::InvalidMappingTarget),
     }
 }
@@ -444,35 +516,32 @@ fn resolve_dependency(
 ) -> Result<Utf8PathBuf, ResolveError> {
     let (package_name, subpath) = parse_package_specifier(specifier)?;
 
-    if let TypeRoots::Explicit(type_roots) = options.type_roots {
-        for type_root in type_roots {
-            let package_path = base_dir.join(type_root).join(package_name);
-            match resolve_package_path(&package_path, subpath, fs, options) {
-                Ok(path) => return Ok(path),
-                Err(ResolveError::NotFound) => { /* continue */ }
-                Err(error) => return Err(error),
-            }
+    for type_root in options.type_roots.explicit_roots() {
+        let package_path = base_dir.join(type_root).join(package_name);
+        match resolve_package_path(&package_path, subpath, fs, options) {
+            Ok(path) => return Ok(path),
+            Err(ResolveError::NotFound) => { /* continue */ }
+            Err(error) => return Err(error),
+        }
 
-            // FIXME: This is an incomplete approximation of how resolving
-            //        inside custom `typeRoots` should work. Besides packages,
-            //        type roots may contain individual `d.ts` files. Such files
-            //        don't even need to match the name of the package, because
-            //        they can do things such as
-            //        `declare module "whatever_package_name"`. But to get these
-            //        things to work reliably, we need to track **global** type
-            //        definitions first, so for now we'll assume a correlation
-            //        between package name and module name.
-            for extension in options.extensions {
-                if extension.starts_with("d.") {
-                    let path = package_path.with_extension(extension);
-                    match fs.path_info(&path) {
-                        Ok(PathInfo::File) => return Ok(normalize_path(&path)),
-                        Ok(PathInfo::Symlink {
-                            canonicalized_target,
-                        }) => return Ok(canonicalized_target),
-                        _ => { /* continue */ }
-                    };
-                }
+        // FIXME: This is an incomplete approximation of how resolving inside
+        //        custom `typeRoots` should work. Besides packages, type roots
+        //        may contain individual `d.ts` files. Such files don't even
+        //        need to match the name of the package, because they can do
+        //        things such as `declare module "whatever_package_name"`. But
+        //        to get these things to work reliably, we need to track
+        //        **global** type definitions first, so for now we'll assume a
+        //        correlation between package name and module name.
+        for extension in options.extensions {
+            if let Some(extension) = definition_extension_for_js_extension(extension) {
+                let path = package_path.with_extension(extension);
+                match fs.path_info(&path) {
+                    Ok(PathInfo::File) => return Ok(normalize_path(&path)),
+                    Ok(PathInfo::Symlink {
+                        canonicalized_target,
+                    }) => return Ok(canonicalized_target),
+                    _ => { /* continue */ }
+                };
             }
         }
     }
@@ -532,24 +601,20 @@ fn resolve_package_path(
         _ => return Err(ResolveError::NotFound),
     };
 
-    if let Ok(package_json) = fs.read_package_json(&package_path.join("package.json")) {
-        if package_json.get_value_by_path(&["exports"]).is_some() {
+    if let Ok(package_json) = fs.read_package_json_in_directory(&package_path) {
+        if package_json.exports.is_some() {
             return resolve_export(subpath, &package_path, &package_json, fs, options);
         }
 
         if subpath.is_empty() {
-            let fallback_field = if options.resolve_types {
-                "types"
+            let field = if options.resolve_types {
+                &package_json.types
             } else {
-                "main"
+                &package_json.main
             };
-
-            if let Some(main_target) = package_json
-                .get_value_by_path(&[fallback_field])
-                .and_then(JsonValue::as_string)
-            {
+            if let Some(target) = field {
                 let options = options.without_extensions_or_manifests();
-                return resolve_relative_path(main_target.as_str(), &package_path, fs, &options);
+                return resolve_relative_path(target, &package_path, fs, &options);
             }
         }
     }
@@ -565,12 +630,26 @@ enum ResolvedPathInfo {
 /// Resolves the given `path` to a tuple of [`ResolvedPathInfo`] and the real
 /// path being pointed to.
 fn resolve_path_info(
-    path: Utf8PathBuf,
+    path: Cow<Utf8Path>,
     fs: &dyn ResolverFsProxy,
+    options: &ResolveOptions,
 ) -> Result<(ResolvedPathInfo, Utf8PathBuf), ResolveError> {
+    if options.resolve_types
+        && let Some(definition_ext) = path
+            .extension()
+            .and_then(definition_extension_for_js_extension)
+    {
+        // Try the type definition path first:
+        let definition_result =
+            resolve_path_info(Cow::Owned(path.with_extension(definition_ext)), fs, options);
+        if definition_result.is_ok() {
+            return definition_result;
+        }
+    }
+
     match fs.path_info(&path)? {
-        PathInfo::Directory => Ok((ResolvedPathInfo::Directory, path)),
-        PathInfo::File => Ok((ResolvedPathInfo::File, path)),
+        PathInfo::Directory => Ok((ResolvedPathInfo::Directory, path.into_owned())),
+        PathInfo::File => Ok((ResolvedPathInfo::File, path.into_owned())),
         PathInfo::Symlink {
             canonicalized_target: normalized_target,
         } => match fs.path_info(&normalized_target)? {
@@ -578,6 +657,15 @@ fn resolve_path_info(
             PathInfo::File => Ok((ResolvedPathInfo::File, normalized_target)),
             PathInfo::Symlink { .. } => Err(ResolveError::BrokenSymlink),
         },
+    }
+}
+
+fn definition_extension_for_js_extension(extension: &str) -> Option<&'static str> {
+    match extension {
+        "js" | "jsx" => Some("d.ts"),
+        "cjs" => Some("d.cts"),
+        "mjs" => Some("d.mts"),
+        _ => None,
     }
 }
 
@@ -623,13 +711,13 @@ fn normalize_subpath(subpath: &str) -> &str {
 fn parse_package_specifier(specifier: &str) -> Result<(&str, &str), ResolveError> {
     let bytes = specifier.as_bytes();
     let mut separator_index = bytes.iter().position(|b| *b == b'/');
-    if let Some(index) = &separator_index {
-        if bytes[0] == b'@' {
-            separator_index = bytes[*index + 1..]
-                .iter()
-                .position(|b| *b == b'/')
-                .map(|i| i + *index + 1);
-        }
+    if let Some(index) = &separator_index
+        && bytes[0] == b'@'
+    {
+        separator_index = bytes[*index + 1..]
+            .iter()
+            .position(|b| *b == b'/')
+            .map(|i| i + *index + 1);
     }
 
     let package_name =
@@ -660,7 +748,7 @@ fn strip_query_and_fragment(specifier: &str) -> &str {
 }
 
 /// Options to pass to the resolver.
-#[derive(Default)]
+#[derive(Clone)]
 pub struct ResolveOptions<'a> {
     /// If `true`, specifiers are assumed to be relative paths. Resolving them
     /// as a package will still be attempted if resolving as a relative path
@@ -695,10 +783,19 @@ pub struct ResolveOptions<'a> {
     /// Extensions are checked in the order given, meaning the first extension
     /// in the list has the highest priority.
     ///
-    /// Extensions should be provided without leading dot.
+    /// Extensions should be provided without a leading dot.
     pub extensions: &'a [&'a str],
 
+    /// List of extension aliases to search for in absolute or relative paths.
+    /// Typically used to resolve `.ts` files by `.js` extension.
+    /// Same behavior as the `extensionAlias` option in [enhanced-resolve](https://github.com/webpack/enhanced-resolve?tab=readme-ov-file#resolver-options).
+    ///
+    /// Extensions should be provided without a leading dot.
+    pub extension_aliases: &'a [(&'a str, &'a [&'a str])],
+
     /// Defines which `package.json` file should be used.
+    ///
+    /// See [`DiscoverableManifest`] for more details.
     pub package_json: DiscoverableManifest<&'a PackageJson>,
 
     /// Whether Node.js builtin modules should be resolved.
@@ -721,16 +818,24 @@ pub struct ResolveOptions<'a> {
     /// - The `package.json`'s `main` field will be ignored.
     /// - Directories configured in [`Self::type_roots`] will be checked before
     ///   looking for dependencies in `node_modules/`.
+    /// - For any import to a **JavaScript** file where an explicit extension is
+    ///   given in the import specifier, the corresponding definition extension
+    ///   is tried first (`.d.ts` for `.js`, `.d.mts` for `.mjs`, and so on).
     ///
     /// In addition, you should set other options as follows:
-    /// - Any TypeScript extensions configured through [`Self::extensions`],
-    ///   such as `ts`, `cts`, and `mts`, should have the corresponding
-    ///   definition extension (`d.ts`, `d.cts`, or `d.mts`) configured as well,
-    ///   but with a higher priority (earlier in the array).
-    /// - [`Self::condition_names`] should be set to `["types", "default"]`.
+    /// - [`Self::condition_names`] should include `"types"`, `"import"`, and
+    ///   `"default"` (in that order).
+    /// - [`Self::extensions`] must include extensions for JavaScript files as
+    ///   well as extensions for TypeScript files. You should _not_ include the
+    ///   extensions for definition files yourself. These extensions will be
+    ///   tried automatically with a priority that is higher than the
+    ///   corresponding JavaScript extension, but lower than the extension that
+    ///   precedes it.
     pub resolve_types: bool,
 
     /// Defines which `tsconfig.json` file should be used.
+    ///
+    /// See [`DiscoverableManifest`] for more details.
     pub tsconfig: DiscoverableManifest<&'a TsConfigJson>,
 
     /// Directories to check for type definitions.
@@ -743,25 +848,108 @@ pub struct ResolveOptions<'a> {
     pub type_roots: TypeRoots<'a>,
 }
 
-impl<'a> ResolveOptions<'a> {
-    fn resolve_types_in_node_modules(&self) -> bool {
-        self.resolve_types && matches!(self.type_roots, TypeRoots::TypesInNodeModules)
+impl Default for ResolveOptions<'_> {
+    fn default() -> Self {
+        Self::new()
     }
+}
 
-    /// Returns the instance with [`Self::assume_relative`] set to `true`.
-    pub fn with_assume_relative(self) -> Self {
+impl<'a> ResolveOptions<'a> {
+    /// Returns a new instance with default settings.
+    pub const fn new() -> Self {
         Self {
-            assume_relative: true,
-            ..self
+            assume_relative: false,
+            condition_names: &[],
+            default_files: &[],
+            extensions: &[],
+            extension_aliases: &[],
+            package_json: DiscoverableManifest::Auto,
+            resolve_node_builtins: false,
+            resolve_types: false,
+            tsconfig: DiscoverableManifest::Auto,
+            type_roots: TypeRoots::Auto,
         }
     }
 
-    fn with_type_roots(&self, type_roots: TypeRoots<'a>) -> Self {
+    /// Returns whether the resolver should resolve types inside `node_modules`
+    /// based on these options.
+    const fn resolve_types_in_node_modules(&self) -> bool {
+        self.resolve_types && matches!(self.type_roots, TypeRoots::TypesInNodeModules)
+    }
+
+    /// Sets [`Self::assume_relative`] to `true` and returns this instance.
+    pub const fn with_assume_relative(mut self) -> Self {
+        self.assume_relative = true;
+        self
+    }
+
+    /// Sets [`Self::condition_names`] and returns this instance.
+    pub const fn with_condition_names(mut self, condition_names: &'a [&'a str]) -> Self {
+        self.condition_names = condition_names;
+        self
+    }
+
+    /// Sets [`Self::default_files`] and returns this instance.
+    pub const fn with_default_files(mut self, default_files: &'a [&'a str]) -> Self {
+        self.default_files = default_files;
+        self
+    }
+
+    /// Sets [`Self::extensions`] and returns this instance.
+    pub const fn with_extensions(mut self, extensions: &'a [&'a str]) -> Self {
+        self.extensions = extensions;
+        self
+    }
+
+    /// Sets [`Self::extension_aliases`] and returns this instance.
+    pub const fn with_extension_aliases(
+        mut self,
+        extension_aliases: &'a [(&'a str, &'a [&'a str])],
+    ) -> Self {
+        self.extension_aliases = extension_aliases;
+        self
+    }
+
+    /// Sets [`Self::package_json`] and returns this instance.
+    pub fn with_package_json(
+        mut self,
+        package_json: DiscoverableManifest<&'a PackageJson>,
+    ) -> Self {
+        self.package_json = package_json;
+        self
+    }
+
+    /// Sets [`Self::resolve_node_builtins`] to `true` and returns this instance.
+    pub const fn with_resolve_node_builtins(mut self) -> Self {
+        self.resolve_node_builtins = true;
+        self
+    }
+
+    /// Sets [`Self::resolve_types`] to `true` and returns this instance.
+    pub const fn with_resolve_types(mut self) -> Self {
+        self.resolve_types = true;
+        self
+    }
+
+    /// Sets [`Self::tsconfig`] and returns this instance.
+    pub fn with_tsconfig(mut self, tsconfig: DiscoverableManifest<&'a TsConfigJson>) -> Self {
+        self.tsconfig = tsconfig;
+        self
+    }
+
+    /// Sets [`Self::type_roots`] and returns this instance.
+    pub const fn with_type_roots(mut self, type_roots: TypeRoots<'a>) -> Self {
+        self.type_roots = type_roots;
+        self
+    }
+
+    fn with_type_roots_and_without_manifests(&self, type_roots: TypeRoots<'a>) -> Self {
         Self {
             assume_relative: self.assume_relative,
             condition_names: self.condition_names,
             default_files: self.default_files,
             extensions: self.extensions,
+            extension_aliases: self.extension_aliases,
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
             resolve_types: self.resolve_types,
@@ -776,6 +964,7 @@ impl<'a> ResolveOptions<'a> {
             condition_names: self.condition_names,
             default_files: self.default_files,
             extensions: &[],
+            extension_aliases: &[],
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
             resolve_types: self.resolve_types,
@@ -791,7 +980,7 @@ impl<'a> ResolveOptions<'a> {
 /// `tsconfig.json` will be automatically discovered, but this enum allows to
 /// turn them off completely, or to provide an explicit manifest to be used
 /// instead.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub enum DiscoverableManifest<T> {
     #[default]
     Auto,
@@ -818,6 +1007,12 @@ pub enum TypeRoots<'a> {
     /// Relative paths are resolved from the package path.
     Explicit(&'a [&'a str]),
 
+    /// Explicit list of directories to search.
+    ///
+    /// Same as [`TypeRoots::Explicit`] except it references a slice of owned
+    /// strings.
+    ExplicitOwned(&'a [String]),
+
     /// The default value to use if no `compilerOptions.typeRoots` field can be
     /// found in the `tsconfig.json`.
     ///
@@ -827,15 +1022,46 @@ pub enum TypeRoots<'a> {
 }
 
 impl<'a> TypeRoots<'a> {
-    const fn from_optional_slice(type_roots: Option<&'a [&'a str]>) -> Self {
+    const fn from_optional_slice(type_roots: Option<&'a [String]>) -> Self {
         match type_roots {
-            Some(type_roots) => Self::Explicit(type_roots),
+            Some(type_roots) => Self::ExplicitOwned(type_roots),
             None => Self::TypesInNodeModules,
+        }
+    }
+
+    fn explicit_roots(&self) -> impl Iterator<Item = &str> {
+        ExplicitTypeRootIterator {
+            type_roots: self,
+            index: 0,
         }
     }
 
     const fn is_auto(self) -> bool {
         matches!(self, Self::Auto)
+    }
+}
+
+struct ExplicitTypeRootIterator<'a> {
+    type_roots: &'a TypeRoots<'a>,
+    index: usize,
+}
+
+impl<'a> Iterator for ExplicitTypeRootIterator<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.type_roots {
+            TypeRoots::Auto => None,
+            TypeRoots::Explicit(items) => items.get(self.index).map(|root| {
+                self.index += 1;
+                *root
+            }),
+            TypeRoots::ExplicitOwned(items) => items.get(self.index).map(|root| {
+                self.index += 1;
+                root.as_str()
+            }),
+            TypeRoots::TypesInNodeModules => None,
+        }
     }
 }
 

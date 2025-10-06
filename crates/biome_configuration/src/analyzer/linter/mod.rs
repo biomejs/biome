@@ -1,4 +1,3 @@
-#[rustfmt::skip]
 mod rules;
 
 use crate::bool::Bool;
@@ -48,7 +47,7 @@ pub enum RuleDomainValue {
     All,
     /// Disables all the rules that belong to this domain
     None,
-    /// It enables only the recommended rules for this domain
+    /// Enables only the recommended rules for this domain
     Recommended,
 }
 
@@ -92,8 +91,4 @@ impl LinterConfiguration {
     pub fn get_rules(&self) -> Rules {
         self.rules.clone().unwrap_or_default()
     }
-}
-
-impl Rules {
-    pub fn get_rule(&self) {}
 }

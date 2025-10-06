@@ -166,3 +166,79 @@ where
         }
     }
 }
+
+/// An offset-aware wrapper around `LosslessTreeSink` for parsing embedded content.
+///
+/// This wrapper applies a base offset to all text positions during parsing,
+/// allowing embedded content (like JavaScript in HTML script tags) to maintain
+/// correct source positions relative to the parent document.
+#[derive(Debug)]
+pub struct OffsetLosslessTreeSink<'a, L, Factory>
+where
+    L: Language,
+    Factory: SyntaxFactory<Kind = L::Kind>,
+{
+    inner: LosslessTreeSink<'a, L, Factory>,
+    base_offset: TextSize,
+}
+
+impl<'a, L, Factory> OffsetLosslessTreeSink<'a, L, Factory>
+where
+    L: Language + 'static,
+    Factory: SyntaxFactory<Kind = L::Kind>,
+{
+    /// Create a new offset-aware tree sink with the given base offset
+    pub fn new(text: &'a str, trivia: &'a [Trivia], base_offset: TextSize) -> Self {
+        Self {
+            inner: LosslessTreeSink::new(text, trivia),
+            base_offset,
+        }
+    }
+
+    /// Create a new offset-aware tree sink with cache and base offset
+    pub fn with_cache(
+        text: &'a str,
+        trivia: &'a [Trivia],
+        cache: &'a mut NodeCache,
+        base_offset: TextSize,
+    ) -> Self {
+        Self {
+            inner: LosslessTreeSink::with_cache(text, trivia, cache),
+            base_offset,
+        }
+    }
+
+    /// Finishes the tree and returns the root node with possible parser errors.
+    ///
+    /// The returned syntax node will have all its text ranges adjusted by the base offset.
+    pub fn finish(self) -> (biome_rowan::SyntaxNodeWithOffset<L>, Vec<ParseDiagnostic>) {
+        let (node, diagnostics) = self.inner.finish();
+        let offset_node = biome_rowan::SyntaxNodeWithOffset::new(node, self.base_offset);
+        (offset_node, diagnostics)
+    }
+}
+
+impl<L, Factory> TreeSink for OffsetLosslessTreeSink<'_, L, Factory>
+where
+    L: Language,
+    Factory: SyntaxFactory<Kind = L::Kind>,
+{
+    type Kind = L::Kind;
+
+    fn token(&mut self, kind: L::Kind, end: TextSize) {
+        // Forward to inner sink - the offset will be applied when finishing
+        self.inner.token(kind, end);
+    }
+
+    fn start_node(&mut self, kind: L::Kind) {
+        self.inner.start_node(kind);
+    }
+
+    fn finish_node(&mut self) {
+        self.inner.finish_node();
+    }
+
+    fn errors(&mut self, errors: Vec<ParseDiagnostic>) {
+        self.inner.errors(errors);
+    }
+}

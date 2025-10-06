@@ -71,7 +71,7 @@ expression: issue_5756.json
 ```
 issue_5756.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The keys are not sorted.
+  i The members are not sorted by key.
   
    > 1 │ {
        │ ^
@@ -85,7 +85,7 @@ issue_5756.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━�
        │ ^
     61 │ 
   
-  i Safe fix: They keys of the current object can be sorted.
+  i Safe fix: Sort the members by key.
   
      1  1 │   {
      2    │ - ··"282828":·null,

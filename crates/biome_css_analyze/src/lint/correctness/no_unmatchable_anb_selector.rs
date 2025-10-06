@@ -7,6 +7,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast};
+use biome_rule_options::no_unmatchable_anb_selector::NoUnmatchableAnbSelectorOptions;
 
 declare_lint_rule! {
     /// Disallow unmatchable An+B selectors.
@@ -59,7 +60,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("selector-anb-no-unmatchable")],
+        sources: &[RuleSource::Stylelint("selector-anb-no-unmatchable").same()],
     }
 }
 
@@ -67,7 +68,7 @@ impl Rule for NoUnmatchableAnbSelector {
     type Query = Ast<CssPseudoClassNthSelector>;
     type State = CssPseudoClassNthSelector;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUnmatchableAnbSelectorOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
@@ -101,16 +102,23 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
     match nth {
         AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(_) => false,
         AnyCssPseudoClassNth::CssPseudoClassNth(nth) => {
-            let coefficient = nth.value();
-            let constant = nth.offset().and_then(|offset| offset.value().ok());
+            let coefficient = nth.value().and_then(|n| n.value_token().ok());
+            let constant = nth
+                .offset()
+                .and_then(|offset| offset.value().ok())
+                .and_then(|n| n.value_token().ok());
 
             match (coefficient, constant) {
-                (Some(a), Some(b)) => a.to_trimmed_text() == "0" && b.to_trimmed_text() == "0",
-                (Some(a), None) => a.to_trimmed_text() == "0",
+                (Some(a), Some(b)) => a.text_trimmed() == "0" && b.text_trimmed() == "0",
+                (Some(a), None) => a.text_trimmed() == "0",
                 _ => false,
             }
         }
-        AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth.to_trimmed_text() == "0",
+        AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth
+            .value()
+            .ok()
+            .and_then(|n| n.value_token().ok())
+            .is_some_and(|n| n.text_trimmed() == "0"),
     }
 }
 
@@ -123,7 +131,8 @@ fn is_within_not_pseudo_class(node: &AnyCssPseudoClassNth) -> bool {
         .ancestors()
         .filter_map(|n| n.cast::<CssPseudoClassFunctionSelectorList>())
         .filter_map(|n| n.name().ok())
-        .filter(|n| n.text() == "not")
+        .filter_map(|n| n.value_token().ok())
+        .filter(|n| n.text_trimmed() == "not")
         .count();
     number_of_not % 2 == 1
 }

@@ -11,6 +11,7 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, trim_leading_trivia_pieces,
 };
+use biome_rule_options::no_useless_type_constraint::NoUselessTypeConstraintOptions;
 
 use crate::JsRuleAction;
 
@@ -57,6 +58,7 @@ declare_lint_rule! {
     /// ```ts,expect_diagnostic
     /// class BazUnknown<T extends unknown> {
     /// }
+    /// ```
     /// ```ts,expect_diagnostic
     /// class BazUnknown {
     ///   quxUnknown<U extends unknown>() {}
@@ -80,7 +82,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUselessTypeConstraint",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("no-unnecessary-type-constraint")],
+        sources: &[RuleSource::EslintTypeScript("no-unnecessary-type-constraint").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -91,7 +93,7 @@ impl Rule for NoUselessTypeConstraint {
     type Query = Ast<TsTypeConstraintClause>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessTypeConstraintOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

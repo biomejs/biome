@@ -225,6 +225,8 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionRelativeSelectorList
 	| CssPseudoClassFunctionValueList
 	| CssPseudoClassFunctionNth
+	| CssPseudoClassFunctionCustomIdentifierList
+	| CssPseudoClassFunctionCustomIdentifier
 	| CssBogusPseudoClass
 
 CssPseudoClassIdentifier =
@@ -233,7 +235,7 @@ CssPseudoClassIdentifier =
 // :first-of-type {}
 //  ^^^^^^^^^^^^^
 CssPseudoClassFunctionIdentifier =
- 	name: 'dir'
+ 	name: CssIdentifier
 	'('
 	ident: CssIdentifier
 	')'
@@ -241,7 +243,7 @@ CssPseudoClassFunctionIdentifier =
 // :global(.class div) {}
 //  ^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionSelector =
- 	name: ('global' | 'local')
+ 	name: CssIdentifier
 	'('
 	selector: AnyCssSelector
 	')'
@@ -249,7 +251,7 @@ CssPseudoClassFunctionSelector =
 // :not(div + #id:hover) {}
 //  ^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionSelectorList =
- 	name: ('matches' | 'not' | 'is' | 'where')
+ 	name: CssIdentifier
 	'('
 	selectors: CssSelectorList
 	')'
@@ -257,7 +259,7 @@ CssPseudoClassFunctionSelectorList =
 // :-webkit-any(i,p,:link,span:focus) {}
 //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelectorList =
- 	name: ('any' | 'past' | 'current' | 'future')
+ 	name: CssIdentifier
 	'('
 	compound_selectors: CssCompoundSelectorList
 	')'
@@ -269,7 +271,7 @@ CssCompoundSelectorList = (AnyCssCompoundSelector (',' AnyCssCompoundSelector)*)
 // :host(span:focus) {}
 //  ^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelector =
- 	name: ('host' | 'host-context')
+ 	name: CssIdentifier
 	'('
 	selector: AnyCssCompoundSelector
 	')'
@@ -281,7 +283,7 @@ AnyCssCompoundSelector =
 // :has(> img, +dt) {}
 // ^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionRelativeSelectorList =
- 	name: 'has'
+ 	name: CssIdentifier
 	'('
 	relative_selectors: CssRelativeSelectorList
 	')'
@@ -303,7 +305,7 @@ CssRelativeSelector =
 // :lang(de, fr) {}
 // ^^^^^^^^^^^^^
 CssPseudoClassFunctionValueList =
- 	name: 'lang'
+ 	name: CssIdentifier
 	'('
 	values: CssPseudoValueList
 	')'
@@ -321,7 +323,7 @@ AnyCssPseudoValue =
 // :nth-child(2n+1 of li, .test) {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionNth =
-	name: ('nth-child' | 'nth-last-child' | 'nth-of-type' | 'nth-last-of-type' | 'nth-col' | 'nth-last-col')
+	name: CssIdentifier
 	'('
 	selector: AnyCssPseudoClassNthSelector
 	')'
@@ -384,6 +386,22 @@ CssPseudoClassOfNthSelector =
 	'of'
 	selectors: CssSelectorList
 
+// :state(checked) { }
+//  ^^^^^^^^^^^^^^
+CssPseudoClassFunctionCustomIdentifier =
+	name: CssIdentifier
+	'('
+	ident: CssCustomIdentifier
+	')'
+
+// :active-view-transition-type(backwards forwards) { }
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPseudoClassFunctionCustomIdentifierList =
+	name: CssIdentifier
+	'('
+	items: CssCustomIdentifierList
+	')'
+
 // a::after {}
 //  ^^^^^^^^
 // video::cue(b) {}
@@ -397,7 +415,8 @@ CssPseudoElementSelector =
 AnyCssPseudoElement =
 	CssPseudoElementIdentifier
 	| CssPseudoElementFunctionSelector
-	| CssPseudoElementFunctionIdentifier
+	| CssPseudoElementFunctionCustomIdentifier
+	| CssPseudoElementFunction
 	| CssBogusPseudoElement
 
 // a::after {}
@@ -415,13 +434,21 @@ CssPseudoElementFunctionSelector =
 
 // ::highlight(sample) {}
 //   ^^^^^^^^^^^^^^^^^
-// ::part(active) {}
-//   ^^^^^^^^^^^^
-CssPseudoElementFunctionIdentifier =
-	name: ('highlight' | 'part')
+CssPseudoElementFunctionCustomIdentifier =
+	name: CssIdentifier
 	'('
-	ident: CssIdentifier
+	ident: CssCustomIdentifier
 	')'
+
+// ::part(active button) {}
+//   ^^^^^^^^^^^^^^^^^^^
+CssPseudoElementFunction =
+	name: CssIdentifier
+	'('
+	items: CssPseudoElementFunctionParameterList
+	')'
+
+CssPseudoElementFunctionParameterList = CssIdentifier*
 
 /////////////
 // COMMON BLOCKS
@@ -442,9 +469,9 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
 	| CssBogus
 	| CssMetavariable
-	| CssEmptyDeclaration
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -460,8 +487,9 @@ CssDeclarationOrAtRuleBlock =
 CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 
 AnyCssDeclarationOrAtRule =
-    CssDeclarationWithSemicolon
-    | CssAtRule
+	CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
+	| CssAtRule
 
 // When nested in this way, the contents of a nested group rule's block are parsed as <block-contents> rather than <rule-list>:
 // https://drafts.csswg.org/css-nesting-1/#conditionals
@@ -489,7 +517,11 @@ CssDeclarationBlock =
 	declarations: CssDeclarationList
  	'}'
 
-CssDeclarationList = CssDeclarationWithSemicolon*
+CssDeclarationList = AnyCssDeclaration*
+
+AnyCssDeclaration =
+	CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
 
 AnyCssRuleBlock =
 	CssRuleBlock
@@ -581,7 +613,7 @@ CssGenericDelimiter =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier
+AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'
@@ -618,6 +650,17 @@ AnyCssAtRule =
 	| CssValueAtRule
 	| CssPositionTryAtRule
 	| CssViewTransitionAtRule
+	// Tailwind CSS 4.0 at rules
+	| TwThemeAtRule
+	| TwSourceAtRule
+	| TwUtilityAtRule
+	| TwVariantAtRule
+	| TwCustomVariantAtRule
+	| TwApplyAtRule
+	| TwReferenceAtRule
+	| TwConfigAtRule
+	| TwPluginAtRule
+	// Unknowns
 	| CssUnknownBlockAtRule
 	| CssUnknownValueAtRule
 	| CssBogusAtRule
@@ -1204,7 +1247,7 @@ AnyCssPageSelectorPseudo =
 // 			     ^^^^^^ ^^^^^^^^^^^^
 CssPageSelectorPseudo =
 	':'
-	selector: ('left' | 'right' | 'first' | 'blank')
+	selector: CssIdentifier
 
 AnyCssPageAtRuleBlock =
 	CssPageAtRuleBlock
@@ -1221,6 +1264,7 @@ CssPageAtRuleItemList = AnyCssPageAtRuleItem*
 
 AnyCssPageAtRuleItem =
 	CssDeclarationWithSemicolon
+	| CssEmptyDeclaration
 	| CssAtRule
 	| CssMarginAtRule
 
@@ -1489,12 +1533,7 @@ AnyCssNamespaceUrl = CssUrlFunction | CssString
 // }
 CssStartingStyleAtRule =
 	'starting-style'
-	block: AnyCssStartingStyleBlock
-
-AnyCssStartingStyleBlock =
-	CssRuleBlock
-	| CssDeclarationBlock
-	| CssBogusBlock
+	block: AnyCssConditionalBlock
 
 // https://www.w3.org/TR/2012/WD-css3-conditional-20120911/#at-document
 // @document [ <url>                   |
@@ -1654,6 +1693,7 @@ AnyCssValue =
 	| CssBracketedValue
 	| CssUnicodeRange
 	| CssMetavariable
+	| TwValueThemeReference
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1812,7 +1852,7 @@ CssUnicodeRangeInterval =
 	end: CssUnicodeCodepoint
 
 
-// Any identifier. Case insensitve, used for standard property names, values, type selectors, etc.
+// Any identifier. Case insensitive, used for standard property names, values, type selectors, etc.
 CssIdentifier = value: 'ident'
 // Any non-standard identifier. Case sensitive, used for class names, ids, etc. Custom identifiers
 // _may_ overlap with standard identifiers defined by CSS (e.g., `color`).
@@ -1828,3 +1868,99 @@ CssUrlValueRaw = value: 'css_url_value_raw_literal'
 
 // https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-css/grammar.js
 CssMetavariable = value: 'grit_metavariable'
+
+
+// Tailwind
+
+// --value(--tab-size-*)
+TwValueThemeReference =
+	reference: CssDashedIdentifier
+	'-'
+	'*'
+
+// Enhanced @utility directive to support functional utilities
+// @utility tab-* { tab-size: --value([integer]); }
+// @utility tab-* { tab-size: --value("inherit", "initial", "unset"); }
+TwUtilityAtRule =
+  'utility'
+  name: AnyTwUtilityName
+  block: AnyCssDeclarationOrRuleBlock
+
+// Support both simple utility names and functional utility names
+AnyTwUtilityName =
+	CssIdentifier
+	| TwFunctionalUtilityName
+
+// Functional utility name: @utility tab-* { ... }
+TwFunctionalUtilityName =
+	identifier: CssIdentifier
+	'-'
+	'*'
+
+// Tailwind 4.0 @theme directive
+// @theme { --color-primary: #3b82f6; }
+TwThemeAtRule =
+  'theme'
+  name: CssIdentifier?
+  block: AnyCssDeclarationOrRuleBlock
+
+// Tailwind 4.0 @variant directive
+// @variant dark { background: black; }
+TwVariantAtRule =
+  'variant'
+  name: CssIdentifier
+  block: AnyCssDeclarationOrRuleBlock
+
+// Tailwind 4.0 @custom-variant directive
+// @custom-variant theme-midnight (&:where([data-theme="midnight"] *));
+TwCustomVariantAtRule =
+  'custom-variant'
+  name: CssIdentifier
+  selector: AnyTwCustomVariantSelector
+
+AnyTwCustomVariantSelector =
+	AnyCssRuleBlock
+	| TwCustomVariantShorthand
+
+TwCustomVariantShorthand =
+  '('
+  selector: AnyCssSelector
+  ')'
+  ';'
+
+// Tailwind 4.0 @apply directive (enhanced)
+// @apply text-lg font-bold;
+TwApplyAtRule =
+  'apply'
+  classes: TwApplyClassList
+  ';'
+
+TwApplyClassList = CssIdentifier*
+
+// Tailwind 4.0 @source directive
+// @source "../node_modules/@my-company/ui-lib";
+TwSourceAtRule =
+  'source'
+  path: CssString
+  ';'
+
+// Tailwind 4.0 @reference directive
+// @reference "../../app.css";
+TwReferenceAtRule =
+  'reference'
+  path: CssString
+  ';'
+
+// Tailwind 4.0 @config directive (compatibility)
+// @config "../../tailwind.config.js";
+TwConfigAtRule =
+  'config'
+  path: CssString
+  ';'
+
+// Tailwind 4.0 @plugin directive (compatibility)
+// @plugin "@tailwindcss/typography";
+TwPluginAtRule =
+  'plugin'
+  name: CssString
+  ';'

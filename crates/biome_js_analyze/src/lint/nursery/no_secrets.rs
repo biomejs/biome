@@ -1,17 +1,12 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-
 use biome_js_syntax::JsStringLiteralExpression;
-
 use biome_rowan::AstNode;
+use biome_rule_options::no_secrets::NoSecretsOptions;
 use regex::Regex;
-
 use std::sync::LazyLock;
-
-use biome_deserialize_macros::Deserializable;
-use serde::{Deserialize, Serialize};
 
 // TODO: Try to get this to work in JavaScript comments as well
 declare_lint_rule! {
@@ -81,8 +76,7 @@ declare_lint_rule! {
         name: "noSecrets",
         language: "js",
         recommended: false,
-        sources: &[RuleSource::EslintNoSecrets("no-secrets")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintNoSecrets("no-secrets").inspired()],
     }
 }
 
@@ -130,6 +124,7 @@ impl Rule for NoSecrets {
             .options()
             .entropy_threshold
             .unwrap_or(DEFAULT_HIGH_ENTROPY_THRESHOLD);
+
         detect_secret(text, &entropy_threshold)
     }
 
@@ -153,20 +148,14 @@ impl Rule for NoSecrets {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct NoSecretsOptions {
-    /// Set entropy threshold (default is 41).
-    entropy_threshold: Option<u16>,
-}
+const MIN_PATTERN_LEN: usize = 14;
+const DEFAULT_HIGH_ENTROPY_THRESHOLD: u16 = 41;
+const ENTROPY_PRECISION_MULTIPLIER: f64 = 10.0;
 
 fn is_path(text: &str) -> bool {
     // Check for common path indicators
     text.starts_with("./") || text.starts_with("../")
 }
-
-const DEFAULT_HIGH_ENTROPY_THRESHOLD: u16 = 41;
 
 // Known sensitive patterns start here
 static JWT_REGEX: LazyLock<Regex> = LazyLock::new(|| {
@@ -330,7 +319,6 @@ static SENSITIVE_PATTERNS: &[SensitivePattern] = &[
         allows_spaces: true,
     },
 ];
-const MIN_PATTERN_LEN: usize = 14;
 
 // Known safe patterns start here
 static BASE64_REGEX: LazyLock<Regex> = LazyLock::new(|| {
@@ -382,9 +370,9 @@ fn detect_secret(data: &str, entropy_threshold: &u16) -> Option<&'static str> {
                 continue;
             }
 
-            let entropy =
-                calculate_entropy_with_case_and_classes(token, *entropy_threshold as f64, 15.0);
-            if (entropy as u16) > *entropy_threshold {
+            let entropy = calculate_entropy_with_case_and_classes(token);
+            let entropy_threshold = *entropy_threshold as f64 / ENTROPY_PRECISION_MULTIPLIER;
+            if entropy > entropy_threshold {
                 return Some("Detected high entropy string");
             }
         }
@@ -403,19 +391,10 @@ References:
 - ChatGPT chat: https://chatgpt.com/share/670370bf-3e18-8011-8454-f3bd01be0319
 - Original paper for Shannon Entropy: https://ieeexplore.ieee.org/abstract/document/6773024/
 */
-fn calculate_entropy_with_case_and_classes(
-    data: &str,
-    base_threshold: f64,
-    scaling_factor: f64,
-) -> f64 {
-    let mut freq = [0usize; 256];
+fn calculate_entropy_with_case_and_classes(data: &str) -> f64 {
+    let shannon_entropy = shannon_entropy(data);
     let len = data.len();
 
-    for &byte in data.as_bytes() {
-        freq[byte as usize] += 1;
-    }
-
-    let mut shannon_entropy = 0.0;
     let mut letter_count = 0;
     let mut uppercase_count = 0;
     let mut lowercase_count = 0;
@@ -423,13 +402,6 @@ fn calculate_entropy_with_case_and_classes(
     let mut symbol_count = 0;
     let mut case_switches = 0;
     let mut previous_char_was_upper = false;
-
-    for count in freq.iter() {
-        if *count > 0 {
-            let p = *count as f64 / len as f64;
-            shannon_entropy -= p * p.log2();
-        }
-    }
 
     // Letter classification and case switching
     for (i, c) in data.chars().enumerate() {
@@ -474,31 +446,29 @@ fn calculate_entropy_with_case_and_classes(
         0.0
     };
 
-    let adjusted_entropy = shannon_entropy
+    shannon_entropy
         + (case_entropy_boost * 2.5)
         + (symbol_entropy_boost * 1.5)
-        + digit_entropy_boost;
-
-    // Apply exponential scaling to avoid excessive boosting for long, structured tokens
-    apply_exponential_entropy_scaling(adjusted_entropy, len, base_threshold, scaling_factor)
+        + digit_entropy_boost
 }
 
-/*
-    A simple mechanism to scale entropy as the string length increases, the reason being that
-    large length strings are likely to be secrets.
-    TODO: However, at some point there should definitely be a cutoff i.e. 100 characters, because it's
-    probably base64 data or something similar at that point.
-    This was taken from GPT, and I sadly couldn't find references for it.
-*/
-fn apply_exponential_entropy_scaling(
-    entropy: f64,
-    token_length: usize,
-    base_threshold: f64,
-    scaling_factor: f64,
-) -> f64 {
-    // We will apply a logarithmic dampening to prevent excessive scaling for long tokens
-    let scaling_adjustment = (token_length as f64 / scaling_factor).ln();
-    base_threshold + entropy * scaling_adjustment
+fn shannon_entropy(data: &str) -> f64 {
+    if data.is_empty() {
+        return 0.0;
+    }
+    let mut freq = [0usize; 256];
+    let len = data.len();
+    for &byte in data.as_bytes() {
+        freq[byte as usize] += 1;
+    }
+    let mut shannon_entropy = 0.0;
+    for count in freq.iter() {
+        if *count > 0 {
+            let p = *count as f64 / len as f64;
+            shannon_entropy -= p * p.log2();
+        }
+    }
+    shannon_entropy
 }
 
 #[cfg(test)]
@@ -516,6 +486,42 @@ mod tests {
         assert_eq!(
             initialized_min_pattern_len, actual_min_pattern_len,
             "The initialized MIN_PATTERN_LEN value is not correct. Please ensure it's the smallest possible number from the SENSITIVE_PATTERNS."
+        );
+    }
+
+    #[test]
+    fn test_shannon_entropy() {
+        let res = shannon_entropy("");
+        assert_eq!(res, 0.0);
+
+        let res = shannon_entropy("a");
+        assert_eq!(res, 0.0);
+
+        let res = shannon_entropy("aaaaa");
+        assert_eq!(res, 0.0);
+
+        let res = shannon_entropy("ab");
+        assert_eq!(res, 1.0);
+
+        let res = shannon_entropy("aab");
+        assert_eq!(res, 0.918_295_834_054_489_6);
+    }
+
+    #[test]
+    fn test_calculate_entropy_with_case_and_classes() {
+        let entropy = calculate_entropy_with_case_and_classes("aaaaaaaaaaaaaaaa");
+        assert!(entropy < 4.0, "Expected low entropy, got {entropy}");
+
+        let entropy = calculate_entropy_with_case_and_classes("AbCdEfGhIjK");
+        assert!(entropy > 5.0, "Expected moderate entropy, got {entropy}");
+
+        let entropy = calculate_entropy_with_case_and_classes("AKIaSyD9mP+e2KqZ2S");
+        assert!(entropy > 6.5, "Expected high entropy, got {entropy}");
+
+        let entropy = calculate_entropy_with_case_and_classes("1234567890");
+        assert!(
+            entropy > 3.0,
+            "Expected some entropy for digits, got {entropy}"
         );
     }
 }

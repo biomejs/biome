@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFormalParameter, JsInitializerClause, JsSyntaxToken, TsPropertyParameter};
 use biome_rowan::{AstNode, BatchMutationExt, Direction, declare_node_union};
+use biome_rule_options::use_default_parameter_last::UseDefaultParameterLastOptions;
 
 use crate::JsRuleAction;
 
@@ -53,8 +54,8 @@ declare_lint_rule! {
         name: "useDefaultParameterLast",
         language: "js",
         sources: &[
-            RuleSource::Eslint("default-param-last"),
-            RuleSource::EslintTypeScript("default-param-last")
+            RuleSource::Eslint("default-param-last").same(),
+            RuleSource::EslintTypeScript("default-param-last").same(),
         ],
         recommended: false,
         severity: Severity::Warning,
@@ -98,7 +99,7 @@ impl Rule for UseDefaultParameterLast {
     type Query = Ast<AnyFormalParameter>;
     type State = AnyFormalParameter;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseDefaultParameterLastOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let formal_param = ctx.query();

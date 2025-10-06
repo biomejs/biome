@@ -1,11 +1,4 @@
 use crate::react::{ReactLibrary, is_react_call_api};
-
-use biome_console::markup;
-use biome_deserialize::{
-    DeserializableTypes, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
-    DeserializationVisitor,
-};
-use biome_diagnostics::Severity;
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
@@ -19,8 +12,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
 use biome_analyze::QueryMatch;
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
+use biome_rule_options::use_exhaustive_dependencies::StableHookResult;
 
 /// Return result of [react_hook_with_dependency].
 #[derive(Debug)]
@@ -148,7 +140,7 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
         return false;
     };
 
-    // HACK: jest has some functions that start with `use` and are not hooks
+    // HACK: Jest/Vitest have some functions that start with `use` and are not hooks
     if let Some(expr) = call
         .callee()
         .ok()
@@ -158,7 +150,8 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
         .and_then(|ident| ident.name().ok())
         .and_then(|name| name.value_token().ok())
     {
-        if expr.text_trimmed() == "jest" {
+        let expr_trimmed = expr.text_trimmed();
+        if expr_trimmed == "jest" || expr_trimmed == "vi" {
             return false;
         }
     }
@@ -243,173 +236,6 @@ impl StableReactHookConfiguration {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub enum StableHookResult {
-    /// Used to indicate the hook does not have a stable result.
-    #[default]
-    None,
-
-    /// Used to indicate the identity of the result value is stable.
-    ///
-    /// Note this does not imply internal stability. For instance, the ref
-    /// objects returned by React's `useRef()` always have a stable identity,
-    /// but their internal value may be mutable.
-    Identity,
-
-    /// Used to indicate the hook returns an array and some of its indices have
-    /// stable identities.
-    ///
-    /// For example, React's `useState()` hook returns a stable function at
-    /// index 1.
-    Indices(Vec<u8>),
-}
-
-#[cfg(feature = "schemars")]
-impl JsonSchema for StableHookResult {
-    fn schema_name() -> String {
-        "StableHookResult".to_owned()
-    }
-
-    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
-        use schemars::schema::*;
-        Schema::Object(SchemaObject {
-            subschemas: Some(Box::new(SubschemaValidation {
-                one_of: Some(vec![
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Boolean.into()),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("Whether the hook has a stable result.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    }),
-                    Schema::Object(SchemaObject {
-                        instance_type: Some(InstanceType::Array.into()),
-                        array: Some(Box::new(ArrayValidation {
-                            items: Some(SingleOrVec::Single(Box::new(Schema::Object(SchemaObject {
-                                instance_type: Some(InstanceType::Integer.into()),
-                                format: Some("uint8".to_owned()),
-                                number: Some(Box::new(NumberValidation {
-                                    minimum: Some(0.),
-                                    maximum: Some(255.),
-                                    ..Default::default()
-                                })),
-                                ..Default::default()
-                            })))),
-                            min_items: Some(1),
-                            ..Default::default()
-                        })),
-                        metadata: Some(Box::new(Metadata {
-                            description: Some("Used to indicate the hook returns an array and some of its indices have stable identities.".to_owned()),
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    })
-                ]),
-                ..Default::default()
-            })),
-            ..Default::default()
-        })
-    }
-}
-
-impl biome_deserialize::Deserializable for StableHookResult {
-    fn deserialize(
-        ctx: &mut impl DeserializationContext,
-        value: &impl DeserializableValue,
-        name: &str,
-    ) -> Option<Self> {
-        value.deserialize(ctx, StableResultVisitor, name)
-    }
-}
-
-struct StableResultVisitor;
-impl DeserializationVisitor for StableResultVisitor {
-    type Output = StableHookResult;
-
-    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY
-        .union(DeserializableTypes::BOOL)
-        .union(DeserializableTypes::NUMBER);
-
-    fn visit_array(
-        self,
-        ctx: &mut impl DeserializationContext,
-        items: impl Iterator<Item = Option<impl DeserializableValue>>,
-        _range: TextRange,
-        _name: &str,
-    ) -> Option<Self::Output> {
-        let indices: Vec<u8> = items
-            .filter_map(|value| {
-                DeserializableValue::deserialize(&value?, ctx, StableResultIndexVisitor, "")
-            })
-            .collect();
-
-        Some(if indices.is_empty() {
-            StableHookResult::None
-        } else {
-            StableHookResult::Indices(indices)
-        })
-    }
-
-    fn visit_bool(
-        self,
-        ctx: &mut impl DeserializationContext,
-        value: bool,
-        range: TextRange,
-        _name: &str,
-    ) -> Option<Self::Output> {
-        match value {
-            true => Some(StableHookResult::Identity),
-            false => {
-                ctx.report(
-                    DeserializationDiagnostic::new(
-                        markup! { "This hook is configured to not have a stable result" },
-                    )
-                    .with_custom_severity(Severity::Warning)
-                    .with_range(range),
-                );
-                Some(StableHookResult::None)
-            }
-        }
-    }
-
-    fn visit_number(
-        self,
-        ctx: &mut impl DeserializationContext,
-        value: biome_deserialize::TextNumber,
-        range: TextRange,
-        name: &str,
-    ) -> Option<Self::Output> {
-        StableResultIndexVisitor::visit_number(StableResultIndexVisitor, ctx, value, range, name)
-            .map(|index| StableHookResult::Indices(vec![index]))
-    }
-}
-
-struct StableResultIndexVisitor;
-impl DeserializationVisitor for StableResultIndexVisitor {
-    type Output = u8;
-
-    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::NUMBER;
-
-    fn visit_number(
-        self,
-        ctx: &mut impl DeserializationContext,
-        value: biome_deserialize::TextNumber,
-        range: TextRange,
-        _name: &str,
-    ) -> Option<Self::Output> {
-        match value.parse::<u8>() {
-            Ok(index) => Some(index),
-            Err(_) => {
-                ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
-                    0, 255, range,
-                ));
-                None
-            }
-        }
-    }
-}
-
 /// Checks if the binding is bound to a stable React hook
 /// return value. Stable returns do not need to be specified
 /// as dependencies.
@@ -439,6 +265,10 @@ pub fn is_binding_react_stable(
         .parent::<JsArrayBindingPatternElement>()
         .map(|parent| parent.syntax().index() / 2)
         .and_then(|index| index.try_into().ok());
+    let key = binding
+        .name_token()
+        .ok()
+        .map(|token| token.text_trimmed().to_string());
     let Some(callee) = declarator
         .initializer()
         .and_then(|initializer| initializer.expression().ok())
@@ -461,10 +291,11 @@ pub fn is_binding_react_stable(
             return false;
         }
 
-        match (&config.result, index) {
-            (StableHookResult::Identity, index) => index.is_none(),
-            (StableHookResult::Indices(indices), Some(index)) => indices.contains(&index),
-            (_, _) => false,
+        match (&config.result, index, &key) {
+            (StableHookResult::Identity, None, _) => true,
+            (StableHookResult::Indices(indices), Some(i), _) => indices.contains(&i),
+            (StableHookResult::Keys(keys), _, Some(k)) => keys.contains(k),
+            _ => false,
         }
     })
 }

@@ -2,24 +2,59 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
-use biome_js_syntax::{AnyJsExpression, AnyJsRoot, JsLanguage, JsSyntaxNode};
+use biome_js_syntax::{
+    AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsLanguage, JsSyntaxNode,
+};
 use biome_js_type_info::Type;
-use biome_module_graph::ScopedResolver;
+use biome_module_graph::ModuleResolver;
 use biome_rowan::{AstNode, TextRange};
 use std::sync::Arc;
 
 /// Service for use with type inference rules.
-#[derive(Clone, Debug)]
+///
+/// This service is used for retrieving [`Type`] instances for arbitrary
+/// expressions or function definitions from the module graph.
+#[derive(Clone)]
 pub struct TypedService {
-    resolver: Option<Arc<ScopedResolver>>,
+    resolver: Option<Arc<ModuleResolver>>,
 }
 
 impl TypedService {
-    pub fn type_for_expression(&self, expr: &AnyJsExpression) -> Type {
+    /// Returns the [`Type`] for the given `expression`.
+    pub fn type_of_expression(&self, expression: &AnyJsExpression) -> Type {
         self.resolver
             .as_ref()
-            .map(|resolver| resolver.resolved_type_for_expression(expr))
+            .map(|resolver| resolver.resolved_type_of_expression(expression))
             .unwrap_or_default()
+    }
+
+    /// Returns the [`Type`] for the given `function`.
+    pub fn type_of_function(&self, function: &AnyJsFunction) -> Type {
+        match function {
+            AnyJsFunction::JsArrowFunctionExpression(expr) => {
+                self.type_of_expression(&AnyJsExpression::JsArrowFunctionExpression(expr.clone()))
+            }
+            AnyJsFunction::JsFunctionDeclaration(decl) => decl
+                .id()
+                .ok()
+                .as_ref()
+                .and_then(AnyJsBinding::as_js_identifier_binding)
+                .and_then(|identifier| identifier.name_token().ok())
+                .and_then(|name| {
+                    self.resolver.as_ref().map(|resolver| {
+                        resolver.resolved_type_of_named_value(function.range(), name.text())
+                    })
+                })
+                .unwrap_or_default(),
+            AnyJsFunction::JsFunctionExportDefaultDeclaration(_decl) => self
+                .resolver
+                .as_ref()
+                .and_then(|resolver| resolver.resolved_type_of_default_export())
+                .unwrap_or_default(),
+            AnyJsFunction::JsFunctionExpression(expr) => {
+                self.type_of_expression(&AnyJsExpression::JsFunctionExpression(expr.clone()))
+            }
+        }
     }
 }
 
@@ -41,7 +76,7 @@ impl FromServices for TypedService {
             }
         }
 
-        let resolver: Option<&Option<Arc<ScopedResolver>>> = services.get_service();
+        let resolver: Option<&Option<Arc<ModuleResolver>>> = services.get_service();
         let resolver = resolver.and_then(|resolver| resolver.as_ref().map(Arc::clone));
         Ok(Self { resolver })
     }

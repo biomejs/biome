@@ -4,7 +4,7 @@ use crate::workspace::ScanKind;
 use biome_analyze::{
     AnalyzerRules, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
-use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
+use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
 use biome_configuration::diagnostics::{
     CantLoadExtendFile, CantResolve, EditorConfigDiagnostic, ParseFailedDiagnostic,
 };
@@ -57,62 +57,6 @@ pub struct LoadedConfiguration {
 }
 
 impl LoadedConfiguration {
-    /// Return the path of the **directory** where the configuration is
-    pub fn directory_path(&self) -> Option<&Utf8Path> {
-        self.directory_path.as_deref()
-    }
-
-    /// Return the path of the **file** where the configuration is
-    pub fn file_path(&self) -> Option<&Utf8Path> {
-        self.file_path.as_deref()
-    }
-
-    /// Whether they are errors emitted. Error are [Severity::Error] or greater.
-    pub fn has_errors(&self) -> bool {
-        self.diagnostics
-            .iter()
-            .any(|diagnostic| diagnostic.severity() >= Severity::Error)
-    }
-
-    /// It returns an iterator over the diagnostics emitted during the resolution of the configuration file
-    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
-        ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
-    }
-}
-
-pub struct ConfigurationDiagnosticsIter<'a> {
-    errors: &'a [Error],
-    len: usize,
-    index: usize,
-}
-
-impl<'a> ConfigurationDiagnosticsIter<'a> {
-    fn new(errors: &'a [Error]) -> Self {
-        Self {
-            len: errors.len(),
-            index: 0,
-            errors,
-        }
-    }
-}
-
-impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
-    type Item = &'a Error;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.len == self.index {
-            return None;
-        }
-
-        let item = self.errors.get(self.index);
-        self.index += 1;
-        item
-    }
-}
-
-impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
-
-impl LoadedConfiguration {
     /// It consumes the payload, applies and extends and returns the final, extended configuration.
     pub fn try_from_payload(
         value: Option<ConfigurationPayload>,
@@ -151,57 +95,70 @@ impl LoadedConfiguration {
             file_path: Some(configuration_file_path),
         })
     }
+
+    /// Return the path of the **directory** where the configuration is
+    pub fn directory_path(&self) -> Option<&Utf8Path> {
+        self.directory_path.as_deref()
+    }
+
+    /// Return the path of the **file** where the configuration is
+    pub fn file_path(&self) -> Option<&Utf8Path> {
+        self.file_path.as_deref()
+    }
+
+    /// Whether they are errors emitted. Error are [Severity::Error] or greater.
+    pub fn has_errors(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.severity() >= Severity::Error)
+    }
+
+    /// It returns an iterator over the diagnostics emitted during the resolution of the configuration file
+    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter<'_> {
+        ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
+    }
 }
 
-/// Load the partial configuration for this session of the CLI.
-///
-/// When `root` is passed, it returns the first configuration that has `root: true`.
+pub struct ConfigurationDiagnosticsIter<'a> {
+    errors: &'a [Error],
+    len: usize,
+    index: usize,
+}
+
+impl<'a> ConfigurationDiagnosticsIter<'a> {
+    fn new(errors: &'a [Error]) -> Self {
+        Self {
+            len: errors.len(),
+            index: 0,
+            errors,
+        }
+    }
+}
+
+impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
+    type Item = &'a Error;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.len == self.index {
+            return None;
+        }
+
+        let item = self.errors.get(self.index);
+        self.index += 1;
+        item
+    }
+}
+
+impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
+
+/// Load the partial configuration for this session.
 #[instrument(level = "debug", skip(fs))]
 pub fn load_configuration(
     fs: &dyn FsWithResolverProxy,
     config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = read_config(fs, config_path, true)?;
-    let mut loaded_configuration = LoadedConfiguration::try_from_payload(config, fs);
-
-    // We loaded the configuration, now we must check if this configuration is inside a monorepo.
-    if let Ok(loaded_configuration) = &mut loaded_configuration {
-        // First, we check if the configuration found uses the syntax `"extends": "//"`
-        if loaded_configuration.configuration.extends_root() {
-            // We start looking upwards and find a `biome.json` that has `root: true`
-            if let Some(directory_path) = loaded_configuration.directory_path.as_ref() {
-                let root_config = read_config(
-                    fs,
-                    ConfigurationPathHint::FromWorkspace(directory_path.clone()),
-                    true,
-                )?;
-
-                if root_config.is_none() {
-                    return Err(BiomeDiagnostic::no_root_from_nested_extend().into());
-                }
-
-                // We call possible extends from the root configuration
-                let mut result = LoadedConfiguration::try_from_payload(root_config, fs)?;
-                // The configuration we found at the beginning now must "extend" from the root, and
-                // to do so we merge the root with the original configuration, so the original
-                // configuration takes precedence...
-                result
-                    .configuration
-                    .merge_with(loaded_configuration.configuration.clone());
-
-                // ...and how we swap the values to `loaded_configuration` configuration takes the correct
-                // configuration has the correct final values
-                std::mem::swap(
-                    &mut loaded_configuration.configuration,
-                    &mut result.configuration,
-                );
-                // We add possible diagnostics coming from the root configuration
-                loaded_configuration.diagnostics.extend(result.diagnostics);
-            }
-        }
-    }
-
-    loaded_configuration
+    LoadedConfiguration::try_from_payload(config, fs)
 }
 
 /// - [Result]: if an error occurred while loading the configuration file.
@@ -209,51 +166,57 @@ pub fn load_configuration(
 /// - [ConfigurationPayload]: The result of the operation
 type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 
-/// Load the configuration from the file system.
+/// Loads the configuration from the file system.
 ///
-/// The configuration file will be read from the `fs`. A [path hint](ConfigurationPathHint) should be provided.
+/// The configuration file will be read from the `fs`.
 ///
-/// - If the path hint is a path to a file that is provided by the user, the function will try to load that file or error.
-///     The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
-///     deserialize it as a `.jsonc` file.
+/// A [`path_hint`](ConfigurationPathHint) should be provided.
 ///
-/// - If the path hint is a path to a directory which is provided by the user, the function will try to find a `biome.json`
-///     or `biome.jsonc` file in order in that directory. And If it cannot find one, it will error.
+/// - If the path hint is a path to a file that is provided by the user, the
+///     function will try to load that file or error. The name doesn't have to
+///     be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`,
+///     Biome will try to deserialize it as a `.jsonc` file.
 ///
-/// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
-///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
-///     means Biome will use the default configuration.
+/// - If the path hint is a path to a directory which is provided by the user,
+///     the function will try to find a `biome.json` or `biome.jsonc` file in
+///     order in that directory. And if it cannot find one, it will error.
 ///
-/// When `seek_root` is `true`, the function will stop at the first configuration file with `"root": true`, and it skips it
-/// otherwise
+/// - Otherwise, the function will try to traverse upwards through the file
+///     system until it finds a `biome.json` or `biome.jsonc` file, or there
+///     aren't directories anymore. In this case, the function will not error
+///     but return an `Ok(None)`, which means Biome will use the default
+///     configuration.
+///
+/// If `seek_root` is `true`, the function will stop at the first
+/// configuration file with `"root": true`. Otherwise, any configuration file
+/// will do.
 #[instrument(level = "debug", skip(fs))]
 pub fn read_config(
     fs: &dyn FileSystem,
-    base_path: ConfigurationPathHint,
+    path_hint: ConfigurationPathHint,
     seek_root: bool,
 ) -> LoadConfig {
     // This path is used for configuration resolution from external packages.
-    let external_resolution_base_path = match &base_path {
+    let external_resolution_base_path = match &path_hint {
         // Path hint from LSP is always the workspace root
         // we use it as the resolution base path.
         ConfigurationPathHint::FromLsp(path) => path.clone(),
         ConfigurationPathHint::FromWorkspace(path) => path.clone(),
         ConfigurationPathHint::FromUser(path) => path.clone(),
-        ConfigurationPathHint::None => fs
-            .working_directory()
-            .map_or(Utf8PathBuf::new(), |working_directory| working_directory),
+        ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
     };
 
     // If the configuration path hint is not a file path
     // we'll auto search for the configuration file
-    let configuration_directory = match base_path {
+    let configuration_directory = match path_hint {
         ConfigurationPathHint::FromLsp(path) => path,
         ConfigurationPathHint::FromWorkspace(path) => path,
-        ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
         ConfigurationPathHint::FromUser(ref config_file_path) => {
-            // If the configuration path hint is from user and is a file path, we'll load it directly
+            // If the configuration path hint is from the user, we'll load it
+            // directly.
             return load_user_config(fs, config_file_path, external_resolution_base_path);
         }
+        ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
     };
 
     // We search for the first non-root `biome.json` or `biome.jsonc` files:
@@ -268,20 +231,14 @@ pub fn read_config(
 
         let deserialized_content =
             deserialize_from_json_str::<Configuration>(content, parser_options, "");
-        let is_root = deserialized_content
+        let is_found = deserialized_content
             .deserialized
             .as_ref()
-            .is_some_and(|config| {
-                if seek_root {
-                    config.is_root()
-                } else {
-                    !config.is_root()
-                }
-            });
-        if is_root {
+            .is_some_and(|config| if seek_root { config.is_root() } else { true });
+        if is_found {
             deserialized = Some(deserialized_content);
         }
-        is_root
+        is_found
     };
 
     let Some(auto_search_result) = fs.auto_search_files_with_predicate(
@@ -306,8 +263,7 @@ fn load_user_config(
     config_file_path: &Utf8Path,
     external_resolution_base_path: Utf8PathBuf,
 ) -> LoadConfig {
-    // If the configuration path hint is from user and is a file path,
-    // we'll load it directly
+    // If the configuration path hint is a file path, we'll load it directly.
     if fs.path_is_file(config_file_path) {
         let content = fs.read_file_from_path(config_file_path)?;
         let parser_options = match config_file_path.extension() {
@@ -468,7 +424,7 @@ pub fn create_config(
 
     config_file
         .set_content(formatted.as_code().as_bytes())
-        .map_err(|_| WorkspaceError::cant_read_file(format!("{}", path)))?;
+        .map_err(|_| WorkspaceError::cant_read_file(format!("{path}")))?;
 
     Ok(())
 }
@@ -512,12 +468,20 @@ pub trait ConfigurationExt {
 }
 
 impl ConfigurationExt for Configuration {
-    /// Mutates the configuration so that any fields that have not been configured explicitly are
-    /// filled in with their values from configs listed in the `extends` field.
+    /// Mutates the configuration so that any fields that have not been
+    /// configured explicitly are filled in with their values from configs
+    /// listed in the `extends` field.
     ///
     /// The `extends` configs are applied from left to right.
     ///
-    /// If a configuration can't be resolved from the file system, the operation will fail.
+    /// If a configuration can't be resolved from the file system, the operation
+    /// will fail.
+    ///
+    /// `file_path` is the path to the configuration file and is used for
+    /// resolving relative paths in the `extends` field.
+    ///
+    /// `external_resolution_base_path` is used for resolving non-relative
+    /// `extends` entries.
     fn apply_extends(
         &mut self,
         fs: &dyn FsWithResolverProxy,
@@ -530,19 +494,20 @@ impl ConfigurationExt for Configuration {
             file_path.parent().expect("file path should have a parent"),
             external_resolution_base_path,
         )?;
-        let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
-            .into_iter()
-            .map(|d| d.consume())
-            .map(|(config, diagnostics)| (config.unwrap_or_default(), diagnostics))
-            .unzip();
+        let (configurations, errors): (Vec<_>, Vec<_>) =
+            deserialized.into_iter().map(Deserialized::consume).unzip();
 
-        let extended_configuration = configurations.into_iter().reduce(
+        let extended_configuration = configurations.into_iter().flatten().reduce(
             |mut previous_configuration, current_configuration| {
                 previous_configuration.merge_with(current_configuration);
                 previous_configuration
             },
         );
         if let Some(mut extended_configuration) = extended_configuration {
+            // Make sure our root value is set explicitly, so it cannot be set
+            // by configs we extend.
+            self.root = Some(self.is_root().into());
+
             // We swap them to avoid having to clone `self.configuration` to merge it.
             std::mem::swap(self, &mut extended_configuration);
             self.merge_with(extended_configuration)
@@ -559,7 +524,8 @@ impl ConfigurationExt for Configuration {
         Ok(())
     }
 
-    /// It attempts to deserialize all the configuration files that were specified in the `extends` property
+    /// Deserializes all the configuration files that were specified in the
+    /// `extends` field.
     fn deserialize_extends(
         &mut self,
         fs: &dyn FsWithResolverProxy,
@@ -578,11 +544,15 @@ impl ConfigurationExt for Configuration {
                 let extend_configuration_file_path = if extend_entry_as_path.starts_with(".") {
                     relative_resolution_base_path.join(extend_entry.as_ref())
                 } else {
+                    const RESOLVE_OPTIONS: ResolveOptions = ResolveOptions::new()
+                        .with_assume_relative()
+                        .with_condition_names(&["biome", "default"]);
+
                     resolve(
                         extend_entry.as_ref(),
                         external_resolution_base_path,
                         fs,
-                        &ResolveOptions::default().with_assume_relative(),
+                        &RESOLVE_OPTIONS,
                     )
                     .map_err(|error| {
                         CantResolve::new(Utf8PathBuf::from(extend_entry), error)
@@ -617,12 +587,16 @@ impl ConfigurationExt for Configuration {
 
                 let mut content = String::new();
                 file.read_to_string(&mut content).map_err(|err| {
-                CantLoadExtendFile::new(extend_configuration_file_path.to_string(), err.to_string()).with_verbose_advice(
-                    markup! {
-                        "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
-                    }
-                )
-            })?;
+                    CantLoadExtendFile::new(
+                        extend_configuration_file_path.to_string(),
+                        err.to_string(),
+                    )
+                    .with_verbose_advice(markup! {
+                        "It's possible that the file was created with a "
+                        "different user/group. Make sure you have the rights "
+                        "to read the file."
+                    })
+                })?;
                 let deserialized = deserialize_from_json_str::<Self>(
                     content.as_str(),
                     match extend_configuration_file_path.extension() {
@@ -655,7 +629,7 @@ mod test {
 
     #[test]
     fn should_not_load_a_configuration_yml() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(Utf8PathBuf::from("biome.yml"), "content".to_string());
         let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("biome.yml"));
 
@@ -666,7 +640,7 @@ mod test {
 
     #[test]
     fn should_skip_non_root_configuration() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             Utf8PathBuf::from("/biome.json"),
             r#"{ "linter": { "enabled": false } }"#.to_string(),
@@ -694,7 +668,7 @@ mod test {
 
     #[test]
     fn should_refuse_user_provided_non_root_configuration() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             Utf8PathBuf::from("/biome.json"),
             r#"{ "linter": { "enabled": false } }"#.to_string(),
@@ -725,24 +699,30 @@ pub struct ProjectScanComputer<'a> {
     requires_project_scan: bool,
     enabled_rules: FxHashSet<RuleFilter<'a>>,
     configuration: &'a Configuration,
-    skip: &'a [RuleSelector],
-    only: &'a [RuleSelector],
+    skip: &'a [AnalyzerSelector],
+    only: &'a [AnalyzerSelector],
 }
 
 impl<'a> ProjectScanComputer<'a> {
-    pub fn new(
-        configuration: &'a Configuration,
-        skip: &'a [RuleSelector],
-        only: &'a [RuleSelector],
-    ) -> Self {
+    pub fn new(configuration: &'a Configuration) -> Self {
         let enabled_rules = configuration.get_linter_rules().as_enabled_rules();
         Self {
             enabled_rules,
             requires_project_scan: false,
-            skip,
-            only,
             configuration,
+            skip: &[],
+            only: &[],
         }
+    }
+
+    pub fn with_rule_selectors(
+        mut self,
+        skip: &'a [AnalyzerSelector],
+        only: &'a [AnalyzerSelector],
+    ) -> Self {
+        self.skip = skip;
+        self.only = only;
+        self
     }
 
     /// Computes and return the [ScanKind] required by this project
@@ -768,7 +748,7 @@ impl<'a> ProjectScanComputer<'a> {
         } else {
             // There's no need to scan further known files if the VCS isn't enabled
             if !self.configuration.use_ignore_file() {
-                ScanKind::None
+                ScanKind::NoScanner
             } else {
                 ScanKind::KnownFiles
             }
@@ -781,13 +761,18 @@ impl<'a> ProjectScanComputer<'a> {
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
-        let selector = RuleSelector::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+
         if !self.only.is_empty() {
-            if self.only.contains(&selector) {
-                let domains = R::METADATA.domains;
-                self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            for selector in self.only.iter() {
+                if selector.match_rule::<R>() {
+                    let domains = R::METADATA.domains;
+                    self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+                    break;
+                }
             }
-        } else if !self.skip.contains(&selector) && self.enabled_rules.contains(&filter) {
+        } else if !self.skip.iter().any(|s| s.match_rule::<R>())
+            && self.enabled_rules.contains(&filter)
+        {
             let domains = R::METADATA.domains;
             self.requires_project_scan |= domains.contains(&RuleDomain::Project);
         }
@@ -837,7 +822,7 @@ impl RegistryVisitor<GraphqlLanguage> for ProjectScanComputer<'_> {
 mod tests {
     use super::*;
     use biome_configuration::analyzer::{
-        Correctness, RuleDomainValue, RuleDomains, SeverityOrGroup,
+        Correctness, DomainSelector, RuleDomainValue, RuleDomains, RuleSelector, SeverityOrGroup,
     };
     use biome_configuration::{
         LinterConfiguration, RuleConfiguration, RulePlainConfiguration, Rules,
@@ -855,8 +840,8 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
-            ScanKind::None
+            ProjectScanComputer::new(&configuration).compute(),
+            ScanKind::NoScanner
         );
     }
 
@@ -874,7 +859,7 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ProjectScanComputer::new(&configuration).compute(),
             ScanKind::Project
         );
     }
@@ -898,7 +883,7 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(&configuration, &[], &[]).compute(),
+            ProjectScanComputer::new(&configuration).compute(),
             ScanKind::Project
         );
     }
@@ -922,13 +907,13 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(
-                &configuration,
-                &[RuleSelector::Rule("correctness", "noPrivateImports")],
-                &[]
-            )
-            .compute(),
-            ScanKind::None
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(
+                    &[RuleSelector::Rule("correctness", "noPrivateImports").into()],
+                    &[]
+                )
+                .compute(),
+            ScanKind::NoScanner
         );
     }
 
@@ -951,13 +936,37 @@ mod tests {
         };
 
         assert_eq!(
-            ProjectScanComputer::new(
-                &configuration,
-                &[],
-                &[RuleSelector::Rule("correctness", "noPrivateImports")]
-            )
-            .compute(),
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(
+                    &[],
+                    &[RuleSelector::Rule("correctness", "noPrivateImports").into()]
+                )
+                .compute(),
             ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_return_project_if_a_domain_contains_project_rules() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("project").into()])
+                .compute(),
+            ScanKind::Project
+        );
+    }
+
+    #[test]
+    fn should_not_return_project_if_a_domain_does_not_contain_project_rules() {
+        let configuration = Configuration::default();
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("test").into()])
+                .compute(),
+            ScanKind::NoScanner
         );
     }
 }

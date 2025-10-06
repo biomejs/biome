@@ -1,7 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::Severity;
@@ -12,6 +11,7 @@ use biome_js_syntax::{
     JsStaticMemberExpression, JsUnaryExpression, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
+use biome_rule_options::use_at_index::UseAtIndexOptions;
 
 declare_lint_rule! {
     /// Use `at()` instead of integer index access.
@@ -79,8 +79,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintUnicorn("prefer-at")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintUnicorn("prefer-at").inspired()],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -129,7 +128,7 @@ impl Rule for UseAtIndex {
     type Query = Ast<AnyJsArrayAccess>;
     type State = UseAtIndexState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseAtIndexOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let exp = ctx.query();

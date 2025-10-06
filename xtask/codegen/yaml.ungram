@@ -29,13 +29,19 @@ SyntaxElement = SyntaxElement
 YamlBogus = SyntaxElement*
 YamlBogusBlockNode = SyntaxElement*
 YamlBogusBlockMapEntry = SyntaxElement*
+YamlBogusBlockHeader = SyntaxElement*
+YamlBogusFlowNode = SyntaxElement*
 
 // https://yaml.org/spec/1.2.2/#92-streams
 YamlRoot =
 	documents: YamlDocumentList
 	eof: 'EOF'
 
-YamlDocumentList = YamlDocument*
+YamlDocumentList = AnyYamlDocument*
+
+AnyYamlDocument =
+	YamlDocument
+	| YamlBogus
 
 // https://yaml.org/spec/1.2.2/#91-documents
 YamlDocument =
@@ -66,14 +72,16 @@ AnyYamlBlockNode =
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+flow-in-block
 YamlFlowInBlockNode =
+	'flow_start'
 	flow: AnyYamlFlowNode
-	newline: 'NEWLINE'?
+	'flow_end'
 
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-node
 AnyYamlFlowNode =
 	YamlFlowJsonNode
 	| YamlFlowYamlNode
 	| YamlAliasNode
+	| YamlBogusFlowNode
 
 // *abc
 // https://yaml.org/spec/1.2.2/#rule-c-ns-alias-node
@@ -135,41 +143,23 @@ AnyYamlFlowMapEntry =
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-map-explicit-entry
 YamlFlowMapExplicitEntry =
 	'?'
-	entry: YamlFlowMapImplicitEntry?
+	key: AnyYamlMappingImplicitKey?
+	':'?
+	value: AnyYamlFlowNode?
 
 // a: b
 // https://yaml.org/spec/1.2.2/#rule-ns-flow-map-implicit-entry
 YamlFlowMapImplicitEntry =
-	key: AnyYamlFlowMapImplicitKey?
-	':'
-	value: AnyYamlFlowNode
-
-AnyYamlFlowMapImplicitKey =
-	YamlFlowYamlNode
-	| YamlFlowJsonNode
+	key: AnyYamlMappingImplicitKey?
+	':'?
+	value: AnyYamlFlowNode?
 
 // https://yaml.org/spec/1.2.2/#rule-s-l+block-in-block
 AnyYamlBlockInBlockNode =
-	YamlBlockCollection
-	| YamlBlockScalar
-
-// https://yaml.org/spec/1.2.2/#rule-s-l+block-collection
-YamlBlockCollection =
-	properties: AnyYamlPropertiesCombination?
-	content: AnyYamlBlockCollectionContent
-
-// https://yaml.org/spec/1.2.2/#rule-s-l+block-scalar
-YamlBlockScalar =
-	properties: AnyYamlPropertiesCombination?
-	content: AnyYamlBlockScalarContent
-
-AnyYamlBlockCollectionContent =
 	YamlBlockSequence
 	| YamlBlockMapping
-
-AnyYamlBlockScalarContent =
-	YamlLiteralScalar
 	| YamlFoldedScalar
+	| YamlLiteralScalar
 
 // a:
 //  - b
@@ -178,16 +168,11 @@ AnyYamlBlockScalarContent =
 // https://yaml.org/spec/1.2.2/#rule-l+block-sequence
 YamlBlockSequence =
 	// Indent block
-	'indent'?
+	'sequence_start'
+	properties: AnyYamlPropertiesCombination?
 	entries: YamlBlockSequenceEntryList
 	// Dedent block, that is, go back to parent block's scope
-	'dedent'?
-
-YamlBlockSequenceEntryList = YamlBlockSequenceEntry*
-
-YamlBlockSequenceEntry =
-	'-'
-	value: AnyYamlBlockIndented?
+	'sequence_end'
 
 // a:
 //  b: c
@@ -196,10 +181,40 @@ YamlBlockSequenceEntry =
 // https://yaml.org/spec/1.2.2/#rule-l+block-mapping
 YamlBlockMapping =
 	// Indent block
-	'indent'?
+	'mapping_start'
+	properties: AnyYamlPropertiesCombination?
 	entries: YamlBlockMapEntryList
 	// Dedent block, that is, go back to parent block's scope
-	'dedent'?
+	'mapping_end'
+
+// x: |
+//  123
+//  456
+// https://yaml.org/spec/1.2.2/#rule-c-l+literal
+YamlLiteralScalar =
+	properties: AnyYamlPropertiesCombination?
+	'|'
+	headers: YamlBlockHeaderList
+	content: YamlBlockContent
+
+// x: >
+//  123
+//  456
+// https://yaml.org/spec/1.2.2/#rule-c-l+folded
+YamlFoldedScalar =
+	properties: AnyYamlPropertiesCombination?
+	'>'
+	headers: YamlBlockHeaderList
+	content: YamlBlockContent
+
+YamlBlockSequenceEntryList = AnyYamlBlockSequenceEntry*
+
+AnyYamlBlockSequenceEntry = YamlBlockSequenceEntry
+	| YamlBogus
+
+YamlBlockSequenceEntry =
+	'-'
+	value: AnyYamlBlockNode?
 
 YamlBlockMapEntryList = AnyYamlBlockMapEntry*
 
@@ -213,54 +228,56 @@ AnyYamlBlockMapEntry =
 // : 10
 // https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-entry
 YamlBlockMapExplicitEntry =
-	key: YamlBlockMapExplicitKey
-	value: YamlBlockMapExplicitValue?
-
-// ? y
-// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
-YamlBlockMapExplicitKey =
 	'?'
-	key: AnyYamlBlockIndented?
-
-// : 10
-// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-explicit-key
-YamlBlockMapExplicitValue =
-	':'
-	value: AnyYamlBlockIndented?
-
-// https://yaml.org/spec/1.2.2/#rule-s-l+block-indented
-// In the specification, this node can be completely empty.
-// Instead of modeling an empty node, we can just make this node optional
-// wherever we refer it.
-AnyYamlBlockIndented =
-	YamlCompactSequence
-	| YamlCompactMapping
-	| AnyYamlBlockNode
-
-// https://yaml.org/spec/1.2.2/#rule-ns-l-compact-sequence
-YamlCompactSequence =
-	entries: YamlBlockSequenceEntryList
-
-// https://yaml.org/spec/1.2.2/#rule-ns-l-compact-mapping
-YamlCompactMapping =
-	entries: YamlBlockSequenceEntryList
+	key: AnyYamlBlockNode?
+	':'?
+	value: AnyYamlBlockNode?
 
 // https://yaml.org/spec/1.2.2/#rule-ns-l-block-map-implicit-entry
 YamlBlockMapImplicitEntry =
-	key: AnyYamlBlockMapImplicitKey?
-	value: YamlBlockMapImplicitValue
+	key: AnyYamlMappingImplicitKey?
+	':'
+	value: AnyYamlBlockNode?
 
 // https://yaml.org/spec/1.2.2/#rule-ns-s-block-map-implicit-key
-AnyYamlBlockMapImplicitKey =
+AnyYamlMappingImplicitKey =
 	YamlFlowJsonNode
 	| YamlFlowYamlNode
 
-// https://yaml.org/spec/1.2.2/#rule-c-l-block-map-implicit-value
-YamlBlockMapImplicitValue =
-	':'
-	// Node value can be empty, but must be replaced by a newline
-	value: AnyYamlBlockNode?
-	newline: 'NEWLINE'?
+// Block header
+// |+9
+//  ^^
+// https://yaml.org/spec/1.2.2/#rule-c-b-block-header
+YamlBlockHeaderList = AnyYamlBlockHeader*
+
+AnyYamlBlockHeader =
+	YamlBlockStripIndicator
+	| YamlBlockKeepIndicator
+	| YamlIndentationIndicator
+	| YamlBogusBlockHeader
+
+// x: >-
+//     ^
+// https://yaml.org/spec/1.2.2/#rule-c-chomping-indicator
+YamlBlockStripIndicator = '-'
+
+// x: >+
+//     ^
+// https://yaml.org/spec/1.2.2/#rule-c-chomping-indicator
+YamlBlockKeepIndicator = '+'
+
+// x: >9
+//     ^
+// https://yaml.org/spec/1.2.2/#rule-c-indentation-indicator
+YamlIndentationIndicator = 'indentation_indicator'
+
+// x: >
+//  123
+//  456
+//  ^^^
+// https://yaml.org/spec/1.2.2/#rule-l-literal-content
+// https://yaml.org/spec/1.2.2/#rule-l-folded-content
+YamlBlockContent = value: 'block_content_literal'
 
 // https://yaml.org/spec/1.2.2/#rule-c-ns-properties
 AnyYamlPropertiesCombination =
@@ -295,17 +312,3 @@ YamlSingleQuotedScalar = value: 'single_quoted_literal'
 // abc
 // https://yaml.org/spec/1.2.2/#rule-ns-plain
 YamlPlainScalar = value: 'plain_literal'
-
-// Block scalars
-// Since block scalars can be parsed differently based on the block header,
-// they must be parsed as a single token
-// x: |
-//  123
-//  456
-// https://yaml.org/spec/1.2.2/#rule-c-l+literal
-YamlLiteralScalar = value: 'literal_block_literal'
-// x: >
-//  123
-//  456
-// https://yaml.org/spec/1.2.2/#rule-c-l+folded
-YamlFoldedScalar = value: 'folded_block_literal'

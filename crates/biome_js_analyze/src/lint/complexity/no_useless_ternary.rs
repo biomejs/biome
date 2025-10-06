@@ -9,6 +9,7 @@ use biome_js_syntax::{
     OperatorPrecedence, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::no_useless_ternary::NoUselessTernaryOptions;
 
 use crate::JsRuleAction;
 
@@ -56,7 +57,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noUselessTernary",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unneeded-ternary")],
+        sources: &[RuleSource::Eslint("no-unneeded-ternary").same()],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
@@ -67,7 +68,7 @@ impl Rule for NoUselessTernary {
     type Query = Ast<JsConditionalExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoUselessTernaryOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_issue_6384.tsx
+---
+# Input
+```tsx
+// should not generate diagnostics
+import type { ComponentProps, FC } from 'react';
+
+export const CardImage: FC<ComponentProps<'img'>> = ({
+	 srcSet,
+	 ...restProps
+ }) => {
+	return (
+		// biome-ignore lint/a11y/useAltText: suppressed
+		<img
+			srcSet={srcSet}
+			loading="lazy"
+			{...restProps}
+		/>
+	);
+};
+
+```

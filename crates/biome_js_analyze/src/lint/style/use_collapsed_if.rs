@@ -8,6 +8,7 @@ use biome_js_factory::make;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{AnyJsStatement, JsIfStatement, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rule_options::use_collapsed_if::UseCollapsedIfOptions;
 
 use crate::JsRuleAction;
 
@@ -69,8 +70,8 @@ declare_lint_rule! {
         name: "useCollapsedIf",
         language: "js",
         sources: &[
-            RuleSource::EslintUnicorn("no-lonely-if"),
-            RuleSource::Clippy("collapsible_if")
+            RuleSource::EslintUnicorn("no-lonely-if").same(),
+            RuleSource::Clippy("collapsible_if").same(),
         ],
         recommended: false,
         severity: Severity::Information,
@@ -87,7 +88,7 @@ impl Rule for UseCollapsedIf {
     type Query = Ast<JsIfStatement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseCollapsedIfOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let if_stmt = ctx.query();

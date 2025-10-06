@@ -6,6 +6,7 @@ use biome_css_syntax::{CssFunction, CssParameter};
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_rowan::AstSeparatedList;
+use biome_rule_options::no_invalid_direction_in_linear_gradient::NoInvalidDirectionInLinearGradientOptions;
 use biome_string_case::StrLikeExtension;
 use regex::Regex;
 use std::sync::LazyLock;
@@ -49,7 +50,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("function-linear-gradient-no-nonstandard-direction")],
+        sources: &[RuleSource::Stylelint("function-linear-gradient-no-nonstandard-direction").same()],
     }
 }
 
@@ -73,7 +74,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
     type Query = Ast<CssFunction>;
     type State = CssParameter;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoInvalidDirectionInLinearGradientOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -95,13 +96,13 @@ impl Rule for NoInvalidDirectionInLinearGradient {
         if IN_KEYWORD.is_match(&first_css_parameter_text) {
             return None;
         }
-        if let Some(first_byte) = first_css_parameter_text.bytes().next() {
-            if first_byte.is_ascii_digit() {
-                if ANGLE.is_match(&first_css_parameter_text) {
-                    return None;
-                }
-                return Some(first_css_parameter);
+        if let Some(first_byte) = first_css_parameter_text.bytes().next()
+            && first_byte.is_ascii_digit()
+        {
+            if ANGLE.is_match(&first_css_parameter_text) {
+                return None;
             }
+            return Some(first_css_parameter);
         }
         let direction_property = ["top", "left", "bottom", "right"];
         if !direction_property.iter().any(|&keyword| {

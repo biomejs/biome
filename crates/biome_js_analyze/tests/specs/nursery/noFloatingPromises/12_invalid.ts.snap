@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: 12_invalid.ts
+---
+# Input
+```ts
+const [result] = [(() => Promise.reject("destructuring bypass"))()];
+result
+
+```
+
+# Diagnostics
+```
+12_invalid.ts:2:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    1 │ const [result] = [(() => Promise.reject("destructuring bypass"))()];
+  > 2 │ result
+      │ ^^^^^^
+    3 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```

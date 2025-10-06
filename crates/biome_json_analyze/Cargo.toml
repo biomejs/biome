@@ -19,6 +19,7 @@ biome_diagnostics  = { workspace = true }
 biome_json_factory = { workspace = true }
 biome_json_syntax  = { workspace = true }
 biome_rowan        = { workspace = true }
+biome_rule_options = { workspace = true }
 biome_string_case  = { workspace = true }
 biome_suppression  = { workspace = true }
 rustc-hash         = { workspace = true }
@@ -27,7 +28,7 @@ rustc-hash         = { workspace = true }
 biome_json_parser = { path = "../biome_json_parser" }
 biome_test_utils  = { path = "../biome_test_utils" }
 camino            = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "=2.10.1" }
+criterion         = { package = "codspeed-criterion-compat", version = "=3.0.3" }
 insta             = { workspace = true, features = ["glob"] }
 tests_macros      = { path = "../tests_macros" }
 

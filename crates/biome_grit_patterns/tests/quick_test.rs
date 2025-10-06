@@ -10,10 +10,9 @@ use biome_js_syntax::JsFileSource;
 #[test]
 fn test_query() {
     let parse_grit_result = parse_grit(
-        "`console.log($arg)` => . where {
-  log(message=\"This is a debug log\", variable=$arg),
-}
-",
+        "
+        `import $what from $where`
+        ",
     );
     if !parse_grit_result.diagnostics().is_empty() {
         panic!("Cannot parse query:\n{:?}", parse_grit_result.diagnostics());
@@ -31,12 +30,11 @@ fn test_query() {
         println!("Diagnostics from compiling query:\n{:?}", query.diagnostics);
     }
 
-    let body = r#"console.log("grape");"#;
+    let body = r#"import { PrismaClient } from "@prisma/client/runtime";"#;
 
-    let file = GritTargetFile::new(
-        "test.js",
-        parse(body, JsFileSource::tsx(), JsParserOptions::default()).into(),
-    );
+    let parsed = parse(body, JsFileSource::js_module(), JsParserOptions::default());
+
+    let file = GritTargetFile::new("test.js", parsed.into());
     let GritQueryResult { effects, logs, .. } =
         query.execute(file).expect("could not execute query");
 

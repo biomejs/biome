@@ -136,6 +136,7 @@ biome_js_analyze             = { version = "0.5.7", path = "./crates/biome_js_an
 biome_js_factory             = { version = "0.5.7", path = "./crates/biome_js_factory" }
 biome_js_formatter           = { version = "0.5.7", path = "./crates/biome_js_formatter" }
 biome_js_parser              = { version = "0.5.7", path = "./crates/biome_js_parser" }
+biome_js_runtime             = { version = "0.0.1", path = "./crates/biome_js_runtime" }
 biome_js_semantic            = { version = "0.5.7", path = "./crates/biome_js_semantic" }
 biome_js_syntax              = { version = "0.5.7", path = "./crates/biome_js_syntax" }
 biome_js_type_info           = { version = "0.0.1", path = "./crates/biome_js_type_info" }
@@ -147,6 +148,7 @@ biome_json_formatter         = { version = "0.5.7", path = "./crates/biome_json_
 biome_json_parser            = { version = "0.5.7", path = "./crates/biome_json_parser" }
 biome_json_syntax            = { version = "0.5.7", path = "./crates/biome_json_syntax" }
 biome_json_value             = { version = "0.1.0", path = "./crates/biome_json_value" }
+biome_line_index             = { version = "0.1.0", path = "./crates/biome_line_index" }
 biome_lsp_converters         = { version = "0.1.0", path = "./crates/biome_lsp_converters" }
 biome_markdown_factory       = { version = "0.0.1", path = "./crates/biome_markdown_factory" }
 biome_markdown_parser        = { version = "0.0.1", path = "./crates/biome_markdown_parser" }
@@ -155,6 +157,10 @@ biome_module_graph           = { version = "0.0.1", path = "./crates/biome_modul
 biome_plugin_loader          = { version = "0.0.1", path = "./crates/biome_plugin_loader" }
 biome_project_layout         = { version = "0.0.1", path = "./crates/biome_project_layout" }
 biome_resolver               = { version = "0.1.0", path = "./crates/biome_resolver" }
+biome_rule_options           = { version = "0.0.1", path = "./crates/biome_rule_options" }
+biome_tailwind_factory       = { version = "0.0.1", path = "./crates/biome_tailwind_factory" }
+biome_tailwind_parser        = { version = "0.0.1", path = "./crates/biome_tailwind_parser" }
+biome_tailwind_syntax        = { version = "0.0.1", path = "./crates/biome_tailwind_syntax" }
 biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
 biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
@@ -164,7 +170,7 @@ biome_markup        = { version = "0.5.7", path = "./crates/biome_markup" }
 biome_package       = { version = "0.5.7", path = "./crates/biome_package" }
 biome_parser        = { version = "0.5.7", path = "./crates/biome_parser" }
 biome_rowan         = { version = "0.5.7", path = "./crates/biome_rowan" }
-biome_string_case   = { version = "0.5.7", path = "./crates/biome_string_case" }
+biome_string_case   = { version = "0.5.7", path = "./crates/biome_string_case", features = ["biome_rowan"] }
 biome_suppression   = { version = "0.5.7", path = "./crates/biome_suppression" }
 biome_text_edit     = { version = "0.5.7", path = "./crates/biome_text_edit" }
 biome_text_size     = { version = "0.5.7", path = "./crates/biome_text_size" }
@@ -177,58 +183,65 @@ biome_flags          = { path = "./crates/biome_flags" }
 biome_formatter_test = { path = "./crates/biome_formatter_test" }
 biome_lsp            = { path = "./crates/biome_lsp" }
 biome_migrate        = { path = "./crates/biome_migrate" }
+biome_ruledoc_utils  = { path = "./crates/biome_ruledoc_utils" }
 biome_service        = { path = "./crates/biome_service" }
 biome_test_utils     = { path = "./crates/biome_test_utils" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-anyhow               = "1.0.98"
+anyhow               = "1.0.100"
+boa_engine           = "0.20.0"
 bpaf                 = { version = "0.9.20", features = ["derive"] }
-camino               = "1.1.10"
-cfg-if               = "1.0.1"
+camino               = "1.1.12"
+cfg-if               = "1.0.3"
 countme              = "3.0.1"
 crossbeam            = "0.8.4"
 dashmap              = "6.1.0"
+dirs                 = "6.0.0"
 enumflags2           = "0.7.12"
 getrandom            = "0.2.15"
 globset              = "0.4.16"
 grit-pattern-matcher = "0.5.1"
 grit-util            = "0.5.1"
-hashbrown            = { version = "0.15.4", default-features = false }
+hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.23"
-indexmap             = { version = "2.9.0" }
-insta                = "1.43.1"
-mimalloc             = "0.1.46"
-papaya               = "0.2"
+indexmap             = { version = "2.10.0" }
+insta                = "1.43.2"
+libc                 = "0.2.176"
+mimalloc             = "0.1.48"
+papaya               = "0.2.3"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 proc-macro-error2    = { version = "2.0.1", default-features = false }
-proc-macro2          = "1.0.95"
+proc-macro2          = "1.0.101"
 quickcheck           = "1.0.3"
 quickcheck_macros    = "1.1.0"
 quote                = "1.0.40"
 rayon                = "1.10.0"
-regex                = "1.11.1"
-rust-lapper          = "1.1.0"
+regex                = "1.11.2"
+rust-lapper          = "1.2.0"
 rustc-hash           = "2.1.1"
 schemars             = { version = "0.8.22", features = ["indexmap2", "smallvec"] }
-serde                = { version = "1.0.219", features = ["derive"] }
-serde_json           = "1.0.140"
+serde                = { version = "1.0.226", features = ["derive"] }
+serde_json           = "1.0.145"
 similar              = "2.7.0"
 smallvec             = { version = "1.15.1", features = ["union", "const_new", "serde"] }
 static_assertions    = "1.1"
 syn                  = "1.0.109"
 termcolor            = "1.4.1"
-terminal_size        = "0.4.2"
+terminal_size        = "0.4.3"
 tikv-jemallocator    = "0.6.0"
-tokio                = "1.45.1"
+tokio                = "1.47.1"
 tower                = "0.5.2"
-tower-lsp-server     = "0.21.1"
+tower-lsp-server     = "0.22.1"
 tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }
-tracing-subscriber   = "0.3.19"
+tracing-subscriber   = "0.3.20"
 unicode-bom          = "2.0.3"
 unicode-width        = "0.1.12"
-ureq                 = "3.0.11"
-url                  = "2.5.4"
+ureq                 = "3.0.12"
+url                  = "2.5.7"
+walkdir              = "2.5.0"
+web-time             = "1.1.0"
+windows              = "0.61.3"
 
 [profile.dev.package.biome_wasm]
 debug     = true

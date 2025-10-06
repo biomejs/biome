@@ -123,10 +123,7 @@ impl BiomeDiagnostic {
         file_path: impl Into<String>,
     ) -> Self {
         Self::InvalidIgnorePattern(InvalidIgnorePattern {
-            message: format!(
-                "Couldn't parse the pattern \"{}\". Reason: {}",
-                pattern, reason,
-            ),
+            message: format!("Couldn't parse the pattern \"{pattern}\". Reason: {reason}",),
             file_path: Some(file_path.into()),
         })
     }
@@ -282,10 +279,10 @@ impl CantLoadExtendFile {
         }
     }
 
-    pub fn with_verbose_advice(mut self, messsage: impl Display) -> Self {
+    pub fn with_verbose_advice(mut self, message: impl Display) -> Self {
         self.verbose_advice
             .messages
-            .push(markup! {{messsage}}.to_owned());
+            .push(markup! {{message}}.to_owned());
         self
     }
 }
@@ -348,10 +345,10 @@ impl CantResolve {
         }
     }
 
-    pub fn with_verbose_advice(mut self, messsage: impl Display) -> Self {
+    pub fn with_verbose_advice(mut self, message: impl Display) -> Self {
         self.verbose_advice
             .messages
-            .push(markup! {{messsage}}.to_owned());
+            .push(markup! {{message}}.to_owned());
         self
     }
 }

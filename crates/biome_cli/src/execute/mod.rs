@@ -18,7 +18,7 @@ use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{
     CliDiagnostic, CliSession, DiagnosticsPayload, Reporter, TEMPORARY_INTERNAL_REPORTER_FILE,
 };
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::AnalyzerSelector;
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Category, category};
 use biome_diagnostics::{Resource, SerdeJsonError};
@@ -31,7 +31,6 @@ use biome_service::workspace::{
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::cmp::Ordering;
-use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::time::Duration;
 use tracing::{info, instrument};
@@ -64,7 +63,7 @@ pub struct Stdin(
 );
 
 impl Stdin {
-    fn as_path(&self) -> &Utf8Path {
+    pub fn as_path(&self) -> &Utf8Path {
         self.0.as_path()
     }
 
@@ -127,13 +126,13 @@ pub enum TraversalMode {
         /// Run only the given rule or group of rules.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
-        only: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
         /// Skip the given rule or group of rules by setting the severity level of the rules to `off`.
         /// This option takes precedence over `--only`.
-        skip: Vec<RuleSelector>,
+        skip: Vec<AnalyzerSelector>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
         vcs_targeted: VcsTargeted,
-        /// Supress existing diagnostics with a `// biome-ignore` comment
+        /// Suppress existing diagnostics with a `// biome-ignore` comment
         suppress: bool,
         /// Explanation for suppressing diagnostics with `--suppress` and `--reason`
         suppression_reason: Option<String>,
@@ -218,17 +217,17 @@ impl TraversalMode {
                 if stdin.is_none() {
                     ScanKind::KnownFiles
                 } else {
-                    ScanKind::None
+                    ScanKind::NoScanner
                 }
             }
             Self::Check { stdin, .. } | Self::Lint { stdin, .. } | Self::Search { stdin, .. } => {
                 if stdin.is_none() {
                     ScanKind::Project
                 } else {
-                    ScanKind::None
+                    ScanKind::NoScanner
                 }
             }
-            Self::Migrate { .. } => ScanKind::None,
+            Self::Migrate { .. } => ScanKind::NoScanner,
         }
     }
 }
@@ -362,21 +361,6 @@ impl Execution {
 
     pub(crate) const fn is_lint(&self) -> bool {
         matches!(self.traversal_mode, TraversalMode::Lint { .. })
-    }
-
-    pub(crate) const fn is_migrate(&self) -> bool {
-        matches!(self.traversal_mode, TraversalMode::Migrate { .. })
-    }
-
-    pub(crate) fn is_stdin(&self) -> bool {
-        match &self.traversal_mode {
-            TraversalMode::Check { stdin, .. } => stdin.is_some(),
-            TraversalMode::Lint { stdin, .. } => stdin.is_some(),
-            TraversalMode::CI { .. } => false,
-            TraversalMode::Format { stdin, .. } => stdin.is_some(),
-            TraversalMode::Migrate { .. } => false,
-            TraversalMode::Search { stdin, .. } => stdin.is_some(),
-        }
     }
 
     #[instrument(level = "debug", skip(self), fields(result))]
@@ -537,7 +521,7 @@ pub fn execute_mode(
     mut execution: Execution,
     mut session: CliSession,
     cli_options: &CliOptions,
-    paths: Vec<OsString>,
+    paths: Vec<String>,
     scanner_duration: Option<Duration>,
     nested_configuration_files: Vec<BiomePath>,
     project_key: ProjectKey,
@@ -580,7 +564,7 @@ pub fn execute_mode(
             &execution,
             biome_path,
             stdin.as_content(),
-            cli_options.verbose,
+            cli_options,
         );
     }
 
@@ -656,6 +640,7 @@ pub fn execute_mode(
                 diagnostics: diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
             };
             let mut buffer = JsonReporterVisitor::new(summary);
             reporter.write(&mut buffer)?;
@@ -707,6 +692,7 @@ pub fn execute_mode(
                 diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
             };
             reporter.write(&mut GithubReporterVisitor(console))?;
         }
@@ -715,6 +701,7 @@ pub fn execute_mode(
                 diagnostics: diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
             };
             reporter.write(&mut GitLabReporterVisitor::new(
                 console,
@@ -727,6 +714,7 @@ pub fn execute_mode(
                 diagnostics_payload,
                 execution: execution.clone(),
                 verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;
         }
@@ -736,10 +724,7 @@ pub fn execute_mode(
     if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
         Err(CliDiagnostic::no_files_processed(
             execution.as_diagnostic_category(),
-            paths
-                .into_iter()
-                .flat_map(|p| p.into_string())
-                .collect::<Vec<_>>(),
+            paths,
         ))
     } else if errors > 0 || should_exit_on_warnings {
         let category = execution.as_diagnostic_category();

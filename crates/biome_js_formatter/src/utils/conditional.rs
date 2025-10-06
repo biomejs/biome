@@ -746,14 +746,14 @@ fn is_jsx_conditional_chain(outer_most: &JsConditionalExpression) -> bool {
         || recurse(outer_most.alternate())
 }
 
-fn format_jsx_chain_consequent(expression: &AnyJsExpression) -> FormatJsxChainExpression {
+fn format_jsx_chain_consequent(expression: &AnyJsExpression) -> FormatJsxChainExpression<'_> {
     FormatJsxChainExpression {
         expression,
         alternate: false,
     }
 }
 
-fn format_jsx_chain_alternate(alternate: &AnyJsExpression) -> FormatJsxChainExpression {
+fn format_jsx_chain_alternate(alternate: &AnyJsExpression) -> FormatJsxChainExpression<'_> {
     FormatJsxChainExpression {
         expression: alternate,
         alternate: true,

@@ -8,6 +8,7 @@ use biome_js_syntax::{
     TsEnumDeclaration,
 };
 use biome_rowan::{AstNode, TextRange};
+use biome_rule_options::use_literal_enum_members::UseLiteralEnumMembersOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -68,7 +69,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useLiteralEnumMembers",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("prefer-literal-enum-member")],
+        sources: &[RuleSource::EslintTypeScript("prefer-literal-enum-member").same()],
         recommended: true,
         severity: Severity::Warning,
     }
@@ -78,7 +79,7 @@ impl Rule for UseLiteralEnumMembers {
     type Query = Ast<TsEnumDeclaration>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
-    type Options = ();
+    type Options = UseLiteralEnumMembersOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let enum_declaration = ctx.query();
@@ -99,18 +100,18 @@ impl Rule for UseLiteralEnumMembers {
                 continue;
             };
             // no initializer => sequentially assigned literal integer
-            if let Some(initializer) = enum_member.initializer() {
-                if let Ok(initializer) = initializer.expression() {
-                    let range = initializer.range();
-                    if !is_constant_enum_expression(initializer, enum_name, &enum_member_names) {
-                        result.push(range);
-                    }
+            if let Some(initializer) = enum_member.initializer()
+                && let Ok(initializer) = initializer.expression()
+            {
+                let range = initializer.range();
+                if !is_constant_enum_expression(initializer, enum_name, &enum_member_names) {
+                    result.push(range);
                 }
             };
-            if let Ok(name) = enum_member.name() {
-                if let Some(name) = name.name() {
-                    enum_member_names.insert(name.to_string());
-                }
+            if let Ok(name) = enum_member.name()
+                && let Some(name) = name.name()
+            {
+                enum_member_names.insert(name.to_string());
             }
         }
         result.into_boxed_slice()

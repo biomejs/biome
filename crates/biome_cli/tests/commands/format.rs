@@ -47,33 +47,15 @@ statement ( ) ;
 </script>
 <div></div>"#;
 
-const SVELTE_IMPLICIT_JS_FILE_FORMATTED: &str = r#"<script>
-import { something } from "file.svelte";
-statement();
-</script>
-<div></div>"#;
-
 const SVELTE_EXPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script lang="js">
 import {    something } from "file.svelte";
 statement ( ) ;
 </script>
 <div></div>"#;
 
-const SVELTE_EXPLICIT_JS_FILE_FORMATTED: &str = r#"<script lang="js">
-import { something } from "file.svelte";
-statement();
-</script>
-<div></div>"#;
-
 const SVELTE_TS_FILE_UNFORMATTED: &str = r#"<script setup lang="ts">
 import     { type     something } from "file.svelte";
 const hello  :      string      = "world";
-</script>
-<div></div>"#;
-
-const SVELTE_TS_FILE_FORMATTED: &str = r#"<script setup lang="ts">
-import { type something } from "file.svelte";
-const hello: string = "world";
 </script>
 <div></div>"#;
 
@@ -159,6 +141,21 @@ const APPLY_BRACKET_SAME_LINE_AFTER: &str = r#"<Foo
 </Foo>;
 "#;
 
+const SPACING_GRAPHQLS_SANITY_BEFORE: &str = r#"  scalar Time
+  scalar UUID
+
+
+ type   User   {
+  id:  UUID!
+   name: String!
+    updatedAt: Time!
+ }
+
+
+
+
+"#;
+
 const APPLY_ATTRIBUTE_POSITION_BEFORE: &str = r#"<Foo className={style}	reallyLongAttributeName1={longComplexValue}
 reallyLongAttributeName2={anotherLongValue} />;
 
@@ -225,7 +222,7 @@ fn format_help() {
 
 #[test]
 fn print() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
@@ -252,7 +249,7 @@ fn print() {
 
 #[test]
 fn write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
@@ -281,7 +278,7 @@ fn write() {
 
 #[test]
 fn format_shows_parse_diagnostics() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
@@ -306,7 +303,7 @@ fn format_shows_parse_diagnostics() {
 
 #[test]
 fn write_only_files_in_correct_base() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_to_format = Utf8Path::new("src/format.js");
@@ -342,7 +339,7 @@ fn write_only_files_in_correct_base() {
 // Ensures lint warnings are not printed in format mode
 #[test]
 fn lint_warning() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
@@ -381,7 +378,7 @@ fn lint_warning() {
 // FIXME: redact snapshot for custom paths in configuration
 #[cfg(not(windows))]
 fn custom_config_file_path() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config_path = Utf8Path::new("/test/biome.json");
@@ -423,7 +420,7 @@ fn custom_config_file_path() {
 // Should throw an error when an invalid configuration path is specified
 #[test]
 fn invalid_config_file_path() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config_path = Utf8Path::new("test");
@@ -458,7 +455,7 @@ fn invalid_config_file_path() {
 
 #[test]
 fn applies_custom_configuration() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
@@ -498,7 +495,7 @@ fn applies_custom_configuration() {
 
 #[test]
 fn applies_custom_configuration_over_config_file() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -541,7 +538,7 @@ fn applies_custom_configuration_over_config_file() {
 
 #[test]
 fn applies_custom_configuration_over_config_file_issue_3175_v1() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -579,7 +576,7 @@ fn applies_custom_configuration_over_config_file_issue_3175_v1() {
 
 #[test]
 fn applies_custom_configuration_over_config_file_issue_3175_v2() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let source = r#"function f() {
@@ -614,7 +611,7 @@ fn applies_custom_configuration_over_config_file_issue_3175_v2() {
 
 #[test]
 fn applies_custom_jsx_quote_style() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.jsx");
@@ -652,7 +649,7 @@ fn applies_custom_jsx_quote_style() {
 
 #[test]
 fn applies_custom_quote_style() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
@@ -691,7 +688,7 @@ fn applies_custom_quote_style() {
 #[test]
 #[ignore = "Enable when we are ready to handle CSS files"]
 fn applies_custom_css_quote_style() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let css_file_path = Utf8Path::new("file.css");
@@ -730,7 +727,7 @@ fn applies_custom_css_quote_style() {
 
 #[test]
 fn applies_custom_trailing_commas() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
@@ -766,7 +763,7 @@ fn applies_custom_trailing_commas() {
 
 #[test]
 fn applies_custom_attribute_position() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
@@ -802,7 +799,7 @@ fn applies_custom_attribute_position() {
 
 #[test]
 fn applies_custom_arrow_parentheses() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
@@ -838,7 +835,7 @@ fn applies_custom_arrow_parentheses() {
 
 #[test]
 fn applies_custom_bracket_spacing() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
@@ -874,7 +871,7 @@ fn applies_custom_bracket_spacing() {
 
 #[test]
 fn applies_custom_bracket_same_line() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.jsx");
@@ -932,7 +929,7 @@ fn trailing_commas_parse_errors() {
 
 #[test]
 fn with_semicolons_options() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.js");
@@ -1121,7 +1118,7 @@ fn quote_properties_parse_errors_letter_case() {
 #[test]
 fn format_with_configuration() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_FORMAT.as_bytes());
 
@@ -1149,7 +1146,7 @@ fn format_with_configuration() {
 
 #[test]
 fn format_is_disabled() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_DISABLED_FORMATTER.as_bytes());
@@ -1236,7 +1233,7 @@ fn format_stdin_with_errors() {
 }
 
 #[test]
-fn format_stdin_errors_with_no_file_extension() {
+fn format_stdin_does_not_with_no_file_extension() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -1250,7 +1247,7 @@ fn format_stdin_errors_with_no_file_extension() {
         Args::from(["format", "--stdin-file-path", "mock"].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -1262,8 +1259,43 @@ fn format_stdin_errors_with_no_file_extension() {
 }
 
 #[test]
+fn format_stdin_does_not_error_with_ignore_unknown_file_extensions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    console
+        .in_buffer
+        .push("function f() {return{}}".to_string());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--stdin-file-path",
+                "mock.cc",
+                "--files-ignore-unknown",
+                "true",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_stdin_does_not_error_with_ignore_unknown_file_extensions",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn does_not_format_if_disabled() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -1304,7 +1336,7 @@ fn does_not_format_if_disabled() {
 #[test]
 fn does_not_format_ignored_files() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -1335,7 +1367,7 @@ fn does_not_format_ignored_files() {
 
 #[test]
 fn does_not_format_if_files_are_listed_in_ignore_option() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -1398,7 +1430,7 @@ fn does_not_format_if_files_are_listed_in_ignore_option() {
 #[test]
 fn does_not_format_ignored_directories() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
@@ -1473,7 +1505,7 @@ fn does_not_format_ignored_file_in_included_directory() {
     let files = [("src/file1.js", true), ("src/file2.js", false)];
 
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
     for (file_path, _) in files {
@@ -1528,7 +1560,7 @@ fn include_ignore_cascade() {
     ];
 
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
     for (file_path, _) in files {
@@ -1563,13 +1595,13 @@ fn include_ignore_cascade() {
 
 #[test]
 fn fs_error_read_only() {
-    let mut fs = MemoryFileSystem::new_read_only();
+    let fs = MemoryFileSystem::new_read_only();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("test.js");
     fs.insert(file_path.into(), *b"content");
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["format", "--write", file_path.as_str()].as_slice()),
@@ -1591,13 +1623,13 @@ fn fs_error_read_only() {
 
 #[test]
 fn file_too_large() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), "statement();\n".repeat(80660).as_bytes());
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["format", file_path.as_str(), "--write"].as_slice()),
@@ -1619,7 +1651,7 @@ fn file_too_large() {
 
 #[test]
 fn file_too_large_config_limit() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     fs.insert(Utf8PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
@@ -1646,7 +1678,7 @@ fn file_too_large_config_limit() {
 
 #[test]
 fn file_too_large_cli_limit() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
@@ -1671,7 +1703,7 @@ fn file_too_large_cli_limit() {
 
 #[test]
 fn files_max_size_parse_error() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
@@ -1696,7 +1728,7 @@ fn files_max_size_parse_error() {
 
 #[test]
 fn max_diagnostics_default() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     for i in 0..60 {
@@ -1704,7 +1736,7 @@ fn max_diagnostics_default() {
         fs.insert(file_path, UNFORMATTED.as_bytes());
     }
 
-    let (mut fs, result) = run_cli(fs, &mut console, Args::from(["format", "src"].as_slice()));
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["format", "src"].as_slice()));
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -1745,7 +1777,7 @@ fn max_diagnostics_default() {
 
 #[test]
 fn max_diagnostics() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     for i in 0..60 {
@@ -1753,7 +1785,7 @@ fn max_diagnostics() {
         fs.insert(file_path, UNFORMATTED.as_bytes());
     }
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["format", "--max-diagnostics", "10", "src"].as_slice()),
@@ -1816,7 +1848,7 @@ fn no_supported_file_found() {
 
 #[test]
 fn print_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
@@ -1846,13 +1878,13 @@ fn vcs_absolute_path() {
         "vcs": {
             "enabled": true,
             "clientKind": "git",
-            "useIgnoreFile": true
+            "useIgnoreFile": false
         }
     }"#;
     let files = [("/symbolic/link/to/path.js", true)];
 
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let gitignore_file = Utf8Path::new(".gitignore");
     fs.insert(gitignore_file.into(), git_ignore.as_bytes());
     let file_path = Utf8Path::new("biome.json");
@@ -1889,7 +1921,7 @@ fn vcs_absolute_path() {
 
 #[test]
 fn ignores_unknown_file() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path1 = Utf8Path::new("test.txt");
@@ -1945,7 +1977,7 @@ fn doesnt_error_if_no_files_were_processed() {
 
 #[test]
 fn ignore_comments_error_when_allow_comments() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config_json = r#"{
@@ -1982,7 +2014,7 @@ fn ignore_comments_error_when_allow_comments() {
 
 #[test]
 fn format_jsonc_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let code = r#"
@@ -2012,7 +2044,7 @@ fn format_jsonc_files() {
 
 #[test]
 fn format_json_when_allow_trailing_commas() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config_json = r#"{
@@ -2049,7 +2081,7 @@ fn format_json_when_allow_trailing_commas() {
 
 #[test]
 fn format_json_when_allow_trailing_commas_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config_json = r#"{
@@ -2089,7 +2121,7 @@ fn format_json_when_allow_trailing_commas_write() {
 
 #[test]
 fn format_json_trailing_commas_none() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config_json = r#"{
@@ -2130,7 +2162,7 @@ fn format_json_trailing_commas_none() {
 
 #[test]
 fn format_json_trailing_commas_all() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config_json = r#"{
@@ -2154,12 +2186,6 @@ fn format_json_trailing_commas_all() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(
-        &fs,
-        Utf8Path::new(file_path),
-        "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n",
-    );
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_json_trailing_commas_all",
@@ -2171,7 +2197,7 @@ fn format_json_trailing_commas_all() {
 
 #[test]
 fn format_json_trailing_commas_overrides_all() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config_json = r#"{
@@ -2201,12 +2227,6 @@ fn format_json_trailing_commas_overrides_all() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(
-        &fs,
-        Utf8Path::new(file_path),
-        "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n",
-    );
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_json_trailing_commas_overrides_all",
@@ -2218,7 +2238,7 @@ fn format_json_trailing_commas_overrides_all() {
 
 #[test]
 fn format_json_trailing_commas_overrides_none() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let config_json = r#"{
@@ -2265,7 +2285,7 @@ fn format_json_trailing_commas_overrides_none() {
 
 #[test]
 fn treat_known_json_files_as_jsonc_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let code = r#"
@@ -2299,7 +2319,7 @@ fn treat_known_json_files_as_jsonc_files() {
 
 #[test]
 fn should_apply_different_formatting() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -2377,7 +2397,7 @@ const a = {
 
 #[test]
 fn should_apply_different_formatting_with_cli() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -2445,7 +2465,7 @@ const a = {
 
 #[test]
 fn should_not_format_json_files_if_disabled() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -2506,7 +2526,7 @@ const a = {
 
 #[test]
 fn should_not_format_js_files_if_disabled() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -2567,7 +2587,7 @@ const a = {
 
 #[test]
 fn should_not_format_css_files_if_disabled() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -2627,7 +2647,7 @@ const a = {
 
 #[test]
 fn should_apply_different_indent_style() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let biome_json = Utf8Path::new("biome.json");
@@ -2721,7 +2741,7 @@ fn override_don_t_affect_ignored_files() {
     let files = [("file1.js", true), ("file2.js", true)];
 
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
     for (file_path, _) in files {
@@ -2757,7 +2777,7 @@ fn override_don_t_affect_ignored_files() {
 #[test]
 fn format_with_configured_line_ending() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
     let config = r#"{
         "formatter": {
@@ -2802,7 +2822,7 @@ fn don_t_format_ignored_known_jsonc_files() {
     let files = [(".eslintrc", false)];
 
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
     for (file_path, _) in files {
@@ -2837,7 +2857,7 @@ fn don_t_format_ignored_known_jsonc_files() {
 
 #[test]
 fn applies_configuration_from_biome_jsonc() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.jsonc");
@@ -2867,7 +2887,7 @@ fn applies_configuration_from_biome_jsonc() {
 
 #[test]
 fn format_package_json() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("package.json");
@@ -2911,7 +2931,7 @@ fn format_package_json() {
 
 #[test]
 fn format_svelte_implicit_js_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -2941,7 +2961,7 @@ fn format_svelte_implicit_js_files() {
 
 #[test]
 fn format_svelte_implicit_js_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -2958,8 +2978,6 @@ fn format_svelte_implicit_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_IMPLICIT_JS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_implicit_js_files_write",
@@ -2971,7 +2989,7 @@ fn format_svelte_implicit_js_files_write() {
 
 #[test]
 fn format_svelte_explicit_js_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -3001,7 +3019,7 @@ fn format_svelte_explicit_js_files() {
 
 #[test]
 fn format_svelte_explicit_js_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -3018,8 +3036,6 @@ fn format_svelte_explicit_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_EXPLICIT_JS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_explicit_js_files_write",
@@ -3031,7 +3047,7 @@ fn format_svelte_explicit_js_files_write() {
 
 #[test]
 fn format_empty_svelte_js_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -3058,7 +3074,7 @@ fn format_empty_svelte_js_files_write() {
 
 #[test]
 fn format_svelte_ts_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -3088,7 +3104,7 @@ fn format_svelte_ts_files() {
 
 #[test]
 fn format_svelte_ts_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -3105,8 +3121,6 @@ fn format_svelte_ts_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_TS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_svelte_ts_files_write",
@@ -3118,7 +3132,7 @@ fn format_svelte_ts_files_write() {
 
 #[test]
 fn format_empty_svelte_ts_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let svelte_file_path = Utf8Path::new("file.svelte");
@@ -3145,7 +3159,7 @@ fn format_empty_svelte_ts_files_write() {
 
 #[test]
 fn should_format_files_in_folders_ignored_by_linter() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("build/file.js");
@@ -3193,7 +3207,7 @@ fn should_format_files_in_folders_ignored_by_linter() {
 
 #[test]
 fn print_json() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
@@ -3220,7 +3234,7 @@ fn print_json() {
 
 #[test]
 fn print_json_pretty() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
@@ -3247,7 +3261,7 @@ fn print_json_pretty() {
 
 #[test]
 fn format_without_file_paths() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.js");
@@ -3270,7 +3284,7 @@ fn format_without_file_paths() {
 
 #[test]
 fn fix() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
@@ -3295,7 +3309,7 @@ fn fix() {
 #[test]
 fn should_error_if_unstaged_files_only_with_staged_flag() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     // Unstaged
     fs.insert(
         Utf8Path::new("file1.js").into(),
@@ -3320,7 +3334,7 @@ fn should_error_if_unstaged_files_only_with_staged_flag() {
 #[test]
 fn should_error_if_unchanged_files_only_with_changed_flag() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     // Unchanged
     fs.insert(
         Utf8Path::new("file1.js").into(),
@@ -3342,8 +3356,33 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
 }
 
 #[test]
+fn can_format_graphphs_files() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.graphqls");
+    fs.insert(file_path.into(), SPACING_GRAPHQLS_SANITY_BEFORE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "can_format_graphphs_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn applies_custom_bracket_spacing_for_graphql() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.graphql");
@@ -3383,7 +3422,7 @@ fn applies_custom_bracket_spacing_for_graphql() {
 /// Change this when HTML formatting is enabled by default
 #[test]
 fn html_disabled_by_default() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.html");
@@ -3414,7 +3453,7 @@ fn html_disabled_by_default() {
 
 #[test]
 fn html_enabled_by_arg_format() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("file.html");
@@ -3449,7 +3488,7 @@ fn html_enabled_by_arg_format() {
 
 #[test]
 fn format_skip_parse_errors_continues_with_valid_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let valid = Utf8Path::new("valid.js");
@@ -3479,6 +3518,32 @@ fn format_skip_parse_errors_continues_with_valid_files() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_skip_parse_errors_continues_with_valid_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_format_file_with_syntax_errors() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let invalid = Utf8Path::new("invalid.js");
+    fs.insert(invalid.into(), "while ) {}".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", invalid.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, invalid, "while ) {}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_format_file_with_syntax_errors",
         fs,
         console,
         result,

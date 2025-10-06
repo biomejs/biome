@@ -7,6 +7,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsAssignmentOperator, JsBinaryOperator, JsForStatement,
     JsIdentifierAssignment, JsIdentifierExpression, JsPostUpdateOperator, JsUnaryOperator,
 };
+use biome_rule_options::use_valid_for_direction::UseValidForDirectionOptions;
 
 declare_lint_rule! {
     /// Enforce "for" loop update clause moving the counter in the right direction.
@@ -45,7 +46,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidForDirection",
         language: "js",
-        sources: &[RuleSource::Eslint("for-direction")],
+        sources: &[RuleSource::Eslint("for-direction").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -55,7 +56,7 @@ impl Rule for UseValidForDirection {
     type Query = Ast<JsForStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseValidForDirectionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

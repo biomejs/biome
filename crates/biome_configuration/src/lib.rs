@@ -68,10 +68,23 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::fmt::Debug;
-use std::num::NonZeroU64;
 use std::str::FromStr;
 use std::sync::LazyLock;
 use vcs::VcsClientKind;
+
+pub const DEFAULT_SCANNER_IGNORE_ENTRIES: &[&[u8]] = &[
+    b".cache",
+    b".git",
+    b".hg",
+    b".netlify",
+    b".output",
+    b".svn",
+    b".yarn",
+    b".timestamp",
+    b".turbo",
+    b".vercel",
+    b".DS_Store",
+];
 
 pub const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
@@ -79,11 +92,6 @@ pub const VERSION: &str = match option_env!("BIOME_VERSION") {
 };
 
 pub type RootEnabled = Bool<true>;
-
-/// Limit the size of files to 1.0 MiB by default
-pub const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
-    // SAFETY: This constant is initialized with a non-zero value
-    NonZeroU64::new(1024 * 1024).unwrap();
 
 /// The configuration that is contained inside the file `biome.json`
 #[derive(
@@ -451,18 +459,19 @@ impl Deserializable for Schema {
                 range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                if let Some(captures) = SCHEMA_REGEX.captures(value.text()) {
-                    if let Some(config_version_match) = captures.get(1) {
-                        let cli_version = Version::new(VERSION);
-                        let config_version_str = Version::new(config_version_match.as_str());
-                        match config_version_str.cmp(&cli_version) {
+                if let Some(captures) = SCHEMA_REGEX.captures(value.text())
+                    && let Some(config_version_match) = captures.get(1)
+                {
+                    let cli_version = Version::new(VERSION);
+                    let config_version_str = Version::new(config_version_match.as_str());
+                    match config_version_str.cmp(&cli_version) {
                             Ordering::Less | Ordering::Greater => {
                                 ctx.report(
                                     DeserializationDiagnostic::new(
                                         markup!(<Warn>"The configuration schema version does not match the CLI version " {VERSION}</Warn>),
                                     )
                                         .with_range(range)
-                                        .with_custom_severity(Severity::Warning)
+                                        .with_custom_severity(Severity::Information)
                                         .with_note(markup!(
                                         {KeyValuePair("Expected", markup!({VERSION}))}
                                         {KeyValuePair("Found", markup!({config_version_str}))}
@@ -474,7 +483,6 @@ impl Deserializable for Schema {
                             }
                             _ => {},
                         }
-                    }
                 }
 
                 Some(Schema(value.text().into()))
@@ -532,9 +540,7 @@ impl Display for Version<'_> {
 pub type FilesIgnoreUnknownEnabled = Bool<false>;
 
 /// The configuration of the filesystem
-#[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
-)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Merge)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {
@@ -555,50 +561,116 @@ pub struct FilesConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 
+    /// **Deprecated:** Please use _force-ignore syntax_ in `files.includes`
+    /// instead: https://biomejs.dev/reference/configuration/#filesincludes
+    ///
     /// Set of file and folder names that should be unconditionally ignored by
     /// Biome's scanner.
-    ///
-    /// Biome maintains an internal list of default ignore entries, which is
-    /// based on user feedback and which may change in any release. This setting
-    /// allows overriding this internal list completely.
-    ///
-    /// This is considered an advanced feature that users _should_ not need to
-    /// tweak themselves, but they can as a last resort. This setting can only
-    /// be configured in root configurations, and is ignored in nested configs.
-    ///
-    /// Entries must be file or folder *names*. Specific paths and globs are not
-    /// supported.
-    ///
-    /// Examples where this may be useful:
-    ///
-    /// ```jsonc
-    /// {
-    ///     "files": {
-    ///         "experimentalScannerIgnores": [
-    ///             // You almost certainly don't want to scan your `.git`
-    ///             // folder, which is why it's already ignored by default:
-    ///             ".git",
-    ///
-    ///             // But the scanner does scan `node_modules` by default. If
-    ///             // you *really* don't want this, you can ignore it like
-    ///             // this:
-    ///             "node_modules",
-    ///
-    ///             // But it's probably better to ignore a specific dependency.
-    ///             // For instance, one that happens to be particularly slow to
-    ///             // scan:
-    ///             "RedisCommander.d.ts",
-    ///         ],
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// Please be aware that rules relying on the module graph or type inference
-    /// information may be negatively affected if dependencies of your project
-    /// aren't (fully) scanned.
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental_scanner_ignores: Option<Vec<String>>,
+}
+
+impl FilesConfiguration {
+    fn deserialize_field(
+        &mut self,
+        ctx: &mut impl DeserializationContext,
+        name: &str,
+        value: &impl DeserializableValue,
+        range: TextRange,
+    ) {
+        match name {
+            "maxSize" => {
+                if let Some(value) = Deserializable::deserialize(ctx, value, name) {
+                    self.max_size = value;
+                }
+            }
+            "ignoreUnknown" => {
+                if let Some(value) = Deserializable::deserialize(ctx, value, name) {
+                    self.ignore_unknown = value;
+                }
+            }
+            "includes" => {
+                if let Some(value) = Deserializable::deserialize(ctx, value, name) {
+                    self.includes = value;
+                }
+            }
+            "experimentalScannerIgnores" => {
+                if let Some(value) = Deserializable::deserialize(ctx, value, name) {
+                    self.experimental_scanner_ignores = value;
+
+                    let mut diagnostic = DeserializationDiagnostic::new_deprecated(name, range);
+                    if let Some(ignores) = &self.experimental_scanner_ignores {
+                        let suggestions: Vec<String> = ignores
+                            .iter()
+                            .filter(|entry| {
+                                !DEFAULT_SCANNER_IGNORE_ENTRIES.contains(&entry.as_bytes())
+                            })
+                            .map(|entry| format!("\"!!**/{entry}\""))
+                            .collect();
+                        diagnostic = diagnostic.note_with_list(
+                            markup! {
+                                "You may want to add the following entries to "
+                                <Emphasis>"files.includes"</Emphasis>" instead:"
+                            },
+                            &suggestions,
+                        );
+                    }
+                    let link = "https://biomejs.dev/reference/configuration/#filesincludes";
+                    ctx.report(diagnostic.with_note(markup! {
+                        "See "<Hyperlink href={link}>"the files.includes documentation"</Hyperlink>
+                        " for more information."
+                    }));
+                }
+            }
+            unknown_key => {
+                const ALLOWED_KEYS: &[&str] = &[
+                    "maxSize",
+                    "ignoreUnknown",
+                    "includes",
+                    "experimentalScannerIgnores",
+                ];
+                ctx.report(DeserializationDiagnostic::new_unknown_key(
+                    unknown_key,
+                    range,
+                    ALLOWED_KEYS,
+                ))
+            }
+        }
+    }
+}
+
+impl biome_deserialize::Deserializable for FilesConfiguration {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = FilesConfiguration;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
+            fn visit_map(
+                self,
+                ctx: &mut impl DeserializationContext,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                _range: TextRange,
+                _name: &str,
+            ) -> Option<Self::Output> {
+                let mut result = FilesConfiguration::default();
+                for (key, value) in members.flatten() {
+                    if let Some(key_text) = Text::deserialize(ctx, &key, "") {
+                        result.deserialize_field(ctx, key_text.text(), &value, key.range());
+                    }
+                }
+                Some(result)
+            }
+        }
+
+        value.deserialize(ctx, Visitor, name)
+    }
 }
 
 #[derive(Debug)]
@@ -611,7 +683,7 @@ pub struct ConfigurationPayload {
     pub external_resolution_base_path: Utf8PathBuf,
 }
 
-#[derive(Debug, Default, PartialEq, Clone)]
+#[derive(Debug, Default, PartialEq, Clone, Eq, Hash)]
 pub enum ConfigurationPathHint {
     /// The default mode, not having a configuration file is not an error.
     /// The path will be filled with the working directory if it is not filled at the time of usage.
@@ -637,16 +709,14 @@ impl Display for ConfigurationPathHint {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
             Self::None => write!(fmt, "Configuration file not provided.",),
-            Self::FromWorkspace(path) => write!(
-                fmt,
-                "Configuration path provided from a workspace: {}",
-                path
-            ),
+            Self::FromWorkspace(path) => {
+                write!(fmt, "Configuration path provided from a workspace: {path}",)
+            }
             Self::FromLsp(path) => {
-                write!(fmt, "Configuration path provided from the LSP: {}", path,)
+                write!(fmt, "Configuration path provided from the LSP: {path}",)
             }
             Self::FromUser(path) => {
-                write!(fmt, "Configuration path provided by the user: {}", path,)
+                write!(fmt, "Configuration path provided by the user: {path}",)
             }
         }
     }
@@ -658,5 +728,14 @@ impl ConfigurationPathHint {
     }
     pub const fn is_from_lsp(&self) -> bool {
         matches!(self, Self::FromLsp(_))
+    }
+
+    pub fn to_path_buf(&self) -> Option<Utf8PathBuf> {
+        match self {
+            Self::None => None,
+            Self::FromWorkspace(path) | Self::FromLsp(path) | Self::FromUser(path) => {
+                Some(path.to_path_buf())
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rule_options::no_misleading_character_class::NoMisleadingCharacterClassOptions;
 
 declare_lint_rule! {
     /// Disallow characters made with multiple code points in character class syntax.
@@ -55,7 +56,7 @@ declare_lint_rule! {
         version: "1.5.0",
         name: "noMisleadingCharacterClass",
         language: "js",
-        sources: &[RuleSource::Eslint("no-misleading-character-class")],
+        sources: &[RuleSource::Eslint("no-misleading-character-class").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
@@ -119,7 +120,7 @@ impl Rule for NoMisleadingCharacterClass {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoMisleadingCharacterClassOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -334,16 +335,13 @@ fn diagnostic_regex_class(
                 if
                     !matches!(prev_char_type, CharType::None | CharType::ZeroWidthJoiner)
                     && end < char_class.len()
-                {
-                    if let Some((c, len)) = decode_next_codepoint(&char_class[end..], is_in_string) {
-                        if c != 0x200D {
+                    && let Some((c, len)) = decode_next_codepoint(&char_class[end..], is_in_string)
+                        && c != 0x200D {
                             return Some(RuleState {
                                 range: TextRange::new((prev_char_index as u32).into(), ((end + len) as u32).into()),
                                 message: Message::JoinedCharSequence,
                             });
                         }
-                    }
-                }
                 prev_char_type = CharType::ZeroWidthJoiner;
             }
             _ => {

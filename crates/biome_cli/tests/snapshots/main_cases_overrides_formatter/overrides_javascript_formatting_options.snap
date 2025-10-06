@@ -1,0 +1,124 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "includes": ["**/*.js"]
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "arrowParentheses": "asNeeded",
+      "attributePosition": "auto",
+      "bracketSameLine": true,
+      "bracketSpacing": false,
+      "expand": "never",
+      "indentStyle": "tab",
+      "indentWidth": 4,
+      "jsxQuoteStyle": "single",
+      "lineEnding": "lf",
+      "lineWidth": 100,
+      "quoteProperties": "preserve",
+      "quoteStyle": "single",
+      "semicolons": "asNeeded",
+      "trailingCommas": "es5"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["overrides.js"],
+      "javascript": {
+        "formatter": {
+          "enabled": true,
+          "arrowParentheses": "always",
+          "attributePosition": "multiline",
+          "bracketSameLine": false,
+          "bracketSpacing": true,
+          "expand": "always",
+          "indentStyle": "space",
+          "indentWidth": 2,
+          "jsxQuoteStyle": "double",
+          "lineEnding": "lf",
+          "lineWidth": 20,
+          "quoteProperties": "asNeeded",
+          "quoteStyle": "double",
+          "semicolons": "always",
+          "trailingCommas": "all"
+        }
+      }
+    }
+  ]
+}
+```
+
+## `base.js`
+
+```js
+import React from 'react'
+
+const arrowParentheses = a => {
+	return `${a} => ${b}`
+}
+
+const testObject = {'must-stay-wrapped': 'This is a test', 𐊧: 'no key quote wrap needed'}
+
+function MyComponent() {
+	return (
+		<>
+			<div autoFocus data-attribute='test'>
+				no self closing element
+			</div>
+			<input type='text' autoComplete='off' defaultValue='field value' />
+		</>
+	)
+}
+
+```
+
+## `overrides.js`
+
+```js
+import React from "react";
+
+const arrowParentheses =
+  (a) => {
+    return `${a} => ${b}`;
+  };
+
+const testObject = {
+  "must-stay-wrapped":
+    "This is a test",
+  𐊧: "no key quote wrap needed",
+};
+
+function MyComponent() {
+  return (
+    <>
+      <div
+        autoFocus
+        data-attribute="test"
+      >
+        no self
+        closing
+        element
+      </div>
+      <input
+        type="text"
+        autoComplete="off"
+        defaultValue="field value"
+      />
+    </>
+  );
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```

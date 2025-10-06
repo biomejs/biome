@@ -6,6 +6,7 @@ use biome_js_syntax::{
     AnyJsClass, AnyJsExpression, JsAssignmentOperator, JsConstructorClassMember, JsLogicalOperator,
 };
 use biome_rowan::{AstNode, AstNodeList, TextRange};
+use biome_rule_options::no_invalid_constructor_super::NoInvalidConstructorSuperOptions;
 
 declare_lint_rule! {
     /// Prevents the incorrect use of `super()` inside classes. It also checks whether a call `super()` is missing from classes that extends other constructors.
@@ -50,7 +51,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noInvalidConstructorSuper",
         language: "js",
-        sources: &[RuleSource::Eslint("constructor-super")],
+        sources: &[RuleSource::Eslint("constructor-super").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -99,7 +100,7 @@ impl Rule for NoInvalidConstructorSuper {
     type Query = Ast<JsConstructorClassMember>;
     type State = NoInvalidConstructorSuperState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoInvalidConstructorSuperOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -127,13 +128,13 @@ impl Rule for NoInvalidConstructorSuper {
             (Some(super_range), Some(extends_clause)) => {
                 let super_class = extends_clause.super_class().ok()?;
                 let extends_range = super_class.range();
-                if let Some(is_valid) = is_valid_constructor(super_class) {
-                    if !is_valid {
-                        return Some(NoInvalidConstructorSuperState::BadExtends {
-                            super_range,
-                            extends_range,
-                        });
-                    }
+                if let Some(is_valid) = is_valid_constructor(super_class)
+                    && !is_valid
+                {
+                    return Some(NoInvalidConstructorSuperState::BadExtends {
+                        super_range,
+                        extends_range,
+                    });
                 }
                 None
             }

@@ -5,6 +5,14 @@ mod diagnostics;
 mod plugin_cache;
 mod plugin_manifest;
 
+#[cfg(feature = "js_plugin")]
+mod analyzer_js_plugin;
+#[cfg(feature = "js_plugin")]
+mod thread_local;
+
+#[cfg(feature = "js_plugin")]
+pub use analyzer_js_plugin::AnalyzerJsPlugin;
+
 pub use analyzer_grit_plugin::AnalyzerGritPlugin;
 pub use diagnostics::PluginDiagnostic;
 pub use plugin_cache::*;
@@ -14,8 +22,9 @@ use std::sync::Arc;
 use biome_analyze::{AnalyzerPlugin, AnalyzerPluginVec};
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_fs::{FileSystem, normalize_path};
+use biome_fs::normalize_path;
 use biome_json_parser::JsonParserOptions;
+use biome_resolver::FsWithResolverProxy;
 use camino::{Utf8Path, Utf8PathBuf};
 use plugin_manifest::PluginManifest;
 
@@ -29,7 +38,7 @@ impl BiomePlugin {
     ///
     /// The base path is used to resolve relative paths.
     pub fn load(
-        fs: &dyn FileSystem,
+        fs: Arc<dyn FsWithResolverProxy>,
         plugin_path: &str,
         base_path: &Utf8Path,
     ) -> Result<(Self, Utf8PathBuf), PluginDiagnostic> {
@@ -41,7 +50,22 @@ impl BiomePlugin {
             .extension()
             .is_some_and(|extension| extension == "grit")
         {
-            let plugin = AnalyzerGritPlugin::load(fs, &plugin_path)?;
+            let plugin = AnalyzerGritPlugin::load(fs.as_ref(), &plugin_path)?;
+            return Ok((
+                Self {
+                    analyzer_plugins: vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)],
+                },
+                plugin_path,
+            ));
+        }
+
+        // TODO: plugin can have multiple analyser rules
+        #[cfg(feature = "js_plugin")]
+        if plugin_path
+            .extension()
+            .is_some_and(|extension| extension == "js" || extension == "mjs")
+        {
+            let plugin = AnalyzerJsPlugin::load(fs.clone(), &plugin_path)?;
             return Ok((
                 Self {
                     analyzer_plugins: vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)],
@@ -77,7 +101,8 @@ impl BiomePlugin {
                 .map(|rule| Utf8PathBuf::from_path_buf(rule).unwrap())
                 .map(|rule| {
                     if rule.as_os_str().as_encoded_bytes().ends_with(b".grit") {
-                        let plugin = AnalyzerGritPlugin::load(fs, &plugin_path.join(rule))?;
+                        let plugin =
+                            AnalyzerGritPlugin::load(fs.as_ref(), &plugin_path.join(rule))?;
                         Ok(Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>))
                     } else {
                         Err(PluginDiagnostic::unsupported_rule_format(markup!(
@@ -95,10 +120,9 @@ impl BiomePlugin {
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use biome_diagnostics::{Error, print_diagnostic_to_string};
     use biome_fs::MemoryFileSystem;
-
-    use super::*;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
@@ -115,7 +139,7 @@ mod test {
 
     #[test]
     fn load_plugin() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             "/my-plugin/biome-manifest.jsonc".into(),
             r#"{
@@ -126,24 +150,26 @@ mod test {
 
         fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
 
-        let (plugin, _) = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
-            .expect("Couldn't load plugin");
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let (plugin, _) =
+            BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/")).expect("Couldn't load plugin");
         assert_eq!(plugin.analyzer_plugins.len(), 1);
     }
 
     #[test]
     fn load_plugin_without_manifest() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
 
-        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"))
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_without_manifest", error.into());
     }
 
     #[test]
     fn load_plugin_with_wrong_version() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             "/my-plugin/biome-manifest.jsonc".into(),
             r#"{
@@ -152,14 +178,15 @@ mod test {
 }"#,
         );
 
-        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"))
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_with_wrong_version", error.into());
     }
 
     #[test]
     fn load_plugin_with_wrong_rule_extension() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert(
             "/my-plugin/biome-manifest.jsonc".into(),
             r#"{
@@ -168,18 +195,36 @@ mod test {
 }"#,
         );
 
-        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let error = BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/"))
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_with_wrong_rule_extension", error.into());
     }
 
     #[test]
     fn load_single_rule_plugin() {
-        let mut fs = MemoryFileSystem::default();
+        let fs = MemoryFileSystem::default();
         fs.insert("/my-plugin.grit".into(), r#"`hello`"#);
 
-        let (plugin, _) = BiomePlugin::load(&fs, "./my-plugin.grit", Utf8Path::new("/"))
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let (plugin, _) = BiomePlugin::load(fs, "./my-plugin.grit", Utf8Path::new("/"))
             .expect("Couldn't load plugin");
+        assert_eq!(plugin.analyzer_plugins.len(), 1);
+    }
+
+    #[cfg(feature = "js_plugin")]
+    #[test]
+    fn load_single_rule_js_plugin() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/my-plugin.js".into(),
+            r#"export default function useMyPlugin() {}"#,
+        );
+
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let (plugin, _) = BiomePlugin::load(fs, "./my-plugin.js", Utf8Path::new("/"))
+            .expect("Couldn't load plugin");
+
         assert_eq!(plugin.analyzer_plugins.len(), 1);
     }
 }

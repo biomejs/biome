@@ -848,19 +848,23 @@ pub const VENDOR_SPECIFIC_PSEUDO_ELEMENTS: [&str; 66] = [
 
 pub const SHADOW_TREE_PSEUDO_ELEMENTS: [&str; 1] = ["part"];
 
-pub const OTHER_PSEUDO_ELEMENTS: [&str; 18] = [
+pub const OTHER_PSEUDO_ELEMENTS: [&str; 22] = [
     "backdrop",
     "content",
     "cue",
+    "details-content",
     "file-selector-button",
     "grammar-error",
     "highlight",
     "marker",
     "placeholder",
+    "prefix",
+    "search-text",
     "selection",
     "shadow",
     "slotted",
     "spelling-error",
+    "suffix",
     "target-text",
     "view-transition",
     "view-transition-group",
@@ -923,7 +927,7 @@ pub const RESOURCE_STATE_PSEUDO_CLASSES: [&str; 7] = [
     "volume-locked",
 ];
 
-pub const OTHER_PSEUDO_CLASSES: [&str; 50] = [
+pub const OTHER_PSEUDO_CLASSES: [&str; 51] = [
     "active",
     "any-link",
     "autofill",
@@ -955,6 +959,7 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 50] = [
     "modal",
     "only-child",
     "only-of-type",
+    "open",
     "optional",
     "out-of-range",
     "past",
@@ -1325,6 +1330,7 @@ pub const KNOWN_PROPERTIES: &[&str] = &[
     "nav-left",
     "nav-right",
     "nav-up",
+    "navigation", // https://www.w3.org/TR/css-view-transitions-2/#view-transition-navigation-descriptor
     "object-fit",
     "object-position",
     "offset",
@@ -5941,42 +5947,42 @@ mod tests {
     }
 
     #[test]
-    fn test_kown_edge_properties_order() {
+    fn test_known_edge_properties_order() {
         for items in KNOWN_EDGE_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
 
     #[test]
-    fn test_kown_explorer_properties_order() {
+    fn test_known_explorer_properties_order() {
         for items in KNOWN_EXPLORER_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
 
     #[test]
-    fn test_kown_firefox_properties_order() {
+    fn test_known_firefox_properties_order() {
         for items in KNOWN_FIREFOX_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
 
     #[test]
-    fn test_kown_safari_properties_order() {
+    fn test_known_safari_properties_order() {
         for items in KNOWN_SAFARI_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
 
     #[test]
-    fn test_kown_sumsung_internet_properties_order() {
+    fn test_known_samsung_internet_properties_order() {
         for items in KNOWN_SAMSUNG_INTERNET_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
     }
 
     #[test]
-    fn test_kown_us_browser_properties_order() {
+    fn test_known_us_browser_properties_order() {
         for items in KNOWN_US_BROWSER_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }

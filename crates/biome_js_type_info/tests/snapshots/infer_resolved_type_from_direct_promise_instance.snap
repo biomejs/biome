@@ -18,13 +18,17 @@ new Promise
 ## Registered types
 
 ```
-Global TypeId(0) => sync Function {
+Global TypeId(0) => value: value
+
+Global TypeId(1) => Call unresolved reference "resolve" (scope ID: 0)(Global TypeId(0))
+
+Global TypeId(2) => sync Function {
   accepts: {
     params: [
-      required resolve: unknown (bindings: resolve:unknown)
+      required resolve: unknown
     ]
     type_args: []
   }
-  returns: unknown reference
+  returns: Global TypeId(1)
 }
 ```

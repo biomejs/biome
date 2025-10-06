@@ -1,0 +1,133 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+interface Foo {
+	foo(): string;
+}
+
+interface Bar {
+	foo(): number;
+	bar(): boolean;
+}
+
+type Intersection = Foo & Bar;
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+
+Module TypeId(1) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+
+Module TypeId(2) => boolean
+
+Module TypeId(3) => sync Function "bar" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(2)
+}
+
+Module TypeId(4) => interface "Foo" {
+  extends: []
+  type_args: []
+  members: ["foo": Module(0) TypeId(0)]
+}
+
+Module TypeId(5) => interface "Bar" {
+  extends: []
+  type_args: []
+  members: ["foo": Module(0) TypeId(1), "bar": Module(0) TypeId(3)]
+}
+
+Module TypeId(6) => interface "(merged)" {
+  extends: []
+  type_args: []
+  members: ["foo": Module(0) TypeId(7), "bar": Module(0) TypeId(3)]
+}
+
+Module TypeId(7) => Module(0) TypeId(1) | Module(0) TypeId(0)
+```
+
+# Module Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string
+}
+
+Full TypeId(1) => sync Function "foo" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+
+Full TypeId(2) => boolean
+
+Full TypeId(3) => sync Function "bar" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(2)
+}
+
+Full TypeId(4) => interface "Foo" {
+  extends: []
+  type_args: []
+  members: ["foo": Module(0) TypeId(0)]
+}
+
+Full TypeId(5) => interface "Bar" {
+  extends: []
+  type_args: []
+  members: ["foo": Module(0) TypeId(1), "bar": Module(0) TypeId(3)]
+}
+
+Full TypeId(6) => interface "(merged)" {
+  extends: []
+  type_args: []
+  members: ["foo": Module(0) TypeId(7), "bar": Module(0) TypeId(3)]
+}
+
+Full TypeId(7) => Module(0) TypeId(1) | Module(0) TypeId(0)
+```

@@ -11,6 +11,7 @@ use biome_js_syntax::{
     JsLogicalOperator, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rule_options::use_valid_typeof::UseValidTypeofOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
@@ -63,7 +64,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidTypeof",
         language: "js",
-        sources: &[RuleSource::Eslint("valid-typeof")],
+        sources: &[RuleSource::Eslint("valid-typeof").same()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
@@ -74,7 +75,7 @@ impl Rule for UseValidTypeof {
     type Query = Ast<JsBinaryExpression>;
     type State = AnyJsExpression;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseValidTypeofOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let n = ctx.query();
@@ -144,16 +145,16 @@ impl Rule for UseValidTypeof {
     }
 
     fn diagnostic(_: &RuleContext<Self>, expr: &Self::State) -> Option<RuleDiagnostic> {
-        if let Some(literal) = expr.as_static_value() {
-            if let Some(literal) = literal.as_string_constant() {
-                return Some(RuleDiagnostic::new(
-                    rule_category!(),
-                    expr.range(),
-                    markup! {
-                        "\""{literal}"\" is not a valid "<Emphasis>"typeof"</Emphasis>" value."
-                    },
-                ));
-            }
+        if let Some(literal) = expr.as_static_value()
+            && let Some(literal) = literal.as_string_constant()
+        {
+            return Some(RuleDiagnostic::new(
+                rule_category!(),
+                expr.range(),
+                markup! {
+                    "\""{literal}"\" is not a valid "<Emphasis>"typeof"</Emphasis>" value."
+                },
+            ));
         }
         Some(
             RuleDiagnostic::new(
@@ -190,7 +191,7 @@ impl Rule for UseValidTypeof {
         mutation.replace_node(
             other.clone(),
             AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(
-                make::js_string_literal_expression(if ctx.as_preferred_quote().is_double() {
+                make::js_string_literal_expression(if ctx.preferred_quote().is_double() {
                     make::js_string_literal(suggestion)
                 } else {
                     make::js_string_literal_single_quotes(suggestion)

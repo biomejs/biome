@@ -2,6 +2,7 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lin
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
+use biome_rule_options::no_evolving_types::NoEvolvingTypesOptions;
 
 declare_lint_rule! {
     /// Disallow variables from evolving into `any` type through reassignments.
@@ -60,7 +61,7 @@ impl Rule for NoEvolvingTypes {
     type Query = Ast<JsVariableDeclaration>;
     type State = JsVariableDeclarator;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoEvolvingTypesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>().language();

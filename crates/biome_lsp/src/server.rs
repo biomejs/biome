@@ -1,4 +1,4 @@
-use crate::capabilities::server_capabilities;
+use crate::capabilities::{DEFAULT_CODE_ACTION_CAPABILITIES, server_capabilities};
 use crate::diagnostics::{LspError, handle_lsp_error};
 use crate::requests::syntax_tree::{SYNTAX_TREE_REQUEST, SyntaxTreePayload};
 use crate::session::{
@@ -11,8 +11,7 @@ use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::workspace::{
-    CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult,
-    ServiceDataNotification,
+    CloseProjectParams, RageEntry, RageParams, RageResult, ServiceNotification,
 };
 use biome_service::{WatcherInstruction, WorkspaceServer};
 use crossbeam::channel::{Sender, bounded};
@@ -30,7 +29,7 @@ use tokio::task::spawn_blocking;
 use tower_lsp_server::jsonrpc::Result as LspResult;
 use tower_lsp_server::{ClientSocket, UriExt, lsp_types::*};
 use tower_lsp_server::{LanguageServer, LspService, Server};
-use tracing::{error, info, instrument, warn};
+use tracing::{debug, error, info, instrument, warn};
 
 pub struct LSPServer {
     pub(crate) session: SessionHandle,
@@ -85,30 +84,30 @@ impl LSPServer {
 
         entries.extend(workspace_entries);
 
-        if let Ok(sessions) = self.sessions.lock() {
-            if sessions.len() > 1 {
-                entries.push(RageEntry::markup(
+        if let Ok(sessions) = self.sessions.lock()
+            && sessions.len() > 1
+        {
+            entries.push(RageEntry::markup(
                     markup!("\n"<Underline><Emphasis>"Other Active Server Workspaces:"</Emphasis></Underline>"\n"),
                 ));
 
-                for (key, session) in sessions.iter() {
-                    if &self.session.key == key {
-                        // Already printed above
-                        continue;
-                    }
+            for (key, session) in sessions.iter() {
+                if &self.session.key == key {
+                    // Already printed above
+                    continue;
+                }
 
-                    let RageResult {
-                        entries: workspace_entries,
-                    } = session.failsafe_rage(params);
+                let RageResult {
+                    entries: workspace_entries,
+                } = session.failsafe_rage(params);
 
-                    entries.extend(workspace_entries);
+                entries.extend(workspace_entries);
 
-                    if let Some(information) = session.client_information() {
-                        entries.push(RageEntry::pair("Client Name", &information.name));
+                if let Some(information) = session.client_information() {
+                    entries.push(RageEntry::pair("Client Name", &information.name));
 
-                        if let Some(version) = &information.version {
-                            entries.push(RageEntry::pair("Client Version", version))
-                        }
+                    if let Some(version) = &information.version {
+                        entries.push(RageEntry::pair("Client Version", version))
                     }
                 }
             }
@@ -120,6 +119,9 @@ impl LSPServer {
     #[instrument(level = "info", skip(self))]
     async fn setup_capabilities(&self) {
         let mut capabilities = CapabilitySet::default();
+
+        let is_linting_and_formatting_disabled = self.session.is_linting_and_formatting_disabled();
+        debug!("Requires configuration: {is_linting_and_formatting_disabled}");
 
         capabilities.add_capability(
             "biome_did_change_extension_settings",
@@ -193,7 +195,7 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_formatting",
             "textDocument/formatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_formatting() {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(None)
@@ -202,7 +204,7 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_range_formatting",
             "textDocument/rangeFormatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_range_formatting() {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(None)
@@ -211,7 +213,8 @@ impl LSPServer {
         capabilities.add_capability(
             "biome_on_type_formatting",
             "textDocument/onTypeFormatting",
-            if self.session.is_linting_and_formatting_disabled() {
+            if is_linting_and_formatting_disabled || !self.session.can_register_on_type_formatting()
+            {
                 CapabilityStatus::Disable
             } else {
                 CapabilityStatus::Enable(Some(json!(DocumentOnTypeFormattingRegistrationOptions {
@@ -222,18 +225,23 @@ impl LSPServer {
             },
         );
 
-        let rename = {
-            let config = self.session.extension_settings.read().ok();
-            config.is_some_and(|x| x.rename_enabled())
-        };
-
         capabilities.add_capability(
-            "biome_rename",
-            "textDocument/rename",
-            if rename {
-                CapabilityStatus::Enable(None)
-            } else {
+            "biome_code_action",
+            "textDocument/codeAction",
+            if is_linting_and_formatting_disabled || !self.session.can_register_code_action() {
                 CapabilityStatus::Disable
+            } else {
+                CapabilityStatus::Enable(Some(json!(CodeActionProviderCapability::from(
+                    CodeActionOptions {
+                        code_action_kinds: Some(
+                            DEFAULT_CODE_ACTION_CAPABILITIES
+                                .iter()
+                                .map(|item| CodeActionKind::from(*item))
+                                .collect::<Vec<_>>(),
+                        ),
+                        ..Default::default()
+                    }
+                ))))
             },
         );
 
@@ -251,6 +259,15 @@ impl LSPServer {
             },
 
             Err(err) => Err(into_lsp_error(err)),
+        }
+    }
+
+    async fn notify_error(&self, err: LspError) {
+        if let Err(err) = handle_lsp_error::<()>(err, &self.session.client).await {
+            self.session
+                .client
+                .log_message(MessageType::ERROR, err)
+                .await;
         }
     }
 }
@@ -292,13 +309,10 @@ impl LanguageServer for LSPServer {
     }
 
     #[tracing::instrument(level = "debug", skip_all)]
-    async fn initialized(&self, params: InitializedParams) {
-        let _ = params;
-
+    async fn initialized(&self, _params: InitializedParams) {
         info!("Attempting to load the configuration from 'biome.json' file");
-
         self.session.load_extension_settings().await;
-        self.session.load_workspace_settings().await;
+        self.session.load_workspace_settings(false).await;
 
         let msg = format!("Server initialized with PID: {}", std::process::id());
         self.session
@@ -329,32 +343,25 @@ impl LanguageServer for LSPServer {
         let file_paths = params
             .changes
             .iter()
-            .map(|change| change.uri.to_file_path());
+            .filter_map(|change| change.uri.to_file_path())
+            .collect::<Vec<_>>();
         for file_path in file_paths {
-            match file_path {
-                Some(file_path) => {
-                    let base_path = self.session.base_path();
-                    if let Some(base_path) = base_path {
-                        let possible_biome_json = file_path.strip_prefix(&base_path);
-                        if let Ok(watched_file) = possible_biome_json {
-                            if ConfigName::file_names()
-                                .contains(&&*watched_file.display().to_string())
-                                || watched_file.ends_with(".editorconfig")
-                            {
-                                self.session.load_workspace_settings().await;
-                                self.setup_capabilities().await;
-                                self.session.update_all_diagnostics().await;
-                                // for now we are only interested to the configuration file,
-                                // so it's OK to exist the loop
-                                break;
-                            }
-                        }
-                    }
-                }
-                None => {
-                    error!(
-                        "The Workspace root URI {file_path:?} could not be parsed as a filesystem path"
-                    );
+            let base_path = self.session.base_path();
+            if let Some(base_path) = base_path {
+                let possible_biome_json = file_path.strip_prefix(&base_path);
+                if let Ok(watched_file) = possible_biome_json
+                    && (ConfigName::file_names()
+                        .iter()
+                        .any(|file_name| watched_file.ends_with(file_name))
+                        || watched_file.ends_with(".editorconfig"))
+                {
+                    self.session.load_extension_settings().await;
+                    self.session.load_workspace_settings(true).await;
+                    self.setup_capabilities().await;
+                    self.session.update_all_diagnostics().await;
+                    // for now we are only interested to the configuration file,
+                    // so it's OK to exit the loop
+                    break;
                 }
             }
         }
@@ -391,60 +398,25 @@ impl LanguageServer for LSPServer {
                     .session
                     .workspace
                     .close_project(CloseProjectParams { project_key })
-                    .map_err(into_lsp_error);
+                    .map_err(LspError::from);
 
                 if let Err(err) = result {
                     error!("Failed to remove project from the workspace: {}", err);
-                    self.session
-                        .client
-                        .log_message(MessageType::ERROR, err)
-                        .await;
+                    self.notify_error(err).await;
                 }
             }
         }
 
-        for added in &params.event.added {
-            if let Ok(project_path) = self.session.file_path(&added.uri) {
-                let result = self
-                    .session
-                    .workspace
-                    .open_project(OpenProjectParams {
-                        path: project_path.clone(),
-                        open_uninitialized: true,
-                        only_rules: None,
-                        skip_rules: None,
-                    })
-                    .map_err(into_lsp_error);
-
-                match result {
-                    Ok(result) => {
-                        self.session
-                            .insert_and_scan_project(
-                                result.project_key,
-                                project_path.clone(),
-                                result.scan_kind,
-                            )
-                            .await;
-
-                        self.session.update_all_diagnostics().await;
-                    }
-                    Err(err) => {
-                        error!("Failed to add project to the workspace: {err}");
-                        self.session
-                            .client
-                            .log_message(MessageType::ERROR, err)
-                            .await;
-                    }
-                }
-            }
-        }
+        self.session.update_workspace_folders(params.event.added);
+        self.session.load_workspace_settings(true).await;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
-        biome_diagnostics::panic::catch_unwind(move || {
-            handlers::analysis::code_actions(&self.session, params).map_err(into_lsp_error)
-        })
-        .map_err(into_lsp_error)?
+        let result = biome_diagnostics::panic::catch_unwind(move || {
+            handlers::analysis::code_actions(&self.session, params)
+        });
+
+        self.map_op_error(result).await
     }
 
     async fn formatting(
@@ -477,25 +449,6 @@ impl LanguageServer for LSPServer {
         });
 
         self.map_op_error(result).await
-    }
-
-    async fn rename(&self, params: RenameParams) -> LspResult<Option<WorkspaceEdit>> {
-        biome_diagnostics::panic::catch_unwind(move || {
-            let rename_enabled = self
-                .session
-                .extension_settings
-                .read()
-                .ok()
-                .and_then(|config| config.settings.rename)
-                .unwrap_or(false);
-
-            if rename_enabled {
-                handlers::rename::rename(&self.session, params).map_err(into_lsp_error)
-            } else {
-                Ok(None)
-            }
-        })
-        .map_err(into_lsp_error)?
     }
 }
 
@@ -576,51 +529,51 @@ pub struct ServerFactory {
     /// initialized on this server instance
     is_initialized: Arc<AtomicBool>,
 
-    /// Receiver for service data notifications.
+    /// Receiver for service notifications.
     ///
     /// If we receive a notification here, diagnostics for open documents are
     /// all refreshed.
-    service_data_rx: watch::Receiver<ServiceDataNotification>,
+    service_rx: watch::Receiver<ServiceNotification>,
 }
 
 impl Default for ServerFactory {
     fn default() -> Self {
-        Self::new_with_fs(Box::new(MemoryFileSystem::default()))
+        Self::new_with_fs(Arc::new(MemoryFileSystem::default()))
     }
 }
 
 impl ServerFactory {
     /// Regular constructor for use in the daemon.
     pub fn new(stop_on_disconnect: bool, instruction_tx: Sender<WatcherInstruction>) -> Self {
-        let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
+        let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
             cancellation: Arc::default(),
             workspace: Arc::new(WorkspaceServer::new(
-                Box::new(OsFileSystem::default()),
+                Arc::new(OsFileSystem::default()),
                 instruction_tx,
-                service_data_tx,
+                service_tx,
                 None,
             )),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect,
             is_initialized: Arc::default(),
-            service_data_rx,
+            service_rx,
         }
     }
 
     /// Constructor for use in tests.
-    pub fn new_with_fs(fs: Box<dyn FsWithResolverProxy>) -> Self {
+    pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         let (watcher_tx, _) = bounded(0);
-        let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
+        let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
             cancellation: Arc::default(),
-            workspace: Arc::new(WorkspaceServer::new(fs, watcher_tx, service_data_tx, None)),
+            workspace: Arc::new(WorkspaceServer::new(fs, watcher_tx, service_tx, None)),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect: true,
             is_initialized: Arc::default(),
-            service_data_rx,
+            service_rx,
         }
     }
 
@@ -636,7 +589,7 @@ impl ServerFactory {
                 client,
                 workspace,
                 self.cancellation.clone(),
-                self.service_data_rx.clone(),
+                self.service_rx.clone(),
             );
             let handle = Arc::new(session);
 
@@ -666,12 +619,14 @@ impl ServerFactory {
         workspace_method!(builder, is_path_ignored);
         workspace_method!(builder, update_settings);
         workspace_method!(builder, open_project);
-        workspace_method!(builder, scan_project_folder);
+        workspace_method!(builder, scan_project);
         workspace_method!(builder, close_project);
         workspace_method!(builder, open_file);
+        workspace_method!(builder, file_exists);
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);
+        workspace_method!(builder, get_module_graph);
         workspace_method!(builder, get_type_info);
         workspace_method!(builder, change_file);
         workspace_method!(builder, check_file_size);

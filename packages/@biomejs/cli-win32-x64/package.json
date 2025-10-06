@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/cli-win32-x64",
-  "version": "2.0.0",
+  "version": "2.2.5",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
@@ -16,5 +16,8 @@
   ],
   "cpu": [
     "x64"
-  ]
+  ],
+  "publishConfig": {
+    "provenance": true
+  }
 }

@@ -11,33 +11,15 @@ statement ( ) ;
 </script>
 <template></template>"#;
 
-const VUE_IMPLICIT_JS_FILE_FORMATTED: &str = r#"<script>
-import { something } from "file.vue";
-statement();
-</script>
-<template></template>"#;
-
 const VUE_EXPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script lang="js">
 import {    something } from "file.vue";
 statement ( ) ;
 </script>
 <template></template>"#;
 
-const VUE_EXPLICIT_JS_FILE_FORMATTED: &str = r#"<script lang="js">
-import { something } from "file.vue";
-statement();
-</script>
-<template></template>"#;
-
 const VUE_TS_FILE_UNFORMATTED: &str = r#"<script setup lang="ts">
 import     { type     something } from "file.vue";
 const hello  :      string      = "world";
-</script>
-<template></template>"#;
-
-const VUE_TS_FILE_FORMATTED: &str = r#"<script setup lang="ts">
-import { type something } from "file.vue";
-const hello: string = "world";
 </script>
 <template></template>"#;
 
@@ -108,7 +90,7 @@ const slots = defineSlots<{
 
 #[test]
 fn format_vue_implicit_js_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -138,7 +120,7 @@ fn format_vue_implicit_js_files() {
 
 #[test]
 fn format_vue_implicit_js_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -155,8 +137,6 @@ fn format_vue_implicit_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, VUE_IMPLICIT_JS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_vue_implicit_js_files_write",
@@ -168,7 +148,7 @@ fn format_vue_implicit_js_files_write() {
 
 #[test]
 fn format_vue_explicit_js_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -198,7 +178,7 @@ fn format_vue_explicit_js_files() {
 
 #[test]
 fn format_vue_explicit_js_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -215,8 +195,6 @@ fn format_vue_explicit_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, VUE_EXPLICIT_JS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_vue_explicit_js_files_write",
@@ -228,7 +206,7 @@ fn format_vue_explicit_js_files_write() {
 
 #[test]
 fn format_empty_vue_js_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -255,7 +233,7 @@ fn format_empty_vue_js_files_write() {
 
 #[test]
 fn format_vue_ts_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -282,7 +260,7 @@ fn format_vue_ts_files() {
 
 #[test]
 fn format_vue_ts_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -296,8 +274,6 @@ fn format_vue_ts_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, VUE_TS_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_vue_ts_files_write",
@@ -309,7 +285,7 @@ fn format_vue_ts_files_write() {
 
 #[test]
 fn format_empty_vue_ts_files_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -336,7 +312,7 @@ fn format_empty_vue_ts_files_write() {
 
 #[test]
 fn format_vue_carriage_return_line_feed_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -370,7 +346,7 @@ fn format_vue_carriage_return_line_feed_files() {
 
 #[test]
 fn format_vue_generic_component_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -400,7 +376,7 @@ fn format_vue_generic_component_files() {
 
 #[test]
 fn lint_vue_js_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -425,7 +401,7 @@ fn lint_vue_js_files() {
 
 #[test]
 fn lint_vue_ts_files() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -450,7 +426,7 @@ fn lint_vue_ts_files() {
 
 #[test]
 fn sorts_imports_check() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -485,7 +461,7 @@ fn sorts_imports_check() {
 
 #[test]
 fn sorts_imports_write() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");
@@ -731,7 +707,7 @@ fn check_stdin_write_unsafe_successfully() {
 
 #[test]
 fn vue_compiler_macros_as_globals() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let vue_file_path = Utf8Path::new("file.vue");

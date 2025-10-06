@@ -9,7 +9,8 @@ use biome_text_size::TextRange;
 use serde::Serialize;
 use std::error::Error;
 use std::fmt::{self, Debug, Display, Formatter};
-use std::iter::FusedIterator;
+use std::hash::{Hash, Hasher};
+use std::iter::{FusedIterator, successors};
 use std::marker::PhantomData;
 
 mod batch;
@@ -774,6 +775,144 @@ impl Display for SyntaxError {
 
 impl Error for SyntaxError {}
 
+/// A "pointer" to a [`SyntaxNode`], via location in the source code.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub struct SyntaxNodePtr<L: Language> {
+    kind: L::Kind,
+    range: TextRange,
+}
+
+impl<L: Language> SyntaxNodePtr<L> {
+    /// Returns a [`SyntaxNodePtr`] for the node.
+    pub fn new(node: &SyntaxNode<L>) -> Self {
+        Self {
+            kind: node.kind(),
+            range: node.text_range_with_trivia(),
+        }
+    }
+
+    /// Like [`Self::try_to_node`] but panics instead of returning `None` on
+    /// failure.
+    pub fn to_node(&self, root: &SyntaxNode<L>) -> SyntaxNode<L> {
+        self.try_to_node(root)
+            .unwrap_or_else(|| panic!("can't resolve {self:?} with {root:?}"))
+    }
+
+    /// "Dereferences" the pointer to get the [`SyntaxNode`] it points to.
+    ///
+    /// Returns `None` if the node is not found, so make sure that the `root`
+    /// syntax tree is equivalent to (i.e. is build from the same text from) the
+    /// tree which was originally used to get this [`SyntaxNodePtr`].
+    ///
+    /// Also returns `None` if `root` is not actually a root (i.e. it has a
+    /// parent).
+    ///
+    /// The complexity is linear in the depth of the tree and logarithmic in
+    /// tree width. As most trees are shallow, thinking about this as
+    /// `O(log(N))` in the size of the tree is not too wrong!
+    pub fn try_to_node(&self, root: &SyntaxNode<L>) -> Option<SyntaxNode<L>> {
+        if root.parent().is_some() {
+            return None;
+        }
+        successors(Some(root.clone()), |node| {
+            node.child_or_token_at_range(self.range)?.into_node()
+        })
+        .find(|it| it.text_range_with_trivia() == self.range && it.kind() == self.kind)
+    }
+
+    /// Casts this to an [`AstPtr`] to the given node type if possible.
+    pub fn cast<N: AstNode<Language = L>>(self) -> Option<AstPtr<N>> {
+        if !N::can_cast(self.kind) {
+            return None;
+        }
+        Some(AstPtr { raw: self })
+    }
+
+    /// Returns the kind of the syntax node this points to.
+    pub fn kind(&self) -> L::Kind {
+        self.kind
+    }
+
+    /// Returns the range of the syntax node this points to.
+    pub fn text_range(&self) -> TextRange {
+        self.range
+    }
+}
+
+/// Like [`SyntaxNodePtr`], but remembers the type of node.
+pub struct AstPtr<N: AstNode> {
+    raw: SyntaxNodePtr<N::Language>,
+}
+
+impl<N: AstNode> AstPtr<N> {
+    /// Returns an [`AstPtr`] for the node.
+    pub fn new(node: &N) -> Self {
+        Self {
+            raw: SyntaxNodePtr::new(node.syntax()),
+        }
+    }
+
+    /// Like `Self::try_to_node` but panics on failure.
+    pub fn to_node(&self, root: &SyntaxNode<N::Language>) -> N {
+        self.try_to_node(root)
+            .unwrap_or_else(|| panic!("can't resolve {self:?} with {root:?}"))
+    }
+
+    /// Given the root node containing the node `n` that `self` is a pointer to,
+    /// returns `n` if possible. See [`SyntaxNodePtr::try_to_node`].
+    pub fn try_to_node(&self, root: &SyntaxNode<N::Language>) -> Option<N> {
+        N::cast(self.raw.try_to_node(root)?)
+    }
+
+    /// Returns the underlying [`SyntaxNodePtr`].
+    pub fn syntax_node_ptr(&self) -> SyntaxNodePtr<N::Language> {
+        self.raw
+    }
+
+    /// Casts this to an [`AstPtr`] to the given node type if possible.
+    pub fn cast<U: AstNode<Language = N::Language>>(self) -> Option<AstPtr<U>> {
+        if !U::can_cast(self.raw.kind) {
+            return None;
+        }
+        Some(AstPtr { raw: self.raw })
+    }
+}
+
+impl<N: AstNode> fmt::Debug for AstPtr<N> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AstPtr").field("raw", &self.raw).finish()
+    }
+}
+
+impl<N: AstNode> Clone for AstPtr<N> {
+    fn clone(&self) -> Self {
+        Self { raw: self.raw }
+    }
+}
+
+impl<N: AstNode> PartialEq for AstPtr<N> {
+    fn eq(&self, other: &Self) -> bool {
+        self.raw == other.raw
+    }
+}
+
+impl<N: AstNode> Eq for AstPtr<N> {}
+
+impl<N: AstNode> Hash for AstPtr<N>
+where
+    <N::Language as Language>::Kind: std::hash::Hash,
+{
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.raw.hash(state)
+    }
+}
+
+impl<N: AstNode> From<AstPtr<N>> for SyntaxNodePtr<N::Language> {
+    fn from(ptr: AstPtr<N>) -> Self {
+        ptr.raw
+    }
+}
+
 pub mod support {
     use super::{AstNode, SyntaxNode, SyntaxToken};
 
@@ -866,7 +1005,9 @@ mod tests {
         LiteralExpression, RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder,
         SeparatedExpressionList,
     };
-    use crate::{AstNode, AstSeparatedElement, AstSeparatedList, SyntaxResult};
+    use crate::{AstNode, AstPtr, AstSeparatedElement, AstSeparatedList, SyntaxResult};
+
+    use super::SyntaxNodePtr;
 
     /// Creates a ast separated list over a sequence of numbers separated by ",".
     /// The elements are pairs of: (value, separator).
@@ -1190,5 +1331,38 @@ mod tests {
                 todo!()
             }
         }
+    }
+
+    #[test]
+    fn syntax_ptr_roundtrip() {
+        // list(1, 2, 3, 4,)
+        let list = build_list(vec![
+            (Some(1), Some(",")),
+            (Some(2), Some(",")),
+            (Some(3), Some(",")),
+            (Some(4), Some(",")),
+        ]);
+
+        let third = list.iter().nth(2).unwrap().unwrap();
+        let third_ptr = SyntaxNodePtr::new(third.syntax());
+        assert_eq!(
+            *third.syntax(),
+            third_ptr.to_node(list.syntax_list().node())
+        );
+    }
+
+    #[test]
+    fn ast_ptr_roundtrip() {
+        // list(1, 2, 3, 4,)
+        let list = build_list(vec![
+            (Some(1), Some(",")),
+            (Some(2), Some(",")),
+            (Some(3), Some(",")),
+            (Some(4), Some(",")),
+        ]);
+
+        let third = list.iter().nth(2).unwrap().unwrap();
+        let third_ptr = AstPtr::new(&third);
+        assert_eq!(third, third_ptr.to_node(list.syntax_list().node()));
     }
 }

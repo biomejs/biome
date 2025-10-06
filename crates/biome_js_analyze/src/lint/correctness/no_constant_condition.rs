@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsWhileStatement, JsYieldExpression, TextRange,
 };
 use biome_rowan::{AstNode, declare_node_union};
+use biome_rule_options::no_constant_condition::NoConstantConditionOptions;
 
 declare_lint_rule! {
     /// Disallow constant expressions in conditions
@@ -83,7 +84,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noConstantCondition",
         language: "js",
-        sources: &[RuleSource::Eslint("no-constant-condition")],
+        sources: &[RuleSource::Eslint("no-constant-condition").same()],
         recommended: true,
         severity: Severity::Error,
     }
@@ -97,7 +98,7 @@ impl Rule for NoConstantCondition {
     type Query = Semantic<ConditionalStatement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoConstantConditionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let conditional_stmt = ctx.query();
@@ -106,12 +107,11 @@ impl Rule for NoConstantCondition {
         // We must verify that the conditional statement is within a generator function.
         // If the statement contains a valid yield expression returned from a `while`, `for`, or `do...while` statement,
         // we don't need to examine the statement's `test`.
-        if let Some(any_js_stmt) = conditional_stmt.body() {
-            if conditional_stmt.is_in_generator_function()
-                && has_valid_yield_expression(&any_js_stmt).unwrap_or(false)
-            {
-                return None;
-            }
+        if let Some(any_js_stmt) = conditional_stmt.body()
+            && conditional_stmt.is_in_generator_function()
+            && has_valid_yield_expression(&any_js_stmt).unwrap_or(false)
+        {
+            return None;
         }
 
         let test = conditional_stmt.test()?;

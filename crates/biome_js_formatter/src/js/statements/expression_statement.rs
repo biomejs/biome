@@ -29,10 +29,11 @@ impl FormatNodeRule<JsExpressionStatement> for FormatJsExpressionStatement {
             .syntax()
             .prev_sibling()
             .and_then(|sibling| sibling.last_token())
+            && token.kind() == T![;]
+            && !token.has_leading_comments()
+            && get_lines_before_token(&token) > 1
         {
-            if token.kind() == T![;] && get_lines_before_token(&token) > 1 {
-                write!(f, [empty_line()])?;
-            }
+            write!(f, [empty_line()])?;
         }
 
         if f.options().semicolons().is_as_needed()

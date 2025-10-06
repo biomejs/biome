@@ -1,10 +1,10 @@
-use biome_lsp_converters::line_index::LineIndex;
+use biome_line_index::LineIndex;
 use biome_service::projects::ProjectKey;
 
 /// Represents an open [`textDocument`]. Can be cheaply cloned.
 ///
 /// [`textDocument`]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub(crate) struct Document {
     pub(crate) project_key: ProjectKey,
     pub(crate) version: i32,

@@ -11,7 +11,9 @@ use biome_diagnostics::{DiagnosticExt, Error, Resource, Severity, category};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::projects::ProjectKey;
-use biome_service::workspace::{DocumentFileSource, DropPatternParams, IsPathIgnoredParams};
+use biome_service::workspace::{
+    DocumentFileSource, DropPatternParams, FileFeaturesResult, IgnoreKind, PathIsIgnoredParams,
+};
 use biome_service::{Workspace, WorkspaceError, extension_error, workspace::SupportsFeatureParams};
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{Receiver, Sender, unbounded};
@@ -20,8 +22,6 @@ use std::collections::BTreeSet;
 use std::sync::RwLock;
 use std::sync::atomic::AtomicU32;
 use std::{
-    env::current_dir,
-    ffi::OsString,
     panic::catch_unwind,
     sync::atomic::{AtomicUsize, Ordering},
     thread,
@@ -40,34 +40,8 @@ pub(crate) fn traverse(
     session: &mut CliSession,
     project_key: ProjectKey,
     cli_options: &CliOptions,
-    mut inputs: Vec<OsString>,
+    inputs: Vec<String>,
 ) -> Result<TraverseResult, CliDiagnostic> {
-    if inputs.is_empty() {
-        match &execution.traversal_mode {
-            TraversalMode::Check { .. }
-            | TraversalMode::Lint { .. }
-            | TraversalMode::Format { .. }
-            | TraversalMode::CI { .. }
-            | TraversalMode::Search { .. } => {
-                // If `--staged` or `--changed` is specified, it's acceptable for them to be empty, so ignore it.
-                if !execution.is_vcs_targeted() {
-                    match current_dir() {
-                        Ok(current_dir) => inputs.push(current_dir.into_os_string()),
-                        Err(err) => return Err(CliDiagnostic::io_error(err)),
-                    }
-                }
-            }
-            _ => {
-                if execution.as_stdin_file().is_none() && !cli_options.no_errors_on_unmatched {
-                    return Err(CliDiagnostic::missing_argument(
-                        "<INPUT>",
-                        format!("{}", execution.traversal_mode),
-                    ));
-                }
-            }
-        }
-    }
-
     let (interner, recv_files) = PathInterner::new();
     let (sender, receiver) = unbounded();
 
@@ -97,7 +71,7 @@ pub(crate) fn traverse(
         // contains are properly closed once the traversal finishes
         let (elapsed, evaluated_paths) = traverse_inputs(
             fs,
-            &inputs,
+            inputs,
             &TraversalOptions {
                 fs,
                 workspace,
@@ -155,16 +129,13 @@ pub(crate) fn traverse(
 /// run it to completion, returning the duration of the process and the evaluated paths
 fn traverse_inputs(
     fs: &dyn FileSystem,
-    inputs: &[OsString],
+    inputs: Vec<String>,
     ctx: &TraversalOptions,
 ) -> (Duration, BTreeSet<BiomePath>) {
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
-            scope.evaluate(
-                ctx,
-                Utf8PathBuf::from_path_buf(input.into()).expect("Valid UTF-8 path"),
-            );
+            scope.evaluate(ctx, Utf8PathBuf::from(input));
         }
     }));
 
@@ -566,10 +537,11 @@ impl TraversalContext for TraversalOptions<'_, '_> {
             //   Note that `symlink/subdir` is not an existing file.
             let can_handle = !self
                 .workspace
-                .is_path_ignored(IsPathIgnoredParams {
+                .is_path_ignored(PathIsIgnoredParams {
                     project_key: self.project_key,
                     path: biome_path.clone(),
                     features: self.execution.to_feature(),
+                    ignore_kind: IgnoreKind::Ancestors,
                 })
                 .unwrap_or_else(|err| {
                     self.push_diagnostic(err.into());
@@ -593,7 +565,9 @@ impl TraversalContext for TraversalOptions<'_, '_> {
         let can_read = DocumentFileSource::can_read(biome_path);
 
         let file_features = match file_features {
-            Ok(file_features) => {
+            Ok(FileFeaturesResult {
+                features_supported: file_features,
+            }) => {
                 if file_features.is_protected() {
                     self.protected_file(biome_path);
                     return false;
@@ -611,6 +585,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
                 return false;
             }
         };
+
         match self.execution.traversal_mode() {
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
                 file_features.supports_lint()

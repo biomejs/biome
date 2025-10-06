@@ -152,8 +152,8 @@ impl SyntaxNodeText {
     /// the node consists of a single token.
     pub fn into_text(self) -> Text {
         match self.node.first_token() {
-            Some(token) if token.text_range() == self.range => Text::Borrowed(token.token_text()),
-            _ => Text::Owned(self.to_string()),
+            Some(token) if token.text_range() == self.range => token.token_text().into(),
+            _ => self.to_string().into(),
         }
     }
 }

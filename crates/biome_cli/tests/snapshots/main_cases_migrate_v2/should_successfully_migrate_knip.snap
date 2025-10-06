@@ -34,15 +34,6 @@ expression: redactor(content)
       "style": {
         "noParameterAssign": "off",
         "useNodeAssertStrict": "error",
-        "useAsConstAssertion": "error",
-        "useDefaultParameterLast": "error",
-        "useEnumInitializers": "error",
-        "useSelfClosingElements": "error",
-        "useSingleVarDeclarator": "error",
-        "noUnusedTemplateLiteral": "error",
-        "useNumberNamespace": "error",
-        "noInferrableTypes": "error",
-        "noUselessElse": "error",
         "noRestrictedImports": {
           "level": "error",
           "options": {

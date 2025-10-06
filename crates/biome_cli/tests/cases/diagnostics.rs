@@ -10,7 +10,7 @@ const TEST_CONTENTS: &str = "debugger;";
 #[test]
 fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
@@ -66,7 +66,7 @@ fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
 
 #[test]
 fn max_diagnostics_no_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     for i in 0..10 {
@@ -76,7 +76,7 @@ fn max_diagnostics_no_verbose() {
     let file_path = Utf8PathBuf::from("src/file.js".to_string());
     fs.insert(file_path, UNFORMATTED.as_bytes());
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["ci", "--max-diagnostics", "10", "src"].as_slice()),
@@ -100,7 +100,7 @@ fn max_diagnostics_no_verbose() {
 
 #[test]
 fn should_fail_when_max_diagnostics_is_zero() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     for i in 0..1 {
@@ -110,7 +110,7 @@ fn should_fail_when_max_diagnostics_is_zero() {
     let file_path = Utf8PathBuf::from("src/file.js".to_string());
     fs.insert(file_path, UNFORMATTED.as_bytes());
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["ci", "--max-diagnostics", "0", "src"].as_slice()),
@@ -134,7 +134,7 @@ fn should_fail_when_max_diagnostics_is_zero() {
 
 #[test]
 fn max_diagnostics_verbose() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     for i in 0..8 {
@@ -144,7 +144,7 @@ fn max_diagnostics_verbose() {
     let file_path = Utf8PathBuf::from("src/file.js".to_string());
     fs.insert(file_path, UNFORMATTED.as_bytes());
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["ci", "--max-diagnostics=10", "--verbose", "src"].as_slice()),
@@ -168,7 +168,7 @@ fn max_diagnostics_verbose() {
 
 #[test]
 fn diagnostic_level() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
@@ -227,7 +227,7 @@ import { FC, memo, useCallback } from "react";
 
 #[test]
 fn max_diagnostics_are_lifted() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     for i in 0..u8::MAX {
@@ -241,7 +241,7 @@ fn max_diagnostics_are_lifted() {
         "debugger;".repeat(u8::MAX as usize * 2).as_bytes(),
     );
 
-    let (mut fs, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["ci", "--max-diagnostics", "none", file_path.as_str()].as_slice()),

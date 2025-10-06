@@ -2,7 +2,6 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize::TextRange;
-use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::AnyJsAssignment;
@@ -13,7 +12,7 @@ use biome_js_syntax::{
 use biome_js_syntax::{JsAssignmentExpression, JsPostUpdateExpression, JsPreUpdateExpression};
 use biome_rowan::AstNode;
 use biome_rowan::declare_node_union;
-use serde::{Deserialize, Serialize};
+use biome_rule_options::no_parameter_assign::{NoParameterAssignOptions, PropertyAssignmentMode};
 
 declare_lint_rule! {
     /// Disallow reassigning `function` parameters.
@@ -105,7 +104,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js,use_options,diagnostic
+    /// ```js,use_options,expect_diagnostic
     /// function update(obj) {
     ///     obj.key = "value"; // Diagnostic: Assignment to a property of function parameter is not allowed.
     /// }
@@ -114,35 +113,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noParameterAssign",
         language: "js",
-        sources: &[RuleSource::Eslint("no-param-reassign")],
+        sources: &[RuleSource::Eslint("no-param-reassign").same()],
         recommended: false,
         severity: Severity::Warning,
     }
-}
-
-/// Options for the rule `NoParameterAssign`
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct NoParameterAssignOptions {
-    /// Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to `allow`.
-    #[serde(default)]
-    pub property_assignment: PropertyAssignmentMode,
-}
-
-#[derive(Copy, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-/// Specifies whether property assignments on function parameters are allowed or denied.
-pub enum PropertyAssignmentMode {
-    /// Allows property assignments on function parameters.
-    /// This is the default behavior, enabling flexibility in parameter usage.
-    #[default]
-    Allow,
-
-    /// Disallows property assignments on function parameters.
-    /// Enforces stricter immutability to prevent unintended side effects.
-    Deny,
 }
 
 impl Rule for NoParameterAssign {

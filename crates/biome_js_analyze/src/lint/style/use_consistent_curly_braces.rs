@@ -1,6 +1,5 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
-    declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -11,6 +10,7 @@ use biome_js_syntax::{
     JsxChildList, JsxExpressionAttributeValue, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPiece, declare_node_union};
+use biome_rule_options::use_consistent_curly_braces::UseConsistentCurlyBracesOptions;
 
 use crate::JsRuleAction;
 
@@ -52,8 +52,7 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintReact("jsx-curly-brace-presence")],
-        source_kind: RuleSourceKind::Inspired,
+        sources: &[RuleSource::EslintReact("jsx-curly-brace-presence").inspired()],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -85,7 +84,7 @@ impl Rule for UseConsistentCurlyBraces {
     type Query = Ast<AnyJsxCurlyQuery>;
     type State = CurlyBraceResolution;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = UseConsistentCurlyBracesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
@@ -340,17 +339,8 @@ fn handle_attr_init_clause(
     match node {
         AnyJsxAttributeValue::AnyJsxTag(_) => Some(CurlyBraceResolution::AddBraces),
         AnyJsxAttributeValue::JsxExpressionAttributeValue(node) => {
-            if has_curly_braces && contains_single_space(&node) {
-                None
-            } else if has_curly_braces && contains_string_literal(&node) {
-                let expression = node.expression().ok()?;
-                let literal = expression
-                    .as_any_js_literal_expression()?
-                    .as_js_string_literal_expression()?;
-                if !contains_forbidden_chars(literal) {
-                    return Some(CurlyBraceResolution::RemoveBraces);
-                }
-                None
+            if has_curly_braces && contains_string_literal(&node) {
+                Some(CurlyBraceResolution::RemoveBraces)
             } else if !has_curly_braces && contains_jsx_tag(&node) {
                 Some(CurlyBraceResolution::AddBraces)
             } else {
@@ -369,11 +359,7 @@ fn handle_jsx_child(child: &AnyJsxChild, has_curly_braces: bool) -> Option<Curly
             )) = child.expression().as_ref()
             {
                 // Don't suggest removing braces for single space or if forbidden chars found
-                if literal
-                    .inner_string_text()
-                    .is_ok_and(|text| text.text() == " ")
-                    || contains_forbidden_chars(literal)
-                {
+                if contains_only_spaces(literal) || contains_forbidden_chars(literal) {
                     return None;
                 }
 
@@ -418,15 +404,10 @@ fn contains_jsx_tag(node: &JsxExpressionAttributeValue) -> bool {
         .is_ok_and(|expr| matches!(expr, AnyJsExpression::JsxTagExpression(_)))
 }
 
-fn contains_single_space(node: &JsxExpressionAttributeValue) -> bool {
-    node.expression().is_ok_and(|expr| {
-        matches!(
-            expr,
-            AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsStringLiteralExpression(literal)
-            ) if literal.inner_string_text().is_ok_and(|text| text.text() == " ")
-        )
-    })
+fn contains_only_spaces(literal: &JsStringLiteralExpression) -> bool {
+    literal
+        .inner_string_text()
+        .is_ok_and(|text| text.bytes().all(|b| b == b' '))
 }
 
 const FORBIDDEN_CHARS: [char; 4] = ['>', '"', '\'', '}'];

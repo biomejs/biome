@@ -1,0 +1,125 @@
+---
+source: crates/biome_module_graph/tests/snap/mod.rs
+expression: content
+---
+# `/src/index.ts` (Not imported by resolver)
+
+## Source
+
+```ts
+type FullConfiguration = InternalConfiguration & PublicConfiguration;
+
+interface InternalConfiguration {
+	cache: Cache;
+	mutate: ScopedMutator;
+}
+
+interface PublicConfiguration {
+	errorRetryInterval: number;
+}
+
+declare const useSWRConfig: () => FullConfiguration;
+
+const { mutate } = useSWRConfig();
+```
+
+## Module Info
+
+```
+Exports {
+  No exports
+}
+Imports {
+  No imports
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => instanceof Module(0) TypeId(5)
+
+Module TypeId(1) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Module TypeId(2) => unknown
+
+Module TypeId(3) => instanceof Module(0) TypeId(7)
+
+Module TypeId(4) => instanceof Module(0) TypeId(8)
+
+Module TypeId(5) => interface "(merged)" {
+  extends: []
+  type_args: []
+  members: [
+    "cache": Module(0) TypeId(6),
+    "mutate": Module(0) TypeId(6),
+    "errorRetryInterval": number
+  ]
+}
+
+Module TypeId(6) => unknown
+
+Module TypeId(7) => interface "InternalConfiguration" {
+  extends: []
+  type_args: []
+  members: ["cache": Module(0) TypeId(6), "mutate": Module(0) TypeId(6)]
+}
+
+Module TypeId(8) => interface "PublicConfiguration" {
+  extends: []
+  type_args: []
+  members: ["errorRetryInterval": number]
+}
+```
+
+# Scoped Type Resolver
+
+## Registered types
+
+```
+Full TypeId(0) => instanceof Module(0) TypeId(5)
+
+Full TypeId(1) => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: Module(0) TypeId(0)
+}
+
+Full TypeId(2) => unknown
+
+Full TypeId(3) => instanceof Module(0) TypeId(7)
+
+Full TypeId(4) => instanceof Module(0) TypeId(8)
+
+Full TypeId(5) => interface "(merged)" {
+  extends: []
+  type_args: []
+  members: [
+    "cache": Module(0) TypeId(6),
+    "mutate": Module(0) TypeId(6),
+    "errorRetryInterval": number
+  ]
+}
+
+Full TypeId(6) => unknown
+
+Full TypeId(7) => interface "InternalConfiguration" {
+  extends: []
+  type_args: []
+  members: ["cache": Module(0) TypeId(6), "mutate": Module(0) TypeId(6)]
+}
+
+Full TypeId(8) => interface "PublicConfiguration" {
+  extends: []
+  type_args: []
+  members: ["errorRetryInterval": number]
+}
+```
