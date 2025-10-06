@@ -22,7 +22,9 @@ HtmlRoot {
     bom_token: missing (optional),
     frontmatter: AstroFrontmatterElement {
         l_fence_token: FENCE@0..3 "---" [] [],
-        content_token: HTML_LITERAL@3..31 "const foo = \"lorem ipsum\";\n" [Newline("\n")] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..31 "const foo = \"lorem ipsum\";\n" [Newline("\n")] [],
+        },
         r_fence_token: FENCE@31..34 "---" [] [],
     },
     directive: missing (optional),
@@ -97,7 +99,8 @@ HtmlRoot {
   0: (empty)
   1: ASTRO_FRONTMATTER_ELEMENT@0..34
     0: FENCE@0..3 "---" [] []
-    1: HTML_LITERAL@3..31 "const foo = \"lorem ipsum\";\n" [Newline("\n")] []
+    1: ASTRO_EMBEDDED_CONTENT@3..31
+      0: HTML_LITERAL@3..31 "const foo = \"lorem ipsum\";\n" [Newline("\n")] []
     2: FENCE@31..34 "---" [] []
   2: (empty)
   3: HTML_ELEMENT_LIST@34..71

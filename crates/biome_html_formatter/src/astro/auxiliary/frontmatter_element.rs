@@ -12,16 +12,12 @@ impl FormatNodeRule<AstroFrontmatterElement> for FormatAstroFrontmatterElement {
     ) -> FormatResult<()> {
         let AstroFrontmatterElementFields {
             l_fence_token,
-            content_token,
+            content,
             r_fence_token,
         } = node.as_fields();
 
         write!(f, [l_fence_token.format(), hard_line_break()])?;
-
-        if let Some(content_token) = content_token {
-            write!(f, [content_token.format(), hard_line_break()])?;
-        }
-
+        write!(f, [content.format(), hard_line_break()])?;
         write!(f, [r_fence_token.format()])?;
 
         Ok(())

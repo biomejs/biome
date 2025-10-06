@@ -5,9 +5,7 @@ use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraver
 use biome_analyze::RuleCategories;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_fs::{BiomePath, TraversalContext};
-use biome_rowan::TextSize;
 use biome_service::diagnostics::FileTooLarge;
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use tracing::{info, instrument};
 
 /// Lints a single file and returns a [FileResult]
@@ -89,20 +87,8 @@ pub(crate) fn analyze_with_guard<'ctx>(
             skipped_suggested_fixes: fix_result.skipped_suggested_fixes,
         });
 
-        let mut output = fix_result.code;
+        let output = fix_result.code;
 
-        match workspace_file.as_extension() {
-            Some("astro") => {
-                output = AstroFileHandler::output(input.as_str(), output.as_str());
-            }
-            Some("vue") => {
-                output = VueFileHandler::output(input.as_str(), output.as_str());
-            }
-            Some("svelte") => {
-                output = SvelteFileHandler::output(input.as_str(), output.as_str());
-            }
-            _ => {}
-        }
         if output != input {
             changed = true;
             workspace_file.update_file(output)?;
@@ -130,26 +116,12 @@ pub(crate) fn analyze_with_guard<'ctx>(
         && pull_diagnostics_result.skipped_diagnostics == 0;
 
     if !no_diagnostics {
-        let offset = match workspace_file.as_extension() {
-            Some("vue") => VueFileHandler::start(input.as_str()),
-            Some("astro") => AstroFileHandler::start(input.as_str()),
-            Some("svelte") => SvelteFileHandler::start(input.as_str()),
-            _ => None,
-        };
-
         ctx.push_message(Message::Diagnostics {
             file_path: workspace_file.path.to_string(),
             content: input,
             diagnostics: pull_diagnostics_result
                 .diagnostics
                 .into_iter()
-                .map(|d| {
-                    if let Some(offset) = offset {
-                        d.with_offset(TextSize::from(offset))
-                    } else {
-                        d
-                    }
-                })
                 .map(|diagnostic| {
                     let category = diagnostic.category();
                     if let Some(category) = category

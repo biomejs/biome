@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -21,18 +21,6 @@ statement ( ) ;
 </script>
 <template></template>"#;
 
-const VUE_FILE_FORMATTED_INDENTED: &str = r#"<script>
-	import { something } from "file.vue";
-	statement();
-</script>
-<template></template>"#;
-
-const VUE_FILE_FORMATTED_UNINDENTED: &str = r#"<script>
-import { something } from "file.vue";
-statement();
-</script>
-<template></template>"#;
-
 #[test]
 fn unindent_vue_by_default() {
     let fs = MemoryFileSystem::default();
@@ -48,8 +36,6 @@ fn unindent_vue_by_default() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, vue_file_path, VUE_FILE_FORMATTED_UNINDENTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -83,8 +69,6 @@ fn indent_vue_by_cli() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, VUE_FILE_FORMATTED_INDENTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "indent_vue_by_cli",
@@ -112,8 +96,6 @@ fn indent_vue_by_config() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, VUE_FILE_FORMATTED_INDENTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "indent_vue_by_config",
@@ -126,18 +108,6 @@ fn indent_vue_by_config() {
 const SVELTE_FILE_UNFORMATTED: &str = r#"<script>
 import {    something } from "file.svelte";
 statement ( ) ;
-</script>
-<div></div>"#;
-
-const SVELTE_FILE_FORMATTED_INDENTED: &str = r#"<script>
-	import { something } from "file.svelte";
-	statement();
-</script>
-<div></div>"#;
-
-const SVELTE_FILE_FORMATTED_UNINDENTED: &str = r#"<script>
-import { something } from "file.svelte";
-statement();
 </script>
 <div></div>"#;
 
@@ -156,8 +126,6 @@ fn unindent_svelte_by_default() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, svelte_file_path, SVELTE_FILE_FORMATTED_UNINDENTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -191,8 +159,6 @@ fn indent_svelte_by_cli() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, svelte_file_path, SVELTE_FILE_FORMATTED_INDENTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "indent_svelte_by_cli",
@@ -219,8 +185,6 @@ fn indent_svelte_by_config() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, svelte_file_path, SVELTE_FILE_FORMATTED_INDENTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

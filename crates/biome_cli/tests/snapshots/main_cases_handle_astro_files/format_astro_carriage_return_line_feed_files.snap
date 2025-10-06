@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `file.astro`
 
@@ -29,11 +29,15 @@ file.astro format ━━━━━━━━━━━━━━━━━━━━�
 
   × Formatter would have printed the following content:
   
-    1 1 │   ---␍
+    1   │ - ---␍
     2   │ - ··const·a····=·"b";␍
+    3   │ - ---␍
+    4   │ - <div></div>
+      1 │ + ---
       2 │ + const·a·=·"b";
-    3 3 │   ---␍
-    4 4 │   <div></div>
+      3 │ + ---
+      4 │ + <div></div>
+      5 │ + 
   
 
 ```

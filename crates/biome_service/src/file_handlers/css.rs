@@ -601,6 +601,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         suppression_reason,
         plugins,
         categories,
+        action_offset,
     } = params;
     let _ = debug_span!("Code actions CSS", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -640,6 +641,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 rule_name: item
                     .rule_name
                     .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                offset: action_offset,
                 suggestion: item.suggestion,
             }
         }));

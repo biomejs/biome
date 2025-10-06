@@ -969,6 +969,7 @@ pub struct CodeAction {
     pub category: ActionCategory,
     pub rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
     pub suggestion: CodeSuggestion,
+    pub offset: Option<TextSize>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `file.svelte`
 
@@ -39,11 +38,12 @@ file.svelte:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━
   
   i Safe fix: Organize Imports (Biome)
   
-    1   │ - import·Button·from·"./components/Button.svelte";
-    2   │ - import·*·as·svelteUse·from·"svelte-use";
-      1 │ + import·*·as·svelteUse·from·"svelte-use";
-      2 │ + import·Button·from·"./components/Button.svelte";
-    3 3 │   
+    1 1 │   
+    2   │ - import·Button·from·"./components/Button.svelte";
+    3   │ - import·*·as·svelteUse·from·"svelte-use";
+      2 │ + import·*·as·svelteUse·from·"svelte-use";
+      3 │ + import·Button·from·"./components/Button.svelte";
+    4 4 │   
   
 
 ```

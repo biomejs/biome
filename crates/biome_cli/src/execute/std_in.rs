@@ -10,7 +10,6 @@ use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::BiomePath;
 use biome_service::WorkspaceError;
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DropPatternParams, FeaturesBuilder, FileContent,
@@ -78,14 +77,8 @@ pub(crate) fn run<'a>(
             })?;
 
             let code = printed.into_code();
-            let output = match biome_path.extension() {
-                Some("astro") => AstroFileHandler::output(content, code.as_str()),
-                Some("vue") => VueFileHandler::output(content, code.as_str()),
-                Some("svelte") => SvelteFileHandler::output(content, code.as_str()),
-                _ => code,
-            };
             console.append(markup! {
-                {output}
+                {code}
             });
             workspace.close_file(CloseFileParams {
                 project_key,
@@ -173,13 +166,7 @@ pub(crate) fn run<'a>(
                 enabled_rules: vec![],
                 rule_categories: rule_categories.build(),
             })?;
-            let code = fix_file_result.code;
-            let output = match biome_path.extension() {
-                Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
-                Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
-                Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
-                _ => code,
-            };
+            let output = fix_file_result.code;
             if output != new_content {
                 version += 1;
                 workspace.change_file(ChangeFileParams {
@@ -193,17 +180,13 @@ pub(crate) fn run<'a>(
         }
 
         if file_features.supports_format() && mode.is_check() {
+            eprintln!("{}", &new_content);
             let printed = workspace.format_file(FormatFileParams {
                 project_key,
                 path: biome_path.clone(),
             })?;
-            let code = printed.into_code();
-            let output = match biome_path.extension() {
-                Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
-                Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
-                Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
-                _ => code,
-            };
+            let output = printed.into_code();
+            dbg!(&output);
             if (mode.is_safe_fixes_enabled() || mode.is_safe_and_unsafe_fixes_enabled())
                 && output != new_content
             {

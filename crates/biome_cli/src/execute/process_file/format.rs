@@ -7,7 +7,6 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use tracing::{debug, instrument};
 
 #[instrument(name = "cli_format", level = "debug", skip(ctx, path))]
@@ -85,30 +84,7 @@ pub(crate) fn format_with_guard<'ctx>(
         .format_file()
         .with_file_path_and_code(workspace_file.path.to_string(), category!("format"))?;
 
-    let mut output = printed.into_code();
-
-    match workspace_file.as_extension() {
-        Some("astro") => {
-            if output.is_empty() {
-                return Ok(FileStatus::Unchanged);
-            }
-            output = AstroFileHandler::output(input.as_str(), output.as_str());
-        }
-        Some("vue") => {
-            if output.is_empty() {
-                return Ok(FileStatus::Unchanged);
-            }
-            output = VueFileHandler::output(input.as_str(), output.as_str());
-        }
-
-        Some("svelte") => {
-            if output.is_empty() {
-                return Ok(FileStatus::Unchanged);
-            }
-            output = SvelteFileHandler::output(input.as_str(), output.as_str());
-        }
-        _ => {}
-    }
+    let output = printed.into_code();
 
     debug!("Format output is different from input: {}", output != input);
     if output != input {

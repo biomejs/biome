@@ -54,10 +54,6 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         self.guard().get_file_content()
     }
 
-    pub(crate) fn as_extension(&self) -> Option<&str> {
-        self.path.extension()
-    }
-
     /// It updates the workspace file with `new_content`
     pub(crate) fn update_file(&mut self, new_content: impl Into<String>) -> Result<(), Error> {
         let new_content = new_content.into();

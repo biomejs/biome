@@ -4,11 +4,8 @@ use self::{
 };
 use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
-pub use crate::file_handlers::astro::{ASTRO_FENCE, AstroFileHandler};
 use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
-pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
-pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
 use crate::settings::Settings;
 use crate::workspace::{
     AnyEmbeddedSnippet, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -34,10 +31,7 @@ use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
-use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{
-    EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
-};
+use biome_js_syntax::{JsFileSource, JsLanguage, TextRange, TextSize};
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_module_graph::ModuleGraph;
@@ -55,7 +49,6 @@ use std::borrow::Cow;
 use std::sync::Arc;
 use tracing::instrument;
 
-mod astro;
 pub(crate) mod css;
 pub(crate) mod graphql;
 pub(crate) mod grit;
@@ -63,9 +56,7 @@ pub(crate) mod html;
 mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
-mod svelte;
 mod unknown;
-mod vue;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -334,25 +325,16 @@ impl DocumentFileSource {
         }
     }
 
-    /// Convert the file source from a JS file source into an HTML-like file source, if the file belongs to an HTML-like language.
-    pub fn to_htmlish(&self) -> Self {
-        match self {
-            Self::Js(js) => match js.as_embedding_kind() {
-                EmbeddingKind::Astro => Self::Html(HtmlFileSource::astro()),
-                EmbeddingKind::Vue => Self::Html(HtmlFileSource::vue()),
-                EmbeddingKind::Svelte => Self::Html(HtmlFileSource::svelte()),
-                EmbeddingKind::None => Self::Unknown,
-            },
-            _ => Self::Unknown,
-        }
-    }
-
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = Self::from(path);
         match file_source {
-            Self::Js(_) => true,
-            Self::Css(_) | Self::Graphql(_) | Self::Json(_) | Self::Html(_) | Self::Grit(_) => true,
+            Self::Js(_)
+            | Self::Css(_)
+            | Self::Graphql(_)
+            | Self::Json(_)
+            | Self::Html(_)
+            | Self::Grit(_) => true,
             Self::Ignore => false,
             Self::Unknown => false,
         }
@@ -650,6 +632,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) enabled_rules: &'a [AnalyzerSelector],
     pub(crate) plugins: AnalyzerPluginVec,
     pub(crate) categories: RuleCategories,
+    pub(crate) action_offset: Option<TextSize>,
 }
 
 pub(crate) struct UpdateSnippetsNodes {
@@ -702,6 +685,7 @@ type FormatEmbedded = fn(
     Vec<FormatEmbedNode>,
 ) -> Result<Printed, WorkspaceError>;
 
+#[derive(Debug)]
 pub(crate) struct FormatEmbedNode {
     pub(crate) range: TextRange,
     pub(crate) node: AnyParse,
@@ -757,9 +741,6 @@ pub(crate) struct Features {
     js: JsFileHandler,
     json: JsonFileHandler,
     css: CssFileHandler,
-    astro: AstroFileHandler,
-    vue: VueFileHandler,
-    svelte: SvelteFileHandler,
     unknown: UnknownFileHandler,
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
@@ -773,9 +754,6 @@ impl Features {
             js: JsFileHandler {},
             json: JsonFileHandler {},
             css: CssFileHandler {},
-            astro: AstroFileHandler {},
-            vue: VueFileHandler {},
-            svelte: SvelteFileHandler {},
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             grit: GritFileHandler {},
@@ -787,12 +765,7 @@ impl Features {
     /// Returns the [Capabilities] associated with a [BiomePath]
     pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
         match language_hint {
-            DocumentFileSource::Js(source) => match source.as_embedding_kind() {
-                EmbeddingKind::Astro => self.astro.capabilities(),
-                EmbeddingKind::Vue => self.vue.capabilities(),
-                EmbeddingKind::Svelte => self.svelte.capabilities(),
-                EmbeddingKind::None => self.js.capabilities(),
-            },
+            DocumentFileSource::Js(_) => self.js.capabilities(),
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
@@ -829,58 +802,6 @@ pub(crate) fn is_diagnostic_error(
     severity >= Severity::Error
 }
 
-/// Parse the "lang" attribute from the opening tag of the "\<script\>" block in Svelte or Vue files.
-/// This function will return the language based on the existence or the value of the "lang" attribute.
-/// We use the JSX parser at the moment to parse the opening tag. So the opening tag should be first
-/// matched by regular expressions.
-///
-// TODO: We should change the parser when HTMLish languages are supported.
-pub(crate) fn parse_lang_from_script_opening_tag(
-    script_opening_tag: &str,
-) -> (Language, LanguageVariant) {
-    parse(
-        script_opening_tag,
-        JsFileSource::jsx(),
-        JsParserOptions::default(),
-    )
-    .try_tree()
-    .and_then(|tree| {
-        tree.as_js_module()?.items().into_iter().find_map(|item| {
-            let expression = item
-                .as_any_js_statement()?
-                .as_js_expression_statement()?
-                .expression()
-                .ok()?;
-            let tag = expression.as_jsx_tag_expression()?.tag().ok()?;
-            let opening_element = tag.as_jsx_element()?.opening_element().ok()?;
-            let lang_attribute = opening_element.attributes().find_by_name("lang")?;
-            let attribute_value = lang_attribute.initializer()?.value().ok()?;
-            let attribute_inner_string =
-                attribute_value.as_jsx_string()?.inner_string_text().ok()?;
-            match attribute_inner_string.text() {
-                "ts" => Some((
-                    Language::TypeScript {
-                        definition_file: false,
-                    },
-                    LanguageVariant::Standard,
-                )),
-                "tsx" => Some((
-                    Language::TypeScript {
-                        definition_file: false,
-                    },
-                    LanguageVariant::Jsx,
-                )),
-                "jsx" => Some((Language::JavaScript, LanguageVariant::Jsx)),
-                "js" => Some((Language::JavaScript, LanguageVariant::Standard)),
-                _ => None,
-            }
-        })
-    })
-    .map_or((Language::JavaScript, LanguageVariant::Standard), |lang| {
-        lang
-    })
-}
-
 pub(crate) fn search(
     path: &BiomePath,
     _file_source: &DocumentFileSource,
@@ -905,36 +826,6 @@ pub(crate) fn search(
         .collect();
 
     Ok(matches)
-}
-
-#[test]
-fn test_svelte_script_lang() {
-    const SVELTE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
-    const SVELTE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
-    const SVELTE_CONTEXT_MODULE_JS_SCRIPT_OPENING_TAG: &str = r#"<script context="module">"#;
-    const SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG: &str =
-        r#"<script context="module" lang="ts">"#;
-
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
 }
 
 /// Type meant to register all the syntax rules for each language supported by Biome
@@ -1662,60 +1553,4 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
 
         (enabled_rules, disabled_rules, analyzer_options)
     }
-}
-
-#[test]
-fn test_vue_script_lang() {
-    const VUE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
-    const VUE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
-    const VUE_TSX_SCRIPT_OPENING_TAG: &str = r#"<script lang="tsx">"#;
-    const VUE_JSX_SCRIPT_OPENING_TAG: &str = r#"<script lang="jsx">"#;
-    const VUE_SETUP_JS_SCRIPT_OPENING_TAG: &str = r#"<script setup>"#;
-    const VUE_SETUP_TS_SCRIPT_OPENING_TAG: &str = r#"<script setup lang="ts">"#;
-
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG)
-            .1
-            .is_standard()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG)
-            .1
-            .is_standard()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JSX_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_JSX_SCRIPT_OPENING_TAG)
-            .1
-            .is_jsx()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_TSX_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_SETUP_JS_SCRIPT_OPENING_TAG)
-            .0
-            .is_javascript()
-    );
-    assert!(
-        parse_lang_from_script_opening_tag(VUE_SETUP_TS_SCRIPT_OPENING_TAG)
-            .0
-            .is_typescript()
-    );
 }

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 # Input messages
 
@@ -23,4 +23,5 @@ import { something } from "file.astro";
 statement();
 ---
 <div></div>
+
 ```
