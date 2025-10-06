@@ -1,3 +1,6 @@
-var a = 1;
-a = 2;
-a = 3;
+// Invalid: basic parameter destructuring
+export default {
+  setup({ count }) {
+    return () => h('div', count);
+  }
+}

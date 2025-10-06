@@ -64,8 +64,6 @@ invalid-parameter-destructuring.js:5:9 lint/nursery/noVueSetupPropsReactivityLos
   
   i To preserve reactivity, access props as properties: `props.propertyName`.
   
-  i Alternatively, use `toRefs(props)` or `toRef(props, 'key')` to create reactive refs.
-  
 
 ```
 
@@ -82,8 +80,6 @@ invalid-parameter-destructuring.js:33:9 lint/nursery/noVueSetupPropsReactivityLo
     35 │   }
   
   i To preserve reactivity, access props as properties: `props.propertyName`.
-  
-  i Alternatively, use `toRefs(props)` or `toRef(props, 'key')` to create reactive refs.
   
 
 ```

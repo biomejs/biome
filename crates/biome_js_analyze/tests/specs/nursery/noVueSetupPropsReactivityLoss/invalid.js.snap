@@ -4,7 +4,29 @@ expression: invalid.js
 ---
 # Input
 ```js
-var a = 1;
-a = 2;
-a = 3;
+// Invalid: basic parameter destructuring
+export default {
+  setup({ count }) {
+    return () => h('div', count);
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:9 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the `setup` function parameters loses reactivity.
+  
+    1 │ // Invalid: basic parameter destructuring
+    2 │ export default {
+  > 3 │   setup({ count }) {
+      │         ^^^^^^^^^
+    4 │     return () => h('div', count);
+    5 │   }
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+
 ```

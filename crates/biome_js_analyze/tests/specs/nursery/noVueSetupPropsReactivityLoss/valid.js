@@ -1,2 +1,8 @@
 /* should not generate diagnostics */
-// var a = 1;
+
+// Valid: using props parameter directly
+export default {
+  setup(props) {
+    return () => h('div', props.count)
+  }
+}
