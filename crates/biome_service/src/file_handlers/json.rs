@@ -696,7 +696,41 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                         }
                     }
                     FixFileMode::ApplySuppressions => {
-                        // TODO: implement once a JSON suppression action is available
+                        for action in signal.actions() {
+                            match params.fix_file_mode {
+                                FixFileMode::SafeFixes => {
+                                    // suppression actions should not be part of safe fixes
+                                    if action.is_suppression() {
+                                        continue;
+                                    }
+                                    if action.applicability == Applicability::MaybeIncorrect {
+                                        skipped_suggested_fixes += 1;
+                                    }
+                                    if action.applicability == Applicability::Always {
+                                        errors = errors.saturating_sub(1);
+                                        return ControlFlow::Break(action);
+                                    }
+                                }
+                                FixFileMode::SafeAndUnsafeFixes => {
+                                    // suppression actions should not be part of safe and unsafe fixes
+                                    if action.is_suppression() {
+                                        continue;
+                                    }
+                                    if matches!(
+                                        action.applicability,
+                                        Applicability::Always | Applicability::MaybeIncorrect
+                                    ) {
+                                        errors = errors.saturating_sub(1);
+                                        return ControlFlow::Break(action);
+                                    }
+                                }
+                                FixFileMode::ApplySuppressions => {
+                                    if action.is_suppression() {
+                                        return ControlFlow::Break(action);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

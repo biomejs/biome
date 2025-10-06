@@ -32,7 +32,7 @@ use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
-use biome_html_syntax::HtmlFileSource;
+use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
@@ -1021,6 +1021,25 @@ impl RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'_> {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for SyntaxVisitor<'_> {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Syntax {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.enabled_rules.push(RuleFilter::Rule(
+            <R::Group as RuleGroup>::NAME,
+            R::METADATA.name,
+        ))
+    }
+}
+
 /// Type meant to register all the lint rules for each language supported by Biome
 ///
 #[derive(Debug)]
@@ -1335,6 +1354,30 @@ impl RegistryVisitor<GraphqlLanguage> for LintVisitor<'_, '_> {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for LintVisitor<'_, '_> {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Lint {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_group<G: RuleGroup<Language = HtmlLanguage>>(&mut self) {
+        G::record_rules(self)
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            biome_html_analyze::METADATA
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
+    }
+}
+
 struct AssistsVisitor<'a, 'b> {
     settings: &'b Settings,
     enabled_rules: Vec<RuleFilter<'a>>,
@@ -1487,6 +1530,22 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'_, '_> {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for AssistsVisitor<'_, '_> {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if C::CATEGORY == RuleCategory::Action {
+            C::record_groups(self)
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.push_rule::<R, <R::Query as Queryable>::Language>();
+    }
+}
+
 pub(crate) struct AnalyzerVisitorBuilder<'a> {
     settings: &'a Settings,
     only: Option<&'a [AnalyzerSelector]>,
@@ -1564,6 +1623,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_css_analyze::visit_registry(&mut syntax);
         biome_json_analyze::visit_registry(&mut syntax);
         biome_graphql_analyze::visit_registry(&mut syntax);
+        biome_html_analyze::visit_registry(&mut syntax);
         enabled_rules.extend(syntax.enabled_rules);
 
         let package_json = self
@@ -1584,6 +1644,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_css_analyze::visit_registry(&mut lint);
         biome_json_analyze::visit_registry(&mut lint);
         biome_graphql_analyze::visit_registry(&mut lint);
+        biome_html_analyze::visit_registry(&mut lint);
         let (linter_enabled_rules, linter_disabled_rules) = lint.finish();
         enabled_rules.extend(linter_enabled_rules);
         disabled_rules.extend(linter_disabled_rules);
@@ -1594,6 +1655,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_css_analyze::visit_registry(&mut assist);
         biome_json_analyze::visit_registry(&mut assist);
         biome_graphql_analyze::visit_registry(&mut assist);
+        biome_html_analyze::visit_registry(&mut assist);
         let (assists_enabled_rules, assists_disabled_rules) = assist.finish();
         enabled_rules.extend(assists_enabled_rules);
         disabled_rules.extend(assists_disabled_rules);

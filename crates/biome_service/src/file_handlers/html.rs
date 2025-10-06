@@ -1,25 +1,25 @@
 use super::{
-    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, DocumentFileSource,
-    EnabledForPath, ExtensionHandler, FixAllParams, FormatEmbedNode, FormatterCapabilities,
-    LintParams, LintResults, ParseEmbedResult, ParseResult, ParserCapabilities, SearchCapabilities,
-    UpdateSnippetsNodes,
+    AnalyzerCapabilities, AnalyzerVisitorBuilder, Capabilities, CodeActionsParams,
+    DebugCapabilities, DocumentFileSource, EnabledForPath, ExtensionHandler, FixAllParams,
+    FormatEmbedNode, FormatterCapabilities, LintParams, LintResults, ParseEmbedResult, ParseResult,
+    ParserCapabilities, ProcessLint, SearchCapabilities, UpdateSnippetsNodes, is_diagnostic_error,
 };
 use crate::settings::{OverrideSettings, check_feature_activity, check_override_feature_activity};
-use crate::workspace::EmbeddedSnippet;
+use crate::workspace::{CodeAction, EmbeddedSnippet, FixAction, FixFileMode};
 use crate::workspace::{FixFileResult, PullActionsResult};
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
     workspace::GetSyntaxTreeResult,
 };
-use biome_analyze::AnalyzerOptions;
+use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleError};
 use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
     HtmlLinterConfiguration, HtmlLinterEnabled, HtmlParseInterpolation, HtmlParserConfiguration,
 };
 use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::{CssFileSource, CssLanguage};
-use biome_diagnostics::{Diagnostic, Severity};
+use biome_diagnostics::Applicability;
 use biome_formatter::format_element::{Interned, LineMode};
 use biome_formatter::prelude::{Document, Tag};
 use biome_formatter::{
@@ -27,6 +27,7 @@ use biome_formatter::{
     LineWidth, Printed,
 };
 use biome_fs::BiomePath;
+use biome_html_analyze::analyze;
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
@@ -43,8 +44,9 @@ use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, BatchMutation, NodeCache, SendNode};
 use camino::Utf8Path;
+use std::borrow::Cow;
 use std::fmt::Debug;
-use tracing::instrument;
+use tracing::{debug_span, error, instrument, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -665,51 +667,234 @@ fn format_embedded(
 
 #[tracing::instrument(level = "debug", skip(params))]
 fn lint(params: LintParams) -> LintResults {
-    let diagnostics = params
-        .parse
-        .into_serde_diagnostics(params.diagnostic_offset);
+    let workspace_settings = &params.settings;
+    let analyzer_options = workspace_settings.analyzer_options::<HtmlLanguage>(
+        params.path,
+        &params.language,
+        params.suppression_reason.as_deref(),
+    );
+    let tree = params.parse.tree();
 
-    let diagnostic_count = diagnostics.len() as u32;
-    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
-    let errors = diagnostics
-        .iter()
-        .filter(|diag| diag.severity() <= Severity::Error)
-        .count();
+    let (enabled_rules, disabled_rules, analyzer_options) =
+        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+            .with_only(params.only)
+            .with_skip(params.skip)
+            .with_path(params.path.as_path())
+            .with_enabled_selectors(params.enabled_selectors)
+            .with_project_layout(params.project_layout.clone())
+            .finish();
 
-    LintResults {
-        diagnostics,
-        errors,
-        skipped_diagnostics,
-    }
+    let filter = AnalysisFilter {
+        categories: params.categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
+    let mut process_lint = ProcessLint::new(&params);
+
+    let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
+        process_lint.process_signal(signal)
+    });
+
+    process_lint.into_result(
+        params
+            .parse
+            .into_serde_diagnostics(params.diagnostic_offset),
+        analyze_diagnostics,
+    )
 }
 
-pub(crate) fn code_actions(_params: CodeActionsParams) -> PullActionsResult {
-    PullActionsResult { actions: vec![] }
+pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
+    let CodeActionsParams {
+        parse,
+        range,
+        settings,
+        path,
+        module_graph: _,
+        project_layout,
+        language,
+        only,
+        skip,
+        suppression_reason,
+        enabled_rules: rules,
+        plugins: _,
+        categories,
+    } = params;
+    let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
+    let tree = parse.tree();
+    let _ = trace_span!("Parsed file", tree =? tree).entered();
+    let Some(_) = language.to_html_file_source() else {
+        error!("Could not determine the HTML file source of the file");
+        return PullActionsResult {
+            actions: Vec::new(),
+        };
+    };
+    let analyzer_options =
+        settings.analyzer_options::<HtmlLanguage>(path, &language, suppression_reason.as_deref());
+    let mut actions = Vec::new();
+    let (enabled_rules, disabled_rules, analyzer_options) =
+        AnalyzerVisitorBuilder::new(settings, analyzer_options)
+            .with_only(only)
+            .with_skip(skip)
+            .with_path(path.as_path())
+            .with_enabled_selectors(rules)
+            .with_project_layout(project_layout)
+            .finish();
+
+    let filter = AnalysisFilter {
+        categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range,
+    };
+
+    analyze(&tree, filter, &analyzer_options, |signal| {
+        actions.extend(signal.actions().into_code_action_iter().map(|item| {
+            CodeAction {
+                category: item.category.clone(),
+                rule_name: item
+                    .rule_name
+                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                suggestion: item.suggestion,
+            }
+        }));
+
+        ControlFlow::<Never>::Continue(())
+    });
+
+    PullActionsResult { actions }
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    // We don't have analyzer rules yet
-    let tree: HtmlRoot = params.parse.tree();
-    let code = if params.should_format {
-        format_node(
-            params
-                .settings
-                .format_options::<HtmlLanguage>(params.biome_path, &params.document_file_source),
-            tree.syntax(),
-            false,
-        )?
-        .print()?
-        .into_code()
-    } else {
-        tree.syntax().to_string()
+    let mut tree: HtmlRoot = params.parse.tree();
+
+    // Compute final rules (taking `overrides` into account)
+    let rules = params.settings.as_linter_rules(params.biome_path.as_path());
+    let analyzer_options = params.settings.analyzer_options::<HtmlLanguage>(
+        params.biome_path,
+        &params.document_file_source,
+        params.suppression_reason.as_deref(),
+    );
+    let (enabled_rules, disabled_rules, analyzer_options) =
+        AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
+            .with_only(params.only)
+            .with_skip(params.skip)
+            .with_path(params.biome_path.as_path())
+            .with_enabled_selectors(params.enabled_rules)
+            .with_project_layout(params.project_layout)
+            .finish();
+
+    let filter = AnalysisFilter {
+        categories: params.rule_categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
     };
-    Ok(FixFileResult {
-        code,
-        skipped_suggested_fixes: 0,
-        actions: vec![],
-        errors: 0,
-    })
+
+    let mut actions = Vec::new();
+    let mut skipped_suggested_fixes = 0;
+    let mut errors: u16 = 0;
+
+    loop {
+        let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
+            let current_diagnostic = signal.diagnostic();
+
+            if let Some(diagnostic) = current_diagnostic.as_ref()
+                && is_diagnostic_error(diagnostic, rules.as_deref())
+            {
+                errors += 1;
+            }
+
+            for action in signal.actions() {
+                match params.fix_file_mode {
+                    FixFileMode::SafeFixes => {
+                        // suppression actions should not be part of safe fixes
+                        if action.is_suppression() {
+                            continue;
+                        }
+                        if action.applicability == Applicability::MaybeIncorrect {
+                            skipped_suggested_fixes += 1;
+                        }
+                        if action.applicability == Applicability::Always {
+                            errors = errors.saturating_sub(1);
+                            return ControlFlow::Break(action);
+                        }
+                    }
+                    FixFileMode::SafeAndUnsafeFixes => {
+                        // suppression actions should not be part of unsafe fixes either
+                        if action.is_suppression() {
+                            continue;
+                        }
+                        if matches!(
+                            action.applicability,
+                            Applicability::Always | Applicability::MaybeIncorrect
+                        ) {
+                            errors = errors.saturating_sub(1);
+                            return ControlFlow::Break(action);
+                        }
+                    }
+                    FixFileMode::ApplySuppressions => {
+                        if action.is_suppression() {
+                            return ControlFlow::Break(action);
+                        }
+                    }
+                }
+            }
+
+            ControlFlow::Continue(())
+        });
+
+        match action {
+            Some(action) => {
+                if let (root, Some((range, _))) =
+                    action.mutation.commit_with_text_range_and_edit(true)
+                {
+                    tree = match HtmlRoot::cast(root) {
+                        Some(tree) => tree,
+                        None => {
+                            return Err(WorkspaceError::RuleError(
+                                RuleError::ReplacedRootWithNonRootError {
+                                    rule_name: action.rule_name.map(|(group, rule)| {
+                                        (Cow::Borrowed(group), Cow::Borrowed(rule))
+                                    }),
+                                },
+                            ));
+                        }
+                    };
+                    actions.push(FixAction {
+                        rule_name: action
+                            .rule_name
+                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
+                        range,
+                    });
+                }
+            }
+            None => {
+                let code = if params.should_format {
+                    format_node(
+                        params.settings.format_options::<HtmlLanguage>(
+                            params.biome_path,
+                            &params.document_file_source,
+                        ),
+                        tree.syntax(),
+                        true,
+                    )?
+                    .print()?
+                    .into_code()
+                } else {
+                    tree.syntax().to_string()
+                };
+                return Ok(FixFileResult {
+                    code,
+                    skipped_suggested_fixes,
+                    actions,
+                    errors: errors.into(),
+                });
+            }
+        }
+    }
 }
 
 #[instrument(level = "debug", skip_all)]

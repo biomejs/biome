@@ -919,6 +919,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             }
                         }
                         FixFileMode::SafeFixes => {
+                            // suppression actions should not be part of safe fixes
                             if action.is_suppression() {
                                 continue;
                             }

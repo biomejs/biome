@@ -18,6 +18,8 @@ use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_parser::HtmlParseOptions;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
 use biome_json_factory::make;
@@ -125,11 +127,22 @@ pub fn check_rules() -> anyhow::Result<()> {
         }
     }
 
+    impl RegistryVisitor<HtmlLanguage> for LintRulesVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.push_rule::<R, <R::Query as Queryable>::Language>()
+        }
+    }
+
     let mut visitor = LintRulesVisitor::default();
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
     biome_css_analyze::visit_registry(&mut visitor);
     biome_graphql_analyze::visit_registry(&mut visitor);
+    biome_html_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups, errors } = visitor;
     if !errors.is_empty() {
@@ -392,7 +405,45 @@ fn assert_lint(
                 });
             }
         }
-        DocumentFileSource::Html(..) => todo!("HTML analysis is not yet supported"),
+        DocumentFileSource::Html(..) => {
+            let parse = biome_html_parser::parse_html(code, HtmlParseOptions::default());
+
+            if parse.has_errors() {
+                for diag in parse.into_diagnostics() {
+                    let error = diag
+                        .with_file_path(test.file_path())
+                        .with_file_source_code(code);
+                    diagnostics.write_parse_error(error);
+                }
+            } else {
+                let root = parse.tree();
+
+                let rule_filter = RuleFilter::Rule(group, rule);
+                let filter = AnalysisFilter {
+                    enabled_rules: Some(slice::from_ref(&rule_filter)),
+                    ..AnalysisFilter::default()
+                };
+
+                let options = test.create_analyzer_options::<HtmlLanguage>(config)?;
+
+                biome_html_analyze::analyze(&root, filter, &options, |signal| {
+                    if let Some(mut diag) = signal.diagnostic() {
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diag = diag.add_code_suggestion(action.into());
+                            }
+                        }
+
+                        let error = diag
+                            .with_file_path(test.file_path())
+                            .with_file_source_code(code);
+                        diagnostics.write_diagnostic(error);
+                    }
+
+                    ControlFlow::<()>::Continue(())
+                });
+            }
+        }
         DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),
 
         // Unknown code blocks should be ignored by tests
