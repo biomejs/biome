@@ -58,12 +58,12 @@ impl AnyHtmlElement {
                 let opening_element = el.opening_element().ok()?;
                 let name = opening_element.name().ok()?;
                 let name_token = name.value_token().ok()?;
-                Some(name_token.token_text())
+                Some(name_token.token_text_trimmed())
             }
             Self::HtmlSelfClosingElement(el) => {
                 let name = el.name().ok()?;
                 let name_token = name.value_token().ok()?;
-                Some(name_token.token_text())
+                Some(name_token.token_text_trimmed())
             }
             _ => None,
         }
