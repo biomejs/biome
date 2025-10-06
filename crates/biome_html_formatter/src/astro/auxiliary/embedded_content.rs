@@ -17,7 +17,6 @@ impl FormatNodeRule<AstroEmbeddedContent> for FormatAstroEmbeddedContent {
         if !f.context().should_delegate_fmt_embedded_nodes() {
             return None;
         }
-        dbg!(&node);
         Some(node.range())
     }
 }
