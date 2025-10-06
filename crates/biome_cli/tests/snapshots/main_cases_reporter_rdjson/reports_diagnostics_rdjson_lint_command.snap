@@ -59,12 +59,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 11,
-            "line": 0
+            "column": 12,
+            "line": 1
           },
           "start": {
-            "column": 7,
-            "line": 0
+            "column": 8,
+            "line": 1
           }
         }
       },
@@ -79,12 +79,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 10,
-            "line": 1
+            "column": 11,
+            "line": 2
           },
           "start": {
-            "column": 9,
-            "line": 1
+            "column": 10,
+            "line": 2
           }
         }
       },
@@ -99,12 +99,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 5,
-            "line": 7
+            "column": 6,
+            "line": 8
           },
           "start": {
-            "column": 4,
-            "line": 7
+            "column": 5,
+            "line": 8
           }
         }
       },
@@ -119,12 +119,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 7,
-            "line": 8
+            "column": 8,
+            "line": 9
           },
           "start": {
-            "column": 6,
-            "line": 8
+            "column": 7,
+            "line": 9
           }
         }
       },
@@ -139,12 +139,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 11,
-            "line": 0
+            "column": 12,
+            "line": 1
           },
           "start": {
-            "column": 7,
-            "line": 0
+            "column": 8,
+            "line": 1
           }
         }
       },
@@ -159,12 +159,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 10,
-            "line": 1
+            "column": 11,
+            "line": 2
           },
           "start": {
-            "column": 9,
-            "line": 1
+            "column": 10,
+            "line": 2
           }
         }
       },
@@ -179,12 +179,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 5,
-            "line": 7
+            "column": 6,
+            "line": 8
           },
           "start": {
-            "column": 4,
-            "line": 7
+            "column": 5,
+            "line": 8
           }
         }
       },
@@ -199,12 +199,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 7,
-            "line": 8
+            "column": 8,
+            "line": 9
           },
           "start": {
-            "column": 6,
-            "line": 8
+            "column": 7,
+            "line": 9
           }
         }
       },
@@ -219,12 +219,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 4,
-            "line": 3
+            "column": 5,
+            "line": 4
           },
           "start": {
-            "column": 2,
-            "line": 3
+            "column": 3,
+            "line": 4
           }
         }
       },
@@ -239,12 +239,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 8,
-            "line": 5
+            "column": 9,
+            "line": 6
           },
           "start": {
-            "column": 0,
-            "line": 5
+            "column": 1,
+            "line": 6
           }
         }
       },
@@ -259,12 +259,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 5,
-            "line": 7
+            "column": 6,
+            "line": 8
           },
           "start": {
-            "column": 4,
-            "line": 7
+            "column": 5,
+            "line": 8
           }
         }
       },
@@ -279,12 +279,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 7,
-            "line": 8
+            "column": 8,
+            "line": 9
           },
           "start": {
-            "column": 6,
-            "line": 8
+            "column": 7,
+            "line": 9
           }
         }
       },
@@ -299,12 +299,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 10,
-            "line": 1
+            "column": 11,
+            "line": 2
           },
           "start": {
-            "column": 9,
-            "line": 1
+            "column": 10,
+            "line": 2
           }
         }
       },
@@ -313,12 +313,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         {
           "range": {
             "end": {
-              "column": 10,
-              "line": 0
+              "column": 11,
+              "line": 1
             },
             "start": {
-              "column": 9,
-              "line": 0
+              "column": 10,
+              "line": 1
             }
           },
           "text": "'z' is defined here:"
@@ -334,12 +334,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "index.ts",
         "range": {
           "end": {
-            "column": 7,
-            "line": 8
+            "column": 8,
+            "line": 9
           },
           "start": {
-            "column": 6,
-            "line": 8
+            "column": 7,
+            "line": 9
           }
         }
       },
@@ -348,12 +348,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         {
           "range": {
             "end": {
-              "column": 5,
-              "line": 7
+              "column": 6,
+              "line": 8
             },
             "start": {
-              "column": 4,
-              "line": 7
+              "column": 5,
+              "line": 8
             }
           },
           "text": "'f' is defined here:"
@@ -369,12 +369,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 4,
-            "line": 3
+            "column": 5,
+            "line": 4
           },
           "start": {
-            "column": 2,
-            "line": 3
+            "column": 3,
+            "line": 4
           }
         }
       },
@@ -389,12 +389,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 8,
-            "line": 5
+            "column": 9,
+            "line": 6
           },
           "start": {
-            "column": 0,
-            "line": 5
+            "column": 1,
+            "line": 6
           }
         }
       },
@@ -409,12 +409,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 5,
-            "line": 7
+            "column": 6,
+            "line": 8
           },
           "start": {
-            "column": 4,
-            "line": 7
+            "column": 5,
+            "line": 8
           }
         }
       },
@@ -429,12 +429,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 7,
-            "line": 8
+            "column": 8,
+            "line": 9
           },
           "start": {
-            "column": 6,
-            "line": 8
+            "column": 7,
+            "line": 9
           }
         }
       },
@@ -449,12 +449,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 10,
-            "line": 1
+            "column": 11,
+            "line": 2
           },
           "start": {
-            "column": 9,
-            "line": 1
+            "column": 10,
+            "line": 2
           }
         }
       },
@@ -463,12 +463,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         {
           "range": {
             "end": {
-              "column": 10,
-              "line": 0
+              "column": 11,
+              "line": 1
             },
             "start": {
-              "column": 9,
-              "line": 0
+              "column": 10,
+              "line": 1
             }
           },
           "text": "'z' is defined here:"
@@ -484,12 +484,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         "path": "main.ts",
         "range": {
           "end": {
-            "column": 7,
-            "line": 8
+            "column": 8,
+            "line": 9
           },
           "start": {
-            "column": 6,
-            "line": 8
+            "column": 7,
+            "line": 9
           }
         }
       },
@@ -498,12 +498,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
         {
           "range": {
             "end": {
-              "column": 5,
-              "line": 7
+              "column": 6,
+              "line": 8
             },
             "start": {
-              "column": 4,
-              "line": 7
+              "column": 5,
+              "line": 8
             }
           },
           "text": "'f' is defined here:"

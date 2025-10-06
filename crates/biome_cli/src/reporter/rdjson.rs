@@ -51,12 +51,12 @@ impl ReporterVisitor for RdJsonReporterVisitor<'_> {
                 if diagnostic.severity() >= payload.diagnostic_level {
                     if diagnostic.tags().is_verbose() {
                         if verbose {
-                            Some(diagnostic_to_rdjson(diagnostic))
+                            diagnostic_to_rdjson(diagnostic)
                         } else {
                             None
                         }
                     } else {
-                        Some(diagnostic_to_rdjson(diagnostic))
+                        diagnostic_to_rdjson(diagnostic)
                     }
                 } else {
                     None
@@ -82,63 +82,49 @@ impl ReporterVisitor for RdJsonReporterVisitor<'_> {
     }
 }
 
-fn diagnostic_to_rdjson<'a>(diagnostic: &'a Error) -> RdJsonDiagnostic<'a> {
+fn diagnostic_to_rdjson<'a>(diagnostic: &'a Error) -> Option<RdJsonDiagnostic<'a>> {
     let message = PrintDescription(diagnostic).to_string();
     let location = diagnostic.location();
-
-    let location = if let (Some(span), Some(source_code), Some(resource)) =
-        (location.span, location.source_code, location.resource)
-    {
-        if let Some(resource) = resource.as_file() {
-            let source = SourceFile::new(source_code);
-            let start = match source.location(span.start()) {
-                Ok(s) => s,
-                Err(_) => return None,
-            };
-            let end = match source.location(span.end()) {
-                Ok(e) => e,
-                Err(_) => return None,
-            };
-            Some(RdJsonLocation {
-                path: resource.to_string(),
-                range: Some(RdJsonRange {
-                    start: RdJsonLineColumn {
-                        column: start.column_number.to_zero_indexed(),
-                        line: start.line_number.to_zero_indexed(),
-                    },
-                    end: RdJsonLineColumn {
-                        column: end.column_number.to_zero_indexed(),
-                        line: end.line_number.to_zero_indexed(),
-                    },
-                }),
-            })
-        } else {
-            None
-        }
-    } else {
-        None
-    };
+    let location = to_rdjson_location(&location);
 
     let suggestions = to_rdjson_suggetions(diagnostic);
-
-    let code = if let Some(category) = diagnostic.category() {
-        RdJsonCode {
-            url: category.link().map(String::from),
-            value: category.name(),
-        }
-    } else {
-        RdJsonCode {
-            url: None,
-            value: "unknown",
-        }
+    let category = diagnostic.category()?;
+    let code = RdJsonCode {
+        url: category.link().map(String::from),
+        value: category.name(),
     };
 
-    RdJsonDiagnostic {
+    Some(RdJsonDiagnostic {
         code,
         location,
         message,
         suggestions,
-    }
+    })
+}
+
+fn to_rdjson_location(location: &Location<'_>) -> Option<RdJsonLocation> {
+    let (Some(span), Some(source_code), Some(resource)) =
+        (location.span, location.source_code, location.resource)
+    else {
+        return None;
+    };
+    let resource = resource.as_file()?;
+    let source = SourceFile::new(source_code);
+    let start = source.location(span.start()).ok()?;
+    let end = source.location(span.end()).ok()?;
+    Some(RdJsonLocation {
+        path: resource.to_string(),
+        range: Some(RdJsonRange {
+            start: RdJsonLineColumn {
+                column: start.column_number.get(),
+                line: start.line_number.get(),
+            },
+            end: RdJsonLineColumn {
+                column: end.column_number.get(),
+                line: end.line_number.get(),
+            },
+        }),
+    })
 }
 
 struct SuggestionsVisitor {
@@ -180,12 +166,12 @@ impl Visit for SuggestionsVisitor {
 
             RdJsonRange {
                 end: RdJsonLineColumn {
-                    line: end.line_number.to_zero_indexed(),
-                    column: end.column_number.to_zero_indexed(),
+                    line: end.line_number.get(),
+                    column: end.column_number.get(),
                 },
                 start: RdJsonLineColumn {
-                    line: start.line_number.to_zero_indexed(),
-                    column: start.column_number.to_zero_indexed(),
+                    line: start.line_number.get(),
+                    column: start.column_number.get(),
                 },
             }
         } else {
