@@ -59,11 +59,28 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// ### style
+    /// ### `style`
     ///
-    /// Use the `style` option to specify the required description style:
-    /// - `"block"` (default): Requires triple-quoted block descriptions (`"""..."""`)
+    /// This option will specify the description style.
+    /// - `"block"`: Requires triple-quoted block descriptions (`"""..."""`)
     /// - `"inline"`: Requires single-quoted inline descriptions (`"..."`)
+    ///
+    /// Default `"block"`
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "style": "block"
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```graphql,expect_diagnostic,use_options
+    /// enum EnumValue {
+    ///   "this is a description"
+    ///   DEFAULT
+    /// }
+    /// ```
     ///
     pub UseConsistentGraphqlDescriptions {
         version: "next",
@@ -110,7 +127,7 @@ impl Rule for UseConsistentGraphqlDescriptions {
                 },
             )
             .note(markup! {
-                    "Expected description to have "{style}" style."
+                    "To stay consistent within the project, write the description "{style}" style."
             }),
         )
     }
