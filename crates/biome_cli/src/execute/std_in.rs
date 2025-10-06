@@ -10,6 +10,9 @@ use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::BiomePath;
 use biome_service::WorkspaceError;
+use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::svelte::SvelteFileHandler;
+use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{

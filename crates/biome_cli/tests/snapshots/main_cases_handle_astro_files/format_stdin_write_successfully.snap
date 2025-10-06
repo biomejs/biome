@@ -23,4 +23,5 @@ import { something } from "file.astro";
 statement();
 ---
 <div></div>
+
 ```

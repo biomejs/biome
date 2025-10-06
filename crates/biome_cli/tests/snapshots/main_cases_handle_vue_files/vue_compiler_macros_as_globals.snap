@@ -62,12 +62,12 @@ file.vue:16:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━
   
   i Unsafe fix: If this is intentional, prepend slots with an underscore.
   
-    13 13 │   })
-    14 14 │   
-    15    │ - const·slots·=·defineSlots<{
-       15 │ + const·_slots·=·defineSlots<{
-    16 16 │   		default(props: { msg: string }): any
-    17 17 │   }>()
+    14 14 │   })
+    15 15 │   
+    16    │ - const·slots·=·defineSlots<{
+       16 │ + const·_slots·=·defineSlots<{
+    17 17 │   		default(props: { msg: string }): any
+    18 18 │   }>()
   
 
 ```

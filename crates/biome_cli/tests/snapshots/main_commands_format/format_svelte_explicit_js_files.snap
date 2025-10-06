@@ -36,7 +36,9 @@ file.svelte format ━━━━━━━━━━━━━━━━━━━━�
       2 │ + import·{·something·}·from·"file.svelte";
       3 │ + statement();
     4 4 │   </script>
-    5 5 │   <div></div>
+    5   │ - <div></div>
+      5 │ + <div></div>
+      6 │ + 
   
 
 ```

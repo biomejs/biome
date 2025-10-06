@@ -1526,6 +1526,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules: &enabled_rules,
             plugins: Vec::new(),
             categories,
+            action_offset: None,
         });
 
         for embedded_snippet in embedded_snippets {
@@ -1551,6 +1552,7 @@ impl Workspace for WorkspaceServer {
                 enabled_rules: &enabled_rules,
                 plugins: Vec::new(),
                 categories,
+                action_offset: Some(embedded_snippet.content_offset()),
             });
 
             result.actions.extend(embedded_actions_result.actions);

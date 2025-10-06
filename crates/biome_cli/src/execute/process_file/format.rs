@@ -7,6 +7,9 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
+use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::svelte::SvelteFileHandler;
+use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use tracing::{debug, instrument};
 

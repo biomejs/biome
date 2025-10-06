@@ -100,7 +100,6 @@ pub(crate) fn code_fix_to_lsp(
     position_encoding: PositionEncoding,
     diagnostics: &[lsp::Diagnostic],
     action: CodeAction,
-    offset: Option<u32>,
 ) -> Result<lsp::CodeAction> {
     // Mark diagnostics emitted by the same rule as resolved by this action
     let diagnostics: Vec<_> = action
@@ -135,6 +134,7 @@ pub(crate) fn code_fix_to_lsp(
     let suggestion = action.suggestion;
 
     let mut changes = HashMap::new();
+    let offset = action.offset.map(u32::from);
     let edits = text_edit(line_index, suggestion.suggestion, position_encoding, offset)?;
 
     changes.insert(url.clone(), edits);

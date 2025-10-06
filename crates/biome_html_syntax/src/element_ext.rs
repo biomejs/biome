@@ -1,8 +1,8 @@
 use crate::{
-    AnyHtmlElement, HtmlAttribute, HtmlElement, HtmlSelfClosingElement, ScriptType,
-    inner_string_text,
+    AnyHtmlElement, AstroEmbeddedContent, HtmlAttribute, HtmlElement, HtmlEmbeddedContent,
+    HtmlSelfClosingElement, HtmlSyntaxToken, ScriptType, inner_string_text,
 };
-use biome_rowan::{AstNodeList, SyntaxResult, TokenText};
+use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 
 /// https://html.spec.whatwg.org/#void-elements
 const VOID_ELEMENTS: &[&str] = &[
@@ -266,5 +266,18 @@ mod tests {
             .unwrap();
 
         assert!(element.is_javascript_tag());
+    }
+}
+
+declare_node_union! {
+    pub AnyEmbeddedContent = HtmlEmbeddedContent | AstroEmbeddedContent
+}
+
+impl AnyEmbeddedContent {
+    pub fn value_token(&self) -> Option<HtmlSyntaxToken> {
+        match self {
+            Self::HtmlEmbeddedContent(node) => node.value_token().ok(),
+            Self::AstroEmbeddedContent(node) => node.content_token(),
+        }
     }
 }

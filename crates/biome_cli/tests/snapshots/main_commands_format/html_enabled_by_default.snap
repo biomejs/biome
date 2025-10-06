@@ -2,14 +2,10 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `file.vue`
+## `file.html`
 
-```vue
-<script lang="js">
-import { something } from "file.vue";
-statement();
-</script>
-<template></template>
+```html
+<!DOCTYPE html>
 
 ```
 

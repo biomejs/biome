@@ -43,11 +43,11 @@ file.vue:5:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: If this is intentional, prepend foo with an underscore.
   
-    2 2 │   delete a.c;
-    3 3 │   
-    4   │ - var·foo:·string·=·"";
-      4 │ + var·_foo:·string·=·"";
-    5 5 │   
+    3 3 │   delete a.c;
+    4 4 │   
+    5   │ - var·foo:·string·=·"";
+      5 │ + var·_foo:·string·=·"";
+    6 6 │   
   
 
 ```
@@ -67,7 +67,7 @@ file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━�
   
   i Unsafe fix: Use === instead.
   
-    1 │ a·===·b;
+    2 │ a·===·b;
       │     +   
 
 ```

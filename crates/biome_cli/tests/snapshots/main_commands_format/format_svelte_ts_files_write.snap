@@ -10,6 +10,7 @@ import { type something } from "file.svelte";
 const hello: string = "world";
 </script>
 <div></div>
+
 ```
 
 # Emitted Messages

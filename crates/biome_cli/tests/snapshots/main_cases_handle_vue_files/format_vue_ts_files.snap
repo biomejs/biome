@@ -36,7 +36,9 @@ file.vue format ━━━━━━━━━━━━━━━━━━━━━�
       2 │ + import·{·type·something·}·from·"file.vue";
       3 │ + const·hello:·string·=·"world";
     4 4 │   </script>
-    5 5 │   <template></template>
+    5   │ - <template></template>
+      5 │ + <template></template>
+      6 │ + 
   
 
 ```
