@@ -980,6 +980,11 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 51] = [
     "visited",
     "window-inactive",
 ];
+
+// CSS Modules pseudo-classes
+// https://github.com/css-modules/css-modules
+pub const CSS_MODULE_PSEUDO_CLASSES: [&str; 2] = ["global", "local"];
+
 // https://github.com/known-css/known-css-properties/blob/master/source/w3c.json
 pub const KNOWN_PROPERTIES: &[&str] = &[
     "-webkit-line-clamp",
