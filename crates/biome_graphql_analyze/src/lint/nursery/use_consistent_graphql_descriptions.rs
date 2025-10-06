@@ -35,28 +35,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ### style: `inline`
-    ///
-    /// #### Invalid
-    ///
-    /// ```graphql
-    /// enum EnumValue {
-    ///   """
-    ///   this is a description
-    ///   """
-    ///   DEFAULT
-    /// }
-    /// ```
-    ///
-    /// #### Valid
-    ///
-    /// ```graphql,expect_diagnostic
-    /// enum EnumValue {
-    ///   "this is a description"
-    ///   DEFAULT
-    /// }
-    /// ```
-    ///
     /// ## Options
     ///
     /// ### `style`
