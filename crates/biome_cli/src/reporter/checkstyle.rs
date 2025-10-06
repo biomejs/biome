@@ -93,7 +93,7 @@ impl<'a> ReporterVisitor for CheckstyleReporterVisitor<'a> {
                     Severity::Fatal => "error",
                 };
                 let description = PrintDescription(diagnostic).to_string();
-                let source = diagnostic.category().map(|c| c.name()).unwrap_or("");
+                let source = diagnostic.category().map_or("", |c| c.name());
                 writeln!(
                     output,
                     "    <error line=\"{}\" column=\"{}\" severity=\"{}\" message=\"{}\" source=\"{}\" />",
