@@ -191,7 +191,7 @@ tests_macros         = { path = "./crates/tests_macros" }
 anyhow               = "1.0.100"
 boa_engine           = "0.20.0"
 bpaf                 = { version = "0.9.20", features = ["derive"] }
-camino               = "1.1.12"
+camino               = "1.2.1"
 cfg-if               = "1.0.3"
 countme              = "3.0.1"
 crossbeam            = "0.8.4"
@@ -206,6 +206,7 @@ hashbrown            = { version = "0.15.5", default-features = false }
 ignore               = "0.4.23"
 indexmap             = { version = "2.10.0" }
 insta                = "1.43.2"
+jiff                 = "0.2.15"
 libc                 = "0.2.176"
 mimalloc             = "0.1.48"
 papaya               = "0.2.3"
@@ -214,13 +215,13 @@ proc-macro-error2    = { version = "2.0.1", default-features = false }
 proc-macro2          = "1.0.101"
 quickcheck           = "1.0.3"
 quickcheck_macros    = "1.1.0"
-quote                = "1.0.40"
+quote                = "1.0.41"
 rayon                = "1.10.0"
-regex                = "1.11.2"
+regex                = "1.11.3"
 rust-lapper          = "1.2.0"
 rustc-hash           = "2.1.1"
 schemars             = { version = "0.8.22", features = ["indexmap2", "smallvec"] }
-serde                = { version = "1.0.226", features = ["derive"] }
+serde                = { version = "1.0.228", features = ["derive"] }
 serde_json           = "1.0.145"
 similar              = "2.7.0"
 smallvec             = { version = "1.15.1", features = ["union", "const_new", "serde"] }

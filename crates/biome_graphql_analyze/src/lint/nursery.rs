@@ -4,4 +4,5 @@
 
 use biome_analyze::declare_lint_group;
 pub mod use_consistent_graphql_descriptions;
-declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: use_consistent_graphql_descriptions :: UseConsistentGraphqlDescriptions ,] } }
+pub mod use_deprecated_date;
+declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: use_consistent_graphql_descriptions :: UseConsistentGraphqlDescriptions , self :: use_deprecated_date :: UseDeprecatedDate ,] } }

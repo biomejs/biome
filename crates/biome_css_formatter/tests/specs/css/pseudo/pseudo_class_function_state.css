@@ -1,0 +1,13 @@
+custom-selector:state(checked) {}
+custom-selector:state( checked) {}
+custom-selector:state(    checked  ) {}
+custom-selector:state(
+checked
+) {}
+
+:host(
+:state(      checked
+))::before {  }
+:host(:state(      checked
+)
+			)::before {  }

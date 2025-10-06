@@ -5174,6 +5174,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDeprecatedDate": {
+					"description": "Require the @deprecated directive to specify a deletion date.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseDeprecatedDateConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.",
 					"anyOf": [
@@ -5206,6 +5213,20 @@
 					"description": "Prefer using the class prop as a classlist over the classnames helper.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikMethodUsage": {
+					"description": "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikMethodUsageConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikValidLexicalScope": {
+					"description": "Disallow unserializable expressions in Qwik dollar ($) scopes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikValidLexicalScopeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10453,6 +10474,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseDeprecatedDateOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseDeprecatedDateOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseDeprecatedReasonOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -11383,6 +11419,36 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseQwikClasslistOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseQwikMethodUsageOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikMethodUsageOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseQwikValidLexicalScopeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikValidLexicalScopeOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -13793,7 +13859,7 @@
 			"type": "object",
 			"properties": {
 				"style": {
-					"description": "The description style to enforce. Default to \"block\"",
+					"description": "The description style to enforce. Defaults to \"block\"",
 					"default": "block",
 					"allOf": [{ "$ref": "#/definitions/Style" }]
 				}
@@ -13896,6 +13962,19 @@
 		},
 		"UseDefaultSwitchClauseOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDeprecatedDateConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseDeprecatedDateOptions" }
+			]
+		},
+		"UseDeprecatedDateOptions": {
+			"type": "object",
+			"properties": {
+				"argumentName": { "default": "deletionDate", "type": "string" }
+			},
 			"additionalProperties": false
 		},
 		"UseDeprecatedReasonConfiguration": {
@@ -14492,6 +14571,26 @@
 			]
 		},
 		"UseQwikClasslistOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikMethodUsageConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikMethodUsageOptions" }
+			]
+		},
+		"UseQwikMethodUsageOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikValidLexicalScopeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikValidLexicalScopeOptions" }
+			]
+		},
+		"UseQwikValidLexicalScopeOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

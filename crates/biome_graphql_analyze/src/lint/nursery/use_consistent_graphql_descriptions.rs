@@ -39,7 +39,7 @@ declare_lint_rule! {
     ///
     /// #### Invalid
     ///
-    /// ```graphql,expect_diagnostic
+    /// ```graphql
     /// enum EnumValue {
     ///   """
     ///   this is a description
@@ -50,7 +50,7 @@ declare_lint_rule! {
     ///
     /// #### Valid
     ///
-    /// ```graphql
+    /// ```graphql,expect_diagnostic
     /// enum EnumValue {
     ///   "this is a description"
     ///   DEFAULT

@@ -1,8 +1,8 @@
 use crate::keywords::{
     A_NPLUS_BNOTATION_PSEUDO_CLASSES, A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES,
-    AT_RULE_PAGE_PSEUDO_CLASSES, HTML_TAGS, KNOWN_CHROME_PROPERTIES, KNOWN_EDGE_PROPERTIES,
-    KNOWN_EXPLORER_PROPERTIES, KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES, KNOWN_SAFARI_PROPERTIES,
-    KNOWN_SAMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES,
+    AT_RULE_PAGE_PSEUDO_CLASSES, CSS_MODULE_PSEUDO_CLASSES, HTML_TAGS, KNOWN_CHROME_PROPERTIES,
+    KNOWN_EDGE_PROPERTIES, KNOWN_EXPLORER_PROPERTIES, KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES,
+    KNOWN_SAFARI_PROPERTIES, KNOWN_SAMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES,
     LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS, LINGUISTIC_PSEUDO_CLASSES,
     LOGICAL_COMBINATIONS_PSEUDO_CLASSES, LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES,
     MATH_ML_TAGS, MEDIA_FEATURE_NAMES, OTHER_PSEUDO_CLASSES, OTHER_PSEUDO_ELEMENTS,
@@ -140,4 +140,15 @@ pub fn is_known_type_selector(prop: &str) -> bool {
         || SVG_TAGS.binary_search(&prop).is_ok()
         || MATH_ML_TAGS.binary_search(&input.as_ref()).is_ok()
         || is_custom_element(prop)
+}
+
+/// Check if the input string is a CSS module pseudo-class.
+///
+/// CSS modules support special pseudo-classes like `:global` and `:local` for
+/// scoping control.
+/// These are only valid when CSS modules are enabled.
+///
+/// See https://github.com/css-modules/css-modules for more details.
+pub fn is_css_module_pseudo_class(prop: &str) -> bool {
+    CSS_MODULE_PSEUDO_CLASSES.binary_search(&prop).is_ok()
 }

@@ -12,15 +12,15 @@
   "keywords": [],
   "author": "Biome Developers and Contributors",
   "license": "MIT OR Apache-2.0",
-  "packageManager": "pnpm@10.12.1",
+  "packageManager": "pnpm@10.18.0",
   "engines": {
-    "pnpm": "10.12.1"
+    "pnpm": "10.18.0"
   },
   "type": "module",
   "devDependencies": {
     "@biomejs/plugin-api": "workspace:",
     "@changesets/changelog-github": "0.5.1",
     "@changesets/cli": "2.29.7",
-    "@types/node": "22.18.6"
+    "@types/node": "22.18.8"
   }
 }

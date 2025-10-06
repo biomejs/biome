@@ -1730,6 +1730,10 @@ export interface Nursery {
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
 	/**
+	 * Require the @deprecated directive to specify a deletion date.
+	 */
+	useDeprecatedDate?: RuleConfiguration_for_UseDeprecatedDateOptions;
+	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
 	useExhaustiveSwitchCases?: RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions;
@@ -1749,6 +1753,14 @@ export interface Nursery {
 	 * Prefer using the class prop as a classlist over the classnames helper.
 	 */
 	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
+	/**
+	 * Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.
+	 */
+	useQwikMethodUsage?: RuleConfiguration_for_UseQwikMethodUsageOptions;
+	/**
+	 * Disallow unserializable expressions in Qwik dollar ($) scopes.
+	 */
+	useQwikValidLexicalScope?: RuleConfiguration_for_UseQwikValidLexicalScopeOptions;
 	/**
 	 * Enforce that components are defined as functions and never as classes.
 	 */
@@ -3073,6 +3085,9 @@ export type RuleConfiguration_for_UseConsistentGraphqlDescriptionsOptions =
 export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
+export type RuleConfiguration_for_UseDeprecatedDateOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseDeprecatedDateOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -3088,6 +3103,12 @@ export type RuleConfiguration_for_UseMaxParamsOptions =
 export type RuleConfiguration_for_UseQwikClasslistOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseQwikClasslistOptions;
+export type RuleConfiguration_for_UseQwikMethodUsageOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikMethodUsageOptions;
+export type RuleConfiguration_for_UseQwikValidLexicalScopeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikValidLexicalScopeOptions;
 export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseReactFunctionComponentsOptions;
@@ -5664,6 +5685,16 @@ export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	 */
 	options: UseConsistentTypeDefinitionsOptions;
 }
+export interface RuleWithOptions_for_UseDeprecatedDateOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseDeprecatedDateOptions;
+}
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5717,6 +5748,26 @@ export interface RuleWithOptions_for_UseQwikClasslistOptions {
 	 * Rule's options
 	 */
 	options: UseQwikClasslistOptions;
+}
+export interface RuleWithOptions_for_UseQwikMethodUsageOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikMethodUsageOptions;
+}
+export interface RuleWithOptions_for_UseQwikValidLexicalScopeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikValidLexicalScopeOptions;
 }
 export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
 	/**
@@ -8212,12 +8263,15 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 }
 export interface UseConsistentGraphqlDescriptionsOptions {
 	/**
-	 * The description style to enforce. Default to "block"
+	 * The description style to enforce. Defaults to "block"
 	 */
 	style?: Style;
 }
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
+}
+export interface UseDeprecatedDateOptions {
+	argumentName?: string;
 }
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
@@ -8229,6 +8283,8 @@ export interface UseMaxParamsOptions {
 	max?: number;
 }
 export interface UseQwikClasslistOptions {}
+export interface UseQwikMethodUsageOptions {}
+export interface UseQwikValidLexicalScopeOptions {}
 export interface UseReactFunctionComponentsOptions {}
 export interface UseSortedClassesOptions {
 	/**
@@ -8959,6 +9015,7 @@ export type Category =
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useConsistentGraphqlDescriptions"
+	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
@@ -8967,6 +9024,8 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikClasslist"
+	| "lint/nursery/useQwikMethodUsage"
+	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useVueMultiWordComponentNames"
