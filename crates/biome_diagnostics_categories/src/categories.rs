@@ -187,6 +187,7 @@ define_categories! {
     "lint/nursery/noVueDuplicateKeys": "https://biomejs.dev/linter/rules/no-vue-duplicate-keys",
     "lint/nursery/noVueReservedKeys": "https://biomejs.dev/linter/rules/no-vue-reserved-keys",
     "lint/nursery/noVueReservedProps": "https://biomejs.dev/linter/rules/no-vue-reserved-props",
+    "lint/nursery/noVueSetupPropsReactivityLoss": "https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss",
     "lint/nursery/useAnchorHref": "https://biomejs.dev/linter/rules/use-anchor-href",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentArrowReturn": "https://biomejs.dev/linter/rules/use-consistent-arrow-return",

@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-typescript.ts
+---
+# Input
+```ts
+// TypeScript specific test cases
+
+// TypeScript interface props
+export default {
+  setup(props: { foo: string; bar: number }) {
+    const { foo, bar } = props;
+    return () => h('div', foo + bar)
+  }
+}
+
+// Type alias props
+type Props = {
+  foo: string;
+  bar: number;
+};
+
+export default {
+  setup(props: Props) {
+    const { foo, bar } = props;
+    return () => h('div', foo + bar)
+  }
+}
+
+// Generic component props
+export default {
+  setup<T extends { foo: string }>(props: T) {
+    const { foo } = props;
+    return () => h('div', foo)
+  }
+}
+
+// defineComponent with TypeScript
+export default defineComponent({
+  setup(props: { foo: string }) {
+    const { foo } = props;
+    return () => h('div', foo)
+  }
+});
+```
+
+# Diagnostics
+```
+invalid-typescript.ts:6:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the root scope of `setup` loses reactivity.
+  
+    4 │ export default {
+    5 │   setup(props: { foo: string; bar: number }) {
+  > 6 │     const { foo, bar } = props;
+      │           ^^^^^^^^^^^^
+    7 │     return () => h('div', foo + bar)
+    8 │   }
+  
+  i The `props` parameter is defined here.
+  
+    3 │ // TypeScript interface props
+    4 │ export default {
+  > 5 │   setup(props: { foo: string; bar: number }) {
+      │         ^^^^^
+    6 │     const { foo, bar } = props;
+    7 │     return () => h('div', foo + bar)
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+  i Alternatively, use `toRefs(props)` or `toRef(props, 'key')` to create reactive refs.
+  
+
+```
+
+```
+invalid-typescript.ts:35:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the root scope of `setup` loses reactivity.
+  
+    33 │ export default defineComponent({
+    34 │   setup(props: { foo: string }) {
+  > 35 │     const { foo } = props;
+       │           ^^^^^^^
+    36 │     return () => h('div', foo)
+    37 │   }
+  
+  i The `props` parameter is defined here.
+  
+    32 │ // defineComponent with TypeScript
+    33 │ export default defineComponent({
+  > 34 │   setup(props: { foo: string }) {
+       │         ^^^^^
+    35 │     const { foo } = props;
+    36 │     return () => h('div', foo)
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+  i Alternatively, use `toRefs(props)` or `toRef(props, 'key')` to create reactive refs.
+  
+
+```

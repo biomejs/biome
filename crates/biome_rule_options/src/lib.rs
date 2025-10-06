@@ -240,6 +240,7 @@ pub mod no_vue_data_object_declaration;
 pub mod no_vue_duplicate_keys;
 pub mod no_vue_reserved_keys;
 pub mod no_vue_reserved_props;
+pub mod no_vue_setup_props_reactivity_loss;
 pub mod no_with;
 pub mod no_yoda_expression;
 pub mod organize_imports;

@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-conditional-destructuring.js
+---
+# Input
+```js
+// Conditional and control flow destructuring that loses reactivity
+
+// Conditional destructuring
+export default {
+  setup(props) {
+    if (props.show) {
+      const { foo } = props;
+      return () => h('div', foo)
+    }
+    return () => h('div', 'hidden')
+  }
+}
+
+// Destructuring in try-catch
+export default {
+  setup(props) {
+    try {
+      const { foo, bar } = props;
+      return () => h('div', foo + bar)
+    } catch (e) {
+      return () => h('div', 'error')
+    }
+  }
+}
+
+// Destructuring in switch statement
+export default {
+  setup(props) {
+    switch (props.type) {
+      case 'type1': {
+        const { foo } = props;
+        return () => h('div', foo)
+      }
+      default:
+        return () => h('div', 'default')
+    }
+  }
+}
+
+// Destructuring in for loop
+export default {
+  setup(props) {
+    for (let i = 0; i < 1; i++) {
+      const { foo } = props;
+      console.log(foo);
+    }
+    return () => h('div', props.bar)
+  }
+}
+```
+
+# Diagnostics
+```
+invalid-conditional-destructuring.js:7:13 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the root scope of `setup` loses reactivity.
+  
+    5 │   setup(props) {
+    6 │     if (props.show) {
+  > 7 │       const { foo } = props;
+      │             ^^^^^^^
+    8 │       return () => h('div', foo)
+    9 │     }
+  
+  i The `props` parameter is defined here.
+  
+    3 │ // Conditional destructuring
+    4 │ export default {
+  > 5 │   setup(props) {
+      │         ^^^^^
+    6 │     if (props.show) {
+    7 │       const { foo } = props;
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+  i Alternatively, use `toRefs(props)` or `toRef(props, 'key')` to create reactive refs.
+  
+
+```
