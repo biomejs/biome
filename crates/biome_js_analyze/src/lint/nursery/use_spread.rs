@@ -5,9 +5,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsMemberExpression, JsCallExpression, JsSyntaxKind, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsCallExpression, JsLanguage, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken};
 use biome_rule_options::use_spread::UseSpreadOptions;
 
 declare_lint_rule! {
@@ -22,6 +22,10 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// foo.apply(null, args);
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// foo.apply(null, [1, 2, 3]);
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -41,7 +45,6 @@ declare_lint_rule! {
     ///
     /// foo.apply(obj, [1, 2, 3]);
     ///
-    /// foo.apply(null, [1, 2, 3]);
     /// ```
     ///
     pub UseSpread {
@@ -50,13 +53,13 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("prefer-spread").same()],
         recommended: true,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
 impl Rule for UseSpread {
     type Query = Ast<JsCallExpression>;
-    type State = ();
+    type State = (AnyJsExpression, AnyJsExpression);
     type Signals = Option<Self::State>;
     type Options = UseSpreadOptions;
 
@@ -64,7 +67,7 @@ impl Rule for UseSpread {
         let node = ctx.query();
         let callee = node.callee().ok()?;
 
-        let member_expr = AnyJsMemberExpression::cast(callee.into_syntax())?;
+        let member_expr = AnyJsMemberExpression::cast_ref(callee.syntax())?;
         if member_expr.member_name()?.text() != "apply" {
             return None;
         }
@@ -80,17 +83,12 @@ impl Rule for UseSpread {
         let second_arg = arguments.last()?.ok()?;
         let spread_candidate = second_arg.as_any_js_expression()?;
 
-        // The rule should not flag `.apply()` calls where the second argument is an array literal.
-        if spread_candidate.syntax().kind() == JsSyntaxKind::JS_ARRAY_EXPRESSION {
-            return None;
-        }
-
         let applied_object = member_expr.object().ok()?;
 
-        let is_this_correct = if let Some(object_member) =
+        let is_same_reference = if let Some(object_member) =
             AnyJsMemberExpression::cast(applied_object.clone().into_syntax())
         {
-            object_member.object().ok()?.syntax().text_trimmed() == this_arg.syntax().text_trimmed()
+            are_nodes_equal(&object_member.object().ok()?, this_arg)
         } else {
             // This handles cases like `foo.apply(null, args)` or `foo.apply(undefined, args)`
             this_arg
@@ -98,7 +96,11 @@ impl Rule for UseSpread {
                 .is_some_and(|v| v.is_null_or_undefined())
         };
 
-        if is_this_correct { Some(()) } else { None }
+        if is_same_reference {
+            Some((applied_object.clone(), spread_candidate.clone()))
+        } else {
+            None
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -107,35 +109,30 @@ impl Rule for UseSpread {
             rule_category!(),
             node.range(),
             markup! {
-                "Use the spread operator instead of "<Emphasis>".apply()"</Emphasis>"."
+               <Emphasis>"apply()"</Emphasis>" is used to call a function with arguments provided as an array."
             },
         ))
     }
 
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        let callee = node.callee().ok()?;
-        let member_expr = AnyJsMemberExpression::cast(callee.into_syntax())?;
-        let object = member_expr.object().ok()?;
-
-        let arguments = node.arguments().ok()?;
-        let arguments_list = arguments.args();
+        let (object, spread_candidate) = state;
 
         let new_arguments = make::js_call_arguments(
             make::token(T!['(']),
             make::js_call_argument_list(
                 [AnyJsCallArgument::from(make::js_spread(
                     make::token(T![...]),
-                    arguments_list.last()?.ok()?.as_any_js_expression()?.clone(),
+                    spread_candidate.clone(),
                 ))],
                 [],
             ),
             make::token(T![')']),
         );
 
-        let new_call_expression = make::js_call_expression(object, new_arguments).build();
+        let new_call_expression = make::js_call_expression(object.clone(), new_arguments).build();
 
         mutation.replace_node(node.clone(), new_call_expression);
 
@@ -145,5 +142,27 @@ impl Rule for UseSpread {
             markup! { "Use the spread operator." }.to_owned(),
             mutation,
         ))
+    }
+}
+
+fn get_identifier_token(node: &AnyJsExpression) -> Option<SyntaxToken<JsLanguage>> {
+    match node {
+        AnyJsExpression::JsIdentifierExpression(identifier) => identifier
+            .name()
+            .ok()
+            .and_then(|name| name.value_token().ok()),
+        _ => None,
+    }
+}
+
+fn are_nodes_equal(node1: &AnyJsExpression, node2: &AnyJsExpression) -> bool {
+    let object_token = get_identifier_token(node1);
+    let this_token = get_identifier_token(node2);
+
+    match (object_token, this_token) {
+        (Some(object_token), Some(this_token)) => {
+            object_token.text_trimmed() == this_token.text_trimmed()
+        }
+        _ => false,
     }
 }
