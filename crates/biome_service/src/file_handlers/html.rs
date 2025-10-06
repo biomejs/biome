@@ -842,7 +842,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     }
                 }
             }
-            }
 
             ControlFlow::Continue(())
         });
