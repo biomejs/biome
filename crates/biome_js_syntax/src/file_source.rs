@@ -148,7 +148,7 @@ pub struct JsFileSource {
     variant: LanguageVariant,
     module_kind: ModuleKind,
     version: LanguageVersion,
-    /// Used to mark if the JavaScript is embebbed inside some particular files. This affects the parsing.
+    /// Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing.
     /// For example, if inside an Astro file, a top-level return statement is allowed.
     embedding_kind: EmbeddingKind,
 }
