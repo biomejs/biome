@@ -388,8 +388,8 @@ fn assert_lint(
                 });
             }
         }
-        DocumentFileSource::Html(..) => {
-            let parse = biome_html_parser::parse_html(code, HtmlParseOptions::default());
+        DocumentFileSource::Html(source) => {
+            let parse = biome_html_parser::parse_html(code, HtmlParseOptions::from(&source));
 
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
