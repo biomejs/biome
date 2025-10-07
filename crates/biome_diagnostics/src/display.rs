@@ -688,6 +688,15 @@ fn is_terminal_program(name: &str) -> bool {
     }
 }
 
+/// Prints [MarkupBuf] to a [String]
+pub fn markup_to_string(markup: &MarkupBuf) -> Option<String> {
+    let mut buffer = Vec::new();
+    let mut write = fmt::Termcolor(termcolor::NoColor::new(&mut buffer));
+    let mut fmt = fmt::Formatter::new(&mut write);
+    fmt.write_markup(markup! { {markup} }).ok()?;
+    String::from_utf8(buffer).ok()
+}
+
 #[cfg(test)]
 mod tests {
     use std::io;
