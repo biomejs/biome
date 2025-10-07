@@ -9411,7 +9411,7 @@ export type DocumentFileSource =
 	| { Grit: GritFileSource };
 export interface JsFileSource {
 	/**
-	 * Used to mark if the JavaScript is embebbed inside some particular files. This affects the parsing. For example, if inside an Astro file, a top-level return statement is allowed.
+	 * Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing. For example, if inside an Astro file, a top-level return statement is allowed.
 	 */
 	embedding_kind: EmbeddingKind;
 	language: Language;
