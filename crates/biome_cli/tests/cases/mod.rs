@@ -25,6 +25,7 @@ mod overrides_linter;
 mod overrides_max_file_size;
 mod overrides_organize_imports;
 mod protected_files;
+mod reporter_checkstyle;
 mod reporter_github;
 mod reporter_gitlab;
 mod reporter_junit;
