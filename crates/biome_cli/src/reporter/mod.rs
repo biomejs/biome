@@ -1,3 +1,4 @@
+pub(crate) mod checkstyle;
 pub(crate) mod github;
 pub(crate) mod gitlab;
 pub(crate) mod json;
