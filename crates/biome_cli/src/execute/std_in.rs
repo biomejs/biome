@@ -180,7 +180,6 @@ pub(crate) fn run<'a>(
         }
 
         if file_features.supports_format() && mode.is_check() {
-            eprintln!("{}", &new_content);
             let printed = workspace.format_file(FormatFileParams {
                 project_key,
                 path: biome_path.clone(),
