@@ -22,4 +22,3 @@ impl Default for NoExcessiveLinesPerFunctionOptions {
         }
     }
 }
-
