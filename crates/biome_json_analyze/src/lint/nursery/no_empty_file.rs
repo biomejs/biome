@@ -59,7 +59,7 @@ impl Rule for NoEmptyFile {
                 },
             )
             .note(markup! {
-                "A higher amount of files can increase the cognitive load, deleting empty files can help reducing this load."
+                "Empty files can clutter the codebase & increase cognitive load; deleting empty files can help reduce it."
             }),
         )
     }

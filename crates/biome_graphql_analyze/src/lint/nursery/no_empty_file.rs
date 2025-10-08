@@ -70,14 +70,11 @@ impl Rule for NoEmptyFile {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        if node.definitions().iter().len() > 0 {
+        if node.definitions().len() > 0 {
             return None;
         }
 
-        let eof_token = node.eof_token().ok()?;
-        if !ctx.options().comments
-            && (eof_token.has_leading_comments() || eof_token.has_trailing_comments())
-        {
+        if !ctx.options().comments && node.syntax().has_comments_direct() {
             return None;
         }
 
@@ -95,7 +92,7 @@ impl Rule for NoEmptyFile {
                 },
             )
             .note(markup! {
-                "A higher amount of files can increase the cognitive load, deleting empty files can help reducing this load."
+                "Empty files can clutter the codebase & increase cognitive load; deleting empty files can help reduce it."
             }),
         )
     }

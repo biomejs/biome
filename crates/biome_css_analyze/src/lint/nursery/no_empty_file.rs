@@ -69,7 +69,7 @@ impl Rule for NoEmptyFile {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        if node.rules().iter().len() > 0 {
+        if node.rules().len() > 0 {
             return None;
         }
 
@@ -91,7 +91,7 @@ impl Rule for NoEmptyFile {
                 },
             )
             .note(markup! {
-                "A higher amount of files can increase the cognitive load, deleting empty files can help reducing this load."
+                "Empty files can clutter the codebase & increase cognitive load; deleting empty files can help reduce it."
             }),
         )
     }

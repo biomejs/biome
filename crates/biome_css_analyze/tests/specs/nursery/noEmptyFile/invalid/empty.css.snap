@@ -16,7 +16,7 @@ empty.css:1:1 lint/nursery/noEmptyFile ━━━━━━━━━━━━━�
   > 1 │ 
       │ 
   
-  i A higher amount of files can increase the cognitive load, deleting empty files can help reducing this load.
+  i Empty files can clutter the codebase & increase cognitive load; deleting empty files can help reduce it.
   
 
 ```

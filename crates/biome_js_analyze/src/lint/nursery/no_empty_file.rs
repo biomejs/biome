@@ -110,23 +110,17 @@ impl Rule for NoEmptyFile {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if node
-            .items()
-            .iter()
-            .filter(|i| {
-                let Some(body) = i.as_any_js_statement() else {
-                    return true;
-                };
+        if node.items().iter().any(|i| {
+            let Some(body) = i.as_any_js_statement() else {
+                return true;
+            };
 
-                return match body {
-                    AnyJsStatement::JsEmptyStatement(_) => false,
-                    AnyJsStatement::JsBlockStatement(block) => block.statements().len() > 0,
-                    _ => true,
-                };
-            })
-            .count()
-            > 0
-        {
+            return match body {
+                AnyJsStatement::JsEmptyStatement(_) => false,
+                AnyJsStatement::JsBlockStatement(block) => block.statements().len() > 0,
+                _ => true,
+            };
+        }) {
             return None;
         }
 
@@ -148,7 +142,7 @@ impl Rule for NoEmptyFile {
                 },
             )
             .note(markup! {
-                "A higher amount of files can increase the cognitive load, deleting empty files can help reducing this load."
+                "Empty files can clutter the codebase & increase cognitive load; deleting empty files can help reduce it."
             }),
         )
     }

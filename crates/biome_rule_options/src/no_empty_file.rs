@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoEmptyFileOptions {
-    /// Wether comments are considered meaningless
+    /// Whether comments are considered meaningless
     pub comments: bool,
 }
 

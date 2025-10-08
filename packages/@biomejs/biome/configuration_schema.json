@@ -3118,7 +3118,7 @@
 			"type": "object",
 			"properties": {
 				"comments": {
-					"description": "Wether comments are considered meaningless",
+					"description": "Whether comments are considered meaningless",
 					"default": true,
 					"type": "boolean"
 				}

@@ -8202,7 +8202,7 @@ export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoEmptyFileOptions {
 	/**
-	 * Wether comments are considered meaningless
+	 * Whether comments are considered meaningless
 	 */
 	comments?: boolean;
 }
