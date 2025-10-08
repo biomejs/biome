@@ -3108,6 +3108,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmptyFileConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmptyFileOptions" }
+			]
+		},
+		"NoEmptyFileOptions": {
+			"type": "object",
+			"properties": {
+				"comments": {
+					"description": "Wether comments are considered meaningless",
+					"default": true,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoEmptyInterfaceConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5000,6 +5017,13 @@
 					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDuplicateDependenciesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmptyFile": {
+					"description": "Disallow empty files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmptyFileConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6921,6 +6945,21 @@
 					"allOf": [
 						{ "$ref": "#/definitions/NoEmptyCharacterClassInRegexOptions" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmptyFileOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmptyFileOptions" }]
 				}
 			},
 			"additionalProperties": false

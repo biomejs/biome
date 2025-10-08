@@ -1,0 +1,22 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```json
+
+```
+
+# Diagnostics
+```
+invalid.json:1:1 lint/nursery/noEmptyFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An empty file is not allowed.
+  
+  > 1 │ 
+      │ 
+  
+  i A higher amount of files can increase the cognitive load, deleting empty files can help reducing this load.
+  
+
+```
