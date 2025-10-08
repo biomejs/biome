@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::CssRoot;
 use biome_rowan::{AstNode, AstNodeList};
-use biome_rule_options::no_empty_file::NoEmptyFileOptions;
+use biome_rule_options::no_empty_source::NoEmptySourceOptions;
 
 declare_lint_rule! {
     /// Disallow empty files.
@@ -51,20 +51,20 @@ declare_lint_rule! {
     /// /* Only comments */
     /// ```
     ///
-    pub NoEmptyFile {
+    pub NoEmptySource {
         version: "next",
-        name: "noEmptyFile",
+        name: "noEmptySource",
         language: "css",
         sources: &[RuleSource::Stylelint("no-empty-source").same()],
         recommended: false,
     }
 }
 
-impl Rule for NoEmptyFile {
+impl Rule for NoEmptySource {
     type Query = Ast<CssRoot>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = NoEmptyFileOptions;
+    type Options = NoEmptySourceOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();

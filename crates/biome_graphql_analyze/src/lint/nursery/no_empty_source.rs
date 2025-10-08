@@ -1,51 +1,84 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_json_syntax::JsonRoot;
-use biome_rowan::AstNode;
-use biome_rule_options::no_empty_file::NoEmptyFileOptions;
+use biome_graphql_syntax::GraphqlRoot;
+use biome_rowan::{AstNode, AstNodeList};
+use biome_rule_options::no_empty_source::NoEmptySourceOptions;
 
 declare_lint_rule! {
     /// Disallow empty files.
     ///
     /// A file containing only the following is considered empty:
     ///   - Whitespace (spaces, tabs or newlines)
+    ///   - Comments
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```json,expect_diagnostic
+    /// ```graphql,expect_diagnostic
     ///
+    /// ```
+    ///
+    /// ```graphql,expect_diagnostic
+    /// # Only comments
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```json
-    /// { }
+    /// ```graphql
+    /// query Member {}
     /// ```
     ///
-    pub NoEmptyFile {
+    /// ```graphql
+    /// fragment StrippedMember on Member {}
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `comments`
+    ///
+    /// Mark comments as meaningless
+    ///
+    /// Default `true`
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "comments": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```graphql,expect_diagnostic
+    /// # Only comments
+    /// ```
+    ///
+    pub NoEmptySource {
         version: "next",
-        name: "noEmptyFile",
-        language: "json",
+        name: "noEmptySource",
+        language: "graphql",
         recommended: false,
     }
 }
 
-impl Rule for NoEmptyFile {
-    type Query = Ast<JsonRoot>;
+impl Rule for NoEmptySource {
+    type Query = Ast<GraphqlRoot>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = NoEmptyFileOptions;
+    type Options = NoEmptySourceOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        if node.value().ok().is_none() {
-            return Some(());
+        if node.definitions().len() > 0 {
+            return None;
         }
 
-        None
+        if !ctx.options().comments && node.syntax().has_comments_direct() {
+            return None;
+        }
+
+        Some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

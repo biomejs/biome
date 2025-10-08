@@ -10,7 +10,7 @@ expression: hashbang.js
 
 # Diagnostics
 ```
-hashbang.js:1:1 lint/nursery/noEmptyFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+hashbang.js:1:1 lint/nursery/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i An empty file is not allowed.
   

@@ -11,7 +11,7 @@ expression: empty-block-statement.js
 
 # Diagnostics
 ```
-empty-block-statement.js:1:1 lint/nursery/noEmptyFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+empty-block-statement.js:1:1 lint/nursery/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i An empty file is not allowed.
   

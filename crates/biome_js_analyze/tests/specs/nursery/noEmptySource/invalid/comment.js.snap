@@ -10,7 +10,7 @@ expression: comment.js
 
 # Diagnostics
 ```
-comment.js:2:1 lint/nursery/noEmptyFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+comment.js:2:1 lint/nursery/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i An empty file is not allowed.
   

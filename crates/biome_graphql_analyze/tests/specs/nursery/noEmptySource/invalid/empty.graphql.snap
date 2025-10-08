@@ -1,21 +1,19 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
-expression: comment.graphql
+expression: empty.graphql
 ---
 # Input
 ```graphql
-# test
 
 ```
 
 # Diagnostics
 ```
-comment.graphql:2:1 lint/nursery/noEmptyFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+empty.graphql:1:1 lint/nursery/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i An empty file is not allowed.
   
-    1 │ # test
-  > 2 │ 
+  > 1 │ 
       │ 
   
   i Empty files can clutter the codebase & increase cognitive load; deleting empty files can help reduce it.

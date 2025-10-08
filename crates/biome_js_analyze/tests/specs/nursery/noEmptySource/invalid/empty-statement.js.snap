@@ -10,7 +10,7 @@ expression: empty-statement.js
 
 # Diagnostics
 ```
-empty-statement.js:1:1 lint/nursery/noEmptyFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+empty-statement.js:1:1 lint/nursery/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i An empty file is not allowed.
   

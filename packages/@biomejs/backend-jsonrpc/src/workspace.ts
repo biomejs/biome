@@ -1636,7 +1636,7 @@ export interface Nursery {
 	/**
 	 * Disallow empty files.
 	 */
-	noEmptyFile?: RuleConfiguration_for_NoEmptyFileOptions;
+	noEmptySource?: RuleConfiguration_for_NoEmptySourceOptions;
 	/**
 	 * Require Promise-like statements to be handled appropriately.
 	 */
@@ -3016,9 +3016,9 @@ export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
-export type RuleConfiguration_for_NoEmptyFileOptions =
+export type RuleConfiguration_for_NoEmptySourceOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoEmptyFileOptions;
+	| RuleWithOptions_for_NoEmptySourceOptions;
 export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoFloatingPromisesOptions;
@@ -5423,7 +5423,7 @@ export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
 	 */
 	options: NoDuplicateDependenciesOptions;
 }
-export interface RuleWithOptions_for_NoEmptyFileOptions {
+export interface RuleWithOptions_for_NoEmptySourceOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -5431,7 +5431,7 @@ export interface RuleWithOptions_for_NoEmptyFileOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoEmptyFileOptions;
+	options: NoEmptySourceOptions;
 }
 export interface RuleWithFixOptions_for_NoFloatingPromisesOptions {
 	/**
@@ -8200,7 +8200,7 @@ export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
-export interface NoEmptyFileOptions {
+export interface NoEmptySourceOptions {
 	/**
 	 * Whether comments are considered meaningless
 	 */
@@ -8985,7 +8985,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
-	| "lint/nursery/noEmptyFile"
+	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
