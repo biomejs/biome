@@ -115,11 +115,11 @@ impl Rule for NoEmptySource {
                 return true;
             };
 
-            return match body {
+            match body {
                 AnyJsStatement::JsEmptyStatement(_) => false,
                 AnyJsStatement::JsBlockStatement(block) => block.statements().len() > 0,
                 _ => true,
-            };
+            }
         }) {
             return None;
         }
