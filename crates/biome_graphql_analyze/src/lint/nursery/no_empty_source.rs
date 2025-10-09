@@ -49,8 +49,8 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```graphql,use_options
-    /// # Only comments
+    /// ```graphql,expect_diagnostic,use_options
+    ///
     /// ```
     ///
     pub NoEmptySource {

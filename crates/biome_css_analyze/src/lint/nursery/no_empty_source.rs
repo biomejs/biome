@@ -47,8 +47,8 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```css,use_options
-    /// /* Only comments */
+    /// ```css,expect_diagnostic,use_options
+    ///
     /// ```
     ///
     pub NoEmptySource {

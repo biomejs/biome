@@ -88,8 +88,8 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js,use_options
-    /// /* Only comments */
+    /// ```js,expect_diagnostic,use_options
+    ///
     /// ```
     ///
     pub NoEmptySource {

@@ -45,8 +45,8 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```jsonc,use_options
-    /// // Only comments
+    /// ```jsonc,expect_diagnostic,use_options
+    ///
     /// ```
     ///
     pub NoEmptySource {
