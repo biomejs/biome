@@ -48,14 +48,16 @@ declare_lint_rule! {
     /// ```json,options
     /// {
     ///   "options": {
-    ///     "style": "block"
+    ///     "style": "inline"
     ///   }
     /// }
     /// ```
     ///
     /// ```graphql,expect_diagnostic,use_options
     /// enum EnumValue {
-    ///   "this is a description"
+    ///   """
+    ///   this is a description
+    ///   """
     ///   DEFAULT
     /// }
     /// ```
