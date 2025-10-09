@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": patch
+"@biomejs/biome": minor
 ---
 
 The `formatWithErrors` option can now be set via CLI using the `--format-with-errors` flag.
