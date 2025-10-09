@@ -5,10 +5,11 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_empty_source::NoEmptySourceOptions;
 
 declare_lint_rule! {
-    /// Disallow empty files.
+    /// Disallow empty sources.
     ///
-    /// A file containing only the following is considered empty:
+    /// A source containing only the following is considered empty:
     ///   - Whitespace (spaces, tabs or newlines)
+    ///   - Comments
     ///
     /// ## Examples
     ///
@@ -18,10 +19,34 @@ declare_lint_rule! {
     ///
     /// ```
     ///
+    /// ```jsonc,expect_diagnostic
+    /// // Only comments
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```json
     /// { }
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `comments`
+    ///
+    /// Whether the comments should be marked as meaningless.
+    ///
+    /// Default `true`
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "comments": false
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsonc,use_options
+    /// // Only comments
     /// ```
     ///
     pub NoEmptySource {
@@ -41,11 +66,15 @@ impl Rule for NoEmptySource {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        if node.value().ok().is_none() {
-            return Some(());
+        if node.value().ok().is_some() {
+            return None;
         }
 
-        None
+        if !ctx.options().comments && node.syntax().has_comments_direct() {
+            return None;
+        }
+
+        Some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -55,11 +84,11 @@ impl Rule for NoEmptySource {
                 rule_category!(),
                 span,
                 markup! {
-                    "An empty file is not allowed."
+                    "An empty source is not allowed."
                 },
             )
             .note(markup! {
-                "Empty files can clutter the codebase & increase cognitive load; deleting empty files can help reduce it."
+                "Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it."
             }),
         )
     }

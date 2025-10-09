@@ -1634,7 +1634,7 @@ export interface Nursery {
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
 	/**
-	 * Disallow empty files.
+	 * Disallow empty sources.
 	 */
 	noEmptySource?: RuleConfiguration_for_NoEmptySourceOptions;
 	/**

@@ -14,14 +14,14 @@ expression: jsdoc.js
 ```
 jsdoc.js:4:1 lint/nursery/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i An empty file is not allowed.
+  i An empty source is not allowed.
   
     2 │  * test
     3 │  */
   > 4 │ 
       │ 
   
-  i Empty files can clutter the codebase & increase cognitive load; deleting empty files can help reduce it.
+  i Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it.
   
 
 ```

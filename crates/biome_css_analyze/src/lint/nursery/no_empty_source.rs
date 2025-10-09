@@ -7,9 +7,9 @@ use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::no_empty_source::NoEmptySourceOptions;
 
 declare_lint_rule! {
-    /// Disallow empty files.
+    /// Disallow empty sources.
     ///
-    /// A file containing only the following is considered empty:
+    /// A source containing only the following is considered empty:
     ///   - Whitespace (spaces, tabs or newlines)
     ///   - Comments
     ///
@@ -35,19 +35,19 @@ declare_lint_rule! {
     ///
     /// ### `comments`
     ///
-    /// Mark comments as meaningless
+    /// Whether the comments should be marked as meaningless.
     ///
     /// Default `true`
     ///
     /// ```json,options
     /// {
     ///   "options": {
-    ///     "comments": true
+    ///     "comments": false
     ///   }
     /// }
     /// ```
     ///
-    /// ```css,expect_diagnostic
+    /// ```css,use_options
     /// /* Only comments */
     /// ```
     ///
@@ -87,11 +87,11 @@ impl Rule for NoEmptySource {
                 rule_category!(),
                 span,
                 markup! {
-                    "An empty file is not allowed."
+                    "An empty source is not allowed."
                 },
             )
             .note(markup! {
-                "Empty files can clutter the codebase & increase cognitive load; deleting empty files can help reduce it."
+                "Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it."
             }),
         )
     }

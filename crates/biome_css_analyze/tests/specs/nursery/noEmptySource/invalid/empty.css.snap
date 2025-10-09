@@ -11,12 +11,12 @@ expression: empty.css
 ```
 empty.css:1:1 lint/nursery/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i An empty file is not allowed.
+  i An empty source is not allowed.
   
   > 1 │ 
       │ 
   
-  i Empty files can clutter the codebase & increase cognitive load; deleting empty files can help reduce it.
+  i Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it.
   
 
 ```
