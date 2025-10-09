@@ -3549,3 +3549,38 @@ fn should_not_format_file_with_syntax_errors() {
         result,
     ));
 }
+
+#[test]
+fn should_format_file_with_syntax_errors_when_flag_enabled() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let invalid = Utf8Path::new("invalid.js");
+    fs.insert(invalid.into(), "while ) {}".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--format-with-errors=true",
+                "--write",
+                invalid.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, invalid, "while ) {}\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_format_file_with_syntax_errors_when_flag_enabled",
+        fs,
+        console,
+        result,
+    ));
+}
