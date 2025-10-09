@@ -10,6 +10,8 @@ Run the formatter on a set of files.
 Usage: format [--write] [--staged] [--changed] [--since=REF] [PATH]...
 
 Generic options applied to all files
+        --format-with-errors=<true|false>  Stores whether formatting should be allowed to proceed if
+                              a given file has syntax errors
         --indent-style=<tab|space>  The indent style.
         --indent-width=NUMBER  The size of the indentation, 2 by default
         --line-ending=<lf|crlf|cr|auto>  The type of line ending.

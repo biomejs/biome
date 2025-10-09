@@ -27,6 +27,8 @@ The configuration that is contained inside the file `biome.json`
                               1 MiB
         --files-ignore-unknown=<true|false>  Tells Biome to not emit diagnostics when handling files
                               that doesn't know
+        --format-with-errors=<true|false>  Stores whether formatting should be allowed to proceed if
+                              a given file has syntax errors
         --indent-style=<tab|space>  The indent style.
         --indent-width=NUMBER  The size of the indentation, 2 by default
         --line-ending=<lf|crlf|cr|auto>  The type of line ending.
