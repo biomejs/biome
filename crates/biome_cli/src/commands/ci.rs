@@ -78,14 +78,14 @@ impl CommandRunner for CiCommandPayload {
             .json
             .get_or_insert_with(JsonConfiguration::default);
         if self.json_parser.is_some() {
-            json.parser = self.json_parser.clone();
+            json.parser.clone_from(&self.json_parser)
         }
 
         let css = configuration
             .css
             .get_or_insert_with(CssConfiguration::default);
         if self.css_parser.is_some() {
-            css.parser = self.css_parser.clone();
+            css.parser.clone_from(&self.css_parser);
         }
 
         let assist = configuration
