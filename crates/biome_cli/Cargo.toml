@@ -66,11 +66,11 @@ tokio                    = { workspace = true, features = ["io-std", "io-util", 
 tracing                  = { workspace = true }
 tracing-appender         = "0.2.3"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }
-tracing-tree             = "0.4.0"
+tracing-tree             = "0.4.1"
 
 
 [target.'cfg(unix)'.dependencies]
-libc  = "0.2.174"
+libc  = "0.2.177"
 tokio = { workspace = true, features = ["process"] }
 
 [target.'cfg(windows)'.dependencies]

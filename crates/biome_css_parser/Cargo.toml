@@ -27,7 +27,7 @@ biome_fs            = { path = "../biome_fs" }
 biome_service       = { path = "../biome_service" }
 biome_test_utils    = { path = "../biome_test_utils" }
 camino              = { workspace = true }
-criterion           = { package = "codspeed-criterion-compat", version = "=3.0.3" }
+criterion           = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta               = { workspace = true }
 quickcheck          = { workspace = true }
 quickcheck_macros   = { workspace = true }
