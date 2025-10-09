@@ -8,7 +8,12 @@ expression: redactor(content)
 Runs formatter, linter and import sorting to the requested files.
 
 Usage: check [--write] [--unsafe] [--assist-enabled=<true|false>] [--enforce-assist=<true|false>] [
---staged] [--changed] [--since=REF] [PATH]...
+--format-with-errors=<true|false>] [--staged] [--changed] [--since=REF] [PATH]...
+
+Options that changes how the JSON parser behaves
+        --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
+        --json-parse-allow-trailing-commas=<true|false>  Allow parsing trailing commas in `.json`
+                              files
 
 The configuration that is contained inside the file `biome.json`
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -27,8 +32,8 @@ The configuration that is contained inside the file `biome.json`
                               1 MiB
         --files-ignore-unknown=<true|false>  Tells Biome to not emit diagnostics when handling files
                               that doesn't know
-        --format-with-errors=<true|false>  Stores whether formatting should be allowed to proceed if
-                              a given file has syntax errors
+        --format-with-errors=<true|false>  Whether formatting should be allowed to proceed if a
+                              given file has syntax errors
         --indent-style=<tab|space>  The indent style.
         --indent-width=NUMBER  The size of the indentation, 2 by default
         --line-ending=<lf|crlf|cr|auto>  The type of line ending.
@@ -100,6 +105,9 @@ The configuration that is contained inside the file `biome.json`
                               languages) files.
         --javascript-assist-enabled=<true|false>  Control the assist for JavaScript (and its super
                               languages) files.
+        --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
+        --json-parse-allow-trailing-commas=<true|false>  Allow parsing trailing commas in `.json`
+                              files
         --json-formatter-enabled=<true|false>  Control the formatter for JSON (and its super
                               languages) files.
         --json-formatter-indent-style=<tab|space>  The indent style applied to JSON (and its super
@@ -128,6 +136,9 @@ The configuration that is contained inside the file `biome.json`
                               files.
         --json-assist-enabled=<true|false>  Control the assist for JSON (and its super languages)
                               files.
+        --css-parse-css-modules=<true|false>  Enables parsing of CSS Modules specific features.
+        --css-parse-tailwind-directives=<true|false>  Enables parsing of Tailwind CSS 4.0 directives
+                              and functions.
         --css-formatter-enabled=<true|false>  Control the formatter for CSS (and its super
                               languages) files.
         --css-formatter-indent-style=<tab|space>  The indent style applied to CSS (and its super
@@ -242,6 +253,8 @@ Available options:
         --assist-enabled=<true|false>  Allow enabling or disabling the assist.
         --enforce-assist=<true|false>  Allows enforcing assist, and make the CLI fail if some
                               actions aren't applied. Defaults to `true`.
+        --format-with-errors=<true|false>  Whether formatting should be allowed to proceed if a
+                              given file has syntax errors
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension
