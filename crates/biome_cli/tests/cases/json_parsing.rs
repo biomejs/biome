@@ -22,12 +22,14 @@ fn check_json_parse_allow_comments_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "check",
-            "--json-parse-allow-comments=true",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "check",
+                "--json-parse-allow-comments=true",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -54,12 +56,14 @@ fn check_json_parse_allow_comments_false() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "check",
-            "--json-parse-allow-comments=false",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "check",
+                "--json-parse-allow-comments=false",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -88,12 +92,14 @@ fn format_json_parse_allow_comments_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "format",
-            "--json-parse-allow-comments=true",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "format",
+                "--json-parse-allow-comments=true",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -120,12 +126,14 @@ fn lint_json_parse_allow_comments_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "lint",
-            "--json-parse-allow-comments=true",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "lint",
+                "--json-parse-allow-comments=true",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -146,20 +154,19 @@ fn check_json_parse_allow_trailing_commas_true() {
 
     let file_path = Utf8Path::new("file.json");
     // JSON with trailing comma
-    fs.insert(
-        file_path.into(),
-        "{\n  \"key\": \"value\",\n}".as_bytes(),
-    );
+    fs.insert(file_path.into(), "{\n  \"key\": \"value\",\n}".as_bytes());
 
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "check",
-            "--json-parse-allow-trailing-commas=true",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "check",
+                "--json-parse-allow-trailing-commas=true",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -178,20 +185,19 @@ fn check_json_parse_allow_trailing_commas_false() {
 
     let file_path = Utf8Path::new("file.json");
     // JSON with trailing comma
-    fs.insert(
-        file_path.into(),
-        "{\n  \"key\": \"value\",\n}".as_bytes(),
-    );
+    fs.insert(file_path.into(), "{\n  \"key\": \"value\",\n}".as_bytes());
 
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "check",
-            "--json-parse-allow-trailing-commas=false",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "check",
+                "--json-parse-allow-trailing-commas=false",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -212,20 +218,19 @@ fn format_json_parse_allow_trailing_commas_true() {
 
     let file_path = Utf8Path::new("file.json");
     // JSON with trailing comma
-    fs.insert(
-        file_path.into(),
-        "{\n  \"key\": \"value\",\n}".as_bytes(),
-    );
+    fs.insert(file_path.into(), "{\n  \"key\": \"value\",\n}".as_bytes());
 
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "format",
-            "--json-parse-allow-trailing-commas=true",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "format",
+                "--json-parse-allow-trailing-commas=true",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -254,13 +259,15 @@ fn check_combined_json_parser_flags() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "check",
-            "--json-parse-allow-comments=true",
-            "--json-parse-allow-trailing-commas=true",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "check",
+                "--json-parse-allow-comments=true",
+                "--json-parse-allow-trailing-commas=true",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -329,12 +336,14 @@ fn check_json_parser_flags_override_config() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "check",
-            "--json-parse-allow-comments=true",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(
+            [
+                "check",
+                "--json-parse-allow-comments=true",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -406,10 +415,7 @@ fn check_json_parse_respects_config_allow_trailing_commas() {
     );
 
     let file_path = Utf8Path::new("file.json");
-    fs.insert(
-        file_path.into(),
-        "{\n  \"key\": \"value\",\n}".as_bytes(),
-    );
+    fs.insert(file_path.into(), "{\n  \"key\": \"value\",\n}".as_bytes());
 
     let (fs, result) = run_cli(
         fs,

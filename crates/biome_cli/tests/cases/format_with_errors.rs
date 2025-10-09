@@ -121,12 +121,7 @@ fn format_format_with_errors_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "format",
-            "--format-with-errors=true",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(["format", "--format-with-errors=true", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -152,12 +147,7 @@ fn format_format_with_errors_false() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "format",
-            "--format-with-errors=false",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(["format", "--format-with-errors=false", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -194,12 +184,7 @@ fn check_format_with_errors_overrides_config() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([
-            "check",
-            "--format-with-errors=true",
-            file_path.as_str(),
-        ]
-        .as_slice()),
+        Args::from(["check", "--format-with-errors=true", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
