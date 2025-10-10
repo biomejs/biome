@@ -5165,6 +5165,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDeprecatedDate": {
+					"description": "Require the @deprecated directive to specify a deletion date.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseDeprecatedDateConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useErrorCause": {
 					"description": "Disallow rethrowing caught errors without wrapping them, using the cause property to preserve the original stack trace.",
 					"anyOf": [
@@ -10448,6 +10455,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseDeprecatedDateOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseDeprecatedDateOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseDeprecatedReasonOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13903,6 +13925,19 @@
 		},
 		"UseDefaultSwitchClauseOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDeprecatedDateConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseDeprecatedDateOptions" }
+			]
+		},
+		"UseDeprecatedDateOptions": {
+			"type": "object",
+			"properties": {
+				"argumentName": { "default": "deletionDate", "type": "string" }
+			},
 			"additionalProperties": false
 		},
 		"UseDeprecatedReasonConfiguration": {
