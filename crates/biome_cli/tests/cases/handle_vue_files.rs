@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -42,12 +42,6 @@ var foo: string = "";
 const VUE_FILE_IMPORTS_BEFORE: &str = r#"<script setup lang="ts">
 import Button from "./components/Button.vue";
 import * as vueUse from "vue-use";
-</script>
-<template></template>"#;
-
-const VUE_FILE_IMPORTS_AFTER: &str = r#"<script setup lang="ts">
-import * as vueUse from "vue-use";
-import Button from "./components/Button.vue";
 </script>
 <template></template>"#;
 
@@ -107,8 +101,6 @@ fn format_vue_implicit_js_files() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, VUE_IMPLICIT_JS_FILE_UNFORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_vue_implicit_js_files",
@@ -165,8 +157,6 @@ fn format_vue_explicit_js_files() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, VUE_EXPLICIT_JS_FILE_UNFORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_vue_explicit_js_files",
@@ -220,8 +210,6 @@ fn format_empty_vue_js_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, "<template></template>");
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_empty_vue_js_files_write",
@@ -246,8 +234,6 @@ fn format_vue_ts_files() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, vue_file_path, VUE_TS_FILE_UNFORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -299,8 +285,6 @@ fn format_empty_vue_ts_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, "<template></template>");
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_empty_vue_ts_files_write",
@@ -329,12 +313,6 @@ fn format_vue_carriage_return_line_feed_files() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(
-        &fs,
-        vue_file_path,
-        VUE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED,
-    );
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_vue_carriage_return_line_feed_files",
@@ -362,8 +340,6 @@ fn format_vue_generic_component_files() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, vue_file_path, VUE_GENERIC_COMPONENT_FILE_UNFORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -448,8 +424,6 @@ fn sorts_imports_check() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, vue_file_path, VUE_FILE_IMPORTS_BEFORE);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "sorts_imports_check",
@@ -483,8 +457,6 @@ fn sorts_imports_write() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, vue_file_path, VUE_FILE_IMPORTS_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -718,8 +690,6 @@ fn vue_compiler_macros_as_globals() {
         &mut console,
         Args::from(["lint", vue_file_path.as_str()].as_slice()),
     );
-
-    assert_file_contents(&fs, vue_file_path, VUE_TS_FILE_SETUP_GLOBALS);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

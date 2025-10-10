@@ -133,7 +133,7 @@ impl HtmlFileSource {
         match language_id {
             "html" => Ok(Self::html()),
             "astro" => Ok(Self::astro()),
-            "vue" => Ok(Self::vue()),
+            "vuejs" | "vue" => Ok(Self::vue()),
             "svelte" => Ok(Self::svelte()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }

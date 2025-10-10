@@ -1,16 +1,16 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `file.svelte`
 
 ```svelte
 <script></script>
+
 ```
 
 # Emitted Messages
 
 ```block
-Formatted 1 file in <TIME>. No fixes applied.
+Formatted 1 file in <TIME>. Fixed 1 file.
 ```

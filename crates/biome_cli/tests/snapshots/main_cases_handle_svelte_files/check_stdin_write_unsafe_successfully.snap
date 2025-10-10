@@ -23,4 +23,5 @@ statement();
 var _foo: string = "";
 </script>
 <div></div>
+
 ```

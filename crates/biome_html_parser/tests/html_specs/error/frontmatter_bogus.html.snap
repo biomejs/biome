@@ -24,7 +24,9 @@ HtmlRoot {
     frontmatter: AstroBogusFrontmatter {
         items: [
             FENCE@0..3 "---" [] [],
-            HTML_LITERAL@3..20 "const b = \"bar\"\n" [Newline("\n")] [],
+            AstroEmbeddedContent {
+                content_token: HTML_LITERAL@3..20 "const b = \"bar\"\n" [Newline("\n")] [],
+            },
             FENCE@20..23 "---" [] [],
         ],
     },
@@ -100,7 +102,8 @@ HtmlRoot {
   0: (empty)
   1: ASTRO_BOGUS_FRONTMATTER@0..23
     0: FENCE@0..3 "---" [] []
-    1: HTML_LITERAL@3..20 "const b = \"bar\"\n" [Newline("\n")] []
+    1: ASTRO_EMBEDDED_CONTENT@3..20
+      0: HTML_LITERAL@3..20 "const b = \"bar\"\n" [Newline("\n")] []
     2: FENCE@20..23 "---" [] []
   2: (empty)
   3: HTML_ELEMENT_LIST@23..68

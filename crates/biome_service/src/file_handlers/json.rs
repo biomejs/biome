@@ -573,6 +573,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         suppression_reason,
         plugins: _,
         categories,
+        action_offset,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
@@ -612,6 +613,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                     .rule_name
                     .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
                 suggestion: item.suggestion,
+                offset: action_offset,
             }
         }));
 
