@@ -470,6 +470,41 @@ pub struct HtmlElementFields {
     pub closing_element: SyntaxResult<HtmlClosingElement>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlEmbeddedContent {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlEmbeddedContent {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlEmbeddedContentFields {
+        HtmlEmbeddedContentFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for HtmlEmbeddedContent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlEmbeddedContentFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlOpeningElement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -847,6 +882,7 @@ impl AnyHtmlAttributeInitializer {
 pub enum AnyHtmlContent {
     AnyHtmlTextExpression(AnyHtmlTextExpression),
     HtmlContent(HtmlContent),
+    HtmlEmbeddedContent(HtmlEmbeddedContent),
 }
 impl AnyHtmlContent {
     pub fn as_any_html_text_expression(&self) -> Option<&AnyHtmlTextExpression> {
@@ -858,6 +894,12 @@ impl AnyHtmlContent {
     pub fn as_html_content(&self) -> Option<&HtmlContent> {
         match &self {
             Self::HtmlContent(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_embedded_content(&self) -> Option<&HtmlEmbeddedContent> {
+        match &self {
+            Self::HtmlEmbeddedContent(item) => Some(item),
             _ => None,
         }
     }
@@ -1487,6 +1529,56 @@ impl From<HtmlElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for HtmlEmbeddedContent {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_EMBEDDED_CONTENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_EMBEDDED_CONTENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlEmbeddedContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("HtmlEmbeddedContent")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlEmbeddedContent").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<HtmlEmbeddedContent> for SyntaxNode {
+    fn from(n: HtmlEmbeddedContent) -> Self {
+        n.syntax
+    }
+}
+impl From<HtmlEmbeddedContent> for SyntaxElement {
+    fn from(n: HtmlEmbeddedContent) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for HtmlOpeningElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2075,13 +2167,19 @@ impl From<HtmlContent> for AnyHtmlContent {
         Self::HtmlContent(node)
     }
 }
+impl From<HtmlEmbeddedContent> for AnyHtmlContent {
+    fn from(node: HtmlEmbeddedContent) -> Self {
+        Self::HtmlEmbeddedContent(node)
+    }
+}
 impl AstNode for AnyHtmlContent {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyHtmlTextExpression::KIND_SET.union(HtmlContent::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyHtmlTextExpression::KIND_SET
+        .union(HtmlContent::KIND_SET)
+        .union(HtmlEmbeddedContent::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            HTML_CONTENT => true,
+            HTML_CONTENT | HTML_EMBEDDED_CONTENT => true,
             k if AnyHtmlTextExpression::can_cast(k) => true,
             _ => false,
         }
@@ -2089,6 +2187,7 @@ impl AstNode for AnyHtmlContent {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             HTML_CONTENT => Self::HtmlContent(HtmlContent { syntax }),
+            HTML_EMBEDDED_CONTENT => Self::HtmlEmbeddedContent(HtmlEmbeddedContent { syntax }),
             _ => {
                 if let Some(any_html_text_expression) = AnyHtmlTextExpression::cast(syntax) {
                     return Some(Self::AnyHtmlTextExpression(any_html_text_expression));
@@ -2101,12 +2200,14 @@ impl AstNode for AnyHtmlContent {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::HtmlContent(it) => &it.syntax,
+            Self::HtmlEmbeddedContent(it) => &it.syntax,
             Self::AnyHtmlTextExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::HtmlContent(it) => it.syntax,
+            Self::HtmlEmbeddedContent(it) => it.syntax,
             Self::AnyHtmlTextExpression(it) => it.into_syntax(),
         }
     }
@@ -2116,6 +2217,7 @@ impl std::fmt::Debug for AnyHtmlContent {
         match self {
             Self::AnyHtmlTextExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlContent(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlEmbeddedContent(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -2124,6 +2226,7 @@ impl From<AnyHtmlContent> for SyntaxNode {
         match n {
             AnyHtmlContent::AnyHtmlTextExpression(it) => it.into(),
             AnyHtmlContent::HtmlContent(it) => it.into(),
+            AnyHtmlContent::HtmlEmbeddedContent(it) => it.into(),
         }
     }
 }
@@ -2389,6 +2492,11 @@ impl std::fmt::Display for HtmlDoubleTextExpression {
     }
 }
 impl std::fmt::Display for HtmlElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlEmbeddedContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

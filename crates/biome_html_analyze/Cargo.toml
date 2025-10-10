@@ -1,0 +1,38 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Biome's HTML linter"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_html_analyze"
+repository.workspace = true
+version              = "0.5.7"
+
+[dependencies]
+biome_analyze            = { workspace = true }
+biome_console            = { workspace = true }
+biome_deserialize        = { workspace = true }
+biome_deserialize_macros = { workspace = true }
+biome_diagnostics        = { workspace = true }
+biome_html_factory       = { workspace = true }
+biome_html_syntax        = { workspace = true }
+biome_rowan              = { workspace = true }
+biome_string_case        = { workspace = true }
+biome_suppression        = { workspace = true }
+schemars                 = { workspace = true, optional = true }
+serde                    = { workspace = true, features = ["derive"] }
+
+[dev-dependencies]
+biome_html_parser = { path = "../biome_html_parser" }
+biome_test_utils  = { path = "../biome_test_utils" }
+camino            = { workspace = true }
+insta             = { workspace = true, features = ["glob"] }
+tests_macros      = { path = "../tests_macros" }
+
+[features]
+schema = ["schemars"]
+
+[lints]
+workspace = true

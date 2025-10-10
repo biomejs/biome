@@ -10,25 +10,44 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::parse_declaration_or_rule_list_block;
-use crate::syntax::parse_error::{expected_any_rule, expected_non_css_wide_keyword_identifier};
+use crate::syntax::parse_error::{
+    expected_any_rule, expected_non_css_wide_keyword_identifier, tailwind_disabled,
+};
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::relative_selector::{RelativeSelectorList, is_at_relative_selector};
-use crate::syntax::value::function::BINARY_OPERATION_TOKEN;
+use crate::syntax::value::function::{
+    BINARY_OPERATION_TOKEN, parse_tailwind_value_theme_reference,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, token_set};
+use biome_parser::{Parser, SyntaxFeature, token_set};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 use value::function::{is_at_any_function, parse_any_function};
 
 use self::parse_error::{expected_component_value, expected_declaration_item};
+
+pub(crate) enum CssSyntaxFeatures {
+    /// Enable support for Tailwind CSS directives and syntax.
+    Tailwind,
+}
+
+impl SyntaxFeature for CssSyntaxFeatures {
+    type Parser<'source> = CssParser<'source>;
+
+    fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
+        match self {
+            Self::Tailwind => p.options().is_tailwind_directives_enabled(),
+        }
+    }
+}
 
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
@@ -318,7 +337,15 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
     if is_at_any_function(p) {
         parse_any_function(p)
     } else if is_at_dashed_identifier(p) {
-        parse_dashed_identifier(p)
+        if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
+            CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
+                p,
+                parse_tailwind_value_theme_reference,
+                |p, m| tailwind_disabled(p, m.range(p)),
+            )
+        } else {
+            parse_dashed_identifier(p)
+        }
     } else if is_at_unicode_range(p) {
         parse_unicode_range(p)
     } else if is_at_identifier(p) {
@@ -560,6 +587,18 @@ impl ParseNodeList for BracketedValueList {
     const LIST_KIND: Self::Kind = CSS_BRACKETED_VALUE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if p.at(T![*]) {
+            return CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
+                p,
+                |p| {
+                    let m = p.start();
+                    p.bump_remap(T![ident]);
+                    Present(m.complete(p, CSS_CUSTOM_IDENTIFIER))
+                },
+                |p, m| tailwind_disabled(p, m.range(p)),
+            );
+        }
+
         parse_custom_identifier(p, CssLexContext::Regular)
     }
 

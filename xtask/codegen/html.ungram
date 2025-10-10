@@ -76,6 +76,7 @@ AnyHtmlElement =
 
 AnyHtmlContent =
 	HtmlContent
+	| HtmlEmbeddedContent
 	| AnyHtmlTextExpression
 
 AnyHtmlTextExpression =
@@ -181,3 +182,4 @@ HtmlString = value: 'html_string_literal'
 HtmlTagName = value: 'html_literal'
 HtmlAttributeName = value: 'html_literal'
 HtmlContent = value: 'html_literal'
+HtmlEmbeddedContent = value: 'html_literal'

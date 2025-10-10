@@ -1,0 +1,49 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@config "./tailwind.config.js";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwConfigAtRule {
+                config_token: CONFIG_KW@1..8 "config" [] [Whitespace(" ")],
+                path: CssString {
+                    value_token: CSS_STRING_LITERAL@8..30 "\"./tailwind.config.js\"" [] [],
+                },
+                semicolon_token: SEMICOLON@30..31 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@31..32 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..32
+  0: (empty)
+  1: CSS_RULE_LIST@0..31
+    0: CSS_AT_RULE@0..31
+      0: AT@0..1 "@" [] []
+      1: TW_CONFIG_AT_RULE@1..31
+        0: CONFIG_KW@1..8 "config" [] [Whitespace(" ")]
+        1: CSS_STRING@8..30
+          0: CSS_STRING_LITERAL@8..30 "\"./tailwind.config.js\"" [] []
+        2: SEMICOLON@30..31 ";" [] []
+  2: EOF@31..32 "" [Newline("\n")] []
+
+```

@@ -75,7 +75,10 @@ impl ExtensionHandler for AstroFileHandler {
                 linter: Some(javascript::linter_enabled),
             },
 
-            parser: ParserCapabilities { parse: Some(parse) },
+            parser: ParserCapabilities {
+                parse: Some(parse),
+                parse_embedded_nodes: None,
+            },
             debug: DebugCapabilities {
                 debug_syntax_tree: None,
                 debug_control_flow: None,
@@ -89,11 +92,13 @@ impl ExtensionHandler for AstroFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
+                update_snippets: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
+                format_embedded: None,
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },

@@ -9,16 +9,18 @@ use crate::commands::MigrateSubCommand;
 use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::{TraverseResult, traverse};
+use crate::reporter::checkstyle::CheckstyleReporter;
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
+use crate::reporter::rdjson::{RdJsonReporter, RdJsonReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{
     CliDiagnostic, CliSession, DiagnosticsPayload, Reporter, TEMPORARY_INTERNAL_REPORTER_FILE,
 };
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::AnalyzerSelector;
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Category, category};
 use biome_diagnostics::{Resource, SerdeJsonError};
@@ -126,10 +128,10 @@ pub enum TraversalMode {
         /// Run only the given rule or group of rules.
         /// If the severity level of a rule is `off`,
         /// then the severity level of the rule is set to `error` if it is a recommended rule or `warn` otherwise.
-        only: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
         /// Skip the given rule or group of rules by setting the severity level of the rules to `off`.
         /// This option takes precedence over `--only`.
-        skip: Vec<RuleSelector>,
+        skip: Vec<AnalyzerSelector>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
         vcs_targeted: VcsTargeted,
         /// Suppress existing diagnostics with a `// biome-ignore` comment
@@ -246,6 +248,10 @@ pub enum ReportMode {
     Junit,
     /// Reports information in the [GitLab Code Quality](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool) format.
     GitLab,
+    /// Reports diagnostics in [Checkstyle XML format](https://checkstyle.org/).
+    Checkstyle,
+    /// Reports information in [reviewdog JSON format](https://deepwiki.com/reviewdog/reviewdog/3.2-reviewdog-diagnostic-format)
+    RdJson,
 }
 
 impl Default for ReportMode {
@@ -268,6 +274,8 @@ impl From<CliReporter> for ReportMode {
             CliReporter::GitHub => Self::GitHub,
             CliReporter::Junit => Self::Junit,
             CliReporter::GitLab => Self::GitLab {},
+            CliReporter::Checkstyle => Self::Checkstyle,
+            CliReporter::RdJson => Self::RdJson,
         }
     }
 }
@@ -702,6 +710,26 @@ pub fn execute_mode(
                 working_directory: fs.working_directory().clone(),
             };
             reporter.write(&mut JunitReporterVisitor::new(console))?;
+        }
+        ReportMode::Checkstyle => {
+            let reporter = CheckstyleReporter {
+                summary,
+                diagnostics_payload,
+                execution: execution.clone(),
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+            reporter
+                .write(&mut crate::reporter::checkstyle::CheckstyleReporterVisitor::new(console))?;
+        }
+        ReportMode::RdJson => {
+            let reporter = RdJsonReporter {
+                diagnostics_payload,
+                execution: execution.clone(),
+                verbose: cli_options.verbose,
+                working_directory: fs.working_directory().clone(),
+            };
+            reporter.write(&mut RdJsonReporterVisitor(console))?;
         }
     }
 

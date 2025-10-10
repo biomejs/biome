@@ -1,0 +1,3 @@
+.foo {
+	@apply text-blue-500 hover:text-blue-600 accent-red accent-blue accent-green text-sm text-md hover:underline md:grid;
+}

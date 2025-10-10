@@ -1,11 +1,16 @@
 use crate::token_source::TokenSource;
 use crate::{EOF_STR, Parser};
+use biome_console::fmt::Formatter;
 use biome_diagnostics::console::fmt::Display;
 use biome_diagnostics::console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
-use biome_diagnostics::{Advices, Diagnostic, Location, LogCategory, MessageAndDescription, Visit};
-use biome_rowan::{SyntaxKind, TextLen, TextRange};
+use biome_diagnostics::{
+    Advices, Category, Diagnostic, Location, LogCategory, MessageAndDescription, Severity, Visit,
+    category,
+};
+use biome_rowan::{SyntaxKind, TextLen, TextRange, TextSize};
 use std::cmp::Ordering;
+use std::ops::Add;
 
 /// A specialized diagnostic for the parser
 ///
@@ -18,17 +23,40 @@ use std::cmp::Ordering;
 ///
 /// These information **are printed in this exact order**.
 ///
-#[derive(Clone, Debug, Diagnostic)]
-#[diagnostic(category = "parse", severity = Error)]
+#[derive(Clone, Debug)]
 pub struct ParseDiagnostic {
     /// The location where the error is occurred
-    #[location(span)]
     span: Option<TextRange>,
-    #[message]
-    #[description]
     pub message: MessageAndDescription,
-    #[advice]
     advice: ParserAdvice,
+    /// Optional offset that shifts the location of advices code frames when printed.
+    advice_offset: Option<TextSize>,
+}
+
+impl Diagnostic for ParseDiagnostic {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("parse"))
+    }
+
+    fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup!({ self.message }))
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(fmt, "{}", self.message)
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
+    }
+
+    fn location(&self) -> Location<'_> {
+        Location::builder().span(&self.span).build()
+    }
+
+    fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        self.record(visitor)
+    }
 }
 
 /// Possible details related to the diagnostic
@@ -82,16 +110,22 @@ impl ParserAdvice {
     }
 }
 
-impl Advices for ParserAdvice {
+impl Advices for ParseDiagnostic {
     fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
-        for advice_kind in &self.advice_list {
+        for advice_kind in &self.advice.advice_list {
             match advice_kind {
                 ParserAdviceKind::Detail(detail) => {
                     let ParserAdviceDetail { span, message } = detail;
                     visitor.record_log(LogCategory::Info, message)?;
 
-                    let location = Location::builder().span(span).build();
-                    visitor.record_frame(location)?;
+                    if let (Some(span), Some(advice_offset)) = (span, self.advice_offset) {
+                        let span = span.add(advice_offset);
+                        let location = Location::builder().span(&span).build();
+                        visitor.record_frame(location)?;
+                    } else {
+                        let location = Location::builder().span(span).build();
+                        visitor.record_frame(location)?;
+                    };
                 }
                 ParserAdviceKind::Hint(hint) => {
                     visitor.record_log(LogCategory::Info, hint)?;
@@ -118,6 +152,15 @@ impl ParseDiagnostic {
             span: span.as_span(),
             message: MessageAndDescription::from(markup! { {message} }.to_owned()),
             advice: ParserAdvice::default(),
+            advice_offset: None,
+        }
+    }
+
+    /// Updates the location of this diagnostic and its advices
+    pub fn set_location_offset(&mut self, offset: TextSize) {
+        self.advice_offset = Some(offset);
+        if let Some(span) = &mut self.span {
+            self.span = Some(span.add(offset));
         }
     }
 
@@ -132,6 +175,7 @@ impl ParseDiagnostic {
             span: range.as_span(),
             message: MessageAndDescription::from(msg),
             advice: ParserAdvice::default(),
+            advice_offset: None,
         }
         .with_detail(range, format!("Expected {names} here."))
     }
@@ -173,6 +217,7 @@ impl ParseDiagnostic {
             span: range.as_span(),
             message: MessageAndDescription::from(msg),
             advice: ParserAdvice::default(),
+            advice_offset: None,
         }
         .with_detail(range, format!("Expected {joined_names} here."))
     }

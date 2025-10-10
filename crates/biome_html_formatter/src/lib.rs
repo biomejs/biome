@@ -2,11 +2,12 @@
 
 use crate::prelude::*;
 use biome_formatter::comments::Comments;
+use biome_formatter::prelude::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
 use biome_formatter::{FormatLanguage, FormatResult, Formatted, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
-use biome_rowan::{AstNode, SyntaxToken};
+use biome_rowan::{AstNode, SyntaxToken, TextRange};
 use comments::HtmlCommentStyle;
 use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
@@ -29,8 +30,13 @@ mod verbatim;
 pub fn format_node(
     options: HtmlFormatOptions,
     root: &HtmlSyntaxNode,
+    delegate_fmt_embedded_nodes: bool,
 ) -> FormatResult<Formatted<HtmlFormatContext>> {
-    biome_formatter::format_node(root, HtmlFormatLanguage::new(options))
+    biome_formatter::format_node(
+        root,
+        HtmlFormatLanguage::new(options),
+        delegate_fmt_embedded_nodes,
+    )
 }
 
 /// Used to get an object that knows how to format this object.
@@ -153,9 +159,15 @@ impl FormatLanguage for HtmlFormatLanguage {
         self,
         root: &biome_rowan::SyntaxNode<Self::SyntaxLanguage>,
         source_map: Option<biome_formatter::TransformSourceMap>,
+        delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &HtmlCommentStyle, source_map.as_ref());
-        HtmlFormatContext::new(self.options, comments).with_source_map(source_map)
+        let context = HtmlFormatContext::new(self.options, comments).with_source_map(source_map);
+        if delegate_fmt_embedded_nodes {
+            context.with_fmt_embedded_nodes()
+        } else {
+            context
+        }
     }
 }
 
@@ -205,8 +217,28 @@ where
 
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        self.fmt_fields(node, f)?;
+        if let Some(range) = self.embedded_node_range(node, f) {
+            // Tokens that belong to embedded nodes are formatted later on,
+            // so we track them, even though they aren't formatted now during this pass.
+            let state = f.state_mut();
+            for token in node.syntax().tokens() {
+                state.track_token(&token);
+            }
+
+            f.write_elements(vec![
+                FormatElement::Tag(StartEmbedded(range)),
+                FormatElement::Tag(EndEmbedded),
+            ])?;
+        } else {
+            self.fmt_fields(node, f)?;
+        }
         Ok(())
+    }
+
+    /// Whether this node contains content that needs to be formatted by an external formatter.
+    /// If so, the function must return the range of the nodes that will be formatted in the second phase.
+    fn embedded_node_range(&self, _node: &N, _f: &mut HtmlFormatter) -> Option<TextRange> {
+        None
     }
 
     /// Formats the node's fields.

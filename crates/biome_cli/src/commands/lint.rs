@@ -2,11 +2,11 @@ use super::{FixFileModeOptions, determine_fix_file_mode};
 use crate::cli_options::CliOptions;
 use crate::commands::{CommandRunner, get_files_to_process_with_cli_options};
 use crate::{CliDiagnostic, Execution, TraversalMode};
-use biome_configuration::analyzer::RuleSelector;
-use biome_configuration::css::CssLinterConfiguration;
+use biome_configuration::analyzer::AnalyzerSelector;
+use biome_configuration::css::{CssLinterConfiguration, CssParserConfiguration};
 use biome_configuration::graphql::GraphqlLinterConfiguration;
 use biome_configuration::javascript::JsLinterConfiguration;
-use biome_configuration::json::JsonLinterConfiguration;
+use biome_configuration::json::{JsonLinterConfiguration, JsonParserConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
 use biome_console::Console;
@@ -26,8 +26,8 @@ pub(crate) struct LintCommandPayload {
     pub(crate) vcs_configuration: Option<VcsConfiguration>,
     pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
-    pub(crate) only: Vec<RuleSelector>,
-    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) only: Vec<AnalyzerSelector>,
+    pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) staged: bool,
     pub(crate) changed: bool,
@@ -36,6 +36,8 @@ pub(crate) struct LintCommandPayload {
     pub(crate) json_linter: Option<JsonLinterConfiguration>,
     pub(crate) css_linter: Option<CssLinterConfiguration>,
     pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,
+    pub(crate) json_parser: Option<JsonParserConfiguration>,
+    pub(crate) css_parser: Option<CssParserConfiguration>,
 }
 
 impl CommandRunner for LintCommandPayload {
@@ -71,9 +73,12 @@ impl CommandRunner for LintCommandPayload {
             ..Default::default()
         });
 
+        let css = fs_configuration.css.get_or_insert_with(Default::default);
         if self.css_linter.is_some() {
-            let css = fs_configuration.css.get_or_insert_with(Default::default);
             css.linter.merge_with(self.css_linter.clone());
+        }
+        if self.css_parser.is_some() {
+            css.parser.merge_with(self.css_parser.clone());
         }
 
         if self.graphql_linter.is_some() {
@@ -88,9 +93,12 @@ impl CommandRunner for LintCommandPayload {
                 .get_or_insert_with(Default::default);
             javascript.linter.merge_with(self.javascript_linter.clone());
         }
+        let json = fs_configuration.json.get_or_insert_with(Default::default);
         if self.json_linter.is_some() {
-            let json = fs_configuration.json.get_or_insert_with(Default::default);
             json.linter.merge_with(self.json_linter.clone());
+        }
+        if self.json_parser.is_some() {
+            json.parser.merge_with(self.json_parser.clone());
         }
 
         Ok(fs_configuration)

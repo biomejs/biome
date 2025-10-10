@@ -132,6 +132,11 @@ impl JsonFileSource {
         // https://github.com/webhintio/hint/blob/6ef9b7cd0c9129ca5a53f30ef51812622ad3d459/packages/utils-fs/src/load-json-file.ts#L1C35-L1C47
         ".hintrc",
         ".hintrc.json",
+        // Uses `json-strip-comments` which also strips trailing commas:
+        // https://github.com/oxc-project/oxc/blob/7d45b2fcab8d7fd269dbca152990907c8b4974b8/crates/oxc_linter/src/config/oxlintrc.rs#L121
+        // https://github.com/oxc-project/json-strip-comments
+        // https://github.com/oxc-project/oxc/blob/7d45b2fcab8d7fd269dbca152990907c8b4974b8/crates/oxc_linter/Cargo.toml#L58
+        ".oxlintrc.json",
         // Uses `jsonc_parser` and allows comments and trailing commas
         // https://github.com/swc-project/swc/blob/ad932f0921411364b801b32f60eaf98f8629e812/crates/swc/src/lib.rs#L1028-L1029
         ".swcrc",

@@ -55,6 +55,7 @@ mod client;
 mod document;
 mod server;
 
+pub use document::{AnyEmbeddedSnippet, EmbeddedSnippet};
 use std::{
     borrow::Cow,
     fmt::{Debug, Display, Formatter},
@@ -65,7 +66,7 @@ use std::{
 };
 
 use biome_analyze::{ActionCategory, RuleCategories};
-use biome_configuration::{Configuration, analyzer::RuleSelector};
+use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
 use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::{CodeSuggestion, serde::Diagnostic};
 use biome_formatter::Printed;
@@ -85,9 +86,6 @@ use smallvec::SmallVec;
 use tokio::sync::watch;
 use tracing::debug;
 
-#[cfg(feature = "schema")]
-use schemars::{r#gen::SchemaGenerator, schema::Schema};
-
 pub use crate::{
     WorkspaceError,
     file_handlers::{Capabilities, DocumentFileSource},
@@ -95,9 +93,10 @@ pub use crate::{
     scanner::ScanKind,
     settings::Settings,
 };
+#[cfg(feature = "schema")]
+use schemars::{r#gen::SchemaGenerator, schema::Schema};
 
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-pub use document::{EmbeddedCssContent, EmbeddedJsContent};
 pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.
@@ -353,11 +352,12 @@ impl Default for FeaturesSupported {
 
 impl Display for FeaturesSupported {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut dbg = f.debug_map();
         for (index, support_kind) in self.0.iter().enumerate() {
             let feature = FeatureKind::from_index(index);
-            write!(f, "{feature}: {support_kind}")?;
+            dbg.key(&feature).value(&support_kind);
         }
-        Ok(())
+        dbg.finish()
     }
 }
 
@@ -918,12 +918,12 @@ pub struct PullDiagnosticsParams {
     pub path: BiomePath,
     pub categories: RuleCategories,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     /// Rules to apply on top of the configuration
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     /// When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
     pub pull_code_actions: bool,
 }
@@ -946,11 +946,11 @@ pub struct PullActionsParams {
     pub range: Option<TextRange>,
     pub suppression_reason: Option<String>,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     #[serde(default)]
     pub categories: RuleCategories,
 }
@@ -1019,12 +1019,12 @@ pub struct FixFileParams {
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
     #[serde(default)]
-    pub only: Vec<RuleSelector>,
+    pub only: Vec<AnalyzerSelector>,
     #[serde(default)]
-    pub skip: Vec<RuleSelector>,
+    pub skip: Vec<AnalyzerSelector>,
     /// Rules to apply to the file
     #[serde(default)]
-    pub enabled_rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<AnalyzerSelector>,
     pub rule_categories: RuleCategories,
     #[serde(default)]
     pub suppression_reason: Option<String>,
@@ -1636,8 +1636,8 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_diagnostics(
         &self,
         categories: RuleCategories,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         pull_code_actions: bool,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
@@ -1654,10 +1654,10 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn pull_actions(
         &self,
         range: Option<TextRange>,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         suppression_reason: Option<String>,
-        enabled_rules: Vec<RuleSelector>,
+        enabled_rules: Vec<AnalyzerSelector>,
         categories: RuleCategories,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
@@ -1707,8 +1707,8 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         fix_file_mode: FixFileMode,
         should_format: bool,
         rule_categories: RuleCategories,
-        only: Vec<RuleSelector>,
-        skip: Vec<RuleSelector>,
+        only: Vec<AnalyzerSelector>,
+        skip: Vec<AnalyzerSelector>,
         suppression_reason: Option<String>,
     ) -> Result<FixFileResult, WorkspaceError> {
         self.workspace.fix_file(FixFileParams {

@@ -45,7 +45,8 @@ fn bench_formatter(criterion: &mut Criterion) {
                     |b, _| {
                         fn format(root: HtmlRoot) -> Printed {
                             let formatted =
-                                format_node(HtmlFormatOptions::default(), root.syntax()).unwrap();
+                                format_node(HtmlFormatOptions::default(), root.syntax(), false)
+                                    .unwrap();
                             let printed = formatted.print();
                             drop(formatted);
                             printed.expect("Document to be valid")

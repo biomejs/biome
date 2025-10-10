@@ -1,0 +1,66 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@reference "./app.css";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    REFERENCE_KW@1..11 "reference" [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@11..22 "\"./app.css\"" [] [],
+                    },
+                    SEMICOLON@22..23 ";" [] [],
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@23..24 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..24
+  0: (empty)
+  1: CSS_RULE_LIST@0..23
+    0: CSS_AT_RULE@0..23
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..23
+        0: REFERENCE_KW@1..11 "reference" [] [Whitespace(" ")]
+        1: CSS_STRING@11..22
+          0: CSS_STRING_LITERAL@11..22 "\"./app.css\"" [] []
+        2: SEMICOLON@22..23 ";" [] []
+  2: EOF@23..24 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+reference.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+  > 1 │ @reference "./app.css";
+      │  ^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
+  
+```

@@ -10,7 +10,7 @@ example.js project  INTERNAL  ━━━━━━━━━━━━━━━━�
     
     Please follow these instructions to discover if you are accidentally analyzing large files and what to do about them in the relative guide.
   
-  i In the meantime, you can ignore this file by adding its name or folder in the files.experimentalScannerIgnores option in your configuration file.
+  i In the meantime, you can force this file to be ignored using a `!!` pattern in the files.includes option in your configuration file.
   
   i Refer to the documentation for more information.
   

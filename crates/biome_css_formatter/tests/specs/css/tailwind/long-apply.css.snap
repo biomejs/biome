@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/tailwind/long-apply.css
+---
+# Input
+
+```css
+.foo {
+	@apply text-blue-500 hover:text-blue-600 accent-red accent-blue accent-green text-sm text-md hover:underline md:grid;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+.foo {
+	@apply text-blue-500 hover:text-blue-600 accent-red accent-blue accent-green text-sm text-md hover:underline md:grid;
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	@apply text-blue-500 hover:text-blue-600 accent-red accent-blue accent-green text-sm text-md hover:underline md:grid;
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+.foo {
+	@apply text-blue-500 hover:text-blue-600 accent-red accent-blue accent-green text-sm text-md hover:underline md:grid;
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	@apply text-blue-500 hover:text-blue-600 accent-red accent-blue accent-green text-sm text-md hover:underline md:grid;
+```

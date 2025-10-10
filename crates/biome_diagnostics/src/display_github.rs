@@ -1,4 +1,5 @@
 use crate::display::frame::SourceFile;
+use crate::display::markup_to_string;
 use crate::{Diagnostic, Resource, Severity, diagnostic::internal::AsDiagnostic};
 use biome_console::{MarkupBuf, fmt, markup};
 use biome_text_size::{TextRange, TextSize};
@@ -118,12 +119,4 @@ fn escape_property<S: AsRef<str>>(value: S) -> String {
         }
     }
     result
-}
-
-fn markup_to_string(markup: &MarkupBuf) -> Option<String> {
-    let mut buffer = Vec::new();
-    let mut write = fmt::Termcolor(termcolor::NoColor::new(&mut buffer));
-    let mut fmt = fmt::Formatter::new(&mut write);
-    fmt.write_markup(markup! { {markup} }).ok()?;
-    String::from_utf8(buffer).ok()
 }

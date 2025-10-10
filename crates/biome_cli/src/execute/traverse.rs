@@ -101,6 +101,7 @@ pub(crate) fn traverse(
 
     let errors = printer.errors();
     let warnings = printer.warnings();
+    let infos = printer.infos();
     let changed = changed.load(Ordering::Relaxed);
     let unchanged = unchanged.load(Ordering::Relaxed);
     let matches = matches.load(Ordering::Relaxed);
@@ -116,6 +117,7 @@ pub(crate) fn traverse(
             errors,
             matches,
             warnings,
+            infos,
             skipped,
             suggested_fixes_skipped,
             diagnostics_not_printed,
@@ -165,6 +167,9 @@ struct DiagnosticsPrinter<'ctx> {
     /// Mutable reference to a boolean flag tracking whether the console thread
     /// printed any warnings-level message
     warnings: AtomicU32,
+    /// Mutable reference to a boolean flag tracking whether the console thread
+    /// printed any info-level message
+    infos: AtomicU32,
     /// Whether the console thread should print diagnostics in verbose mode
     verbose: bool,
     /// The diagnostic level the console thread should print
@@ -183,6 +188,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
         Self {
             errors: AtomicU32::new(0),
             warnings: AtomicU32::new(0),
+            infos: AtomicU32::new(0),
             remaining_diagnostics: AtomicU32::new(0),
             execution,
             diagnostic_level: Severity::Hint,
@@ -216,6 +222,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
 
     fn warnings(&self) -> u32 {
         self.warnings.load(Ordering::Relaxed)
+    }
+
+    fn infos(&self) -> u32 {
+        self.infos.load(Ordering::Relaxed)
     }
 
     fn not_printed_diagnostics(&self) -> u32 {
@@ -284,6 +294,9 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     if err.severity() == Severity::Warning {
                         self.warnings.fetch_add(1, Ordering::Relaxed);
                     }
+                    // if err.severity() == Severity::Information {
+                    //     self.infos.fetch_add(1, Ordering::Relaxed);
+                    // }
                     if let Some(Resource::File(file_path)) = location.resource.as_ref() {
                         // Retrieves the file name from the file ID cache, if it's a miss
                         // flush entries from the interner channel until it's found
@@ -339,6 +352,9 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                         }
                         if severity == Severity::Warning {
                             self.warnings.fetch_add(1, Ordering::Relaxed);
+                        }
+                        if severity == Severity::Information {
+                            self.infos.fetch_add(1, Ordering::Relaxed);
                         }
 
                         let should_print = self.should_print();
@@ -585,6 +601,7 @@ impl TraversalContext for TraversalOptions<'_, '_> {
                 return false;
             }
         };
+
         match self.execution.traversal_mode() {
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
                 file_features.supports_lint()

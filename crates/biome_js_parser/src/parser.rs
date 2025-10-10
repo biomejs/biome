@@ -41,7 +41,7 @@ pub struct JsParser<'source> {
 impl<'source> JsParser<'source> {
     /// Creates a new parser that parses the `source`.
     pub fn new(source: &'source str, source_type: JsFileSource, options: JsParserOptions) -> Self {
-        let source = JsTokenSource::from_str(source, options.clone());
+        let source = JsTokenSource::from_str(source, options);
 
         JsParser {
             state: JsParserState::new(&source_type),

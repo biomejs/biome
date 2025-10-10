@@ -24,7 +24,7 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic
     /// function f() {
     ///     console.log(x);
-    ///     const x;
+    ///     let x;
     /// }
     /// ```
     ///

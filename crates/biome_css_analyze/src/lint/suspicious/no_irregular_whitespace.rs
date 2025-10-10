@@ -28,11 +28,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```css,expect_diagnostic
-    /// .firstClass .secondClass {
-    ///   color:red;
-    /// }
-    /// ```
     /// ### Valid
     ///
     /// ```css

@@ -1,12 +1,13 @@
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCallExpression, JsxAttribute};
 use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_children_prop::NoChildrenPropOptions;
+
 declare_lint_rule! {
     /// Prevent passing of **children** as props.
     ///
@@ -29,6 +30,7 @@ declare_lint_rule! {
         name: "noChildrenProp",
         language: "jsx",
         sources: &[RuleSource::EslintReact("no-children-prop").same()],
+        domains: &[RuleDomain::React],
         recommended: true,
         severity: Severity::Error,
     }

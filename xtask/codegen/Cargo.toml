@@ -24,6 +24,9 @@ biome_diagnostics     = { workspace = true, optional = true }
 biome_graphql_analyze = { workspace = true, optional = true }
 biome_graphql_parser  = { workspace = true, optional = true }
 biome_graphql_syntax  = { workspace = true, optional = true }
+biome_html_analyze    = { workspace = true, optional = true }
+biome_html_parser     = { workspace = true, optional = true }
+biome_html_syntax     = { workspace = true, optional = true }
 biome_js_analyze      = { workspace = true, optional = true }
 biome_js_factory      = { workspace = true, optional = true }
 biome_js_formatter    = { workspace = true, optional = true }
@@ -51,6 +54,8 @@ configuration = [
   "biome_css_syntax",
   "biome_graphql_analyze",
   "biome_graphql_syntax",
+  "biome_html_analyze",
+  "biome_html_syntax",
   "biome_rowan",
   "pulldown-cmark",
   "biome_diagnostics",

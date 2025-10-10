@@ -1,0 +1,54 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "files": { "includes": ["**/*.js", "!nested/biome.json"] } }
+```
+
+## `nested/biome.json`
+
+```json
+{ "formatter": { "enabled": false } }
+```
+
+## `a.js`
+
+```js
+  statement(  )  
+```
+
+## `nested/a.js`
+
+```js
+  statement(  )  
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+<TEMP_DIR>/errors_on_ignored_nested_biome_json/nested/biome.json configuration ━━━━━━━━━━━━━━━━━━━━
+
+  × Found a nested root configuration, but there's already a root configuration.
+  
+  i The other configuration was found in <TEMP_DIR>/errors_on_ignored_nested_biome_json.
+  
+  i Use the migration command from the root of the project to update the configuration.
+  
+  $ biome migrate --write
+  
+
+```

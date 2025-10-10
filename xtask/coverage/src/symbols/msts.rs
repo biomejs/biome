@@ -81,7 +81,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
             self.name.clone(),
             code.clone(),
             JsFileSource::tsx(),
-            options.clone(),
+            options,
         );
 
         let mut prev_starts: HashSet<TextSize> = HashSet::default();

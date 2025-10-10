@@ -4,7 +4,9 @@ use crate::commands::{CommandRunner, get_files_to_process_with_cli_options};
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::analyzer::LinterEnabled;
 use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
-use biome_configuration::formatter::FormatterEnabled;
+use biome_configuration::css::CssParserConfiguration;
+use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
+use biome_configuration::json::JsonParserConfiguration;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
@@ -26,6 +28,9 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
+    pub(crate) format_with_errors: Option<FormatWithErrorsEnabled>,
+    pub(crate) json_parser: Option<JsonParserConfiguration>,
+    pub(crate) css_parser: Option<CssParserConfiguration>,
 }
 
 impl LoadEditorConfig for CheckCommandPayload {
@@ -61,6 +66,9 @@ impl CommandRunner for CheckCommandPayload {
         if self.formatter_enabled.is_some() {
             formatter.enabled = self.formatter_enabled;
         }
+        if self.format_with_errors.is_some() {
+            formatter.format_with_errors = self.format_with_errors;
+        }
 
         let linter = configuration
             .linter
@@ -76,6 +84,16 @@ impl CommandRunner for CheckCommandPayload {
 
         if self.assist_enabled.is_some() {
             assist.enabled = self.assist_enabled;
+        }
+
+        let css = configuration.css.get_or_insert_with(Default::default);
+        if self.css_parser.is_some() {
+            css.parser.merge_with(self.css_parser.clone());
+        }
+
+        let json = configuration.json.get_or_insert_with(Default::default);
+        if self.json_parser.is_some() {
+            json.parser.merge_with(self.json_parser.clone())
         }
 
         if let Some(mut conf) = self.configuration.clone() {

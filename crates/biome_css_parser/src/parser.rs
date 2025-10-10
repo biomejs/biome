@@ -33,6 +33,10 @@ pub struct CssParserOptions {
     /// Enables parsing of Grit metavariables.
     /// Defaults to `false`.
     pub grit_metavariables: bool,
+
+    /// Enables parsing of Tailwind CSS 4.0 directives and functions.
+    /// Defaults to `false`.
+    pub tailwind_directives: bool,
 }
 
 impl CssParserOptions {
@@ -54,6 +58,12 @@ impl CssParserOptions {
         self
     }
 
+    /// Enables parsing of Tailwind CSS 4.0 directives and functions.
+    pub fn allow_tailwind_directives(mut self) -> Self {
+        self.tailwind_directives = true;
+        self
+    }
+
     /// Checks if parsing of CSS Modules features is disabled.
     pub fn is_css_modules_disabled(&self) -> bool {
         !self.css_modules
@@ -62,6 +72,11 @@ impl CssParserOptions {
     /// Checks if parsing of Grit metavariables is enabled.
     pub fn is_metavariable_enabled(&self) -> bool {
         self.grit_metavariables
+    }
+
+    /// Checks if parsing of Tailwind CSS 4.0 directives is enabled.
+    pub fn is_tailwind_directives_enabled(&self) -> bool {
+        self.tailwind_directives
     }
 }
 

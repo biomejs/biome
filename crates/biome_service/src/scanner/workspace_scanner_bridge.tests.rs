@@ -295,6 +295,55 @@ fn should_index_an_ignored_file_if_it_is_a_dependency_of_a_non_ignored_file() {
 }
 
 #[test]
+fn should_not_index_a_force_ignored_file_even_if_it_is_a_dependency() {
+    let file_path_a = Utf8PathBuf::from("/project/a.js");
+    let file_path_root_b = Utf8PathBuf::from("/project/b.js");
+    let file_path_nested_b = Utf8PathBuf::from("/project/nested/b.js");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        file_path_a.clone(),
+        "import './b.js';\nimport './nested/b.js';",
+    );
+    fs.insert(file_path_root_b.clone(), "import 'foo';");
+    fs.insert(file_path_nested_b.clone(), "import 'foo';");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                files: Some(FilesConfiguration {
+                    includes: Some(vec![
+                        NormalizedGlob::from_str("**").unwrap(),
+                        NormalizedGlob::from_str("!!**/b.js").unwrap(),
+                        NormalizedGlob::from_str("b.js").unwrap(),
+                    ]),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+        })
+        .expect("can update settings");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(workspace.is_indexed(&file_path_a));
+    assert!(workspace.is_indexed(&file_path_root_b));
+    assert!(!workspace.is_indexed(&file_path_nested_b));
+}
+
+#[test]
 fn should_not_index_dependency_with_scan_kind_known_files() {
     let file_path = Utf8PathBuf::from("/project/a.js");
 

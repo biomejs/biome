@@ -125,17 +125,33 @@ impl Projects {
             .map(|data| data.root_settings.clone())
     }
 
-    /// Returns whether a path is ignored based on the
-    /// `files.experimentalScannerIgnores` setting only.
-    pub fn is_ignored_by_scanner(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        self.0.pin().get(&project_key).is_none_or(|data| {
-            let ignore_entries = &data.root_settings.files.scanner_ignore_entries;
-            path.components().any(|component| {
-                ignore_entries
-                    .iter()
-                    .any(|entry| entry == component.as_os_str().as_encoded_bytes())
-            })
-        })
+    /// Returns whether a path is force-ignored using a forced negation (`!!`)
+    /// as part of `files.includes`.
+    pub fn is_force_ignored(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+        let data = self.0.pin();
+        let Some(project_data) = data.get(&project_key) else {
+            return false;
+        };
+
+        // Deprecated: Check `experimentalScannerIgnores` too.
+        let ignore_entries = &project_data.root_settings.files.scanner_ignore_entries;
+        if path.components().any(|component| {
+            ignore_entries
+                .iter()
+                .any(|entry| entry == component.as_os_str().as_encoded_bytes())
+        }) {
+            return true;
+        }
+
+        let includes = project_data
+            .nested_settings
+            .iter()
+            .find(|(project_path, _)| path.starts_with(project_path))
+            .map_or(
+                &project_data.root_settings.files.includes,
+                |(_, settings)| &settings.files.includes,
+            );
+        includes.is_force_ignored(path)
     }
 
     pub fn is_ignored_by_top_level_config(
@@ -206,7 +222,6 @@ impl Projects {
         let mut file_features = FeaturesSupported::default();
         file_features = file_features.with_capabilities(capabilities);
         file_features = file_features.with_settings_and_language(settings, path, capabilities);
-
         if settings.ignore_unknown_enabled() && language == DocumentFileSource::Unknown {
             file_features.ignore_not_supported();
         } else if path.file_name().is_some_and(|file_name| {
@@ -310,31 +325,6 @@ impl Projects {
         }
 
         belongs_to_project && !belongs_to_other
-    }
-
-    /// Returns the maximum file size setting for the given project.
-    pub fn get_max_file_size(&self, project_key: ProjectKey, file_path: &Utf8Path) -> usize {
-        let limit = self
-            .0
-            .pin()
-            .get(&project_key)
-            .and_then(|data| {
-                data.root_settings
-                    .override_settings
-                    .patterns
-                    .iter()
-                    .find_map(|pattern| {
-                        if pattern.is_file_included(file_path) {
-                            pattern.files.max_size
-                        } else {
-                            None
-                        }
-                    })
-                    .or(data.root_settings.files.max_size)
-            })
-            .unwrap_or_default();
-
-        usize::from(limit)
     }
 }
 

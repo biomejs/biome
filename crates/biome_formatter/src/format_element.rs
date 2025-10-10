@@ -126,7 +126,7 @@ impl PrintMode {
 pub struct Interned(Rc<[FormatElement]>);
 
 impl Interned {
-    pub(super) fn new(content: Vec<FormatElement>) -> Self {
+    pub fn new(content: Vec<FormatElement>) -> Self {
         Self(content.into())
     }
 }
@@ -315,6 +315,10 @@ impl BestFittingElement {
 
     pub fn variants(&self) -> &[Box<[FormatElement]>] {
         &self.variants
+    }
+
+    pub(crate) fn variants_mut(&mut self) -> &mut [Box<[FormatElement]>] {
+        &mut self.variants
     }
 
     /// Returns the least expanded variant

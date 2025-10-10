@@ -16,6 +16,7 @@ use super::{
 
 /// `pre` tags are "preformatted", so we should not format the content inside them. <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/pre>
 /// We ignore the `script` and `style` tags as well, since embedded language parsing/formatting is not yet implemented.
+///
 const HTML_VERBATIM_TAGS: &[&str] = &["script", "style", "pre"];
 
 #[derive(Debug, Clone, Default)]
@@ -43,6 +44,13 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                 .as_ref()
                 .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
         });
+
+        let should_format_embedded_nodes = if f.context().should_delegate_fmt_embedded_nodes() {
+            // Only delegate for supported <script> or <style> content
+            node.is_supported_script_tag() || node.is_style_tag()
+        } else {
+            false
+        };
 
         let content_has_leading_whitespace = children
             .syntax()
@@ -85,11 +93,13 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         let should_borrow_opening_r_angle = is_whitespace_sensitive
             && !children.is_empty()
             && !content_has_leading_whitespace
-            && !should_be_verbatim;
+            && !should_be_verbatim
+            && !should_format_embedded_nodes;
         let should_borrow_closing_tag = is_whitespace_sensitive
             && !children.is_empty()
             && !content_has_trailing_whitespace
-            && !should_be_verbatim;
+            && !should_be_verbatim
+            && !should_format_embedded_nodes;
 
         let borrowed_r_angle = if should_borrow_opening_r_angle {
             opening_element.r_angle_token().ok()
@@ -111,8 +121,12 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             &opening_element,
             f,
         )?;
-        if should_be_verbatim {
-            write!(f, [&format_verbatim_skipped(children.syntax())])?;
+        // The order here is important. First, we must check if we can delegate the formatting
+        // of embedded nodes, then we check if we should format them verbatim.
+        if should_format_embedded_nodes {
+            write!(f, [children.format()])?;
+        } else if should_be_verbatim {
+            write!(f, [&format_html_verbatim_node(children.syntax())])?;
         } else {
             let format_children = FormatHtmlElementList::default()
                 .with_options(FormatHtmlElementListOptions {

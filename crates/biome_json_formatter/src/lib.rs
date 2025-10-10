@@ -24,7 +24,9 @@ use biome_formatter::{
     TransformSourceMap, write,
 };
 use biome_formatter::{Formatted, Printed};
-use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode, JsonSyntaxToken};
+use biome_json_syntax::{
+    AnyJsonValue, JsonLanguage, JsonSyntaxNode, JsonSyntaxNodeWithOffset, JsonSyntaxToken,
+};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
 
 /// Used to get an object that knows how to format this object.
@@ -269,6 +271,7 @@ impl FormatLanguage for JsonFormatLanguage {
         self,
         root: &JsonSyntaxNode,
         source_map: Option<TransformSourceMap>,
+        _delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &JsonCommentStyle, source_map.as_ref());
         JsonFormatContext::new(self.options, comments).with_source_map(source_map)
@@ -345,7 +348,17 @@ pub fn format_node(
     options: JsonFormatOptions,
     root: &JsonSyntaxNode,
 ) -> FormatResult<Formatted<JsonFormatContext>> {
-    biome_formatter::format_node(root, JsonFormatLanguage::new(options))
+    biome_formatter::format_node(root, JsonFormatLanguage::new(options), false)
+}
+
+/// Formats a JSON syntax tree.
+///
+/// It returns the [Formatted] document that can be printed to a string.
+pub fn format_node_with_offset(
+    options: JsonFormatOptions,
+    root: &JsonSyntaxNodeWithOffset,
+) -> FormatResult<Formatted<JsonFormatContext>> {
+    biome_formatter::format_node_with_offset(root, JsonFormatLanguage::new(options), false)
 }
 
 /// Formats a single node within a file, supported by Biome.

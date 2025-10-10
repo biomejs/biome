@@ -45,7 +45,7 @@ impl TestCase for BabelJsxTestCase {
             self.name().to_string(),
             self.code.clone(),
             source_type,
-            options.clone(),
+            options,
         );
         let result = parse(&self.code, source_type, options);
 

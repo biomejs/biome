@@ -1,0 +1,28 @@
+/* @reference directive */
+@reference "./app.css";
+
+@reference "./base-styles.css";
+
+/* @reference with relative path */
+@reference "./variables.css";
+
+/* @reference with node_modules path */
+@reference "../node_modules/normalize.css/normalize.css";
+
+/* @reference with scoped package */
+@reference "../node_modules/@company/design-tokens/index.css";
+
+/* @reference with file extension */
+@reference "./typography.css";
+
+/* @reference without file extension */
+@reference "./mixins";
+
+/* @reference with CSS file in different directory */
+@reference "../assets/fonts.css";
+
+/* @reference with vendor prefixed file */
+@reference "./vendor/bootstrap-grid.css";
+
+/* @reference with versioned file */
+@reference "./theme-v2.css";

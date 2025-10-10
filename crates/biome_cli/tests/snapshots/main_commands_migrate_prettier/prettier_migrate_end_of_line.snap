@@ -53,9 +53,14 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       25 │ + → → → "bracketSpacing":·true
       26 │ + → → }
       27 │ + → },
-      28 │ + → "html":·{·"formatter":·{·"selfCloseVoidElements":·"always"·}·}
-      29 │ + }
-      30 │ + 
+      28 │ + → "html":·{
+      29 │ + → → "formatter":·{
+      30 │ + → → → "indentScriptAndStyle":·false,
+      31 │ + → → → "selfCloseVoidElements":·"always"
+      32 │ + → → }
+      33 │ + → }
+      34 │ + }
+      35 │ + 
   
 
 ```

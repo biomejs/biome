@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_css_syntax::CssLanguage;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_string_case::Case;
@@ -19,6 +20,9 @@ use xtask_codegen::{to_capitalized, update};
 #[derive(Default)]
 struct LintRulesVisitor {
     groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
+    /// Mapping from domain to group/rule
+    /// e.g next => (<group>/<rule>, <group>/<rule>)
+    domains: BTreeMap<&'static str, BTreeSet<(&'static str, &'static str)>>,
 }
 
 impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
@@ -36,6 +40,13 @@ impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
             .entry(<R::Group as RuleGroup>::NAME)
             .or_default()
             .insert(R::METADATA.name, R::METADATA);
+
+        for domain in R::METADATA.domains.iter() {
+            self.domains
+                .entry(domain.as_str())
+                .or_default()
+                .insert((<R::Group as RuleGroup>::NAME, R::METADATA.name));
+        }
     }
 }
 
@@ -87,6 +98,25 @@ impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
     fn record_rule<R>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+impl RegistryVisitor<HtmlLanguage> for LintRulesVisitor {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
             + 'static,
     {
         self.groups
@@ -177,6 +207,25 @@ impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
     }
 }
 
+impl RegistryVisitor<HtmlLanguage> for AssistActionsVisitor {
+    fn record_category<C: GroupCategory<Language = HtmlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = HtmlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.groups
+            .entry(<R::Group as RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
 pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     let rule_options_root = get_analyzer_rule_options_path();
     let lib_root = rule_options_root.join("lib.rs");
@@ -190,6 +239,8 @@ pub(crate) fn generate_rule_options(mode: Mode) -> Result<()> {
     biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
+    biome_html_analyze::visit_registry(&mut lint_visitor);
+    biome_html_analyze::visit_registry(&mut assist_visitor);
 
     let mut rule_names = BTreeSet::default();
     let mut lib_exports = vec![quote! {
@@ -247,6 +298,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
     biome_graphql_analyze::visit_registry(&mut assist_visitor);
+    biome_html_analyze::visit_registry(&mut lint_visitor);
+    biome_html_analyze::visit_registry(&mut assist_visitor);
 
     // let LintRulesVisitor { groups } = lint_visitor;
 
@@ -264,6 +317,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         &mode,
         RuleCategory::Action,
     )?;
+
+    generate_for_domains(lint_visitor.domains, &mode)?;
 
     Ok(())
 }
@@ -1102,4 +1157,80 @@ fn generate_group_struct(
             }
         }
     }
+}
+
+fn generate_for_domains(
+    domains: BTreeMap<&'static str, BTreeSet<(&'static str, &'static str)>>,
+    mode: &Mode,
+) -> Result<()> {
+    let destination =
+        project_root().join("crates/biome_configuration/src/generated/domain_selector.rs");
+
+    let mut as_rule_filters_arms = vec![];
+    let mut match_rule_arms = vec![];
+    let mut lazy_locks = vec![];
+    for (domain_name, data) in domains {
+        let vector = data
+            .iter()
+            .map(|(group, rules)| {
+                quote! {
+                    RuleFilter::Rule(#group, #rules)
+                }
+            })
+            .collect::<Vec<_>>();
+        let domain_filters = Ident::new(
+            &format!("{}_FILTERS", domain_name.to_ascii_uppercase()),
+            Span::call_site(),
+        );
+
+        lazy_locks.push(quote! {
+            static #domain_filters: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+                vec![
+                    #( #vector ),*
+                ]
+            });
+        });
+
+        let domain_as_string = Literal::string(domain_name);
+        as_rule_filters_arms.push(quote! {
+            #domain_as_string => #domain_filters.clone()
+        });
+        match_rule_arms.push(quote! {
+            #domain_as_string => #domain_filters.iter().any(|filter| filter.match_rule::<R>())
+        });
+    }
+
+    let stream = quote! {
+        use std::sync::LazyLock;
+        use crate::analyzer::DomainSelector;
+        use biome_analyze::{Rule, RuleFilter};
+
+        #( #lazy_locks )*
+
+        impl DomainSelector {
+            pub fn as_rule_filters(&self) -> Vec<RuleFilter<'static>> {
+                match self.0 {
+                    #( #as_rule_filters_arms ),*,
+                    _ => unreachable!(
+                        "DomainFilter::as_rule_filters: domain {} not found",
+                        self.0
+                    )
+                }
+            }
+
+            pub fn match_rule<R>(&self) -> bool
+                where
+                    R: Rule,
+            {
+                match self.0 {
+                    #( #match_rule_arms ),*,
+                    _ => false,
+                }
+            }
+        }
+    };
+
+    update(destination.as_path(), &xtask::reformat(stream)?, mode)?;
+
+    Ok(())
 }

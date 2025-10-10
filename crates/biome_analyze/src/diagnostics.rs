@@ -1,13 +1,13 @@
+use crate::rule::RuleDiagnostic;
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Location, LogCategory,
     MessageAndDescription, Severity, Visit, advice::CodeSuggestionAdvice, category,
 };
-use biome_rowan::TextRange;
+use biome_rowan::{TextRange, TextSize};
 use std::borrow::Cow;
 use std::fmt::{Debug, Formatter};
-
-use crate::rule::RuleDiagnostic;
+use std::ops::Add;
 
 /// Small wrapper for diagnostics during the analysis phase.
 ///
@@ -88,7 +88,7 @@ impl Diagnostic for AnalyzerDiagnostic {
 
     fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
         match &self.kind {
-            DiagnosticKind::Rule(rule_diagnostic) => rule_diagnostic.advices().record(visitor)?,
+            DiagnosticKind::Rule(rule_diagnostic) => rule_diagnostic.record(visitor)?,
             DiagnosticKind::Raw(error) => error.advices(visitor)?,
         }
 
@@ -132,6 +132,18 @@ impl AnalyzerDiagnostic {
 
         self.code_suggestion_list.push(suggestion);
         self
+    }
+
+    /// The location of the diagnostic is shifted using this offset.
+    /// This is only applied when the [Self::kind] is [DiagnosticKind::Rule]
+    pub fn add_diagnostic_offset(&mut self, offset: TextSize) {
+        if let DiagnosticKind::Rule(rule_diagnostic) = &mut self.kind {
+            let diagnostic = rule_diagnostic.as_mut();
+            if let Some(span) = &diagnostic.span {
+                diagnostic.span = Some(span.add(offset));
+            }
+            diagnostic.set_advice_offset(offset);
+        }
     }
 
     pub const fn is_raw(&self) -> bool {

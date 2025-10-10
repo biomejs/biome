@@ -35,6 +35,7 @@ pub struct CssConfiguration {
 
 pub type CssAllowWrongLineCommentsEnabled = Bool<false>;
 pub type CssModulesEnabled = Bool<false>;
+pub type CssTailwindDirectivesEnabled = Bool<false>;
 
 /// Options that changes how the CSS parser behaves
 #[derive(
@@ -45,11 +46,17 @@ pub type CssModulesEnabled = Bool<false>;
 pub struct CssParserConfiguration {
     /// Allow comments to appear on incorrect lines in `.css` files
     #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_wrong_line_comments: Option<CssAllowWrongLineCommentsEnabled>,
 
     /// Enables parsing of CSS Modules specific features.
-    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("css-parse-css-modules"), argument("true|false"))]
     pub css_modules: Option<CssModulesEnabled>,
+
+    /// Enables parsing of Tailwind CSS 4.0 directives and functions.
+    #[bpaf(long("css-parse-tailwind-directives"), argument("true|false"))]
+    pub tailwind_directives: Option<CssTailwindDirectivesEnabled>,
 }
 
 pub type CssFormatterEnabled = Bool<true>;
@@ -76,8 +83,8 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to CSS (and its super languages) files.
-    #[bpaf(long("css-formatter-line-ending"), argument("lf|crlf|cr"))]
+    /// The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+    #[bpaf(long("css-formatter-line-ending"), argument("lf|crlf|cr|auto"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 

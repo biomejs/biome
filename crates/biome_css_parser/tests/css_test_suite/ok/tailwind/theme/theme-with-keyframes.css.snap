@@ -1,0 +1,211 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@theme {
+	@keyframes accordion-down {
+		from {
+			height: 0;
+		}
+
+		to {
+			height: var(--radix-accordion-content-height);
+		}
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwThemeAtRule {
+                theme_token: THEME_KW@1..7 "theme" [] [Whitespace(" ")],
+                name: missing (optional),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@7..8 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssAtRule {
+                            at_token: AT@8..11 "@" [Newline("\n"), Whitespace("\t")] [],
+                            rule: CssKeyframesAtRule {
+                                keyframes_token: KEYFRAMES_KW@11..21 "keyframes" [] [Whitespace(" ")],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@21..36 "accordion-down" [] [Whitespace(" ")],
+                                },
+                                block: CssKeyframesBlock {
+                                    l_curly_token: L_CURLY@36..37 "{" [] [],
+                                    items: CssKeyframesItemList [
+                                        CssKeyframesItem {
+                                            selectors: CssKeyframesSelectorList [
+                                                CssKeyframesIdentSelector {
+                                                    selector: FROM_KW@37..45 "from" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                                },
+                                            ],
+                                            block: CssDeclarationBlock {
+                                                l_curly_token: L_CURLY@45..46 "{" [] [],
+                                                declarations: CssDeclarationList [
+                                                    CssDeclarationWithSemicolon {
+                                                        declaration: CssDeclaration {
+                                                            property: CssGenericProperty {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@46..56 "height" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                                                },
+                                                                colon_token: COLON@56..58 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@58..59 "0" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            important: missing (optional),
+                                                        },
+                                                        semicolon_token: SEMICOLON@59..60 ";" [] [],
+                                                    },
+                                                ],
+                                                r_curly_token: R_CURLY@60..64 "}" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                        },
+                                        CssKeyframesItem {
+                                            selectors: CssKeyframesSelectorList [
+                                                CssKeyframesIdentSelector {
+                                                    selector: TO_KW@64..71 "to" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                                },
+                                            ],
+                                            block: CssDeclarationBlock {
+                                                l_curly_token: L_CURLY@71..72 "{" [] [],
+                                                declarations: CssDeclarationList [
+                                                    CssDeclarationWithSemicolon {
+                                                        declaration: CssDeclaration {
+                                                            property: CssGenericProperty {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@72..82 "height" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                                                },
+                                                                colon_token: COLON@82..84 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssFunction {
+                                                                        name: CssIdentifier {
+                                                                            value_token: IDENT@84..87 "var" [] [],
+                                                                        },
+                                                                        l_paren_token: L_PAREN@87..88 "(" [] [],
+                                                                        items: CssParameterList [
+                                                                            CssParameter {
+                                                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                                                    css_component_value_list: CssComponentValueList [
+                                                                                        CssDashedIdentifier {
+                                                                                            value_token: IDENT@88..120 "--radix-accordion-content-height" [] [],
+                                                                                        },
+                                                                                    ],
+                                                                                },
+                                                                            },
+                                                                        ],
+                                                                        r_paren_token: R_PAREN@120..121 ")" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            important: missing (optional),
+                                                        },
+                                                        semicolon_token: SEMICOLON@121..122 ";" [] [],
+                                                    },
+                                                ],
+                                                r_curly_token: R_CURLY@122..126 "}" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@126..129 "}" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@129..131 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@131..132 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..132
+  0: (empty)
+  1: CSS_RULE_LIST@0..131
+    0: CSS_AT_RULE@0..131
+      0: AT@0..1 "@" [] []
+      1: TW_THEME_AT_RULE@1..131
+        0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_DECLARATION_OR_RULE_BLOCK@7..131
+          0: L_CURLY@7..8 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@8..129
+            0: CSS_AT_RULE@8..129
+              0: AT@8..11 "@" [Newline("\n"), Whitespace("\t")] []
+              1: CSS_KEYFRAMES_AT_RULE@11..129
+                0: KEYFRAMES_KW@11..21 "keyframes" [] [Whitespace(" ")]
+                1: CSS_CUSTOM_IDENTIFIER@21..36
+                  0: IDENT@21..36 "accordion-down" [] [Whitespace(" ")]
+                2: CSS_KEYFRAMES_BLOCK@36..129
+                  0: L_CURLY@36..37 "{" [] []
+                  1: CSS_KEYFRAMES_ITEM_LIST@37..126
+                    0: CSS_KEYFRAMES_ITEM@37..64
+                      0: CSS_KEYFRAMES_SELECTOR_LIST@37..45
+                        0: CSS_KEYFRAMES_IDENT_SELECTOR@37..45
+                          0: FROM_KW@37..45 "from" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
+                      1: CSS_DECLARATION_BLOCK@45..64
+                        0: L_CURLY@45..46 "{" [] []
+                        1: CSS_DECLARATION_LIST@46..60
+                          0: CSS_DECLARATION_WITH_SEMICOLON@46..60
+                            0: CSS_DECLARATION@46..59
+                              0: CSS_GENERIC_PROPERTY@46..59
+                                0: CSS_IDENTIFIER@46..56
+                                  0: IDENT@46..56 "height" [Newline("\n"), Whitespace("\t\t\t")] []
+                                1: COLON@56..58 ":" [] [Whitespace(" ")]
+                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@58..59
+                                  0: CSS_NUMBER@58..59
+                                    0: CSS_NUMBER_LITERAL@58..59 "0" [] []
+                              1: (empty)
+                            1: SEMICOLON@59..60 ";" [] []
+                        2: R_CURLY@60..64 "}" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_KEYFRAMES_ITEM@64..126
+                      0: CSS_KEYFRAMES_SELECTOR_LIST@64..71
+                        0: CSS_KEYFRAMES_IDENT_SELECTOR@64..71
+                          0: TO_KW@64..71 "to" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
+                      1: CSS_DECLARATION_BLOCK@71..126
+                        0: L_CURLY@71..72 "{" [] []
+                        1: CSS_DECLARATION_LIST@72..122
+                          0: CSS_DECLARATION_WITH_SEMICOLON@72..122
+                            0: CSS_DECLARATION@72..121
+                              0: CSS_GENERIC_PROPERTY@72..121
+                                0: CSS_IDENTIFIER@72..82
+                                  0: IDENT@72..82 "height" [Newline("\n"), Whitespace("\t\t\t")] []
+                                1: COLON@82..84 ":" [] [Whitespace(" ")]
+                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@84..121
+                                  0: CSS_FUNCTION@84..121
+                                    0: CSS_IDENTIFIER@84..87
+                                      0: IDENT@84..87 "var" [] []
+                                    1: L_PAREN@87..88 "(" [] []
+                                    2: CSS_PARAMETER_LIST@88..120
+                                      0: CSS_PARAMETER@88..120
+                                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@88..120
+                                          0: CSS_COMPONENT_VALUE_LIST@88..120
+                                            0: CSS_DASHED_IDENTIFIER@88..120
+                                              0: IDENT@88..120 "--radix-accordion-content-height" [] []
+                                    3: R_PAREN@120..121 ")" [] []
+                              1: (empty)
+                            1: SEMICOLON@121..122 ";" [] []
+                        2: R_CURLY@122..126 "}" [Newline("\n"), Whitespace("\t\t")] []
+                  2: R_CURLY@126..129 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@129..131 "}" [Newline("\n")] []
+  2: EOF@131..132 "" [Newline("\n")] []
+
+```

@@ -59,4 +59,5 @@ src/index.ts:5:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
+Found 1 info.
 ```

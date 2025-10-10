@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `check.js`
 
@@ -17,7 +17,7 @@ flags/invalid ━━━━━━━━━━━━━━━━━━━━━━
   × Failed to parse CLI arguments.
     
     Caused by:
-      couldn't parse `suspicious/inexistant`: This rule doesn't exist.
+      couldn't parse `suspicious/inexistant`: The rule, group or domain doesn't exist.
   
 
 

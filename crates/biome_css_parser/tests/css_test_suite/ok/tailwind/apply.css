@@ -1,0 +1,31 @@
+/* @apply directive */
+@apply text-lg font-bold;
+
+@apply flex items-center justify-between px-4 py-2;
+
+/* @apply with single utility */
+@apply hidden;
+
+/* @apply with spacing utilities */
+@apply m-4 p-8;
+
+/* @apply with color utilities */
+@apply bg-blue-500 text-white;
+
+/* @apply with typography utilities */
+@apply text-center leading-relaxed tracking-wide;
+
+/* @apply with layout utilities */
+@apply container mx-auto max-w-4xl;
+
+/* @apply with transform utilities */
+@apply transform rotate-45 scale-110;
+
+/* @apply with transition utilities */
+@apply transition-all duration-300 ease-in-out;
+
+/* @apply with custom utilities */
+@apply my-custom-utility another-utility;
+
+/* @apply with numeric utilities */
+@apply w-1 h-96 z-10;

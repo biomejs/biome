@@ -90,8 +90,8 @@ impl ReporterVisitor for JunitReporterVisitor<'_> {
 
                 status.set_description(format!(
                     "line {row:?}, col {col:?}, {body}",
-                    row = start.line_number.to_zero_indexed(),
-                    col = start.column_number.to_zero_indexed(),
+                    row = start.line_number.get(),
+                    col = start.column_number.get(),
                     body = message
                 ));
                 let mut case = TestCase::new(

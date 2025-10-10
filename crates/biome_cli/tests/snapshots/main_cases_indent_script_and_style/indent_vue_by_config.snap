@@ -1,0 +1,31 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": {
+      "indentScriptAndStyle": true
+    }
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<script>
+	import { something } from "file.vue";
+	statement();
+</script>
+<template></template>
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```

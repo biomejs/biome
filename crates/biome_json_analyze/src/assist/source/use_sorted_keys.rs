@@ -46,13 +46,13 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```json,use_options,expect_diagnostic
+    /// ```json,use_options,expect_diff
     /// {
     ///     "val13": 1,
     ///     "val1": 1,
     ///     "val2": 1,
     ///     "val21": 1,
-    ///     "val11": 1,
+    ///     "val11": 1
     /// }
     /// ```
     ///
@@ -65,13 +65,13 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```json,use_options,expect_diagnostic
+    /// ```json,use_options,expect_diff
     /// {
     ///     "val13": 1,
     ///     "val1": 1,
     ///     "val2": 1,
     ///     "val21": 1,
-    ///     "val11": 1,
+    ///     "val11": 1
     /// }
     /// ```
     ///

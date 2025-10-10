@@ -885,7 +885,7 @@ impl EmbeddedSendNode {
     /// Downcast this handle into a [SyntaxNodeWithOffset]
     pub fn into_node<L>(self) -> SyntaxNodeWithOffset<L>
     where
-        L: Language + 'static,
+        L: Language,
     {
         SyntaxNodeWithOffset {
             node: SyntaxNode::new_root(self.green),
@@ -1148,7 +1148,10 @@ pub struct SyntaxNodeWithOffset<L: Language> {
     pub offset: TextSize,
 }
 
-impl<L: Language> SyntaxNodeWithOffset<L> {
+impl<L> SyntaxNodeWithOffset<L>
+where
+    L: Language,
+{
     pub fn new(node: SyntaxNode<L>, offset: TextSize) -> Self {
         Self { node, offset }
     }

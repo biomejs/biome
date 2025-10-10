@@ -44,14 +44,14 @@ declare_source_rule! {
     /// ## Examples
     ///
     /// ```js,expect_diff
-    /// {
+    /// const obj = {
     ///   x: 1,
     ///   a: 2,
     /// };
     /// ```
     ///
     /// ```js,expect_diff
-    /// {
+    /// const obj = {
     ///   x: 1,
     ///   ...f,
     ///   y: 4,
@@ -62,8 +62,8 @@ declare_source_rule! {
     /// };
     /// ```
     ///
-    /// ```js,expect_diff
-    /// {
+    /// ```js
+    /// const obj = {
     ///   get aab() {
     ///     return this._aab;
     ///   },
@@ -100,7 +100,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```js,use_options,expect_diagnostic
+    /// ```js,use_options,expect_diff
     /// const obj = {
     ///     val13: 1,
     ///     val1: 1,
@@ -119,7 +119,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```js,use_options,expect_diagnostic
+    /// ```js,use_options,expect_diff
     /// const obj = {
     ///     val13: 1,
     ///     val1: 1,

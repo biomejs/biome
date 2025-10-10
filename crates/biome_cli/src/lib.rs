@@ -91,6 +91,9 @@ impl<'app> CliSession<'app> {
                 staged,
                 changed,
                 since,
+                format_with_errors,
+                json_parser,
+                css_parser,
             } => run_command(
                 self,
                 &cli_options,
@@ -108,6 +111,9 @@ impl<'app> CliSession<'app> {
                     staged,
                     changed,
                     since,
+                    format_with_errors,
+                    json_parser,
+                    css_parser,
                 },
             ),
             BiomeCommand::Lint {
@@ -131,6 +137,8 @@ impl<'app> CliSession<'app> {
                 javascript_linter,
                 json_linter,
                 graphql_linter,
+                css_parser,
+                json_parser,
             } => run_command(
                 self,
                 &cli_options,
@@ -154,6 +162,8 @@ impl<'app> CliSession<'app> {
                     javascript_linter,
                     json_linter,
                     graphql_linter,
+                    css_parser,
+                    json_parser,
                 },
             ),
             BiomeCommand::Ci {
@@ -166,6 +176,9 @@ impl<'app> CliSession<'app> {
                 cli_options,
                 changed,
                 since,
+                format_with_errors,
+                css_parser,
+                json_parser,
                 ..
             } => run_command(
                 self,
@@ -179,6 +192,9 @@ impl<'app> CliSession<'app> {
                     paths,
                     changed,
                     since,
+                    format_with_errors,
+                    css_parser,
+                    json_parser,
                 },
             ),
             BiomeCommand::Format {
@@ -198,6 +214,8 @@ impl<'app> CliSession<'app> {
                 staged,
                 changed,
                 since,
+                css_parser,
+                json_parser,
             } => run_command(
                 self,
                 &cli_options,
@@ -217,6 +235,8 @@ impl<'app> CliSession<'app> {
                     staged,
                     changed,
                     since,
+                    css_parser,
+                    json_parser,
                 },
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),

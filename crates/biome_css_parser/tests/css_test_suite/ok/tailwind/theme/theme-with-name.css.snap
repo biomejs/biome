@@ -1,0 +1,89 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@theme foo {
+	--foo: #fff;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwThemeAtRule {
+                theme_token: THEME_KW@1..7 "theme" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@7..11 "foo" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@11..12 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssDashedIdentifier {
+                                        value_token: IDENT@12..19 "--foo" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@19..21 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssColor {
+                                            hash_token: HASH@21..22 "#" [] [],
+                                            value_token: CSS_COLOR_LITERAL@22..25 "fff" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@25..26 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@26..28 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@28..29 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..29
+  0: (empty)
+  1: CSS_RULE_LIST@0..28
+    0: CSS_AT_RULE@0..28
+      0: AT@0..1 "@" [] []
+      1: TW_THEME_AT_RULE@1..28
+        0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@7..11
+          0: IDENT@7..11 "foo" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@11..28
+          0: L_CURLY@11..12 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@12..26
+            0: CSS_DECLARATION_WITH_SEMICOLON@12..26
+              0: CSS_DECLARATION@12..25
+                0: CSS_GENERIC_PROPERTY@12..25
+                  0: CSS_DASHED_IDENTIFIER@12..19
+                    0: IDENT@12..19 "--foo" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@19..21 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@21..25
+                    0: CSS_COLOR@21..25
+                      0: HASH@21..22 "#" [] []
+                      1: CSS_COLOR_LITERAL@22..25 "fff" [] []
+                1: (empty)
+              1: SEMICOLON@25..26 ";" [] []
+          2: R_CURLY@26..28 "}" [Newline("\n")] []
+  2: EOF@28..29 "" [Newline("\n")] []
+
+```

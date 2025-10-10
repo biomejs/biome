@@ -1,0 +1,151 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@utility foo-* {
+	width: --value([length)
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@9..12 "foo" [] [],
+                    },
+                    minus_token: MINUS@12..13 "-" [] [],
+                    star_token: STAR@13..15 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@15..16 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@16..23 "width" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@23..25 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@25..32 "--value" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@32..33 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssBracketedValue {
+                                                                l_brack_token: L_BRACK@33..34 "[" [] [],
+                                                                items: CssBracketedValueList [
+                                                                    CssCustomIdentifier {
+                                                                        value_token: IDENT@34..40 "length" [] [],
+                                                                    },
+                                                                ],
+                                                                r_brack_token: missing (required),
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@40..41 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: missing (optional),
+                        },
+                    ],
+                    r_curly_token: R_CURLY@41..43 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@43..44 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..44
+  0: (empty)
+  1: CSS_RULE_LIST@0..43
+    0: CSS_AT_RULE@0..43
+      0: AT@0..1 "@" [] []
+      1: TW_UTILITY_AT_RULE@1..43
+        0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@9..15
+          0: CSS_IDENTIFIER@9..12
+            0: IDENT@9..12 "foo" [] []
+          1: MINUS@12..13 "-" [] []
+          2: STAR@13..15 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@15..43
+          0: L_CURLY@15..16 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@16..41
+            0: CSS_DECLARATION_WITH_SEMICOLON@16..41
+              0: CSS_DECLARATION@16..41
+                0: CSS_GENERIC_PROPERTY@16..41
+                  0: CSS_IDENTIFIER@16..23
+                    0: IDENT@16..23 "width" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@23..25 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@25..41
+                    0: CSS_FUNCTION@25..41
+                      0: CSS_IDENTIFIER@25..32
+                        0: IDENT@25..32 "--value" [] []
+                      1: L_PAREN@32..33 "(" [] []
+                      2: CSS_PARAMETER_LIST@33..40
+                        0: CSS_PARAMETER@33..40
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@33..40
+                            0: CSS_COMPONENT_VALUE_LIST@33..40
+                              0: CSS_BRACKETED_VALUE@33..40
+                                0: L_BRACK@33..34 "[" [] []
+                                1: CSS_BRACKETED_VALUE_LIST@34..40
+                                  0: CSS_CUSTOM_IDENTIFIER@34..40
+                                    0: IDENT@34..40 "length" [] []
+                                2: (empty)
+                      3: R_PAREN@40..41 ")" [] []
+                1: (empty)
+              1: (empty)
+          2: R_CURLY@41..43 "}" [Newline("\n")] []
+  2: EOF@43..44 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+value-arbitrary.css:2:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ')'.
+  
+    1 │ @utility foo-* {
+  > 2 │ 	width: --value([length)
+      │ 	                      ^
+    3 │ }
+    4 │ 
+  
+  i Expected an identifier here.
+  
+    1 │ @utility foo-* {
+  > 2 │ 	width: --value([length)
+      │ 	                      ^
+    3 │ }
+    4 │ 
+  
+```

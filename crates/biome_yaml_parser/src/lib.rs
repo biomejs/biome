@@ -1,4 +1,4 @@
-use biome_parser::{AnyParse, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
+use biome_parser::{AnyParse, NodeParse, prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 use biome_yaml_factory::YamlSyntaxFactory;
 use biome_yaml_syntax::{YamlLanguage, YamlRoot, YamlSyntaxNode};
@@ -94,11 +94,12 @@ impl From<YamlParse> for AnyParse {
     fn from(parse: YamlParse) -> Self {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
-        Self::new(
+        NodeParse::new(
             // SAFETY: the parser should always return a root node
             root.as_send().unwrap(),
             diagnostics,
         )
+        .into()
     }
 }
 

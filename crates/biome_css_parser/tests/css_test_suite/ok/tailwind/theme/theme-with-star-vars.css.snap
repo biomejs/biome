@@ -1,0 +1,127 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@theme {
+	--color-*: initial;
+	--spacing-*: initial;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwThemeAtRule {
+                theme_token: THEME_KW@1..7 "theme" [] [Whitespace(" ")],
+                name: missing (optional),
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@7..8 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: TwValueThemeReference {
+                                        reference: CssDashedIdentifier {
+                                            value_token: IDENT@8..17 "--color" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                        minus_token: MINUS@17..18 "-" [] [],
+                                        star_token: STAR@18..19 "*" [] [],
+                                    },
+                                    colon_token: COLON@19..21 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@21..28 "initial" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@28..29 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: TwValueThemeReference {
+                                        reference: CssDashedIdentifier {
+                                            value_token: IDENT@29..40 "--spacing" [Newline("\n"), Whitespace("\t")] [],
+                                        },
+                                        minus_token: MINUS@40..41 "-" [] [],
+                                        star_token: STAR@41..42 "*" [] [],
+                                    },
+                                    colon_token: COLON@42..44 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@44..51 "initial" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@51..52 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@52..54 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@54..55 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..55
+  0: (empty)
+  1: CSS_RULE_LIST@0..54
+    0: CSS_AT_RULE@0..54
+      0: AT@0..1 "@" [] []
+      1: TW_THEME_AT_RULE@1..54
+        0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_DECLARATION_OR_RULE_BLOCK@7..54
+          0: L_CURLY@7..8 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@8..52
+            0: CSS_DECLARATION_WITH_SEMICOLON@8..29
+              0: CSS_DECLARATION@8..28
+                0: CSS_GENERIC_PROPERTY@8..28
+                  0: TW_VALUE_THEME_REFERENCE@8..19
+                    0: CSS_DASHED_IDENTIFIER@8..17
+                      0: IDENT@8..17 "--color" [Newline("\n"), Whitespace("\t")] []
+                    1: MINUS@17..18 "-" [] []
+                    2: STAR@18..19 "*" [] []
+                  1: COLON@19..21 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@21..28
+                    0: CSS_IDENTIFIER@21..28
+                      0: IDENT@21..28 "initial" [] []
+                1: (empty)
+              1: SEMICOLON@28..29 ";" [] []
+            1: CSS_DECLARATION_WITH_SEMICOLON@29..52
+              0: CSS_DECLARATION@29..51
+                0: CSS_GENERIC_PROPERTY@29..51
+                  0: TW_VALUE_THEME_REFERENCE@29..42
+                    0: CSS_DASHED_IDENTIFIER@29..40
+                      0: IDENT@29..40 "--spacing" [Newline("\n"), Whitespace("\t")] []
+                    1: MINUS@40..41 "-" [] []
+                    2: STAR@41..42 "*" [] []
+                  1: COLON@42..44 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@44..51
+                    0: CSS_IDENTIFIER@44..51
+                      0: IDENT@44..51 "initial" [] []
+                1: (empty)
+              1: SEMICOLON@51..52 ";" [] []
+          2: R_CURLY@52..54 "}" [Newline("\n")] []
+  2: EOF@54..55 "" [Newline("\n")] []
+
+```

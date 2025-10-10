@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// class A {
     ///     protected constructor() {
     ///         this.prop = 1;

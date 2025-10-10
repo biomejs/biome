@@ -80,7 +80,8 @@ pub(crate) fn derive_best_scan_kind(
 mod tests {
     use super::*;
     use crate::{TraversalMode, VcsTargeted};
-    use biome_configuration::{LinterConfiguration, analyzer::RuleSelector};
+    use biome_configuration::LinterConfiguration;
+    use biome_configuration::analyzer::RuleSelector;
 
     #[test]
     fn should_return_none_for_lint_command() {
@@ -88,7 +89,7 @@ mod tests {
             fix_file_mode: None,
             stdin: None,
             only: vec![],
-            skip: vec![RuleSelector::Rule("correctness", "noPrivateImports")],
+            skip: vec![RuleSelector::Rule("correctness", "noPrivateImports").into()],
 
             vcs_targeted: VcsTargeted::default(),
             suppress: false,

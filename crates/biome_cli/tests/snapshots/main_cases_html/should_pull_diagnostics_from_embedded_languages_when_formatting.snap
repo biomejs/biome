@@ -1,0 +1,79 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": {
+      "enabled": true,
+      "indentScriptAndStyle": true
+    }
+  }
+}
+```
+
+## `file.html`
+
+```html
+<script>
+	function () { return "ipsum" }
+</script>
+<style>
+	#id .class div > { background-color: ; align: center; padding: 0; }
+</style>
+
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.html:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a name for the function in a function declaration, but found none
+  
+  > 1 │ <script>function () { return "ipsum" }</script>
+      │                  ^
+    2 │ <style>#id .class div > { background-color: ; align: center; padding: 0; } </style>
+    3 │ 
+  
+
+```
+
+```block
+file.html:2:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '{'.
+  
+    1 │ <script>function () { return "ipsum" }</script>
+  > 2 │ <style>#id .class div > { background-color: ; align: center; padding: 0; } </style>
+      │                         ^
+    3 │ 
+  
+  i Expected a compound selector here.
+  
+    1 │ <script>function () { return "ipsum" }</script>
+  > 2 │ <style>#id .class div > { background-color: ; align: center; padding: 0; } </style>
+      │                         ^
+    3 │ 
+  
+
+```
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+Found 2 errors.
+```

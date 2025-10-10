@@ -66,10 +66,12 @@ declare_lint_rule! {
     /// export { B }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// // Header comment
     /// import /*inner comment */ A from 'mod'; // Associated comment
+    /// ```
     ///
+    /// ```ts,expect_diagnostic
     /// // Another header comment
     /// import {
     ///     // A's header comment

@@ -5,7 +5,7 @@ pub use biome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsModule, JsScript, JsSyntaxNode, ModuleKind,
 };
 use biome_parser::token_source::Trivia;
-use biome_parser::{AnyParse, event::Event};
+use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse, event::Event};
 use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
 use std::marker::PhantomData;
 
@@ -117,11 +117,25 @@ impl<T> From<Parse<T>> for AnyParse {
     fn from(parse: Parse<T>) -> Self {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
-        Self::new(
+        NodeParse::new(
             // SAFETY: the parser should always return a root node
             root.as_send().unwrap(),
             diagnostics,
         )
+        .into()
+    }
+}
+
+impl From<JsOffsetParse> for AnyParse {
+    fn from(parse: JsOffsetParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        EmbeddedNodeParse::new(
+            // SAFETY: the parser should always return a root node
+            root.as_embedded_send(),
+            diagnostics,
+        )
+        .into()
     }
 }
 
@@ -295,8 +309,8 @@ impl JsOffsetParse {
     }
 
     /// The offset-aware syntax node represented by this Parse result
-    pub fn syntax(&self) -> &biome_rowan::SyntaxNodeWithOffset<JsLanguage> {
-        &self.root
+    pub fn syntax(&self) -> SyntaxNodeWithOffset<JsLanguage> {
+        self.root.clone()
     }
 
     /// Get the diagnostics which occurred when parsing

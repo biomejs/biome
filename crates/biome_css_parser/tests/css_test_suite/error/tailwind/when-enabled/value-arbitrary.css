@@ -1,0 +1,3 @@
+@utility foo-* {
+	width: --value([length)
+}

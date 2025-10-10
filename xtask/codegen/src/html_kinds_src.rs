@@ -42,6 +42,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_ELEMENT_LIST",
         "HTML_ATTRIBUTE_LIST",
         "HTML_CONTENT",
+        "HTML_EMBEDDED_CONTENT",
         "HTML_CDATA_SECTION",
         "COMMENT",
         "HTML_DOUBLE_TEXT_EXPRESSION",

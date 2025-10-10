@@ -1,0 +1,121 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "formatWithErrors": false
+  }
+}
+```
+
+## `file.js`
+
+```js
+let a = {
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This let declares a variable that is only assigned once.
+  
+  > 1 │ let a = {
+      │ ^^^
+  
+  i 'a' is never reassigned.
+  
+  > 1 │ let a = {
+      │     ^
+  
+  i Safe fix: Use const instead.
+  
+  - let·a·=·{
+  + const·a·=·{
+  
+
+```
+
+```block
+file.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable a is unused.
+  
+  > 1 │ let a = {
+      │     ^
+  
+  i Unused variables are often the result of an incomplete refactoring, typos, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+  - let·a·=·{
+  + let·_a·=·{
+  
+
+```
+
+```block
+file.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+  > 1 │ let a = {
+      │          
+  
+  i the file ends here
+  
+  > 1 │ let a = {
+      │          
+  
+
+```
+
+```block
+file.js:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+  > 1 │ let a = {
+      │          
+  
+  i the file ends here
+  
+  > 1 │ let a = {
+      │          
+  
+
+```
+
+```block
+file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - let·a·=·{
+      1 │ + let·a·=·{
+      2 │ + 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 3 errors.
+Found 2 warnings.
+```

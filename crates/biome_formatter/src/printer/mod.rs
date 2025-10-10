@@ -58,26 +58,24 @@ impl<'a> Printer<'a> {
         document: &'a Document,
         indent: u16,
     ) -> PrintResult<Printed> {
-        tracing::debug_span!("Printer::print").in_scope(move || {
-            let mut stack = PrintCallStack::new(PrintElementArgs::new());
-            let mut queue: PrintQueue<'a> = PrintQueue::new(document.as_ref());
-            let mut indent_stack = PrintIndentStack::new(Indention::Level(indent));
+        let mut stack = PrintCallStack::new(PrintElementArgs::new());
+        let mut queue: PrintQueue<'a> = PrintQueue::new(document.as_ref());
+        let mut indent_stack = PrintIndentStack::new(Indention::Level(indent));
+        self.state.pending_indent = indent_stack.indention();
+        while let Some(element) = queue.pop() {
+            self.print_element(&mut stack, &mut indent_stack, &mut queue, element)?;
 
-            while let Some(element) = queue.pop() {
-                self.print_element(&mut stack, &mut indent_stack, &mut queue, element)?;
-
-                if queue.is_empty() {
-                    self.flush_line_suffixes(&mut queue, &mut stack, &mut indent_stack, None);
-                }
+            if queue.is_empty() {
+                self.flush_line_suffixes(&mut queue, &mut stack, &mut indent_stack, None);
             }
+        }
 
-            Ok(Printed::new(
-                self.state.buffer,
-                None,
-                self.state.source_markers,
-                self.state.verbatim_markers,
-            ))
-        })
+        Ok(Printed::new(
+            self.state.buffer,
+            None,
+            self.state.source_markers,
+            self.state.verbatim_markers,
+        ))
     }
 
     /// Prints a single element and push the following elements to queue
@@ -266,7 +264,7 @@ impl<'a> Printer<'a> {
                 stack.push(TagKind::Verbatim, args);
             }
 
-            FormatElement::Tag(tag @ (StartLabelled(_) | StartEntry)) => {
+            FormatElement::Tag(tag @ (StartLabelled(_) | StartEntry | StartEmbedded(_))) => {
                 stack.push(tag.kind(), args);
             }
             FormatElement::Tag(
@@ -275,7 +273,8 @@ impl<'a> Printer<'a> {
                 | EndGroup
                 | EndConditionalContent
                 | EndVerbatim
-                | EndFill),
+                | EndFill
+                | EndEmbedded),
             ) => {
                 stack.pop(tag.kind())?;
             }
@@ -1230,7 +1229,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             }
 
             FormatElement::Tag(
-                tag @ (StartFill | StartVerbatim(_) | StartLabelled(_) | StartEntry),
+                tag @ (StartFill | StartVerbatim(_) | StartLabelled(_) | StartEntry
+                | StartEmbedded(_)),
             ) => {
                 self.stack.push(tag.kind(), args);
             }
@@ -1240,7 +1240,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 | EndGroup
                 | EndConditionalContent
                 | EndVerbatim
-                | EndFill),
+                | EndFill
+                | EndEmbedded),
             ) => {
                 self.stack.pop(tag.kind())?;
             }
@@ -1421,6 +1422,18 @@ mod tests {
             .expect("Document to be valid")
     }
 
+    fn format_with_options_and_indentation(
+        root: &dyn Format<SimpleFormatContext>,
+        options: PrinterOptions,
+        indent: u16,
+    ) -> Printed {
+        let formatted = crate::format!(SimpleFormatContext::default(), [root]).unwrap();
+
+        Printer::new(options)
+            .print_with_indent(formatted.document(), indent)
+            .expect("Document to be valid")
+    }
+
     #[test]
     fn it_prints_a_group_on_a_single_line_if_it_fits() {
         let result = format(&FormatArrayElements {
@@ -1508,6 +1521,39 @@ a"#,
             "function main() {\r\tlet x = `This is a multiline\rstring`;\r}\r",
             result.as_code()
         );
+    }
+
+    #[test]
+    fn it_converts_line_endings_to_auto() {
+        let options = PrinterOptions {
+            line_ending: LineEnding::Auto,
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options(
+            &format_args![
+                text("function main() {"),
+                block_indent(&text("let x = `This is a multiline\nstring`;")),
+                text("}"),
+                hard_line_break()
+            ],
+            options,
+        );
+
+        #[cfg(windows)]
+        {
+            assert_eq!(
+                "function main() {\r\n\tlet x = `This is a multiline\r\nstring`;\r\n}\r\n",
+                result.as_code()
+            );
+        }
+        #[cfg(not(windows))]
+        {
+            assert_eq!(
+                "function main() {\n\tlet x = `This is a multiline\nstring`;\n}\n",
+                result.as_code()
+            );
+        }
     }
 
     #[test]
@@ -1725,7 +1771,7 @@ two lines`,
                         text("The referenced group breaks."),
                         hard_line_break()
                     ])
-                    .with_group_id(Some(group_id)),
+                        .with_group_id(Some(group_id)),
                     group(&format_args![
                         text("This group breaks because:"),
                         soft_line_break_or_space(),
@@ -1809,6 +1855,85 @@ Group 1 breaks"#
             "(\nThis is a string\n containing a newline\n)",
             result.as_code()
         );
+    }
+
+    #[test]
+    fn break_group_if_partial_string_exceeds_print_width_with_indent() {
+        let options = PrinterOptions {
+            print_width: PrintWidth::new(10),
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options_and_indentation(
+            &format_args![group(&format_args!(
+                text("Hello world"),
+                soft_line_break(),
+                text("Hello world")
+            ))],
+            options,
+            1,
+        );
+
+        assert_eq!(result.as_code(), "\tHello world\n\tHello world");
+    }
+
+    #[test]
+    fn test_fill_breaks_with_indent() {
+        let mut state = FormatState::new(());
+        let mut buffer = VecBuffer::new(&mut state);
+        let mut formatter = Formatter::new(&mut buffer);
+
+        formatter
+            .fill()
+            // These all fit on the same line together
+            .entry(
+                &soft_line_break_or_space(),
+                &format_args!(text("1"), text(",")),
+            )
+            .entry(
+                &soft_line_break_or_space(),
+                &format_args!(text("2"), text(",")),
+            )
+            .entry(
+                &soft_line_break_or_space(),
+                &format_args!(text("3"), text(",")),
+            )
+            // This one fits on a line by itself,
+            .entry(
+                &soft_line_break_or_space(),
+                &format_args!(text("723493294"), text(",")),
+            )
+            // fits without breaking
+            .entry(
+                &soft_line_break_or_space(),
+                &group(&format_args!(
+                    text("["),
+                    soft_block_indent(&text("5")),
+                    text("],")
+                )),
+            )
+            // this one must be printed in expanded mode to fit
+            .entry(
+                &soft_line_break_or_space(),
+                &group(&format_args!(
+                    text("["),
+                    soft_block_indent(&text("123456789")),
+                    text("]"),
+                )),
+            )
+            .finish()
+            .unwrap();
+
+        let document = Document::from(buffer.into_vec());
+
+        let printed = Printer::new(PrinterOptions::default().with_print_width(PrintWidth::new(10)))
+            .print_with_indent(&document, 1)
+            .unwrap();
+
+        assert_eq!(
+            printed.as_code(),
+            "\t1, 2, 3,\n\t723493294,\n\t[5],\n\t[\n\t\t123456789\n\t]"
+        )
     }
 
     struct FormatArrayElements<'a> {

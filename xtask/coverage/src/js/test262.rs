@@ -100,12 +100,8 @@ impl Test262TestCase {
             .is_some();
 
         let options = JsParserOptions::default().with_parse_class_parameter_decorators();
-        let files = TestCaseFiles::single(
-            self.name.clone(),
-            self.code.clone(),
-            source_type,
-            options.clone(),
-        );
+        let files =
+            TestCaseFiles::single(self.name.clone(), self.code.clone(), source_type, options);
 
         match parse(&code, source_type, options).ok() {
             Ok(root) if !should_fail => {

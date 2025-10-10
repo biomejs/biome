@@ -60,7 +60,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div class="hover:focus:m-2 foo hover:px-2 p-4">
+    /// <div class="hover:focus:m-2 foo hover:px-2 p-4" />
     /// ```
     ///
     /// ## Options

@@ -1,4 +1,5 @@
 use crate::parser::CssParser;
+use biome_console::markup;
 use biome_css_syntax::CssSyntaxKind;
 use biome_parser::Parser;
 use biome_parser::diagnostic::{expect_one_of, expected_any, expected_node};
@@ -230,4 +231,11 @@ pub(crate) fn expected_component_value(p: &CssParser, range: TextRange) -> Parse
 
 pub(crate) fn expected_declaration(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("<declaration>", range, p)
+}
+
+pub(crate) fn tailwind_disabled(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(markup! { "Tailwind-specific syntax is disabled."}, range)
+        .with_hint(markup! {
+            "Enable "<Emphasis>"`tailwindDirectives`"</Emphasis>" in the css parser options, or remove this if you are not using Tailwind CSS."
+        })
 }

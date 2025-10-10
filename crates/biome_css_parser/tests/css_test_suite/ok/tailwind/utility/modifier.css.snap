@@ -1,0 +1,151 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+@utility text-* {
+	line-height: --modifier(--leading-*, [length]);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwUtilityAtRule {
+                utility_token: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")],
+                name: TwFunctionalUtilityName {
+                    identifier: CssIdentifier {
+                        value_token: IDENT@9..13 "text" [] [],
+                    },
+                    minus_token: MINUS@13..14 "-" [] [],
+                    star_token: STAR@14..16 "*" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@16..17 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@17..30 "line-height" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@30..32 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@32..42 "--modifier" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@42..43 "(" [] [],
+                                            items: CssParameterList [
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            TwValueThemeReference {
+                                                                reference: CssDashedIdentifier {
+                                                                    value_token: IDENT@43..52 "--leading" [] [],
+                                                                },
+                                                                minus_token: MINUS@52..53 "-" [] [],
+                                                                star_token: STAR@53..54 "*" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                COMMA@54..56 "," [] [Whitespace(" ")],
+                                                CssParameter {
+                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssBracketedValue {
+                                                                l_brack_token: L_BRACK@56..57 "[" [] [],
+                                                                items: CssBracketedValueList [
+                                                                    CssCustomIdentifier {
+                                                                        value_token: IDENT@57..63 "length" [] [],
+                                                                    },
+                                                                ],
+                                                                r_brack_token: R_BRACK@63..64 "]" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@64..65 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@65..66 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@66..68 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@68..69 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..69
+  0: (empty)
+  1: CSS_RULE_LIST@0..68
+    0: CSS_AT_RULE@0..68
+      0: AT@0..1 "@" [] []
+      1: TW_UTILITY_AT_RULE@1..68
+        0: UTILITY_KW@1..9 "utility" [] [Whitespace(" ")]
+        1: TW_FUNCTIONAL_UTILITY_NAME@9..16
+          0: CSS_IDENTIFIER@9..13
+            0: IDENT@9..13 "text" [] []
+          1: MINUS@13..14 "-" [] []
+          2: STAR@14..16 "*" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@16..68
+          0: L_CURLY@16..17 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@17..66
+            0: CSS_DECLARATION_WITH_SEMICOLON@17..66
+              0: CSS_DECLARATION@17..65
+                0: CSS_GENERIC_PROPERTY@17..65
+                  0: CSS_IDENTIFIER@17..30
+                    0: IDENT@17..30 "line-height" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@30..32 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@32..65
+                    0: CSS_FUNCTION@32..65
+                      0: CSS_IDENTIFIER@32..42
+                        0: IDENT@32..42 "--modifier" [] []
+                      1: L_PAREN@42..43 "(" [] []
+                      2: CSS_PARAMETER_LIST@43..64
+                        0: CSS_PARAMETER@43..54
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@43..54
+                            0: CSS_COMPONENT_VALUE_LIST@43..54
+                              0: TW_VALUE_THEME_REFERENCE@43..54
+                                0: CSS_DASHED_IDENTIFIER@43..52
+                                  0: IDENT@43..52 "--leading" [] []
+                                1: MINUS@52..53 "-" [] []
+                                2: STAR@53..54 "*" [] []
+                        1: COMMA@54..56 "," [] [Whitespace(" ")]
+                        2: CSS_PARAMETER@56..64
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@56..64
+                            0: CSS_COMPONENT_VALUE_LIST@56..64
+                              0: CSS_BRACKETED_VALUE@56..64
+                                0: L_BRACK@56..57 "[" [] []
+                                1: CSS_BRACKETED_VALUE_LIST@57..63
+                                  0: CSS_CUSTOM_IDENTIFIER@57..63
+                                    0: IDENT@57..63 "length" [] []
+                                2: R_BRACK@63..64 "]" [] []
+                      3: R_PAREN@64..65 ")" [] []
+                1: (empty)
+              1: SEMICOLON@65..66 ";" [] []
+          2: R_CURLY@66..68 "}" [Newline("\n")] []
+  2: EOF@68..69 "" [Newline("\n")] []
+
+```
