@@ -1,7 +1,7 @@
 ---
 "@biomejs/biome": patch
 ---
-Added the lint rule `useErrorCause`.
+Added the nursery lint rule `useErrorCause`.
 
 This rule enforces that errors caught in a `catch` clause are not rethrown without wrapping them in a new `Error` object and specifying the original error as the `cause`. This helps preserve the error’s stack trace and context for better debugging.
 
@@ -10,7 +10,7 @@ It can be configured with the following option:
 - `requireCatchParameter`: (default: `true`)
   - When `true`, the rule requires that `catch` clauses have a parameter. If a `throw` statement appears inside a `catch` clause without a parameter, it will be flagged.
 
-#### Invalid
+**Invalid examples**:
 
 ```js
 try {
@@ -28,7 +28,7 @@ try {
 }
 ```
 
-#### Valid
+**Valid examples:**
 
 ```js
 try {
@@ -46,7 +46,7 @@ try {
 }
 ```
 
-#### `requireCatchParameter: false`
+**Valid example** when `requireCatchParameter` is `false`:
 
 Valid:
 

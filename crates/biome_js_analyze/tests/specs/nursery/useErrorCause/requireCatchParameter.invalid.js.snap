@@ -4,18 +4,89 @@ expression: requireCatchParameter.invalid.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 
 try {
-    foo();
-} catch {
-    throw new Error("fail");
+  throw new Error("Original error");
+} catch (err) {
+  throw err;
 }
 
 
 try {
-    foo();
-} catch {
-    throw new Error("fail", { cause: err });
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error("Wrapper error");
 }
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed: ${err.message}`);
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  if (true) {
+    throw err;
+  }
+}
+
+
+
+try {
+  throw new Error("Original error");
+} catch ({ message }) {
+  throw new Error(message);
+}
+
+```
+
+# Diagnostics
+```
+requireCatchParameter.invalid.js:13:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    11 │   throw new Error("Original error");
+    12 │ } catch (err) {
+  > 13 │   throw new Error("Wrapper error");
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+
+```
+
+```
+requireCatchParameter.invalid.js:20:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    18 │   throw new Error("Original error");
+    19 │ } catch (err) {
+  > 20 │   throw new Error(`Failed: ${err.message}`);
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ }
+    22 │ 
+  
+
+```
+
+```
+requireCatchParameter.invalid.js:36:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
+  
+    34 │ try {
+    35 │   throw new Error("Original error");
+  > 36 │ } catch ({ message }) {
+       │          ^^^^^^^^^^^
+    37 │   throw new Error(message);
+    38 │ }
+  
 
 ```

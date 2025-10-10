@@ -5166,7 +5166,7 @@
 					]
 				},
 				"useErrorCause": {
-					"description": "Disallow rethrowing caught errors without wrapping them.",
+					"description": "Disallow rethrowing caught errors without wrapping them, using the cause property to preserve the original stack trace.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseErrorCauseConfiguration" },
 						{ "type": "null" }

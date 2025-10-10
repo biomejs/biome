@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 
 try {
   throw new Error("Original error");

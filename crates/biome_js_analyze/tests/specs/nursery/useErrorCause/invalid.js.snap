@@ -4,6 +4,7 @@ expression: invalid.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 
 try {
   throw new Error("Original error");
@@ -51,61 +52,61 @@ try {
 
 # Diagnostics
 ```
-invalid.js:12:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
   
-    10 │   throw new Error("Original error");
-    11 │ } catch (err) {
-  > 12 │   throw new Error("Wrapper error");
+    11 │   throw new Error("Original error");
+    12 │ } catch (err) {
+  > 13 │   throw new Error("Wrapper error");
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ }
-    14 │ 
+    14 │ }
+    15 │ 
   
 
 ```
 
 ```
-invalid.js:19:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
   
-    17 │   throw new Error("Original error");
-    18 │ } catch (err) {
-  > 19 │   throw new Error(`Failed: ${err.message}`);
+    18 │   throw new Error("Original error");
+    19 │ } catch (err) {
+  > 20 │   throw new Error(`Failed: ${err.message}`);
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    20 │ }
-    21 │ 
+    21 │ }
+    22 │ 
   
 
 ```
 
 ```
-invalid.js:34:2 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:2 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is being discarded because the `catch` clause doesn't have a parameter.Specify an error object in the `catch` clause to access the original error.
   
-    32 │ 	doSomething();
-    33 │ } catch {
-  > 34 │ 	throw new TypeError("Something went wrong");
+    33 │ 	doSomething();
+    34 │ } catch {
+  > 35 │ 	throw new TypeError("Something went wrong");
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    35 │ }
-    36 │ 
+    36 │ }
+    37 │ 
   
 
 ```
 
 ```
-invalid.js:40:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
   
-    38 │ try {
-    39 │   throw new Error("Original error");
-  > 40 │ } catch ({ message }) {
+    39 │ try {
+    40 │   throw new Error("Original error");
+  > 41 │ } catch ({ message }) {
        │          ^^^^^^^^^^^
-    41 │   throw new Error(message);
-    42 │ }
+    42 │   throw new Error(message);
+    43 │ }
   
 
 ```

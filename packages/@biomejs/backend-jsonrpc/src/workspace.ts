@@ -1726,7 +1726,7 @@ export interface Nursery {
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
 	/**
-	 * Disallow rethrowing caught errors without wrapping them.
+	 * Disallow rethrowing caught errors without wrapping them, using the cause property to preserve the original stack trace.
 	 */
 	useErrorCause?: RuleConfiguration_for_UseErrorCauseOptions;
 	/**

@@ -7,10 +7,9 @@ use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::use_error_cause::UseErrorCauseOptions;
 
 declare_lint_rule! {
-    /// Disallow rethrowing caught errors without wrapping them.
+    /// Disallow rethrowing caught errors without wrapping them, using the `cause` property to preserve the original stack trace.
     ///
-    /// When rethrowing a caught error, it's recommended to wrap it in a new `Error` object to preserve the original error's stack trace and context.
-    /// The original error should be passed as the `cause` property of the new `Error` object.
+    /// When rethrowing a caught error, it's recommended to wrap it in a new `Error` object to preserve the original error's stack trace and context. The original error should be passed as the `cause` property of the new `Error` object.
     ///
     /// This rule enforces that practice, helping to maintain a clear and traceable error propagation chain, which is crucial for effective debugging.
     ///
@@ -29,9 +28,9 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// try {
-    /// 	doSomething();
+    ///     doSomething();
     /// } catch {
-    /// 	throw new Error("Something went wrong");
+    ///     throw new Error("Something went wrong");
     /// }
     /// ```
     ///
@@ -50,6 +49,53 @@ declare_lint_rule! {
     ///   // ...
     /// } catch (err) {
     ///   throw new Error("Something went wrong", { cause: err });
+    /// }
+    ///
+    /// try {
+    ///     throw "Not a rethrow, so it's ignored when nested";
+    /// } catch (err) {
+    ///     const fn = () => {
+    ///         throw new Error("New unrelated error");
+    ///     }
+    ///     fn();
+    /// }
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// The following options are available:
+    ///
+    /// ### `requireCatchParameter`
+    ///
+    /// If `true`, the rule will report a diagnostic for a `throw` statement inside an empty `catch {}` block, recommending that the error be caught in a parameter.
+    ///
+    /// Default: `true`
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "requireCatchParameter": false
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// This option is enabled by default, meaning the following code is considered invalid:
+    ///
+    /// ```js,expect_diagnostic
+    /// try {
+    ///     doSomething();
+    /// } catch {
+    ///     throw new Error("Something went wrong");
+    /// }
+    /// ```
+    ///
+    /// To disable this check, you would set the option to `false`:
+    ///
+    /// ```js,use_options
+    /// try {
+    ///     doSomething();
+    /// } catch {
+    ///     throw new Error("Something went wrong");
     /// }
     /// ```
     ///
