@@ -1,0 +1,10 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: fragment.graphql
+---
+# Input
+```graphql
+/* should not generate diagnostics */
+fragment Test on Person {}
+
+```
