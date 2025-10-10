@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseDeprecatedDate {
-        version: "next",
+        version: "2.2.6",
         name: "useDeprecatedDate",
         language: "graphql",
         sources: &[RuleSource::EslintGraphql("require-deprecation-date").same()],
