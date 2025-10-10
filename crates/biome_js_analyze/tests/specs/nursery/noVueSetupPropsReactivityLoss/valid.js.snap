@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Valid: using props parameter directly
+export default {
+  setup(props) {
+    return () => h('div', props.count)
+  }
+}
+
+```

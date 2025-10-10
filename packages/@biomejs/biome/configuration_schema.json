@@ -4964,6 +4964,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueSetupPropsReactivityLossConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoVueSetupPropsReactivityLossOptions" }
+			]
+		},
+		"NoVueSetupPropsReactivityLossOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5135,6 +5145,15 @@
 					"description": "Disallow reserved names to be used as props.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoVueReservedPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueSetupPropsReactivityLoss": {
+					"description": "Disallow destructuring of props passed to setup in Vue projects.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoVueSetupPropsReactivityLossConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -9864,6 +9883,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoVueReservedPropsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoVueSetupPropsReactivityLossOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoVueSetupPropsReactivityLossOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
