@@ -1381,12 +1381,10 @@
 			"properties": {
 				"allowWrongLineComments": {
 					"description": "Allow comments to appear on incorrect lines in `.css` files",
-					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
 					"description": "Enables parsing of CSS Modules specific features.",
-					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {
@@ -1574,7 +1572,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
 				},
 				"formatWithErrors": {
-					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
+					"description": "Whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"includes": {

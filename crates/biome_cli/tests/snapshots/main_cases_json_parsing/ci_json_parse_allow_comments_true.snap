@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.json`
+
+```json
+{
+  // This is a comment
+  "key": "value"
+}
+```
+
+# Termination Message
+
+```block
+ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × File content differs from formatting output
+  
+    1 1 │   {
+    2   │ - ··//·This·is·a·comment
+    3   │ - ··"key":·"value"
+    4   │ - }
+      2 │ + → //·This·is·a·comment
+      3 │ + → "key":·"value"
+      4 │ + }
+      5 │ + 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

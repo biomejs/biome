@@ -1,0 +1,18 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.json`
+
+```json
+{
+  // This is a comment
+  "key": "value"
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

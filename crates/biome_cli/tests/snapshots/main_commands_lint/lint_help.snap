@@ -10,6 +10,11 @@ Run various checks on a set of files.
 Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|RULE|DOMAIN>]... [
 --skip=<GROUP|RULE|DOMAIN>]... [--staged] [--changed] [--since=REF] [PATH]...
 
+Options that changes how the JSON parser behaves
+        --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
+        --json-parse-allow-trailing-commas=<true|false>  Allow parsing trailing commas in `.json`
+                              files
+
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
         --vcs-client-kind=<git>  The kind of client.
