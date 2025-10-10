@@ -46,8 +46,16 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// #### Invalid
+    ///
     /// ```jsonc,expect_diagnostic,use_options
     ///
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```jsonc,expect_diagnostic,use_options
+    /// // Only comments
     /// ```
     ///
     pub NoEmptySource {

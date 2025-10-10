@@ -51,8 +51,16 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// #### Invalid
+    ///
     /// ```graphql,expect_diagnostic,use_options
     ///
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```graphql,expect_diagnostic,use_options
+    /// # Only comments
     /// ```
     ///
     pub NoEmptySource {
