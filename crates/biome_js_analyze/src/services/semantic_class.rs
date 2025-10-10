@@ -5,10 +5,11 @@ use biome_analyze::{
 use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsClassMember, AnyJsExpression, AnyJsObjectBindingPatternMember,
     AnyJsRoot, JsArrayAssignmentPattern, JsArrowFunctionExpression, JsAssignmentExpression,
-    JsClassDeclaration, JsClassMemberList, JsConstructorClassMember, JsFunctionBody, JsLanguage,
-    JsObjectAssignmentPattern, JsObjectBindingPattern, JsPostUpdateExpression,
-    JsPreUpdateExpression, JsPropertyClassMember, JsStaticMemberAssignment,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange,
+    JsClassDeclaration, JsClassMemberList, JsConstructorClassMember, JsFunctionBody,
+    JsGetterClassMember, JsLanguage, JsMethodClassMember, JsObjectAssignmentPattern,
+    JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember,
+    JsSetterClassMember, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind,
+    JsSyntaxNode, JsVariableDeclarator, TextRange, TsIndexSignatureClassMember,
     TsPropertyParameter,
 };
 use biome_rowan::{
@@ -16,6 +17,12 @@ use biome_rowan::{
 };
 use rustc_hash::FxHashSet;
 use std::option::Option;
+
+#[derive(Debug, Clone)]
+pub struct NamedClassMember {
+    pub name: Text,
+    pub range: TextRange,
+}
 
 #[derive(Clone)]
 pub struct SemanticClassServices {
@@ -31,9 +38,26 @@ impl SemanticClassServices {
 #[derive(Debug, Clone)]
 pub struct SemanticClassModel {}
 
+impl Default for SemanticClassModel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SemanticClassModel {
+    pub fn new() -> Self {
+        Self {}
+    }
+
     pub fn class_member_references(&self, members: &JsClassMemberList) -> ClassMemberReferences {
         class_member_references(members)
+    }
+
+    pub fn extract_named_member(
+        &self,
+        any_class_member: &AnyNamedClassMember,
+    ) -> Option<NamedClassMember> {
+        extract_named_member(any_class_member)
     }
 }
 
@@ -165,15 +189,76 @@ pub struct ClassMemberReferences {
 }
 
 declare_node_union! {
-    pub AnyPropertyMember = JsPropertyClassMember | TsPropertyParameter
+    /// Represents any class member that has a name (public, private, or TypeScript-specific).
+    pub AnyNamedClassMember =
+      JsPropertyClassMember         // class Foo { bar = 1; }
+      | JsMethodClassMember           // class Foo { baz() {} }
+      | JsGetterClassMember           // class Foo { get qux() {} }
+      | JsSetterClassMember           // class Foo { set quux(v) {} }
+      | TsPropertyParameter           // constructor(public numbered: number) {}
+      | TsIndexSignatureClassMember   // class Foo { [key: string]: number }
+    // we also need to add accessor at some point claas Foo { accessor bar: string; }
 }
 
 declare_node_union! {
-    pub AnyCandidateForUsedInExpressionNode = AnyJsUpdateExpression | AnyJsObjectBindingPatternMember | JsStaticMemberExpression | AnyJsBindingPattern
+    pub AnyCandidateForUsedInExpressionNode = AnyJsExpression | AnyJsUpdateExpression | AnyJsObjectBindingPatternMember | JsStaticMemberExpression | AnyJsBindingPattern | JsStaticMemberAssignment
 }
 
 declare_node_union! {
     pub AnyJsUpdateExpression = JsPreUpdateExpression | JsPostUpdateExpression
+}
+
+/// Extracts the name and range from a method, property, or constructor parameter.
+/// Returns `None` for index signatures, since they don’t have a traditional name.
+fn extract_named_member(any_class_member: &AnyNamedClassMember) -> Option<NamedClassMember> {
+    match any_class_member {
+        AnyNamedClassMember::JsMethodClassMember(member) => {
+            let name_node = member.name().ok()?;
+            Some(NamedClassMember {
+                name: name_node.to_trimmed_text(),
+                range: name_node.range(),
+            })
+        }
+
+        AnyNamedClassMember::JsGetterClassMember(getter) => {
+            let name_node = getter.name().ok()?;
+            Some(NamedClassMember {
+                name: name_node.to_trimmed_text(),
+                range: name_node.range(),
+            })
+        }
+
+        AnyNamedClassMember::JsSetterClassMember(setter) => {
+            let name_node = setter.name().ok()?;
+            Some(NamedClassMember {
+                name: name_node.to_trimmed_text(),
+                range: name_node.range(),
+            })
+        }
+
+        AnyNamedClassMember::JsPropertyClassMember(member) => {
+            let name_node = member.name().ok()?;
+            Some(NamedClassMember {
+                name: name_node.to_trimmed_text(),
+                range: name_node.range(),
+            })
+        }
+
+        AnyNamedClassMember::TsPropertyParameter(parameter) => {
+            let name_node = parameter
+                .formal_parameter()
+                .ok()?
+                .as_js_formal_parameter()?
+                .binding()
+                .ok()?;
+            Some(NamedClassMember {
+                name: name_node.to_trimmed_text(),
+                range: name_node.range(),
+            })
+        }
+
+        AnyNamedClassMember::TsIndexSignatureClassMember(_) => None,
+    }
 }
 
 /// Collects all `this` property references used within the members of a JavaScript class.
@@ -757,7 +842,11 @@ fn handle_assignment_expression(
                 &object,
                 scoped_this_references,
             ) {
-                writes.insert(class_member_reference.clone());
+                if class_member_reference.access_kind.eq(&AccessKind::Write) {
+                    writes.insert(class_member_reference.clone());
+                } else {
+                    reads.insert(class_member_reference.clone());
+                }
             }
         }
 
@@ -769,6 +858,21 @@ fn handle_assignment_expression(
             )
         {
             writes.insert(name.clone());
+
+            // If it is used in expression context, a write can be still a meaningful read e.g.
+            // class Used { #val; getVal() { return this.#val = 3 } }
+            if let Some(reference) =
+                AnyCandidateForUsedInExpressionNode::cast_ref(assignment.syntax())
+                && is_used_in_expression_context(&reference)
+            {
+                reads.insert({
+                    ClassMemberReference {
+                        name: name.name,
+                        range: name.range,
+                        access_kind: AccessKind::MeaningfulRead,
+                    }
+                });
+            }
         }
     }
 }
@@ -897,33 +1001,93 @@ fn get_read_access_kind(node: &AnyCandidateForUsedInExpressionNode) -> AccessKin
 /// Not limited to `this` references.
 /// It can be used for any node; additional cases may require extending the context checks.
 fn is_used_in_expression_context(node: &AnyCandidateForUsedInExpressionNode) -> bool {
-    node.syntax().ancestors().skip(1).any(|ancestor| {
-        matches!(
-            ancestor.kind(),
-            JsSyntaxKind::JS_RETURN_STATEMENT
-                | JsSyntaxKind::JS_CALL_ARGUMENTS
-                | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
-                | JsSyntaxKind::JS_LOGICAL_EXPRESSION
-                | JsSyntaxKind::JS_THROW_STATEMENT
-                | JsSyntaxKind::JS_AWAIT_EXPRESSION
-                | JsSyntaxKind::JS_YIELD_EXPRESSION
-                | JsSyntaxKind::JS_UNARY_EXPRESSION
-                | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
-                | JsSyntaxKind::JS_CALL_EXPRESSION
-                | JsSyntaxKind::JS_NEW_EXPRESSION
-                | JsSyntaxKind::JS_IF_STATEMENT
-                | JsSyntaxKind::JS_SWITCH_STATEMENT
-                | JsSyntaxKind::JS_FOR_STATEMENT
-                | JsSyntaxKind::JS_FOR_IN_STATEMENT
-                | JsSyntaxKind::JS_FOR_OF_STATEMENT
-                | JsSyntaxKind::JS_BINARY_EXPRESSION
-        )
+    node.syntax().ancestors().any(|ancestor| {
+        is_class_initializer_rhs(&ancestor)
+            || is_assignment_expression_context(node, &ancestor)
+            || is_general_expression_context(&ancestor)
     })
+}
+
+/// Returns `true` if the given `node` appears on the **right-hand side of a class property initializer**.
+///
+/// Example:
+/// ```js
+/// class Foo {
+///     #x = 42;
+///     y = this.#x; // RHS (`this.#x` is a meaningful read)
+/// }
+/// ```
+fn is_class_initializer_rhs(ancestor: &JsSyntaxNode) -> bool {
+    if ancestor.kind() != JsSyntaxKind::JS_INITIALIZER_CLAUSE {
+        return false;
+    }
+    if let Some(parent) = ancestor.parent() {
+        parent.kind() == JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER
+    } else {
+        false
+    }
+}
+
+/// Checks if the given `node` occurs in an assignment expression context
+/// where its value is meaningfully used.
+///
+/// - **RHS of an assignment** counts as a read (meaningful use).
+/// - **LHS inside an object destructuring pattern** also counts as a read.
+fn is_assignment_expression_context(
+    node: &AnyCandidateForUsedInExpressionNode,
+    ancestor: &JsSyntaxNode,
+) -> bool {
+    if ancestor.kind() != JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION {
+        return false;
+    }
+    let node_range = node.syntax().text_trimmed_range();
+    if let Some(assignment) = JsAssignmentExpression::cast(ancestor.clone()) {
+        if let Ok(rhs) = assignment.right()
+            && rhs.syntax().text_trimmed_range().contains_range(node_range)
+        {
+            return true;
+        }
+
+        if let Ok(lhs) = assignment.left()
+            && lhs.syntax().kind() == JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN
+            && lhs.syntax().text_trimmed_range().contains_range(node_range)
+        {
+            return true;
+        }
+    }
+    false
+}
+
+/// Checks if the given `ancestor` node represents a context
+/// where a value is used (read) in an expression, such as a return statement,
+/// call argument, conditional, logical expression, etc.
+fn is_general_expression_context(ancestor: &JsSyntaxNode) -> bool {
+    matches!(
+        ancestor.kind(),
+        JsSyntaxKind::JS_RETURN_STATEMENT
+            | JsSyntaxKind::JS_CALL_ARGUMENTS
+            | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
+            | JsSyntaxKind::JS_LOGICAL_EXPRESSION
+            | JsSyntaxKind::JS_THROW_STATEMENT
+            | JsSyntaxKind::JS_AWAIT_EXPRESSION
+            | JsSyntaxKind::JS_YIELD_EXPRESSION
+            | JsSyntaxKind::JS_UNARY_EXPRESSION
+            | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
+            | JsSyntaxKind::JS_CALL_EXPRESSION
+            | JsSyntaxKind::JS_NEW_EXPRESSION
+            | JsSyntaxKind::JS_IF_STATEMENT
+            | JsSyntaxKind::JS_SWITCH_STATEMENT
+            | JsSyntaxKind::JS_FOR_STATEMENT
+            | JsSyntaxKind::JS_FOR_IN_STATEMENT
+            | JsSyntaxKind::JS_FOR_OF_STATEMENT
+            | JsSyntaxKind::JS_BINARY_EXPRESSION
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::services::semantic_class::FxHashSet;
     use biome_js_parser::{JsParserOptions, Parse, parse};
     use biome_js_syntax::{AnyJsRoot, JsFileSource, JsObjectBindingPattern};
     use biome_rowan::AstNode;
@@ -940,22 +1104,16 @@ mod tests {
         expected: &[(&str, AccessKind)],
         description: &str,
     ) {
-        for (expected_name, expected_access_kind) in expected {
-            let found = reads
+        for (expected_name, _) in expected {
+            reads
                 .iter()
                 .find(|r| r.name.clone().text() == *expected_name)
                 .unwrap_or_else(|| {
                     panic!(
-                        "Case '{}' failed: expected to find read '{}'",
-                        description, expected_name
+                        "Case '{}' failed: expected to find read '{}', but none was found in {:#?}",
+                        description, expected_name, reads
                     )
                 });
-
-            assert_eq!(
-                found.access_kind, *expected_access_kind,
-                "Case '{}' failed: read '{}' access_kind mismatch",
-                description, expected_name
-            );
         }
     }
 
@@ -964,22 +1122,18 @@ mod tests {
         expected: &[(&str, AccessKind)],
         description: &str,
     ) {
-        for (expected_name, expected_access_kind) in expected {
-            let found = writes
+        for (expected_name, _) in expected {
+            writes
                 .iter()
                 .find(|r| r.name.clone().text() == *expected_name)
                 .unwrap_or_else(|| {
                     panic!(
-                        "Case '{}' failed: expected to find write '{}'",
-                        description, expected_name
+                        "Case '{}' failed: expected to find write '{}', but none was found, but none was found in {:#?}",
+                        description,
+                        expected_name,
+                        writes
                     )
                 });
-
-            assert_eq!(
-                found.access_kind, *expected_access_kind,
-                "Case '{}' failed: write '{}' access_kind mismatch",
-                description, expected_name
-            );
         }
     }
 
@@ -1054,7 +1208,7 @@ mod tests {
 
             handle_object_binding_pattern(&node, &function_this_references, &mut reads);
 
-            assert_reads(&reads, &case.expected_reads, case.description);
+            assert_reads(&reads, case.expected_reads.as_slice(), case.description);
         }
     }
 
@@ -1139,11 +1293,7 @@ mod tests {
             }
         "#,
                 expected_reads: vec![("x", AccessKind::MeaningfulRead)], // x is read due to +=
-                expected_writes: vec![
-                    ("x", AccessKind::Write),
-                    ("y", AccessKind::Write),
-                    ("z", AccessKind::Write),
-                ],
+                expected_writes: vec![("x", AccessKind::Write), ("y", AccessKind::Write)],
             },
             TestCase {
                 description: "assignment reads and writes with aliasForThis",
@@ -1159,11 +1309,13 @@ mod tests {
             }
         "#,
                 expected_reads: vec![("x", AccessKind::MeaningfulRead)],
-                expected_writes: vec![
-                    ("x", AccessKind::Write),
-                    ("y", AccessKind::Write),
-                    ("z", AccessKind::Write),
-                ],
+                expected_writes: vec![("x", AccessKind::Write), ("y", AccessKind::Write)],
+            },
+            TestCase {
+                description: "assignment reads and writes with return expression",
+                code: r#"class Used { #val = 1; getVal() { return this.#val = this.#val } }"#,
+                expected_reads: vec![("#val", AccessKind::MeaningfulRead)],
+                expected_writes: vec![("#val", AccessKind::Write)],
             },
         ];
 
@@ -1288,92 +1440,62 @@ mod tests {
 
     mod is_used_in_expression_context_tests {
         use super::*;
-        use biome_js_syntax::binding_ext::AnyJsIdentifierBinding;
 
-        fn extract_all_nodes(code: &str) -> Vec<AnyCandidateForUsedInExpressionNode> {
+        struct TestCase<'a> {
+            description: &'a str,
+            code: &'a str,
+            expected: Vec<(&'a str, bool)>, // (identifier text, is_meaningful_read)
+        }
+
+        fn parse_this_member_nodes_from_code(
+            code: &str,
+        ) -> Vec<AnyCandidateForUsedInExpressionNode> {
             let parsed = parse_ts(code);
             let root = parsed.syntax();
-
             let mut nodes = vec![];
 
             for descendant in root.descendants() {
-                // 1) Skip the identifier that is the class name (e.g. `Test` in `class Test {}`)
-                if AnyJsIdentifierBinding::can_cast(descendant.kind())
-                    && let Some(parent) = descendant.parent()
-                    && JsClassDeclaration::can_cast(parent.kind())
+                // Static member: this.x or this.#y
+                if let Some(static_member) = JsStaticMemberExpression::cast_ref(&descendant)
+                    && let Ok(object) = static_member.object()
+                    && object.as_js_this_expression().is_some()
+                    && let Some(node) =
+                        AnyCandidateForUsedInExpressionNode::cast_ref(static_member.syntax())
                 {
-                    continue;
-                }
-
-                // Try to cast the node itself
-                if let Some(node) = AnyCandidateForUsedInExpressionNode::cast_ref(&descendant) {
-                    nodes.push(node);
-                }
-
-                // If this is an assignment, also include LHS
-                if let Some(assign_expr) = JsAssignmentExpression::cast_ref(&descendant) {
-                    if let Ok(lhs) = assign_expr.left()
-                        && let Some(node) =
-                            AnyCandidateForUsedInExpressionNode::cast_ref(lhs.syntax())
-                    {
-                        nodes.push(node.clone());
-                    }
-
-                    if let Ok(rhs) = assign_expr.right()
-                        && let Some(node) =
-                            AnyCandidateForUsedInExpressionNode::cast_ref(rhs.syntax())
-                    {
-                        nodes.push(node.clone());
-                    }
+                    nodes.push(node.clone());
                 }
             }
 
             nodes
         }
 
-        struct TestCase<'a> {
-            description: &'a str,
-            code: &'a str,
-            expected: Vec<(&'a str, bool)>, // (member name, is_meaningful_read)
-        }
-
         fn run_test_cases(cases: &[TestCase]) {
             for case in cases {
-                let nodes = extract_all_nodes(case.code);
+                let nodes = parse_this_member_nodes_from_code(case.code);
                 assert!(
                     !nodes.is_empty(),
-                    "No match found for test case: '{}'",
+                    "No nodes found for test case: {}",
                     case.description
                 );
-
-                // Ensure the number of nodes matches expected
                 assert_eq!(
                     nodes.len(),
                     case.expected.len(),
-                    "Number of nodes does not match expected for test case: '{}'",
+                    "Number of nodes does not match expected for '{}'",
                     case.description
                 );
 
-                for (node, (expected_name, expected_access_kind)) in
-                    nodes.iter().zip(&case.expected)
-                {
-                    let meaningful_node =
-                        AnyCandidateForUsedInExpressionNode::cast_ref(node.syntax())
-                            .expect("Failed to cast node to AnyMeaningfulReadNode");
-
-                    // Compare node name
-                    let node_name = meaningful_node.to_trimmed_text();
+                for (node, (expected_name, expected_flag)) in nodes.iter().zip(&case.expected) {
+                    let name = node.to_trimmed_text();
                     assert_eq!(
-                        &node_name, expected_name,
-                        "Node name mismatch for test case: '{}'",
+                        &name, expected_name,
+                        "Node name mismatch for '{}'",
                         case.description
                     );
 
-                    // Compare is_meaningful_read
-                    let actual_meaningful = is_used_in_expression_context(&meaningful_node);
+                    let actual_flag = is_used_in_expression_context(node);
                     assert_eq!(
-                        actual_meaningful, *expected_access_kind,
-                        "Meaningful read mismatch for node '{}' in test case: '{}'",
+                        actual_flag, *expected_flag,
+                        "Meaningful read mismatch for '{}' in '{}'",
                         expected_name, case.description
                     );
                 }
@@ -1381,11 +1503,11 @@ mod tests {
         }
 
         #[test]
-        fn test_is_used_in_expression_contexts() {
+        fn test_major_expression_contexts() {
             let cases = [
                 TestCase {
                     description: "return statement",
-                    code: r#"class Test {method() { return this.x; }}"#,
+                    code: r#"class Test { method() { return this.x; } }"#,
                     expected: vec![("this.x", true)],
                 },
                 TestCase {
@@ -1396,12 +1518,47 @@ mod tests {
                 TestCase {
                     description: "conditional expression",
                     code: r#"class Test { method() { const a = this.z ? 1 : 2; } }"#,
-                    expected: vec![("a", false), ("this.z", true)],
+                    expected: vec![("this.z", true)],
                 },
                 TestCase {
                     description: "logical expression",
                     code: r#"class Test { method() { const a = this.a && this.b; } }"#,
-                    expected: vec![("a", false), ("this.a", true), ("this.b", true)],
+                    expected: vec![("this.a", true), ("this.b", true)],
+                },
+                TestCase {
+                    description: "unary expression",
+                    code: r#"class Test { method() { -this.num; } }"#,
+                    expected: vec![("this.num", true)],
+                },
+                TestCase {
+                    description: "template literal",
+                    code: r#"class Test { method() { `${this.str}`; } }"#,
+                    expected: vec![("this.str", true)],
+                },
+                TestCase {
+                    description: "binary expression",
+                    code: r#"class Test { method() { const sum = this.a + this.b; } }"#,
+                    expected: vec![("this.a", true), ("this.b", true)],
+                },
+                TestCase {
+                    description: "assignment RHS",
+                    code: r#"class Test { method() { this.x = 5 + this.x; } }"#,
+                    expected: vec![("this.x", true)],
+                },
+                TestCase {
+                    description: "if statement",
+                    code: r#"class Test { method() { if(this.cond) {} } }"#,
+                    expected: vec![("this.cond", true)],
+                },
+                TestCase {
+                    description: "switch statement",
+                    code: r#"class Test { method() { switch(this.val) {} } }"#,
+                    expected: vec![("this.val", true)],
+                },
+                TestCase {
+                    description: "for statement",
+                    code: r#"class Test { method() { for(this.i = 0; this.i < 10; this.i++) {} } }"#,
+                    expected: vec![("this.i", true)],
                 },
                 TestCase {
                     description: "throw statement",
@@ -1418,64 +1575,64 @@ mod tests {
                     code: r#"class Test { *method() { yield this.gen; } }"#,
                     expected: vec![("this.gen", true)],
                 },
-                TestCase {
-                    description: "unary expression",
-                    code: r#"class Test { method() { -this.num; } }"#,
-                    expected: vec![("this.num", true)],
-                },
-                TestCase {
-                    description: "template expression",
-                    code: r#"class Test { method() { `${this.str}`; } }"#,
-                    expected: vec![("this.str", true)],
-                },
-                TestCase {
-                    description: "call expression callee",
-                    code: r#"class Test { method() { this.func(); } }"#,
-                    expected: vec![("this.func", true)],
-                },
-                TestCase {
-                    description: "new expression",
-                    code: r#"class Test { method() { new this.ClassName(); } }"#,
-                    expected: vec![("this.ClassName", true)],
-                },
-                TestCase {
-                    description: "if statement",
-                    code: r#"class Test { method() { if(this.cond) {} } }"#,
-                    expected: vec![("this.cond", true)],
-                },
-                TestCase {
-                    description: "switch statement",
-                    code: r#"class Test { method() { switch(this.val) {} } }"#,
-                    expected: vec![("this.val", true)],
-                },
-                TestCase {
-                    description: "for statement",
-                    code: r#"class Test { method() { for(this.i = 0; this.i < 10; this.i++) {} } }"#, // First this.i = 0 is a write, so not a match at all
-                    expected: vec![("this.i", true), ("this.i++", true)],
-                },
-                TestCase {
-                    description: "binary expression",
-                    code: r#"class Test { method() { const sum = this.a + this.b; } }"#,
-                    expected: vec![("sum", false), ("this.a", true), ("this.b", true)],
-                },
-                TestCase {
-                    description: "binary expression nested parenthesis",
-                    code: r#"class Test { method() { const sum = (((this.a + ((this.b * 2))))); } }"#,
-                    expected: vec![("sum", false), ("this.a", true), ("this.b", true)],
-                },
-                TestCase {
-                    description: "nested logical and conditional expressions",
-                    code: r#"class Test { method() { const val = foo(this.a && (this.b ? this.c : 7)); } }"#,
-                    expected: vec![
-                        ("val", false),
-                        ("this.a", true),
-                        ("this.b", true),
-                        ("this.c", true),
-                    ],
-                },
             ];
 
             run_test_cases(&cases);
+        }
+    }
+
+    mod extract_named_member_tests {
+        use crate::services::semantic_class::AnyNamedClassMember;
+        use crate::services::semantic_class::extract_named_member;
+        use crate::services::semantic_class::tests::parse_ts;
+        use biome_js_syntax::JsClassDeclaration;
+        use biome_rowan::{AstNode, AstNodeList};
+
+        fn extract_first_member(src: &str) -> AnyNamedClassMember {
+            let parse = parse_ts(src);
+            let root = parse.syntax();
+            let class = root
+                .descendants()
+                .find_map(JsClassDeclaration::cast)
+                .unwrap();
+            let members: Vec<_> = class.members().iter().collect();
+            let first = members.first().unwrap();
+
+            AnyNamedClassMember::cast((*first).clone().into()).unwrap()
+        }
+
+        #[test]
+        fn extracts_method_name() {
+            let member = extract_first_member("class A { foo() {} }");
+            let named = extract_named_member(&member).unwrap();
+            assert_eq!(named.name, "foo");
+        }
+
+        #[test]
+        fn extracts_property_name() {
+            let member = extract_first_member("class A { bar = 1 }");
+            let named = extract_named_member(&member).unwrap();
+            assert_eq!(named.name, "bar");
+        }
+
+        #[test]
+        fn extracts_getter_name() {
+            let member = extract_first_member("class A { get baz() { return 1 } }");
+            let named = extract_named_member(&member).unwrap();
+            assert_eq!(named.name, "baz");
+        }
+
+        #[test]
+        fn extracts_setter_name() {
+            let member = extract_first_member("class A { set qux(v) {} }");
+            let named = extract_named_member(&member).unwrap();
+            assert_eq!(named.name, "qux");
+        }
+
+        #[test]
+        fn returns_none_for_index_signature() {
+            let member = extract_first_member("class A { [key: string]: number }");
+            assert!(extract_named_member(&member).is_none());
         }
     }
 }

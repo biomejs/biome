@@ -52,7 +52,7 @@ export function f(options: PostcssOptions) {
         .with_configuration(
             AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::ReactClassic),
         );
-    let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
+    let rule_filter = RuleFilter::Rule("correctness", "noUnusedPrivateClassMembers");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
 
