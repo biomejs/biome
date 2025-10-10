@@ -35,16 +35,18 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// ### `comments`
+    /// ### `allowComments`
     ///
-    /// Whether the comments should be marked as meaningless.
+    /// Whether the comments should be marked as meaningful.
+    /// When this option has been set to `true`, a file with only comments is considered valid.
     ///
-    /// Default `true`
+    /// Default `false`
+    ///
     ///
     /// ```json,options
     /// {
     ///   "options": {
-    ///     "comments": false
+    ///     "allowComments": true
     ///   }
     /// }
     /// ```
@@ -74,7 +76,7 @@ impl Rule for NoEmptySource {
             return None;
         }
 
-        if !ctx.options().comments && node.syntax().has_comments_direct() {
+        if ctx.options().allow_comments && node.syntax().has_comments_direct() {
             return None;
         }
 

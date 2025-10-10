@@ -3137,9 +3137,9 @@
 		"NoEmptySourceOptions": {
 			"type": "object",
 			"properties": {
-				"comments": {
-					"description": "Whether comments are considered meaningless",
-					"default": true,
+				"allowComments": {
+					"description": "Whether comments are considered meaningful",
+					"default": false,
 					"type": "boolean"
 				}
 			},

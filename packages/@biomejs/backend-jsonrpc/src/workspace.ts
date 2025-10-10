@@ -8202,9 +8202,9 @@ export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoEmptySourceOptions {
 	/**
-	 * Whether comments are considered meaningless
+	 * Whether comments are considered meaningful
 	 */
-	comments?: boolean;
+	allowComments?: boolean;
 }
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
