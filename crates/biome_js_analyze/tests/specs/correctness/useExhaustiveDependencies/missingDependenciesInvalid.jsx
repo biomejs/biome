@@ -9,6 +9,7 @@ import {
 	useState,
 	useReducer,
 	useTransition,
+  useEffectEvent,
 } from "react";
 import { useRef } from "unknown/hooks"
 
@@ -29,6 +30,7 @@ function MyComponent2() {
   const memoizedValue = useMemo();
   const deferredValue = useDeferredValue(value);
   const [isPending, startTransition] = useTransition();
+  const event = useEffectEvent(() => {});
   useEffect(() => {
       console.log(name);
       setName(1);
@@ -42,6 +44,7 @@ function MyComponent2() {
 
       console.log(isPending);
       startTransition();
+      event();
   }, []);
 }
 
