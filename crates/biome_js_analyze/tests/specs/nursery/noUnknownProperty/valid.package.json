@@ -1,0 +1,6 @@
+{
+  "name": "no-unknown-property",
+  "dependencies": {
+    "react": "16.4.0"
+  }
+}
