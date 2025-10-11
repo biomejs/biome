@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "noUnknownProperty": {
+          "level": "error",
+          "options": {
+            "requireDataLowercase": true
+          }
+        }
+      }
+    }
+  }
+}
