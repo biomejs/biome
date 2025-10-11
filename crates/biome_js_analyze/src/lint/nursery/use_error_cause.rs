@@ -45,6 +45,18 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// Cause error is being shadowed by a closer scoped redeclaration.
+    /// ```js,expect_diagnostic
+    /// try {
+    ///     doSomething();
+    /// } catch (error) {
+    ///     if (whatever) {
+    ///         const error = anotherError; // This declaration shadows the caught error.
+    ///         throw new Error("Something went wrong", { cause: error });
+    ///     }
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
