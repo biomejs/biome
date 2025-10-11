@@ -8,12 +8,11 @@ use biome_rule_options::use_error_cause::UseErrorCauseOptions;
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow rethrowing caught errors without wrapping them, using the `cause` property to preserve the original stack trace.
+    /// Enforce that `new Error()` is thrown with the original error as `cause`.
     ///
-    /// When rethrowing a caught error, it's recommended to wrap it in a new `Error` object to preserve the original error's stack trace and context. The original error should be passed as the `cause` property of the new `Error` object.
+    /// When catching and rethrowing an error, it's recommended to wrap the original error in a new `Error` object to preserve the original error's stack trace and context. The original error should be passed as the `cause` property of the new `Error` object.
     ///
     /// This rule enforces that practice, helping to maintain a clear and traceable error propagation chain, which is crucial for effective debugging.
-    ///
     ///
     /// ## Examples
     ///
