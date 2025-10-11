@@ -240,9 +240,43 @@ pub enum RuleError {
     ReplacedRootWithNonRootError {
         rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
     },
+    /// The rules listed below caused an infinite loop when applying fixes to the file.
+    ConflictingRuleFixesError {
+        rules: Vec<(Cow<'static, str>, Cow<'static, str>)>,
+    },
 }
 
-impl Diagnostic for RuleError {}
+impl Diagnostic for RuleError {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("internalError/panic"))
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            fmt,
+            "An internal error occurred when analyzing this file.\n\n{}\n\nThis is likely a bug in Biome, not an error in your code. Please consider filing an issue on GitHub with a reproduction of this error.",
+            self
+        )?;
+        Ok(())
+    }
+
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup! {
+            "An internal error occurred when analyzing this file."
+        })?;
+        fmt.write_markup(markup! {
+            {self}
+        })?;
+        fmt.write_markup(markup! {
+            "This is likely a bug in Biome, not an error in your code. Please consider filing an issue on "<Hyperlink href="https://github.com/biomejs/biome/issues/new/choose">"GitHub"</Hyperlink>" with a reproduction of this error."
+        })?;
+        Ok(())
+    }
+}
 
 impl std::fmt::Display for RuleError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -252,13 +286,27 @@ impl std::fmt::Display for RuleError {
             } => {
                 std::write!(
                     fmt,
-                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
+                    "The rule '{group}/{rule}' replaced the root of the file with a non-root node."
                 )
             }
             Self::ReplacedRootWithNonRootError { rule_name: None } => {
                 std::write!(
                     fmt,
-                    "a code action replaced the root of the file with a non-root node."
+                    "A code action replaced the root of the file with a non-root node."
+                )
+            }
+            Self::ConflictingRuleFixesError { rules } => {
+                if rules.is_empty() {
+                    return std::write!(fmt, "conflicting rule fixes detected");
+                }
+                let rules_list = rules
+                    .iter()
+                    .map(|(group, rule)| format!("'{group}/{rule}'"))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                std::write!(
+                    fmt,
+                    "The rules {rules_list} caused an infinite loop when applying fixes to the file."
                 )
             }
         }
@@ -273,13 +321,27 @@ impl biome_console::fmt::Display for RuleError {
             } => {
                 std::write!(
                     fmt,
-                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
+                    "The rule '{group}/{rule}' replaced the root of the file with a non-root node."
                 )
             }
             Self::ReplacedRootWithNonRootError { rule_name: None } => {
                 std::write!(
                     fmt,
-                    "a code action replaced the root of the file with a non-root node."
+                    "A code action replaced the root of the file with a non-root node."
+                )
+            }
+            Self::ConflictingRuleFixesError { rules } => {
+                if rules.is_empty() {
+                    return std::write!(fmt, "Conflicting rule fixes detected.");
+                }
+                let rules_list = rules
+                    .iter()
+                    .map(|(group, rule)| format!("'{group}/{rule}'"))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                std::write!(
+                    fmt,
+                    "The rules {rules_list} caused an infinite loop when applying fixes to the file."
                 )
             }
         }
