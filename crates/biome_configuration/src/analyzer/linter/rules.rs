@@ -4725,6 +4725,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -4909,12 +4910,12 @@ impl RuleGroupExt for Nursery {
         if let Some(rule) = self.use_sorted_interface_members.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
         }
         if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
         }
         index_set
     }
@@ -5093,12 +5094,12 @@ impl RuleGroupExt for Nursery {
         if let Some(rule) = self.use_sorted_interface_members.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
         }
         if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
         }
         index_set
     }
