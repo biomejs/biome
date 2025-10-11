@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
@@ -127,7 +127,10 @@ declare_lint_rule! {
 pub enum State {
     WithoutCause(TextRange),
     NoErrorBinding(TextRange),
-    ShadowedCause { cause_range: TextRange, catch_binding_range: TextRange },
+    ShadowedCause {
+        cause_range: TextRange,
+        catch_binding_range: TextRange,
+    },
     DestructuringBinding(TextRange),
 }
 
@@ -206,9 +209,12 @@ impl Rule for UseErrorCause {
                                 .and_then(|name_node| name_node.name())
                                 .is_some_and(|name| name == "cause");
 
-                            if is_cause_prop {
-                                if let Some(value) = prop.value().ok() {
-                                    match is_cause_value_correct_error(&value, identifier_binding, model) {
+                            if is_cause_prop && let Ok(value) = prop.value() {
+                                    match is_cause_value_correct_error(
+                                        &value,
+                                        identifier_binding,
+                                        model,
+                                    ) {
                                         CauseValueCheckResult::Correct => return None,
                                         CauseValueCheckResult::Shadowed => {
                                             return Some(State::ShadowedCause {
@@ -222,7 +228,7 @@ impl Rule for UseErrorCause {
                                         }
                                     }
                                 }
-                            }
+
                         }
                     }
 
