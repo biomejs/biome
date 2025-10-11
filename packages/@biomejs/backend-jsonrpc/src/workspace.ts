@@ -1730,6 +1730,10 @@ export interface Nursery {
 	 */
 	useDeprecatedDate?: RuleConfiguration_for_UseDeprecatedDateOptions;
 	/**
+	 * Disallow rethrowing caught errors without wrapping them, using the cause property to preserve the original stack trace.
+	 */
+	useErrorCause?: RuleConfiguration_for_UseErrorCauseOptions;
+	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
 	useExhaustiveSwitchCases?: RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions;
@@ -3081,6 +3085,9 @@ export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
 export type RuleConfiguration_for_UseDeprecatedDateOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseDeprecatedDateOptions;
+export type RuleConfiguration_for_UseErrorCauseOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseErrorCauseOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -5678,6 +5685,16 @@ export interface RuleWithOptions_for_UseDeprecatedDateOptions {
 	 */
 	options: UseDeprecatedDateOptions;
 }
+export interface RuleWithOptions_for_UseErrorCauseOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseErrorCauseOptions;
+}
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -8250,6 +8267,15 @@ export interface UseConsistentTypeDefinitionsOptions {
 export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
+/**
+ * Options for the `useErrorCause` rule.
+ */
+export interface UseErrorCauseOptions {
+	/**
+	 * When set to `true`, the rule requires that `catch` clauses have a parameter.
+	 */
+	requireCatchParameter?: boolean;
+}
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
 export type UseImageSizeOptions = null;
@@ -8988,6 +9014,7 @@ export type Category =
 	| "lint/nursery/useAnchorHref"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentArrowReturn"
+	| "lint/nursery/useErrorCause"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTypeDefinitions"
 	| "lint/nursery/useDeprecatedDate"

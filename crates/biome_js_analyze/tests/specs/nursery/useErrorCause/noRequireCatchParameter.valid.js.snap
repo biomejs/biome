@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: requireCatchParameter.valid.js
+---
+# Input
+```js
+// should not generate diagnostics
+
+
+try {
+	doSomething();
+} catch {
+	throw new TypeError("Something went wrong");
+}
+
+
+try {
+    doSomething();
+} catch (e) {
+    console.error(e);
+}
+
+```

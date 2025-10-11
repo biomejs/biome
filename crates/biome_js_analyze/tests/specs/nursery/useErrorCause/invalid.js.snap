@@ -1,0 +1,160 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error("Wrapper error");
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed: ${err.message}`);
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  if (true) {
+    throw err;
+  }
+}
+
+try {
+	doSomething();
+} catch {
+	throw new TypeError("Something went wrong");
+}
+
+
+try {
+  throw new Error("Original error");
+} catch ({ message }) {
+  throw new Error(message);
+}
+
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
+}
+
+try {
+    doSomething();
+} catch (error) {
+    if (whatever) {
+        const error = anotherError; // This declaration is the problem.
+        throw new Error("Something went wrong", { cause: error });
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:6:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    4 │   throw new Error("Original error");
+    5 │ } catch (err) {
+  > 6 │   throw new Error("Wrapper error");
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+
+```
+
+```
+invalid.js:13:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    11 │   throw new Error("Original error");
+    12 │ } catch (err) {
+  > 13 │   throw new Error(`Failed: ${err.message}`);
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+
+```
+
+```
+invalid.js:28:2 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is being discarded because the `catch` clause doesn't have a parameter.Specify an error object in the `catch` clause to access the original error.
+  
+    26 │ 	doSomething();
+    27 │ } catch {
+  > 28 │ 	throw new TypeError("Something went wrong");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ }
+    30 │ 
+  
+
+```
+
+```
+invalid.js:34:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
+  
+    32 │ try {
+    33 │   throw new Error("Original error");
+  > 34 │ } catch ({ message }) {
+       │          ^^^^^^^^^^^
+    35 │   throw new Error(message);
+    36 │ }
+  
+
+```
+
+```
+invalid.js:42:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    40 │   throw new Error("Original error");
+    41 │ } catch (err) {
+  > 42 │   throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ }
+    44 │ 
+  
+
+```
+
+```
+invalid.js:50:58 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The `cause` property is shadowing the original error from the `catch` clause.
+  
+    48 │     if (whatever) {
+    49 │         const error = anotherError; // This declaration is the problem.
+  > 50 │         throw new Error("Something went wrong", { cause: error });
+       │                                                          ^^^^^
+    51 │     }
+    52 │ }
+  
+  i The original error is declared here.
+  
+    45 │ try {
+    46 │     doSomething();
+  > 47 │ } catch (error) {
+       │          ^^^^^
+    48 │     if (whatever) {
+    49 │         const error = anotherError; // This declaration is the problem.
+  
+
+```

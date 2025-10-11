@@ -5172,6 +5172,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useErrorCause": {
+					"description": "Disallow rethrowing caught errors without wrapping them, using the cause property to preserve the original stack trace.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseErrorCauseConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.",
 					"anyOf": [
@@ -10497,6 +10504,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseErrorCauseOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseErrorCauseOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseErrorMessageOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13936,6 +13958,24 @@
 		},
 		"UseEnumInitializersOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseErrorCauseConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseErrorCauseOptions" }
+			]
+		},
+		"UseErrorCauseOptions": {
+			"description": "Options for the `useErrorCause` rule.",
+			"type": "object",
+			"properties": {
+				"requireCatchParameter": {
+					"description": "When set to `true`, the rule requires that `catch` clauses have a parameter.",
+					"default": true,
+					"type": "boolean"
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseErrorMessageConfiguration": {
