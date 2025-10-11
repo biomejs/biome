@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: requireCatchParameter.invalid.js
+expression: noRequireCatchParameter.invalid.js
 ---
 # Input
 ```js
@@ -47,7 +47,7 @@ try {
 
 # Diagnostics
 ```
-requireCatchParameter.invalid.js:13:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+noRequireCatchParameter.invalid.js:13:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
   
@@ -62,7 +62,7 @@ requireCatchParameter.invalid.js:13:3 lint/nursery/useErrorCause ━━━━━
 ```
 
 ```
-requireCatchParameter.invalid.js:20:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+noRequireCatchParameter.invalid.js:20:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
   
@@ -77,7 +77,7 @@ requireCatchParameter.invalid.js:20:3 lint/nursery/useErrorCause ━━━━━
 ```
 
 ```
-requireCatchParameter.invalid.js:36:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+noRequireCatchParameter.invalid.js:36:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
   
