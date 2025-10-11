@@ -55,6 +55,15 @@ try {
   throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
 }
 
+try {
+    doSomething();
+} catch (error) {
+    if (whatever) {
+        const error = anotherError; // This declaration is the problem.
+        throw new Error("Something went wrong", { cause: error });
+    }
+}
+
 ```
 
 # Diagnostics
@@ -129,6 +138,30 @@ invalid.js:49:3 lint/nursery/useErrorCause ━━━━━━━━━━━━�
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     50 │ }
     51 │ 
+  
+
+```
+
+```
+invalid.js:57:58 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The `cause` property is shadowing the original error from the `catch` clause.
+  
+    55 │     if (whatever) {
+    56 │         const error = anotherError; // This declaration is the problem.
+  > 57 │         throw new Error("Something went wrong", { cause: error });
+       │                                                          ^^^^^
+    58 │     }
+    59 │ }
+  
+  i The original error is declared here.
+  
+    52 │ try {
+    53 │     doSomething();
+  > 54 │ } catch (error) {
+       │          ^^^^^
+    55 │     if (whatever) {
+    56 │         const error = anotherError; // This declaration is the problem.
   
 
 ```
