@@ -1,10 +1,13 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsBindingPattern, JsCatchClause, JsThrowStatement};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::use_error_cause::UseErrorCauseOptions;
+
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Disallow rethrowing caught errors without wrapping them, using the `cause` property to preserve the original stack trace.
@@ -112,11 +115,12 @@ declare_lint_rule! {
 pub enum State {
     WithoutCause(TextRange),
     NoErrorBinding(TextRange),
+    ShadowedCause { cause_range: TextRange, catch_binding_range: TextRange },
     DestructuringBinding(TextRange),
 }
 
 impl Rule for UseErrorCause {
-    type Query = Ast<JsThrowStatement>;
+    type Query = Semantic<JsThrowStatement>;
     type State = State;
     type Signals = Option<Self::State>;
     type Options = UseErrorCauseOptions;
@@ -124,6 +128,7 @@ impl Rule for UseErrorCause {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let throw_statement = ctx.query();
         let options = ctx.options();
+        let model = ctx.model();
 
         let catch_clause = throw_statement
             .syntax()
@@ -155,7 +160,6 @@ impl Rule for UseErrorCause {
                 AnyJsBindingPattern::AnyJsBinding(catch_error_binding) => {
                     let identifier_binding = catch_error_binding.as_js_identifier_binding()?;
 
-                    let catch_error_name = identifier_binding.name_token().ok()?;
                     let thrown_expression = throw_statement.argument().ok()?;
 
                     let Some(new_expression) = thrown_expression.as_js_new_expression() else {
@@ -191,19 +195,20 @@ impl Rule for UseErrorCause {
                                 .is_some_and(|name| name == "cause");
 
                             if is_cause_prop {
-                                let is_correct_error = prop.value().ok().is_some_and(|value| {
-                                    value
-                                        .as_js_identifier_expression()
-                                        .and_then(|ident_expr| ident_expr.name().ok())
-                                        .and_then(|name| name.value_token().ok())
-                                        .is_some_and(|token| {
-                                            token.token_text_trimmed()
-                                                == catch_error_name.text_trimmed()
-                                        })
-                                });
-
-                                if is_correct_error {
-                                    return None;
+                                if let Some(value) = prop.value().ok() {
+                                    match is_cause_value_correct_error(&value, identifier_binding, model) {
+                                        CauseValueCheckResult::Correct => return None,
+                                        CauseValueCheckResult::Shadowed => {
+                                            return Some(State::ShadowedCause {
+                                                cause_range: value.range(),
+                                                catch_binding_range: identifier_binding.range(),
+                                            });
+                                        }
+                                        CauseValueCheckResult::Incorrect => {
+                                            // Continue checking other properties, another `cause` might be present.
+                                            // This is unlikely to be valid JS, but we handle it.
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -237,6 +242,19 @@ impl Rule for UseErrorCause {
                     Include the original error in the `cause` property to preserve it."
                 },
             )),
+            State::ShadowedCause { cause_range, catch_binding_range } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    cause_range,
+                    markup! {
+                        "The `cause` property is shadowing the original error from the `catch` clause."
+                    },
+                )
+                .detail(
+                    catch_binding_range,
+                    "The original error is declared here.",
+                ),
+            ),
             State::NoErrorBinding(range) => Some(RuleDiagnostic::new(
                 rule_category!(),
                 range,
@@ -256,5 +274,36 @@ impl Rule for UseErrorCause {
                 },
             )),
         }
+    }
+}
+
+enum CauseValueCheckResult {
+    Correct,
+    Shadowed,
+    Incorrect,
+}
+
+fn is_cause_value_correct_error(
+    value: &biome_js_syntax::AnyJsExpression,
+    catch_error_binding: &biome_js_syntax::JsIdentifierBinding,
+    model: &SemanticModel,
+) -> CauseValueCheckResult {
+    let Some(cause_identifier_expr) = value.as_js_identifier_expression() else {
+        return CauseValueCheckResult::Incorrect;
+    };
+    let Ok(cause_reference) = cause_identifier_expr.name() else {
+        return CauseValueCheckResult::Incorrect;
+    };
+
+    let Some(cause_binding) = model.binding(&cause_reference) else {
+        return CauseValueCheckResult::Incorrect;
+    };
+
+    let catch_binding = model.as_binding(catch_error_binding);
+
+    if cause_binding == catch_binding {
+        CauseValueCheckResult::Correct
+    } else {
+        CauseValueCheckResult::Shadowed
     }
 }

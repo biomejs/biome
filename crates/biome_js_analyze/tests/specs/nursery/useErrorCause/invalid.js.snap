@@ -48,6 +48,13 @@ try {
   throw new Error(message);
 }
 
+
+try {
+  throw new Error("Original error");
+} catch (err) {
+  throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
+}
+
 ```
 
 # Diagnostics
@@ -107,6 +114,21 @@ invalid.js:41:10 lint/nursery/useErrorCause ━━━━━━━━━━━━
        │          ^^^^^^^^^^^
     42 │   throw new Error(message);
     43 │ }
+  
+
+```
+
+```
+invalid.js:49:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    47 │   throw new Error("Original error");
+    48 │ } catch (err) {
+  > 49 │   throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ }
+    51 │ 
   
 
 ```
