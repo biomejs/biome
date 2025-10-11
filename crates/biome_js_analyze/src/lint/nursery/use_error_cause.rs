@@ -1,6 +1,4 @@
-use biome_analyze::{
-    Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsBindingPattern, JsCatchClause, JsThrowStatement};
@@ -210,25 +208,24 @@ impl Rule for UseErrorCause {
                                 .is_some_and(|name| name == "cause");
 
                             if is_cause_prop && let Ok(value) = prop.value() {
-                                    match is_cause_value_correct_error(
-                                        &value,
-                                        identifier_binding,
-                                        model,
-                                    ) {
-                                        CauseValueCheckResult::Correct => return None,
-                                        CauseValueCheckResult::Shadowed => {
-                                            return Some(State::ShadowedCause {
-                                                cause_range: value.range(),
-                                                catch_binding_range: identifier_binding.range(),
-                                            });
-                                        }
-                                        CauseValueCheckResult::Incorrect => {
-                                            // Continue checking other properties, another `cause` might be present.
-                                            // This is unlikely to be valid JS, but we handle it.
-                                        }
+                                match is_cause_value_correct_error(
+                                    &value,
+                                    identifier_binding,
+                                    model,
+                                ) {
+                                    CauseValueCheckResult::Correct => return None,
+                                    CauseValueCheckResult::Shadowed => {
+                                        return Some(State::ShadowedCause {
+                                            cause_range: value.range(),
+                                            catch_binding_range: identifier_binding.range(),
+                                        });
+                                    }
+                                    CauseValueCheckResult::Incorrect => {
+                                        // Continue checking other properties, another `cause` might be present.
+                                        // This is unlikely to be valid JS, but we handle it.
                                     }
                                 }
-
+                            }
                         }
                     }
 
