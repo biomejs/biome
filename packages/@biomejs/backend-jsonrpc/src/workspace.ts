@@ -1730,7 +1730,7 @@ export interface Nursery {
 	 */
 	useDeprecatedDate?: RuleConfiguration_for_UseDeprecatedDateOptions;
 	/**
-	 * Disallow rethrowing caught errors without wrapping them, using the cause property to preserve the original stack trace.
+	 * Enforce that new Error() is thrown with the original error as cause.
 	 */
 	useErrorCause?: RuleConfiguration_for_UseErrorCauseOptions;
 	/**
