@@ -3,13 +3,6 @@
 try {
   throw new Error("Original error");
 } catch (err) {
-  throw err;
-}
-
-
-try {
-  throw new Error("Original error");
-} catch (err) {
   throw new Error("Wrapper error");
 }
 

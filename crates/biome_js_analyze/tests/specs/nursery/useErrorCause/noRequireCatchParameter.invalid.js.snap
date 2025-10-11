@@ -9,13 +9,6 @@ expression: noRequireCatchParameter.invalid.js
 try {
   throw new Error("Original error");
 } catch (err) {
-  throw err;
-}
-
-
-try {
-  throw new Error("Original error");
-} catch (err) {
   throw new Error("Wrapper error");
 }
 
@@ -47,14 +40,29 @@ try {
 
 # Diagnostics
 ```
+noRequireCatchParameter.invalid.js:6:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    4 │   throw new Error("Original error");
+    5 │ } catch (err) {
+  > 6 │   throw new Error("Wrapper error");
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+
+```
+
+```
 noRequireCatchParameter.invalid.js:13:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
   
     11 │   throw new Error("Original error");
     12 │ } catch (err) {
-  > 13 │   throw new Error("Wrapper error");
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 13 │   throw new Error(`Failed: ${err.message}`);
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │ }
     15 │ 
   
@@ -62,31 +70,16 @@ noRequireCatchParameter.invalid.js:13:3 lint/nursery/useErrorCause ━━━━�
 ```
 
 ```
-noRequireCatchParameter.invalid.js:20:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
-  
-    18 │   throw new Error("Original error");
-    19 │ } catch (err) {
-  > 20 │   throw new Error(`Failed: ${err.message}`);
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ }
-    22 │ 
-  
-
-```
-
-```
-noRequireCatchParameter.invalid.js:36:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+noRequireCatchParameter.invalid.js:29:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
   
-    34 │ try {
-    35 │   throw new Error("Original error");
-  > 36 │ } catch ({ message }) {
+    27 │ try {
+    28 │   throw new Error("Original error");
+  > 29 │ } catch ({ message }) {
        │          ^^^^^^^^^^^
-    37 │   throw new Error(message);
-    38 │ }
+    30 │   throw new Error(message);
+    31 │ }
   
 
 ```

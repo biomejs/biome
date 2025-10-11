@@ -9,13 +9,6 @@ expression: invalid.js
 try {
   throw new Error("Original error");
 } catch (err) {
-  throw err;
-}
-
-
-try {
-  throw new Error("Original error");
-} catch (err) {
   throw new Error("Wrapper error");
 }
 
@@ -68,14 +61,29 @@ try {
 
 # Diagnostics
 ```
+invalid.js:6:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  
+    4 │   throw new Error("Original error");
+    5 │ } catch (err) {
+  > 6 │   throw new Error("Wrapper error");
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+
+```
+
+```
 invalid.js:13:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
   
     11 │   throw new Error("Original error");
     12 │ } catch (err) {
-  > 13 │   throw new Error("Wrapper error");
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 13 │   throw new Error(`Failed: ${err.message}`);
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │ }
     15 │ 
   
@@ -83,85 +91,70 @@ invalid.js:13:3 lint/nursery/useErrorCause ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:20:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
-  
-    18 │   throw new Error("Original error");
-    19 │ } catch (err) {
-  > 20 │   throw new Error(`Failed: ${err.message}`);
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ }
-    22 │ 
-  
-
-```
-
-```
-invalid.js:35:2 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:2 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is being discarded because the `catch` clause doesn't have a parameter.Specify an error object in the `catch` clause to access the original error.
   
-    33 │ 	doSomething();
-    34 │ } catch {
-  > 35 │ 	throw new TypeError("Something went wrong");
+    26 │ 	doSomething();
+    27 │ } catch {
+  > 28 │ 	throw new TypeError("Something went wrong");
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    36 │ }
-    37 │ 
+    29 │ }
+    30 │ 
   
 
 ```
 
 ```
-invalid.js:41:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:10 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
   
-    39 │ try {
-    40 │   throw new Error("Original error");
-  > 41 │ } catch ({ message }) {
+    32 │ try {
+    33 │   throw new Error("Original error");
+  > 34 │ } catch ({ message }) {
        │          ^^^^^^^^^^^
-    42 │   throw new Error(message);
-    43 │ }
+    35 │   throw new Error(message);
+    36 │ }
   
 
 ```
 
 ```
-invalid.js:49:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:42:3 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
   
-    47 │   throw new Error("Original error");
-    48 │ } catch (err) {
-  > 49 │   throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
+    40 │   throw new Error("Original error");
+    41 │ } catch (err) {
+  > 42 │   throw new Error(`Failed to process: ${err.message}`, { cause: err.message });
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    50 │ }
-    51 │ 
+    43 │ }
+    44 │ 
   
 
 ```
 
 ```
-invalid.js:57:58 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:50:58 lint/nursery/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The `cause` property is shadowing the original error from the `catch` clause.
   
-    55 │     if (whatever) {
-    56 │         const error = anotherError; // This declaration is the problem.
-  > 57 │         throw new Error("Something went wrong", { cause: error });
+    48 │     if (whatever) {
+    49 │         const error = anotherError; // This declaration is the problem.
+  > 50 │         throw new Error("Something went wrong", { cause: error });
        │                                                          ^^^^^
-    58 │     }
-    59 │ }
+    51 │     }
+    52 │ }
   
   i The original error is declared here.
   
-    52 │ try {
-    53 │     doSomething();
-  > 54 │ } catch (error) {
+    45 │ try {
+    46 │     doSomething();
+  > 47 │ } catch (error) {
        │          ^^^^^
-    55 │     if (whatever) {
-    56 │         const error = anotherError; // This declaration is the problem.
+    48 │     if (whatever) {
+    49 │         const error = anotherError; // This declaration is the problem.
   
 
 ```
