@@ -318,6 +318,13 @@ fn is_cause_value_correct_error(
     if cause_binding == catch_binding {
         CauseValueCheckResult::Correct
     } else {
-        CauseValueCheckResult::Shadowed
+        let cause_name = cause_identifier_expr.name().ok().and_then(|n| n.value_token().ok());
+        let catch_name = catch_error_binding.name_token().ok();
+
+        if cause_name.as_ref().map(|t| t.text_trimmed()) == catch_name.as_ref().map(|t| t.text_trimmed()) {
+            CauseValueCheckResult::Shadowed
+        } else {
+            CauseValueCheckResult::Incorrect
+        }
     }
 }

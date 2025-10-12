@@ -13,7 +13,6 @@ try {
   throw new Error(`Failed: ${err.message}`);
 }
 
-
 try {
   throw new Error("Original error");
 } catch (err) {
@@ -50,3 +49,10 @@ try {
         throw new Error("Something went wrong", { cause: error });
     }
 }
+
+try {
+    doSomething();
+} catch (err) {
+	throw new Error("", { cause: otherVar });
+}
+
