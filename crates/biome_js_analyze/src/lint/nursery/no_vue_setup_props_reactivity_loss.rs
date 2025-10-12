@@ -49,14 +49,11 @@ declare_lint_rule! {
     }
 }
 
-pub enum Violation {
-    ParameterDestructuring(TextRange),
-}
+pub struct Violation(TextRange);
 
 impl Violation {
     fn range(&self) -> TextRange {
-        let Self::ParameterDestructuring(range) = self;
-        *range
+        self.0
     }
 }
 
@@ -107,20 +104,15 @@ impl Rule for NoVueSetupPropsReactivityLoss {
 }
 
 fn check_call_expression_setup(call_expr: &JsCallExpression) -> Vec<Violation> {
-    let Some(args) = call_expr.arguments().ok() else {
-        return vec![];
-    };
-    let Some(arg) = args.args().iter().next().and_then(|a| a.ok()) else {
-        return vec![];
-    };
-    let Some(expr) = arg.as_any_js_expression() else {
-        return vec![];
-    };
-    let Some(obj_expr) = expr.as_js_object_expression() else {
-        return vec![];
-    };
-
-    check_object_members(&obj_expr.members())
+    if let Ok(args) = call_expr.arguments()
+        && let Some(Ok(arg)) = args.args().iter().next()
+        && let Some(expr) = arg.as_any_js_expression()
+        && let Some(obj_expr) = expr.as_js_object_expression()
+    {
+        check_object_members(&obj_expr.members())
+    } else {
+        vec![]
+    }
 }
 
 fn check_object_members(members: &JsObjectMemberList) -> Vec<Violation> {
@@ -136,12 +128,8 @@ fn check_setup_params(setup_fn: &SetupFunction) -> Option<Violation> {
     let first_param = get_first_parameter(setup_fn)?;
 
     match first_param {
-        AnyJsBindingPattern::JsObjectBindingPattern(obj) => {
-            Some(Violation::ParameterDestructuring(obj.range()))
-        }
-        AnyJsBindingPattern::JsArrayBindingPattern(arr) => {
-            Some(Violation::ParameterDestructuring(arr.range()))
-        }
+        AnyJsBindingPattern::JsObjectBindingPattern(obj) => Some(Violation(obj.range())),
+        AnyJsBindingPattern::JsArrayBindingPattern(arr) => Some(Violation(arr.range())),
         AnyJsBindingPattern::AnyJsBinding(_) => None,
     }
 }
