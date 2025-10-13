@@ -11,13 +11,15 @@ use biome_js_syntax::{
     JsReferenceIdentifier, JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use biome_rule_options::no_vue_setup_props_reactivity_loss::NoVueSetupPropsReactivityLossOptions;
 
 declare_lint_rule! {
     /// Disallow destructuring of `props` passed to `setup` in Vue projects.
     ///
     /// In Vue's Composition API, props must be accessed as `props.propertyName` to maintain
-    /// reactivity. Destructuring `props` directly in the `setup` function parameters will
-    /// cause the resulting variables to lose their reactive nature.
+    /// reactivity. Destructuring `props` directly in the `setup` function parameters or
+    /// in the root scope of the setup function body will cause the resulting variables to
+    /// lose their reactive nature.
     ///
     /// ## Examples
     ///
@@ -26,6 +28,15 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic
     /// export default {
     ///   setup({ count }) {
+    ///     return () => h('div', count);
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// export default {
+    ///   setup(props) {
+    ///     const { count } = props;
     ///     return () => h('div', count);
     ///   }
     /// }
@@ -74,7 +85,7 @@ impl Rule for NoVueSetupPropsReactivityLoss {
     type Query = VueComponentQuery;
     type State = Violation;
     type Signals = Vec<Self::State>;
-    type Options = ();
+    type Options = NoVueSetupPropsReactivityLossOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();
@@ -159,20 +170,19 @@ fn check_setup_function(setup_fn: &SetupFunction, model: &SemanticModel) -> Vec<
         return vec![];
     };
 
-    // Check parameter destructuring first
-    match &first_param {
-        AnyJsBindingPattern::JsObjectBindingPattern(pattern) => {
-            return vec![Violation::ParameterDestructuring(pattern.range())];
-        }
-        AnyJsBindingPattern::JsArrayBindingPattern(pattern) => {
-            return vec![Violation::ParameterDestructuring(pattern.range())];
-        }
-        AnyJsBindingPattern::AnyJsBinding(binding) => {
-            // Check for body destructuring
-            if let Some(id_binding) = binding.as_js_identifier_binding() {
-                return find_body_destructuring_violations(setup_fn, id_binding, model);
-            }
-        }
+    // Check for parameter destructuring: `setup({ a, b })`
+    if let AnyJsBindingPattern::JsObjectBindingPattern(pattern) = &first_param {
+        return vec![Violation::ParameterDestructuring(pattern.range())];
+    }
+    if let AnyJsBindingPattern::JsArrayBindingPattern(pattern) = &first_param {
+        return vec![Violation::ParameterDestructuring(pattern.range())];
+    }
+
+    // Check for body destructuring: `const { a, b } = props`
+    if let AnyJsBindingPattern::AnyJsBinding(binding) = &first_param
+        && let Some(id_binding) = binding.as_js_identifier_binding()
+    {
+        return find_body_destructuring_violations(setup_fn, id_binding, model);
     }
 
     vec![]
@@ -223,62 +233,50 @@ fn find_destructuring_info(reference: &JsReferenceIdentifier) -> Option<Destruct
     reference.syntax().ancestors().find_map(|ancestor| {
         // Check if it's in a variable declarator
         if let Some(declarator) = JsVariableDeclarator::cast_ref(&ancestor) {
-            return check_declarator_destructuring(&declarator, reference);
-        }
+            // Verify that the reference is in the initializer (right side of =)
+            let init = declarator.initializer()?;
+            let init_expr = init.expression().ok()?;
+            if !init_expr.range().contains_range(reference.range()) {
+                return None;
+            }
 
-        // Check if it's in an assignment expression
-        if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor) {
-            return check_assignment_destructuring(&assignment, reference);
+            // Handle `const { ... } = props` (or any expression involving props)
+            let id = declarator.id().ok()?;
+            if let AnyJsBindingPattern::JsObjectBindingPattern(pattern) = id {
+                return Some(DestructuringInfo {
+                    destructuring_range: pattern.range(),
+                });
+            }
+            if let AnyJsBindingPattern::JsArrayBindingPattern(pattern) = id {
+                return Some(DestructuringInfo {
+                    destructuring_range: pattern.range(),
+                });
+            }
+        } else if let Some(assignment) = JsAssignmentExpression::cast_ref(&ancestor) {
+            // Verify that the reference is in the right side of =
+            let right_expr = assignment.right().ok()?;
+            if !right_expr.range().contains_range(reference.range()) {
+                return None;
+            }
+
+            // Handle `{ ... } = props` (or any expression involving props)
+            let left = assignment.left().ok()?;
+            if let biome_js_syntax::AnyJsAssignmentPattern::JsObjectAssignmentPattern(pattern) =
+                left
+            {
+                return Some(DestructuringInfo {
+                    destructuring_range: pattern.range(),
+                });
+            }
+            if let biome_js_syntax::AnyJsAssignmentPattern::JsArrayAssignmentPattern(pattern) = left
+            {
+                return Some(DestructuringInfo {
+                    destructuring_range: pattern.range(),
+                });
+            }
         }
 
         None
-    })
-}
-
-fn check_declarator_destructuring(
-    declarator: &JsVariableDeclarator,
-    reference: &JsReferenceIdentifier,
-) -> Option<DestructuringInfo> {
-    let init = declarator.initializer()?;
-    let init_expr = init.expression().ok()?;
-
-    // Ensure reference is in the initializer (right side of =)
-    if !init_expr.range().contains_range(reference.range()) {
-        return None;
-    }
-
-    let id = declarator.id().ok()?;
-    let destructuring_range = match id {
-        AnyJsBindingPattern::JsObjectBindingPattern(p) => p.range(),
-        AnyJsBindingPattern::JsArrayBindingPattern(p) => p.range(),
-        _ => return None,
-    };
-
-    Some(DestructuringInfo {
-        destructuring_range,
-    })
-}
-
-fn check_assignment_destructuring(
-    assignment: &JsAssignmentExpression,
-    reference: &JsReferenceIdentifier,
-) -> Option<DestructuringInfo> {
-    let right_expr = assignment.right().ok()?;
-
-    // Ensure reference is in the right side of =
-    if !right_expr.range().contains_range(reference.range()) {
-        return None;
-    }
-
-    let left = assignment.left().ok()?;
-    let destructuring_range = match left {
-        biome_js_syntax::AnyJsAssignmentPattern::JsObjectAssignmentPattern(p) => p.range(),
-        biome_js_syntax::AnyJsAssignmentPattern::JsArrayAssignmentPattern(p) => p.range(),
-        _ => return None,
-    };
-
-    Some(DestructuringInfo {
-        destructuring_range,
     })
 }
 

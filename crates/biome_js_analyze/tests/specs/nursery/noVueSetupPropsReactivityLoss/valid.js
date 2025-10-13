@@ -31,3 +31,35 @@ export default {
     }
   };
 }
+
+// Valid: destructuring from toRefs(props)
+{
+  const Component = {
+    setup(props) {
+      const { count } = toRefs(props);
+      return () => h('div', count.value);
+    }
+  };
+}
+
+// Valid: assignment destructuring from toRefs(props)
+{
+  const Component = {
+    setup(props) {
+      let count;
+      ({ count } = toRefs(props));
+      return () => h('div', count.value);
+    }
+  };
+}
+
+// Valid: destructuring from props wrapped in parentheses should still be flagged elsewhere,
+// but toRefs should be allowed even with parentheses
+{
+  const Component = {
+    setup(props) {
+      const { count } = (toRefs(props));
+      return () => h('div', count.value);
+    }
+  };
+}
