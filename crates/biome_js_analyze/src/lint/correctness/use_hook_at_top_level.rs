@@ -11,10 +11,11 @@ use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsBinding, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction,
     AnyJsObjectMemberName, JsArrayAssignmentPatternElement, JsArrayBindingPatternElement,
-    JsCallExpression, JsConditionalExpression, JsGetterClassMember, JsGetterObjectMember,
-    JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember,
-    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
-    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
+    JsArrowFunctionExpression, JsCallExpression, JsConditionalExpression, JsFunctionExpression,
+    JsGetterClassMember, JsGetterObjectMember, JsIfStatement, JsLanguage, JsLogicalExpression,
+    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPatternShorthandProperty,
+    JsReturnStatement, JsSetterClassMember, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
+    JsTryFinallyStatement, TextRange,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, Text, WalkEvent, declare_node_union};
 use rustc_hash::FxHashMap;
@@ -120,6 +121,7 @@ pub enum SuggestionKind {
     Nested,
     Recursive,
     TopLevel,
+    ComponentOrHook,
 }
 
 /// Verifies whether the call expression is at the top level of the component,
@@ -247,9 +249,22 @@ fn is_nested_function_inside_component_or_hook(function: &AnyJsFunctionOrMethod)
 }
 
 fn is_top_level_call(call: &JsCallExpression) -> bool {
-    !call.syntax()
+    !call
+        .syntax()
         .ancestors()
         .any(|node| AnyJsFunctionOrMethod::try_cast(node).is_ok())
+}
+
+fn is_anonymous_function(function: &AnyJsFunctionOrMethod) -> bool {
+    if JsArrowFunctionExpression::cast_ref(function.syntax()).is_some() {
+        return true;
+    }
+
+    if JsFunctionExpression::cast_ref(function.syntax()).is_some() {
+        return true;
+    }
+
+    false
 }
 
 /// Model for tracking which function calls are preceded by an early return.
@@ -536,6 +551,19 @@ impl Rule for UseHookAtTopLevel {
             }
         }
 
+        if enclosing_function_if_call_is_at_top_level(call)
+            .filter(|function| {
+                !function.is_react_component_or_hook() && !is_anonymous_function(function)
+            })
+            .is_some()
+        {
+            return Some(Suggestion {
+                hook_name_range: get_hook_name_range()?,
+                path: vec![call.syntax().text_range_with_trivia()],
+                kind: SuggestionKind::ComponentOrHook,
+            });
+        }
+
         None
     }
 
@@ -555,6 +583,9 @@ impl Rule for UseHookAtTopLevel {
             SuggestionKind::TopLevel => markup! {
                 "This hook is being called at the module level, but all hooks must be called from "
                 "within a hook or component."
+            },
+            SuggestionKind::ComponentOrHook => markup! {
+                "This hook is being called from within a function that is not a hook or component."
             },
             _ if path.len() <= 1 => markup! {
                 "This hook is being called conditionally, but all hooks must be called in the "
@@ -584,22 +615,21 @@ impl Rule for UseHookAtTopLevel {
             );
         }
 
-        if matches!(kind, SuggestionKind::TopLevel) {
-            diag = diag.note(markup! {
+        diag = match kind {
+            SuggestionKind::TopLevel | SuggestionKind::ComponentOrHook => diag.note(markup! {
                 "Move the hook call into the top level of a hook or component in order to use it."
-            });
-        } else {
-            diag = diag.note(markup! {
+            }),
+            _ => diag.note(markup! {
                 "For React to preserve state between calls, hooks needs to be called "
                 "unconditionally and always in the same order."
-            });
+            }),
+        };
 
-            if matches!(kind, SuggestionKind::Recursive) {
-                diag = diag.note(markup! {
-                    "This means recursive calls are not allowed, because they require a condition "
-                    "in order to terminate."
-                });
-            }
+        if matches!(kind, SuggestionKind::Recursive) {
+            diag = diag.note(markup! {
+                "This means recursive calls are not allowed, because they require a condition "
+                "in order to terminate."
+            });
         }
 
         diag = diag.note(markup! {

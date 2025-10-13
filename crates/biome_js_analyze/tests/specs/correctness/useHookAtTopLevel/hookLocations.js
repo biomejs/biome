@@ -1,7 +1,6 @@
 // Invalid as hooks cannot be used at module level.
 useHook();
 
-/*
 // Invalid as hooks cannot be called in non-component functions.
 function notAComponent() {
 	useHook();
@@ -22,8 +21,11 @@ function useMyHook() {
 	useHook();
 }
 
-// Valid as hooks can be called within anonymous functions.
+// Valid as hooks can be called within anonymous functions (for better or worse).
 test("the hook", () => {
+	useHook();
+});
+test("the hook", function () {
 	useHook();
 });
 
@@ -31,4 +33,3 @@ test("the hook", () => {
 test("more hook", () => {
 	renderHook(() => useHook());
 });
-*/
