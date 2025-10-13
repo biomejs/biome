@@ -1863,6 +1863,10 @@
 						{ "type": "null" }
 					]
 				},
+				"experimentalFullSupportEnabled": {
+					"description": "Enables full support for HTML, Vue, Svelte and Astro files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "HTML formatter options",
 					"anyOf": [

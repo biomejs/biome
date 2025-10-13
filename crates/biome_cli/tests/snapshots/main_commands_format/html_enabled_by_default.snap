@@ -2,19 +2,15 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-# Input messages
+## `file.html`
 
-```block
----
-debugger;
----
-<div></div>
+```html
+<!DOCTYPE html>
+
 ```
 
 # Emitted Messages
 
 ```block
----
----
-<div></div>
+Formatted 1 file in <TIME>. Fixed 1 file.
 ```

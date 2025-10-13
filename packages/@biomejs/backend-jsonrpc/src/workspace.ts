@@ -8,7 +8,13 @@ export interface SupportsFeatureParams {
 export type FeatureName = FeatureKind[];
 export type BiomePath = string;
 export type ProjectKey = number;
-export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
+export type FeatureKind =
+	| "format"
+	| "lint"
+	| "search"
+	| "assist"
+	| "debug"
+	| "htmlFullSupport";
 export interface FileFeaturesResult {
 	featuresSupported: FeaturesSupported;
 }
@@ -245,6 +251,10 @@ export interface GritConfiguration {
  */
 export interface HtmlConfiguration {
 	assist?: HtmlAssistConfiguration;
+	/**
+	 * Enables full support for HTML, Vue, Svelte and Astro files.
+	 */
+	experimentalFullSupportEnabled?: Bool;
 	/**
 	 * HTML formatter options
 	 */
@@ -9411,7 +9421,7 @@ export type DocumentFileSource =
 	| { Grit: GritFileSource };
 export interface JsFileSource {
 	/**
-	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
+	 * Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing. For example, if inside an Astro file, a top-level return statement is allowed.
 	 */
 	embedding_kind: EmbeddingKind;
 	language: Language;
@@ -9625,6 +9635,7 @@ export interface PullActionsResult {
 }
 export interface CodeAction {
 	category: ActionCategory;
+	offset?: TextSize;
 	ruleName?: [string, string];
 	suggestion: CodeSuggestion;
 }

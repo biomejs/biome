@@ -280,9 +280,13 @@ where
                 panic!("Configuration is invalid");
             }
 
-            let format_language = self
-                .language
-                .to_format_language(&settings, &DocumentFileSource::from_path(input_file));
+            let format_language = self.language.to_format_language(
+                &settings,
+                &DocumentFileSource::from_path(
+                    input_file,
+                    settings.experimental_full_html_support_enabled(),
+                ),
+            );
 
             let (mut output_code, printed) = self.formatted(&parsed, format_language.clone());
 

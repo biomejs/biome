@@ -482,6 +482,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         enabled_rules: rules,
         plugins: _,
         categories,
+        action_offset,
     } = params;
     let _ = debug_span!("Code actions GraphQL", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -525,6 +526,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                     .rule_name
                     .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
                 suggestion: item.suggestion,
+                offset: action_offset,
             }
         }));
 
