@@ -207,7 +207,7 @@ ignore               = "0.4.23"
 indexmap             = { version = "2.10.0" }
 insta                = "1.43.2"
 jiff                 = "0.2.15"
-libc                 = "0.2.176"
+libc                 = "0.2.177"
 mimalloc             = "0.1.48"
 papaya               = "0.2.3"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
