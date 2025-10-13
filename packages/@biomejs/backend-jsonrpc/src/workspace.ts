@@ -8565,7 +8565,12 @@ export interface NoTemplateCurlyInStringOptions {}
 export interface NoThenPropertyOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
-export interface NoUnknownAtRulesOptions {}
+export interface NoUnknownAtRulesOptions {
+	/**
+	 * A list of unknown at-rule names to ignore (case-insensitive).
+	 */
+	ignore: string[];
+}
 export interface NoUnsafeDeclarationMergingOptions {}
 export interface NoUnsafeNegationOptions {}
 export interface NoUselessEscapeInStringOptions {}
