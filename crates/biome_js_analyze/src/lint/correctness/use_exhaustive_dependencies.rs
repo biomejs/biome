@@ -400,6 +400,18 @@ fn get_whole_static_member_expression(reference: &JsSyntaxNode) -> Option<AnyJsM
         .last()?
         .parent()?;
 
+    // If the parent node is a call expression, drop the last part of the member expression to
+    // avoid breaking the prototype chain.
+    if let Some(parent) = root.parent()
+        && JsCallExpression::can_cast(parent.kind())
+    {
+        return AnyJsMemberExpression::cast(root)?
+            .object()
+            .ok()?
+            .into_syntax()
+            .cast();
+    }
+
     root.cast()
 }
 
