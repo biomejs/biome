@@ -4971,6 +4971,7 @@
 			]
 		},
 		"NoVueSetupPropsReactivityLossOptions": {
+			"description": "Options for the `noVueSetupPropsReactivityLoss` rule. Currently no customisable settings.",
 			"type": "object",
 			"additionalProperties": false
 		},

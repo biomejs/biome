@@ -8245,6 +8245,9 @@ export interface NoVueDataObjectDeclarationOptions {}
 export interface NoVueDuplicateKeysOptions {}
 export interface NoVueReservedKeysOptions {}
 export interface NoVueReservedPropsOptions {}
+/**
+ * Options for the `noVueSetupPropsReactivityLoss` rule. Currently no customisable settings.
+ */
 export interface NoVueSetupPropsReactivityLossOptions {}
 export type UseAnchorHrefOptions = null;
 /**
