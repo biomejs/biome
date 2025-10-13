@@ -174,11 +174,11 @@ impl DocumentFileSource {
             if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
                 return Ok(file_source.into());
             }
-            if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
+            if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
                 return Ok(file_source.into());
             }
         } else {
-            if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
+            if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
                 return Ok(file_source.into());
             }
 
@@ -187,7 +187,7 @@ impl DocumentFileSource {
             }
         }
 
-        if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
+        if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = CssFileSource::try_from_extension(extension) {

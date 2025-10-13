@@ -21,7 +21,7 @@ use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_parser::HtmlParseOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{JsLanguage, TextSize};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
 use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
@@ -228,6 +228,23 @@ fn assert_lint(
 
     match test.document_file_source() {
         DocumentFileSource::Js(file_source) => {
+            // Temporary support for astro, svelte and vue code blocks
+            let (code, file_source) = match file_source.as_embedding_kind() {
+                EmbeddingKind::Astro => (
+                    biome_service::file_handlers::AstroFileHandler::input(code),
+                    JsFileSource::ts(),
+                ),
+                EmbeddingKind::Svelte => (
+                    biome_service::file_handlers::SvelteFileHandler::input(code),
+                    biome_service::file_handlers::SvelteFileHandler::file_source(code),
+                ),
+                EmbeddingKind::Vue => (
+                    biome_service::file_handlers::VueFileHandler::input(code),
+                    biome_service::file_handlers::VueFileHandler::file_source(code),
+                ),
+                _ => (code, file_source),
+            };
+
             let parse = biome_js_parser::parse(code, file_source, JsParserOptions::default());
 
             if parse.has_errors() {
