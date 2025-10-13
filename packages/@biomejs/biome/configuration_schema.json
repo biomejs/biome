@@ -4466,6 +4466,13 @@
 		},
 		"NoUnknownAtRulesOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown at-rule names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownFunctionConfiguration": {
