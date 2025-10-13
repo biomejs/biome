@@ -188,6 +188,54 @@ fn lint_astro_files() {
 }
 
 #[test]
+fn full_support() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        r#"---
+import z from "zod";
+import { sure } from "sure.js";
+import s from "src/utils";
+
+let schema = z.object().optional();
+schema + sure()
+---
+
+<html><head><title>Astro</title></head><body></body></html>
+
+<style>
+#id { font-family: comic-sans } .class { background: red}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn lint_and_fix_astro_files() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

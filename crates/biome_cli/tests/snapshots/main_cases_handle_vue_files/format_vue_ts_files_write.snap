@@ -10,7 +10,6 @@ import { type something } from "file.vue";
 const hello: string = "world";
 </script>
 <template></template>
-
 ```
 
 # Emitted Messages

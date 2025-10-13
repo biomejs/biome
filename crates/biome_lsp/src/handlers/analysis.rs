@@ -14,9 +14,13 @@ use biome_line_index::LineIndex;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::WorkspaceError;
+use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::svelte::SvelteFileHandler;
+use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
-    IgnoreKind, PathIsIgnoredParams, PullActionsParams, SupportsFeatureParams,
+    GetFileContentParams, IgnoreKind, PathIsIgnoredParams, PullActionsParams,
+    SupportsFeatureParams,
 };
 use std::borrow::Cow;
 use std::collections::HashMap;
@@ -112,6 +116,16 @@ pub(crate) fn code_actions(
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
+    let content = session.workspace.get_file_content(GetFileContentParams {
+        project_key: doc.project_key,
+        path: path.clone(),
+    })?;
+    let offset = match path.extension() {
+        Some("vue") => VueFileHandler::start(content.as_str()),
+        Some("astro") => AstroFileHandler::start(content.as_str()),
+        Some("svelte") => SvelteFileHandler::start(content.as_str()),
+        _ => None,
+    };
 
     let cursor_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)
         .with_context(|| {
@@ -122,7 +136,18 @@ pub(crate) fn code_actions(
                 &doc.line_index,
             )
         })?;
-
+    let cursor_range = if let Some(offset) = offset {
+        if cursor_range.start().gt(&TextSize::from(offset)) {
+            TextRange::new(
+                cursor_range.start().sub(TextSize::from(offset)),
+                cursor_range.end().sub(TextSize::from(offset)),
+            )
+        } else {
+            cursor_range
+        }
+    } else {
+        cursor_range
+    };
     debug!("Cursor range {:?}", &cursor_range);
     let result = match session.workspace.pull_actions(PullActionsParams {
         project_key: doc.project_key,
@@ -330,7 +355,26 @@ fn fix_all(
         suppression_reason: None,
         rule_categories: categories.build(),
     })?;
+    let output = if file_features.supports_full_html_support() {
+        fixed.code
+    } else {
+        match path.as_path().extension() {
+            Some(extension) => {
+                let input = session.workspace.get_file_content(GetFileContentParams {
+                    project_key: doc.project_key,
+                    path: path.clone(),
+                })?;
+                match extension {
+                    "astro" => AstroFileHandler::output(input.as_str(), fixed.code.as_str()),
+                    "vue" => VueFileHandler::output(input.as_str(), fixed.code.as_str()),
+                    "svelte" => SvelteFileHandler::output(input.as_str(), fixed.code.as_str()),
+                    _ => fixed.code,
+                }
+            }
 
+            _ => fixed.code,
+        }
+    };
     if fixed.actions.is_empty() {
         return Ok(None);
     }
@@ -389,7 +433,7 @@ fn fix_all(
                 start: lsp::Position::new(0, 0),
                 end: lsp::Position::new(line_index.len(), 0),
             },
-            new_text: fixed.code,
+            new_text: output,
         }],
     );
 

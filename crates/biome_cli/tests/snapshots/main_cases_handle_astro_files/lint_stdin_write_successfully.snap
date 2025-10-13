@@ -16,7 +16,6 @@ export { a };
 
 ```block
 ---
-
 import {a} from 'mod';
 export { a };
 ---

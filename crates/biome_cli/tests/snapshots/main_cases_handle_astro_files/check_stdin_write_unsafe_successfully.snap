@@ -25,5 +25,4 @@ something();
 var _foo: string = "";
 ---
 <div></div>
-
 ```

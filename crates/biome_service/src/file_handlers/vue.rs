@@ -148,8 +148,7 @@ fn format(
     settings: &Settings,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
-    let html_options =
-        settings.format_options::<HtmlLanguage>(biome_path, &document_file_source.to_htmlish());
+    let html_options = settings.format_options::<HtmlLanguage>(biome_path, &document_file_source);
     let indent_amount = if *html_options.indent_script_and_style() {
         1
     } else {

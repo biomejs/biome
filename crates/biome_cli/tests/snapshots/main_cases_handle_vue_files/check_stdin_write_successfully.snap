@@ -24,5 +24,4 @@ import { Button } from "./components/Button.vue";
 delete a.c;
 </script>
 <template></template>
-
 ```

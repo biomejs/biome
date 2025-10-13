@@ -36,9 +36,7 @@ file.svelte format ━━━━━━━━━━━━━━━━━━━━�
       2 │ + import·Button·from·"./components/Button.svelte";
       3 │ + const·hello:·string·=·"world";
     4 4 │   </script>
-    5   │ - <div></div>
-      5 │ + <div></div>
-      6 │ + 
+    5 5 │   <div></div>
   
 
 ```

@@ -10,7 +10,6 @@ import { something } from "file.vue";
 statement();
 </script>
 <template></template>
-
 ```
 
 # Emitted Messages

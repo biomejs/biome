@@ -22,7 +22,6 @@ expression: redactor(content)
 	statement();
 </script>
 <div></div>
-
 ```
 
 # Emitted Messages

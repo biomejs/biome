@@ -4,13 +4,17 @@ use crate::utils::text_edit;
 use anyhow::Context;
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
-use biome_rowan::{TextLen, TextRange};
+use biome_rowan::{TextLen, TextRange, TextSize};
+use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::svelte::SvelteFileHandler;
+use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FeaturesSupported, FileFeaturesResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetFileContentParams, IgnoreKind, PathIsIgnoredParams,
     SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
+use std::ops::Sub;
 use tower_lsp_server::lsp_types::*;
 
 #[tracing::instrument(level = "debug", skip(session), err)]
@@ -66,13 +70,27 @@ pub(crate) fn format(
             path: path.clone(),
         })?;
 
-        let output = printed.into_code();
+        let mut output = printed.into_code();
         let input = session.workspace.get_file_content(GetFileContentParams {
             project_key: doc.project_key,
             path: path.clone(),
         })?;
         if output.is_empty() {
             return Ok(None);
+        }
+        if !file_features.supports_full_html_support() {
+            match path.extension() {
+                Some("astro") => {
+                    output = AstroFileHandler::output(input.as_str(), output.as_str());
+                }
+                Some("vue") => {
+                    output = VueFileHandler::output(input.as_str(), output.as_str());
+                }
+                Some("svelte") => {
+                    output = SvelteFileHandler::output(input.as_str(), output.as_str());
+                }
+                _ => {}
+            }
         }
 
         let indels = biome_text_edit::TextEdit::from_unicode_words(input.as_str(), output.as_str());
@@ -147,6 +165,25 @@ pub(crate) fn format_range(
             project_key: doc.project_key,
             path: path.clone(),
         })?;
+
+        let offset = match path.extension() {
+            Some("vue") => VueFileHandler::start(content.as_str()),
+            Some("astro") => AstroFileHandler::start(content.as_str()),
+            Some("svelte") => SvelteFileHandler::start(content.as_str()),
+            _ => None,
+        };
+        let format_range = if let Some(offset) = offset {
+            if format_range.start() - TextSize::from(offset) >= TextSize::from(0) {
+                TextRange::new(
+                    format_range.start().sub(TextSize::from(offset)),
+                    format_range.end().sub(TextSize::from(offset)),
+                )
+            } else {
+                format_range
+            }
+        } else {
+            format_range
+        };
 
         let formatted = session.workspace.format_range(FormatRangeParams {
             project_key: doc.project_key,

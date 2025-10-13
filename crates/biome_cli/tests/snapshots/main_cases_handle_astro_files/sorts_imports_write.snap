@@ -6,7 +6,6 @@ expression: redactor(content)
 
 ```astro
 ---
-
 import { Code } from "astro:components";
 import { getLocale } from "astro:i18n";
 ---

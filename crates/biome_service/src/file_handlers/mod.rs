@@ -4,11 +4,11 @@ use self::{
 };
 use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
-use crate::file_handlers::astro::AstroFileHandler;
+pub use crate::file_handlers::astro::AstroFileHandler;
 use crate::file_handlers::graphql::GraphqlFileHandler;
 use crate::file_handlers::ignore::IgnoreFileHandler;
-use crate::file_handlers::svelte::SvelteFileHandler;
-use crate::file_handlers::vue::VueFileHandler;
+pub use crate::file_handlers::svelte::SvelteFileHandler;
+pub use crate::file_handlers::vue::VueFileHandler;
 use crate::settings::Settings;
 use crate::workspace::{
     AnyEmbeddedSnippet, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -34,7 +34,10 @@ use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_js_analyze::METADATA as js_metadata;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextRange, TextSize};
+use biome_js_parser::{JsParserOptions, parse};
+use biome_js_syntax::{
+    EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
+};
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_module_graph::ModuleGraph;
@@ -119,25 +122,38 @@ impl From<GritFileSource> for DocumentFileSource {
 
 impl From<&Utf8Path> for DocumentFileSource {
     fn from(path: &Utf8Path) -> Self {
-        Self::from_path(path)
+        Self::from_path(path, false)
     }
 }
 
 impl DocumentFileSource {
-    fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
+    fn try_from_well_known(
+        path: &Utf8Path,
+        experimental_full_html_support: bool,
+    ) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
-            return Ok(file_source.into());
+        if experimental_full_html_support {
+            if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
+            if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
+        } else {
+            if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
+            if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
+                return Ok(file_source.into());
+            }
         }
+
         if let Ok(file_source) = CssFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
-            return Ok(file_source.into());
-        }
-        if let Ok(file_source) = HtmlFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
@@ -145,14 +161,32 @@ impl DocumentFileSource {
     }
 
     /// Returns the document file source corresponding to this file name from well-known files
-    pub fn from_well_known(path: &Utf8Path) -> Self {
-        Self::try_from_well_known(path).unwrap_or(Self::Unknown)
+    pub fn from_well_known(path: &Utf8Path, experimental_full_html_support: bool) -> Self {
+        Self::try_from_well_known(path, experimental_full_html_support).unwrap_or(Self::Unknown)
     }
 
-    fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
-        if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
+    fn try_from_extension(
+        extension: &str,
+        experimental_full_html_support: bool,
+    ) -> Result<Self, FileSourceError> {
+        // Order here is important
+        if experimental_full_html_support {
+            if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
+            if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
+        } else {
+            if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
+
+            if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
+                return Ok(file_source.into());
+            }
         }
+
         if let Ok(file_source) = JsFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -162,9 +196,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
-        }
+
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -172,8 +204,8 @@ impl DocumentFileSource {
     }
 
     /// Returns the document file source corresponding to this file extension
-    pub fn from_extension(extension: &str) -> Self {
-        Self::try_from_extension(extension).unwrap_or(Self::Unknown)
+    pub fn from_extension(extension: &str, experimental_full_html_support: bool) -> Self {
+        Self::try_from_extension(extension, experimental_full_html_support).unwrap_or(Self::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
@@ -209,8 +241,11 @@ impl DocumentFileSource {
         Self::try_from_language_id(language_id).unwrap_or(Self::Unknown)
     }
 
-    pub(crate) fn try_from_path(path: &Utf8Path) -> Result<Self, FileSourceError> {
-        if let Ok(file_source) = Self::try_from_well_known(path) {
+    pub(crate) fn try_from_path(
+        path: &Utf8Path,
+        experimental_full_html_support: bool,
+    ) -> Result<Self, FileSourceError> {
+        if let Ok(file_source) = Self::try_from_well_known(path, experimental_full_html_support) {
             return Ok(file_source);
         }
 
@@ -241,12 +276,12 @@ impl DocumentFileSource {
                 .ok_or(FileSourceError::MissingFileExtension)?,
         };
 
-        Self::try_from_extension(extension.as_ref())
+        Self::try_from_extension(extension.as_ref(), experimental_full_html_support)
     }
 
     /// Returns the document file source corresponding to the file path
-    pub fn from_path(path: &Utf8Path) -> Self {
-        Self::try_from_path(path).unwrap_or(Self::Unknown)
+    pub fn from_path(path: &Utf8Path, experimental_full_html_support: bool) -> Self {
+        Self::try_from_path(path, experimental_full_html_support).unwrap_or(Self::Unknown)
     }
 
     /// Returns the document file source if it's not unknown, otherwise returns `other`.
@@ -362,8 +397,8 @@ impl DocumentFileSource {
     }
 
     /// Whether this file can contain embedded nodes
-    pub fn can_contain_embeds(path: &Utf8Path) -> bool {
-        let file_source = Self::from(path);
+    pub fn can_contain_embeds(path: &Utf8Path, experimental_full_html_support: bool) -> bool {
+        let file_source = Self::from_path(path, experimental_full_html_support);
         match file_source {
             Self::Html(_) => true,
             Self::Js(_)
@@ -818,6 +853,58 @@ pub(crate) fn is_diagnostic_error(
         );
 
     severity >= Severity::Error
+}
+
+/// Parse the "lang" attribute from the opening tag of the "\<script\>" block in Svelte or Vue files.
+/// This function will return the language based on the existence or the value of the "lang" attribute.
+/// We use the JSX parser at the moment to parse the opening tag. So the opening tag should be first
+/// matched by regular expressions.
+///
+// TODO: We should change the parser when HTMLish languages are supported.
+pub(crate) fn parse_lang_from_script_opening_tag(
+    script_opening_tag: &str,
+) -> (Language, LanguageVariant) {
+    parse(
+        script_opening_tag,
+        JsFileSource::jsx(),
+        JsParserOptions::default(),
+    )
+    .try_tree()
+    .and_then(|tree| {
+        tree.as_js_module()?.items().into_iter().find_map(|item| {
+            let expression = item
+                .as_any_js_statement()?
+                .as_js_expression_statement()?
+                .expression()
+                .ok()?;
+            let tag = expression.as_jsx_tag_expression()?.tag().ok()?;
+            let opening_element = tag.as_jsx_element()?.opening_element().ok()?;
+            let lang_attribute = opening_element.attributes().find_by_name("lang")?;
+            let attribute_value = lang_attribute.initializer()?.value().ok()?;
+            let attribute_inner_string =
+                attribute_value.as_jsx_string()?.inner_string_text().ok()?;
+            match attribute_inner_string.text() {
+                "ts" => Some((
+                    Language::TypeScript {
+                        definition_file: false,
+                    },
+                    LanguageVariant::Standard,
+                )),
+                "tsx" => Some((
+                    Language::TypeScript {
+                        definition_file: false,
+                    },
+                    LanguageVariant::Jsx,
+                )),
+                "jsx" => Some((Language::JavaScript, LanguageVariant::Jsx)),
+                "js" => Some((Language::JavaScript, LanguageVariant::Standard)),
+                _ => None,
+            }
+        })
+    })
+    .map_or((Language::JavaScript, LanguageVariant::Standard), |lang| {
+        lang
+    })
 }
 
 pub(crate) fn search(

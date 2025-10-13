@@ -10,7 +10,6 @@ import { something } from "file.svelte";
 statement();
 </script>
 <div></div>
-
 ```
 
 # Emitted Messages

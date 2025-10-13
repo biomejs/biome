@@ -6,7 +6,6 @@ expression: redactor(content)
 
 ```astro
 ---
-
 ---
 <div></div>
 ```

@@ -27,5 +27,4 @@ something();
 var foo: string = "";
 ---
 <div></div>
-
 ```

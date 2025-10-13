@@ -468,6 +468,107 @@ fn sorts_imports_write() {
 }
 
 #[test]
+fn full_support() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        astro_file_path.into(),
+        r#"<script>
+import z from "zod";
+import { sure } from "sure.js";
+import s from "src/utils";
+
+let schema = z.object().optional();
+schema + sure()
+</script>
+
+<html><head><title>Svelte</title></head><body></body></html>
+
+<style>
+#id { font-family: comic-sans } .class { background: red}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn full_support_ts() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        astro_file_path.into(),
+        r#"<script lang="ts">
+import z from "zod";
+import { sure } from "sure.js";
+import s from "src/utils";
+
+interface Props {
+    title: string;
+}
+
+let schema = z.object().optional();
+schema + sure();
+const props: Props = { title: "Hello" };
+</script>
+
+<html><head><title>Svelte</title></head><body></body></html>
+
+<style>
+#id { font-family: comic-sans } .class { background: red}
+</style>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_ts",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_stdin_successfully() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

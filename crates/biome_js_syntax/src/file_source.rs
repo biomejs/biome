@@ -337,6 +337,13 @@ impl JsFileSource {
             // Note: the extension passed to this function can contain dots,
             // this should be handled properly by the extension provider
             "d.ts" | "d.mts" | "d.cts" => Ok(Self::d_ts()),
+            // TODO: Remove once we have full support of astro files
+            "astro" => Ok(Self::astro()),
+            // TODO: Remove once we have full support of vue files
+            "vue" => Ok(Self::vue()),
+            // TODO: Remove once we have full support of svelte files
+            "svelte" => Ok(Self::svelte()),
+
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -363,6 +370,12 @@ impl JsFileSource {
             "typescript" => Ok(Self::ts()),
             "javascriptreact" => Ok(Self::jsx()),
             "typescriptreact" => Ok(Self::tsx()),
+            // TODO: Remove once we have full support of astro files
+            "astro" => Ok(Self::astro()),
+            // TODO: Remove once we have full support of vue files
+            "vue" | "vuejs" => Ok(Self::vue()),
+            // TODO: Remove once we have full support of svelte files
+            "svelte" => Ok(Self::svelte()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }

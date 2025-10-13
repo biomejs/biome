@@ -9,6 +9,8 @@ use biome_html_formatter::context::{
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
+pub type ExperimentalFullSupportEnabled = Bool<false>;
+
 /// Options applied to HTML files
 #[derive(
     Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
@@ -16,6 +18,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct HtmlConfiguration {
+    /// Enables full support for HTML, Vue, Svelte and Astro files.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub experimental_full_support_enabled: Option<ExperimentalFullSupportEnabled>,
+
     /// HTML parsing options
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]

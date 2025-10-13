@@ -27,5 +27,4 @@ statement();
 var foo: string = "";
 </script>
 <div></div>
-
 ```

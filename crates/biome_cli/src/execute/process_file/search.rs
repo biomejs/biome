@@ -35,7 +35,7 @@ pub(crate) fn search_with_guard<'ctx>(
 ) -> FileResult {
     let _ = tracing::info_span!("Search ", path =? workspace_file.path).entered();
 
-    let file_source = DocumentFileSource::from_path(workspace_file.path.as_path());
+    let file_source = DocumentFileSource::from_path(workspace_file.path.as_path(), false);
     let pattern_language = match &_ctx.execution.traversal_mode {
         TraversalMode::Search {
             language: Some(pattern_language),
