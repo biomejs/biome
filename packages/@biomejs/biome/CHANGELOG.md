@@ -1,5 +1,134 @@
 # @biomejs/biome
 
+## 2.2.6
+
+### Patch Changes
+
+- [#7071](https://github.com/biomejs/biome/pull/7071) [`a8e7301`](https://github.com/biomejs/biome/commit/a8e73018a8c9e34a182624a91389e19d1fa7817f) Thanks [@ptkagori](https://github.com/ptkagori)! - Added the [`useQwikMethodUsage`](https://biomejs.dev/linter/rules/use-qwik-method-usage) lint rule for the Qwik domain.
+
+  This rule validates Qwik hook usage. Identifiers matching `useXxx` must be called only within serialisable reactive contexts (for example, inside `component$`, route loaders/actions, or within other Qwik hooks), preventing common Qwik antipatterns.
+
+  **Invalid:**
+
+  ```js
+  // Top-level hook call is invalid.
+  const state = useStore({ count: 0 });
+
+  function helper() {
+    // Calling a hook in a non-reactive function is invalid.
+    const loc = useLocation();
+  }
+  ```
+
+  **Valid:**
+
+  ```js
+  component$(() => {
+    const state = useStore({ count: 0 }); // OK inside component$.
+    return <div>{state.count}</div>;
+  });
+
+  const handler = $(() => {
+    const loc = useLocation(); // OK inside a $-wrapped closure.
+    console.log(loc.params);
+  });
+  ```
+
+- [#7685](https://github.com/biomejs/biome/pull/7685) [`52071f5`](https://github.com/biomejs/biome/commit/52071f54bc1a3c5d1d2ee6039c5feead836638ed) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Fixed [#6981](https://github.com/biomejs/biome/issues/6981): The [NoUnknownPseudoClass](https://biomejs.dev/linter/rules/no-unknown-pseudo-class/) rule no longer reports local pseudo-classes when CSS Modules are used.
+
+- [#7640](https://github.com/biomejs/biome/pull/7640) [`899f7b2`](https://github.com/biomejs/biome/commit/899f7b28ec9cc457d02565d69212e7c29b5b5aff) Thanks [@arendjr](https://github.com/arendjr)! - Fixed [#7638](https://github.com/biomejs/biome/issues/7638): [`useImportExtensions`](https://biomejs.dev/linter/rules/use-import-extensions/) no longer emits diagnostics on valid import paths that end with a query or hash.
+
+  #### Example
+
+  ```js
+  // This no longer warns if `index.css` exists:
+  import style from "../theme/index.css?inline";
+  ```
+
+- [#7071](https://github.com/biomejs/biome/pull/7071) [`a8e7301`](https://github.com/biomejs/biome/commit/a8e73018a8c9e34a182624a91389e19d1fa7817f) Thanks [@ptkagori](https://github.com/ptkagori)! - Added the [`useQwikValidLexicalScope`](https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope) rule to the Qwik domain.
+
+  This rule helps you avoid common bugs in Qwik components by checking that your variables and functions are declared in the correct place.
+
+  **Invalid:**
+
+  ```js
+  // Invalid: state defined outside the component's lexical scope.
+  let state = useStore({ count: 0 });
+  const Component = component$(() => {
+    return (
+      <button onClick$={() => state.count++}>Invalid: {state.count}</button>
+    );
+  });
+  ```
+
+  **Valid:**
+
+  ```js
+  // Valid: state initialised within the component's lexical scope and captured by the event.
+  const Component = component$(() => {
+    const state = useStore({ count: 0 });
+    return <button onClick$={() => state.count++}>Valid: {state.count}</button>;
+  });
+  ```
+
+- [#7620](https://github.com/biomejs/biome/pull/7620) [`5beb1ee`](https://github.com/biomejs/biome/commit/5beb1eefe134f4dc713cfb28bfa1cbae38319975) Thanks [@Netail](https://github.com/Netail)! - Added the rule [`useDeprecatedDate`](https://biomejs.dev/linter/rules/use-deprecated-date/), which makes a deprecation date required for the graphql `@deprecated` directive.
+
+  ##### Invalid
+
+  ```graphql
+  query {
+    member @deprecated(reason: "Use `members` instead") {
+      id
+    }
+  }
+  ```
+
+  ##### Valid
+
+  ```graphql
+  query {
+    member
+      @deprecated(reason: "Use `members` instead", deletionDate: "2099-12-25") {
+      id
+    }
+  }
+  ```
+
+- [#7709](https://github.com/biomejs/biome/pull/7709) [`d6da4d5`](https://github.com/biomejs/biome/commit/d6da4d5a272d61420997e26aef80f53298515665) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#7704](https://github.com/biomejs/biome/issues/7704): The [`useExhaustiveDependencies`](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/) rule now correctly adds an object dependency when its method is called within the closure.
+
+  For example:
+
+  ```js
+  function Component(props) {
+    useEffect(() => {
+      props.foo();
+    }, []);
+  }
+  ```
+
+  will now be fixed to:
+
+  ```js
+  function Component(props) {
+    useEffect(() => {
+      props.foo();
+    }, [props]);
+  }
+  ```
+
+- [#7624](https://github.com/biomejs/biome/pull/7624) [`309ae41`](https://github.com/biomejs/biome/commit/309ae41c1a29e50d71300d3e63f6c64ee6ecb968) Thanks [@lucasweng](https://github.com/lucasweng)! - Fixed [#7595](https://github.com/biomejs/biome/issues/7595): [`noUselessEscapeInString`](https://biomejs.dev/linter/rules/no-useless-escape-in-string/) no longer reports `$\{` escape in template literals.
+
+- [#7665](https://github.com/biomejs/biome/pull/7665) [`29e4229`](https://github.com/biomejs/biome/commit/29e422939f25595dca4f19735a27258d97545288) Thanks [@ryan-m-walker](https://github.com/ryan-m-walker)! - Fixed [#7619](https://github.com/biomejs/biome/issues/7619): Added support for parsing the CSS `:state()` pseudo-class.
+
+  ```css
+  custom-selector:state(checked) {
+  }
+  ```
+
+- [#7608](https://github.com/biomejs/biome/pull/7608) [`41df59b`](https://github.com/biomejs/biome/commit/41df59bfc6d49190b9c35fa262def3ecfcc6abd2) Thanks [@ritoban23](https://github.com/ritoban23)! - Fixed [#7604](https://github.com/biomejs/biome/issues/7604): the `useMaxParams` rule now highlights parameter lists instead of entire function bodies. This provides more precise error highlighting. Previously, the entire function was highlighted; now only the parameter list is highlighted, such as `(a, b, c, d, e, f, g, h)`.
+
+- [#7643](https://github.com/biomejs/biome/pull/7643) [`459a6ac`](https://github.com/biomejs/biome/commit/459a6aca67290e8b974802bd693738f79883d67e) Thanks [@daivinhtran](https://github.com/daivinhtran)! - Fixed [#7580](https://github.com/biomejs/biome/issues/7580): Include plugin in summary report
+
 ## 2.2.5
 
 ### Patch Changes

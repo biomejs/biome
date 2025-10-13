@@ -32,7 +32,7 @@ declare_lint_rule! {
     /// ```
     ///
  pub UseQwikValidLexicalScope {
-        version: "next",
+        version: "2.2.6",
         name: "useQwikValidLexicalScope",
         language: "jsx",
         sources: &[RuleSource::EslintQwik("valid-lexical-scope").same()],
