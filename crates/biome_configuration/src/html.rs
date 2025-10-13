@@ -43,7 +43,7 @@ pub struct HtmlConfiguration {
     pub assist: Option<HtmlAssistConfiguration>,
 }
 
-pub type HtmlFormatterEnabled = Bool<true>; // Keep it disabled by default while experimental.
+pub type HtmlFormatterEnabled = Bool<false>; // Keep it disabled by default while experimental.
 pub type HtmlLinterEnabled = Bool<true>;
 pub type HtmlAssistEnabled = Bool<true>;
 pub type HtmlParseInterpolation = Bool<false>;
