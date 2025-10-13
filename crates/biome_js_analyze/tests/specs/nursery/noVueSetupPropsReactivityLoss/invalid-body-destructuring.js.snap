@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-body-destructuring.js
+---
+# Input
+```js
+// Invalid: destructuring props in setup function body
+export default {
+  setup(props) {
+    const { count } = props;
+    return () => h('div', count);
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid-body-destructuring.js:4:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the root scope of `setup` loses reactivity.
+  
+    2 │ export default {
+    3 │   setup(props) {
+  > 4 │     const { count } = props;
+      │           ^^^^^^^^^
+    5 │     return () => h('div', count);
+    6 │   }
+  
+  i The `props` parameter is defined here.
+  
+    1 │ // Invalid: destructuring props in setup function body
+    2 │ export default {
+  > 3 │   setup(props) {
+      │         ^^^^^
+    4 │     const { count } = props;
+    5 │     return () => h('div', count);
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+
+```

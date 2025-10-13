@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-typescript.ts
+---
+# Input
+```ts
+// Invalid: TypeScript file with destructuring
+interface Props {
+  count: number;
+  msg: string;
+}
+
+export default {
+  setup(props: Props) {
+    const { count, msg } = props;
+    return { count, msg };
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid-typescript.ts:9:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the root scope of `setup` loses reactivity.
+  
+     7 │ export default {
+     8 │   setup(props: Props) {
+   > 9 │     const { count, msg } = props;
+       │           ^^^^^^^^^^^^^^
+    10 │     return { count, msg };
+    11 │   }
+  
+  i The `props` parameter is defined here.
+  
+     7 │ export default {
+   > 8 │   setup(props: Props) {
+       │         ^^^^^
+     9 │     const { count, msg } = props;
+    10 │     return { count, msg };
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+
+```

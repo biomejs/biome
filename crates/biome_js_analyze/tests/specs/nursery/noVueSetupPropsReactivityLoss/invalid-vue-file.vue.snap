@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-file.vue
+---
+# Input
+```ts
+export default {
+  setup(props) {
+    const { count } = props;
+    return { count };
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid-vue-file.vue:3:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the root scope of `setup` loses reactivity.
+  
+    1 │ export default {
+    2 │   setup(props) {
+  > 3 │     const { count } = props;
+      │           ^^^^^^^^^
+    4 │     return { count };
+    5 │   }
+  
+  i The `props` parameter is defined here.
+  
+    1 │ export default {
+  > 2 │   setup(props) {
+      │         ^^^^^
+    3 │     const { count } = props;
+    4 │     return { count };
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+
+```
