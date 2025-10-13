@@ -477,7 +477,7 @@ pub(crate) fn parse_embedded_script(
     let html_file_source = html_file_source.to_html_file_source()?;
     if element.is_javascript_tag() {
         let file_source = if html_file_source.is_svelte() || html_file_source.is_vue() {
-            let mut file_source = if element.is_typescript_lang().unwrap_or_default() {
+            let mut file_source = if element.is_typescript_lang() {
                 JsFileSource::ts()
             } else {
                 JsFileSource::js_module()
@@ -530,6 +530,7 @@ pub(crate) fn parse_embedded_script(
     }
 }
 
+/// Parses embedded style, but it skips it if it contains SASS language
 pub(crate) fn parse_embedded_style(
     element: HtmlElement,
     cache: &mut NodeCache,
@@ -539,6 +540,11 @@ pub(crate) fn parse_embedded_style(
     if element.is_style_tag() {
         // This is probably an error
         if element.children().len() > 1 {
+            return None;
+        }
+
+        // We don't support SASS
+        if element.is_sass_lang() {
             return None;
         }
 

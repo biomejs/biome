@@ -86,7 +86,10 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
             &L::lookup_settings(&settings.languages).linter,
             L::resolve_environment(&settings),
             &BiomePath::new(input_file),
-            &DocumentFileSource::from_path(input_file),
+            &DocumentFileSource::from_path(
+                input_file,
+                settings.experimental_full_html_support_enabled(),
+            ),
             None,
         )
     }
@@ -130,7 +133,10 @@ where
             .merge_with_configuration(configuration, None)
             .unwrap();
 
-        let document_file_source = DocumentFileSource::from_path(input_file);
+        let document_file_source = DocumentFileSource::from_path(
+            input_file,
+            settings.experimental_full_html_support_enabled(),
+        );
         settings.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
@@ -191,7 +197,7 @@ fn get_js_like_paths_in_dir(dir: &Utf8Path) -> Vec<BiomePath> {
             if path.is_dir() {
                 get_js_like_paths_in_dir(&path)
             } else {
-                DocumentFileSource::from_well_known(&path)
+                DocumentFileSource::from_well_known(&path, false)
                     .is_javascript_like()
                     .then(|| BiomePath::new(path))
                     .into_iter()

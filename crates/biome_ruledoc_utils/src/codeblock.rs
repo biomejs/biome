@@ -94,7 +94,7 @@ impl CodeBlock {
     }
 
     pub fn document_file_source(&self) -> DocumentFileSource {
-        DocumentFileSource::from_extension(&self.tag)
+        DocumentFileSource::from_extension(&self.tag, false)
     }
 
     /// Returns the block's file path, but only if one was set explicitly using
@@ -138,7 +138,8 @@ impl FromStr for CodeBlock {
 
                         code_block.file_path = Some(normalize_file_path(path));
                     } else {
-                        if DocumentFileSource::from_extension(token) == DocumentFileSource::Unknown
+                        if DocumentFileSource::from_extension(token, false)
+                            == DocumentFileSource::Unknown
                         {
                             bail!("Unrecognised attribute in code block: {token}");
                         }

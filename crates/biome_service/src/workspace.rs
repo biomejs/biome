@@ -219,10 +219,10 @@ impl FeaturesSupported {
             }
         }
 
-        if let Some(experimental_full_html_support) = settings.experimental_full_html_support {
-            if experimental_full_html_support.value() {
-                self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
-            }
+        if let Some(experimental_full_html_support) = settings.experimental_full_html_support
+            && experimental_full_html_support.value()
+        {
+            self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
         }
 
         debug!("The file has the following feature sets: {:?}", &self);
