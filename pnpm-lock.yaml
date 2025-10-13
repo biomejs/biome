@@ -58,7 +58,7 @@ importers:
         version: 7.1.5(@types/node@22.17.1)(jiti@1.21.6)
       vitest:
         specifier: 3.2.4
-        version: 3.2.4(@types/node@22.17.1)(happy-dom@18.0.1)(jiti@1.21.6)
+        version: 3.2.4(@types/node@22.17.1)(happy-dom@20.0.0)(jiti@1.21.6)
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
         specifier: 2.2.6
@@ -147,7 +147,7 @@ importers:
         version: 7.1.5(@types/node@22.18.10)(jiti@1.21.6)
       vitest:
         specifier: 3.2.4
-        version: 3.2.4(@types/node@22.18.10)(happy-dom@18.0.1)(jiti@1.21.6)
+        version: 3.2.4(@types/node@22.18.10)(happy-dom@20.0.0)(jiti@1.21.6)
 
   packages/@biomejs/plugin-api:
     dependencies:
@@ -164,8 +164,8 @@ importers:
   packages/aria-data:
     dependencies:
       happy-dom:
-        specifier: ^18.0.1
-        version: 18.0.1
+        specifier: ^20.0.0
+        version: 20.0.0
 
   packages/tailwindcss-config-analyzer:
     dependencies:
@@ -1090,8 +1090,8 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  happy-dom@18.0.1:
-    resolution: {integrity: sha512-qn+rKOW7KWpVTtgIUi6RVmTBZJSe2k0Db0vh1f7CWrWclkkc7/Q+FrOfkZIb2eiErLyqu5AXEzE7XthO9JVxRA==}
+  happy-dom@20.0.0:
+    resolution: {integrity: sha512-GkWnwIFxVGCf2raNrxImLo397RdGhLapj5cT3R2PT7FwL62Ze1DROhzmYW7+J3p9105DYMVenEejEbnq5wA37w==}
     engines: {node: '>=20.0.0'}
 
   has-flag@3.0.0:
@@ -2629,7 +2629,7 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  happy-dom@18.0.1:
+  happy-dom@20.0.0:
     dependencies:
       '@types/node': 20.19.9
       '@types/whatwg-mimetype': 3.0.2
@@ -3107,7 +3107,7 @@ snapshots:
       fsevents: 2.3.3
       jiti: 1.21.6
 
-  vitest@3.2.4(@types/node@22.17.1)(happy-dom@18.0.1)(jiti@1.21.6):
+  vitest@3.2.4(@types/node@22.17.1)(happy-dom@20.0.0)(jiti@1.21.6):
     dependencies:
       '@types/chai': 5.2.2
       '@vitest/expect': 3.2.4
@@ -3134,7 +3134,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.17.1
-      happy-dom: 18.0.1
+      happy-dom: 20.0.0
     transitivePeerDependencies:
       - jiti
       - less
@@ -3149,7 +3149,7 @@ snapshots:
       - tsx
       - yaml
 
-  vitest@3.2.4(@types/node@22.18.10)(happy-dom@18.0.1)(jiti@1.21.6):
+  vitest@3.2.4(@types/node@22.18.10)(happy-dom@20.0.0)(jiti@1.21.6):
     dependencies:
       '@types/chai': 5.2.2
       '@vitest/expect': 3.2.4
@@ -3176,7 +3176,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.18.10
-      happy-dom: 18.0.1
+      happy-dom: 20.0.0
     transitivePeerDependencies:
       - jiti
       - less
