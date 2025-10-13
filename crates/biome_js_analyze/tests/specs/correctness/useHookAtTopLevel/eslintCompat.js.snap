@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: eslintCompat.js
+---
+# Input
+```js
+// Invalid as hooks cannot be used at module level.
+useHook();
+
+/*
+// Invalid as hooks cannot be called in non-component functions.
+function notAComponent() {
+	useHook();
+}
+
+// Valid as hook is called in a component (by naming convention).
+function AComponent() {
+	useHook();
+}
+
+// Invalid as hooks cannot be called in non-hook functions.
+function notUseMyHook() {
+	useHook();
+}
+
+// Valid as hook is called in a hook (by naming convention).
+function useMyHook() {
+	useHook();
+}
+
+// Valid as hooks can be called within anonymous functions.
+test("the hook", () => {
+	useHook();
+});
+
+// Valid as hooks can be called within nested anonymous functions.
+test("more hook", () => {
+	renderHook(() => useHook());
+});
+*/
+
+```
+
+# Diagnostics
+```
+eslintCompat.js:2:1 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook is being called at the module level, but all hooks must be called from within a hook or component.
+  
+    1 │ // Invalid as hooks cannot be used at module level.
+  > 2 │ useHook();
+      │ ^^^^^^^
+    3 │ 
+    4 │ /*
+  
+  i Move the hook call into the top level of a hook or component in order to use it.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
