@@ -59,7 +59,7 @@ impl Rule for IgnoreScanner {
             .filter_map(|element| {
                 let value = element.as_json_string_value()?;
                 let value = value.inner_string_text().ok()?;
-                let new_inner_string = format!("!!{}", value.text());
+                let new_inner_string = format!("!!**/{}", value.text());
                 Some(AnyJsonValue::JsonStringValue(json_string_value(
                     json_string_literal(new_inner_string.as_str()),
                 )))

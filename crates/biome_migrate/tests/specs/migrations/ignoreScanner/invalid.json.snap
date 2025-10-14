@@ -42,7 +42,7 @@ invalid.json:3:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━
      5   │ - ······"bar"
      6   │ - ····],
      7   │ - ····"includes":·["**",·"!foo.ts"]
-       3 │ + ····"includes":·["**",·"!foo.ts",·"!!foo",·"!!bar"]
+       3 │ + ····"includes":·["**",·"!foo.ts",·"!!**/foo",·"!!**/bar"]
      8 4 │     }
      9 5 │   }
   
