@@ -499,7 +499,25 @@ pub struct ClassInfo {
 /// it is considered a custom class instead and `None` is returned.
 pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<ClassInfo> {
     let utility_data = tokenize_class(class_name)?;
-    let utility_info = get_utility_info(sort_config.utilities, &utility_data.utility);
+
+    // Use utilities_owned if available, otherwise use static utilities.
+    // Both owned fields must be set/unset together.
+    debug_assert_eq!(
+        sort_config.utilities_owned.is_some(),
+        sort_config.layer_index_map_owned.is_some(),
+        "inconsistent SortConfig: utilities_owned and layer_index_map_owned must be set together"
+    );
+    let using_owned = sort_config.utilities_owned.is_some();
+
+    let utility_info = if using_owned {
+        get_utility_info_owned(
+            // Safe due to the debug_assert above
+            sort_config.utilities_owned.as_ref().unwrap(),
+            &utility_data.utility,
+        )
+    } else {
+        get_utility_info(sort_config.utilities, &utility_data.utility)
+    };
 
     // Split up variants into arbitrary and known variants.
     let (arbitrary_variants, current_variants): (
@@ -513,10 +531,23 @@ pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<Clas
         .collect();
 
     if let Some(utility_info) = utility_info {
+        // Use the matching layer index map consistently with the utilities set
+        let layer_index = if using_owned {
+            *sort_config
+                .layer_index_map_owned
+                .as_ref()
+                .unwrap()
+                .get(utility_info.layer.as_str())?
+        } else {
+            *sort_config
+                .layer_index_map
+                .get(utility_info.layer.as_str())?
+        };
+
         return Some(ClassInfo {
             text: class_name.into(),
             variant_weight: compute_variants_weight(sort_config.variants, &current_variants),
-            layer_index: *sort_config.layer_index_map.get(&utility_info.layer)?,
+            layer_index,
             utility_index: utility_info.index,
             arbitrary_variants: if arbitrary_variants.is_empty() {
                 None
