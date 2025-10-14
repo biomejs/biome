@@ -276,6 +276,7 @@ pub mod use_default_switch_clause_last;
 pub mod use_deprecated_date;
 pub mod use_deprecated_reason;
 pub mod use_enum_initializers;
+pub mod use_error_cause;
 pub mod use_error_message;
 pub mod use_exhaustive_dependencies;
 pub mod use_exhaustive_switch_cases;

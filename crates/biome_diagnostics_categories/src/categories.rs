@@ -190,6 +190,7 @@ define_categories! {
     "lint/nursery/useAnchorHref": "https://biomejs.dev/linter/rules/use-anchor-href",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentArrowReturn": "https://biomejs.dev/linter/rules/use-consistent-arrow-return",
+    "lint/nursery/useErrorCause": "https://biomejs.dev/linter/rules/use-error-cause",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useConsistentTypeDefinitions": "https://biomejs.dev/linter/rules/use-consistent-type-definitions",
     "lint/nursery/useDeprecatedDate": "https://biomejs.dev/linter/rules/use-deprecated-date",
