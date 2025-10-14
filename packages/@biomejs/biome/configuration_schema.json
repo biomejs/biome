@@ -3128,6 +3128,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmptySourceConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmptySourceOptions" }
+			]
+		},
+		"NoEmptySourceOptions": {
+			"type": "object",
+			"properties": {
+				"allowComments": {
+					"description": "Whether comments are considered meaningful",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoEmptyTypeParametersConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5000,6 +5017,13 @@
 					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDuplicateDependenciesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmptySource": {
+					"description": "Disallow empty sources.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmptySourceConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6955,6 +6979,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoEmptyPatternOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmptySourceOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmptySourceOptions" }]
 				}
 			},
 			"additionalProperties": false
