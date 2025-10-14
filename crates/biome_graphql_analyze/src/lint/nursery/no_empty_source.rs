@@ -59,7 +59,7 @@ declare_lint_rule! {
     ///
     /// #### Valid
     ///
-    /// ```graphql,expect_diagnostic,use_options
+    /// ```graphql,ignore,use_options
     /// # Only comments
     /// ```
     ///
