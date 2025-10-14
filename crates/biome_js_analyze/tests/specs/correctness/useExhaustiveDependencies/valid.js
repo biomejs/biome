@@ -12,6 +12,7 @@ import {
 	useMemo,
 	useTransition,
 	useId,
+    useEffectEvent,
 } from "react";
 import { useRef as uR } from "react"
 import doSomething from 'a';
@@ -54,6 +55,7 @@ function MyComponent4() {
     const [isPending, startTransition] = useTransition();
     const id = useId();
     const externalStore = useSyncExternalStore();
+    const event = useEffectEvent(() => {});
     useEffect(() => {
         console.log(name);
         setName(1);
@@ -74,6 +76,8 @@ function MyComponent4() {
         console.log(id);
 
         console.log(externalStore);
+
+        event();
     }, [name, state, memoizedCallback, memoizedValue, isPending, externalStore, id, theme]);
 }
 
