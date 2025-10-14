@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-typescript.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Valid: TypeScript file with proper props usage
+interface Props {
+  count: number;
+  msg: string;
+}
+
+export default {
+  setup(props: Props) {
+    return () => props.count + props.msg;
+  }
+}
+
+```

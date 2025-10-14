@@ -1,0 +1,65 @@
+/* should not generate diagnostics */
+
+// Valid: using props parameter directly
+export default {
+  setup(props) {
+    return () => h('div', props.count)
+  }
+}
+
+// Valid: destructuring in nested function (not root scope)
+{
+  const Component = {
+    setup(props) {
+      const handler = () => {
+        const { count } = props;
+        console.log(count);
+      };
+      return { handler };
+    }
+  };
+}
+
+// Valid: destructuring in nested arrow function
+{
+  const Component = {
+    setup(props) {
+      return () => {
+        const { count } = props;
+        return count;
+      };
+    }
+  };
+}
+
+// Valid: destructuring from toRefs(props)
+{
+  const Component = {
+    setup(props) {
+      const { count } = toRefs(props);
+      return () => h('div', count.value);
+    }
+  };
+}
+
+// Valid: assignment destructuring from toRefs(props)
+{
+  const Component = {
+    setup(props) {
+      let count;
+      ({ count } = toRefs(props));
+      return () => h('div', count.value);
+    }
+  };
+}
+
+// Valid: destructuring from props wrapped in parentheses should still be flagged elsewhere,
+// but toRefs should be allowed even with parentheses
+{
+  const Component = {
+    setup(props) {
+      const { count } = (toRefs(props));
+      return () => h('div', count.value);
+    }
+  };
+}

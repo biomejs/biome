@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-body-arrow-function.js
+---
+# Input
+```js
+// Invalid: arrow function with body destructuring
+export default {
+  setup: (props) => {
+    const { count } = props;
+    return () => count;
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid-body-arrow-function.js:4:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the root scope of `setup` loses reactivity.
+  
+    2 │ export default {
+    3 │   setup: (props) => {
+  > 4 │     const { count } = props;
+      │           ^^^^^^^^^
+    5 │     return () => count;
+    6 │   }
+  
+  i The `props` parameter is defined here.
+  
+    1 │ // Invalid: arrow function with body destructuring
+    2 │ export default {
+  > 3 │   setup: (props) => {
+      │           ^^^^^
+    4 │     const { count } = props;
+    5 │     return () => count;
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+
+```

@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-body-array-destructuring.js
+---
+# Input
+```js
+// Invalid: array destructuring in body
+export default {
+  setup(props) {
+    const [first] = props;
+    return first;
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid-body-array-destructuring.js:4:11 lint/nursery/noVueSetupPropsReactivityLoss ━━━━━━━━━━━━━━━━
+
+  i Destructuring `props` in the root scope of `setup` loses reactivity.
+  
+    2 │ export default {
+    3 │   setup(props) {
+  > 4 │     const [first] = props;
+      │           ^^^^^^^
+    5 │     return first;
+    6 │   }
+  
+  i The `props` parameter is defined here.
+  
+    1 │ // Invalid: array destructuring in body
+    2 │ export default {
+  > 3 │   setup(props) {
+      │         ^^^^^
+    4 │     const [first] = props;
+    5 │     return first;
+  
+  i To preserve reactivity, access props as properties: `props.propertyName`.
+  
+
+```
