@@ -192,6 +192,9 @@ fn get_utility_info_impl<L: UtilityLayerLike>(
                     // `gap-x-4`, and there are targets like `gap-` and `gap-x-`, we want to
                     // make sure that the `gap-x-` target is matched as it is more specific,
                     // regardless of the order in which the targets are defined.
+                    //
+                    // When multiple targets have the same length (tie), the first encountered
+                    // match wins. This effectively uses layer order as the tie-breaker.
                     let target_len = target.len();
                     if target_len > longest_prefix {
                         best_match = Some((layer_name, index));
@@ -338,6 +341,34 @@ mod get_utility_info_tests {
             get_utility_info(utility_config.as_slice(), &utility_data),
             Some(UtilityInfo {
                 layer: "arbitrary".to_string(),
+                index: 0,
+            })
+        );
+    }
+
+    #[test]
+    fn test_equal_length_tie_across_layers() {
+        // When two partial matches have the same length across different layers,
+        // the first encountered layer wins (layer order as tie-breaker).
+        let utility_config = vec![
+            UtilityLayer {
+                name: "layer1",
+                classes: &["btn-"],
+            },
+            UtilityLayer {
+                name: "layer2",
+                classes: &["btn-"],
+            },
+        ];
+        let utility_data = ClassSegmentStructure {
+            text: "btn-primary".into(),
+            arbitrary: false,
+        };
+        // Should match layer1 because it comes first
+        assert_eq!(
+            get_utility_info(utility_config.as_slice(), &utility_data),
+            Some(UtilityInfo {
+                layer: "layer1".to_string(),
                 index: 0,
             })
         );
