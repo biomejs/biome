@@ -40,3 +40,5 @@ This configuration achieves the following:
 In general, we now recommend using the force-ignore syntax for any folders that contain _output_ files, such as `build/` and `dist/`. For such folders, it is highly unlikely that indexing has any useful benefits. For folders containing generated files, you may wish to use the regular ignore syntax so that type information can still be extracted from the files.
 
 `experimentalScannerIgnores` will continue to work for now, but you'll see a deprecation warning if you still use it.
+
+Run the `biome migrate --write` command to automatically update the configuration file.
