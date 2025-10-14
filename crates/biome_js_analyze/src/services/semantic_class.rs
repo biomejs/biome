@@ -906,7 +906,7 @@ fn handle_assignment_expression(
         // Array assignment pattern
         if let Some(array) = left.as_js_array_assignment_pattern() {
             for class_member_reference in
-                ThisPatternResolver::collect_array_assignment_names(&array, scoped_this_references)
+                ThisPatternResolver::collect_array_assignment_names(array, scoped_this_references)
             {
                 writes.insert(class_member_reference);
             }
@@ -915,7 +915,7 @@ fn handle_assignment_expression(
         // Object assignment pattern
         if let Some(object) = left.as_js_object_assignment_pattern() {
             for class_member_reference in ThisPatternResolver::collect_object_assignment_names(
-                &object,
+                object,
                 scoped_this_references,
             ) {
                 match class_member_reference.access_kind {
