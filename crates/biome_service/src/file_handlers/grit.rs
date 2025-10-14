@@ -263,6 +263,7 @@ impl ExtensionHandler for GritFileHandler {
                 code_actions: None,
                 rename: None,
                 fix_all: Some(fix_all),
+                update_snippets: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -405,7 +406,9 @@ fn format_on_type(
 fn lint(params: LintParams) -> LintResults {
     let _ = debug_span!("Linting Grit file", path =? params.path, language =? params.language)
         .entered();
-    let diagnostics = params.parse.into_serde_diagnostics();
+    let diagnostics = params
+        .parse
+        .into_serde_diagnostics(params.diagnostic_offset);
 
     let diagnostic_count = diagnostics.len() as u32;
     let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
@@ -423,7 +426,6 @@ fn lint(params: LintParams) -> LintResults {
 
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    // We don't have analyzer rules yet
     let tree: GritRoot = params.parse.tree();
     let code = if params.should_format {
         format_node(

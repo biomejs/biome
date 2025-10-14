@@ -5,7 +5,9 @@ use anyhow::Context;
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextLen, TextRange, TextSize};
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::svelte::SvelteFileHandler;
+use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FeaturesSupported, FileFeaturesResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetFileContentParams, IgnoreKind, PathIsIgnoredParams,
@@ -76,17 +78,19 @@ pub(crate) fn format(
         if output.is_empty() {
             return Ok(None);
         }
-        match path.extension() {
-            Some("astro") => {
-                output = AstroFileHandler::output(input.as_str(), output.as_str());
+        if !file_features.supports_full_html_support() {
+            match path.extension() {
+                Some("astro") => {
+                    output = AstroFileHandler::output(input.as_str(), output.as_str());
+                }
+                Some("vue") => {
+                    output = VueFileHandler::output(input.as_str(), output.as_str());
+                }
+                Some("svelte") => {
+                    output = SvelteFileHandler::output(input.as_str(), output.as_str());
+                }
+                _ => {}
             }
-            Some("vue") => {
-                output = VueFileHandler::output(input.as_str(), output.as_str());
-            }
-            Some("svelte") => {
-                output = SvelteFileHandler::output(input.as_str(), output.as_str());
-            }
-            _ => {}
         }
 
         let indels = biome_text_edit::TextEdit::from_unicode_words(input.as_str(), output.as_str());
@@ -161,6 +165,7 @@ pub(crate) fn format_range(
             project_key: doc.project_key,
             path: path.clone(),
         })?;
+
         let offset = match path.extension() {
             Some("vue") => VueFileHandler::start(content.as_str()),
             Some("astro") => AstroFileHandler::start(content.as_str()),

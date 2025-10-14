@@ -55,7 +55,7 @@ mod client;
 mod document;
 mod server;
 
-pub use document::{EmbeddedLanguageContent, EmbeddedSnippets};
+pub use document::{AnyEmbeddedSnippet, EmbeddedSnippet};
 use std::{
     borrow::Cow,
     fmt::{Debug, Display, Formatter},
@@ -130,8 +130,9 @@ pub struct SupportsFeatureResult {
 pub struct FeaturesSupported([SupportKind; NUM_FEATURE_KINDS]);
 
 impl FeaturesSupported {
-    /// By default, all features are not supported by a file.
+    /// By default, a file does not support all features.
     const WORKSPACE_FEATURES: [SupportKind; NUM_FEATURE_KINDS] = [
+        SupportKind::FileNotSupported,
         SupportKind::FileNotSupported,
         SupportKind::FileNotSupported,
         SupportKind::FileNotSupported,
@@ -218,6 +219,12 @@ impl FeaturesSupported {
             }
         }
 
+        if let Some(experimental_full_html_support) = settings.experimental_full_html_support
+            && experimental_full_html_support.value()
+        {
+            self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
+        }
+
         debug!("The file has the following feature sets: {:?}", &self);
 
         self
@@ -265,6 +272,11 @@ impl FeaturesSupported {
 
     pub fn supports_search(&self) -> bool {
         self.supports(FeatureKind::Search)
+    }
+
+    // TODO: remove once html full support is stable
+    pub fn supports_full_html_support(&self) -> bool {
+        self.supports(FeatureKind::HtmlFullSupport)
     }
 
     /// Returns the [`SupportKind`] for the given `feature`, but only if it is
@@ -536,9 +548,11 @@ pub enum FeatureKind {
     Search,
     Assist,
     Debug,
+    // TODO: remove once full HTML support is stable
+    HtmlFullSupport,
 }
 
-pub const NUM_FEATURE_KINDS: usize = 5;
+pub const NUM_FEATURE_KINDS: usize = 6;
 
 impl Display for FeatureKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -548,6 +562,7 @@ impl Display for FeatureKind {
             Self::Search => write!(f, "Search"),
             Self::Assist => write!(f, "Assist"),
             Self::Debug => write!(f, "Debug"),
+            Self::HtmlFullSupport => write!(f, "HtmlFullSupport"),
         }
     }
 }
@@ -565,6 +580,7 @@ impl FeatureKind {
             2 => Self::Search,
             3 => Self::Assist,
             4 => Self::Debug,
+            5 => Self::HtmlFullSupport,
             _ => unreachable!("invalid index for FeatureKind"),
         }
     }
@@ -578,6 +594,7 @@ impl FeatureKind {
             Self::Search => 2,
             Self::Assist => 3,
             Self::Debug => 4,
+            Self::HtmlFullSupport => 5,
         }
     }
 }
@@ -606,6 +623,7 @@ impl Debug for FeatureName {
                 FeatureKind::Search => list.entry(&"Search"),
                 FeatureKind::Assist => list.entry(&"Assist"),
                 FeatureKind::Debug => list.entry(&"Debug"),
+                FeatureKind::HtmlFullSupport => list.entry(&"HtmlFullSupport"),
             };
         }
         list.finish()
@@ -969,6 +987,7 @@ pub struct CodeAction {
     pub category: ActionCategory,
     pub rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
     pub suggestion: CodeSuggestion,
+    pub offset: Option<TextSize>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

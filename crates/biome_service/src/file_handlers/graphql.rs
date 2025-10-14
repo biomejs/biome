@@ -288,6 +288,7 @@ impl ExtensionHandler for GraphqlFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
+                update_snippets: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -437,10 +438,10 @@ fn lint(params: LintParams) -> LintResults {
 
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&params.only)
-            .with_skip(&params.skip)
+            .with_only(params.only)
+            .with_skip(params.skip)
             .with_path(params.path.as_path())
-            .with_enabled_selectors(&params.enabled_selectors)
+            .with_enabled_selectors(params.enabled_selectors)
             .with_project_layout(params.project_layout.clone())
             .finish();
 
@@ -457,7 +458,12 @@ fn lint(params: LintParams) -> LintResults {
         process_lint.process_signal(signal)
     });
 
-    process_lint.into_result(params.parse.into_serde_diagnostics(), analyze_diagnostics)
+    process_lint.into_result(
+        params
+            .parse
+            .into_serde_diagnostics(params.diagnostic_offset),
+        analyze_diagnostics,
+    )
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
@@ -476,6 +482,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         enabled_rules: rules,
         plugins: _,
         categories,
+        action_offset,
     } = params;
     let _ = debug_span!("Code actions GraphQL", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -495,10 +502,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(settings, analyzer_options)
-            .with_only(&only)
-            .with_skip(&skip)
+            .with_only(only)
+            .with_skip(skip)
             .with_path(path.as_path())
-            .with_enabled_selectors(&rules)
+            .with_enabled_selectors(rules)
             .with_project_layout(project_layout)
             .finish();
 
@@ -519,6 +526,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                     .rule_name
                     .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
                 suggestion: item.suggestion,
+                offset: action_offset,
             }
         }));
 
@@ -541,10 +549,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     );
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.settings, analyzer_options)
-            .with_only(&params.only)
-            .with_skip(&params.skip)
+            .with_only(params.only)
+            .with_skip(params.skip)
             .with_path(params.biome_path.as_path())
-            .with_enabled_selectors(&params.enabled_rules)
+            .with_enabled_selectors(params.enabled_rules)
             .with_project_layout(params.project_layout)
             .finish();
 
@@ -570,13 +578,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             }
 
             for action in signal.actions() {
-                // suppression actions should not be part of the fixes (safe or suggested)
-                if action.is_suppression() {
-                    continue;
-                }
-
                 match params.fix_file_mode {
                     FixFileMode::SafeFixes => {
+                        // suppression actions should not be part of safe fixes
+                        if action.is_suppression() {
+                            continue;
+                        }
                         if action.applicability == Applicability::MaybeIncorrect {
                             skipped_suggested_fixes += 1;
                         }
@@ -595,7 +602,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         }
                     }
                     FixFileMode::ApplySuppressions => {
-                        // TODO: implement once a GraphQL suppression action is available
+                        if action.is_suppression() {
+                            return ControlFlow::Break(action);
+                        }
                     }
                 }
             }

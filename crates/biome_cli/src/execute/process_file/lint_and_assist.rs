@@ -7,7 +7,10 @@ use biome_diagnostics::{Diagnostic, DiagnosticExt, Error, Severity, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_rowan::TextSize;
 use biome_service::diagnostics::FileTooLarge;
-use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use biome_service::file_handlers::astro::AstroFileHandler;
+use biome_service::file_handlers::svelte::SvelteFileHandler;
+use biome_service::file_handlers::vue::VueFileHandler;
+use biome_service::workspace::FeaturesSupported;
 use tracing::{info, instrument};
 
 /// Lints a single file and returns a [FileResult]
@@ -18,6 +21,7 @@ pub(crate) fn lint_and_assist<'ctx>(
     suppress: bool,
     suppression_reason: Option<&str>,
     categories: RuleCategories,
+    features_supported: &FeaturesSupported,
 ) -> FileResult {
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
     let result = workspace_file.guard().check_file_size()?;
@@ -35,6 +39,7 @@ pub(crate) fn lint_and_assist<'ctx>(
             suppress,
             suppression_reason,
             categories,
+            features_supported,
         )
     }
 }
@@ -47,6 +52,7 @@ pub(crate) fn analyze_with_guard<'ctx>(
     suppress: bool,
     suppression_reason: Option<&str>,
     categories: RuleCategories,
+    features_supported: &FeaturesSupported,
 ) -> FileResult {
     let mut input = workspace_file.input()?;
     let mut changed = false;
@@ -91,17 +97,19 @@ pub(crate) fn analyze_with_guard<'ctx>(
 
         let mut output = fix_result.code;
 
-        match workspace_file.as_extension() {
-            Some("astro") => {
-                output = AstroFileHandler::output(input.as_str(), output.as_str());
+        if !features_supported.supports_full_html_support() {
+            match workspace_file.as_extension() {
+                Some("astro") => {
+                    output = AstroFileHandler::output(input.as_str(), output.as_str());
+                }
+                Some("vue") => {
+                    output = VueFileHandler::output(input.as_str(), output.as_str());
+                }
+                Some("svelte") => {
+                    output = SvelteFileHandler::output(input.as_str(), output.as_str());
+                }
+                _ => {}
             }
-            Some("vue") => {
-                output = VueFileHandler::output(input.as_str(), output.as_str());
-            }
-            Some("svelte") => {
-                output = SvelteFileHandler::output(input.as_str(), output.as_str());
-            }
-            _ => {}
         }
         if output != input {
             changed = true;
@@ -130,11 +138,15 @@ pub(crate) fn analyze_with_guard<'ctx>(
         && pull_diagnostics_result.skipped_diagnostics == 0;
 
     if !no_diagnostics {
-        let offset = match workspace_file.as_extension() {
-            Some("vue") => VueFileHandler::start(input.as_str()),
-            Some("astro") => AstroFileHandler::start(input.as_str()),
-            Some("svelte") => SvelteFileHandler::start(input.as_str()),
-            _ => None,
+        let offset = if features_supported.supports_full_html_support() {
+            None
+        } else {
+            match workspace_file.as_extension() {
+                Some("vue") => VueFileHandler::start(input.as_str()),
+                Some("astro") => AstroFileHandler::start(input.as_str()),
+                Some("svelte") => SvelteFileHandler::start(input.as_str()),
+                _ => None,
+            }
         };
 
         ctx.push_message(Message::Diagnostics {

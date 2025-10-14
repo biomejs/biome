@@ -1,0 +1,15 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.module.css`
+
+```css
+.className { composes: other from './other.module.css'; }
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

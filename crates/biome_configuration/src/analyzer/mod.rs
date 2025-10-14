@@ -501,7 +501,7 @@ impl<'de> serde::Deserialize<'de> for AnalyzerSelector {
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for AnalyzerSelector {
     fn schema_name() -> String {
-        "Selector".to_string()
+        "AnalyzerSelector".to_string()
     }
     fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
         String::json_schema(generator)

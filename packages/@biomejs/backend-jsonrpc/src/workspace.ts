@@ -8,7 +8,13 @@ export interface SupportsFeatureParams {
 export type FeatureName = FeatureKind[];
 export type BiomePath = string;
 export type ProjectKey = number;
-export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
+export type FeatureKind =
+	| "format"
+	| "lint"
+	| "search"
+	| "assist"
+	| "debug"
+	| "htmlFullSupport";
 export interface FileFeaturesResult {
 	featuresSupported: FeaturesSupported;
 }
@@ -179,7 +185,7 @@ export interface FormatterConfiguration {
 	 */
 	expand?: Expand;
 	/**
-	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
+	 * Whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
 	formatWithErrors?: Bool;
 	/**
@@ -245,6 +251,10 @@ export interface GritConfiguration {
  */
 export interface HtmlConfiguration {
 	assist?: HtmlAssistConfiguration;
+	/**
+	 * Enables full support for HTML, Vue, Svelte and Astro files.
+	 */
+	experimentalFullSupportEnabled?: Bool;
 	/**
 	 * HTML formatter options
 	 */
@@ -1759,6 +1769,14 @@ export interface Nursery {
 	 */
 	useQwikClasslist?: RuleConfiguration_for_UseQwikClasslistOptions;
 	/**
+	 * Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.
+	 */
+	useQwikMethodUsage?: RuleConfiguration_for_UseQwikMethodUsageOptions;
+	/**
+	 * Disallow unserializable expressions in Qwik dollar ($) scopes.
+	 */
+	useQwikValidLexicalScope?: RuleConfiguration_for_UseQwikValidLexicalScopeOptions;
+	/**
 	 * Enforce that components are defined as functions and never as classes.
 	 */
 	useReactFunctionComponents?: RuleConfiguration_for_UseReactFunctionComponentsOptions;
@@ -3094,6 +3112,12 @@ export type RuleConfiguration_for_UseMaxParamsOptions =
 export type RuleConfiguration_for_UseQwikClasslistOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseQwikClasslistOptions;
+export type RuleConfiguration_for_UseQwikMethodUsageOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikMethodUsageOptions;
+export type RuleConfiguration_for_UseQwikValidLexicalScopeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseQwikValidLexicalScopeOptions;
 export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseReactFunctionComponentsOptions;
@@ -5714,6 +5738,26 @@ export interface RuleWithOptions_for_UseQwikClasslistOptions {
 	 */
 	options: UseQwikClasslistOptions;
 }
+export interface RuleWithOptions_for_UseQwikMethodUsageOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikMethodUsageOptions;
+}
+export interface RuleWithOptions_for_UseQwikValidLexicalScopeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseQwikValidLexicalScopeOptions;
+}
 export interface RuleWithOptions_for_UseReactFunctionComponentsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8219,6 +8263,8 @@ export interface UseMaxParamsOptions {
 	max?: number;
 }
 export interface UseQwikClasslistOptions {}
+export interface UseQwikMethodUsageOptions {}
+export interface UseQwikValidLexicalScopeOptions {}
 export interface UseReactFunctionComponentsOptions {}
 export interface UseSortedClassesOptions {
 	/**
@@ -8519,7 +8565,12 @@ export interface NoTemplateCurlyInStringOptions {}
 export interface NoThenPropertyOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
-export interface NoUnknownAtRulesOptions {}
+export interface NoUnknownAtRulesOptions {
+	/**
+	 * A list of unknown at-rule names to ignore (case-insensitive).
+	 */
+	ignore: string[];
+}
 export interface NoUnsafeDeclarationMergingOptions {}
 export interface NoUnsafeNegationOptions {}
 export interface NoUselessEscapeInStringOptions {}
@@ -8955,6 +9006,8 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useQwikClasslist"
+	| "lint/nursery/useQwikMethodUsage"
+	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useVueMultiWordComponentNames"
@@ -9373,7 +9426,7 @@ export type DocumentFileSource =
 	| { Grit: GritFileSource };
 export interface JsFileSource {
 	/**
-	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
+	 * Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing. For example, if inside an Astro file, a top-level return statement is allowed.
 	 */
 	embedding_kind: EmbeddingKind;
 	language: Language;
@@ -9555,17 +9608,18 @@ export interface PullDiagnosticsParams {
 	/**
 	 * Rules to apply on top of the configuration
 	 */
-	enabledRules?: Selector[];
-	only?: Selector[];
+	enabledRules?: AnalyzerSelector[];
+	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	/**
 	 * When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
 	 */
 	pullCodeActions: boolean;
-	skip?: Selector[];
+	skip?: AnalyzerSelector[];
 }
 export type RuleCategories = RuleCategory[];
+export type AnalyzerSelector = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -9574,12 +9628,12 @@ export interface PullDiagnosticsResult {
 }
 export interface PullActionsParams {
 	categories?: RuleCategories;
-	enabledRules?: Selector[];
-	only?: Selector[];
+	enabledRules?: AnalyzerSelector[];
+	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	range?: TextRange;
-	skip?: Selector[];
+	skip?: AnalyzerSelector[];
 	suppressionReason?: string;
 }
 export interface PullActionsResult {
@@ -9587,6 +9641,7 @@ export interface PullActionsResult {
 }
 export interface CodeAction {
 	category: ActionCategory;
+	offset?: TextSize;
 	ruleName?: [string, string];
 	suggestion: CodeSuggestion;
 }
@@ -9674,14 +9729,14 @@ export interface FixFileParams {
 	/**
 	 * Rules to apply to the file
 	 */
-	enabledRules?: Selector[];
+	enabledRules?: AnalyzerSelector[];
 	fixFileMode: FixFileMode;
-	only?: Selector[];
+	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	ruleCategories: RuleCategories;
 	shouldFormat: boolean;
-	skip?: Selector[];
+	skip?: AnalyzerSelector[];
 	suppressionReason?: string;
 }
 /**

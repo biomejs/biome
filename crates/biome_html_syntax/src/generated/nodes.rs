@@ -20,6 +20,41 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroEmbeddedContent {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroEmbeddedContent {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroEmbeddedContentFields {
+        AstroEmbeddedContentFields {
+            content_token: self.content_token(),
+        }
+    }
+    pub fn content_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for AstroEmbeddedContent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroEmbeddedContentFields {
+    pub content_token: Option<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AstroFrontmatterElement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -36,15 +71,15 @@ impl AstroFrontmatterElement {
     pub fn as_fields(&self) -> AstroFrontmatterElementFields {
         AstroFrontmatterElementFields {
             l_fence_token: self.l_fence_token(),
-            content_token: self.content_token(),
+            content: self.content(),
             r_fence_token: self.r_fence_token(),
         }
     }
     pub fn l_fence_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn content_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 1usize)
+    pub fn content(&self) -> SyntaxResult<AstroEmbeddedContent> {
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn r_fence_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -61,7 +96,7 @@ impl Serialize for AstroFrontmatterElement {
 #[derive(Serialize)]
 pub struct AstroFrontmatterElementFields {
     pub l_fence_token: SyntaxResult<SyntaxToken>,
-    pub content_token: Option<SyntaxToken>,
+    pub content: SyntaxResult<AstroEmbeddedContent>,
     pub r_fence_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -970,6 +1005,56 @@ impl AnyHtmlTextExpression {
         }
     }
 }
+impl AstNode for AstroEmbeddedContent {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_EMBEDDED_CONTENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_EMBEDDED_CONTENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroEmbeddedContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroEmbeddedContent")
+                .field(
+                    "content_token",
+                    &support::DebugOptionalElement(self.content_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("AstroEmbeddedContent").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroEmbeddedContent> for SyntaxNode {
+    fn from(n: AstroEmbeddedContent) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroEmbeddedContent> for SyntaxElement {
+    fn from(n: AstroEmbeddedContent) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for AstroFrontmatterElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1002,10 +1087,7 @@ impl std::fmt::Debug for AstroFrontmatterElement {
                     "l_fence_token",
                     &support::DebugSyntaxResult(self.l_fence_token()),
                 )
-                .field(
-                    "content_token",
-                    &support::DebugOptionalElement(self.content_token()),
-                )
+                .field("content", &support::DebugSyntaxResult(self.content()))
                 .field(
                     "r_fence_token",
                     &support::DebugSyntaxResult(self.r_fence_token()),
@@ -2442,6 +2524,11 @@ impl std::fmt::Display for AnyHtmlElement {
     }
 }
 impl std::fmt::Display for AnyHtmlTextExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroEmbeddedContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

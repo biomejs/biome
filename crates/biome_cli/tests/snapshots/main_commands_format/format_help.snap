@@ -10,6 +10,8 @@ Run the formatter on a set of files.
 Usage: format [--write] [--staged] [--changed] [--since=REF] [PATH]...
 
 Generic options applied to all files
+        --format-with-errors=<true|false>  Whether formatting should be allowed to proceed if a
+                              given file has syntax errors
         --indent-style=<tab|space>  The indent style.
         --indent-width=NUMBER  The size of the indentation, 2 by default
         --line-ending=<lf|crlf|cr|auto>  The type of line ending.
@@ -77,6 +79,11 @@ Formatting options specific to the JavaScript files
                               into multiple lines, whether to break them before or after the binary
                               operator. Defaults to "after".
 
+Options that changes how the JSON parser behaves
+        --json-parse-allow-comments=<true|false>  Allow parsing comments in `.json` files
+        --json-parse-allow-trailing-commas=<true|false>  Allow parsing trailing commas in `.json`
+                              files
+
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
         --vcs-client-kind=<git>  The kind of client.
@@ -118,8 +125,8 @@ Global options applied to all commands
                               processed during the execution of the command.
         --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
                               warnings.
-        --reporter=<json|json-pretty|github|junit|summary|gitlab>  Allows to change how diagnostics
-                              and summary are reported.
+        --reporter=<json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson>  Allows to
+                              change how diagnostics and summary are reported.
         --log-file=ARG        Optional path to redirect log messages to.
                               If omitted, logs are printed to stdout.
         --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most

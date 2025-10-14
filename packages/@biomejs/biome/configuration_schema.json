@@ -1381,12 +1381,10 @@
 			"properties": {
 				"allowWrongLineComments": {
 					"description": "Allow comments to appear on incorrect lines in `.css` files",
-					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
 					"description": "Enables parsing of CSS Modules specific features.",
-					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {
@@ -1574,7 +1572,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
 				},
 				"formatWithErrors": {
-					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
+					"description": "Whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"includes": {
@@ -1864,6 +1862,10 @@
 						{ "$ref": "#/definitions/HtmlAssistConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"experimentalFullSupportEnabled": {
+					"description": "Enables full support for HTML, Vue, Svelte and Astro files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"formatter": {
 					"description": "HTML formatter options",
@@ -4468,6 +4470,13 @@
 		},
 		"NoUnknownAtRulesOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown at-rule names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownFunctionConfiguration": {
@@ -5242,6 +5251,20 @@
 					"description": "Prefer using the class prop as a classlist over the classnames helper.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikMethodUsage": {
+					"description": "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikMethodUsageConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikValidLexicalScope": {
+					"description": "Disallow unserializable expressions in Qwik dollar ($) scopes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikValidLexicalScopeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11406,6 +11429,36 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseQwikMethodUsageOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikMethodUsageOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseQwikValidLexicalScopeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseQwikValidLexicalScopeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseReactFunctionComponentsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -14478,6 +14531,26 @@
 			]
 		},
 		"UseQwikClasslistOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikMethodUsageConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikMethodUsageOptions" }
+			]
+		},
+		"UseQwikMethodUsageOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseQwikValidLexicalScopeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseQwikValidLexicalScopeOptions" }
+			]
+		},
+		"UseQwikValidLexicalScopeOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

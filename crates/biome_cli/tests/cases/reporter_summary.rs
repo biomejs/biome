@@ -1,9 +1,18 @@
-use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::{run_cli, run_cli_with_server_workspace};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
 use camino::Utf8Path;
+
+const PLUGIN: &str = r#"
+`debugger` as $dbg where {
+    register_diagnostic(
+        message = "Found debugger statement",
+        span = $dbg
+    )
+}
+"#;
 
 const MAIN_1: &str = r#"import { z} from "z"
 import { z, b , a} from "lodash"
@@ -60,6 +69,17 @@ fn reports_diagnostics_summary_check_command() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
+    let plugin_path = Utf8Path::new("plugin.grit");
+    fs.insert(plugin_path.into(), PLUGIN.as_bytes());
+
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        br#"{
+            "plugins": ["plugin.grit"]
+        }"#,
+    );
+
     let file_path1 = Utf8Path::new("main.ts");
     fs.insert(file_path1.into(), MAIN_1.as_bytes());
 
@@ -69,7 +89,7 @@ fn reports_diagnostics_summary_check_command() {
     let file_path3 = Utf8Path::new("index.css");
     fs.insert(file_path3.into(), MAIN_3.as_bytes());
 
-    let (fs, result) = run_cli(
+    let (fs, result) = run_cli_with_server_workspace(
         fs,
         &mut console,
         Args::from(
@@ -140,6 +160,17 @@ fn reports_diagnostics_summary_lint_command() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
+    let plugin_path = Utf8Path::new("plugin.grit");
+    fs.insert(plugin_path.into(), PLUGIN.as_bytes());
+
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        br#"{
+            "plugins": ["plugin.grit"]
+        }"#,
+    );
+
     let file_path1 = Utf8Path::new("main.ts");
     fs.insert(file_path1.into(), MAIN_1.as_bytes());
 
@@ -149,7 +180,7 @@ fn reports_diagnostics_summary_lint_command() {
     let file_path3 = Utf8Path::new("index.css");
     fs.insert(file_path3.into(), MAIN_3.as_bytes());
 
-    let (fs, result) = run_cli(
+    let (fs, result) = run_cli_with_server_workspace(
         fs,
         &mut console,
         Args::from(

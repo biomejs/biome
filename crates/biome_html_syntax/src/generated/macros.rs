@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::HtmlSyntaxNode::kind(&node) {
+                $crate::HtmlSyntaxKind::ASTRO_EMBEDDED_CONTENT => {
+                    let $pattern = unsafe { $crate::AstroEmbeddedContent::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::ASTRO_FRONTMATTER_ELEMENT => {
                     let $pattern = unsafe { $crate::AstroFrontmatterElement::new_unchecked(node) };
                     $body
