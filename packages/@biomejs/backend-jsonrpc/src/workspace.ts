@@ -1634,6 +1634,10 @@ export interface Nursery {
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
 	/**
+	 * Disallow empty sources.
+	 */
+	noEmptySource?: RuleConfiguration_for_NoEmptySourceOptions;
+	/**
 	 * Require Promise-like statements to be handled appropriately.
 	 */
 	noFloatingPromises?: RuleFixConfiguration_for_NoFloatingPromisesOptions;
@@ -3016,6 +3020,9 @@ export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
+export type RuleConfiguration_for_NoEmptySourceOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmptySourceOptions;
 export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoFloatingPromisesOptions;
@@ -5422,6 +5429,16 @@ export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
 	 * Rule's options
 	 */
 	options: NoDuplicateDependenciesOptions;
+}
+export interface RuleWithOptions_for_NoEmptySourceOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmptySourceOptions;
 }
 export interface RuleWithFixOptions_for_NoFloatingPromisesOptions {
 	/**
@@ -8200,6 +8217,12 @@ export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
+export interface NoEmptySourceOptions {
+	/**
+	 * Whether comments are considered meaningful
+	 */
+	allowComments?: boolean;
+}
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
 	/**
@@ -8986,6 +9009,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
