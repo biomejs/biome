@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: with_comments.ts
+---
+# Input
+```ts
+interface InterfaceWithComments {
+	// This is a zebra property
+	zebra: string;
+
+	/**
+	 * Apple property with JSDoc comment
+	 * @example apple = 42
+	 */
+	apple: number;
+
+	// Simple comment for banana
+	banana: boolean; // inline comment
+
+	/* Block comment for charlie */
+	charlie: object;
+}
+
+```
+
+# Diagnostics
+```
+with_comments.ts:3:2 lint/nursery/useSortedInterfaceMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The interface members are not sorted by key.
+  
+     1 │ interface InterfaceWithComments {
+     2 │ 	// This is a zebra property
+   > 3 │ 	zebra: string;
+       │ 	^^^^^^^^^^^^^^
+   > 4 │ 
+        ...
+  > 14 │ 	/* Block comment for charlie */
+  > 15 │ 	charlie: object;
+       │ 	^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i Safe fix: Sort the interface members by key.
+  
+     1  1 │   interface InterfaceWithComments {
+     2  2 │   	// This is a zebra property
+     3    │ - → zebra:·string;
+     4    │ - 
+     5    │ - → /**
+     6    │ - → ·*·Apple·property·with·JSDoc·comment
+     7    │ - → ·*·@example·apple·=·42
+     8    │ - → ·*/
+     9    │ - → apple:·number;
+        3 │ + → apple:·number;
+    10  4 │   
+    11  5 │   	// Simple comment for banana
+    ····· │ 
+    13  7 │   
+    14  8 │   	/* Block comment for charlie */
+    15    │ - → charlie:·object;
+        9 │ + → charlie:·object;
+       10 │ + → //·This·is·a·zebra·property
+       11 │ + → zebra:·string;
+    16 12 │   }
+    17 13 │   
+  
+
+```

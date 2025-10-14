@@ -205,6 +205,7 @@ define_categories! {
     "lint/nursery/useQwikValidLexicalScope": "https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope",
     "lint/nursery/useReactFunctionComponents": "https://biomejs.dev/linter/rules/use-react-function-components",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
+    "lint/nursery/useSortedInterfaceMembers": "https://biomejs.dev/linter/rules/use-sorted-interface-members",
     "lint/nursery/useVueMultiWordComponentNames": "https://biomejs.dev/linter/rules/use-vue-multi-word-component-names",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noAwaitInLoops": "https://biomejs.dev/linter/rules/no-await-in-loops",
@@ -391,6 +392,7 @@ define_categories! {
     "lint/suspicious/useStrictMode": "https://biomejs.dev/linter/rules/use-strict-mode",
     // end lint rules
     // start assist actions
+    "assist/source/useSortedInterfaceMembers": "https://biomejs.dev/assist/actions/use-sorted-interface-members",
     "assist/source/useSortedKeys": "https://biomejs.dev/assist/actions/use-sorted-keys",
     "assist/source/useSortedProperties": "https://biomejs.dev/assist/actions/use-sorted-properties",
     "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",
