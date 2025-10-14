@@ -269,12 +269,9 @@ impl Scanner {
             let (_duration, folders_to_watch) =
                 scan_dependencies(project_path, dependencies, &mut ctx);
 
-            for folder_to_watch in folders_to_watch {
-                let _ = self.watcher_tx.try_send(WatcherInstruction::WatchFolder(
-                    folder_to_watch,
-                    ctx.scan_kind.clone_without_targeting_info(),
-                ));
-            }
+            let _ = self
+                .watcher_tx
+                .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
 
             // Make sure the diagnostics sender is dropped.
             drop(ctx);
@@ -375,12 +372,9 @@ impl Scanner {
 
                 duration += dependencies_duration;
 
-                for folder_to_watch in folders_to_watch {
-                    let _ = self.watcher_tx.try_send(WatcherInstruction::WatchFolder(
-                        folder_to_watch,
-                        ctx.scan_kind.clone_without_targeting_info(),
-                    ));
-                }
+                let _ = self
+                    .watcher_tx
+                    .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
             }
 
             // Make sure the diagnostics sender is dropped.
@@ -439,6 +433,7 @@ impl Scanner {
         let mut manifests = Vec::new();
         let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
         let mut ignore_paths = Vec::new();
+        let mut folders_to_watch = FxHashSet::<Utf8PathBuf>::default();
 
         // We want to process files that closest to the project root first. For
         // example, we must process first the `.gitignore` at the root of the
@@ -451,14 +446,14 @@ impl Scanner {
             } else if path.is_ignore() {
                 ignore_paths.push(path);
             } else if ctx.watch && fs.symlink_path_kind(&path).is_ok_and(PathKind::is_dir) {
-                let _ = self.watcher_tx.try_send(WatcherInstruction::WatchFolder(
-                    path.into(),
-                    ctx.scan_kind.clone_without_targeting_info(),
-                ));
+                folders_to_watch.insert(path.into());
             } else {
                 handleable_paths.push(path);
             }
         }
+        let _ = self
+            .watcher_tx
+            .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
         fs.traversal(Box::new(|scope: &dyn TraversalScope| {
             for path in &configs {
                 scope.handle(ctx, path.to_path_buf());
