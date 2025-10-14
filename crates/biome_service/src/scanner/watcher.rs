@@ -22,7 +22,7 @@ pub enum WatcherInstruction {
     /// Watches the specified paths non-recursively.
     WatchFolders(FxHashSet<Utf8PathBuf>),
 
-    /// Unwatches the watched paths starts with the specified path.
+    /// Unwatches the watched paths starting with the specified path.
     UnwatchFolder(Utf8PathBuf),
 
     /// Re-indexes a file after it was closed by a client.
@@ -367,7 +367,7 @@ impl Watcher {
 
         if let Err(error) = watcher_paths.commit() {
             // TODO: Improve error propagation.
-            warn!("Error commiting the watched paths: {error}");
+            warn!("Error committing the watched paths: {error}");
         }
     }
 
@@ -389,7 +389,7 @@ impl Watcher {
 
         if let Err(error) = watcher_paths.commit() {
             // TODO: Improve error propagation.
-            warn!("Error commiting the watched paths: {error}");
+            warn!("Error committing the watched paths: {error}");
         }
     }
 }
