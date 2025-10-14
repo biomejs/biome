@@ -4,7 +4,7 @@
 
 Enhanced the `init` command. The `init` command now checks if the existing project contains known ignore files and known generated folders.
 
-If Biome finds `.gitignore` and `.ignore`, it will add the following configuration to `biome.json`:
+If Biome finds `.gitignore` or `.ignore` files, it will add the following configuration to `biome.json`:
 ```diff
 {
 +  "vcs": {
