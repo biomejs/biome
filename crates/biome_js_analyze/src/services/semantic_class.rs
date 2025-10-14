@@ -129,9 +129,7 @@ impl Visitor for SyntaxClassMemberReferencesVisitor {
     }
 }
 
-pub struct SemanticClassMemberReferencesVisitor {
-    pub root_found: bool,
-}
+pub struct SemanticClassMemberReferencesVisitor {}
 
 impl Visitor for SemanticClassMemberReferencesVisitor {
     type Language = JsLanguage;
@@ -141,12 +139,10 @@ impl Visitor for SemanticClassMemberReferencesVisitor {
         event: &WalkEvent<JsSyntaxNode>,
         mut ctx: VisitorContext<'_, '_, JsLanguage>,
     ) {
-        if (!self.root_found)
-            && let WalkEvent::Enter(node) = event
+        if let WalkEvent::Enter(node) = event
             && JsClassDeclaration::can_cast(node.kind())
         {
             ctx.match_query(node.clone());
-            self.root_found = true;
         }
     }
 }
@@ -162,7 +158,7 @@ impl QueryMatch for SemanticClass<JsClassDeclaration> {
 
 impl<N> Queryable for SemanticClass<N>
 where
-    N: AstNode<Language = JsLanguage> + 'static,
+    N: AstNode<Language=JsLanguage> + 'static,
 {
     type Input = JsSyntaxNode;
     type Output = N;
@@ -174,9 +170,7 @@ where
         analyzer.add_visitor(Phases::Syntax, || {
             SyntaxClassMemberReferencesVisitor::new(root.clone())
         });
-        analyzer.add_visitor(Phases::Semantic, || SemanticClassMemberReferencesVisitor {
-            root_found: false,
-        });
+        analyzer.add_visitor(Phases::Semantic, || SemanticClassMemberReferencesVisitor {});
     }
 
     fn key() -> QueryKey<Self::Language> {
@@ -235,7 +229,7 @@ declare_node_union! {
       | JsSetterClassMember           // class Foo { set quux(v) {} }
       | TsPropertyParameter           // constructor(public numbered: number) {}
       | TsIndexSignatureClassMember   // class Foo { [key: string]: number }
-      // accessor at some point can be added e.g. claas Foo { accessor bar: string; }
+    // we also need to add accessor at some point claas Foo { accessor bar: string; }
 }
 
 declare_node_union! {
@@ -491,7 +485,7 @@ impl ThisScopeReferences {
                 let unwrapped = &expr.omit_parentheses();
 
                 // Only direct `this` assignments (not this.prop)
-                if JsThisExpression::cast_ref(unwrapped.syntax()).is_some() {
+                if JsThisExpression::can_cast(unwrapped.syntax().kind()) {
                     Some(id.syntax().text_trimmed().into_text())
                 } else {
                     None
@@ -719,14 +713,14 @@ fn visit_references_in_body(
                     JsSyntaxKind::JS_OBJECT_BINDING_PATTERN => {
                         handle_object_binding_pattern(&node, scoped_this_references, reads);
                     }
-                    JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
-                        handle_assignment_expression(&node, scoped_this_references, reads, writes);
-                    }
-                    JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
+                    JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
                     | JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
                         handle_dynamic_member_expression(&node, scoped_this_references, semantic, reads);
                     }
-                    JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
+                    JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
+                        handle_assignment_expression(&node, scoped_this_references, reads, writes);
+                    }
+                    JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION=> {
                         handle_static_member_expression(&node, scoped_this_references, reads);
                     }
                     JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
@@ -768,7 +762,7 @@ fn handle_object_binding_pattern(
     node: &SyntaxNode<JsLanguage>,
     scoped_this_references: &[FunctionThisAliases],
     reads: &mut FxHashSet<ClassMemberReference>,
-) -> bool {
+) {
     if let Some(binding) = JsObjectBindingPattern::cast_ref(node)
         && let Some(parent) = binding.syntax().parent()
         && let Some(variable_declarator) = JsVariableDeclarator::cast_ref(&parent)
@@ -790,9 +784,7 @@ fn handle_object_binding_pattern(
                 });
             }
         }
-        return true;
     }
-    false
 }
 
 /// Detects direct static property reads from `this` or its aliases,
@@ -815,7 +807,7 @@ fn handle_static_member_expression(
     node: &SyntaxNode<JsLanguage>,
     scoped_this_references: &[FunctionThisAliases],
     reads: &mut FxHashSet<ClassMemberReference>,
-) -> bool {
+) {
     if let Some(static_member) = JsStaticMemberExpression::cast_ref(node)
         && let Ok(object) = static_member.object()
         && is_this_reference(&object, scoped_this_references)
@@ -826,11 +818,7 @@ fn handle_static_member_expression(
             range: member.syntax().text_trimmed_range(),
             access_kind: get_read_access_kind(&static_member.into()),
         });
-
-        return true;
     }
-
-    false
 }
 
 /// we assume that any usage in an expression context is meaningful read, and writes are much less likely
@@ -840,7 +828,7 @@ fn handle_dynamic_member_expression(
     scoped_this_references: &[FunctionThisAliases],
     semantic: &SemanticModel,
     reads: &mut FxHashSet<ClassMemberReference>,
-) -> bool {
+) {
     if let Some(dynamic_member) = AnyJsComputedMember::cast(node.clone())
         && let Ok(object) = dynamic_member.object()
         && is_this_reference(&object, scoped_this_references)
@@ -848,7 +836,7 @@ fn handle_dynamic_member_expression(
         && let Some(id_expr) = JsIdentifierExpression::cast_ref(member_expr.syntax())
         && let Some(ty) = resolve_formal_param_type(semantic, &id_expr)
         && let Some(ts_union_type) = TsUnionType::cast(ty.syntax().clone())
-            .or_else(|| resolve_reference_to_union(semantic, &ty))
+        .or_else(|| resolve_reference_to_union(semantic, &ty))
     {
         let items: Vec<_> = extract_literal_types(&ts_union_type);
 
@@ -864,11 +852,7 @@ fn handle_dynamic_member_expression(
                 )),
             });
         }
-
-        return true;
     }
-
-    false
 }
 
 /// Detects reads and writes to `this` properties inside assignment expressions.
@@ -893,93 +877,78 @@ fn handle_assignment_expression(
     scoped_this_references: &[FunctionThisAliases],
     reads: &mut FxHashSet<ClassMemberReference>,
     writes: &mut FxHashSet<ClassMemberReference>,
-) -> bool {
-    let assignment = match JsAssignmentExpression::cast_ref(node) {
-        Some(assignment) => assignment,
-        None => return false,
-    };
-    let left = match assignment.left() {
-        Ok(left) => left,
-        Err(_) => return false,
-    };
-    let operator = match assignment.operator_token() {
-        Ok(operator) => operator,
-        Err(_) => return false,
-    };
-
-    // Shorthand: store `as_any_js_assignment` once
-    let any_assignment = left.as_any_js_assignment();
-    let mut is_handled = false;
-
-    // Compound assignment -> meaningful read
-    if let Some(operand) = any_assignment
-        && matches!(
-            operator.kind(),
-            JsSyntaxKind::PIPE2EQ
-                | JsSyntaxKind::AMP2EQ
-                | JsSyntaxKind::SLASHEQ
-                | JsSyntaxKind::STAREQ
-                | JsSyntaxKind::PERCENTEQ
-                | JsSyntaxKind::PLUSEQ
-                | JsSyntaxKind::QUESTION2EQ
-        )
-        && let Some(name) = ThisPatternResolver::extract_this_member_reference(
+) {
+    if let Some(assignment) = JsAssignmentExpression::cast_ref(node)
+        && let Ok(left) = assignment.left()
+    {
+        // Compound assignment -> meaningful read
+        if let Ok(operator) = assignment.operator_token()
+            && let Some(operand) = left.as_any_js_assignment()
+            && matches!(
+                operator.kind(),
+                JsSyntaxKind::PIPE2EQ
+                    | JsSyntaxKind::AMP2EQ
+                    | JsSyntaxKind::SLASHEQ
+                    | JsSyntaxKind::STAREQ
+                    | JsSyntaxKind::PERCENTEQ
+                    | JsSyntaxKind::PLUSEQ
+                    | JsSyntaxKind::QUESTION2EQ
+            )
+            && let Some(name) = ThisPatternResolver::extract_this_member_reference(
             operand.as_js_static_member_assignment(),
             scoped_this_references,
             AccessKind::MeaningfulRead,
         )
-    {
-        reads.insert(name);
-        is_handled = true;
-    }
-
-    // Array assignment pattern
-    if let Some(array) = left.as_js_array_assignment_pattern() {
-        for class_member_reference in
-            ThisPatternResolver::collect_array_assignment_names(array, scoped_this_references)
         {
-            writes.insert(class_member_reference);
+            reads.insert(name);
         }
-        is_handled = true;
-    }
 
-    // Object assignment pattern
-    if let Some(object) = left.as_js_object_assignment_pattern() {
-        for class_member_reference in
-            ThisPatternResolver::collect_object_assignment_names(object, scoped_this_references)
-        {
-            match class_member_reference.access_kind {
-                AccessKind::Write => writes.insert(class_member_reference),
-                _ => reads.insert(class_member_reference),
-            };
+        // Array assignment pattern
+        if let Some(array) = left.as_js_array_assignment_pattern() {
+            for class_member_reference in
+                ThisPatternResolver::collect_array_assignment_names(&array, scoped_this_references)
+            {
+                writes.insert(class_member_reference);
+            }
         }
-        is_handled = true;
-    }
 
-    // Plain assignment
-    if let Some(operand) = any_assignment
-        && let Some(name) = ThisPatternResolver::extract_this_member_reference(
-            operand.as_js_static_member_assignment(),
+        // Object assignment pattern
+        if let Some(object) = left.as_js_object_assignment_pattern() {
+            for class_member_reference in ThisPatternResolver::collect_object_assignment_names(
+                &object,
+                scoped_this_references,
+            ) {
+                match class_member_reference.access_kind {
+                    AccessKind::Write => writes.insert(class_member_reference),
+                    _ => reads.insert(class_member_reference),
+                };
+            }
+        }
+
+        // Plain assignment
+        if let Some(assignment) = left.as_any_js_assignment()
+            && let Some(name) = ThisPatternResolver::extract_this_member_reference(
+            assignment.as_js_static_member_assignment(),
             scoped_this_references,
             AccessKind::Write,
         )
-    {
-        writes.insert(name.clone());
-
-        if let Some(reference) = AnyCandidateForUsedInExpressionNode::cast_ref(operand.syntax())
-            && is_used_in_expression_context(&reference)
         {
-            reads.insert(ClassMemberReference {
-                name: name.name,
-                range: name.range,
-                access_kind: AccessKind::MeaningfulRead,
-            });
+            writes.insert(name.clone());
 
-            is_handled = true;
+            // If it is used in expression context, a write can be still a meaningful read e.g.
+            // class Used { #val; getVal() { return this.#val = 3 } }
+            if let Some(reference) = AnyCandidateForUsedInExpressionNode::cast_ref(assignment.syntax())
+                && is_used_in_expression_context(&reference)
+            {
+                reads.insert({ ClassMemberReference {
+                        name: name.name,
+                        range: name.range,
+                        access_kind: AccessKind::MeaningfulRead,
+                    }
+                });
+            }
         }
     }
-
-    is_handled
 }
 
 /// Detects reads and writes from increment/decrement operations on `this` properties,

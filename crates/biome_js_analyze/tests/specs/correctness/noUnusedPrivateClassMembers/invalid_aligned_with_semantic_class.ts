@@ -28,6 +28,16 @@ class UsedMember {
 	}
 }
 
+class UsedMember {
+	#usedInInnerClass;
+
+	method(a) {
+		return class {
+			foo = a.#usedInInnerClass;
+		}
+	}
+}
+
 class C {
 	set #x(value) {
 		doSomething(value);
