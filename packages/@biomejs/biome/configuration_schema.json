@@ -3175,6 +3175,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmptySourceConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmptySourceOptions" }
+			]
+		},
+		"NoEmptySourceOptions": {
+			"type": "object",
+			"properties": {
+				"allowComments": {
+					"description": "Whether comments are considered meaningful",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoEmptyTypeParametersConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5057,6 +5074,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptySource": {
+					"description": "Disallow empty sources.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmptySourceConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.",
 					"anyOf": [
@@ -5216,6 +5240,13 @@
 						{
 							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"useDeprecatedDate": {
+					"description": "Require the @deprecated directive to specify a deletion date.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseDeprecatedDateConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7002,6 +7033,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoEmptyPatternOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmptySourceOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmptySourceOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -10495,6 +10541,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseDeprecatedDateOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseDeprecatedDateOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseDeprecatedReasonOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13935,6 +13996,19 @@
 		},
 		"UseDefaultSwitchClauseOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDeprecatedDateConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseDeprecatedDateOptions" }
+			]
+		},
+		"UseDeprecatedDateOptions": {
+			"type": "object",
+			"properties": {
+				"argumentName": { "default": "deletionDate", "type": "string" }
+			},
 			"additionalProperties": false
 		},
 		"UseDeprecatedReasonConfiguration": {

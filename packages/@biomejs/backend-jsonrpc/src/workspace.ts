@@ -1657,6 +1657,10 @@ export interface Nursery {
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
 	/**
+	 * Disallow empty sources.
+	 */
+	noEmptySource?: RuleConfiguration_for_NoEmptySourceOptions;
+	/**
 	 * Require Promise-like statements to be handled appropriately.
 	 */
 	noFloatingPromises?: RuleFixConfiguration_for_NoFloatingPromisesOptions;
@@ -1748,6 +1752,10 @@ export interface Nursery {
 	 * Enforce type definitions to consistently use either interface or type.
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
+	/**
+	 * Require the @deprecated directive to specify a deletion date.
+	 */
+	useDeprecatedDate?: RuleConfiguration_for_UseDeprecatedDateOptions;
 	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
@@ -3031,6 +3039,9 @@ export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
+export type RuleConfiguration_for_NoEmptySourceOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmptySourceOptions;
 export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoFloatingPromisesOptions;
@@ -3097,6 +3108,9 @@ export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
 export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
+export type RuleConfiguration_for_UseDeprecatedDateOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseDeprecatedDateOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -5432,6 +5446,16 @@ export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
 	 */
 	options: NoDuplicateDependenciesOptions;
 }
+export interface RuleWithOptions_for_NoEmptySourceOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmptySourceOptions;
+}
 export interface RuleWithFixOptions_for_NoFloatingPromisesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5683,6 +5707,16 @@ export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	 * Rule's options
 	 */
 	options: UseConsistentTypeDefinitionsOptions;
+}
+export interface RuleWithOptions_for_UseDeprecatedDateOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseDeprecatedDateOptions;
 }
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
@@ -8189,6 +8223,12 @@ export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
+export interface NoEmptySourceOptions {
+	/**
+	 * Whether comments are considered meaningful
+	 */
+	allowComments?: boolean;
+}
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
 	/**
@@ -8252,6 +8292,9 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 }
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
+}
+export interface UseDeprecatedDateOptions {
+	argumentName?: string;
 }
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
@@ -8970,6 +9013,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
@@ -8998,6 +9042,7 @@ export type Category =
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTypeDefinitions"
+	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"

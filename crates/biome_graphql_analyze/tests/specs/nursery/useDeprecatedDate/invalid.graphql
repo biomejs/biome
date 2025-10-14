@@ -1,0 +1,17 @@
+query {
+  member @deprecated(reason: "Use `members` instead") {
+		id
+	}
+}
+
+query {
+  member @deprecated(reason: "Use `members` instead", deletionDate: "invalid-date") {
+		id
+	}
+}
+
+query {
+  member @deprecated(reason: "Use `members` instead", deletionDate: "1999-12-25") {
+		id
+	}
+}
