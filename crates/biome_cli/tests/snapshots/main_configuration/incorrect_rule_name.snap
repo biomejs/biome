@@ -71,6 +71,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noPrecisionLoss
   - noPrivateImports
   - noProcessGlobal
+  - noQwikUseVisibleTask
   - noReactPropAssignments
   - noRenderReturnValue
   - noRestrictedElements
@@ -103,11 +104,13 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useExhaustiveDependencies
   - useGraphqlNamedOperations
   - useHookAtTopLevel
+  - useImageSize
   - useImportExtensions
   - useIsNan
   - useJsonImportAttributes
   - useJsxKeyInIterable
   - useParseIntRadix
+  - useQwikClasslist
   - useSingleJsDocAsterisk
   - useUniqueElementIds
   - useValidForDirection
@@ -170,6 +173,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useConsistentCurlyBraces
   - useConsistentMemberAccessibility
   - useConsistentObjectDefinitions
+  - useConsistentTypeDefinitions
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
@@ -192,6 +196,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useNumberNamespace
   - useNumericSeparators
   - useObjectSpread
+  - useReactFunctionComponents
   - useReadonlyClassProperties
   - useSelfClosingElements
   - useShorthandAssign
