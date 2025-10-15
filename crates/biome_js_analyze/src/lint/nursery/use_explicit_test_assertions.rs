@@ -56,7 +56,11 @@ impl Rule for UseExplicitTestAssertions {
         }
 
         if let Ok(args) = node.arguments() {
-            if let [Some(second)] = args.get_arguments_by_index([1]) {
+            let arguments = args.get_arguments_by_index([1]);
+            if arguments.is_empty() {
+                return None;
+            }
+            if let [Some(second)] = arguments {
                 if let Some(test_body) = second.as_any_js_expression() {
                     if expression_contains_expect(test_body) {
                         return None;
