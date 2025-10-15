@@ -21,21 +21,34 @@ function AComponent() {
 function notUseMyHook() {
 	useHook();
 }
+const SomeObject = {
+	notHook() {
+		useHook();
+	},
+};
+class SomeClass {
+	notHook() {
+		useHook();
+	}
+}
 
 // Valid as hook is called in a hook (by naming convention).
 function useMyHook() {
 	useHook();
 }
 
-// Valid as hooks can be called within anonymous functions (for better or worse).
+// Valid as hooks can be called within function expressions (for better or worse).
 test("the hook", () => {
 	useHook();
 });
 test("the hook", function () {
 	useHook();
 });
+test("the hook", function named() {
+	useHook();
+});
 
-// Valid as hooks can be called within nested anonymous functions.
+// Valid as hooks can be called within nested function expressions.
 test("more hook", () => {
 	renderHook(() => useHook());
 });
@@ -56,7 +69,7 @@ hookLocations.js:2:1 lint/correctness/useHookAtTopLevel ━━━━━━━━
   
   i Move the hook call into the top level of a hook or component in order to use it.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -64,7 +77,7 @@ hookLocations.js:2:1 lint/correctness/useHookAtTopLevel ━━━━━━━━
 ```
 hookLocations.js:6:2 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook is being called from within a function that is not a hook or component.
+  × This hook is being called from within a function or method that is not a hook or component.
   
     4 │ // Invalid as hooks cannot be called in non-component functions.
     5 │ function notAComponent() {
@@ -75,7 +88,7 @@ hookLocations.js:6:2 lint/correctness/useHookAtTopLevel ━━━━━━━━
   
   i Move the hook call into the top level of a hook or component in order to use it.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```
@@ -83,18 +96,56 @@ hookLocations.js:6:2 lint/correctness/useHookAtTopLevel ━━━━━━━━
 ```
 hookLocations.js:16:2 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook is being called from within a function that is not a hook or component.
+  × This hook is being called from within a function or method that is not a hook or component.
   
     14 │ // Invalid as hooks cannot be called in non-hook functions.
     15 │ function notUseMyHook() {
   > 16 │ 	useHook();
        │ 	^^^^^^^
     17 │ }
-    18 │ 
+    18 │ const SomeObject = {
   
   i Move the hook call into the top level of a hook or component in order to use it.
   
-  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  i See https://react.dev/reference/rules/rules-of-hooks
+  
+
+```
+
+```
+hookLocations.js:20:3 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook is being called from within a function or method that is not a hook or component.
+  
+    18 │ const SomeObject = {
+    19 │ 	notHook() {
+  > 20 │ 		useHook();
+       │ 		^^^^^^^
+    21 │ 	},
+    22 │ };
+  
+  i Move the hook call into the top level of a hook or component in order to use it.
+  
+  i See https://react.dev/reference/rules/rules-of-hooks
+  
+
+```
+
+```
+hookLocations.js:25:3 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook is being called from within a function or method that is not a hook or component.
+  
+    23 │ class SomeClass {
+    24 │ 	notHook() {
+  > 25 │ 		useHook();
+       │ 		^^^^^^^
+    26 │ 	}
+    27 │ }
+  
+  i Move the hook call into the top level of a hook or component in order to use it.
+  
+  i See https://react.dev/reference/rules/rules-of-hooks
   
 
 ```

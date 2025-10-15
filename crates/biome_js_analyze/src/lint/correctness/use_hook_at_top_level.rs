@@ -11,11 +11,10 @@ use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsBinding, AnyJsClassMemberName, AnyJsExpression, AnyJsFunction,
     AnyJsObjectMemberName, JsArrayAssignmentPatternElement, JsArrayBindingPatternElement,
-    JsArrowFunctionExpression, JsCallExpression, JsConditionalExpression, JsFunctionExpression,
-    JsGetterClassMember, JsGetterObjectMember, JsIfStatement, JsLanguage, JsLogicalExpression,
-    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPatternShorthandProperty,
-    JsReturnStatement, JsSetterClassMember, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
-    JsTryFinallyStatement, TextRange,
+    JsCallExpression, JsConditionalExpression, JsGetterClassMember, JsGetterObjectMember,
+    JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodClassMember, JsMethodObjectMember,
+    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
+    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, Text, WalkEvent, declare_node_union};
 use rustc_hash::FxHashMap;
@@ -54,12 +53,24 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// function notAHook() {
+    ///     useEffect();
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
     /// function Component1() {
     ///     useEffect();
     /// }
+    /// ```
+    ///
+    /// ```js
+    /// test("the hook", () => {
+    ///     renderHook(() => useHook());
+    /// });
     /// ```
     ///
     pub UseHookAtTopLevel {
@@ -87,6 +98,16 @@ impl AnyJsFunctionOrMethod {
         }
 
         false
+    }
+
+    fn is_function_expression(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyJsFunction(
+                AnyJsFunction::JsArrowFunctionExpression(_)
+                    | AnyJsFunction::JsFunctionExpression(_)
+            )
+        )
     }
 
     fn name(&self) -> Option<Text> {
@@ -252,19 +273,7 @@ fn is_top_level_call(call: &JsCallExpression) -> bool {
     !call
         .syntax()
         .ancestors()
-        .any(|node| AnyJsFunctionOrMethod::try_cast(node).is_ok())
-}
-
-fn is_anonymous_function(function: &AnyJsFunctionOrMethod) -> bool {
-    if JsArrowFunctionExpression::cast_ref(function.syntax()).is_some() {
-        return true;
-    }
-
-    if JsFunctionExpression::cast_ref(function.syntax()).is_some() {
-        return true;
-    }
-
-    false
+        .any(|node| AnyJsFunctionOrMethod::can_cast(node.kind()))
 }
 
 /// Model for tracking which function calls are preceded by an early return.
@@ -551,12 +560,9 @@ impl Rule for UseHookAtTopLevel {
             }
         }
 
-        if enclosing_function_if_call_is_at_top_level(call)
-            .filter(|function| {
-                !function.is_react_component_or_hook() && !is_anonymous_function(function)
-            })
-            .is_some()
-        {
+        if enclosing_function_if_call_is_at_top_level(call).is_some_and(|function| {
+            !function.is_react_component_or_hook() && !function.is_function_expression()
+        }) {
             return Some(Suggestion {
                 hook_name_range: get_hook_name_range()?,
                 path: vec![call.syntax().text_range_with_trivia()],
@@ -585,7 +591,7 @@ impl Rule for UseHookAtTopLevel {
                 "within a hook or component."
             },
             SuggestionKind::ComponentOrHook => markup! {
-                "This hook is being called from within a function that is not a hook or component."
+                "This hook is being called from within a function or method that is not a hook or component."
             },
             _ if path.len() <= 1 => markup! {
                 "This hook is being called conditionally, but all hooks must be called in the "
@@ -633,7 +639,7 @@ impl Rule for UseHookAtTopLevel {
         }
 
         diag = diag.note(markup! {
-            "See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level"
+            "See https://react.dev/reference/rules/rules-of-hooks"
         });
         Some(diag)
     }
