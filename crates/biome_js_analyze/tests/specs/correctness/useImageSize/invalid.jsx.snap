@@ -9,7 +9,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:1:1 lint/nursery/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:1:1 lint/correctness/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing width or height attribute on img element.
   

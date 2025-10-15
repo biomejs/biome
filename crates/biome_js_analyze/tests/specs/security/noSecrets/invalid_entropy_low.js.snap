@@ -13,7 +13,7 @@ const mediumEntropy4 = "TokenXyZ98765";
 
 # Diagnostics
 ```
-invalid_entropy_low.js:2:24 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_entropy_low.js:2:24 lint/security/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential secret found.
   
@@ -35,7 +35,7 @@ invalid_entropy_low.js:2:24 lint/nursery/noSecrets ━━━━━━━━━�
 ```
 
 ```
-invalid_entropy_low.js:3:24 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_entropy_low.js:3:24 lint/security/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential secret found.
   
@@ -58,7 +58,7 @@ invalid_entropy_low.js:3:24 lint/nursery/noSecrets ━━━━━━━━━�
 ```
 
 ```
-invalid_entropy_low.js:4:24 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_entropy_low.js:4:24 lint/security/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential secret found.
   
@@ -80,7 +80,7 @@ invalid_entropy_low.js:4:24 lint/nursery/noSecrets ━━━━━━━━━�
 ```
 
 ```
-invalid_entropy_low.js:5:24 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_entropy_low.js:5:24 lint/security/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential secret found.
   

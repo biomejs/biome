@@ -43,7 +43,7 @@ interface ValidInterface {
 
 # Diagnostics
 ```
-invalid.ts:2:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:1 lint/style/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of the type detected.
   
@@ -73,7 +73,7 @@ invalid.ts:2:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.ts:6:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:6:1 lint/style/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of the type detected.
   
@@ -105,7 +105,7 @@ invalid.ts:6:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.ts:10:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:10:1 lint/style/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of the type detected.
   
@@ -134,7 +134,7 @@ invalid.ts:10:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━
 ```
 
 ```
-invalid.ts:12:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:12:1 lint/style/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of the type detected.
   
@@ -163,7 +163,7 @@ invalid.ts:12:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━
 ```
 
 ```
-invalid.ts:14:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:14:1 lint/style/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of the type detected.
   
@@ -197,7 +197,7 @@ invalid.ts:14:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━
 ```
 
 ```
-invalid.ts:19:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:19:1 lint/style/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of the type detected.
   
@@ -233,7 +233,7 @@ invalid.ts:19:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━
 ```
 
 ```
-invalid.ts:25:1 lint/nursery/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:25:1 lint/style/useConsistentTypeDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use of the type detected.
   

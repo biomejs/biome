@@ -37,7 +37,7 @@ export const NestedClassnamesInvalid = () => (
 
 # Diagnostics
 ```
-invalid.jsx:7:10 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:10 lint/correctness/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid third-party classnames utilities with Qwik components
   
@@ -68,7 +68,7 @@ invalid.jsx:7:10 lint/nursery/useQwikClasslist ━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:23:19 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:19 lint/correctness/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid third-party classnames utilities with Qwik components
   
@@ -94,7 +94,7 @@ invalid.jsx:23:19 lint/nursery/useQwikClasslist ━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:28:8 lint/nursery/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:28:8 lint/correctness/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid third-party classnames utilities with Qwik components
   

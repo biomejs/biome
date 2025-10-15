@@ -32,7 +32,7 @@ export default class Baz extends React.Component {
 
 # Diagnostics
 ```
-invalid.jsx:1:1 lint/nursery/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:1:1 lint/style/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Class components are not allowed. Function components are the preferred way to write components.
   
@@ -52,7 +52,7 @@ invalid.jsx:1:1 lint/nursery/useReactFunctionComponents ━━━━━━━━
 ```
 
 ```
-invalid.jsx:7:1 lint/nursery/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:1 lint/style/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Class components are not allowed. Function components are the preferred way to write components.
   
@@ -74,7 +74,7 @@ invalid.jsx:7:1 lint/nursery/useReactFunctionComponents ━━━━━━━━
 ```
 
 ```
-invalid.jsx:13:8 lint/nursery/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:8 lint/style/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Class components are not allowed. Function components are the preferred way to write components.
   
@@ -96,7 +96,7 @@ invalid.jsx:13:8 lint/nursery/useReactFunctionComponents ━━━━━━━�
 ```
 
 ```
-invalid.jsx:19:16 lint/nursery/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:19:16 lint/style/useReactFunctionComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Class components are not allowed. Function components are the preferred way to write components.
   

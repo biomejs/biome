@@ -71,7 +71,7 @@ useVisibleTask$(({ track, cleanup }) => {
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   
@@ -91,7 +91,7 @@ invalid.js:1:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   
@@ -113,7 +113,7 @@ invalid.js:5:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   
@@ -135,7 +135,7 @@ invalid.js:10:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 
 ```
-invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   
@@ -156,7 +156,7 @@ invalid.js:15:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 
 ```
-invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   
@@ -177,7 +177,7 @@ invalid.js:22:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 
 ```
-invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   
@@ -198,7 +198,7 @@ invalid.js:30:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 
 ```
-invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   
@@ -219,7 +219,7 @@ invalid.js:36:3 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 
 ```
-invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:5 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   
@@ -241,7 +241,7 @@ invalid.js:43:5 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 
 ```
-invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:49:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   
@@ -263,7 +263,7 @@ invalid.js:49:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 
 ```
-invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:53:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   
@@ -285,7 +285,7 @@ invalid.js:53:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━
 ```
 
 ```
-invalid.js:57:1 lint/nursery/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:57:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid useVisibleTask$ for non-interactive initialization
   

@@ -40,7 +40,7 @@ foo.bar?.()!;
 
 # Diagnostics
 ```
-invalid.ts:4:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:4:1 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
@@ -58,7 +58,7 @@ invalid.ts:4:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━
 ```
 
 ```
-invalid.ts:7:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:7:1 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
@@ -76,7 +76,7 @@ invalid.ts:7:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━
 ```
 
 ```
-invalid.ts:10:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:10:1 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
@@ -94,7 +94,7 @@ invalid.ts:10:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:13:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:1 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
@@ -112,7 +112,7 @@ invalid.ts:13:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:16:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:16:1 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
@@ -130,7 +130,7 @@ invalid.ts:16:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:19:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:19:1 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
@@ -148,7 +148,7 @@ invalid.ts:19:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:22:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:22:1 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
@@ -166,7 +166,7 @@ invalid.ts:22:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:25:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:25:1 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
@@ -184,7 +184,7 @@ invalid.ts:25:1 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:28:2 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:28:2 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
@@ -202,7 +202,7 @@ invalid.ts:28:2 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━�
 ```
 
 ```
-invalid.ts:31:2 lint/nursery/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:31:2 lint/suspicious/noNonNullAssertedOptionalChain ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Forbidden non-null assertion after optional chaining.
   
