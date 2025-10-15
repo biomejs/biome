@@ -39,7 +39,7 @@ export const NestedClassnamesInvalid = () => (
 ```
 invalid.jsx:7:10 lint/correctness/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid third-party classnames utilities with Qwik components
+  × Avoid third-party classnames utilities with Qwik components
   
      5 │ export default component$((props) => {
      6 │   return (
@@ -70,7 +70,7 @@ invalid.jsx:7:10 lint/correctness/useQwikClasslist ━━━━━━━━━�
 ```
 invalid.jsx:23:19 lint/correctness/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid third-party classnames utilities with Qwik components
+  × Avoid third-party classnames utilities with Qwik components
   
     21 │ // Invalid: classnames with spread props
     22 │ export const SpreadPropsInvalid = (props) => (
@@ -96,7 +96,7 @@ invalid.jsx:23:19 lint/correctness/useQwikClasslist ━━━━━━━━━�
 ```
 invalid.jsx:28:8 lint/correctness/useQwikClasslist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid third-party classnames utilities with Qwik components
+  × Avoid third-party classnames utilities with Qwik components
   
     26 │ // Invalid: classnames in nested call
     27 │ export const NestedClassnamesInvalid = () => (

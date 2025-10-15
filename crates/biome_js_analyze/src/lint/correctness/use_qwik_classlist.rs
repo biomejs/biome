@@ -31,7 +31,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintQwik("prefer-classlist").same()],
         recommended: true,
-        severity: Severity::Warning,
+        severity: Severity::Error,
         domains: &[RuleDomain::Qwik],
     }
 }

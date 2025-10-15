@@ -370,7 +370,7 @@ impl RuleSource {
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
-            Self::EslintQwik(rule_name) => format!("https://github.com/QwikDev/qwik/tree/main/packages/eslint-plugin-qwik/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintQwik(rule_name) => format!("https://qwik.dev/docs/advanced/eslint#{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),

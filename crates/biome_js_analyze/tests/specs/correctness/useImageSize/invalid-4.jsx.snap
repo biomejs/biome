@@ -12,7 +12,7 @@ expression: invalid-4.jsx
 ```
 invalid-4.jsx:2:1 lint/correctness/useImageSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing width or height attribute on img element.
+  × Missing width or height attribute on img element.
   
     1 │ // Invalid: missing width
   > 2 │ <img src="/image.png" height="200" />·

@@ -8,7 +8,10 @@ use biome_rule_options::use_image_size::UseImageSizeOptions;
 declare_lint_rule! {
     /// Enforces that `<img>` elements have both width and height attributes.
     ///
-    /// This rule ensures that `<img>` elements have `width` and `height` attributes
+    /// This rule ensures that `<img>` elements have `width` and `height` attributes.
+    ///
+    /// Images without specified width and height can cause layout shifts as the browser does not know how much space to reserve for them, leading to a poor user experience.
+    /// It's recommended to always include these attributes to prevent such issues.
     ///
     /// ## Examples
     ///
@@ -45,7 +48,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintQwik("jsx-img").same()],
         recommended: true,
-        severity: Severity::Warning,
+        severity: Severity::Error,
         domains: &[RuleDomain::Qwik],
     }
 }
