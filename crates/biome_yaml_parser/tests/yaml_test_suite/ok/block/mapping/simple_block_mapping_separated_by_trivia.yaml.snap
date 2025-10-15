@@ -49,7 +49,7 @@ YamlRoot {
                                     },
                                 },
                             ],
-                            mapping_end_token: MAPPING_END@7..8 "" [Newline("\n")] [],
+                            mapping_end_token: MAPPING_END@7..7 "" [] [],
                         },
                         colon_token: missing (optional),
                         value: missing (optional),
@@ -58,7 +58,7 @@ YamlRoot {
                         key: YamlFlowYamlNode {
                             properties: missing (optional),
                             content: YamlPlainScalar {
-                                value_token: PLAIN_LITERAL@8..34 "c" [Comments("# this is another trivia"), Newline("\n")] [],
+                                value_token: PLAIN_LITERAL@7..34 "c" [Newline("\n"), Comments("# this is another trivia"), Newline("\n")] [],
                             },
                         },
                         colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
@@ -96,9 +96,9 @@ YamlRoot {
         0: MAPPING_START@0..0 "" [] []
         1: (empty)
         2: YAML_BLOCK_MAP_ENTRY_LIST@0..38
-          0: YAML_BLOCK_MAP_EXPLICIT_ENTRY@0..8
+          0: YAML_BLOCK_MAP_EXPLICIT_ENTRY@0..7
             0: QUESTION@0..2 "?" [] [Whitespace(" ")]
-            1: YAML_BLOCK_MAPPING@2..8
+            1: YAML_BLOCK_MAPPING@2..7
               0: MAPPING_START@2..2 "" [] []
               1: (empty)
               2: YAML_BLOCK_MAP_ENTRY_LIST@2..7
@@ -115,14 +115,14 @@ YamlRoot {
                       1: YAML_PLAIN_SCALAR@5..7
                         0: PLAIN_LITERAL@5..7 "10" [] []
                     2: FLOW_END@7..7 "" [] []
-              3: MAPPING_END@7..8 "" [Newline("\n")] []
+              3: MAPPING_END@7..7 "" [] []
             2: (empty)
             3: (empty)
-          1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@8..38
-            0: YAML_FLOW_YAML_NODE@8..34
+          1: YAML_BLOCK_MAP_IMPLICIT_ENTRY@7..38
+            0: YAML_FLOW_YAML_NODE@7..34
               0: (empty)
-              1: YAML_PLAIN_SCALAR@8..34
-                0: PLAIN_LITERAL@8..34 "c" [Comments("# this is another trivia"), Newline("\n")] []
+              1: YAML_PLAIN_SCALAR@7..34
+                0: PLAIN_LITERAL@7..34 "c" [Newline("\n"), Comments("# this is another trivia"), Newline("\n")] []
             1: COLON@34..36 ":" [] [Whitespace(" ")]
             2: YAML_FLOW_IN_BLOCK_NODE@36..38
               0: FLOW_START@36..36 "" [] []

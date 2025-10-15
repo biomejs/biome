@@ -1,5 +1,6 @@
 import "./sub/foo";
 import "./sub/bar/";
+import "./sub/index";
 
 // Guaranteed resolve to 'index.js' file
 import './sub/bar/../'
@@ -24,3 +25,7 @@ require("./sub/foo")
 import "./sub/styles.css"
 import "./sub/component.svg.svelte";
 import "./sub/component.svg.svelte?query=string&query2#hash";
+
+// Invalid extension
+import "./sub/foo.js";
+import "./sub/bar/index.js";

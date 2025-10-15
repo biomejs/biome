@@ -83,7 +83,7 @@ impl Rule for NoDuplicateObjectKeys {
             diagnostic = diagnostic.detail(
                 range,
                 markup! {
-                    "This where a duplicated key was declared again."
+                    "This is where a duplicated key was declared again."
                 },
             );
         }

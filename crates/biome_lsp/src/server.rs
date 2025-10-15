@@ -6,13 +6,12 @@ use crate::session::{
 };
 use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
-use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::workspace::{
-    CloseProjectParams, RageEntry, RageParams, RageResult, ServiceDataNotification,
+    CloseProjectParams, RageEntry, RageParams, RageResult, ServiceNotification,
 };
 use biome_service::{WatcherInstruction, WorkspaceServer};
 use crossbeam::channel::{Sender, bounded};
@@ -85,30 +84,30 @@ impl LSPServer {
 
         entries.extend(workspace_entries);
 
-        if let Ok(sessions) = self.sessions.lock() {
-            if sessions.len() > 1 {
-                entries.push(RageEntry::markup(
+        if let Ok(sessions) = self.sessions.lock()
+            && sessions.len() > 1
+        {
+            entries.push(RageEntry::markup(
                     markup!("\n"<Underline><Emphasis>"Other Active Server Workspaces:"</Emphasis></Underline>"\n"),
                 ));
 
-                for (key, session) in sessions.iter() {
-                    if &self.session.key == key {
-                        // Already printed above
-                        continue;
-                    }
+            for (key, session) in sessions.iter() {
+                if &self.session.key == key {
+                    // Already printed above
+                    continue;
+                }
 
-                    let RageResult {
-                        entries: workspace_entries,
-                    } = session.failsafe_rage(params);
+                let RageResult {
+                    entries: workspace_entries,
+                } = session.failsafe_rage(params);
 
-                    entries.extend(workspace_entries);
+                entries.extend(workspace_entries);
 
-                    if let Some(information) = session.client_information() {
-                        entries.push(RageEntry::pair("Client Name", &information.name));
+                if let Some(information) = session.client_information() {
+                    entries.push(RageEntry::pair("Client Name", &information.name));
 
-                        if let Some(version) = &information.version {
-                            entries.push(RageEntry::pair("Client Version", version))
-                        }
+                    if let Some(version) = &information.version {
+                        entries.push(RageEntry::pair("Client Version", version))
                     }
                 }
             }
@@ -310,13 +309,10 @@ impl LanguageServer for LSPServer {
     }
 
     #[tracing::instrument(level = "debug", skip_all)]
-    async fn initialized(&self, params: InitializedParams) {
-        let _ = params;
-
+    async fn initialized(&self, _params: InitializedParams) {
         info!("Attempting to load the configuration from 'biome.json' file");
-
         self.session.load_extension_settings().await;
-        self.session.load_workspace_settings().await;
+        self.session.load_workspace_settings(false).await;
 
         let msg = format!("Server initialized with PID: {}", std::process::id());
         self.session
@@ -353,18 +349,19 @@ impl LanguageServer for LSPServer {
             let base_path = self.session.base_path();
             if let Some(base_path) = base_path {
                 let possible_biome_json = file_path.strip_prefix(&base_path);
-                if let Ok(watched_file) = possible_biome_json {
-                    if ConfigName::file_names().contains(&&*watched_file.display().to_string())
-                        || watched_file.ends_with(".editorconfig")
-                    {
-                        self.session.load_extension_settings().await;
-                        self.session.load_workspace_settings().await;
-                        self.setup_capabilities().await;
-                        self.session.update_all_diagnostics().await;
-                        // for now we are only interested to the configuration file,
-                        // so it's OK to exit the loop
-                        break;
-                    }
+                if let Ok(watched_file) = possible_biome_json
+                    && (ConfigName::file_names()
+                        .iter()
+                        .any(|file_name| watched_file.ends_with(file_name))
+                        || watched_file.ends_with(".editorconfig"))
+                {
+                    self.session.load_extension_settings().await;
+                    self.session.load_workspace_settings(true).await;
+                    self.setup_capabilities().await;
+                    self.session.update_all_diagnostics().await;
+                    // for now we are only interested to the configuration file,
+                    // so it's OK to exit the loop
+                    break;
                 }
             }
         }
@@ -410,18 +407,8 @@ impl LanguageServer for LSPServer {
             }
         }
 
-        for added in &params.event.added {
-            if let Ok(project_path) = self.session.file_path(&added.uri) {
-                let status = self
-                    .session
-                    .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(
-                        project_path.to_path_buf(),
-                    ))
-                    .await;
-                debug!("Configuration status: {status:?}");
-                self.session.set_configuration_status(status);
-            }
-        }
+        self.session.update_workspace_folders(params.event.added);
+        self.session.load_workspace_settings(true).await;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
@@ -542,11 +529,11 @@ pub struct ServerFactory {
     /// initialized on this server instance
     is_initialized: Arc<AtomicBool>,
 
-    /// Receiver for service data notifications.
+    /// Receiver for service notifications.
     ///
     /// If we receive a notification here, diagnostics for open documents are
     /// all refreshed.
-    service_data_rx: watch::Receiver<ServiceDataNotification>,
+    service_rx: watch::Receiver<ServiceNotification>,
 }
 
 impl Default for ServerFactory {
@@ -558,35 +545,35 @@ impl Default for ServerFactory {
 impl ServerFactory {
     /// Regular constructor for use in the daemon.
     pub fn new(stop_on_disconnect: bool, instruction_tx: Sender<WatcherInstruction>) -> Self {
-        let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
+        let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
             cancellation: Arc::default(),
             workspace: Arc::new(WorkspaceServer::new(
                 Arc::new(OsFileSystem::default()),
                 instruction_tx,
-                service_data_tx,
+                service_tx,
                 None,
             )),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect,
             is_initialized: Arc::default(),
-            service_data_rx,
+            service_rx,
         }
     }
 
     /// Constructor for use in tests.
     pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         let (watcher_tx, _) = bounded(0);
-        let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
+        let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
             cancellation: Arc::default(),
-            workspace: Arc::new(WorkspaceServer::new(fs, watcher_tx, service_data_tx, None)),
+            workspace: Arc::new(WorkspaceServer::new(fs, watcher_tx, service_tx, None)),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect: true,
             is_initialized: Arc::default(),
-            service_data_rx,
+            service_rx,
         }
     }
 
@@ -602,7 +589,7 @@ impl ServerFactory {
                 client,
                 workspace,
                 self.cancellation.clone(),
-                self.service_data_rx.clone(),
+                self.service_rx.clone(),
             );
             let handle = Arc::new(session);
 
@@ -632,13 +619,14 @@ impl ServerFactory {
         workspace_method!(builder, is_path_ignored);
         workspace_method!(builder, update_settings);
         workspace_method!(builder, open_project);
-        workspace_method!(builder, scan_project_folder);
+        workspace_method!(builder, scan_project);
         workspace_method!(builder, close_project);
         workspace_method!(builder, open_file);
         workspace_method!(builder, file_exists);
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);
+        workspace_method!(builder, get_module_graph);
         workspace_method!(builder, get_type_info);
         workspace_method!(builder, change_file);
         workspace_method!(builder, check_file_size);

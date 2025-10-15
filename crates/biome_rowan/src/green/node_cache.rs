@@ -225,7 +225,7 @@ impl NodeCache {
         &mut self,
         kind: RawSyntaxKind,
         children: &[(u64, GreenElement)],
-    ) -> NodeCacheNodeEntryMut {
+    ) -> NodeCacheNodeEntryMut<'_> {
         if children.len() > 3 {
             return NodeCacheNodeEntryMut::NoCache(Self::UNCACHED_NODE_HASH);
         }

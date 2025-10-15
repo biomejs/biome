@@ -24,9 +24,12 @@ fn main() {
 fn input_ranges() -> impl Iterator<Item = String> {
     vec![
         "~1.2.3".into(),
+        "^1.2.3".into(),
         ">=1.2.3".into(),
         "<=1.2.3".into(),
+        "1.2".into(),
         "1.2.3 - 2.3.4".into(),
+        ">=1.2.9 <2.0.0".into(),
         "1.2.7 || >=1.2.9 <2.0.0".into(),
     ]
     .into_iter()

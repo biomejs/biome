@@ -591,7 +591,7 @@ fn should_ignore_nested_configuration_in_ignored_directory() {
         "biome.jsonc",
         r#"{
     "files": {
-        "includes": ["**/*.js", "!vendor/**"],
+        "includes": ["**/*.js", "!vendor"],
     },
     "linter": {
         "rules": {

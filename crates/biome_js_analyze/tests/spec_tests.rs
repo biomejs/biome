@@ -15,7 +15,7 @@ use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
     code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, module_graph_for_test_file, parse_test_path,
-    project_layout_with_node_manifest, register_leak_checker, scripts_from_json,
+    project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
 use camino::Utf8Path;
@@ -167,21 +167,20 @@ pub(crate) fn analyze_and_snap(
 ) {
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
-    let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
+    let project_layout = project_layout_for_test_file(input_file, &mut diagnostics);
 
-    if let Some((_, manifest)) = project_layout.find_node_manifest_for_path(input_file) {
-        if manifest.r#type == Some(PackageType::CommonJs) &&
+    if let Some((_, manifest)) = project_layout.find_node_manifest_for_path(input_file)
+        && manifest.r#type == Some(PackageType::CommonJs) &&
             // At the moment we treat JS and JSX at the same way
             (source_type.file_extension() == "js" || source_type.file_extension() == "jsx" )
-        {
-            source_type.set_module_kind(ModuleKind::Script)
-        }
+    {
+        source_type.set_module_kind(ModuleKind::Script)
     }
 
     let parsed = parse(input_code, source_type, parser_options.clone());
     let root = parsed.tree();
 
-    let options = create_analyzer_options(input_file, &mut diagnostics);
+    let options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
     let module_graph = if needs_module_graph {
@@ -463,7 +462,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
     };
 
     // Enable at least 1 rule so that PhaseRunner will be called
-    // which is necessary to parse and store supression comments
+    // which is necessary to parse and store suppression comments
     let rule_filter = RuleFilter::Rule("nursery", "noCommonJs");
     let filter = AnalysisFilter {
         enabled_rules: Some(slice::from_ref(&rule_filter)),

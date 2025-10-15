@@ -3,6 +3,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 use biome_analyze::declare_lint_group;
-pub mod use_named_operation;
-pub mod use_naming_convention;
-declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: use_named_operation :: UseNamedOperation , self :: use_naming_convention :: UseNamingConvention ,] } }
+pub mod no_empty_source;
+pub mod use_deprecated_date;
+declare_lint_group! { pub Nursery { name : "nursery" , rules : [self :: no_empty_source :: NoEmptySource , self :: use_deprecated_date :: UseDeprecatedDate ,] } }

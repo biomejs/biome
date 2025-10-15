@@ -1,0 +1,116 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue7704.js
+---
+# Input
+```js
+import { useEffect } from "react";
+
+function InvalidComponent(props) {
+	useEffect(() => {
+		props.foo();
+	}, []);
+}
+
+function InvalidComponent2(props) {
+	useEffect(() => {
+		props.foo();
+	}, [props.foo]);
+}
+
+function ValidComponent(props) {
+	useEffect(() => {
+		props.foo();
+	}, [props]);
+}
+
+```
+
+# Diagnostics
+```
+issue7704.js:4:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on props.
+  
+    3 │ function InvalidComponent(props) {
+  > 4 │ 	useEffect(() => {
+      │ 	^^^^^^^^^
+    5 │ 		props.foo();
+    6 │ 	}, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    3 │ function InvalidComponent(props) {
+    4 │ 	useEffect(() => {
+  > 5 │ 		props.foo();
+      │ 		^^^^^
+    6 │ 	}, []);
+    7 │ }
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    6 │ → },·[props]);
+      │       +++++   
+
+```
+
+```
+issue7704.js:10:2 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies a dependency more specific that its captures: props.foo
+  
+     9 │ function InvalidComponent2(props) {
+  > 10 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    11 │ 		props.foo();
+    12 │ 	}, [props.foo]);
+  
+  i This capture is more generic than...
+  
+     9 │ function InvalidComponent2(props) {
+    10 │ 	useEffect(() => {
+  > 11 │ 		props.foo();
+       │ 		^^^^^
+    12 │ 	}, [props.foo]);
+    13 │ }
+  
+  i ...this dependency.
+  
+    10 │ 	useEffect(() => {
+    11 │ 		props.foo();
+  > 12 │ 	}, [props.foo]);
+       │ 	    ^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+
+```
+
+```
+issue7704.js:10:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on props.
+  
+     9 │ function InvalidComponent2(props) {
+  > 10 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    11 │ 		props.foo();
+    12 │ 	}, [props.foo]);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+     9 │ function InvalidComponent2(props) {
+    10 │ 	useEffect(() => {
+  > 11 │ 		props.foo();
+       │ 		^^^^^
+    12 │ 	}, [props.foo]);
+    13 │ }
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    12 │ → },·[props.foo,·props]);
+       │                +++++++   
+
+```

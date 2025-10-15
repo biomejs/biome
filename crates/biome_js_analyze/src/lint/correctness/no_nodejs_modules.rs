@@ -60,13 +60,12 @@ impl Rule for NoNodejsModules {
         if node.is_in_ts_module_declaration() {
             return None;
         }
-        if let AnyJsImportLike::JsModuleSource(module_source) = &node {
-            if let Some(import_clause) = module_source.parent::<AnyJsImportClause>() {
-                if import_clause.type_token().is_some() {
-                    // Ignore type-only imports
-                    return None;
-                }
-            }
+        if let AnyJsImportLike::JsModuleSource(module_source) = &node
+            && let Some(import_clause) = module_source.parent::<AnyJsImportClause>()
+            && import_clause.type_token().is_some()
+        {
+            // Ignore type-only imports
+            return None;
         }
         let module_name = node.module_name_token()?;
         let module_name_text = inner_string_text(&module_name);

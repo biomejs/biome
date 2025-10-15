@@ -9,7 +9,7 @@ pub(crate) struct FormatRemoved<'a> {
     token: &'a HtmlSyntaxToken,
 }
 
-pub(crate) fn format_removed(token: &HtmlSyntaxToken) -> FormatRemoved {
+pub(crate) fn format_removed(token: &HtmlSyntaxToken) -> FormatRemoved<'_> {
     FormatRemoved { token }
 }
 

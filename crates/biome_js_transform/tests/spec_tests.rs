@@ -96,7 +96,7 @@ pub(crate) fn analyze_and_snap(
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
-    let options = create_analyzer_options(input_file, &mut diagnostics);
+    let options = create_analyzer_options::<JsLanguage>(input_file, &mut diagnostics);
 
     let mut transformations = vec![];
     let (_, errors) =

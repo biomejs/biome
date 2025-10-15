@@ -14,10 +14,15 @@ use biome_js_syntax::{
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, TextRange, TokenText, declare_node_union,
 };
+use camino::Utf8Path;
 use std::iter;
 
 use crate::utils::rename::RenamableNode;
 use enumflags2::{BitFlags, bitflags};
+
+mod component_name;
+
+pub use component_name::VueComponentName;
 
 /// VueComponentQuery is a query type that can be used to find Vue components.
 /// It can match any potential Vue component.
@@ -57,9 +62,52 @@ pub enum VueDeclarationCollectionFilter {
     Computed = 1 << 6,
 }
 
+pub struct VueComponent<'a> {
+    kind: AnyVueComponent,
+    path: &'a Utf8Path,
+}
+
+impl<'a> VueComponent<'a> {
+    pub fn new(path: &'a Utf8Path, kind: AnyVueComponent) -> Self {
+        Self { path, kind }
+    }
+
+    pub fn kind(&self) -> &AnyVueComponent {
+        &self.kind
+    }
+
+    pub fn from_potential_component(
+        potential_component: &AnyPotentialVueComponent,
+        model: &SemanticModel,
+        source: &JsFileSource,
+        path: &'a Utf8Path,
+    ) -> Option<Self> {
+        let component =
+            AnyVueComponent::from_potential_component(potential_component, model, source)?;
+        Some(Self::new(path, component))
+    }
+
+    /// The name of the component, if it can be determined.
+    ///
+    /// Derived from the file name if the name is not explicitly set in the component definition.
+    pub fn name(&self) -> Option<VueComponentName<'a>> {
+        self.kind()
+            .component_name()
+            .map(VueComponentName::FromComponent)
+            .or_else(|| {
+                // filename fallback only for Single-File Components
+                if self.path.extension() == Some("vue") {
+                    self.path.file_stem().map(VueComponentName::FromPath)
+                } else {
+                    None
+                }
+            })
+    }
+}
+
 /// An abstraction over multiple ways to define a vue component.
 /// Provides a list of declarations for a component.
-pub enum VueComponent {
+pub enum AnyVueComponent {
     /// Options API style Vue component.
     /// ```html
     /// <script> export default { props: [ ... ], data: { ... }, ... }; </script>
@@ -83,7 +131,7 @@ pub enum VueComponent {
     Setup(VueSetupComponent),
 }
 
-impl VueComponent {
+impl AnyVueComponent {
     pub fn from_potential_component(
         potential_component: &AnyPotentialVueComponent,
         model: &SemanticModel,
@@ -207,7 +255,20 @@ declare_node_union! {
     pub AnyVueDataDeclarationsGroup = JsPropertyObjectMember | JsMethodObjectMember
 }
 
-impl VueComponentDeclarations for VueComponent {
+impl VueComponentDeclarations for VueComponent<'_> {
+    fn declarations(
+        &'_ self,
+        filter: BitFlags<VueDeclarationCollectionFilter>,
+    ) -> Vec<VueDeclaration> {
+        self.kind.declarations(filter)
+    }
+
+    fn data_declarations_group(&self) -> Option<AnyVueDataDeclarationsGroup> {
+        self.kind().data_declarations_group()
+    }
+}
+
+impl VueComponentDeclarations for AnyVueComponent {
     fn declarations(
         &self,
         filter: BitFlags<VueDeclarationCollectionFilter>,
@@ -430,14 +491,14 @@ impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
     ) -> Vec<VueDeclaration> {
         let mut result = vec![];
 
-        if filter.contains(VueDeclarationCollectionFilter::Setup) {
-            if let Some(setup_func) = self.setup_func() {
-                result.extend(
-                    iter_func_return_properties(setup_func.syntax())
-                        .map(AnyVueSetupDeclaration::JsPropertyObjectMember)
-                        .map(VueDeclaration::Setup),
-                );
-            }
+        if filter.contains(VueDeclarationCollectionFilter::Setup)
+            && let Some(setup_func) = self.setup_func()
+        {
+            result.extend(
+                iter_func_return_properties(setup_func.syntax())
+                    .map(AnyVueSetupDeclaration::JsPropertyObjectMember)
+                    .map(VueDeclaration::Setup),
+            );
         }
 
         for (name, group_object_member) in self.iter_declaration_groups() {
@@ -649,7 +710,7 @@ declare_node_union! {
 impl VueDeclarationName for AnyVueSetupDeclaration {
     fn declaration_name(&self) -> Option<TokenText> {
         match self {
-            Self::JsIdentifierBinding(ident) => Some(ident.name_token().ok()?.token_text()),
+            Self::JsIdentifierBinding(ident) => Some(ident.name_token().ok()?.token_text_trimmed()),
             Self::JsFunctionDeclaration(function) => Some(
                 function
                     .id()
@@ -657,7 +718,7 @@ impl VueDeclarationName for AnyVueSetupDeclaration {
                     .as_js_identifier_binding()?
                     .name_token()
                     .ok()?
-                    .token_text(),
+                    .token_text_trimmed(),
             ),
             Self::JsPropertyObjectMember(property) => property.name().ok()?.name(),
         }
@@ -739,17 +800,16 @@ fn get_props_declarations_from_call(
     model: &SemanticModel,
 ) -> Vec<VueDeclaration> {
     let mut result = vec![];
-    if let Ok(arguments) = call.arguments() {
-        if let Some(Ok(first_argument)) = arguments.args().first() {
-            if let Some(expression) = first_argument.as_any_js_expression() {
-                result.extend(collect_props_declarations_from_expression(expression));
-            }
-        }
+    if let Ok(arguments) = call.arguments()
+        && let Some(Ok(first_argument)) = arguments.args().first()
+        && let Some(expression) = first_argument.as_any_js_expression()
+    {
+        result.extend(collect_props_declarations_from_expression(expression));
     }
-    if let Some(type_arguments) = call.type_arguments() {
-        if let Some(Ok(props_type)) = type_arguments.ts_type_argument_list().iter().next() {
-            result.extend(collect_props_declarations_from_type(&props_type, model));
-        }
+    if let Some(type_arguments) = call.type_arguments()
+        && let Some(Ok(props_type)) = type_arguments.ts_type_argument_list().iter().next()
+    {
+        result.extend(collect_props_declarations_from_type(&props_type, model));
     }
     result
 }
@@ -886,20 +946,19 @@ fn iter_declaration_group_properties(
 ) -> Box<dyn Iterator<Item = JsPropertyObjectMember>> {
     match container {
         AnyJsObjectMember::JsPropertyObjectMember(property) => {
-            if let Ok(value) = property.value() {
-                if let Some(expression) = value.inner_expression() {
-                    if let AnyJsExpression::JsObjectExpression(object_expression) = expression {
-                        return Box::new(object_expression.members().iter().filter_map(|member| {
-                            if let Ok(AnyJsObjectMember::JsPropertyObjectMember(property)) = member
-                            {
-                                Some(property)
-                            } else {
-                                None
-                            }
-                        }));
-                    } else {
-                        return Box::new(iter_func_return_properties(expression.syntax()));
-                    }
+            if let Ok(value) = property.value()
+                && let Some(expression) = value.inner_expression()
+            {
+                if let AnyJsExpression::JsObjectExpression(object_expression) = expression {
+                    return Box::new(object_expression.members().iter().filter_map(|member| {
+                        if let Ok(AnyJsObjectMember::JsPropertyObjectMember(property)) = member {
+                            Some(property)
+                        } else {
+                            None
+                        }
+                    }));
+                } else {
+                    return Box::new(iter_func_return_properties(expression.syntax()));
                 }
             }
         }

@@ -39,10 +39,10 @@ impl Rule for Schema {
                 .strip_prefix("https://biomejs.dev/schemas/")?
                 .strip_suffix("/schema.json");
 
-            if let Some(current_version) = value {
-                if current_version != BIOME_VERSION {
-                    return Some(string_value.range());
-                }
+            if let Some(current_version) = value
+                && current_version != BIOME_VERSION
+            {
+                return Some(string_value.range());
             }
         }
 

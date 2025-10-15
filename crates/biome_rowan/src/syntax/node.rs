@@ -2,13 +2,13 @@ use crate::green::GreenElement;
 use crate::syntax::SyntaxTrivia;
 use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::{
-    Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
+    AstNode, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
     SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent, cursor,
 };
 use biome_text_size::{TextRange, TextSize};
 #[cfg(feature = "serde")]
 use serde::Serialize;
-use std::any::TypeId;
+use std::any::{Any, TypeId, type_name};
 use std::fmt::{Debug, Formatter};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
@@ -855,6 +855,24 @@ impl SendNode {
             None
         }
     }
+
+    /// Downcasts this node to a language-specific root node.
+    ///
+    /// ## Panics
+    ///
+    /// If the node is not of the right language.
+    pub fn to_language_root<N>(&self) -> N
+    where
+        N: AstNode,
+        N::Language: 'static,
+    {
+        N::unwrap_cast(self.clone().into_node().unwrap_or_else(|| {
+            panic!(
+                "could not downcast root node to language {}",
+                type_name::<N::Language>()
+            )
+        }))
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -1185,6 +1203,32 @@ impl<L: Language> SyntaxNodeWithOffset<L> {
         EmbeddedSendNode {
             green: self.node.green_node(),
             offset: self.offset,
+        }
+    }
+}
+
+/// Marker trait to prevent unrelated types to be contained in the [`crate::ErasedSyntaxNode`] struct.
+pub trait AsSyntaxNode: Any {}
+
+impl<L: Language + 'static> AsSyntaxNode for SyntaxNode<L> {}
+
+/// Opaque struct for [`SyntaxNode`] without the `L: Language` constraint.
+#[derive(Debug)]
+pub struct AnySyntaxNode {
+    raw: Box<dyn Any>,
+}
+
+impl AnySyntaxNode {
+    #[inline]
+    pub fn downcast_ref<T: AsSyntaxNode>(&self) -> Option<&T> {
+        self.raw.downcast_ref()
+    }
+}
+
+impl<L: Language + 'static> From<SyntaxNode<L>> for AnySyntaxNode {
+    fn from(value: SyntaxNode<L>) -> Self {
+        Self {
+            raw: Box::new(value),
         }
     }
 }

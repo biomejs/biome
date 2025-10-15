@@ -112,8 +112,8 @@ pub trait LanguageSrc {
     /// ```ignore
     /// fn to_token_name(&self, token_name: &str) -> &str {
     ///     match token_name {
-    ///         "'('" => "l_braket",
-    ///         "')'" => "r_braket",
+    ///         "'('" => "l_bracket",
+    ///         "')'" => "r_bracket",
     ///         "<!--" => "comment_start",
     ///         "-->" => "comment_end",
     ///         _ => token_name

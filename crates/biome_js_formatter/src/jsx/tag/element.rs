@@ -187,7 +187,7 @@ enum ElementLayout {
 
     /// Prefer breaking the template if it is the only child of the element
     /// ```javascript
-    /// <div>{`A Long Tempalte String That uses ${
+    /// <div>{`A Long Template String That uses ${
     ///   5 + 4
     /// } that will eventually break across multiple lines ${(40 / 3) * 45}`}</div>;
     /// ```

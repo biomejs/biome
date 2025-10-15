@@ -445,18 +445,19 @@ impl Deserializable for Schema {
                 range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                if let Some(captures) = SCHEMA_REGEX.captures(value.text()) {
-                    if let Some(config_version_match) = captures.get(1) {
-                        let cli_version = Version::new(VERSION);
-                        let config_version_str = Version::new(config_version_match.as_str());
-                        match config_version_str.cmp(&cli_version) {
+                if let Some(captures) = SCHEMA_REGEX.captures(value.text())
+                    && let Some(config_version_match) = captures.get(1)
+                {
+                    let cli_version = Version::new(VERSION);
+                    let config_version_str = Version::new(config_version_match.as_str());
+                    match config_version_str.cmp(&cli_version) {
                             Ordering::Less | Ordering::Greater => {
                                 ctx.report(
                                     DeserializationDiagnostic::new(
                                         markup!(<Warn>"The configuration schema version does not match the CLI version " {VERSION}</Warn>),
                                     )
                                         .with_range(range)
-                                        .with_custom_severity(Severity::Warning)
+                                        .with_custom_severity(Severity::Information)
                                         .with_note(markup!(
                                         {KeyValuePair("Expected", markup!({VERSION}))}
                                         {KeyValuePair("Found", markup!({config_version_str}))}
@@ -468,7 +469,6 @@ impl Deserializable for Schema {
                             }
                             _ => {},
                         }
-                    }
                 }
 
                 Some(Schema(value.text().into()))
@@ -605,7 +605,7 @@ pub struct ConfigurationPayload {
     pub external_resolution_base_path: Utf8PathBuf,
 }
 
-#[derive(Debug, Default, PartialEq, Clone)]
+#[derive(Debug, Default, PartialEq, Clone, Eq, Hash)]
 pub enum ConfigurationPathHint {
     /// The default mode, not having a configuration file is not an error.
     /// The path will be filled with the working directory if it is not filled at the time of usage.
@@ -650,5 +650,14 @@ impl ConfigurationPathHint {
     }
     pub const fn is_from_lsp(&self) -> bool {
         matches!(self, Self::FromLsp(_))
+    }
+
+    pub fn to_path_buf(&self) -> Option<Utf8PathBuf> {
+        match self {
+            Self::None => None,
+            Self::FromWorkspace(path) | Self::FromLsp(path) | Self::FromUser(path) => {
+                Some(path.to_path_buf())
+            }
+        }
     }
 }

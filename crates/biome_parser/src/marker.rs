@@ -74,14 +74,13 @@ impl Marker {
     {
         self.bomb.defuse();
         let idx = self.pos as usize;
-        if idx == p.context().events.len() - 1 {
-            if let Some(Event::Start {
+        if idx == p.context().events.len() - 1
+            && let Some(Event::Start {
                 forward_parent: None,
                 kind,
             }) = p.context_mut().events.pop()
-            {
-                assert_eq!(kind, P::Kind::TOMBSTONE);
-            }
+        {
+            assert_eq!(kind, P::Kind::TOMBSTONE);
         }
         if let Some(idx) = self.child_idx {
             match p.context_mut().events[idx] {

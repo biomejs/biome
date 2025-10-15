@@ -44,12 +44,14 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_CONTENT",
         "HTML_CDATA_SECTION",
         "COMMENT",
+        "HTML_DOUBLE_TEXT_EXPRESSION",
+        "HTML_SINGLE_TEXT_EXPRESSION",
         "HTML_TEXT_EXPRESSION",
-        "SVELTE_TEXT_EXPRESSION",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",
         "HTML_BOGUS_ATTRIBUTE",
+        "HTML_BOGUS_TEXT_EXPRESSION",
         "ASTRO_BOGUS_FRONTMATTER",
     ],
 };

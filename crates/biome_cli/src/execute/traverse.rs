@@ -12,7 +12,7 @@ use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    DocumentFileSource, DropPatternParams, FileFeaturesResult, IgnoreKind, IsPathIgnoredParams,
+    DocumentFileSource, DropPatternParams, FileFeaturesResult, IgnoreKind, PathIsIgnoredParams,
 };
 use biome_service::{Workspace, WorkspaceError, extension_error, workspace::SupportsFeatureParams};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -537,11 +537,11 @@ impl TraversalContext for TraversalOptions<'_, '_> {
             //   Note that `symlink/subdir` is not an existing file.
             let can_handle = !self
                 .workspace
-                .is_path_ignored(IsPathIgnoredParams {
+                .is_path_ignored(PathIsIgnoredParams {
                     project_key: self.project_key,
                     path: biome_path.clone(),
                     features: self.execution.to_feature(),
-                    ignore_kind: IgnoreKind::Path,
+                    ignore_kind: IgnoreKind::Ancestors,
                 })
                 .unwrap_or_else(|err| {
                     self.push_diagnostic(err.into());

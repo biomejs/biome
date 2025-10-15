@@ -1,4 +1,5 @@
 mod constants;
+pub mod generated_mappings;
 
 use super::{
     DisregardedSlotCondition, GritTargetLanguageImpl, LeafEquivalenceClass, LeafNormalizer,
@@ -11,6 +12,7 @@ use crate::{
 use biome_css_syntax::{CssLanguage, CssSyntaxKind};
 use biome_rowan::{RawSyntaxKind, SyntaxKindSet};
 use constants::DISREGARDED_SNIPPET_SLOTS;
+use generated_mappings::kind_by_name;
 
 const COMMENT_KINDS: SyntaxKindSet<CssLanguage> =
     SyntaxKindSet::from_raw(RawSyntaxKind(CssSyntaxKind::COMMENT as u16)).union(
@@ -30,12 +32,9 @@ impl GritTargetLanguageImpl for CssTargetLanguage {
 
     /// Returns the syntax kind for a node by name.
     ///
-    /// For compatibility with existing Grit snippets (as well as the online
-    /// Grit playground), node names should be aligned with TreeSitter's
-    /// `ts_language_symbol_for_name()`.
-    fn kind_by_name(&self, _node_name: &str) -> Option<CssSyntaxKind> {
-        // TODO: See [super::JsTargetLanguage::kind_by_name()].
-        None
+    /// Supports native Biome AST patterns for full language coverage.
+    fn kind_by_name(&self, node_name: &str) -> Option<CssSyntaxKind> {
+        kind_by_name(node_name)
     }
 
     /// Returns the node name for a given syntax kind.

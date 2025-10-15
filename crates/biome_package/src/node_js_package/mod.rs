@@ -72,7 +72,7 @@ impl Package for NodeJsPackage {
                     ProjectAnalyzeDiagnostic::new_invalid_license(license.to_string())
                         .with_range(range),
                 )
-            } else if !LICENSE_LIST.is_deprecated(license) {
+            } else if LICENSE_LIST.is_deprecated(license) {
                 diagnostics.push(
                     ProjectAnalyzeDiagnostic::new_deprecated_license(license.to_string())
                         .with_range(range),

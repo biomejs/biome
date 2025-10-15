@@ -60,7 +60,7 @@ impl ResolvedTypeId {
 
     /// Applies the module ID of `self` to `reference`.
     #[inline]
-    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<'_, TypeReference> {
         self.0.apply_module_id_to_reference(reference)
     }
 
@@ -175,7 +175,7 @@ impl ResolverId {
 
     /// Applies the module ID of `self` to the given `reference`.
     #[inline]
-    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<'_, TypeReference> {
         match reference {
             TypeReference::Resolved(id) => {
                 Cow::Owned(TypeReference::Resolved(self.apply_module_id(*id)))
@@ -349,7 +349,7 @@ impl<'a> ResolvedTypeData<'a> {
     /// Applies the module ID from the embedded [`ResolverId`] to the given
     /// `reference`.
     #[inline]
-    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<TypeReference> {
+    pub fn apply_module_id_to_reference(self, reference: &TypeReference) -> Cow<'_, TypeReference> {
         self.id.apply_module_id_to_reference(reference)
     }
 
@@ -449,7 +449,7 @@ impl<'a> ResolvedTypeMember<'a> {
     ///
     /// This means if the member represents a getter or setter, it will
     /// dereference to the type of the property being get or set.
-    pub fn deref_ty(&self, resolver: &dyn TypeResolver) -> Cow<TypeReference> {
+    pub fn deref_ty(&self, resolver: &dyn TypeResolver) -> Cow<'_, TypeReference> {
         if self.is_getter() {
             resolver
                 .resolve_and_get(&self.ty())
@@ -477,6 +477,12 @@ impl<'a> ResolvedTypeMember<'a> {
     #[inline]
     pub fn is_getter(&self) -> bool {
         self.member.is_getter()
+    }
+
+    pub fn is_index_signature_with_ty(&self, predicate: impl Fn(&TypeReference) -> bool) -> bool {
+        self.member.is_index_signature_with_ty(|reference| {
+            predicate(&self.apply_module_id_to_reference(reference))
+        })
     }
 
     #[inline]
@@ -509,7 +515,7 @@ impl<'a> ResolvedTypeMember<'a> {
     }
 
     /// Returns a reference to the type of the member.
-    pub fn ty(&self) -> Cow<TypeReference> {
+    pub fn ty(&self) -> Cow<'_, TypeReference> {
         self.apply_module_id_to_reference(&self.member.ty)
     }
 }
@@ -541,7 +547,7 @@ pub trait TypeResolver {
     fn get_by_id(&self, id: TypeId) -> &TypeData;
 
     /// Returns type data by its resolved ID, if possible.
-    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData>;
+    fn get_by_resolved_id(&self, id: ResolvedTypeId) -> Option<ResolvedTypeData<'_>>;
 
     /// Returns the [`TypeReference`] to refer to a [`TypeId`] belonging to this
     /// resolver.
@@ -627,7 +633,7 @@ pub trait TypeResolver {
 
     /// Resolves a type reference and immediately returns the associated
     /// [`TypeData`] if found.
-    fn resolve_and_get(&self, ty: &TypeReference) -> Option<ResolvedTypeData> {
+    fn resolve_and_get(&self, ty: &TypeReference) -> Option<ResolvedTypeData<'_>> {
         match self
             .resolve_reference(ty)
             .and_then(|id| self.get_by_resolved_id(id))
@@ -675,7 +681,7 @@ pub trait TypeResolver {
         &mut self,
         scope_id: ScopeId,
         expression: &AnyJsExpression,
-    ) -> Cow<TypeData>;
+    ) -> Cow<'_, TypeData>;
 
     /// Resolves a type reference.
     fn resolve_reference(&self, ty: &TypeReference) -> Option<ResolvedTypeId>;

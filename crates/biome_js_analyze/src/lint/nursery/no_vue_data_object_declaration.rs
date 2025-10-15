@@ -124,6 +124,7 @@ impl Rule for NoVueDataObjectDeclaration {
             ctx.query(),
             ctx.model(),
             ctx.source_type::<JsFileSource>(),
+            ctx.file_path(),
         )?;
 
         let data_decl = component.data_declarations_group()?;

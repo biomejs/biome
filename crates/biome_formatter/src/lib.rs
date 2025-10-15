@@ -15,9 +15,9 @@
 //! ## Formatting Macros
 //!
 //! This crate defines two macros to construct the IR. These are inspired by Rust's `fmt` macros
-//! * [`format!`]: Formats a formatable object
+//! * [`format!`]: Formats a formattable object
 //! * [`format_args!`]: Concatenates a sequence of Format objects.
-//! * [`write!`]: Writes a sequence of formatable objects into an output buffer.
+//! * [`write!`]: Writes a sequence of formattable objects into an output buffer.
 
 #![deny(clippy::use_self)]
 #![deny(rustdoc::broken_intra_doc_links)]
@@ -1624,12 +1624,12 @@ pub fn format_range<Language: FormatLanguage>(
 
     // If the range ends before the trimmed start of the token, move the
     // end to the trimmed end of the previous token if it exists
-    if end_token_trimmed_start >= range.end() {
-        if let Some(next_token) = end_token.prev_token() {
-            let next_token_end = text_non_whitespace_range(&next_token).end();
-            if next_token_end >= trimmed_start {
-                end_token = next_token;
-            }
+    if end_token_trimmed_start >= range.end()
+        && let Some(next_token) = end_token.prev_token()
+    {
+        let next_token_end = text_non_whitespace_range(&next_token).end();
+        if next_token_end >= trimmed_start {
+            end_token = next_token;
         }
     }
 

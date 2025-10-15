@@ -1,0 +1,75 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue6893.js
+---
+# Input
+```js
+function App() {
+	const firstId = `${Math.random()}`
+	const secondId = `${Math.random()}`
+
+	React.useEffect(() => {
+		console.log({firstId, secondId})
+	}, [])
+}
+
+```
+
+# Diagnostics
+```
+issue6893.js:5:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on firstId.
+  
+    3 │ 	const secondId = `${Math.random()}`
+    4 │ 
+  > 5 │ 	React.useEffect(() => {
+      │ 	      ^^^^^^^^^
+    6 │ 		console.log({firstId, secondId})
+    7 │ 	}, [])
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    5 │ 	React.useEffect(() => {
+  > 6 │ 		console.log({firstId, secondId})
+      │ 		             ^^^^^^^
+    7 │ 	}, [])
+    8 │ }
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    7 │ → },·[firstId])
+      │       +++++++  
+
+```
+
+```
+issue6893.js:5:8 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on secondId.
+  
+    3 │ 	const secondId = `${Math.random()}`
+    4 │ 
+  > 5 │ 	React.useEffect(() => {
+      │ 	      ^^^^^^^^^
+    6 │ 		console.log({firstId, secondId})
+    7 │ 	}, [])
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    5 │ 	React.useEffect(() => {
+  > 6 │ 		console.log({firstId, secondId})
+      │ 		                      ^^^^^^^^
+    7 │ 	}, [])
+    8 │ }
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    7 │ → },·[secondId])
+      │       ++++++++  
+
+```

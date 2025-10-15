@@ -62,7 +62,7 @@ impl AstNodePattern<GritQueryContext> for GritNodePattern {
     fn children(
         &self,
         _definitions: &StaticDefinitions<GritQueryContext>,
-    ) -> Vec<PatternOrPredicate<GritQueryContext>> {
+    ) -> Vec<PatternOrPredicate<'_, GritQueryContext>> {
         self.args
             .iter()
             .map(|arg| PatternOrPredicate::Pattern(&arg.pattern))

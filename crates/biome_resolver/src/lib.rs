@@ -41,7 +41,11 @@ pub fn resolve(
     }
 
     if specifier.starts_with('/') {
-        return resolve_absolute_path(Utf8PathBuf::from(specifier), fs, options);
+        return resolve_absolute_path_with_extension_aliases(
+            Utf8PathBuf::from(specifier),
+            fs,
+            options,
+        );
     }
 
     if is_relative_specifier(specifier) {
@@ -56,6 +60,38 @@ pub fn resolve(
     }
 
     resolve_module(specifier, base_dir, fs, options)
+}
+
+/// Resolves the given absolute `path` with the extension aliases specified in the options.
+fn resolve_absolute_path_with_extension_aliases(
+    path: Utf8PathBuf,
+    fs: &dyn ResolverFsProxy,
+    options: &ResolveOptions,
+) -> Result<Utf8PathBuf, ResolveError> {
+    // Skip if no extension is in the path.
+    let Some(extension) = path.extension() else {
+        return resolve_absolute_path(path, fs, options);
+    };
+
+    // Skip if no extension alias is configured.
+    let Some(&(_, aliases)) = options
+        .extension_aliases
+        .iter()
+        .find(|(ext, _)| *ext == extension)
+    else {
+        return resolve_absolute_path(path, fs, options);
+    };
+
+    // Try to resolve the path for each extension alias.
+    for alias in aliases {
+        match resolve_absolute_path(path.with_extension(alias), fs, options) {
+            Ok(path) => return Ok(path),
+            Err(ResolveError::NotFound) => { /* continue */ }
+            Err(error) => return Err(error),
+        }
+    }
+
+    Err(ResolveError::NotFound)
 }
 
 /// Resolves the given absolute `path`.
@@ -111,7 +147,7 @@ fn resolve_relative_path(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    resolve_absolute_path(base_dir.join(path), fs, options)
+    resolve_absolute_path_with_extension_aliases(base_dir.join(path), fs, options)
 }
 
 /// Resolve the directory `dir_path`.
@@ -206,21 +242,20 @@ fn resolve_module_with_package_json(
         return resolve_import_alias(specifier, package_path, package_json, fs, options);
     }
 
-    if let Some(package_name) = &package_json.name {
-        if specifier.starts_with(package_name.as_ref())
-            && specifier
-                .as_bytes()
-                .get(package_name.len())
-                .is_some_and(|c| *c == b'/')
-        {
-            return resolve_export(
-                &specifier[package_name.len() + 1..],
-                package_path,
-                package_json,
-                fs,
-                options,
-            );
-        }
+    if let Some(package_name) = &package_json.name
+        && specifier.starts_with(package_name.as_ref())
+        && specifier
+            .as_bytes()
+            .get(package_name.len())
+            .is_some_and(|c| *c == b'/')
+    {
+        return resolve_export(
+            &specifier[package_name.len() + 1..],
+            package_path,
+            package_json,
+            fs,
+            options,
+        );
     }
 
     resolve_dependency(specifier, package_path, fs, options)
@@ -236,7 +271,10 @@ fn resolve_import_alias(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
-    let imports = package_json.imports.clone().ok_or(ResolveError::NotFound)?;
+    let imports = package_json
+        .imports
+        .as_ref()
+        .ok_or(ResolveError::NotFound)?;
     let imports = imports
         .as_object()
         .ok_or(ResolveError::InvalidMappingTarget)?;
@@ -439,6 +477,12 @@ fn resolve_target_value(
             }
             None => resolve_string(target.as_str()),
         },
+        JsonValue::Array(targets) => targets
+            .iter()
+            .find_map(|target| {
+                resolve_target_value(target, glob_replacement, package_path, fs, options).ok()
+            })
+            .ok_or(ResolveError::NotFound),
         _ => Err(ResolveError::InvalidMappingTarget),
     }
 }
@@ -573,17 +617,16 @@ fn resolve_path_info(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<(ResolvedPathInfo, Utf8PathBuf), ResolveError> {
-    if options.resolve_types {
-        if let Some(definition_ext) = path
+    if options.resolve_types
+        && let Some(definition_ext) = path
             .extension()
             .and_then(definition_extension_for_js_extension)
-        {
-            // Try the type definition path first:
-            let definition_result =
-                resolve_path_info(Cow::Owned(path.with_extension(definition_ext)), fs, options);
-            if definition_result.is_ok() {
-                return definition_result;
-            }
+    {
+        // Try the type definition path first:
+        let definition_result =
+            resolve_path_info(Cow::Owned(path.with_extension(definition_ext)), fs, options);
+        if definition_result.is_ok() {
+            return definition_result;
         }
     }
 
@@ -651,13 +694,13 @@ fn normalize_subpath(subpath: &str) -> &str {
 fn parse_package_specifier(specifier: &str) -> Result<(&str, &str), ResolveError> {
     let bytes = specifier.as_bytes();
     let mut separator_index = bytes.iter().position(|b| *b == b'/');
-    if let Some(index) = &separator_index {
-        if bytes[0] == b'@' {
-            separator_index = bytes[*index + 1..]
-                .iter()
-                .position(|b| *b == b'/')
-                .map(|i| i + *index + 1);
-        }
+    if let Some(index) = &separator_index
+        && bytes[0] == b'@'
+    {
+        separator_index = bytes[*index + 1..]
+            .iter()
+            .position(|b| *b == b'/')
+            .map(|i| i + *index + 1);
     }
 
     let package_name =
@@ -722,8 +765,15 @@ pub struct ResolveOptions<'a> {
     /// Extensions are checked in the order given, meaning the first extension
     /// in the list has the highest priority.
     ///
-    /// Extensions should be provided without leading dot.
+    /// Extensions should be provided without a leading dot.
     pub extensions: &'a [&'a str],
+
+    /// List of extension aliases to search for in absolute or relative paths.
+    /// Typically used to resolve `.ts` files by `.js` extension.
+    /// Same behavior as the `extensionAlias` option in [enhanced-resolve](https://github.com/webpack/enhanced-resolve?tab=readme-ov-file#resolver-options).
+    ///
+    /// Extensions should be provided without a leading dot.
+    pub extension_aliases: &'a [(&'a str, &'a [&'a str])],
 
     /// Defines which `package.json` file should be used.
     ///
@@ -762,7 +812,7 @@ pub struct ResolveOptions<'a> {
     ///   extensions for definition files yourself. These extensions will be
     ///   tried automatically with a priority that is higher than the
     ///   corresponding JavaScript extension, but lower than the extension that
-    ///   preceeds it.
+    ///   precedes it.
     pub resolve_types: bool,
 
     /// Defines which `tsconfig.json` file should be used.
@@ -794,6 +844,7 @@ impl<'a> ResolveOptions<'a> {
             condition_names: &[],
             default_files: &[],
             extensions: &[],
+            extension_aliases: &[],
             package_json: DiscoverableManifest::Auto,
             resolve_node_builtins: false,
             resolve_types: false,
@@ -829,6 +880,15 @@ impl<'a> ResolveOptions<'a> {
     /// Sets [`Self::extensions`] and returns this instance.
     pub const fn with_extensions(mut self, extensions: &'a [&'a str]) -> Self {
         self.extensions = extensions;
+        self
+    }
+
+    /// Sets [`Self::extension_aliases`] and returns this instance.
+    pub const fn with_extension_aliases(
+        mut self,
+        extension_aliases: &'a [(&'a str, &'a [&'a str])],
+    ) -> Self {
+        self.extension_aliases = extension_aliases;
         self
     }
 
@@ -871,6 +931,7 @@ impl<'a> ResolveOptions<'a> {
             condition_names: self.condition_names,
             default_files: self.default_files,
             extensions: self.extensions,
+            extension_aliases: self.extension_aliases,
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
             resolve_types: self.resolve_types,
@@ -885,6 +946,7 @@ impl<'a> ResolveOptions<'a> {
             condition_names: self.condition_names,
             default_files: self.default_files,
             extensions: &[],
+            extension_aliases: &[],
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
             resolve_types: self.resolve_types,

@@ -43,5 +43,12 @@ foo[/\w+/] && foo[/ab+c/].baz;
 
 (foo || {})().bar;
 
+typeof foo !== undefined && foo.bar;
+typeof foo != undefined && foo.bar;
+
+typeof window !== "undefined" && window.location;
+"undefined" !== typeof document && document.body;
+
+
 // FIXME: This should not generate a diagnostic
 // (new foo() || {}).bar;

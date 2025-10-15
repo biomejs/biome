@@ -18,7 +18,7 @@ use crate::{
         RenameResult,
     },
 };
-use biome_analyze::options::PreferredQuote;
+use biome_analyze::options::{PreferredIndentation, PreferredQuote};
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
     RuleCategoriesBuilder, RuleError, RuleFilter,
@@ -39,14 +39,15 @@ use biome_js_analyze::{
     ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
 };
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
-use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteProperties, Semicolons};
+use biome_js_formatter::context::{
+    ArrowParentheses, JsFormatOptions, OperatorLinebreak, QuoteProperties, Semicolons,
+};
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsRoot, JsClassDeclaration, JsClassExpression, JsFileSource, JsFunctionDeclaration,
-    JsLanguage, JsSyntaxNode, JsVariableDeclarator, LanguageVariant, TextRange, TextSize,
-    TokenAtOffset,
+    JsLanguage, JsSyntaxNode, JsVariableDeclarator, TextRange, TextSize, TokenAtOffset,
 };
 use biome_js_type_info::{GlobalsResolver, ScopeId, TypeData, TypeResolver};
 use biome_module_graph::ModuleGraph;
@@ -77,6 +78,7 @@ pub struct JsFormatterSettings {
     pub enabled: Option<JsFormatterEnabled>,
     pub attribute_position: Option<AttributePosition>,
     pub expand: Option<Expand>,
+    pub operator_linebreak: Option<OperatorLinebreak>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -97,6 +99,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             indent_style: value.indent_style,
             line_ending: value.line_ending,
             expand: value.expand,
+            operator_linebreak: value.operator_linebreak,
         }
     }
 }
@@ -238,7 +241,8 @@ impl ServiceLanguage for JsLanguage {
                 .or(global.attribute_position)
                 .unwrap_or_default(),
         )
-        .with_expand(language.expand.or(global.expand).unwrap_or_default());
+        .with_expand(language.expand.or(global.expand).unwrap_or_default())
+        .with_operator_linebreak(language.operator_linebreak.unwrap_or_default());
 
         overrides.override_js_format_options(path, options)
     }
@@ -256,12 +260,9 @@ impl ServiceLanguage for JsLanguage {
             .javascript
             .formatter
             .quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
+            .map(|quote_style: QuoteStyle| match quote_style {
+                QuoteStyle::Single => PreferredQuote::Single,
+                QuoteStyle::Double => PreferredQuote::Double,
             })
             .unwrap_or_default();
         let preferred_jsx_quote = global
@@ -269,14 +270,31 @@ impl ServiceLanguage for JsLanguage {
             .javascript
             .formatter
             .jsx_quote_style
-            .map(|quote_style: QuoteStyle| {
-                if quote_style == QuoteStyle::Single {
-                    PreferredQuote::Single
-                } else {
-                    PreferredQuote::Double
-                }
+            .map(|quote_style: QuoteStyle| match quote_style {
+                QuoteStyle::Single => PreferredQuote::Single,
+                QuoteStyle::Double => PreferredQuote::Double,
             })
             .unwrap_or_default();
+        let preferred_indentation = {
+            let indent_style = global
+                .languages
+                .javascript
+                .formatter
+                .indent_style
+                .unwrap_or_else(|| global.formatter.indent_style.unwrap_or_default());
+            match indent_style {
+                IndentStyle::Tab => PreferredIndentation::Tab,
+                IndentStyle::Space => PreferredIndentation::Spaces(
+                    global
+                        .languages
+                        .javascript
+                        .formatter
+                        .indent_width
+                        .unwrap_or_else(|| global.formatter.indent_width.unwrap_or_default())
+                        .value(),
+                ),
+            }
+        };
 
         let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
@@ -294,12 +312,7 @@ impl ServiceLanguage for JsLanguage {
         };
         configuration = configuration.with_jsx_runtime(jsx_runtime);
 
-        globals.extend(
-            overrides
-                .override_js_globals(path, &global.languages.javascript.globals)
-                .into_iter()
-                .collect::<Vec<_>>(),
-        );
+        globals.extend(overrides.override_js_globals(path, &global.languages.javascript.globals));
 
         if let Some(filename) = path.file_name() {
             if filename.ends_with(".vue") {
@@ -320,6 +333,10 @@ impl ServiceLanguage for JsLanguage {
             } else if filename.ends_with(".svelte")
                 || filename.ends_with(".svelte.js")
                 || filename.ends_with(".svelte.ts")
+                || filename.ends_with(".svelte.test.ts")
+                || filename.ends_with(".svelte.test.js")
+                || filename.ends_with(".svelte.spec.ts")
+                || filename.ends_with(".svelte.spec.js")
             {
                 // Svelte 5 runes
                 globals.extend(
@@ -341,7 +358,8 @@ impl ServiceLanguage for JsLanguage {
             .with_rules(to_analyzer_rules(global, path.as_path()))
             .with_globals(globals)
             .with_preferred_quote(preferred_quote)
-            .with_preferred_jsx_quote(preferred_jsx_quote);
+            .with_preferred_jsx_quote(preferred_jsx_quote)
+            .with_preferred_indentation(preferred_indentation);
 
         AnalyzerOptions::default()
             .with_file_path(path.as_path())
@@ -512,17 +530,7 @@ fn parse(
         .override_settings
         .apply_override_js_parser_options(biome_path, &mut options);
 
-    let mut file_source = file_source.to_js_file_source().unwrap_or_default();
-    let jsx_everywhere = settings
-        .languages
-        .javascript
-        .parser
-        .jsx_everywhere
-        .unwrap_or_default()
-        .into();
-    if jsx_everywhere && !file_source.is_typescript() {
-        file_source = file_source.with_variant(LanguageVariant::Jsx);
-    }
+    let file_source = file_source.to_js_file_source().unwrap_or_default();
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
     ParseResult {
         any_parse: parse.into(),
@@ -879,10 +887,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             |signal| {
                 let current_diagnostic = signal.diagnostic();
 
-                if let Some(diagnostic) = current_diagnostic.as_ref() {
-                    if is_diagnostic_error(diagnostic, rules.as_deref()) {
-                        errors += 1;
-                    }
+                if let Some(diagnostic) = current_diagnostic.as_ref()
+                    && is_diagnostic_error(diagnostic, rules.as_deref())
+                {
+                    errors += 1;
                 }
 
                 for action in signal.actions() {
@@ -1085,7 +1093,3 @@ fn rename(
         ))
     }
 }
-
-#[cfg(test)]
-#[path = "javascript.tests.rs"]
-mod tests;

@@ -58,6 +58,8 @@ use biome_formatter::{Buffer, CstFormatContext, format_args, write};
 use biome_js_syntax::binary_like_expression::{
     AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression,
 };
+
+use crate::{JsFormatOptions, context::OperatorLinebreak};
 use biome_js_syntax::{AnyJsExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression};
 
 use crate::js::expressions::static_member_expression::AnyJsStaticMemberLike;
@@ -275,13 +277,21 @@ impl Format<JsFormatContext> for BinaryLeftOrRightSide {
 
                 let operator_and_right_expression = format_with(|f| {
                     let should_inline = binary_like_expression.should_inline_logical_expression();
-
-                    write!(f, [space(), operator_token.format()])?;
+                    let options: &JsFormatOptions = f.options();
+                    let op_linebreak = options.operator_linebreak();
 
                     if should_inline {
-                        write!(f, [space()])?;
+                        write!(f, [space(), operator_token.format(), space()])?;
+                    } else if let OperatorLinebreak::Before = op_linebreak {
+                        write!(
+                            f,
+                            [soft_line_break_or_space(), operator_token.format(), space()]
+                        )?;
                     } else {
-                        write!(f, [soft_line_break_or_space()])?;
+                        write!(
+                            f,
+                            [space(), operator_token.format(), soft_line_break_or_space()]
+                        )?;
                     }
 
                     write!(f, [right.format()])?;

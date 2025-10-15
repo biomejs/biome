@@ -319,27 +319,6 @@ impl JsBinaryExpression {
             Ok(T![>] | T![<] | T![>=] | T![<=] | T![==] | T![===] | T![!=] | T![!==])
         )
     }
-
-    /// Whether this is a comparison operation similar to the optional chain
-    /// ```js
-    /// foo !== undefined;
-    /// foo != undefined;
-    /// foo !== null;
-    /// foo != null;
-    ///```
-    pub fn is_optional_chain_like(&self) -> SyntaxResult<bool> {
-        if matches!(
-            self.operator(),
-            Ok(JsBinaryOperator::StrictInequality | JsBinaryOperator::Inequality)
-        ) {
-            Ok(self
-                .right()?
-                .as_static_value()
-                .is_some_and(|x| x.is_null_or_undefined()))
-        } else {
-            Ok(false)
-        }
-    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
@@ -815,12 +794,11 @@ impl JsTemplateExpression {
         // Guarding against skipped token trivia on elements that we remove.
         // Because that would result in the skipped token trivia being emitted before the template.
         for element in self.elements() {
-            if let AnyJsTemplateElement::JsTemplateChunkElement(element) = element {
-                if let Some(leading_trivia) = element.syntax().first_leading_trivia() {
-                    if leading_trivia.has_skipped() {
-                        return false;
-                    }
-                }
+            if let AnyJsTemplateElement::JsTemplateChunkElement(element) = element
+                && let Some(leading_trivia) = element.syntax().first_leading_trivia()
+                && leading_trivia.has_skipped()
+            {
+                return false;
             }
         }
 
@@ -1181,12 +1159,12 @@ impl AnyJsExpression {
             }
 
             // Check for concurrent.only pattern: test.concurrent.only
-            if first_token.text() == "only" && second_token.text() == "concurrent" {
-                if let Some(third_token) = members.next() {
-                    if matches!(third_token.text(), "test" | "it") {
-                        return Ok(true);
-                    }
-                }
+            if first_token.text() == "only"
+                && second_token.text() == "concurrent"
+                && let Some(third_token) = members.next()
+                && matches!(third_token.text(), "test" | "it")
+            {
+                return Ok(true);
             }
         }
 
@@ -1244,15 +1222,14 @@ impl AnyJsExpression {
             }
 
             // Check for "test.concurrent.only.each" pattern
-            if third_token.text() == "concurrent" {
-                if let Some(fourth_token) = members.next() {
-                    if matches!(
-                        fourth_token.text(),
-                        "test" | "it" | "xtest" | "xit" | "ftest" | "fit"
-                    ) {
-                        return Ok(true);
-                    }
-                }
+            if third_token.text() == "concurrent"
+                && let Some(fourth_token) = members.next()
+                && matches!(
+                    fourth_token.text(),
+                    "test" | "it" | "xtest" | "xit" | "ftest" | "fit"
+                )
+            {
+                return Ok(true);
             }
         }
 
@@ -1727,7 +1704,7 @@ impl AnyJsObjectMember {
             Self::JsShorthandPropertyObjectMember(member) => {
                 return Some(member.name().ok()?.value_token().ok()?.token_text_trimmed());
             }
-            Self::JsBogusMember(_) | Self::JsSpread(_) => {
+            Self::JsBogusMember(_) | Self::JsSpread(_) | Self::JsMetavariable(_) => {
                 return None;
             }
         };
@@ -1963,10 +1940,10 @@ pub fn global_identifier(expr: &AnyJsExpression) -> Option<(JsReferenceIdentifie
         }
         expr = member_expr.object().ok()?.omit_parentheses();
     }
-    if let Some(reference) = expr.as_js_reference_identifier() {
-        if matches!(reference.name().ok()?.text(), GLOBAL_THIS | WINDOW) {
-            return Some((reference, name));
-        }
+    if let Some(reference) = expr.as_js_reference_identifier()
+        && matches!(reference.name().ok()?.text(), GLOBAL_THIS | WINDOW)
+    {
+        return Some((reference, name));
     }
     None
 }

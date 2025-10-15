@@ -1,2 +1,2 @@
 /* should not generate diagnostics */
-const aSepcial_CASE = 0;
+const aSpecial_CASE = 0;

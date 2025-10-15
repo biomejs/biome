@@ -723,10 +723,10 @@ fn generate_for_groups(
                     #(
                         if let Some(rules) = rules.#group_idents.as_ref() {
                             for rule_name in #group_pascal_idents::GROUP_RULES {
-                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
-                                    if let Some(rule_key) = metadata.find_rule(#group_strings, rule_name) {
-                                        analyzer_rules.push_rule(rule_key, rule_options);
-                                    }
+                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name)
+                                    && let Some(rule_key) = metadata.find_rule(#group_strings, rule_name)
+                                {
+                                    analyzer_rules.push_rule(rule_key, rule_options);
                                 }
                             }
                         }
@@ -747,10 +747,10 @@ fn generate_for_groups(
                     #(
                         if let Some(rules) = rules.#group_idents.as_ref() {
                             for rule_name in #group_pascal_idents::GROUP_RULES {
-                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
-                                    if let Some(rule_key) = metadata.find_rule(#group_strings, rule_name) {
-                                        analyzer_rules.push_rule(rule_key, rule_options);
-                                    }
+                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name)
+                                    && let Some(rule_key) = metadata.find_rule(#group_strings, rule_name)
+                                {
+                                    analyzer_rules.push_rule(rule_key, rule_options);
                                 }
                             }
                         }
@@ -881,23 +881,23 @@ fn generate_group_struct(
         });
 
         rule_enabled_check_line.push(quote! {
-            if let Some(rule) = self.#rule_identifier.as_ref() {
-                if rule.is_enabled() {
-                    index_set.insert(RuleFilter::Rule(
-                        Self::GROUP_NAME,
-                        Self::GROUP_RULES[#rule_position],
-                    ));
-                }
+            if let Some(rule) = self.#rule_identifier.as_ref()
+                && rule.is_enabled()
+            {
+                index_set.insert(RuleFilter::Rule(
+                    Self::GROUP_NAME,
+                    Self::GROUP_RULES[#rule_position],
+                ));
             }
         });
         rule_disabled_check_line.push(quote! {
-            if let Some(rule) = self.#rule_identifier.as_ref() {
-                if rule.is_disabled() {
-                    index_set.insert(RuleFilter::Rule(
-                        Self::GROUP_NAME,
-                        Self::GROUP_RULES[#rule_position],
-                    ));
-                }
+            if let Some(rule) = self.#rule_identifier.as_ref()
+                && rule.is_disabled()
+            {
+                index_set.insert(RuleFilter::Rule(
+                    Self::GROUP_NAME,
+                    Self::GROUP_RULES[#rule_position],
+                ));
             }
         });
 
@@ -937,7 +937,7 @@ fn generate_group_struct(
             #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
             /// A list of rules that belong to this group
             pub struct #group_pascal_ident {
-                /// It enables the recommended rules for this group
+                /// Enables the recommended rules for this group
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
@@ -1010,7 +1010,7 @@ fn generate_group_struct(
             #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
             /// A list of rules that belong to this group
             pub struct #group_pascal_ident {
-                /// It enables the recommended rules for this group
+                /// Enables the recommended rules for this group
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 

@@ -113,12 +113,12 @@ YamlRoot {
                         },
                     },
                 ],
-                sequence_end_token: SEQUENCE_END@32..33 "" [Newline("\n")] [],
+                sequence_end_token: SEQUENCE_END@32..32 "" [] [],
             },
             dotdotdot_token: missing (optional),
         },
     ],
-    eof_token: EOF@33..33 "" [] [],
+    eof_token: EOF@32..33 "" [Newline("\n")] [],
 }
 ```
 
@@ -126,12 +126,12 @@ YamlRoot {
 
 ```
 0: YAML_ROOT@0..33
-  0: YAML_DOCUMENT_LIST@0..33
-    0: YAML_DOCUMENT@0..33
+  0: YAML_DOCUMENT_LIST@0..32
+    0: YAML_DOCUMENT@0..32
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
-      3: YAML_BLOCK_SEQUENCE@0..33
+      3: YAML_BLOCK_SEQUENCE@0..32
         0: SEQUENCE_START@0..0 "" [] []
         1: (empty)
         2: YAML_BLOCK_SEQUENCE_ENTRY_LIST@0..32
@@ -195,8 +195,8 @@ YamlRoot {
                       2: (empty)
                   2: R_CURLY@31..32 "}" [] []
               2: FLOW_END@32..32 "" [] []
-        3: SEQUENCE_END@32..33 "" [Newline("\n")] []
+        3: SEQUENCE_END@32..32 "" [] []
       4: (empty)
-  1: EOF@33..33 "" [] []
+  1: EOF@32..33 "" [Newline("\n")] []
 
 ```

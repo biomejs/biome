@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: assignments.jsx
+---
+# Input
+```jsx
+arr = <>Error</>;
+err = <Fragment>Error</Fragment>;
+err = <React.Fragment>Error</React.Fragment>;
+
+```

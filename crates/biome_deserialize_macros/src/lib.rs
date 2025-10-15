@@ -45,7 +45,7 @@ use syn::{DeriveInput, parse_macro_input};
 ///
 /// ### `unknown_fields`
 ///
-/// This attribute allows controling how to handle unknown fields in structs.
+/// This attribute allows controlling how to handle unknown fields in structs.
 /// It takes one of the following values:
 ///
 /// - `"deny"`: emit an error when an unknown struct field is found.
@@ -58,7 +58,7 @@ use syn::{DeriveInput, parse_macro_input};
 /// it automatically picks up on Serde's
 /// [`deny_unknown_fields` attribute](https://serde.rs/container-attrs.html#from).
 /// `serde(deny_unknown_fields)` is mapped to `unknown_fields = "error"`.
-/// `deserializable(unknown_fields = _)` takes precdence over `serde(deny_unknown_fields = _)`.
+/// `deserializable(unknown_fields = _)` takes precedence over `serde(deny_unknown_fields = _)`.
 ///
 /// ```no_test
 /// #[derive(Default, Deserializable)]
@@ -121,7 +121,7 @@ use syn::{DeriveInput, parse_macro_input};
 /// For structs and enums that also implement Serde's [serde::Deserialize],
 /// it automatically picks up on Serde's
 /// [`from` attribute](https://serde.rs/container-attrs.html#from).
-/// `deserializable(from = _)` takes precdence over `serde(from = _)`.
+/// `deserializable(from = _)` takes precedence over `serde(from = _)`.
 ///
 /// ```no_test
 /// #[derive(Default, Deserializable)]
@@ -154,7 +154,7 @@ use syn::{DeriveInput, parse_macro_input};
 /// For structs and enums that also implement Serde's [serde::Deserialize],
 /// it automatically picks up on Serde's
 /// [`try_from` attribute](https://serde.rs/container-attrs.html#try_from).
-/// `deserializable(try_from = _)` takes precdence over `serde(try_from = _)`.
+/// `deserializable(try_from = _)` takes precedence over `serde(try_from = _)`.
 ///
 /// ```no_test
 /// #[derive(Default, Deserializable)]
@@ -241,7 +241,7 @@ use syn::{DeriveInput, parse_macro_input};
 /// For structs that also implement Serde's `Serialize` or `Deserialize`,
 /// it automatically picks up on Serde's
 /// [`rename` attribute](https://serde.rs/field-attrs.html#rename).
-/// `deserializable(rename = _)` takes precdence over `serde(rename = _)`.
+/// `deserializable(rename = _)` takes precedence over `serde(rename = _)`.
 ///
 /// ```no_test
 /// #[derive(Default, Deserialize, Deserializable, Serialize)]

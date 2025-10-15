@@ -22,9 +22,9 @@ use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, SupportsFeatureParams,
 };
-use biome_service::workspace::{FileFeaturesResult, ServiceDataNotification};
+use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_service::workspace::{ScanKind, ScanProjectFolderParams};
+use biome_service::workspace::{ScanKind, ScanProjectParams};
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use futures::StreamExt;
@@ -40,6 +40,7 @@ use std::sync::atomic::{AtomicBool, AtomicU8};
 use tokio::spawn;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
+use tokio::sync::RwLock as TokioRwLock;
 use tokio::sync::watch;
 use tokio::task::spawn_blocking;
 use tower_lsp_server::lsp_types::{ClientCapabilities, Diagnostic, Uri};
@@ -71,6 +72,9 @@ pub(crate) struct Session {
     /// The parameters provided by the client in the "initialize" request
     initialize_params: OnceCell<InitializeParams>,
 
+    /// Tracks workspace folders. They can change during the lifecycle of the server
+    workspace_folders: RwLock<Option<Vec<WorkspaceFolder>>>,
+
     /// The settings of the Biome extension (under the `biome` namespace)
     pub(crate) extension_settings: RwLock<ExtensionSettings>,
 
@@ -91,11 +95,15 @@ pub(crate) struct Session {
 
     pub(crate) cancellation: Arc<Notify>,
 
-    /// Receiver for service data notifications.
+    /// Receiver for service notifications.
     ///
     /// If we receive a notification here, diagnostics for open documents are
     /// all refreshed.
-    service_data_rx: watch::Receiver<ServiceDataNotification>,
+    service_rx: watch::Receiver<ServiceNotification>,
+
+    /// Lock used to synchronize multiple atomic operations to load the configuration file
+    loading_operations:
+        TokioRwLock<FxHashMap<Utf8PathBuf, tokio::sync::broadcast::Sender<ConfigurationStatus>>>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -104,7 +112,6 @@ struct InitializeParams {
     client_capabilities: ClientCapabilities,
     client_information: Option<ClientInformation>,
     root_uri: Option<Uri>,
-    workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -192,7 +199,7 @@ impl Session {
         client: Client,
         workspace: Arc<dyn Workspace>,
         cancellation: Arc<Notify>,
-        service_data_rx: watch::Receiver<ServiceDataNotification>,
+        service_rx: watch::Receiver<ServiceNotification>,
     ) -> Self {
         let config = RwLock::new(ExtensionSettings::new());
         Self {
@@ -206,7 +213,9 @@ impl Session {
             extension_settings: config,
             cancellation,
             notified_broken_configuration: AtomicBool::new(false),
-            service_data_rx,
+            service_rx,
+            loading_operations: Default::default(),
+            workspace_folders: Default::default(),
         }
     }
 
@@ -223,8 +232,12 @@ impl Session {
             client_capabilities,
             client_information,
             root_uri,
-            workspace_folders,
         });
+
+        {
+            let mut this_workspace_folders = self.workspace_folders.write().unwrap();
+            *this_workspace_folders = workspace_folders;
+        }
 
         if let Err(err) = result {
             error!("Failed to initialize session: {err}");
@@ -232,16 +245,16 @@ impl Session {
 
         let session = self.clone();
         spawn(async move {
-            let mut service_data_rx = session.service_data_rx.clone();
+            let mut service_data_rx = session.service_rx.clone();
             while let Ok(()) = service_data_rx.changed().await {
-                match *session.service_data_rx.borrow() {
-                    ServiceDataNotification::Updated => {
+                match *session.service_rx.borrow() {
+                    ServiceNotification::IndexUpdated => {
                         let session = session.clone();
                         spawn(async move {
                             session.update_all_diagnostics().await;
                         });
                     }
-                    ServiceDataNotification::Stop => {
+                    ServiceNotification::WatcherStopped => {
                         break;
                     }
                 }
@@ -316,19 +329,15 @@ impl Session {
         project_key: ProjectKey,
         path: BiomePath,
         scan_kind: ScanKind,
+        force: bool,
     ) {
         self.projects.pin().insert(path.clone(), project_key);
 
         // Spawn the scan in the background, to avoid timing out the LSP request.
         let session = self.clone();
-        let project_path = path.clone();
-        spawn(async move {
-            session
-                .scan_project_folder(project_key, project_path, scan_kind)
-                .await
-        })
-        .await
-        .expect("Scanning task to complete successfully");
+        spawn(async move { session.scan_project(project_key, scan_kind, force).await })
+            .await
+            .expect("Scanning task to complete successfully");
     }
 
     /// Get a [`Document`] matching the provided [`Uri`]
@@ -470,7 +479,7 @@ impl Session {
                 .collect()
         };
 
-        tracing::Span::current().record("diagnostic_count", diagnostics.len());
+        info!("Diagnostics sent to the client {}", diagnostics.len());
 
         self.client
             .publish_diagnostics(url, diagnostics, Some(doc.version))
@@ -582,10 +591,13 @@ impl Session {
     }
 
     /// Get the current workspace folders
-    pub(crate) fn get_workspace_folders(&self) -> Option<&Vec<WorkspaceFolder>> {
-        self.initialize_params
-            .get()
-            .and_then(|c| c.workspace_folders.as_ref())
+    pub(crate) fn get_workspace_folders(&self) -> Option<Vec<WorkspaceFolder>> {
+        self.workspace_folders.read().unwrap().clone()
+    }
+
+    pub(crate) fn update_workspace_folders(&self, folders: Vec<WorkspaceFolder>) {
+        let mut workspace_folders = self.workspace_folders.write().unwrap();
+        *workspace_folders = Some(folders);
     }
 
     /// Returns the base path of the workspace on the filesystem if it has one
@@ -614,7 +626,7 @@ impl Session {
     /// This function attempts to read the `biome.json` configuration file from
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
-    pub(crate) async fn load_workspace_settings(self: &Arc<Self>) {
+    pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
         if let Some(config_path) = self
             .extension_settings
             .read()
@@ -625,7 +637,7 @@ impl Session {
             self.set_configuration_status(ConfigurationStatus::Loading);
 
             let status = self
-                .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path))
+                .load_biome_configuration_file(ConfigurationPathHint::FromUser(config_path), reload)
                 .await;
             debug!("Configuration status: {:?}", status);
             self.set_configuration_status(status);
@@ -640,9 +652,10 @@ impl Session {
                 match base_path {
                     Some(base_path) => {
                         let status = self
-                            .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(
-                                base_path,
-                            ))
+                            .load_biome_configuration_file(
+                                ConfigurationPathHint::FromWorkspace(base_path),
+                                reload,
+                            )
                             .await;
                         debug!("Configuration status: {:?}", status);
                         self.set_configuration_status(status);
@@ -660,31 +673,28 @@ impl Session {
                 None => ConfigurationPathHint::default(),
                 Some(path) => ConfigurationPathHint::FromLsp(path),
             };
-            let status = self.load_biome_configuration_file(base_path).await;
+            let status = self.load_biome_configuration_file(base_path, reload).await;
             self.set_configuration_status(status);
         }
     }
 
     #[instrument(level = "debug", skip(self))]
-    pub(crate) async fn scan_project_folder(
+    pub(crate) async fn scan_project(
         self: &Arc<Self>,
         project_key: ProjectKey,
-        project_path: BiomePath,
         scan_kind: ScanKind,
+        force: bool,
     ) {
         let session = self.clone();
 
         spawn_blocking(move || {
-            let result = session
-                .workspace
-                .scan_project_folder(ScanProjectFolderParams {
-                    project_key,
-                    path: Some(project_path),
-                    watch: true,
-                    force: false,
-                    scan_kind,
-                    verbose: false,
-                });
+            let result = session.workspace.scan_project(ScanProjectParams {
+                project_key,
+                watch: true,
+                force,
+                scan_kind,
+                verbose: false,
+            });
 
             match result {
                 Ok(result) => {
@@ -717,6 +727,72 @@ impl Session {
     pub(super) async fn load_biome_configuration_file(
         self: &Arc<Self>,
         base_path: ConfigurationPathHint,
+        reload: bool,
+    ) -> ConfigurationStatus {
+        let current_status = self.configuration_status();
+        if current_status.is_loaded() && !reload {
+            return current_status;
+        }
+        // Check if there's already an ongoing operation for this path
+        let path_to_index = base_path.to_path_buf().unwrap_or_default();
+        {
+            let operations = self.loading_operations.read().await;
+
+            if let Some(sender) = operations.get(&path_to_index).cloned() {
+                drop(operations); // Release read lock
+
+                // Wait for the ongoing operation to complete
+                let mut receiver = sender.subscribe();
+                match receiver.recv().await {
+                    Ok(status) => {
+                        debug!(
+                            "Reused configuration loading result for path: {:?}",
+                            base_path
+                        );
+                        return status;
+                    }
+                    Err(_) => {
+                        // The sender was dropped or no more messages, continue to load
+                        debug!(
+                            "Configuration loading broadcast ended for path: {:?}",
+                            base_path
+                        );
+                    }
+                }
+            }
+        }
+
+        // Create a broadcast channel for this operation
+        let (tx, _rx) = tokio::sync::broadcast::channel(1);
+
+        // Store the receiver for other tasks to subscribe to
+        {
+            let mut operations = self.loading_operations.write().await;
+            operations.insert(path_to_index.clone(), tx.clone());
+        }
+
+        // Perform the actual loading
+        let status = self
+            .load_biome_configuration_file_internal(base_path.clone(), reload)
+            .await;
+
+        // Broadcast the result to any waiting tasks
+        let _ = tx.send(status);
+
+        // Clean up the operation
+        {
+            let mut operations = self.loading_operations.write().await;
+            operations.remove(&path_to_index);
+        }
+
+        status
+    }
+
+    #[tracing::instrument(level = "debug", skip(self))]
+    pub(super) async fn load_biome_configuration_file_internal(
+        self: &Arc<Self>,
+        base_path: ConfigurationPathHint,
+        force: bool,
     ) -> ConfigurationStatus {
         let loaded_configuration = match load_configuration(self.workspace.fs(), base_path.clone())
         {
@@ -789,16 +865,23 @@ impl Session {
                 .or_else(|| fs.working_directory())
                 .unwrap_or_default(),
         };
-        let register_result = self.workspace.open_project(OpenProjectParams {
-            path: path.as_path().into(),
-            open_uninitialized: true,
-        });
-        let OpenProjectResult { project_key } = match register_result {
-            Ok(result) => result,
-            Err(error) => {
-                error!("Failed to register the project folder: {error}");
-                self.client.log_message(MessageType::ERROR, &error).await;
-                return ConfigurationStatus::Error;
+
+        let project_key = match self.project_for_path(&path) {
+            Some(project_key) => project_key,
+            None => {
+                let register_result = self.workspace.open_project(OpenProjectParams {
+                    path: path.as_path().into(),
+                    open_uninitialized: true,
+                });
+                let OpenProjectResult { project_key } = match register_result {
+                    Ok(result) => result,
+                    Err(error) => {
+                        error!("Failed to register the project folder: {error}");
+                        self.client.log_message(MessageType::ERROR, &error).await;
+                        return ConfigurationStatus::Error;
+                    }
+                };
+                project_key
             }
         };
 
@@ -818,7 +901,7 @@ impl Session {
             configuration,
         });
 
-        self.insert_and_scan_project(project_key, path.into(), scan_kind)
+        self.insert_and_scan_project(project_key, path.into(), scan_kind, force)
             .await;
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {

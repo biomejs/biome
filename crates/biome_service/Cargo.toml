@@ -21,6 +21,7 @@ biome_console           = { workspace = true }
 biome_css_analyze       = { workspace = true }
 biome_css_formatter     = { workspace = true }
 biome_css_parser        = { workspace = true }
+biome_css_semantic      = { workspace = true }
 biome_css_syntax        = { workspace = true }
 biome_deserialize       = { workspace = true }
 biome_diagnostics       = { workspace = true, features = ["camino"] }
@@ -49,7 +50,7 @@ biome_json_analyze      = { workspace = true }
 biome_json_formatter    = { workspace = true, features = ["serde"] }
 biome_json_parser       = { workspace = true }
 biome_json_syntax       = { workspace = true }
-biome_module_graph      = { workspace = true }
+biome_module_graph      = { workspace = true, features = ["serde"] }
 biome_package           = { workspace = true }
 biome_parser            = { workspace = true }
 biome_plugin_loader     = { workspace = true }
@@ -63,7 +64,7 @@ crossbeam               = { workspace = true }
 enumflags2              = { workspace = true, features = ["serde"] }
 getrandom               = { workspace = true, features = ["js"] }
 ignore                  = { workspace = true }
-notify                  = { version = "8.1.0", features = ["crossbeam-channel"] }
+notify                  = { version = "8.2.0", features = ["crossbeam-channel"] }
 papaya                  = { workspace = true }
 rayon                   = { workspace = true }
 regex                   = { workspace = true }
@@ -74,11 +75,13 @@ serde_json              = { workspace = true, features = ["raw_value"] }
 smallvec                = { workspace = true, features = ["serde"] }
 tokio                   = { workspace = true, features = ["sync"] }
 tracing                 = { workspace = true, features = ["attributes", "log"] }
+web-time                = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }
 
 [features]
+js_plugin = ["biome_plugin_loader/js_plugin"]
 schema = [
   "dep:schemars",
   "biome_configuration/schema",
@@ -95,6 +98,7 @@ schema = [
   "biome_html_syntax/schema",
   "biome_html_formatter/schema",
   "biome_fs/schema",
+  "biome_module_graph/schema",
 ]
 
 [lints]

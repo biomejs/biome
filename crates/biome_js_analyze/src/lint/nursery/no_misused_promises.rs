@@ -28,34 +28,34 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=promise-in-condition.js
     /// const promise = Promise.resolve('value');
     /// if (promise) { /* This branch will always execute */ }
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=promise-in-ternary-condition.js
     /// const promise = Promise.resolve('value');
     /// const val = promise ? 123 : 456; // Always evaluates to `123`.
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=promise-in-filter.js
     /// // The following filter has no effect:
     /// const promise = Promise.resolve('value');
     /// [1, 2, 3].filter(() => promise);
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=promise-while-condition.js
     /// const promise = Promise.resolve('value');
     /// while (promise) { /* This is an endless loop */ }
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=spread-promise.js
     /// // Using a `Promise` as an iterable expands to nothing:
     /// const getData = () => fetch('/');
     /// console.log({ foo: 42, ...getData() });
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic,file=promise-in-forEach.js
     /// // These `fetch`-es are not `await`-ed in order:
     /// [1, 2, 3].forEach(async value => {
     ///     await fetch(`/${value}`);
@@ -64,7 +64,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```js,file=valid-promises.js
     /// const promise = Promise.resolve('value');
     /// if (await promise) { /* Do something */ }
     ///

@@ -50,17 +50,14 @@ function withThisParam(this, a, b, c, d, e, f, g) {
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:23 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 8 parameters, but only 4 are allowed.
   
   > 1 │ function tooManyParams(a, b, c, d, e, f, g, h) {
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 2 │     return a + b + c + d + e + f + g + h;
-  > 3 │ }
-      │ ^
-    4 │ 
-    5 │ function namedFunction(a, b, c, d, e, f, g, h, i) {
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │     return a + b + c + d + e + f + g + h;
+    3 │ }
   
   i Functions with many parameters are hard to read and maintain.
   
@@ -70,19 +67,16 @@ invalid.js:1:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:5:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:23 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 9 parameters, but only 4 are allowed.
   
     3 │ }
     4 │ 
   > 5 │ function namedFunction(a, b, c, d, e, f, g, h, i) {
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 6 │     return a + b + c + d + e + f + g + h + i;
-  > 7 │ }
-      │ ^
-    8 │ 
-    9 │ const fn1 = function(a, b, c, d, e, f, g, h) {
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     return a + b + c + d + e + f + g + h + i;
+    7 │ }
   
   i Functions with many parameters are hard to read and maintain.
   
@@ -92,19 +86,16 @@ invalid.js:5:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:9:13 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:21 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 8 parameters, but only 4 are allowed.
   
      7 │ }
      8 │ 
    > 9 │ const fn1 = function(a, b, c, d, e, f, g, h) {
-       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 10 │     return a + b + c + d + e + f + g + h;
-  > 11 │ };
-       │ ^
-    12 │ 
-    13 │ const fn2 = function namedFnExpression(a, b, c, d, e, f, g, h, i) {
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     return a + b + c + d + e + f + g + h;
+    11 │ };
   
   i Functions with many parameters are hard to read and maintain.
   
@@ -114,19 +105,16 @@ invalid.js:9:13 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:13:13 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:39 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 9 parameters, but only 4 are allowed.
   
     11 │ };
     12 │ 
   > 13 │ const fn2 = function namedFnExpression(a, b, c, d, e, f, g, h, i) {
-       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 14 │     return a + b + c + d + e + f + g + h + i;
-  > 15 │ };
-       │ ^
-    16 │ 
-    17 │ const arrow1 = (a, b, c, d, e, f, g, h) => {
+       │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │     return a + b + c + d + e + f + g + h + i;
+    15 │ };
   
   i Functions with many parameters are hard to read and maintain.
   
@@ -143,12 +131,9 @@ invalid.js:17:16 lint/nursery/useMaxParams ━━━━━━━━━━━━�
     15 │ };
     16 │ 
   > 17 │ const arrow1 = (a, b, c, d, e, f, g, h) => {
-       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 18 │     return a + b + c + d + e + f + g + h;
-  > 19 │ };
-       │ ^
-    20 │ 
-    21 │ const arrow2 = (a, b, c, d, e, f, g, h, i) => a + b + c + d + e + f + g + h + i;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │     return a + b + c + d + e + f + g + h;
+    19 │ };
   
   i Functions with many parameters are hard to read and maintain.
   
@@ -165,7 +150,7 @@ invalid.js:21:16 lint/nursery/useMaxParams ━━━━━━━━━━━━�
     19 │ };
     20 │ 
   > 21 │ const arrow2 = (a, b, c, d, e, f, g, h, i) => a + b + c + d + e + f + g + h + i;
-       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │ 
     23 │ class MyClass {
   
@@ -177,18 +162,15 @@ invalid.js:21:16 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:24:5 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:11 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 8 parameters, but only 4 are allowed.
   
     23 │ class MyClass {
   > 24 │     method(a, b, c, d, e, f, g, h) {
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 25 │         return a + b + c + d + e + f + g + h;
-  > 26 │     }
-       │     ^
-    27 │ 
-    28 │     constructor(a, b, c, d, e, f, g, h, i) {
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │         return a + b + c + d + e + f + g + h;
+    26 │     }
   
   i Functions with many parameters are hard to read and maintain.
   
@@ -198,19 +180,16 @@ invalid.js:24:5 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:28:5 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:16 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 9 parameters, but only 4 are allowed.
   
     26 │     }
     27 │ 
   > 28 │     constructor(a, b, c, d, e, f, g, h, i) {
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 29 │         this.sum = a + b + c + d + e + f + g + h + i;
-  > 30 │     }
-       │     ^
-    31 │ }
-    32 │ 
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │         this.sum = a + b + c + d + e + f + g + h + i;
+    30 │     }
   
   i Functions with many parameters are hard to read and maintain.
   
@@ -220,18 +199,15 @@ invalid.js:28:5 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:34:5 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:11 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 8 parameters, but only 4 are allowed.
   
     33 │ const obj = {
   > 34 │     method(a, b, c, d, e, f, g, h) {
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 35 │         return a + b + c + d + e + f + g + h;
-  > 36 │     }
-       │     ^
-    37 │ };
-    38 │ 
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │         return a + b + c + d + e + f + g + h;
+    36 │     }
   
   i Functions with many parameters are hard to read and maintain.
   
@@ -241,18 +217,16 @@ invalid.js:34:5 lint/nursery/useMaxParams ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:39:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:39:23 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 8 parameters, but only 4 are allowed.
   
     37 │ };
     38 │ 
   > 39 │ function withThisParam(this, a, b, c, d, e, f, g) {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 40 │     return a + b + c + d + e + f + g;
-  > 41 │ }
-       │ ^
-    42 │ 
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │     return a + b + c + d + e + f + g;
+    41 │ }
   
   i Functions with many parameters are hard to read and maintain.
   

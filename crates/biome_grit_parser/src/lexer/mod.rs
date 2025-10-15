@@ -798,7 +798,7 @@ impl<'src> GritLexer<'src> {
                     _ => {
                         self.diagnostics.push(
                             ParseDiagnostic::new(
-                                "Unxpected string prefix",
+                                "Unexpected string prefix",
                                 name_start..self.text_position(),
                             )
                             .with_hint("Use a language annotation to create a language-specific snippet or use the `r` prefix to create a regex literal.")
@@ -821,7 +821,7 @@ impl<'src> GritLexer<'src> {
                     _ => {
                         self.diagnostics.push(
                             ParseDiagnostic::new(
-                                "Unxpected snippet prefix",
+                                "Unexpected snippet prefix",
                                 name_start..self.text_position(),
                             )
                             .with_hint("Supported snippet prefixes are `r` and `raw`."),

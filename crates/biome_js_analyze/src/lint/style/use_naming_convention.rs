@@ -286,6 +286,14 @@ declare_lint_rule! {
     ///   }
     ///   ```
     ///
+    /// - Declarations inside a global declaration
+    ///
+    ///   ```ts
+    ///   declare global {
+    ///     interface HTMLElement {}
+    ///   }
+    ///   ```
+    ///
     /// ## Options
     ///
     /// The rule provides several options that are detailed in the following subsections.
@@ -755,14 +763,13 @@ impl Rule for UseNamingConvention {
                 return None;
             }
         }
-        if name.starts_with('_') {
-            if let Ok(binding) = &node.try_into() {
-                if is_unused(ctx.model(), binding) {
-                    // Always ignore unused variables prefixed with `_`.
-                    // This notably avoids a conflict with the `noUnusedVariables` lint rule.
-                    return None;
-                }
-            }
+        if name.starts_with('_')
+            && let Ok(binding) = &node.try_into()
+            && is_unused(ctx.model(), binding)
+        {
+            // Always ignore unused variables prefixed with `_`.
+            // This notably avoids a conflict with the `noUnusedVariables` lint rule.
+            return None;
         }
         if options.require_ascii && !name.is_ascii() {
             return Some(State {
@@ -931,20 +938,19 @@ impl Rule for UseNamingConvention {
             .source_type::<JsFileSource>()
             .language()
             .is_definition_file();
-        if is_declaration_file {
-            if let Some(items) = node
+        if is_declaration_file
+            && let Some(items) = node
                 .syntax()
                 .ancestors()
                 .skip(1)
                 .find_map(JsModuleItemList::cast)
-            {
-                // A declaration file without exports and imports is a global declaration file.
-                // All types are available in every files of the project.
-                // Thus, it is ok if types are not used locally.
-                let is_top_level = items.parent::<TsDeclarationModule>().is_some();
-                if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
-                    return None;
-                }
+        {
+            // A declaration file without exports and imports is a global declaration file.
+            // All types are available in every files of the project.
+            // Thus, it is ok if types are not used locally.
+            let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+            if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                return None;
             }
         }
         let model = ctx.model();
@@ -1197,7 +1203,6 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
             | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_) => {
-
                 selector_from_parent_binding_pattern_declaration(&decl.parent_binding_pattern_declaration()?)
             }
             AnyJsBindingDeclaration::JsVariableDeclarator(var) => {
@@ -1208,7 +1213,18 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             | AnyJsBindingDeclaration::JsFormalParameter(_)
             | AnyJsBindingDeclaration::JsRestParameter(_) => Some(Kind::FunctionParameter.into()),
             AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(Kind::CatchParameter.into()),
-            AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Kind::ClassProperty.into()),
+            AnyJsBindingDeclaration::TsPropertyParameter(param) => {
+                let modifiers: BitFlags<Modifier> = (&param.modifiers()).into();
+                if modifiers.contains(Modifier::Override) {
+                    // Ignore explicitly overridden members
+                    None
+                } else {
+                    Some(Selector::with_modifiers(
+                        Kind::ClassProperty,
+                        to_restricted_modifiers(modifiers),
+                    ))
+                }
+            },
             AnyJsBindingDeclaration::TsIndexSignatureParameter(member_name) => {
                 if let Some(member) = member_name.parent::<>() {
                     selector_from_class_member(&member)
@@ -1231,9 +1247,12 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             }
             AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
             | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportAlias, Scope::Global)),
-            AnyJsBindingDeclaration::TsModuleDeclaration(_) => Some(Selector::with_scope(Kind::Namespace, Scope::Global)),
-            AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) => Some(Selector::with_scope(Kind::TypeAlias, scope_from_declaration(decl)?)),
+            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) =>
+                Some(Selector::with_scope(Kind::ImportAlias, Scope::Global)),
+            AnyJsBindingDeclaration::TsModuleDeclaration(_) =>
+                Some(Selector::with_scope(Kind::Namespace, Scope::Global)),
+            AnyJsBindingDeclaration::TsTypeAliasDeclaration(_) =>
+                Some(Selector::with_scope(Kind::TypeAlias, scope_from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsClassDeclaration(class) => {
                 Some(Selector {
                     kind: Kind::Class,
@@ -1259,8 +1278,10 @@ fn selector_from_binding_declaration(decl: &AnyJsBindingDeclaration) -> Option<S
             AnyJsBindingDeclaration::JsClassExpression(_) => {
                 Some(Selector::with_scope(Kind::Class, scope_from_declaration(decl)?))
             }
-            AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => Some(Selector::with_scope(Kind::Interface, scope_from_declaration(decl)?)),
-            AnyJsBindingDeclaration::TsEnumDeclaration(_) => Some(Selector::with_scope(Kind::Enum, scope_from_declaration(decl)?)),
+            AnyJsBindingDeclaration::TsInterfaceDeclaration(_) =>
+                Some(Selector::with_scope(Kind::Interface, scope_from_declaration(decl)?)),
+            AnyJsBindingDeclaration::TsEnumDeclaration(_) =>
+                Some(Selector::with_scope(Kind::Enum, scope_from_declaration(decl)?)),
             AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
@@ -1303,7 +1324,9 @@ fn selector_from_variable_declarator(var: &JsVariableDeclarator, scope: Scope) -
 
 fn selector_from_object_member(member: &AnyJsObjectMember) -> Option<Selector> {
     match member {
-        AnyJsObjectMember::JsBogusMember(_) | AnyJsObjectMember::JsSpread(_) => None,
+        AnyJsObjectMember::JsBogusMember(_)
+        | AnyJsObjectMember::JsSpread(_)
+        | AnyJsObjectMember::JsMetavariable(_) => None,
         AnyJsObjectMember::JsGetterObjectMember(_) => Some(Kind::ObjectLiteralGetter.into()),
         AnyJsObjectMember::JsMethodObjectMember(_) => Some(Kind::ObjectLiteralMethod.into()),
         AnyJsObjectMember::JsPropertyObjectMember(_)
@@ -1443,14 +1466,15 @@ fn scope_from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
         AnyJsControlFlowRoot::can_cast(x.kind())
             || x.kind() == JsSyntaxKind::TS_DECLARATION_MODULE
             || x.kind() == JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION
+            || x.kind() == JsSyntaxKind::TS_GLOBAL_DECLARATION
     })?;
     match control_flow_root.kind() {
         JsSyntaxKind::JS_MODULE
         | JsSyntaxKind::JS_SCRIPT
         | JsSyntaxKind::TS_DECLARATION_MODULE
         | JsSyntaxKind::TS_MODULE_DECLARATION => Some(Scope::Global),
-        // Ignore declarations in an external module declaration
-        JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION => None,
+        // Ignore declarations in external module declaration and global declarations.
+        JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION | JsSyntaxKind::TS_GLOBAL_DECLARATION => None,
         _ => Some(Scope::Any),
     }
 }

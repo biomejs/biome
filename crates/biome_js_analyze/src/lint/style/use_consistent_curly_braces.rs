@@ -339,17 +339,8 @@ fn handle_attr_init_clause(
     match node {
         AnyJsxAttributeValue::AnyJsxTag(_) => Some(CurlyBraceResolution::AddBraces),
         AnyJsxAttributeValue::JsxExpressionAttributeValue(node) => {
-            if has_curly_braces && contains_single_space(&node) {
-                None
-            } else if has_curly_braces && contains_string_literal(&node) {
-                let expression = node.expression().ok()?;
-                let literal = expression
-                    .as_any_js_literal_expression()?
-                    .as_js_string_literal_expression()?;
-                if !contains_forbidden_chars(literal) {
-                    return Some(CurlyBraceResolution::RemoveBraces);
-                }
-                None
+            if has_curly_braces && contains_string_literal(&node) {
+                Some(CurlyBraceResolution::RemoveBraces)
             } else if !has_curly_braces && contains_jsx_tag(&node) {
                 Some(CurlyBraceResolution::AddBraces)
             } else {
@@ -368,11 +359,7 @@ fn handle_jsx_child(child: &AnyJsxChild, has_curly_braces: bool) -> Option<Curly
             )) = child.expression().as_ref()
             {
                 // Don't suggest removing braces for single space or if forbidden chars found
-                if literal
-                    .inner_string_text()
-                    .is_ok_and(|text| text.text() == " ")
-                    || contains_forbidden_chars(literal)
-                {
+                if contains_only_spaces(literal) || contains_forbidden_chars(literal) {
                     return None;
                 }
 
@@ -417,15 +404,10 @@ fn contains_jsx_tag(node: &JsxExpressionAttributeValue) -> bool {
         .is_ok_and(|expr| matches!(expr, AnyJsExpression::JsxTagExpression(_)))
 }
 
-fn contains_single_space(node: &JsxExpressionAttributeValue) -> bool {
-    node.expression().is_ok_and(|expr| {
-        matches!(
-            expr,
-            AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsStringLiteralExpression(literal)
-            ) if literal.inner_string_text().is_ok_and(|text| text.text() == " ")
-        )
-    })
+fn contains_only_spaces(literal: &JsStringLiteralExpression) -> bool {
+    literal
+        .inner_string_text()
+        .is_ok_and(|text| text.bytes().all(|b| b == b' '))
 }
 
 const FORBIDDEN_CHARS: [char; 4] = ['>', '"', '\'', '}'];

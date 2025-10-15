@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoNextAsyncClientComponent {
-        version: "next",
+        version: "2.2.0",
         name: "noNextAsyncClientComponent",
         language: "js",
         sources: &[RuleSource::EslintNext("no-async-client-component").same()],

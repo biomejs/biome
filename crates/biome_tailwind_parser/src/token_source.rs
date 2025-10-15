@@ -26,6 +26,8 @@ pub(crate) enum TailwindLexContext {
     Arbitrary,
     /// Like Arbitrary, but specifically for arbitrary variants.
     ArbitraryVariant,
+    /// Like Arbitrary, but specifically for arbitrary candidates.
+    ArbitraryCandidate,
 }
 
 impl LexContext for TailwindLexContext {

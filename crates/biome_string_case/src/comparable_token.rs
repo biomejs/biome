@@ -13,6 +13,14 @@ impl ComparableToken {
     pub const fn new(token: TokenText) -> Self {
         Self { token }
     }
+
+    pub fn ascii_nat_cmp(&self, other: &Self) -> Ordering {
+        self.token.text().ascii_nat_cmp(other.token.text())
+    }
+
+    pub fn lexicographic_cmp(&self, other: &Self) -> Ordering {
+        self.token.text().lexicographic_cmp(other.token.text())
+    }
 }
 impl From<TokenText> for ComparableToken {
     fn from(value: TokenText) -> Self {

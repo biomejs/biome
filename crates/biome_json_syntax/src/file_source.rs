@@ -266,12 +266,11 @@ impl JsonFileSource {
         if Self::is_well_known_json_allow_comments_file(file_name) {
             return Ok(Self::json_allow_comments(extension));
         }
-        if let Some(camino::Utf8Component::Normal(parent_dir)) = path.components().rev().nth(1) {
-            if Self::is_well_known_json_allow_comments_directory(parent_dir)
-                && file_name.ends_with(".json")
-            {
-                return Ok(Self::json_allow_comments(extension));
-            }
+        if let Some(camino::Utf8Component::Normal(parent_dir)) = path.components().rev().nth(1)
+            && Self::is_well_known_json_allow_comments_directory(parent_dir)
+            && file_name.ends_with(".json")
+        {
+            return Ok(Self::json_allow_comments(extension));
         }
         // edge case: check if this is the global vscode or zed configuration file
         // we do this check first because it doesn't require any allocations

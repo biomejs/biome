@@ -3,8 +3,7 @@ use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource};
 use biome_module_graph::ModuleGraph;
 use biome_project_layout::ProjectLayout;
-use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
-use std::time::Duration;
+use divan::Bencher;
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -21,75 +20,73 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[cfg(all(target_env = "musl", target_os = "linux", target_arch = "aarch64"))]
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
-fn bench_module_graph(criterion: &mut Criterion) {
-    let cases = [
-        (
-            "react/index.d.ts",
-            include_bytes!(
-                "../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"
-            ) as &[u8],
-        ),
-        (
-            "@next/font/google/index.d.ts",
-            include_bytes!("./next_font_google.d.ts") as &[u8],
-        ),
-        // FIXME: enable it once the perf reaches a decent number
-        // (
-        //     "RedisCommander.d.ts",
-        //     include_bytes!("./RedisCommander.d.ts") as &[u8],
-        // ),
-    ];
 
-    let mut group = criterion.benchmark_group("module_graph");
-    group.sample_size(10);
-    group.measurement_time(Duration::from_secs(60));
+fn main() {
+    // Run registered benchmarks.
+    divan::main();
+}
 
-    for (name, content) in cases {
-        group.bench_with_input(BenchmarkId::from_parameter(name), content, |b, content| {
+const INDEX_D_TS_CASES: &[(&str, &[u8])] = &[
+    (
+        "react/index.d.ts",
+        include_bytes!(
+            "../../biome_resolver/tests/fixtures/resolver_cases_5/node_modules/@types/react/index.d.ts"
+        ) as &[u8],
+    ),
+    (
+        "@next/font/google/index.d.ts",
+        include_bytes!("./next_font_google.d.ts") as &[u8],
+    ),
+    (
+        "RedisCommander.d.ts",
+        include_bytes!("./RedisCommander.d.ts") as &[u8],
+    ),
+    (
+        "astro_server.mjs",
+        include_bytes!("./astro_server.mjs") as &[u8],
+    ),
+];
+
+fn index_d_ts_cases() -> impl Iterator<Item = &'static str> {
+    INDEX_D_TS_CASES.iter().map(|(name, _content)| *name)
+}
+
+#[divan::bench(name = "index_d_ts", args = index_d_ts_cases())]
+fn bench_index_d_ts(bencher: Bencher, name: &str) {
+    bencher
+        .with_inputs(|| {
+            let content = INDEX_D_TS_CASES
+                .iter()
+                .find_map(|(case_name, content)| (*case_name == name).then_some(*content))
+                .expect("cannot find test case");
+
             let fs = MemoryFileSystem::default();
             fs.insert(name.into(), content);
 
-            let added_paths = [BiomePath::new(name)];
-            let added_paths = get_added_paths(&fs, &added_paths);
-
-            b.iter(|| {
-                let module_graph = ModuleGraph::default();
-                module_graph.update_graph_for_js_paths(
-                    &fs,
-                    &ProjectLayout::default(),
-                    &added_paths,
-                    &[],
-                );
-                criterion::black_box(())
-            })
+            let path = BiomePath::new(name);
+            let root = get_js_root(&fs, &path);
+            (fs, path, root)
+        })
+        .bench_local_values(|(fs, path, root)| {
+            let module_graph = ModuleGraph::default();
+            module_graph.update_graph_for_js_paths(
+                &fs,
+                &ProjectLayout::default(),
+                &[(&path, root)],
+                &[],
+            );
+            divan::black_box(&module_graph);
         });
-    }
-
-    group.finish();
 }
 
-criterion_group!(module_graph, bench_module_graph);
-criterion_main!(module_graph);
-
-fn get_added_paths<'a>(
-    fs: &dyn FileSystem,
-    paths: &'a [BiomePath],
-) -> Vec<(&'a BiomePath, AnyJsRoot)> {
-    paths
-        .iter()
-        .filter_map(|path| {
-            let root = fs.read_file_from_path(path).ok().and_then(|content| {
-                let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
-                let parsed =
-                    biome_js_parser::parse(&content, file_source, JsParserOptions::default());
-                let diagnostics = parsed.diagnostics();
-                assert!(
-                    diagnostics.is_empty(),
-                    "Unexpected diagnostics: {diagnostics:?}"
-                );
-                parsed.try_tree()
-            })?;
-            Some((path, root))
-        })
-        .collect()
+fn get_js_root(fs: &dyn FileSystem, path: &BiomePath) -> AnyJsRoot {
+    let content = fs.read_file_from_path(path).expect("cannot read file");
+    let file_source = JsFileSource::try_from(path.as_path()).unwrap_or_default();
+    let parsed = biome_js_parser::parse(&content, file_source, JsParserOptions::default());
+    let diagnostics = parsed.diagnostics();
+    assert!(
+        diagnostics.is_empty(),
+        "Unexpected diagnostics: {diagnostics:?}"
+    );
+    parsed.try_tree().expect("cannot convert tree")
 }

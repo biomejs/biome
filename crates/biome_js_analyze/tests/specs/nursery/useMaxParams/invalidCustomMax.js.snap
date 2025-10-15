@@ -12,16 +12,15 @@ function twoParams(a, b) {
 
 # Diagnostics
 ```
-invalidCustomMax.js:2:1 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCustomMax.js:2:19 lint/nursery/useMaxParams ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Function has 2 parameters, but only 1 are allowed.
   
     1 │ // should generate diagnostics - function exceeds max of 1
   > 2 │ function twoParams(a, b) {
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 3 │     return a + b;
-  > 4 │ }
-      │ ^
+      │                   ^^^^^^
+    3 │     return a + b;
+    4 │ }
   
   i Functions with many parameters are hard to read and maintain.
   

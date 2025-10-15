@@ -121,12 +121,12 @@ impl Rule for NoSvgWithoutTitle {
             return None;
         }
 
-        if let Some(aria_hidden_attr) = node.find_attribute_by_name("aria-hidden") {
-            if let Some(attr_static_val) = aria_hidden_attr.as_static_value() {
-                let attr_text = attr_static_val.text();
-                if attr_text == "true" {
-                    return None;
-                }
+        if let Some(aria_hidden_attr) = node.find_attribute_by_name("aria-hidden")
+            && let Some(attr_static_val) = aria_hidden_attr.as_static_value()
+        {
+            let attr_text = attr_static_val.text();
+            if attr_text == "true" {
+                return None;
             }
         }
 
@@ -188,7 +188,7 @@ impl Rule for NoSvgWithoutTitle {
     }
 }
 
-/// Checks if the given attribute is attached to the `svg` element and the attribute value is used by the `id` of the childs element.
+/// Checks if the given attribute is attached to the `svg` element and the attribute value is used by the `id` of the child element.
 fn is_valid_attribute_value(
     attribute: Option<JsxAttribute>,
     jsx_child_list: &JsxChildList,
