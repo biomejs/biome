@@ -14458,6 +14458,11 @@
 		"UseImportExtensionsOptions": {
 			"type": "object",
 			"properties": {
+				"extensionMappings": {
+					"description": "A map of file extensions to their suggested replacements. For example, `{\"ts\": \"js\"}` would suggest `.js` extensions for TypeScript imports.",
+					"type": ["object", "null"],
+					"additionalProperties": { "type": "string" }
+				},
 				"forceJsExtensions": {
 					"description": "If `true`, the suggested extension is always `.js` regardless of what extension the source file has in your project.",
 					"type": ["boolean", "null"]
