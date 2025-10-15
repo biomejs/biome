@@ -247,7 +247,6 @@ pub mod organize_imports;
 pub mod use_adjacent_overload_signatures;
 pub mod use_alt_text;
 pub mod use_anchor_content;
-pub mod use_anchor_href;
 pub mod use_aria_activedescendant_with_tabindex;
 pub mod use_aria_props_for_role;
 pub mod use_aria_props_supported_by_role;
