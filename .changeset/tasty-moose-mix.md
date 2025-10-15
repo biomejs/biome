@@ -4,9 +4,7 @@
 
 Added new nursery [`useExplicitTestAssertions`](https://biomejs.dev/linter/rules/use-explicit-test-assertions/) rule, inspired by [`expect-expect`](https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/expect-expect.md). Require all test cases to use `expect()` (Vitest/Jest) or `assert()` (node:assert).
 
-## Examples
-
-### Invalid
+**Invalid examples**
 
 ```js
 test("myLogic", () => {
@@ -18,7 +16,7 @@ test("myLogic", () => {
 test("myLogic", () => {});
 ```
 
-### Valid
+**Valid examples**
 
 ```js
 test("myLogic", () => {
