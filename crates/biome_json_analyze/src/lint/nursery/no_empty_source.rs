@@ -54,7 +54,7 @@ declare_lint_rule! {
     ///
     /// #### Valid
     ///
-    /// ```jsonc,expect_diagnostic,use_options
+    /// ```jsonc,ignore,use_options
     /// // Only comments
     /// ```
     ///
