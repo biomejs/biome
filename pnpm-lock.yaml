@@ -58,7 +58,7 @@ importers:
         version: 7.1.5(@types/node@22.17.1)(jiti@1.21.6)
       vitest:
         specifier: 3.2.4
-        version: 3.2.4(@types/node@22.17.1)(happy-dom@20.0.0)(jiti@1.21.6)
+        version: 3.2.4(@types/node@22.17.1)(happy-dom@20.0.2)(jiti@1.21.6)
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
         specifier: 2.2.6
@@ -147,7 +147,7 @@ importers:
         version: 7.1.5(@types/node@22.18.10)(jiti@1.21.6)
       vitest:
         specifier: 3.2.4
-        version: 3.2.4(@types/node@22.18.10)(happy-dom@20.0.0)(jiti@1.21.6)
+        version: 3.2.4(@types/node@22.18.10)(happy-dom@20.0.2)(jiti@1.21.6)
 
   packages/@biomejs/plugin-api:
     dependencies:
@@ -165,7 +165,7 @@ importers:
     dependencies:
       happy-dom:
         specifier: ^20.0.0
-        version: 20.0.0
+        version: 20.0.2
 
   packages/tailwindcss-config-analyzer:
     dependencies:
@@ -666,8 +666,8 @@ packages:
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
-  '@types/node@20.19.9':
-    resolution: {integrity: sha512-cuVNgarYWZqxRJDQHEB58GEONhOK79QVR/qYx4S7kcUObQvUwvFnYxJuuHUKm2aieN9X3yZB4LZsuYNU1Qphsw==}
+  '@types/node@20.19.21':
+    resolution: {integrity: sha512-CsGG2P3I5y48RPMfprQGfy4JPRZ6csfC3ltBZSRItG3ngggmNY/qs2uZKp4p9VbrpqNNSMzUZNFZKzgOGnd/VA==}
 
   '@types/node@22.17.1':
     resolution: {integrity: sha512-y3tBaz+rjspDTylNjAX37jEC3TETEFGNJL6uQDxwF9/8GLLIjW1rvVHlynyuUKMnMr1Roq8jOv3vkopBjC4/VA==}
@@ -1090,8 +1090,8 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  happy-dom@20.0.0:
-    resolution: {integrity: sha512-GkWnwIFxVGCf2raNrxImLo397RdGhLapj5cT3R2PT7FwL62Ze1DROhzmYW7+J3p9105DYMVenEejEbnq5wA37w==}
+  happy-dom@20.0.2:
+    resolution: {integrity: sha512-pYOyu624+6HDbY+qkjILpQGnpvZOusItCk+rvF5/V+6NkcgTKnbOldpIy22tBnxoaLtlM9nXgoqAcW29/B7CIw==}
     engines: {node: '>=20.0.0'}
 
   has-flag@3.0.0:
@@ -2126,7 +2126,7 @@ snapshots:
 
   '@types/node@12.20.55': {}
 
-  '@types/node@20.19.9':
+  '@types/node@20.19.21':
     dependencies:
       undici-types: 6.21.0
 
@@ -2629,9 +2629,9 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  happy-dom@20.0.0:
+  happy-dom@20.0.2:
     dependencies:
-      '@types/node': 20.19.9
+      '@types/node': 20.19.21
       '@types/whatwg-mimetype': 3.0.2
       whatwg-mimetype: 3.0.0
 
@@ -3107,7 +3107,7 @@ snapshots:
       fsevents: 2.3.3
       jiti: 1.21.6
 
-  vitest@3.2.4(@types/node@22.17.1)(happy-dom@20.0.0)(jiti@1.21.6):
+  vitest@3.2.4(@types/node@22.17.1)(happy-dom@20.0.2)(jiti@1.21.6):
     dependencies:
       '@types/chai': 5.2.2
       '@vitest/expect': 3.2.4
@@ -3134,7 +3134,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.17.1
-      happy-dom: 20.0.0
+      happy-dom: 20.0.2
     transitivePeerDependencies:
       - jiti
       - less
@@ -3149,7 +3149,7 @@ snapshots:
       - tsx
       - yaml
 
-  vitest@3.2.4(@types/node@22.18.10)(happy-dom@20.0.0)(jiti@1.21.6):
+  vitest@3.2.4(@types/node@22.18.10)(happy-dom@20.0.2)(jiti@1.21.6):
     dependencies:
       '@types/chai': 5.2.2
       '@vitest/expect': 3.2.4
@@ -3176,7 +3176,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.18.10
-      happy-dom: 20.0.0
+      happy-dom: 20.0.2
     transitivePeerDependencies:
       - jiti
       - less
