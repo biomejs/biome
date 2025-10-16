@@ -52,6 +52,29 @@ const NO_DEBUGGER_AFTER: &str = "debugger;\n";
 
 const UPGRADE_SEVERITY_CODE: &str = r#"if(!cond) { exprA(); } else { exprB() }"#;
 
+// Test code for diagnostic level with fix functionality
+const DIAGNOSTIC_LEVEL_TEST_BEFORE: &str = r#"let x: number | undefined = undefined;
+if (x == 1) {
+  console.log(x);
+}
+"#;
+
+const DIAGNOSTIC_LEVEL_TEST_CONFIG: &str = r#"{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "complexity": {
+        "noUselessUndefinedInitialization": "info"
+      },
+      "suspicious": {
+        "noDoubleEquals": "error"
+      }
+    }
+  }
+}
+"#;
+
 const NURSERY_UNSTABLE: &str = r#"if(a = b) {}"#;
 
 #[test]
@@ -4335,6 +4358,141 @@ fn should_not_choke_on_recursive_function_call() {
         module_path!(),
         "should_not_choke_on_recursive_function_call",
         fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_diagnostic_level_error_only_fixes_error_level() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("test.ts");
+    let config_path = Utf8Path::new("biome.json");
+
+    fs.insert(file_path.into(), DIAGNOSTIC_LEVEL_TEST_BEFORE.as_bytes());
+    fs.insert(config_path.into(), DIAGNOSTIC_LEVEL_TEST_CONFIG.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from([
+            "lint",
+            "--diagnostic-level=error",
+            "--fix",
+            "--unsafe",
+            file_path.as_str(),
+        ]
+        .as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    // Should only fix the error-level violation (noDoubleEquals), not the info-level one
+    // Verify that == was changed to === (error-level fix applied)
+    assert!(buffer.contains("x === 1"), "Error-level fix should be applied: == -> ===");
+    // Verify that undefined initialization was NOT removed (info-level fix not applied)
+    assert!(buffer.contains("= undefined"), "Info-level fix should NOT be applied: = undefined should remain");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_diagnostic_level_error_only_fixes_error_level",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_diagnostic_level_info_fixes_all_levels() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("test.ts");
+    let config_path = Utf8Path::new("biome.json");
+
+    fs.insert(file_path.into(), DIAGNOSTIC_LEVEL_TEST_BEFORE.as_bytes());
+    fs.insert(config_path.into(), DIAGNOSTIC_LEVEL_TEST_CONFIG.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from([
+            "lint",
+            "--diagnostic-level=info",
+            "--fix",
+            "--unsafe",
+            file_path.as_str(),
+        ]
+        .as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    // Should fix both info-level and error-level violations
+    // Verify that == was changed to === (error-level fix applied)
+    assert!(buffer.contains("x === 1"), "Error-level fix should be applied: == -> ===");
+    // Verify that undefined initialization was removed (info-level fix applied)
+    assert!(!buffer.contains("= undefined"), "Info-level fix should be applied: = undefined should be removed");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_diagnostic_level_info_fixes_all_levels",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_diagnostic_level_without_fix_respects_level() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("test.ts");
+    let config_path = Utf8Path::new("biome.json");
+
+    fs.insert(file_path.into(), DIAGNOSTIC_LEVEL_TEST_BEFORE.as_bytes());
+    fs.insert(config_path.into(), DIAGNOSTIC_LEVEL_TEST_CONFIG.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from([
+            "lint",
+            "--diagnostic-level=error",
+            file_path.as_str(),
+        ]
+        .as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    // File should remain unchanged
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+    assert_eq!(buffer, DIAGNOSTIC_LEVEL_TEST_BEFORE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_diagnostic_level_without_fix_respects_level",
+        fs,
         console,
         result,
     ));
