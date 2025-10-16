@@ -21,6 +21,11 @@ const __dirname = import.meta.dirname;
 // Capture groups: $1 = 'version\s*=\s*', $2 = version value
 const CARGO_VERSION_FIELD_REGEX = /^(version\s*=\s*)"([^"]+)"$/gm;
 
+// Matches a publish field in Cargo.toml to detect publish = true/false
+// Example matches: publish = true, publish              = false
+// Capture groups: $1 = full value (true or false)
+const CARGO_PUBLISH_FIELD_REGEX = /^publish\s*=\s*(true|false)$/gm;
+
 // Matches a workspace dependency line in root Cargo.toml for a specific crate.
 // This is dynamically constructed for each crate name.
 // Example: biome_analyze = { version = "0.5.7", path = "./crates/biome_analyze" }
@@ -34,62 +39,84 @@ const WORKSPACE_DEPENDENCY_REGEX_TEMPLATE = (crateName) =>
 // Does NOT accept: 2.0.0-rc.2, 1.0.0-beta.1
 const SEMVER_REGEX = /^\d+\.\d+\.\d+$/;
 
-// List of publishable crates (those that have a version in workspace dependencies)
-const PUBLISHABLE_CRATES = [
-	"biome_analyze",
-	"biome_aria",
-	"biome_aria_metadata",
-	"biome_console",
-	"biome_control_flow",
-	"biome_css_analyze",
-	"biome_css_factory",
-	"biome_css_formatter",
-	"biome_css_parser",
-	"biome_css_syntax",
-	"biome_deserialize",
-	"biome_deserialize_macros",
-	"biome_diagnostics",
-	"biome_diagnostics_categories",
-	"biome_diagnostics_macros",
-	"biome_formatter",
-	"biome_fs",
-	"biome_graphql_analyze",
-	"biome_graphql_factory",
-	"biome_graphql_formatter",
-	"biome_graphql_parser",
-	"biome_graphql_syntax",
-	"biome_grit_factory",
-	"biome_grit_parser",
-	"biome_grit_syntax",
-	"biome_html_factory",
-	"biome_html_parser",
-	"biome_html_syntax",
-	"biome_js_analyze",
-	"biome_js_factory",
-	"biome_js_formatter",
-	"biome_js_parser",
-	"biome_js_semantic",
-	"biome_js_syntax",
-	"biome_js_type_info",
-	"biome_js_type_info_macros",
-	"biome_jsdoc_comment",
-	"biome_json_analyze",
-	"biome_json_factory",
-	"biome_json_formatter",
-	"biome_json_parser",
-	"biome_json_syntax",
-	"biome_markup",
-	"biome_package",
-	"biome_parser",
-	"biome_project_layout",
-	"biome_rowan",
-	"biome_rule_options",
-	"biome_string_case",
-	"biome_suppression",
-	"biome_text_edit",
-	"biome_text_size",
-	"biome_unicode_table",
-];
+/**
+ * Get the publish status of a crate from its Cargo.toml
+ * @param {string} cargoTomlPath - Path to the Cargo.toml file
+ * @returns {{hasPublishField: boolean, isPublishable: boolean, crateName: string}}
+ */
+function getCratePublishStatus(cargoTomlPath) {
+	const content = fs.readFileSync(cargoTomlPath, "utf8");
+
+	// Extract crate name for error messages
+	const nameMatch = /^name\s*=\s*"([^"]+)"$/gm.exec(content);
+	const crateName = nameMatch ? nameMatch[1] : path.basename(path.dirname(cargoTomlPath));
+
+	// Check if publish field exists
+	CARGO_PUBLISH_FIELD_REGEX.lastIndex = 0;
+	const publishMatch = CARGO_PUBLISH_FIELD_REGEX.exec(content);
+
+	if (!publishMatch) {
+		return {
+			hasPublishField: false,
+			isPublishable: false,
+			crateName,
+		};
+	}
+
+	return {
+		hasPublishField: true,
+		isPublishable: publishMatch[1] === "true",
+		crateName,
+	};
+}
+
+/**
+ * Get all publishable crates by scanning the crates directory
+ * @returns {Array<{name: string, path: string}>}
+ */
+function getPublishableCrates() {
+	const cratesDir = path.join(__dirname, "..", "crates");
+	const publishableCrates = [];
+	const errors = [];
+
+	const crateDirs = fs.readdirSync(cratesDir, { withFileTypes: true })
+		.filter(dirent => dirent.isDirectory())
+		.map(dirent => dirent.name);
+
+	for (const crateName of crateDirs) {
+		const cargoTomlPath = path.join(cratesDir, crateName, "Cargo.toml");
+
+		if (!fs.existsSync(cargoTomlPath)) {
+			console.warn(`WARNING: No Cargo.toml found in crates/${crateName}`);
+			continue;
+		}
+
+		const status = getCratePublishStatus(cargoTomlPath);
+
+		if (!status.hasPublishField) {
+			errors.push(`crates/${crateName}/Cargo.toml`);
+			continue;
+		}
+
+		if (status.isPublishable) {
+			publishableCrates.push({
+				name: status.crateName,
+				path: cargoTomlPath,
+			});
+		}
+	}
+
+	if (errors.length > 0) {
+		console.error("\nError: The following crates are missing the 'publish' field:");
+		for (const errorPath of errors) {
+			console.error(`  - ${errorPath}`);
+		}
+		console.error("\nAll crates must have a 'publish = true' or 'publish = false' field.");
+		process.exit(1);
+	}
+
+	return publishableCrates;
+}
 
 /**
  * Update version in a Cargo.toml file preserving formatting
@@ -138,11 +165,12 @@ function updateCargoToml(filePath, newVersion, dryRun = false) {
 
 /**
  * Update workspace dependencies in root Cargo.toml
+ * @param {Array<{name: string, path: string}>} publishableCrates - List of publishable crates
  * @param {string} newVersion - New version string
  * @param {boolean} dryRun - If true, don't write changes
  * @returns {{success: boolean, changes: Array<{crate: string, oldVersion: string, newVersion: string}>}}
  */
-function updateWorkspaceDependencies(newVersion, dryRun = false) {
+function updateWorkspaceDependencies(publishableCrates, newVersion, dryRun = false) {
 	const rootCargoPath = path.join(__dirname, "..", "Cargo.toml");
 	const content = fs.readFileSync(rootCargoPath, "utf8");
 
@@ -150,16 +178,16 @@ function updateWorkspaceDependencies(newVersion, dryRun = false) {
 	let updatedContent = content;
 	const changes = [];
 
-	for (const crateName of PUBLISHABLE_CRATES) {
+	for (const crate of publishableCrates) {
 		const regex = new RegExp(
-			WORKSPACE_DEPENDENCY_REGEX_TEMPLATE(crateName),
+			WORKSPACE_DEPENDENCY_REGEX_TEMPLATE(crate.name),
 			"gm",
 		);
 
 		const match = regex.exec(updatedContent);
 		if (match) {
 			const oldVersion = match[2];
-			changes.push({ crate: crateName, oldVersion, newVersion });
+			changes.push({ crate: crate.name, oldVersion, newVersion });
 
 			// Reset regex for replacement
 			regex.lastIndex = 0;
@@ -242,26 +270,23 @@ function main() {
 		console.info(`Updating crate versions to ${newVersion}...\n`);
 	}
 
+	// Get all publishable crates by scanning crates directory
+	const publishableCrates = getPublishableCrates();
+
+	console.info(`Found ${publishableCrates.length} publishable crate(s)\n`);
+
 	// Update workspace dependencies
-	const workspaceResult = updateWorkspaceDependencies(newVersion, dryRun);
+	const workspaceResult = updateWorkspaceDependencies(publishableCrates, newVersion, dryRun);
 
 	// Update individual crate Cargo.toml files
 	let updatedCount = 0;
 
-	for (const crateName of PUBLISHABLE_CRATES) {
-		const cargoTomlPath = path.join(
-			__dirname,
-			"..",
-			"crates",
-			crateName,
-			"Cargo.toml",
-		);
-
-		const result = updateCargoToml(cargoTomlPath, newVersion, dryRun);
+	for (const crate of publishableCrates) {
+		const result = updateCargoToml(crate.path, newVersion, dryRun);
 		if (result.success) {
 			if (dryRun) {
 				console.info(
-					`${crateName}: ${result.oldVersion} -> ${result.newVersion}`,
+					`${crate.name}: ${result.oldVersion} -> ${result.newVersion}`,
 				);
 			}
 			updatedCount++;
