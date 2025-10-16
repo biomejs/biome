@@ -65,7 +65,7 @@ pub(crate) fn analyze_with_guard<'ctx>(
 
         let fix_result = workspace_file
             .guard()
-            .fix_file_with_diagnostic_level(
+            .fix_file(
                 *fix_mode,
                 false,
                 categories,
