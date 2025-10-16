@@ -12,24 +12,20 @@ repository.workspace = true
 version              = "0.5.7"
 
 [[example]]
-name    = "cli"
-publish = true
-test    = true
+name = "cli"
+test = true
 
 [[example]]
-name    = "fs"
-publish = true
-test    = true
+name = "fs"
+test = true
 
 [[example]]
-name    = "lint"
-publish = true
-test    = true
+name = "lint"
+test = true
 
 [[example]]
-name    = "serde"
-publish = true
-test    = true
+name = "serde"
+test = true
 
 [dependencies]
 backtrace                    = "0.3.76"

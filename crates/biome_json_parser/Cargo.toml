@@ -46,4 +46,3 @@ workspace = true
 [[bench]]
 harness = false
 name    = "json_parser"
-publish = true

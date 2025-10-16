@@ -72,4 +72,3 @@ workspace = true
 [[bench]]
 harness = false
 name    = "js_analyzer"
-publish = true

@@ -64,7 +64,6 @@ independent = true
 [[bench]]
 harness = false
 name    = "js_formatter"
-publish = true
 
 [lints]
 workspace = true

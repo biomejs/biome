@@ -34,7 +34,6 @@ serde   = ["dep:serde", "biome_text_size/serde", "biome_text_size/serde"]
 [[bench]]
 harness = false
 name    = "mutation"
-publish = true
 
 [lints]
 workspace = true

@@ -46,4 +46,3 @@ workspace = true
 [[bench]]
 harness = false
 name    = "css_parser"
-publish = true

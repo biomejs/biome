@@ -64,4 +64,3 @@ workspace = true
 [[bench]]
 harness = false
 name    = "js_parser"
-publish = true

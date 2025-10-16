@@ -26,7 +26,6 @@ static_assertions = { workspace = true }
 [[test]]
 name              = "serde"
 path              = "tests/serde.rs"
-publish           = true
 required-features = ["serde"]
 
 [lints]

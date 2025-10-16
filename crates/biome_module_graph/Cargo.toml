@@ -63,4 +63,3 @@ serde  = ["dep:serde"]
 [[bench]]
 harness = false
 name    = "module_graph"
-publish = true

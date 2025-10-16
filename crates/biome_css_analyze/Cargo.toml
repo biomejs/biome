@@ -58,4 +58,3 @@ workspace = true
 [[bench]]
 harness = false
 name    = "css_analyzer"
-publish = true
