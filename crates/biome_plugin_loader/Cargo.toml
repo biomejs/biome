@@ -7,12 +7,12 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_plugin_loader"
+publish              = true
 repository.workspace = true
 version              = "0.0.1"
 
 [dependencies]
 biome_analyze            = { workspace = true }
-biome_configuration      = { workspace = true }
 biome_console            = { workspace = true }
 biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
@@ -31,6 +31,7 @@ grit-pattern-matcher     = { workspace = true }
 grit-util                = { workspace = true }
 papaya                   = { workspace = true }
 rustc-hash               = { workspace = true }
+schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
 
 biome_js_runtime = { workspace = true, optional = true }
@@ -52,3 +53,4 @@ workspace = true
 [features]
 default   = []
 js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:windows"]
+schema    = ["dep:schemars"]

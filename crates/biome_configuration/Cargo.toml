@@ -7,6 +7,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_configuration"
+publish              = false
 repository.workspace = true
 version              = "0.0.1"
 
@@ -27,6 +28,7 @@ biome_js_formatter       = { workspace = true, features = ["serde"] }
 biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
+biome_plugin_loader      = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
 biome_rule_options       = { workspace = true }
@@ -48,6 +50,7 @@ schema = [
   "biome_json_formatter/schema",
   "biome_js_formatter/schema",
   "biome_rule_options/schema",
+  "biome_plugin_loader/schema",
 ]
 
 [dev-dependencies]

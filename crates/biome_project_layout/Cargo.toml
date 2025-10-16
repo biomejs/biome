@@ -8,6 +8,7 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_project_layout"
+publish              = true
 repository.workspace = true
 version              = "0.0.1"
 
