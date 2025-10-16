@@ -2,9 +2,9 @@
 
 /**
  * Script to update versions of publishable Biome crates
- * Usage: node scripts/update-crate-versions.js <new-version> [--dry-run]
- * Example: node scripts/update-crate-versions.js 0.6.0
- * Example (dry-run): node scripts/update-crate-versions.js 0.6.0 --dry-run
+ * Usage: node scripts/update-crates-versions.mjs <new-version> [--dry-run]
+ * Example: node scripts/update-crates-versions.mjs 0.6.0
+ * Example (dry-run): node scripts/update-crates-versions.mjs 0.6.0 --dry-run
  */
 
 import fs from "node:fs";
@@ -205,19 +205,19 @@ function main() {
 	const { values, positionals } = parsedArgs;
 
 	if (values.help) {
-		console.info("Usage: node scripts/update-crate-versions.mjs <version> [--dry-run]");
+		console.info("Usage: node scripts/update-crates-versions.mjs <version> [--dry-run]");
 		console.info("\nOptions:");
 		console.info("  --dry-run    Show what would be updated without making changes");
 		console.info("  --help       Show this help message");
 		console.info("\nExamples:");
-		console.info("  node scripts/update-crate-versions.mjs 0.6.0");
-		console.info("  node scripts/update-crate-versions.mjs 0.6.0 --dry-run");
+		console.info("  node scripts/update-crates-versions.mjs 0.6.0");
+		console.info("  node scripts/update-crates-versions.mjs 0.6.0 --dry-run");
 		process.exit(0);
 	}
 
 	if (positionals.length === 0) {
 		console.error("Error: Missing version argument");
-		console.error("Usage: node scripts/update-crate-versions.mjs <version> [--dry-run]");
+		console.error("Usage: node scripts/update-crates-versions.mjs <version> [--dry-run]");
 		console.error("Run with --help for more information");
 		process.exit(1);
 	}
@@ -276,7 +276,7 @@ function main() {
 		console.info(
 			"\nRun without --dry-run to apply these changes:",
 		);
-		console.info(`   node scripts/update-crate-versions.js ${newVersion}`);
+		console.info(`   node scripts/update-crates-versions.mjs ${newVersion}`);
 	}
 }
 

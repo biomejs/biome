@@ -7,24 +7,29 @@ homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_diagnostics"
+publish              = true
 repository.workspace = true
 version              = "0.5.7"
 
 [[example]]
-name = "cli"
-test = true
+name    = "cli"
+publish = true
+test    = true
 
 [[example]]
-name = "fs"
-test = true
+name    = "fs"
+publish = true
+test    = true
 
 [[example]]
-name = "lint"
-test = true
+name    = "lint"
+publish = true
+test    = true
 
 [[example]]
-name = "serde"
-test = true
+name    = "serde"
+publish = true
+test    = true
 
 [dependencies]
 backtrace                    = "0.3.76"
