@@ -54,4 +54,3 @@ workspace = true
 [[bench]]
 harness = false
 name    = "css_formatter"
-publish = true
