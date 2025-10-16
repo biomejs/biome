@@ -18,6 +18,53 @@ const privateKey3 = "K7!mP9$qR2#nX5&vL8*yT4^uH6%wB3+gC1~zF0@jM7-eI9#kQ2$pL5";
 
 # Diagnostics
 ```
+invalid_entropy_high.options:7:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `noSecrets`.
+  
+    5 │         "rules": {
+    6 │             "nursery": {
+  > 7 │                 "noSecrets": {
+      │                 ^^^^^^^^^^^
+    8 │                     "level": "error",
+    9 │                     "options": {
+  
+  i Known keys:
+  
+  - recommended
+  - noDeprecatedImports
+  - noDuplicateDependencies
+  - noEmptySource
+  - noFloatingPromises
+  - noImportCycles
+  - noJsxLiterals
+  - noMisusedPromises
+  - noNextAsyncClientComponent
+  - noReactForwardRef
+  - noShadow
+  - noUnnecessaryConditions
+  - noUnresolvedImports
+  - noUnusedExpressions
+  - noUselessCatchBinding
+  - noUselessUndefined
+  - noVueDataObjectDeclaration
+  - noVueDuplicateKeys
+  - noVueReservedKeys
+  - noVueReservedProps
+  - useConsistentArrowReturn
+  - useDeprecatedDate
+  - useExhaustiveSwitchCases
+  - useExplicitType
+  - useMaxParams
+  - useQwikMethodUsage
+  - useQwikValidLexicalScope
+  - useSortedClasses
+  - useVueMultiWordComponentNames
+  
+
+```
+
+```
 invalid_entropy_high.js:2:22 lint/security/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential secret found.

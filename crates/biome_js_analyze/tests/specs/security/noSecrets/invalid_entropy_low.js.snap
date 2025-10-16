@@ -13,6 +13,53 @@ const mediumEntropy4 = "TokenXyZ98765";
 
 # Diagnostics
 ```
+invalid_entropy_low.options:7:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `noSecrets`.
+  
+    5 │         "rules": {
+    6 │             "nursery": {
+  > 7 │                 "noSecrets": {
+      │                 ^^^^^^^^^^^
+    8 │                     "level": "error",
+    9 │                     "options": {
+  
+  i Known keys:
+  
+  - recommended
+  - noDeprecatedImports
+  - noDuplicateDependencies
+  - noEmptySource
+  - noFloatingPromises
+  - noImportCycles
+  - noJsxLiterals
+  - noMisusedPromises
+  - noNextAsyncClientComponent
+  - noReactForwardRef
+  - noShadow
+  - noUnnecessaryConditions
+  - noUnresolvedImports
+  - noUnusedExpressions
+  - noUselessCatchBinding
+  - noUselessUndefined
+  - noVueDataObjectDeclaration
+  - noVueDuplicateKeys
+  - noVueReservedKeys
+  - noVueReservedProps
+  - useConsistentArrowReturn
+  - useDeprecatedDate
+  - useExhaustiveSwitchCases
+  - useExplicitType
+  - useMaxParams
+  - useQwikMethodUsage
+  - useQwikValidLexicalScope
+  - useSortedClasses
+  - useVueMultiWordComponentNames
+  
+
+```
+
+```
 invalid_entropy_low.js:2:24 lint/security/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Potential secret found.

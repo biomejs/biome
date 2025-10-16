@@ -1,9 +1,10 @@
 {
-    "$schema": "../../../../../../backend-jsonrpc/src/workspace.schema.json",
+    "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
     "linter": {
         "rules": {
-            "nursery": {
+            "style": {
                 "useConsistentTypeDefinitions": {
+                    "level": "on",
                     "options": {
                         "style": "type"
                     }
