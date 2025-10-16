@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+	<App data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+</>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i data-* attributes should be lowercase. Use 'data-testid' instead of 'data-testID'.
+  
+    1 │ <>
+  > 2 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+      │ 	     ^^^^^^^^^^^^^^^^^
+    3 │ 	<App data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+    4 │ </>;
+  
+
+```
+
+```
+invalid.jsx:2:25 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i data-* attributes should be lowercase. Use 'data-under_score' instead of 'data-under_sCoRe'.
+  
+    1 │ <>
+  > 2 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+      │ 	                       ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	<App data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+    4 │ </>;
+  
+
+```
+
+```
+invalid.jsx:2:48 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unknown property 'dataNotAnDataAttribute' found
+  
+    1 │ <>
+  > 2 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+      │ 	                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	<App data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+    4 │ </>;
+  
+
+```
+
+```
+invalid.jsx:3:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i data-* attributes should be lowercase. Use 'data-testid' instead of 'data-testID'.
+  
+    1 │ <>
+    2 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+  > 3 │ 	<App data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+      │ 	     ^^^^^^^^^^^^^^^^^
+    4 │ </>;
+    5 │ 
+  
+
+```
+
+```
+invalid.jsx:3:25 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i data-* attributes should be lowercase. Use 'data-under_score' instead of 'data-under_sCoRe'.
+  
+    1 │ <>
+    2 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+  > 3 │ 	<App data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
+      │ 	                       ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </>;
+    5 │ 
+  
+
+```

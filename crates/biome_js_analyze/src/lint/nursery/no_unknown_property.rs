@@ -1,32 +1,90 @@
-use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsxElementName,  JsxAttribute, jsx_ext::AnyJsxElement};
+use biome_js_syntax::AnyJsxAttributeName;
+use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
-use biome_rowan::{AstNodeList, TextRange};
+use biome_rowan::TextRange;
 use biome_rule_options::no_unknown_property::NoUnknownPropertyOptions;
 use regex::Regex;
 
+use crate::services::manifest::Manifest;
+
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Disallow unknown DOM properties.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// In JSX, most DOM properties and attributes should be camelCased to be consistent with standard JavaScript style.
+    /// This can be a possible source of error if you are used to writing plain HTML.
+    /// Only `data-*` and `aria-*` attributes are allowed to use hyphens and lowercase letters in JSX.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// ```jsx,expect_diagnostic
+    /// <div allowTransparency="true" />
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div onclick={() => {}} />
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div for="bar" />
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
-    /// // var a = 1;
+    /// ```jsx
+    /// <div className="foo" />
+    /// ```
+    ///
+    /// ```jsx
+    /// <div onClick={() => {}} />
+    /// ```
+    ///
+    /// ```jsx
+    /// <div htmlFor="bar" />
+    /// ```
+    ///
+    /// ```jsx
+    /// <div data-foo="bar" />
+    /// ```
+    ///
+    /// ```jsx
+    /// <div aria-label="Close" />
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `ignore`
+    ///
+    /// An array of property and attribute names to ignore during validation.
+    ///
+    /// ```json
+    /// {
+    ///   "noUnknownProperty": {
+    ///     "options": {
+    ///       "ignore": ["custom-attribute", "non-standard-prop"]
+    ///     }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ### `requireDataLowercase`
+    ///
+    /// When set to `true`, requires `data-*` attributes to contain only lowercase characters.
+    /// React will issue a warning when `data-*` attributes contain uppercase characters.
+    ///
+    /// **Default**: `false`
+    ///
+    /// ```json
+    /// {
+    ///   "noUnknownProperty": {
+    ///     "options": {
+    ///       "requireDataLowercase": true
+    ///     }
+    ///   }
+    /// }
     /// ```
     ///
     pub NoUnknownProperty {
@@ -36,6 +94,50 @@ declare_lint_rule! {
         recommended: false,
     }
 }
+
+const REACT_ON_PROPS: &[&str] = &[
+    "onGotPointerCapture",
+    "onGotPointerCaptureCapture",
+    "onLostPointerCapture",
+    "onLostPointerCapture",
+    "onLostPointerCaptureCapture",
+    "onPointerCancel",
+    "onPointerCancelCapture",
+    "onPointerDown",
+    "onPointerDownCapture",
+    "onPointerEnter",
+    "onPointerEnterCapture",
+    "onPointerLeave",
+    "onPointerLeaveCapture",
+    "onPointerMove",
+    "onPointerMoveCapture",
+    "onPointerOut",
+    "onPointerOutCapture",
+    "onPointerOver",
+    "onPointerOverCapture",
+    "onPointerUp",
+    "onPointerUpCapture",
+];
+
+/**
+ * Popover API properties added in React 19
+ */
+// const POPOVER_API_PROPS: &[&str] = &[
+//     "popover",
+//     "popoverTarget",
+//     "popoverTargetAction",
+//     "onToggle",
+//     "onBeforeToggle",
+// ];
+
+const POPOVER_API_PROPS_LOWER: &[&str] = &[
+    "popover",
+    "popovertarget",
+    "popovertargetaction",
+    "ontoggle",
+    "onbeforetoggle",
+];
+
 const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("abbr", &["th", "td"]),
     (
@@ -58,7 +160,7 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ),
     ("disablePictureInPicture", &["video"]),
     ("disableRemotePlayback", &["audio", "video"]),
-    ("displayStyle", &["math"]),
+    ("displaystyle", &["math"]),
     ("download", &["a", "area"]),
     (
         "fill",
@@ -225,11 +327,12 @@ const DOM_PROPERTIES_IGNORE_CASE: [&str; 5] = [
 ];
 
 const DOM_ATTRIBUTE_NAMES: &[(&str, &str)] = &[
+    ("accept-charset", "acceptCharset"),
     ("class", "className"),
+    ("crossorigin", "crossOrigin"),
     ("for", "htmlFor"),
-    ("maxlength", "maxLength"),
-    ("readonly", "readOnly"),
-    ("tabindex", "tabIndex"),
+    ("http-equiv", "httpEquiv"),
+    ("nomodule", "noModule"),
 ];
 
 const SVGDOM_ATTRIBUTE_NAMES: &[(&str, &str)] = &[
@@ -914,37 +1017,26 @@ fn is_valid_aria_attribute(name: &str) -> bool {
 }
 
 fn get_dom_property_names() -> Vec<&'static str> {
-    let all_dom_property_names: Vec<&str> = DOM_PROPERTY_NAMES_TWO_WORDS
+    let mut all_dom_property_names: Vec<&str> = DOM_PROPERTY_NAMES_TWO_WORDS
         .iter()
         .chain(DOM_PROPERTY_NAMES_ONE_WORD.iter())
         .copied()
         .collect();
 
+    all_dom_property_names.extend(REACT_ON_PROPS.iter());
+    all_dom_property_names.extend(POPOVER_API_PROPS_LOWER.iter());
+
     all_dom_property_names
 }
 
-fn is_valid_html_tag_in_jsx(node: &AnyJsxElement) -> Option<bool> {
+fn is_valid_html_tag_in_jsx(node: &AnyJsxElement, tag_name: &str) -> bool {
     let tag_convention = Regex::new(r"^[a-z][^-]*$").unwrap();
 
-    let tag_name = match node {
-        AnyJsxElement::JsxOpeningElement(opening_element) => {
-            opening_element.name().ok()?.name_value_token().ok()?
-        }
-        AnyJsxElement::JsxSelfClosingElement(self_closing_element) => {
-            self_closing_element.name().ok()?.name_value_token().ok()?
-        }
-    };
-
-    if tag_convention.is_match(tag_name.text_trimmed()) {
-        return Some(
-            !node
-                .attributes()
-                .iter()
-                .any(|attr| attr.to_trimmed_text() == "is"),
-        );
+    if tag_convention.is_match(&tag_name) {
+        return node.attributes().find_by_name("is").is_none();
     }
 
-    Some(false)
+    false
 }
 
 fn get_tag_name(element: &AnyJsxElement) -> Option<String> {
@@ -1009,25 +1101,46 @@ fn get_standard_name(name: &str) -> Option<&'static str> {
 }
 
 impl Rule for NoUnknownProperty {
-    type Query = Ast<JsxAttribute>;
+    type Query = Manifest<JsxAttribute>;
     type State = (TextRange, NoUnknownPropertyDiagnostic);
     type Signals = Option<Self::State>;
     type Options = NoUnknownPropertyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let node_name = node.name_value_token().ok()?;
 
-        let name = normalize_attribute_case(node_name.text_trimmed());
+        let options = ctx.options();
+
+        let node_name = match node.name().ok()? {
+            AnyJsxAttributeName::JsxName(name) => {
+                name.value_token().ok()?.text_trimmed().to_string()
+            }
+            AnyJsxAttributeName::JsxNamespaceName(name) => {
+                let namespace = name.namespace().ok()?.value_token().ok()?;
+                let name = &name.name().ok()?.value_token().ok()?;
+                // There could be better way, but i couldn't extract namespaced attributes
+                // For e.g xlink:href
+                // without manually concatenating with ':'
+                namespace.text_trimmed().to_string() + ":" + name.text_trimmed()
+            }
+        };
+
+        if options.ignore.contains(&node_name) {
+            return None;
+        }
+
+        let name = normalize_attribute_case(&node_name);
         let parent = node.syntax().parent()?.parent()?;
         let element = AnyJsxElement::cast_ref(&parent)?;
 
+        // Ignore tags like <Foo.bar />
         if tag_name_has_dot(&element)? {
             return None;
         }
 
+        // Handle data-* attributes
         if is_valid_data_attribute(name) {
-            if name.to_lowercase() != name {
+            if options.require_data_lowercase && name.to_lowercase() != name {
                 return Some((
                     node.range(),
                     NoUnknownPropertyDiagnostic::DataLowercaseRequired {
@@ -1039,24 +1152,24 @@ impl Rule for NoUnknownProperty {
             return None;
         }
 
+        // Handle aria-* attributes
         if is_valid_aria_attribute(name) {
             return None;
         }
 
         let tag_name = get_tag_name(&element)?;
 
+        // Special case for fbt/fbs nodes
         if tag_name == "fbt" || tag_name == "fbs" {
             return None;
         }
 
-        if !is_valid_html_tag_in_jsx(&element)? {
+        // Only validate HTML/DOM elements, not React components
+        if !is_valid_html_tag_in_jsx(&element, &tag_name) {
             return None;
         }
 
-        let allowed_tags = ATTRIBUTE_TAGS_MAP
-            .binary_search_by_key(&name, |&(key, _)| key)
-            .ok()
-            .map(|idx| ATTRIBUTE_TAGS_MAP[idx].1);
+        let allowed_tags = get_allowed_tags(&name);
 
         if let Some(allowed_tags) = allowed_tags {
             if !allowed_tags.contains(&&tag_name.as_str()) {
@@ -1069,6 +1182,7 @@ impl Rule for NoUnknownProperty {
                     },
                 ));
             }
+            return None;
         }
 
         if let Some(standard_name) = get_standard_name(name) {
@@ -1081,6 +1195,7 @@ impl Rule for NoUnknownProperty {
                     },
                 ));
             }
+            return None;
         }
 
         Some((
@@ -1094,18 +1209,14 @@ impl Rule for NoUnknownProperty {
     fn diagnostic(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let (range, diagnostic_kind) = _state;
         match diagnostic_kind {
-            NoUnknownPropertyDiagnostic::UnknownProp { name } => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    *range,
-                    markup! {
-                        "Unknown property '" {name} "' found"
-                    },
-                )
-                .note(markup! {
-                    "This note will give you more information."
-                }),
-            ),
+            NoUnknownPropertyDiagnostic::UnknownProp { name } => Some(RuleDiagnostic::new(
+                rule_category!(),
+                *range,
+                markup! {
+                    "Unknown property '"{name}"' found"
+
+                },
+            )),
             NoUnknownPropertyDiagnostic::UnknownPropWithStandardName {
                 name,
                 standard_name,

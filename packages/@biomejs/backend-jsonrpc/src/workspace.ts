@@ -1678,6 +1678,10 @@ export interface Nursery {
 	 */
 	noShadow?: RuleConfiguration_for_NoShadowOptions;
 	/**
+	 * Disallow unknown DOM properties.
+	 */
+	noUnknownProperty?: RuleConfiguration_for_NoUnknownPropertyOptions;
+	/**
 	 * Disallow unnecessary type-based conditions that can be statically determined as redundant.
 	 */
 	noUnnecessaryConditions?: RuleConfiguration_for_NoUnnecessaryConditionsOptions;
@@ -8130,7 +8134,10 @@ export interface NoUndeclaredVariablesOptions {
 }
 export interface NoUnknownFunctionOptions {}
 export interface NoUnknownMediaFeatureNameOptions {}
-export interface NoUnknownPropertyOptions {}
+export interface NoUnknownPropertyOptions {
+	ignore: string[];
+	requireDataLowercase?: boolean;
+}
 export interface NoUnknownPseudoClassOptions {}
 export interface NoUnknownPseudoElementOptions {}
 export interface NoUnknownTypeSelectorOptions {}
@@ -8998,6 +9005,7 @@ export type Category =
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noSecrets"
 	| "lint/nursery/noShadow"
+	| "lint/nursery/noUnknownProperty"
 	| "lint/nursery/noUnnecessaryConditions"
 	| "lint/nursery/noUnresolvedImports"
 	| "lint/nursery/noUnusedExpressions"
