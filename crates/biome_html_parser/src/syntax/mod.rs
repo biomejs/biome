@@ -49,6 +49,7 @@ impl SyntaxFeature for HtmlSyntaxFeatures {
 const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<], T![/]);
 const RECOVER_TEXT_EXPRESSION_LIST: TokenSet<HtmlSyntaxKind> =
     token_set!(T![<], T![>], T!['}'], T!["}}"]);
+const VUE_DIRECTIVE_CHARS: TokenSet<HtmlSyntaxKind> = token_set![T![@], T![.], T![:]];
 
 /// These elements are effectively always self-closing. They should not have a closing tag (if they do, it should be a parsing error). They might not contain a `/` like in `<img />`.
 static VOID_ELEMENTS: &[&str] = &[
@@ -335,7 +336,9 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
     } else {
         let m = p.start();
         parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
-        if p.at(T![:]) {
+        // Here we harness cases where we parse an attribute like: <i class.bind="icon">
+        // The parser correctly reads class, but then we find `.`, which we know to be a Vue syntax
+        if p.at_ts(VUE_DIRECTIVE_CHARS) {
             m.abandon(p);
             p.rewind(chpt);
             return HtmlSyntaxFeatures::Vue.parse_exclusive_syntax(
