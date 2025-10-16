@@ -12,6 +12,7 @@ use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, check_feature_activity, check_override_feature_activity,
 };
+use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
@@ -35,6 +36,7 @@ use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
 use camino::Utf8Path;
 use std::borrow::Cow;
+use std::collections::HashSet;
 use tracing::{debug_span, error, info, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -544,6 +546,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut actions = Vec::new();
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
+    let mut growth_guard = GrowthGuard::new(tree.syntax().text_range_with_trivia().len().into());
 
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
@@ -612,6 +615,27 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
                         range,
                     });
+
+                    // Check for runaway edit growth
+                    let curr_len: u32 = tree.syntax().text_range_with_trivia().len().into();
+                    if !growth_guard.check(curr_len) {
+                        // In order to provide a useful diagnostic, we want to flag the rules that caused the conflict.
+                        // We can do this by inspecting the last few fixes that were applied.
+                        // We limit it to the last 10 fixes. If there is a chain of conflicting fixes longer than that, something is **really** fucked up.
+
+                        let mut seen_rules = HashSet::new();
+                        for action in actions.iter().rev().take(10) {
+                            if let Some((group, rule)) = action.rule_name.as_ref() {
+                                seen_rules.insert((group.clone(), rule.clone()));
+                            }
+                        }
+
+                        return Err(WorkspaceError::RuleError(
+                            RuleError::ConflictingRuleFixesError {
+                                rules: seen_rules.into_iter().collect(),
+                            },
+                        ));
+                    }
                 }
             }
             None => {

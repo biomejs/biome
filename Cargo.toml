@@ -207,7 +207,7 @@ ignore               = "0.4.23"
 indexmap             = { version = "2.10.0" }
 insta                = "1.43.2"
 jiff                 = "0.2.15"
-libc                 = "0.2.176"
+libc                 = "0.2.177"
 mimalloc             = "0.1.48"
 papaya               = "0.2.3"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
@@ -237,7 +237,7 @@ tracing              = { version = "0.1.41", default-features = false, features 
 tracing-subscriber   = "0.3.20"
 unicode-bom          = "2.0.3"
 unicode-width        = "0.1.12"
-ureq                 = "3.0.12"
+ureq                 = "3.1.2"
 url                  = "2.5.7"
 walkdir              = "2.5.0"
 web-time             = "1.1.0"
