@@ -86,6 +86,9 @@ pub(crate) struct Session {
     /// to update the diagnostics
     notified_broken_configuration: AtomicBool,
 
+    /// Tracks whether the initialized() notification has been received
+    initialized: AtomicBool,
+
     /// Projects opened in this session, mapped from the project's root path to
     /// the associated project key.
     projects: HashMap<BiomePath, ProjectKey>,
@@ -213,6 +216,7 @@ impl Session {
             extension_settings: config,
             cancellation,
             notified_broken_configuration: AtomicBool::new(false),
+            initialized: AtomicBool::new(false),
             service_rx,
             loading_operations: Default::default(),
             workspace_folders: Default::default(),
@@ -621,6 +625,16 @@ impl Session {
     /// Returns a reference to the client information for this session
     pub(crate) fn client_information(&self) -> Option<&ClientInformation> {
         self.initialize_params.get()?.client_information.as_ref()
+    }
+
+    /// Mark that the initialized() notification has been received
+    pub(crate) fn set_initialized(&self) {
+        self.initialized.store(true, Ordering::Relaxed);
+    }
+
+    /// Returns true if the initialized() notification has been received
+    pub(crate) fn has_initialized(&self) -> bool {
+        self.initialized.load(Ordering::Relaxed)
     }
 
     /// This function attempts to read the `biome.json` configuration file from
