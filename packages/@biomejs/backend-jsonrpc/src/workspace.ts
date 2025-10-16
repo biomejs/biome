@@ -8,7 +8,13 @@ export interface SupportsFeatureParams {
 export type FeatureName = FeatureKind[];
 export type BiomePath = string;
 export type ProjectKey = number;
-export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
+export type FeatureKind =
+	| "format"
+	| "lint"
+	| "search"
+	| "assist"
+	| "debug"
+	| "htmlFullSupport";
 export interface FileFeaturesResult {
 	featuresSupported: FeaturesSupported;
 }
@@ -179,7 +185,7 @@ export interface FormatterConfiguration {
 	 */
 	expand?: Expand;
 	/**
-	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
+	 * Whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
 	formatWithErrors?: Bool;
 	/**
@@ -245,6 +251,10 @@ export interface GritConfiguration {
  */
 export interface HtmlConfiguration {
 	assist?: HtmlAssistConfiguration;
+	/**
+	 * Enables full support for HTML, Vue, Svelte and Astro files.
+	 */
+	experimentalFullSupportEnabled?: Bool;
 	/**
 	 * HTML formatter options
 	 */
@@ -1647,6 +1657,10 @@ export interface Nursery {
 	 */
 	noDuplicateDependencies?: RuleConfiguration_for_NoDuplicateDependenciesOptions;
 	/**
+	 * Disallow empty sources.
+	 */
+	noEmptySource?: RuleConfiguration_for_NoEmptySourceOptions;
+	/**
 	 * Require Promise-like statements to be handled appropriately.
 	 */
 	noFloatingPromises?: RuleFixConfiguration_for_NoFloatingPromisesOptions;
@@ -1738,6 +1752,10 @@ export interface Nursery {
 	 * Enforce type definitions to consistently use either interface or type.
 	 */
 	useConsistentTypeDefinitions?: RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions;
+	/**
+	 * Require the @deprecated directive to specify a deletion date.
+	 */
+	useDeprecatedDate?: RuleConfiguration_for_UseDeprecatedDateOptions;
 	/**
 	 * Require switch-case statements to be exhaustive.
 	 */
@@ -3021,6 +3039,9 @@ export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 export type RuleConfiguration_for_NoDuplicateDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDuplicateDependenciesOptions;
+export type RuleConfiguration_for_NoEmptySourceOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoEmptySourceOptions;
 export type RuleFixConfiguration_for_NoFloatingPromisesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoFloatingPromisesOptions;
@@ -3087,6 +3108,9 @@ export type RuleFixConfiguration_for_UseConsistentArrowReturnOptions =
 export type RuleFixConfiguration_for_UseConsistentTypeDefinitionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions;
+export type RuleConfiguration_for_UseDeprecatedDateOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseDeprecatedDateOptions;
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
@@ -5422,6 +5446,16 @@ export interface RuleWithOptions_for_NoDuplicateDependenciesOptions {
 	 */
 	options: NoDuplicateDependenciesOptions;
 }
+export interface RuleWithOptions_for_NoEmptySourceOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoEmptySourceOptions;
+}
 export interface RuleWithFixOptions_for_NoFloatingPromisesOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -5673,6 +5707,16 @@ export interface RuleWithFixOptions_for_UseConsistentTypeDefinitionsOptions {
 	 * Rule's options
 	 */
 	options: UseConsistentTypeDefinitionsOptions;
+}
+export interface RuleWithOptions_for_UseDeprecatedDateOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseDeprecatedDateOptions;
 }
 export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	/**
@@ -8179,6 +8223,12 @@ export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
+export interface NoEmptySourceOptions {
+	/**
+	 * Whether comments are considered meaningful
+	 */
+	allowComments?: boolean;
+}
 export interface NoFloatingPromisesOptions {}
 export interface NoImportCyclesOptions {
 	/**
@@ -8242,6 +8292,9 @@ This option is only applicable when used in conjunction with the `asNeeded` opti
 }
 export interface UseConsistentTypeDefinitionsOptions {
 	style?: ConsistentTypeDefinition;
+}
+export interface UseDeprecatedDateOptions {
+	argumentName?: string;
 }
 export interface UseExhaustiveSwitchCasesOptions {}
 export interface UseExplicitTypeOptions {}
@@ -8555,7 +8608,12 @@ export interface NoTemplateCurlyInStringOptions {}
 export interface NoThenPropertyOptions {}
 export interface NoTsIgnoreOptions {}
 export interface NoUnassignedVariablesOptions {}
-export interface NoUnknownAtRulesOptions {}
+export interface NoUnknownAtRulesOptions {
+	/**
+	 * A list of unknown at-rule names to ignore (case-insensitive).
+	 */
+	ignore: string[];
+}
 export interface NoUnsafeDeclarationMergingOptions {}
 export interface NoUnsafeNegationOptions {}
 export interface NoUselessEscapeInStringOptions {}
@@ -8955,6 +9013,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDeprecatedImports"
 	| "lint/nursery/noDuplicateDependencies"
+	| "lint/nursery/noEmptySource"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImportCycles"
@@ -8983,6 +9042,7 @@ export type Category =
 	| "lint/nursery/useConsistentArrowReturn"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentTypeDefinitions"
+	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
@@ -9411,7 +9471,7 @@ export type DocumentFileSource =
 	| { Grit: GritFileSource };
 export interface JsFileSource {
 	/**
-	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
+	 * Used to mark if the JavaScript is embedded inside some particular files. This affects the parsing. For example, if inside an Astro file, a top-level return statement is allowed.
 	 */
 	embedding_kind: EmbeddingKind;
 	language: Language;
@@ -9593,17 +9653,18 @@ export interface PullDiagnosticsParams {
 	/**
 	 * Rules to apply on top of the configuration
 	 */
-	enabledRules?: Selector[];
-	only?: Selector[];
+	enabledRules?: AnalyzerSelector[];
+	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	/**
 	 * When `false` the diagnostics, don't have code frames of the code actions (fixes, suppressions, etc.)
 	 */
 	pullCodeActions: boolean;
-	skip?: Selector[];
+	skip?: AnalyzerSelector[];
 }
 export type RuleCategories = RuleCategory[];
+export type AnalyzerSelector = string;
 export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
@@ -9612,12 +9673,12 @@ export interface PullDiagnosticsResult {
 }
 export interface PullActionsParams {
 	categories?: RuleCategories;
-	enabledRules?: Selector[];
-	only?: Selector[];
+	enabledRules?: AnalyzerSelector[];
+	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	range?: TextRange;
-	skip?: Selector[];
+	skip?: AnalyzerSelector[];
 	suppressionReason?: string;
 }
 export interface PullActionsResult {
@@ -9625,6 +9686,7 @@ export interface PullActionsResult {
 }
 export interface CodeAction {
 	category: ActionCategory;
+	offset?: TextSize;
 	ruleName?: [string, string];
 	suggestion: CodeSuggestion;
 }
@@ -9712,14 +9774,14 @@ export interface FixFileParams {
 	/**
 	 * Rules to apply to the file
 	 */
-	enabledRules?: Selector[];
+	enabledRules?: AnalyzerSelector[];
 	fixFileMode: FixFileMode;
-	only?: Selector[];
+	only?: AnalyzerSelector[];
 	path: BiomePath;
 	projectKey: ProjectKey;
 	ruleCategories: RuleCategories;
 	shouldFormat: boolean;
-	skip?: Selector[];
+	skip?: AnalyzerSelector[];
 	suppressionReason?: string;
 }
 /**

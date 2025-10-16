@@ -43,13 +43,13 @@ pub type JsonAllowTrailingCommasEnabled = Bool<false>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsonParserConfiguration {
-    #[bpaf(hide)]
+    #[bpaf(long("json-parse-allow-comments"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Allow parsing comments in `.json` files
     pub allow_comments: Option<JsonAllowCommentsEnabled>,
 
-    #[bpaf(hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("json-parse-allow-trailing-commas"), argument("true|false"))]
     /// Allow parsing trailing commas in `.json` files
     pub allow_trailing_commas: Option<JsonAllowTrailingCommasEnabled>,
 }

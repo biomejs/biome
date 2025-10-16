@@ -32,14 +32,40 @@ declare_lint_rule! {
     /// @charset 'UTF-8';
     /// ```
     ///
-    /// ```css
-    /// @media (max-width: 960px) {
-    ///   body {
-    ///     font-size: 13px;
-    ///   }
-    /// }
-    /// ```
-    pub NoUnknownAtRules {
+     /// ```css
+     /// @media (max-width: 960px) {
+     ///   body {
+     ///     font-size: 13px;
+     ///   }
+     /// }
+     /// ```
+     ///
+     /// ## Options
+     ///
+     /// ### `ignore`
+     ///
+     /// A list of unknown at-rule names to ignore (case-insensitive).
+     ///
+     /// ```json,options
+     /// {
+     ///   "options": {
+     ///     "ignore": [
+     ///       "custom-at-rule",
+     ///       "my-custom-rule"
+     ///     ]
+     ///   }
+     /// }
+     /// ```
+     ///
+     /// #### Valid
+     ///
+     /// ```css,use_options
+     /// @custom-at-rule {}
+     /// @my-custom-rule {
+     ///   color: red;
+     /// }
+     /// ```
+     pub NoUnknownAtRules {
         version: "2.0.0",
         name: "noUnknownAtRules",
         language: "css",
@@ -51,6 +77,16 @@ declare_lint_rule! {
 
 declare_node_union! {
   pub AnyUnknownAtRule = CssUnknownBlockAtRule | CssUnknownValueAtRule
+}
+
+/// Determines if the given unknown at-rule name should be ignored.
+fn should_ignore(name: &str, options: &NoUnknownAtRulesOptions) -> bool {
+    for ignore_pattern in &options.ignore {
+        if name.eq_ignore_ascii_case(ignore_pattern) {
+            return true;
+        }
+    }
+    false
 }
 
 pub struct NoUnknownAtRuleState {
@@ -70,9 +106,16 @@ impl Rule for NoUnknownAtRules {
             AnyUnknownAtRule::CssUnknownBlockAtRule(rule) => rule.name().ok()?,
             AnyUnknownAtRule::CssUnknownValueAtRule(rule) => rule.name().ok()?,
         };
+        let name = rule.value_token().ok()?.text_trimmed().to_string();
+
+        // Check if this unknown at-rule should be ignored
+        if should_ignore(&name, ctx.options()) {
+            return None;
+        }
+
         Some(NoUnknownAtRuleState {
             range: rule.range(),
-            name: rule.value_token().ok()?.text_trimmed().to_string(),
+            name,
         })
     }
 

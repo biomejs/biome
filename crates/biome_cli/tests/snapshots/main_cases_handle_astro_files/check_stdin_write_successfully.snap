@@ -9,7 +9,7 @@ expression: redactor(content)
 import {a as a} from 'mod';
 import {    something } from "file.astro";
 debugger;
-statement ( ) ;
+something ( ) ;
 var foo: string = "";
 ---
 <div></div>
@@ -23,7 +23,7 @@ import { something } from "file.astro";
 import { a } from "mod";
 
 debugger;
-statement();
+something();
 var foo: string = "";
 ---
 <div></div>

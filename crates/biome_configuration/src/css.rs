@@ -46,14 +46,16 @@ pub type CssTailwindDirectivesEnabled = Bool<false>;
 pub struct CssParserConfiguration {
     /// Allow comments to appear on incorrect lines in `.css` files
     #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_wrong_line_comments: Option<CssAllowWrongLineCommentsEnabled>,
 
     /// Enables parsing of CSS Modules specific features.
-    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("css-parse-css-modules"), argument("true|false"))]
     pub css_modules: Option<CssModulesEnabled>,
 
     /// Enables parsing of Tailwind CSS 4.0 directives and functions.
-    #[bpaf(hide)]
+    #[bpaf(long("css-parse-tailwind-directives"), argument("true|false"))]
     pub tailwind_directives: Option<CssTailwindDirectivesEnabled>,
 }
 

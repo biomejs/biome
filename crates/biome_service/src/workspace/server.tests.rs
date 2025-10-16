@@ -270,7 +270,7 @@ function Foo({cond}) {
         })
         .unwrap();
 
-    let ts_file_source = workspace.get_file_source("/project/a.ts".into());
+    let ts_file_source = workspace.get_file_source("/project/a.ts".into(), false);
     let ts = ts_file_source.to_js_file_source().expect("JS file source");
     assert!(ts.is_typescript());
     assert!(!ts.is_jsx());
@@ -279,7 +279,7 @@ function Foo({cond}) {
         Err(error) => panic!("File not available: {error}"),
     }
 
-    let js_file_source = workspace.get_file_source("/project/a.js".into());
+    let js_file_source = workspace.get_file_source("/project/a.js".into(), false);
     let js = js_file_source.to_js_file_source().expect("JS file source");
     assert!(!js.is_typescript());
     assert!(js.is_jsx());
@@ -382,7 +382,7 @@ function Foo({cond}) {
         })
         .unwrap();
 
-    let js_file_source = workspace.get_file_source("/project/a.js".into());
+    let js_file_source = workspace.get_file_source("/project/a.js".into(), false);
     let js = js_file_source.to_js_file_source().expect("JS file source");
     assert!(!js.is_typescript());
     assert!(!js.is_jsx());
@@ -391,7 +391,7 @@ function Foo({cond}) {
         Err(error) => panic!("File not available: {error}"),
     }
 
-    let jsx_file_source = workspace.get_file_source("/project/a.jsx".into());
+    let jsx_file_source = workspace.get_file_source("/project/a.jsx".into(), false);
     let jsx = jsx_file_source.to_js_file_source().expect("JS file source");
     assert!(!jsx.is_typescript());
     assert!(jsx.is_jsx());

@@ -131,10 +131,9 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             input_code.as_str()
         };
 
-        // if source_type.
         analyze_and_snap(
             &mut snapshot,
-            input_code,
+            &input_code,
             source_type,
             filter,
             file_name,

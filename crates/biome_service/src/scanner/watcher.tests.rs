@@ -16,6 +16,7 @@ use biome_fs::TemporaryFs;
 
 use crate::{
     projects::ProjectKey,
+    scanner::ScanKind,
     scanner::test_utils::{MockWorkspaceWatcherBridge, StopSender},
 };
 
@@ -42,10 +43,9 @@ fn should_index_on_write_but_not_on_read() {
 
         instruction_channel
             .sender
-            .send(WatcherInstruction::WatchFolder(
+            .send(WatcherInstruction::WatchFolders(FxHashSet::from_iter([
                 project_path.to_path_buf(),
-                scan_kind,
-            ))
+            ])))
             .expect("can send watch instruction");
 
         let _stop_sender = StopSender(instruction_channel);
@@ -112,10 +112,9 @@ fn should_index_on_create_and_unload_on_delete() {
 
         instruction_channel
             .sender
-            .send(WatcherInstruction::WatchFolder(
+            .send(WatcherInstruction::WatchFolders(FxHashSet::from_iter([
                 project_path.to_path_buf(),
-                scan_kind,
-            ))
+            ])))
             .expect("can send watch instruction");
 
         let _stop_sender = StopSender(instruction_channel);

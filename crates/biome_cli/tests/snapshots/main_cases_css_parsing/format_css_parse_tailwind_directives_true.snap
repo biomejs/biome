@@ -1,0 +1,44 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.css`
+
+```css
+@import 'tailwindcss';
+.foo { color: red; }
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.css format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - @import·'tailwindcss';
+    2   │ - .foo·{·color:·red;·}
+      1 │ + @import·"tailwindcss";
+      2 │ + .foo·{
+      3 │ + → color:·red;
+      4 │ + }
+      5 │ + 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

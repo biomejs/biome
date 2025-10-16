@@ -6,7 +6,7 @@ use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
-use biome_configuration::html::HtmlConfiguration;
+use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::plugins::Plugins;
@@ -73,9 +73,18 @@ pub struct Settings {
     pub override_settings: OverrideSettings,
     /// The VCS settings of the project
     pub vcs_settings: VcsSettings,
+
+    // TODO: remove once HTML full support is stable
+    pub experimental_full_html_support: Option<ExperimentalFullSupportEnabled>,
 }
 
 impl Settings {
+    pub fn experimental_full_html_support_enabled(&self) -> bool {
+        self.experimental_full_html_support
+            .unwrap_or_default()
+            .value()
+    }
+
     pub fn source(&self) -> Option<Configuration> {
         self.source.as_ref().map(|source| {
             let (config, _) = source.deref().clone();
@@ -142,7 +151,8 @@ impl Settings {
         }
         // html settings
         if let Some(html) = configuration.html {
-            self.languages.html = html.into()
+            self.experimental_full_html_support = html.experimental_full_support_enabled;
+            self.languages.html = html.into();
         }
 
         // plugin settings
@@ -304,6 +314,7 @@ impl Settings {
             FeatureKind::Format => &self.formatter.includes,
             FeatureKind::Lint => &self.linter.includes,
             FeatureKind::Assist => &self.assist.includes,
+            FeatureKind::HtmlFullSupport => return false,
             FeatureKind::Search => return false, // There is no search-specific config.
             FeatureKind::Debug => return false,
         };

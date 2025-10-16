@@ -1,8 +1,8 @@
 use crate::{
-    AnyHtmlElement, HtmlAttribute, HtmlElement, HtmlSelfClosingElement, ScriptType,
-    inner_string_text,
+    AnyHtmlElement, AstroEmbeddedContent, HtmlAttribute, HtmlElement, HtmlEmbeddedContent,
+    HtmlSelfClosingElement, HtmlSyntaxToken, ScriptType, inner_string_text,
 };
-use biome_rowan::{AstNodeList, SyntaxResult, TokenText};
+use biome_rowan::{AstNodeList, SyntaxResult, TokenText, declare_node_union};
 
 /// https://html.spec.whatwg.org/#void-elements
 const VOID_ELEMENTS: &[&str] = &[
@@ -185,7 +185,7 @@ impl HtmlElement {
     }
 
     /// Returns `true` if the element is a `<script lang="ts">`
-    pub fn is_typescript_lang(&self) -> SyntaxResult<bool> {
+    pub fn is_typescript_lang(&self) -> bool {
         let is_script = self.is_script_tag();
         let lang_attribute = self.find_attribute_by_name("lang");
         let is_lang_typescript = lang_attribute.is_some_and(|attribute| {
@@ -199,7 +199,25 @@ impl HtmlElement {
                     text.eq_ignore_ascii_case("ts")
                 })
         });
-        Ok(is_script && is_lang_typescript)
+        is_script && is_lang_typescript
+    }
+
+    /// Returns `true` if the element is a `<style lang="sass">` or `<style lang="scss">`
+    pub fn is_sass_lang(&self) -> bool {
+        let is_style = self.is_style_tag();
+        let lang_attribute = self.find_attribute_by_name("lang");
+        let is_lang_typescript = lang_attribute.is_some_and(|attribute| {
+            attribute
+                .initializer()
+                .and_then(|initializer| initializer.value().ok())
+                .and_then(|value| value.as_html_string().cloned())
+                .and_then(|value| value.value_token().ok())
+                .is_some_and(|token| {
+                    let text = inner_string_text(&token);
+                    text.eq_ignore_ascii_case("sass") || text.eq_ignore_ascii_case("scss")
+                })
+        });
+        is_style && is_lang_typescript
     }
 }
 
@@ -266,5 +284,18 @@ mod tests {
             .unwrap();
 
         assert!(element.is_javascript_tag());
+    }
+}
+
+declare_node_union! {
+    pub AnyEmbeddedContent = HtmlEmbeddedContent | AstroEmbeddedContent
+}
+
+impl AnyEmbeddedContent {
+    pub fn value_token(&self) -> Option<HtmlSyntaxToken> {
+        match self {
+            Self::HtmlEmbeddedContent(node) => node.value_token().ok(),
+            Self::AstroEmbeddedContent(node) => node.content_token(),
+        }
     }
 }

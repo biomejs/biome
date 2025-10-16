@@ -1,0 +1,48 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid2.json
+---
+# Input
+```json
+{
+  "files": {
+    "experimentalScannerIgnores": [
+      "foo",
+      "bar"
+    ]
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid2.json:3:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The field experimentalScannerIgnores has been removed. Its usage is now stable and moved inside a new ignore syntax.
+  
+    1 │ {
+    2 │   "files": {
+  > 3 │     "experimentalScannerIgnores": [
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │       "foo",
+  > 5 │       "bar"
+  > 6 │     ]
+      │     ^
+    7 │   }
+    8 │ }
+  
+  i Safe fix: Update the files.includes field.
+  
+    1 1 │   {
+    2 2 │     "files": {
+    3   │ - ····"experimentalScannerIgnores":·[
+    4   │ - ······"foo",
+    5   │ - ······"bar"
+    6   │ - ····]
+      3 │ + ····"includes":["**",·"!!**/foo",·"!!**/bar"]
+    7 4 │     }
+    8 5 │   }
+  
+
+```

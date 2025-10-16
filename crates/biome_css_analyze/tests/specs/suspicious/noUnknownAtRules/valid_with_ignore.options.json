@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noUnknownAtRules": {
+          "level": "error",
+          "options": {
+            "ignore": ["custom-at-rule", "MyCustomRule", "another-custom-rule"]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.module.css`
+
+```css
+.className { composes: other from './other.module.css';
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.module.css:1:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+  > 1 │ .className { composes: other from './other.module.css';
+      │                                                        
+  
+  i the file ends here
+  
+  > 1 │ .className { composes: other from './other.module.css';
+      │                                                        
+  
+
+```
+
+```block
+file.module.css:1:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+  > 1 │ .className { composes: other from './other.module.css';
+      │                                                        
+  
+  i the file ends here
+  
+  > 1 │ .className { composes: other from './other.module.css';
+      │                                                        
+  
+
+```
+
+```block
+file.module.css format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - .className·{·composes:·other·from·'./other.module.css';
+      1 │ + .className·{·composes:·other·from·'./other.module.css';
+      2 │ + 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 3 errors.
+```

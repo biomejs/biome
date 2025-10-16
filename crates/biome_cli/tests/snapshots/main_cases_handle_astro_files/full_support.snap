@@ -1,0 +1,84 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": { "enabled": true },
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+import { sure } from "sure.js";
+import z from "zod";
+
+const schema = z.object().optional();
+schema + sure();
+---
+<html>
+	<head>
+		<title>Astro</title>
+	</head>
+	<body></body>
+</html>
+
+<style>
+#id {
+	font-family: comic-sans;
+}
+.class {
+	background: red;
+}
+</style>
+
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.astro:13:20 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Generic font family missing.
+  
+    12 │ <style>
+  > 13 │ #id { font-family: comic-sans } .class { background: red}
+       │                    ^^^^^^^^^^
+    14 │ </style>
+    15 │ 
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+Found 1 error.
+```

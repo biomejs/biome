@@ -210,19 +210,30 @@ impl WorkspaceServer {
     }
 
     /// Gets the supported capabilities for a given file path.
-    fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
-        let language = self.get_file_source(path);
+    fn get_file_capabilities(
+        &self,
+        path: &BiomePath,
+        experimental_full_html_support: bool,
+    ) -> Capabilities {
+        let language = self.get_file_source(path, experimental_full_html_support);
         self.features.get_capabilities(language)
     }
 
     /// Retrieves the supported language of a file.
-    fn get_file_source(&self, path: &Utf8Path) -> DocumentFileSource {
+    fn get_file_source(
+        &self,
+        path: &Utf8Path,
+        experimental_full_html_support: bool,
+    ) -> DocumentFileSource {
         self.documents
             .pin()
             .get(path)
             .map(|doc| doc.file_source_index)
             .and_then(|index| self.get_source(index))
-            .unwrap_or(DocumentFileSource::from_path(path))
+            .unwrap_or(DocumentFileSource::from_path(
+                path,
+                experimental_full_html_support,
+            ))
     }
 
     /// Returns an error factory function for unsupported features at a given
@@ -232,9 +243,10 @@ impl WorkspaceServer {
         path: &'a Utf8Path,
     ) -> impl FnOnce() -> WorkspaceError + 'a {
         move || {
-            let file_source = self.get_file_source(path);
+            // For simplicity and avoid too many changes, we hardcode the support to false
+            let file_source = self.get_file_source(path, false);
 
-            let language = DocumentFileSource::from_path(path).or(file_source);
+            let language = DocumentFileSource::from_path(path, false).or(file_source);
             WorkspaceError::source_file_not_supported(
                 language,
                 path.to_string(),
@@ -288,12 +300,15 @@ impl WorkspaceServer {
             return Ok(Default::default());
         }
 
-        let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
-
         let settings = self
             .projects
             .get_settings_based_on_path(project_key, &path)
             .ok_or_else(WorkspaceError::no_project)?;
+
+        let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(
+            &path,
+            settings.experimental_full_html_support_enabled(),
+        ));
 
         if let DocumentFileSource::Js(js) = &mut source {
             match path.extension() {
@@ -363,8 +378,10 @@ impl WorkspaceServer {
         };
         // Second-pass parsing for HTML files with embedded JavaScript and CSS
         // content.
-        let embedded_snippets = if DocumentFileSource::can_contain_embeds(path.as_path())
-            && let Some(Ok(any_parse)) = &syntax
+        let embedded_snippets = if DocumentFileSource::can_contain_embeds(
+            path.as_path(),
+            settings.experimental_full_html_support_enabled(),
+        ) && let Some(Ok(any_parse)) = &syntax
         {
             // Second-pass parsing for HTML files with embedded JavaScript and CSS content
 
@@ -523,7 +540,8 @@ impl WorkspaceServer {
         settings: &Settings,
     ) -> Result<Vec<AnyEmbeddedSnippet>, WorkspaceError> {
         let mut embedded_nodes = Vec::new();
-        let capabilities = self.get_file_capabilities(path);
+        let capabilities =
+            self.get_file_capabilities(path, settings.experimental_full_html_support_enabled());
         let Some(parse_embedded) = capabilities.parser.parse_embedded_nodes else {
             return Ok(Default::default());
         };
@@ -1078,7 +1096,14 @@ impl Workspace for WorkspaceServer {
         &self,
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
-        let language = self.get_file_source(&params.path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let language = self.get_file_source(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
         let capabilities = self.features.get_capabilities(language);
 
         self.projects.get_file_features(
@@ -1116,7 +1141,14 @@ impl Workspace for WorkspaceServer {
         &self,
         params: GetSyntaxTreeParams,
     ) -> Result<GetSyntaxTreeResult, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.get_file_capabilities(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
         let debug_syntax_tree = capabilities
             .debug
             .debug_syntax_tree
@@ -1133,7 +1165,14 @@ impl Workspace for WorkspaceServer {
         &self,
         params: GetControlFlowGraphParams,
     ) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.get_file_capabilities(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
         let debug_control_flow = capabilities
             .debug
             .debug_control_flow
@@ -1146,28 +1185,41 @@ impl Workspace for WorkspaceServer {
     }
 
     fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let debug_formatter_ir = capabilities
-            .debug
-            .debug_formatter_ir
-            .ok_or_else(self.build_capability_error(&params.path))?;
         let settings = self
             .projects
             .get_settings_based_on_path(params.project_key, &params.path)
             .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.get_file_capabilities(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
+        let debug_formatter_ir = capabilities
+            .debug
+            .debug_formatter_ir
+            .ok_or_else(self.build_capability_error(&params.path))?;
         let parse = self.get_parse(&params.path)?;
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && parse.has_errors()
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
-        let document_file_source = self.get_file_source(&params.path);
+        let document_file_source = self.get_file_source(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
 
         debug_formatter_ir(&params.path, &document_file_source, parse, &settings)
     }
 
     fn get_type_info(&self, params: GetTypeInfoParams) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.get_file_capabilities(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
         let debug_type_info = capabilities
             .debug
             .debug_type_info
@@ -1181,7 +1233,14 @@ impl Workspace for WorkspaceServer {
         &self,
         params: GetRegisteredTypesParams,
     ) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.get_file_capabilities(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
         let debug_registered_types = capabilities
             .debug
             .debug_registered_types
@@ -1192,7 +1251,14 @@ impl Workspace for WorkspaceServer {
     }
 
     fn get_semantic_model(&self, params: GetSemanticModelParams) -> Result<String, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.get_file_capabilities(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
         let debug_semantic_model = capabilities
             .debug
             .debug_semantic_model
@@ -1272,10 +1338,14 @@ impl Workspace for WorkspaceServer {
 
         let parsed = self.parse(&path, &content, &settings, index, &mut node_cache)?;
         let root = parsed.any_parse.unwrap_as_send_node();
-        let document_source = self.get_file_source(&path);
+        let document_source =
+            self.get_file_source(&path, settings.experimental_full_html_support_enabled());
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
-        let embedded_snippets = if DocumentFileSource::can_contain_embeds(path.as_path()) {
+        let embedded_snippets = if DocumentFileSource::can_contain_embeds(
+            path.as_path(),
+            settings.experimental_full_html_support_enabled(),
+        ) {
             // Second-pass parsing for HTML files with embedded JavaScript and CSS content
             let mut node_cache = NodeCache::default();
             self.parse_embedded_language_snippets(
@@ -1365,18 +1435,18 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             pull_code_actions,
         } = params;
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
         let (parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
-        let language = self.get_file_source(&path);
+        let language =
+            self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_capabilities(language);
         let (diagnostics, errors, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
             && let Some(lint) = capabilities.analyzer.lint
         {
-            let settings = self
-                .projects
-                .get_settings_based_on_path(project_key, &path)
-                .ok_or_else(WorkspaceError::no_project)?;
-
             let plugins = if categories.is_lint() {
                 self.get_analyzer_plugins_for_project(
                     settings.source_path().unwrap_or_default().as_path(),
@@ -1500,18 +1570,20 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             categories,
         } = params;
-        let capabilities = self.get_file_capabilities(&path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities =
+            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let code_actions = capabilities
             .analyzer
             .code_actions
             .ok_or_else(self.build_capability_error(&path))?;
 
         let (parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
-        let language = self.get_file_source(&path);
-        let settings = self
-            .projects
-            .get_settings_based_on_path(project_key, &path)
-            .ok_or_else(WorkspaceError::no_project)?;
+        let language =
+            self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let mut result = code_actions(CodeActionsParams {
             parse,
             range,
@@ -1526,6 +1598,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules: &enabled_rules,
             plugins: Vec::new(),
             categories,
+            action_offset: None,
         });
 
         for embedded_snippet in embedded_snippets {
@@ -1551,6 +1624,7 @@ impl Workspace for WorkspaceServer {
                 enabled_rules: &enabled_rules,
                 plugins: Vec::new(),
                 categories,
+                action_offset: Some(embedded_snippet.content_offset()),
             });
 
             result.actions.extend(embedded_actions_result.actions);
@@ -1569,7 +1643,14 @@ impl Workspace for WorkspaceServer {
         )
     )]
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.get_file_capabilities(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
 
         let format = capabilities
             .formatter
@@ -1577,11 +1658,6 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
 
         let format_embedded = capabilities.formatter.format_embedded;
-
-        let settings = self
-            .projects
-            .get_settings_based_on_path(params.project_key, &params.path)
-            .ok_or_else(WorkspaceError::no_project)?;
 
         let (parse, embedded_nodes) = self.get_parse_with_embedded_format_nodes(&params.path)?;
 
@@ -1591,7 +1667,10 @@ impl Workspace for WorkspaceServer {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
 
-        let document_file_source = self.get_file_source(&params.path);
+        let document_file_source = self.get_file_source(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
         if !embedded_nodes.is_empty() {
             let format_embedded =
                 format_embedded.ok_or_else(self.build_capability_error(&params.path))?;
@@ -1608,22 +1687,28 @@ impl Workspace for WorkspaceServer {
 
     #[instrument(level = "debug", skip(self, params))]
     fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let format_range = capabilities
-            .formatter
-            .format_range
-            .ok_or_else(self.build_capability_error(&params.path))?;
         let settings = self
             .projects
             .get_settings_based_on_path(params.project_key, &params.path)
             .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.get_file_capabilities(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
+        let format_range = capabilities
+            .formatter
+            .format_range
+            .ok_or_else(self.build_capability_error(&params.path))?;
         let parse = self.get_parse(&params.path)?;
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && parse.has_errors()
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
-        let document_file_source = self.get_file_source(&params.path);
+        let document_file_source = self.get_file_source(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
         format_range(
             &params.path,
             &document_file_source,
@@ -1635,23 +1720,29 @@ impl Workspace for WorkspaceServer {
 
     #[instrument(level = "debug", skip(self, params))]
     fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.get_file_capabilities(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
         let format_on_type = capabilities
             .formatter
             .format_on_type
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let settings = self
-            .projects
-            .get_settings_based_on_path(params.project_key, &params.path)
-            .ok_or_else(WorkspaceError::no_project)?;
         let parse = self.get_parse(&params.path)?;
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && parse.has_errors()
         {
             return Err(WorkspaceError::format_with_errors_disabled());
         }
-        let document_file_source = self.get_file_source(&params.path);
+        let document_file_source = self.get_file_source(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
 
         format_on_type(
             &params.path,
@@ -1686,7 +1777,12 @@ impl Workspace for WorkspaceServer {
             suppression_reason,
         } = params;
 
-        let capabilities = self.get_file_capabilities(&path);
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities =
+            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
 
         let fix_all = capabilities
             .analyzer
@@ -1695,17 +1791,14 @@ impl Workspace for WorkspaceServer {
 
         let (mut parse, embedded_snippets) = self.get_parse_with_snippets(&path)?;
 
-        let settings = self
-            .projects
-            .get_settings_based_on_path(project_key, &path)
-            .ok_or_else(WorkspaceError::no_project)?;
         let plugins = self
             .get_analyzer_plugins_for_project(
                 settings.source_path().unwrap_or_default().as_path(),
                 &settings.get_plugins_for_path(&path),
             )
             .map_err(WorkspaceError::plugin_errors)?;
-        let language = self.get_file_source(&path);
+        let language =
+            self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let plugins = if rule_categories.contains(RuleCategory::Lint) {
             plugins
         } else {
@@ -1789,8 +1882,15 @@ impl Workspace for WorkspaceServer {
         })
     }
 
-    fn rename(&self, params: super::RenameParams) -> Result<RenameResult, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
+    fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError> {
+        let settings = self
+            .projects
+            .get_settings_based_on_path(params.project_key, &params.path)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let capabilities = self.get_file_capabilities(
+            &params.path,
+            settings.experimental_full_html_support_enabled(),
+        );
         let rename = capabilities
             .analyzer
             .rename
@@ -1864,12 +1964,17 @@ impl Workspace for WorkspaceServer {
             pattern,
         }: SearchPatternParams,
     ) -> Result<SearchResults, WorkspaceError> {
+        let settings = self
+            .projects
+            .get_settings_based_on_path(project_key, &path)
+            .ok_or_else(WorkspaceError::no_project)?;
         let patterns = self.patterns.pin();
         let query = patterns
             .get(&pattern)
             .ok_or_else(WorkspaceError::invalid_pattern)?;
 
-        let capabilities = self.get_file_capabilities(&path);
+        let capabilities =
+            self.get_file_capabilities(&path, settings.experimental_full_html_support_enabled());
         let search = capabilities
             .search
             .search
@@ -1880,13 +1985,14 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(WorkspaceError::no_project)?;
         let parse = self.get_parse(&path)?;
 
-        let document_file_source = self.get_file_source(&path);
+        let document_file_source =
+            self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let matches = search(&path, &document_file_source, parse, query, &settings)?;
 
         Ok(SearchResults { path, matches })
     }
 
-    fn drop_pattern(&self, params: super::DropPatternParams) -> Result<(), WorkspaceError> {
+    fn drop_pattern(&self, params: DropPatternParams) -> Result<(), WorkspaceError> {
         self.patterns.pin().remove(&params.pattern);
         Ok(())
     }

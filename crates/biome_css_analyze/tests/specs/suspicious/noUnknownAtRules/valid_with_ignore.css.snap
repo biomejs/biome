@@ -1,0 +1,20 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid_with_ignore.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+/* These should be valid because they're in the ignore list */
+@custom-at-rule {}
+@MyCustomRule {
+  color: red;
+}
+@mycustomrule {
+  color: red;
+}
+@another-custom-rule {
+  font-size: 14px;
+}
+```

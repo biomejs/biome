@@ -24,7 +24,7 @@ unicode-bom           = { workspace = true }
 
 [dev-dependencies]
 biome_test_utils  = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "=3.0.3" }
+criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }

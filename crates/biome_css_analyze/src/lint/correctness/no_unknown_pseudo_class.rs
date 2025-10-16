@@ -1,6 +1,9 @@
 use crate::{
     keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
-    utils::{is_custom_selector, is_known_pseudo_class, is_page_pseudo_class, vendor_prefixed},
+    utils::{
+        is_css_module_pseudo_class, is_custom_selector, is_known_pseudo_class,
+        is_page_pseudo_class, vendor_prefixed,
+    },
 };
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -174,9 +177,7 @@ impl Rule for NoUnknownPseudoClass {
             }
         };
 
-        let is_valid_global = lower_name == "global" && is_css_modules;
-
-        if is_valid_class || is_valid_global {
+        if is_valid_class || is_css_modules && is_css_module_pseudo_class(lower_name) {
             None
         } else {
             Some(NoUnknownPseudoClassSelectorState {

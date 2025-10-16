@@ -143,7 +143,7 @@ impl ReactLibrary {
 /// List of valid [`React` API]
 ///
 /// [`React` API]: https://reactjs.org/docs/react-api.html
-const VALID_REACT_API: [&str; 29] = [
+const VALID_REACT_API: [&str; 31] = [
     "Component",
     "PureComponent",
     "memo",
@@ -173,6 +173,8 @@ const VALID_REACT_API: [&str; 29] = [
     "useTransition",
     "useId",
     "useSyncExternalStore",
+    "Activity",
+    "useEffectEvent",
 ];
 
 /// Checks if the current [JsCallExpression] is a potential [`React` API].

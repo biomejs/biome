@@ -1381,12 +1381,10 @@
 			"properties": {
 				"allowWrongLineComments": {
 					"description": "Allow comments to appear on incorrect lines in `.css` files",
-					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
 					"description": "Enables parsing of CSS Modules specific features.",
-					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {
@@ -1574,7 +1572,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
 				},
 				"formatWithErrors": {
-					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
+					"description": "Whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"includes": {
@@ -1864,6 +1862,10 @@
 						{ "$ref": "#/definitions/HtmlAssistConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"experimentalFullSupportEnabled": {
+					"description": "Enables full support for HTML, Vue, Svelte and Astro files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"formatter": {
 					"description": "HTML formatter options",
@@ -3173,6 +3175,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEmptySourceConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoEmptySourceOptions" }
+			]
+		},
+		"NoEmptySourceOptions": {
+			"type": "object",
+			"properties": {
+				"allowComments": {
+					"description": "Whether comments are considered meaningful",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoEmptyTypeParametersConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4468,6 +4487,13 @@
 		},
 		"NoUnknownAtRulesOptions": {
 			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "A list of unknown at-rule names to ignore (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoUnknownFunctionConfiguration": {
@@ -5048,6 +5074,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptySource": {
+					"description": "Disallow empty sources.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoEmptySourceConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noFloatingPromises": {
 					"description": "Require Promise-like statements to be handled appropriately.",
 					"anyOf": [
@@ -5207,6 +5240,13 @@
 						{
 							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"useDeprecatedDate": {
+					"description": "Require the @deprecated directive to specify a deletion date.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseDeprecatedDateConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -6993,6 +7033,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoEmptyPatternOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoEmptySourceOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoEmptySourceOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -10486,6 +10541,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseDeprecatedDateOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseDeprecatedDateOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseDeprecatedReasonOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -13926,6 +13996,19 @@
 		},
 		"UseDefaultSwitchClauseOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseDeprecatedDateConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseDeprecatedDateOptions" }
+			]
+		},
+		"UseDeprecatedDateOptions": {
+			"type": "object",
+			"properties": {
+				"argumentName": { "default": "deletionDate", "type": "string" }
+			},
 			"additionalProperties": false
 		},
 		"UseDeprecatedReasonConfiguration": {

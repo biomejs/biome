@@ -11,7 +11,7 @@ use biome_service::workspace::FeaturesSupported;
 pub(crate) fn check_file<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     path: BiomePath,
-    file_features: FeaturesSupported,
+    file_features: &FeaturesSupported,
 ) -> FileResult {
     let mut has_failures = false;
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
@@ -34,8 +34,14 @@ pub(crate) fn check_file<'ctx>(
         categories = categories.with_assist();
     }
 
-    let analyzer_result =
-        analyze_with_guard(ctx, &mut workspace_file, false, None, categories.build());
+    let analyzer_result = analyze_with_guard(
+        ctx,
+        &mut workspace_file,
+        false,
+        None,
+        categories.build(),
+        file_features,
+    );
 
     let mut changed = false;
     // To reduce duplication of the same error on format and lint_and_assist
@@ -67,7 +73,7 @@ pub(crate) fn check_file<'ctx>(
         if ctx.execution.should_skip_parse_errors() && skipped_parse_error {
             // Parse errors are already skipped during the analyze phase, so no need to do it here.
         } else {
-            let format_result = format_with_guard(ctx, &mut workspace_file);
+            let format_result = format_with_guard(ctx, &mut workspace_file, file_features);
             match format_result {
                 Ok(status) => {
                     if status.is_changed() {
