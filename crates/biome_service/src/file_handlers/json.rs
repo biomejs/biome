@@ -1,6 +1,6 @@
 use super::{
     AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
-    ExtensionHandler, ParseResult, ProcessLint, SearchCapabilities, is_diagnostic_error,
+    ExtensionHandler, ParseResult, ProcessLint, SearchCapabilities, get_diagnostic_severity, is_diagnostic_error,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -662,6 +662,16 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                 // suppression actions should not be part of the fixes (safe or suggested)
                 if action.is_suppression() {
                     continue;
+                }
+
+                // Check if we should skip this fix based on diagnostic level
+                if let Some(diagnostic) = current_diagnostic.as_ref() {
+                    if let Some(min_level) = params.diagnostic_level {
+                        let diagnostic_severity = get_diagnostic_severity(diagnostic, rules.as_deref());
+                        if diagnostic_severity < min_level {
+                            continue;
+                        }
+                    }
                 }
 
                 match params.fix_file_mode {

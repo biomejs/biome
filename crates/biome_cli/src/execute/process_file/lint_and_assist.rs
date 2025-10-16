@@ -65,13 +65,14 @@ pub(crate) fn analyze_with_guard<'ctx>(
 
         let fix_result = workspace_file
             .guard()
-            .fix_file(
+            .fix_file_with_diagnostic_level(
                 *fix_mode,
                 false,
                 categories,
                 only.clone(),
                 skip.clone(),
                 Some(suppression_explanation.to_string()),
+                Some(ctx.diagnostic_level),
             )
             .with_file_path_and_code(
                 workspace_file.path.to_string(),

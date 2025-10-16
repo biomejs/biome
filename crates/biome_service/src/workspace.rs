@@ -1028,6 +1028,9 @@ pub struct FixFileParams {
     pub rule_categories: RuleCategories,
     #[serde(default)]
     pub suppression_reason: Option<String>,
+    /// The minimum diagnostic level to fix
+    #[serde(default)]
+    pub diagnostic_level: Option<biome_diagnostics::Severity>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1721,6 +1724,31 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             rule_categories,
             suppression_reason,
             enabled_rules: vec![],
+            diagnostic_level: None,
+        })
+    }
+
+    pub fn fix_file_with_diagnostic_level(
+        &self,
+        fix_file_mode: FixFileMode,
+        should_format: bool,
+        rule_categories: RuleCategories,
+        only: Vec<RuleSelector>,
+        skip: Vec<RuleSelector>,
+        suppression_reason: Option<String>,
+        diagnostic_level: Option<biome_diagnostics::Severity>,
+    ) -> Result<FixFileResult, WorkspaceError> {
+        self.workspace.fix_file(FixFileParams {
+            project_key: self.project_key,
+            path: self.path.clone(),
+            fix_file_mode,
+            should_format,
+            only,
+            skip,
+            rule_categories,
+            suppression_reason,
+            enabled_rules: vec![],
+            diagnostic_level,
         })
     }
 

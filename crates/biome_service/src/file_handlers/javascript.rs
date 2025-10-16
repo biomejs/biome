@@ -5,7 +5,7 @@ use super::{
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
-use crate::file_handlers::{FixAllParams, is_diagnostic_error};
+use crate::file_handlers::{FixAllParams, get_diagnostic_severity, is_diagnostic_error};
 use crate::settings::{
     OverrideSettings, Settings, check_feature_activity, check_override_feature_activity,
 };
@@ -898,6 +898,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
 
                 for action in signal.actions() {
+                    // Check if we should skip this fix based on diagnostic level
+                    if let Some(diagnostic) = current_diagnostic.as_ref() {
+                        if let Some(min_level) = params.diagnostic_level {
+                            let diagnostic_severity = get_diagnostic_severity(diagnostic, rules.as_deref());
+                            if diagnostic_severity < min_level {
+                                continue;
+                            }
+                        }
+                    }
+
                     match params.fix_file_mode {
                         FixFileMode::ApplySuppressions => {
                             if action.is_suppression() {
