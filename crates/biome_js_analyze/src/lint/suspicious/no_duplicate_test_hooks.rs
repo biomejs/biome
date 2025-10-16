@@ -223,16 +223,16 @@ impl Rule for NoDuplicateTestHooks {
         let node = ctx.query();
         let callee = node.callee().ok()?;
         let node_name = callee.get_callee_object_name()?;
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 ctx.query().range(),
                 markup! {
-                    "Disallow duplicate setup and teardown hooks."
+                    "The test hook "<Emphasis>{node_name.text_trimmed()}</Emphasis>" is used multiple times in the same test block."
                 },
-            )
-            .note(markup! {
-                "Disallow "<Emphasis>{node_name.text_trimmed()}</Emphasis>" duplicacy inside the describe function."
+            ).note(markup! {
+                "The presence of the same hook more than once in the same test block can create unexpected errors inside tests. Remove one of them."
             }),
         )
     }
