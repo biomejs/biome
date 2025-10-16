@@ -964,3 +964,125 @@ export const squash = function squash() {};
 
     assert_debug_snapshot!(result)
 }
+
+#[test]
+fn diagnostic_level_respects_fix_filtering() {
+    use biome_analyze::RuleCategoriesBuilder;
+    use biome_diagnostics::Severity;
+    use crate::workspace::{FixFileMode, FixFileParams};
+
+    let (workspace, project_key) = create_server();
+
+    // Create a TypeScript file with violations at different severity levels
+    let file_content = r#"let x: number | undefined = undefined;
+if (x == 1) {
+  console.log(x);
+}
+"#;
+
+    let config_content = r#"{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "complexity": {
+        "noUselessUndefinedInitialization": "info"
+      },
+      "suspicious": {
+        "noDoubleEquals": "error"
+      }
+    }
+  }
+}
+"#;
+
+    // Set up configuration
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: serde_json::from_str(config_content).unwrap(),
+            workspace_directory: None,
+        })
+        .unwrap();
+
+    let _file_guard = FileGuard::open(
+        workspace.as_ref(),
+        OpenFileParams {
+            project_key,
+            path: BiomePath::new("test.ts"),
+            content: FileContent::from_client(file_content),
+            document_file_source: None,
+            persist_node_cache: false,
+        },
+    )
+    .unwrap();
+
+    let rule_categories = RuleCategoriesBuilder::default().with_lint().build();
+
+    // Test 1: With diagnostic_level=error, should only fix error-level violations
+    let result_error_level = workspace
+        .fix_file(FixFileParams {
+            project_key,
+            path: BiomePath::new("test.ts"),
+            fix_file_mode: FixFileMode::SafeAndUnsafeFixes,
+            should_format: false,
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            rule_categories,
+            suppression_reason: None,
+            diagnostic_level: Some(Severity::Error),
+        })
+        .unwrap();
+
+    // Should only fix the error-level violation (noDoubleEquals), not the info-level one
+    let expected_error_only = r#"let x: number | undefined = undefined;
+if (x === 1) {
+  console.log(x);
+}
+"#;
+    assert_eq!(result_error_level.code, expected_error_only);
+
+    // Test 2: With diagnostic_level=information, should fix both info and error level violations
+    let result_info_level = workspace
+        .fix_file(FixFileParams {
+            project_key,
+            path: BiomePath::new("test.ts"),
+            fix_file_mode: FixFileMode::SafeAndUnsafeFixes,
+            should_format: false,
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            rule_categories,
+            suppression_reason: None,
+            diagnostic_level: Some(Severity::Information),
+        })
+        .unwrap();
+
+    // Should fix both violations
+    let expected_both_fixed = r#"let x: number | undefined ;
+if (x === 1) {
+  console.log(x);
+}
+"#;
+    assert_eq!(result_info_level.code, expected_both_fixed);
+
+    // Test 3: With diagnostic_level=None (default), should fix all violations
+    let result_no_level = workspace
+        .fix_file(FixFileParams {
+            project_key,
+            path: BiomePath::new("test.ts"),
+            fix_file_mode: FixFileMode::SafeAndUnsafeFixes,
+            should_format: false,
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            rule_categories,
+            suppression_reason: None,
+            diagnostic_level: None,
+        })
+        .unwrap();
+
+    // Should fix both violations (same as info level)
+    assert_eq!(result_no_level.code, expected_both_fixed);
+}

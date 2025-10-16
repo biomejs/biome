@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "complexity": {
+        "noUselessUndefinedInitialization": "info"
+      },
+      "suspicious": {
+        "noDoubleEquals": "error"
+      }
+    }
+  }
+}
+```
+
+## `test.ts`
+
+```ts
+let x: number | undefined;
+if (x === 1) {
+	console.log(x);
+}
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```
