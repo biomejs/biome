@@ -414,6 +414,8 @@ pub struct FixAllParams<'a> {
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
     pub(crate) plugins: AnalyzerPluginVec,
+    /// The minimum diagnostic level to fix
+    pub(crate) diagnostic_level: Option<biome_diagnostics::Severity>,
 }
 
 #[derive(Default)]
@@ -744,7 +746,16 @@ pub(crate) fn is_diagnostic_error(
     diagnostic: &'_ AnalyzerDiagnostic,
     rules: Option<&'_ Rules>,
 ) -> bool {
-    let severity = diagnostic
+    let severity = get_diagnostic_severity(diagnostic, rules);
+    severity >= Severity::Error
+}
+
+/// Gets the effective severity of a diagnostic, taking into account rule configuration
+pub(crate) fn get_diagnostic_severity(
+    diagnostic: &'_ AnalyzerDiagnostic,
+    rules: Option<&'_ Rules>,
+) -> Severity {
+    diagnostic
         .category()
         .filter(|category| category.name().starts_with("lint/"))
         .map_or_else(
@@ -756,9 +767,7 @@ pub(crate) fn is_diagnostic_error(
                     })
                     .unwrap_or(Severity::Warning)
             },
-        );
-
-    severity >= Severity::Error
+        )
 }
 
 /// Parse the "lang" attribute from the opening tag of the "\<script\>" block in Svelte or Vue files.
