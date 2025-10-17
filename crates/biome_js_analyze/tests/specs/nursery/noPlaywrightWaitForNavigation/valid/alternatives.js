@@ -1,4 +1,4 @@
 await page.waitForURL('/home');
-await page.waitForLoadState('networkidle');
+await page.waitForLoadState('load');
 await page.goto('/home');
 

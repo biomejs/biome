@@ -402,11 +402,15 @@ fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
                 return true;
             }
             biome_js_syntax::JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => {
-                // If it's an arrow function with expression body, it's implicitly returned
+                // If it's an arrow function with expression body, check if our call is exactly the body
                 if let Some(arrow) = JsArrowFunctionExpression::cast_ref(&node) {
                     if let Ok(body) = arrow.body() {
-                        if body.as_any_js_expression().is_some() {
-                            return true;
+                        if let Some(body_expr) = body.as_any_js_expression() {
+                            // Only return true if the call expression is exactly the arrow body
+                            // (not just nested somewhere inside it)
+                            if call_expr.syntax().text_trimmed_range() == body_expr.syntax().text_trimmed_range() {
+                                return true;
+                            }
                         }
                     }
                 }
