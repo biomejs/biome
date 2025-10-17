@@ -1,7 +1,7 @@
 use super::{
     AnalyzerVisitorBuilder, CodeActionsParams, EnabledForPath, ExtensionHandler, FixAllParams,
-    LintParams, LintResults, ParseResult, ProcessLint, SearchCapabilities, get_diagnostic_severity, is_diagnostic_error,
-    search,
+    LintParams, LintResults, ParseResult, ProcessLint, SearchCapabilities, get_diagnostic_severity,
+    is_diagnostic_error, search,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
@@ -647,26 +647,25 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             |signal| {
                 let current_diagnostic = signal.diagnostic();
 
-                if let Some(diagnostic) = current_diagnostic.as_ref()
-                    && is_diagnostic_error(diagnostic, rules.as_deref())
-                {
-                    errors += 1;
+                if let Some(diagnostic) = current_diagnostic.as_ref() {
+                    // Check if we should skip this diagnostic based on its level
+                    if let Some(min_level) = params.diagnostic_level {
+                        let diagnostic_severity =
+                            get_diagnostic_severity(diagnostic, rules.as_deref());
+                        if diagnostic_severity < min_level {
+                            return ControlFlow::Continue(());
+                        }
+                    }
+
+                    if is_diagnostic_error(diagnostic, rules.as_deref()) {
+                        errors += 1;
+                    }
                 }
 
                 for action in signal.actions() {
                     // suppression actions should not be part of the fixes (safe or suggested)
                     if action.is_suppression() {
                         continue;
-                    }
-
-                    // Check if we should skip this fix based on diagnostic level
-                    if let Some(diagnostic) = current_diagnostic.as_ref() {
-                        if let Some(min_level) = params.diagnostic_level {
-                            let diagnostic_severity = get_diagnostic_severity(diagnostic, rules.as_deref());
-                            if diagnostic_severity < min_level {
-                                continue;
-                            }
-                        }
                     }
 
                     match params.fix_file_mode {
