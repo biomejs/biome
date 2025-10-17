@@ -3206,7 +3206,7 @@
 					"description": "The maximum number of lines allowed in a function body.",
 					"default": 50,
 					"type": "integer",
-					"format": "uint8",
+					"format": "uint16",
 					"minimum": 1.0
 				},
 				"skipBlankLines": {
