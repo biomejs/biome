@@ -382,7 +382,7 @@ impl RuleSource {
             Self::EslintVueJs(rule_name) => format!("https://eslint.vuejs.org/rules/{rule_name}"),
             Self::EslintPackageJson(rule_name) => format!("https://github.com/JoshuaKGoldberg/eslint-plugin-package-json/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintPackageJsonDependencies(rule_name) => format!("https://github.com/idan-at/eslint-plugin-package-json-dependencies/blob/master/docs/rules/{rule_name}.md"),
-            Self::EslintPlaywright(rule_name) => format!("https://github.com/playwright-community/eslint-plugin-playwright/tree/main/docs/rules/{rule_name}.md"),
+            Self::EslintPlaywright(rule_name) => format!("https://github.com/playwright-community/eslint-plugin-playwright/blob/main/docs/rules/{rule_name}.md"),
         }
     }
 
