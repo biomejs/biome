@@ -2432,6 +2432,16 @@
 			"additionalProperties": false
 		},
 		"MaxSize": { "type": "integer", "format": "uint64", "minimum": 1.0 },
+		"MissingPlaywrightAwaitConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithMissingPlaywrightAwaitOptions" }
+			]
+		},
+		"MissingPlaywrightAwaitOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"Modifiers": {
 			"type": "array",
 			"items": { "$ref": "#/definitions/RestrictedModifier" },
@@ -3917,6 +3927,128 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoPlaywrightElementHandleConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightElementHandleOptions" }
+			]
+		},
+		"NoPlaywrightElementHandleOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightEvalConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightEvalOptions" }
+			]
+		},
+		"NoPlaywrightEvalOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightFocusedTestConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightFocusedTestOptions" }
+			]
+		},
+		"NoPlaywrightFocusedTestOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightForceOptionConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightForceOptionOptions" }
+			]
+		},
+		"NoPlaywrightForceOptionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightNetworkidleConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightNetworkidleOptions" }
+			]
+		},
+		"NoPlaywrightNetworkidleOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightPagePauseConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightPagePauseOptions" }
+			]
+		},
+		"NoPlaywrightPagePauseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightSkippedTestConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightSkippedTestOptions" }
+			]
+		},
+		"NoPlaywrightSkippedTestOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightUselessAwaitConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightUselessAwaitOptions" }
+			]
+		},
+		"NoPlaywrightUselessAwaitOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightValidDescribeCallbackConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{
+					"$ref": "#/definitions/RuleWithNoPlaywrightValidDescribeCallbackOptions"
+				}
+			]
+		},
+		"NoPlaywrightValidDescribeCallbackOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightWaitForNavigationConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightWaitForNavigationOptions" }
+			]
+		},
+		"NoPlaywrightWaitForNavigationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightWaitForSelectorConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightWaitForSelectorOptions" }
+			]
+		},
+		"NoPlaywrightWaitForSelectorOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoPlaywrightWaitForTimeoutConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoPlaywrightWaitForTimeoutOptions" }
+			]
+		},
+		"NoPlaywrightWaitForTimeoutOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoPositiveTabindexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5006,6 +5138,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"missingPlaywrightAwait": {
+					"description": "Enforce Playwright async APIs to be awaited or returned.",
+					"anyOf": [
+						{ "$ref": "#/definitions/MissingPlaywrightAwaitConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDeprecatedImports": {
 					"description": "Restrict imports of deprecated exports.",
 					"anyOf": [
@@ -5068,6 +5207,96 @@
 						{
 							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightElementHandle": {
+					"description": "Disallow usage of element handles (page.$() and page.$$()).",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPlaywrightElementHandleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightEval": {
+					"description": "Disallow usage of page.$eval() and page.$$eval().",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPlaywrightEvalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightFocusedTest": {
+					"description": "Disallow usage of .only annotation in Playwright tests.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPlaywrightFocusedTestConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightForceOption": {
+					"description": "Disallow usage of the { force: true } option.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPlaywrightForceOptionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightNetworkidle": {
+					"description": "Disallow usage of the networkidle option.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPlaywrightNetworkidleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightPagePause": {
+					"description": "Disallow using page.pause().",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPlaywrightPagePauseConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightSkippedTest": {
+					"description": "Disallow usage of .skip annotation in Playwright tests.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPlaywrightSkippedTestConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightUselessAwait": {
+					"description": "Disallow unnecessary await for Playwright methods that don't return promises.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPlaywrightUselessAwaitConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightValidDescribeCallback": {
+					"description": "Enforce valid describe() callback.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoPlaywrightValidDescribeCallbackConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightWaitForNavigation": {
+					"description": "Disallow using page.waitForNavigation().",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoPlaywrightWaitForNavigationConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightWaitForSelector": {
+					"description": "Disallow using page.waitForSelector().",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoPlaywrightWaitForSelectorConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightWaitForTimeout": {
+					"description": "Disallow using page.waitForTimeout().",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoPlaywrightWaitForTimeoutConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5869,6 +6098,25 @@
 					"enum": ["error"]
 				}
 			]
+		},
+		"RuleWithMissingPlaywrightAwaitOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/MissingPlaywrightAwaitOptions" }]
+				}
+			},
+			"additionalProperties": false
 		},
 		"RuleWithNoAccessKeyOptions": {
 			"type": "object",
@@ -8182,6 +8430,200 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoParameterPropertiesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightElementHandleOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoPlaywrightElementHandleOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightEvalOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoPlaywrightEvalOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightFocusedTestOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoPlaywrightFocusedTestOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightForceOptionOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoPlaywrightForceOptionOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightNetworkidleOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoPlaywrightNetworkidleOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightPagePauseOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoPlaywrightPagePauseOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightSkippedTestOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoPlaywrightSkippedTestOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightUselessAwaitOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoPlaywrightUselessAwaitOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightValidDescribeCallbackOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoPlaywrightValidDescribeCallbackOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightWaitForNavigationOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoPlaywrightWaitForNavigationOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightWaitForSelectorOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoPlaywrightWaitForSelectorOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoPlaywrightWaitForTimeoutOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/NoPlaywrightWaitForTimeoutOptions" }
+					]
 				}
 			},
 			"additionalProperties": false

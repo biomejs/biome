@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsObjectExpression};
@@ -87,7 +87,7 @@ impl Rule for NoPlaywrightForceOption {
 
         // Check the arguments for { force: true }
         let args = call_expr.arguments().ok()?;
-        
+
         for arg in args.args().into_iter().flatten() {
             if let Some(expr) = arg.as_any_js_expression() {
                 if let AnyJsExpression::JsObjectExpression(obj_expr) = expr {
@@ -132,7 +132,9 @@ fn has_force_true(obj_expr: &JsObjectExpression) -> bool {
                             // Check if value is true
                             if let Ok(value) = prop.value() {
                                 if let Some(literal) = value.as_any_js_literal_expression() {
-                                    if let Some(bool_lit) = literal.as_js_boolean_literal_expression() {
+                                    if let Some(bool_lit) =
+                                        literal.as_js_boolean_literal_expression()
+                                    {
                                         if let Ok(value_token) = bool_lit.value_token() {
                                             if value_token.text_trimmed() == "true" {
                                                 return true;
@@ -147,7 +149,6 @@ fn has_force_true(obj_expr: &JsObjectExpression) -> bool {
             }
         }
     }
-    
+
     false
 }
-

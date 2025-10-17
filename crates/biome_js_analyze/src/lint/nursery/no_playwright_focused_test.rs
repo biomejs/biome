@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
@@ -59,18 +59,18 @@ impl Rule for NoPlaywrightFocusedTest {
 
         // Check if this is a member expression like test.only() or describe.only()
         let member_expr = JsStaticMemberExpression::cast_ref(callee.syntax())?;
-        
+
         // Check if the member being accessed is "only"
         let member_name = member_expr.member().ok()?;
         let member_text = member_name.as_js_name()?.value_token().ok()?;
-        
+
         if member_text.text_trimmed() != "only" {
             return None;
         }
 
         // Check if the object is test/describe or a chain like test.describe
         let object = member_expr.object().ok()?;
-        
+
         fn is_test_or_describe_object(expr: &biome_js_syntax::AnyJsExpression) -> bool {
             match expr {
                 biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => {
@@ -128,4 +128,3 @@ impl Rule for NoPlaywrightFocusedTest {
         )
     }
 }
-

@@ -89,6 +89,7 @@ impl std::fmt::Display for RuleGroup {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum RuleName {
+    MissingPlaywrightAwait,
     NoAccessKey,
     NoAccumulatingSpread,
     NoAdjacentSpacesInRegex,
@@ -227,6 +228,18 @@ pub enum RuleName {
     NoOctalEscape,
     NoParameterAssign,
     NoParameterProperties,
+    NoPlaywrightElementHandle,
+    NoPlaywrightEval,
+    NoPlaywrightFocusedTest,
+    NoPlaywrightForceOption,
+    NoPlaywrightNetworkidle,
+    NoPlaywrightPagePause,
+    NoPlaywrightSkippedTest,
+    NoPlaywrightUselessAwait,
+    NoPlaywrightValidDescribeCallback,
+    NoPlaywrightWaitForNavigation,
+    NoPlaywrightWaitForSelector,
+    NoPlaywrightWaitForTimeout,
     NoPositiveTabindex,
     NoPrecisionLoss,
     NoPrivateImports,
@@ -455,6 +468,7 @@ pub enum RuleName {
 impl RuleName {
     pub const fn as_str(self) -> &'static str {
         match self {
+            Self::MissingPlaywrightAwait => "missingPlaywrightAwait",
             Self::NoAccessKey => "noAccessKey",
             Self::NoAccumulatingSpread => "noAccumulatingSpread",
             Self::NoAdjacentSpacesInRegex => "noAdjacentSpacesInRegex",
@@ -597,6 +611,18 @@ impl RuleName {
             Self::NoOctalEscape => "noOctalEscape",
             Self::NoParameterAssign => "noParameterAssign",
             Self::NoParameterProperties => "noParameterProperties",
+            Self::NoPlaywrightElementHandle => "noPlaywrightElementHandle",
+            Self::NoPlaywrightEval => "noPlaywrightEval",
+            Self::NoPlaywrightFocusedTest => "noPlaywrightFocusedTest",
+            Self::NoPlaywrightForceOption => "noPlaywrightForceOption",
+            Self::NoPlaywrightNetworkidle => "noPlaywrightNetworkidle",
+            Self::NoPlaywrightPagePause => "noPlaywrightPagePause",
+            Self::NoPlaywrightSkippedTest => "noPlaywrightSkippedTest",
+            Self::NoPlaywrightUselessAwait => "noPlaywrightUselessAwait",
+            Self::NoPlaywrightValidDescribeCallback => "noPlaywrightValidDescribeCallback",
+            Self::NoPlaywrightWaitForNavigation => "noPlaywrightWaitForNavigation",
+            Self::NoPlaywrightWaitForSelector => "noPlaywrightWaitForSelector",
+            Self::NoPlaywrightWaitForTimeout => "noPlaywrightWaitForTimeout",
             Self::NoPositiveTabindex => "noPositiveTabindex",
             Self::NoPrecisionLoss => "noPrecisionLoss",
             Self::NoPrivateImports => "noPrivateImports",
@@ -825,6 +851,7 @@ impl RuleName {
     }
     pub const fn group(self) -> RuleGroup {
         match self {
+            Self::MissingPlaywrightAwait => RuleGroup::Nursery,
             Self::NoAccessKey => RuleGroup::A11y,
             Self::NoAccumulatingSpread => RuleGroup::Performance,
             Self::NoAdjacentSpacesInRegex => RuleGroup::Complexity,
@@ -963,6 +990,18 @@ impl RuleName {
             Self::NoOctalEscape => RuleGroup::Suspicious,
             Self::NoParameterAssign => RuleGroup::Style,
             Self::NoParameterProperties => RuleGroup::Style,
+            Self::NoPlaywrightElementHandle => RuleGroup::Nursery,
+            Self::NoPlaywrightEval => RuleGroup::Nursery,
+            Self::NoPlaywrightFocusedTest => RuleGroup::Nursery,
+            Self::NoPlaywrightForceOption => RuleGroup::Nursery,
+            Self::NoPlaywrightNetworkidle => RuleGroup::Nursery,
+            Self::NoPlaywrightPagePause => RuleGroup::Nursery,
+            Self::NoPlaywrightSkippedTest => RuleGroup::Nursery,
+            Self::NoPlaywrightUselessAwait => RuleGroup::Nursery,
+            Self::NoPlaywrightValidDescribeCallback => RuleGroup::Nursery,
+            Self::NoPlaywrightWaitForNavigation => RuleGroup::Nursery,
+            Self::NoPlaywrightWaitForSelector => RuleGroup::Nursery,
+            Self::NoPlaywrightWaitForTimeout => RuleGroup::Nursery,
             Self::NoPositiveTabindex => RuleGroup::A11y,
             Self::NoPrecisionLoss => RuleGroup::Correctness,
             Self::NoPrivateImports => RuleGroup::Correctness,
@@ -1194,6 +1233,7 @@ impl std::str::FromStr for RuleName {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "missingPlaywrightAwait" => Ok(Self::MissingPlaywrightAwait),
             "noAccessKey" => Ok(Self::NoAccessKey),
             "noAccumulatingSpread" => Ok(Self::NoAccumulatingSpread),
             "noAdjacentSpacesInRegex" => Ok(Self::NoAdjacentSpacesInRegex),
@@ -1338,6 +1378,18 @@ impl std::str::FromStr for RuleName {
             "noOctalEscape" => Ok(Self::NoOctalEscape),
             "noParameterAssign" => Ok(Self::NoParameterAssign),
             "noParameterProperties" => Ok(Self::NoParameterProperties),
+            "noPlaywrightElementHandle" => Ok(Self::NoPlaywrightElementHandle),
+            "noPlaywrightEval" => Ok(Self::NoPlaywrightEval),
+            "noPlaywrightFocusedTest" => Ok(Self::NoPlaywrightFocusedTest),
+            "noPlaywrightForceOption" => Ok(Self::NoPlaywrightForceOption),
+            "noPlaywrightNetworkidle" => Ok(Self::NoPlaywrightNetworkidle),
+            "noPlaywrightPagePause" => Ok(Self::NoPlaywrightPagePause),
+            "noPlaywrightSkippedTest" => Ok(Self::NoPlaywrightSkippedTest),
+            "noPlaywrightUselessAwait" => Ok(Self::NoPlaywrightUselessAwait),
+            "noPlaywrightValidDescribeCallback" => Ok(Self::NoPlaywrightValidDescribeCallback),
+            "noPlaywrightWaitForNavigation" => Ok(Self::NoPlaywrightWaitForNavigation),
+            "noPlaywrightWaitForSelector" => Ok(Self::NoPlaywrightWaitForSelector),
+            "noPlaywrightWaitForTimeout" => Ok(Self::NoPlaywrightWaitForTimeout),
             "noPositiveTabindex" => Ok(Self::NoPositiveTabindex),
             "noPrecisionLoss" => Ok(Self::NoPrecisionLoss),
             "noPrivateImports" => Ok(Self::NoPrivateImports),
@@ -4646,10 +4698,11 @@ impl From<GroupPlainConfiguration> for Correctness {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
-pub struct Nursery { # [doc = r" Enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Restrict imports of deprecated exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_deprecated_imports : Option < RuleConfiguration < biome_rule_options :: no_deprecated_imports :: NoDeprecatedImportsOptions >> , # [doc = "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\"."] # [serde (skip_serializing_if = "Option::is_none")] pub no_duplicate_dependencies : Option < RuleConfiguration < biome_rule_options :: no_duplicate_dependencies :: NoDuplicateDependenciesOptions >> , # [doc = "Disallow empty sources."] # [serde (skip_serializing_if = "Option::is_none")] pub no_empty_source : Option < RuleConfiguration < biome_rule_options :: no_empty_source :: NoEmptySourceOptions >> , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallow string literals inside JSX elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_jsx_literals : Option < RuleConfiguration < biome_rule_options :: no_jsx_literals :: NoJsxLiteralsOptions >> , # [doc = "Disallow Promises to be used in places where they are almost certainly a mistake."] # [serde (skip_serializing_if = "Option::is_none")] pub no_misused_promises : Option < RuleFixConfiguration < biome_rule_options :: no_misused_promises :: NoMisusedPromisesOptions >> , # [doc = "Prevent client components from being async functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_next_async_client_component : Option < RuleConfiguration < biome_rule_options :: no_next_async_client_component :: NoNextAsyncClientComponentOptions >> , # [doc = "Disallow non-null assertions after optional chaining expressions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_non_null_asserted_optional_chain : Option < RuleConfiguration < biome_rule_options :: no_non_null_asserted_optional_chain :: NoNonNullAssertedOptionalChainOptions >> , # [doc = "Disallow useVisibleTask$() functions in Qwik components."] # [serde (skip_serializing_if = "Option::is_none")] pub no_qwik_use_visible_task : Option < RuleConfiguration < biome_rule_options :: no_qwik_use_visible_task :: NoQwikUseVisibleTaskOptions >> , # [doc = "Replaces usages of forwardRef with passing ref as a prop."] # [serde (skip_serializing_if = "Option::is_none")] pub no_react_forward_ref : Option < RuleFixConfiguration < biome_rule_options :: no_react_forward_ref :: NoReactForwardRefOptions >> , # [doc = "Disallow usage of sensitive data such as API keys and tokens."] # [serde (skip_serializing_if = "Option::is_none")] pub no_secrets : Option < RuleConfiguration < biome_rule_options :: no_secrets :: NoSecretsOptions >> , # [doc = "Disallow variable declarations from shadowing variables declared in the outer scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shadow : Option < RuleConfiguration < biome_rule_options :: no_shadow :: NoShadowOptions >> , # [doc = "Disallow unnecessary type-based conditions that can be statically determined as redundant."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unnecessary_conditions : Option < RuleConfiguration < biome_rule_options :: no_unnecessary_conditions :: NoUnnecessaryConditionsOptions >> , # [doc = "Warn when importing non-existing exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unresolved_imports : Option < RuleConfiguration < biome_rule_options :: no_unresolved_imports :: NoUnresolvedImportsOptions >> , # [doc = "Disallow expression statements that are neither a function call nor an assignment."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_expressions : Option < RuleConfiguration < biome_rule_options :: no_unused_expressions :: NoUnusedExpressionsOptions >> , # [doc = "Disallow unused catch bindings."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_catch_binding : Option < RuleFixConfiguration < biome_rule_options :: no_useless_catch_binding :: NoUselessCatchBindingOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Enforce that Vue component data options are declared as functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_data_object_declaration : Option < RuleFixConfiguration < biome_rule_options :: no_vue_data_object_declaration :: NoVueDataObjectDeclarationOptions >> , # [doc = "Disallow duplicate keys in Vue component data, methods, computed properties, and other options."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_duplicate_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_duplicate_keys :: NoVueDuplicateKeysOptions >> , # [doc = "Disallow reserved keys in Vue component data and computed properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_keys :: NoVueReservedKeysOptions >> , # [doc = "Disallow reserved names to be used as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_props : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_props :: NoVueReservedPropsOptions >> , # [doc = "Enforces href attribute for \\<a> elements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_anchor_href : Option < RuleConfiguration < biome_rule_options :: use_anchor_href :: UseAnchorHrefOptions >> , # [doc = "Enforce consistent arrow function bodies."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_arrow_return : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_arrow_return :: UseConsistentArrowReturnOptions >> , # [doc = "Enforce type definitions to consistently use either interface or type."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_type_definitions : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_type_definitions :: UseConsistentTypeDefinitionsOptions >> , # [doc = "Require the @deprecated directive to specify a deletion date."] # [serde (skip_serializing_if = "Option::is_none")] pub use_deprecated_date : Option < RuleConfiguration < biome_rule_options :: use_deprecated_date :: UseDeprecatedDateOptions >> , # [doc = "Require switch-case statements to be exhaustive."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_switch_cases : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCasesOptions >> , # [doc = "Enforce types in functions, methods, variables, and parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Enforces that \\<img> elements have both width and height attributes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_image_size : Option < RuleConfiguration < biome_rule_options :: use_image_size :: UseImageSizeOptions >> , # [doc = "Enforce a maximum number of parameters in function definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_max_params : Option < RuleConfiguration < biome_rule_options :: use_max_params :: UseMaxParamsOptions >> , # [doc = "Prefer using the class prop as a classlist over the classnames helper."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_classlist : Option < RuleConfiguration < biome_rule_options :: use_qwik_classlist :: UseQwikClasslistOptions >> , # [doc = "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_method_usage : Option < RuleConfiguration < biome_rule_options :: use_qwik_method_usage :: UseQwikMethodUsageOptions >> , # [doc = "Disallow unserializable expressions in Qwik dollar ($) scopes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_valid_lexical_scope : Option < RuleConfiguration < biome_rule_options :: use_qwik_valid_lexical_scope :: UseQwikValidLexicalScopeOptions >> , # [doc = "Enforce that components are defined as functions and never as classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_react_function_components : Option < RuleConfiguration < biome_rule_options :: use_react_function_components :: UseReactFunctionComponentsOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> , # [doc = "Enforce multi-word component names in Vue components."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_multi_word_component_names : Option < RuleConfiguration < biome_rule_options :: use_vue_multi_word_component_names :: UseVueMultiWordComponentNamesOptions >> }
+pub struct Nursery { # [doc = r" Enables the recommended rules for this group"] # [serde (skip_serializing_if = "Option::is_none")] pub recommended : Option < bool > , # [doc = "Enforce Playwright async APIs to be awaited or returned."] # [serde (skip_serializing_if = "Option::is_none")] pub missing_playwright_await : Option < RuleFixConfiguration < biome_rule_options :: missing_playwright_await :: MissingPlaywrightAwaitOptions >> , # [doc = "Restrict imports of deprecated exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_deprecated_imports : Option < RuleConfiguration < biome_rule_options :: no_deprecated_imports :: NoDeprecatedImportsOptions >> , # [doc = "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\"."] # [serde (skip_serializing_if = "Option::is_none")] pub no_duplicate_dependencies : Option < RuleConfiguration < biome_rule_options :: no_duplicate_dependencies :: NoDuplicateDependenciesOptions >> , # [doc = "Disallow empty sources."] # [serde (skip_serializing_if = "Option::is_none")] pub no_empty_source : Option < RuleConfiguration < biome_rule_options :: no_empty_source :: NoEmptySourceOptions >> , # [doc = "Require Promise-like statements to be handled appropriately."] # [serde (skip_serializing_if = "Option::is_none")] pub no_floating_promises : Option < RuleFixConfiguration < biome_rule_options :: no_floating_promises :: NoFloatingPromisesOptions >> , # [doc = "Prevent import cycles."] # [serde (skip_serializing_if = "Option::is_none")] pub no_import_cycles : Option < RuleConfiguration < biome_rule_options :: no_import_cycles :: NoImportCyclesOptions >> , # [doc = "Disallow string literals inside JSX elements."] # [serde (skip_serializing_if = "Option::is_none")] pub no_jsx_literals : Option < RuleConfiguration < biome_rule_options :: no_jsx_literals :: NoJsxLiteralsOptions >> , # [doc = "Disallow Promises to be used in places where they are almost certainly a mistake."] # [serde (skip_serializing_if = "Option::is_none")] pub no_misused_promises : Option < RuleFixConfiguration < biome_rule_options :: no_misused_promises :: NoMisusedPromisesOptions >> , # [doc = "Prevent client components from being async functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_next_async_client_component : Option < RuleConfiguration < biome_rule_options :: no_next_async_client_component :: NoNextAsyncClientComponentOptions >> , # [doc = "Disallow non-null assertions after optional chaining expressions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_non_null_asserted_optional_chain : Option < RuleConfiguration < biome_rule_options :: no_non_null_asserted_optional_chain :: NoNonNullAssertedOptionalChainOptions >> , # [doc = "Disallow usage of element handles (page.$() and page.$$())."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_element_handle : Option < RuleConfiguration < biome_rule_options :: no_playwright_element_handle :: NoPlaywrightElementHandleOptions >> , # [doc = "Disallow usage of page.$eval() and page.$$eval()."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_eval : Option < RuleConfiguration < biome_rule_options :: no_playwright_eval :: NoPlaywrightEvalOptions >> , # [doc = "Disallow usage of .only annotation in Playwright tests."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_focused_test : Option < RuleConfiguration < biome_rule_options :: no_playwright_focused_test :: NoPlaywrightFocusedTestOptions >> , # [doc = "Disallow usage of the { force: true } option."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_force_option : Option < RuleConfiguration < biome_rule_options :: no_playwright_force_option :: NoPlaywrightForceOptionOptions >> , # [doc = "Disallow usage of the networkidle option."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_networkidle : Option < RuleConfiguration < biome_rule_options :: no_playwright_networkidle :: NoPlaywrightNetworkidleOptions >> , # [doc = "Disallow using page.pause()."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_page_pause : Option < RuleConfiguration < biome_rule_options :: no_playwright_page_pause :: NoPlaywrightPagePauseOptions >> , # [doc = "Disallow usage of .skip annotation in Playwright tests."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_skipped_test : Option < RuleConfiguration < biome_rule_options :: no_playwright_skipped_test :: NoPlaywrightSkippedTestOptions >> , # [doc = "Disallow unnecessary await for Playwright methods that don't return promises."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_useless_await : Option < RuleFixConfiguration < biome_rule_options :: no_playwright_useless_await :: NoPlaywrightUselessAwaitOptions >> , # [doc = "Enforce valid describe() callback."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_valid_describe_callback : Option < RuleConfiguration < biome_rule_options :: no_playwright_valid_describe_callback :: NoPlaywrightValidDescribeCallbackOptions >> , # [doc = "Disallow using page.waitForNavigation()."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_wait_for_navigation : Option < RuleConfiguration < biome_rule_options :: no_playwright_wait_for_navigation :: NoPlaywrightWaitForNavigationOptions >> , # [doc = "Disallow using page.waitForSelector()."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_wait_for_selector : Option < RuleConfiguration < biome_rule_options :: no_playwright_wait_for_selector :: NoPlaywrightWaitForSelectorOptions >> , # [doc = "Disallow using page.waitForTimeout()."] # [serde (skip_serializing_if = "Option::is_none")] pub no_playwright_wait_for_timeout : Option < RuleConfiguration < biome_rule_options :: no_playwright_wait_for_timeout :: NoPlaywrightWaitForTimeoutOptions >> , # [doc = "Disallow useVisibleTask$() functions in Qwik components."] # [serde (skip_serializing_if = "Option::is_none")] pub no_qwik_use_visible_task : Option < RuleConfiguration < biome_rule_options :: no_qwik_use_visible_task :: NoQwikUseVisibleTaskOptions >> , # [doc = "Replaces usages of forwardRef with passing ref as a prop."] # [serde (skip_serializing_if = "Option::is_none")] pub no_react_forward_ref : Option < RuleFixConfiguration < biome_rule_options :: no_react_forward_ref :: NoReactForwardRefOptions >> , # [doc = "Disallow usage of sensitive data such as API keys and tokens."] # [serde (skip_serializing_if = "Option::is_none")] pub no_secrets : Option < RuleConfiguration < biome_rule_options :: no_secrets :: NoSecretsOptions >> , # [doc = "Disallow variable declarations from shadowing variables declared in the outer scope."] # [serde (skip_serializing_if = "Option::is_none")] pub no_shadow : Option < RuleConfiguration < biome_rule_options :: no_shadow :: NoShadowOptions >> , # [doc = "Disallow unnecessary type-based conditions that can be statically determined as redundant."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unnecessary_conditions : Option < RuleConfiguration < biome_rule_options :: no_unnecessary_conditions :: NoUnnecessaryConditionsOptions >> , # [doc = "Warn when importing non-existing exports."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unresolved_imports : Option < RuleConfiguration < biome_rule_options :: no_unresolved_imports :: NoUnresolvedImportsOptions >> , # [doc = "Disallow expression statements that are neither a function call nor an assignment."] # [serde (skip_serializing_if = "Option::is_none")] pub no_unused_expressions : Option < RuleConfiguration < biome_rule_options :: no_unused_expressions :: NoUnusedExpressionsOptions >> , # [doc = "Disallow unused catch bindings."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_catch_binding : Option < RuleFixConfiguration < biome_rule_options :: no_useless_catch_binding :: NoUselessCatchBindingOptions >> , # [doc = "Disallow the use of useless undefined."] # [serde (skip_serializing_if = "Option::is_none")] pub no_useless_undefined : Option < RuleFixConfiguration < biome_rule_options :: no_useless_undefined :: NoUselessUndefinedOptions >> , # [doc = "Enforce that Vue component data options are declared as functions."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_data_object_declaration : Option < RuleFixConfiguration < biome_rule_options :: no_vue_data_object_declaration :: NoVueDataObjectDeclarationOptions >> , # [doc = "Disallow duplicate keys in Vue component data, methods, computed properties, and other options."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_duplicate_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_duplicate_keys :: NoVueDuplicateKeysOptions >> , # [doc = "Disallow reserved keys in Vue component data and computed properties."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_keys : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_keys :: NoVueReservedKeysOptions >> , # [doc = "Disallow reserved names to be used as props."] # [serde (skip_serializing_if = "Option::is_none")] pub no_vue_reserved_props : Option < RuleConfiguration < biome_rule_options :: no_vue_reserved_props :: NoVueReservedPropsOptions >> , # [doc = "Enforces href attribute for \\<a> elements."] # [serde (skip_serializing_if = "Option::is_none")] pub use_anchor_href : Option < RuleConfiguration < biome_rule_options :: use_anchor_href :: UseAnchorHrefOptions >> , # [doc = "Enforce consistent arrow function bodies."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_arrow_return : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_arrow_return :: UseConsistentArrowReturnOptions >> , # [doc = "Enforce type definitions to consistently use either interface or type."] # [serde (skip_serializing_if = "Option::is_none")] pub use_consistent_type_definitions : Option < RuleFixConfiguration < biome_rule_options :: use_consistent_type_definitions :: UseConsistentTypeDefinitionsOptions >> , # [doc = "Require the @deprecated directive to specify a deletion date."] # [serde (skip_serializing_if = "Option::is_none")] pub use_deprecated_date : Option < RuleConfiguration < biome_rule_options :: use_deprecated_date :: UseDeprecatedDateOptions >> , # [doc = "Require switch-case statements to be exhaustive."] # [serde (skip_serializing_if = "Option::is_none")] pub use_exhaustive_switch_cases : Option < RuleFixConfiguration < biome_rule_options :: use_exhaustive_switch_cases :: UseExhaustiveSwitchCasesOptions >> , # [doc = "Enforce types in functions, methods, variables, and parameters."] # [serde (skip_serializing_if = "Option::is_none")] pub use_explicit_type : Option < RuleConfiguration < biome_rule_options :: use_explicit_type :: UseExplicitTypeOptions >> , # [doc = "Enforces that \\<img> elements have both width and height attributes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_image_size : Option < RuleConfiguration < biome_rule_options :: use_image_size :: UseImageSizeOptions >> , # [doc = "Enforce a maximum number of parameters in function definitions."] # [serde (skip_serializing_if = "Option::is_none")] pub use_max_params : Option < RuleConfiguration < biome_rule_options :: use_max_params :: UseMaxParamsOptions >> , # [doc = "Prefer using the class prop as a classlist over the classnames helper."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_classlist : Option < RuleConfiguration < biome_rule_options :: use_qwik_classlist :: UseQwikClasslistOptions >> , # [doc = "Disallow use* hooks outside of component$ or other use* hooks in Qwik applications."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_method_usage : Option < RuleConfiguration < biome_rule_options :: use_qwik_method_usage :: UseQwikMethodUsageOptions >> , # [doc = "Disallow unserializable expressions in Qwik dollar ($) scopes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_qwik_valid_lexical_scope : Option < RuleConfiguration < biome_rule_options :: use_qwik_valid_lexical_scope :: UseQwikValidLexicalScopeOptions >> , # [doc = "Enforce that components are defined as functions and never as classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_react_function_components : Option < RuleConfiguration < biome_rule_options :: use_react_function_components :: UseReactFunctionComponentsOptions >> , # [doc = "Enforce the sorting of CSS utility classes."] # [serde (skip_serializing_if = "Option::is_none")] pub use_sorted_classes : Option < RuleFixConfiguration < biome_rule_options :: use_sorted_classes :: UseSortedClassesOptions >> , # [doc = "Enforce multi-word component names in Vue components."] # [serde (skip_serializing_if = "Option::is_none")] pub use_vue_multi_word_component_names : Option < RuleConfiguration < biome_rule_options :: use_vue_multi_word_component_names :: UseVueMultiWordComponentNamesOptions >> }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
+        "missingPlaywrightAwait",
         "noDeprecatedImports",
         "noDuplicateDependencies",
         "noEmptySource",
@@ -4659,6 +4712,18 @@ impl Nursery {
         "noMisusedPromises",
         "noNextAsyncClientComponent",
         "noNonNullAssertedOptionalChain",
+        "noPlaywrightElementHandle",
+        "noPlaywrightEval",
+        "noPlaywrightFocusedTest",
+        "noPlaywrightForceOption",
+        "noPlaywrightNetworkidle",
+        "noPlaywrightPagePause",
+        "noPlaywrightSkippedTest",
+        "noPlaywrightUselessAwait",
+        "noPlaywrightValidDescribeCallback",
+        "noPlaywrightWaitForNavigation",
+        "noPlaywrightWaitForSelector",
+        "noPlaywrightWaitForTimeout",
         "noQwikUseVisibleTask",
         "noReactForwardRef",
         "noSecrets",
@@ -4688,7 +4753,7 @@ impl Nursery {
         "useVueMultiWordComponentNames",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] =
-        &[RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8])];
+        &[RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9])];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -4726,6 +4791,19 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -4737,369 +4815,499 @@ impl RuleGroupExt for Nursery {
     }
     fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.no_deprecated_imports.as_ref()
+        if let Some(rule) = self.missing_playwright_await.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
         }
-        if let Some(rule) = self.no_duplicate_dependencies.as_ref()
+        if let Some(rule) = self.no_deprecated_imports.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.no_empty_source.as_ref()
+        if let Some(rule) = self.no_duplicate_dependencies.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.no_floating_promises.as_ref()
+        if let Some(rule) = self.no_empty_source.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
-        if let Some(rule) = self.no_import_cycles.as_ref()
+        if let Some(rule) = self.no_floating_promises.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
         }
-        if let Some(rule) = self.no_jsx_literals.as_ref()
+        if let Some(rule) = self.no_import_cycles.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
         }
-        if let Some(rule) = self.no_misused_promises.as_ref()
+        if let Some(rule) = self.no_jsx_literals.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
         }
-        if let Some(rule) = self.no_next_async_client_component.as_ref()
+        if let Some(rule) = self.no_misused_promises.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
         }
-        if let Some(rule) = self.no_non_null_asserted_optional_chain.as_ref()
+        if let Some(rule) = self.no_next_async_client_component.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
         }
-        if let Some(rule) = self.no_qwik_use_visible_task.as_ref()
+        if let Some(rule) = self.no_non_null_asserted_optional_chain.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
         }
-        if let Some(rule) = self.no_react_forward_ref.as_ref()
+        if let Some(rule) = self.no_playwright_element_handle.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
         }
-        if let Some(rule) = self.no_secrets.as_ref()
+        if let Some(rule) = self.no_playwright_eval.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
         }
-        if let Some(rule) = self.no_shadow.as_ref()
+        if let Some(rule) = self.no_playwright_focused_test.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
         }
-        if let Some(rule) = self.no_unnecessary_conditions.as_ref()
+        if let Some(rule) = self.no_playwright_force_option.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
         }
-        if let Some(rule) = self.no_unresolved_imports.as_ref()
+        if let Some(rule) = self.no_playwright_networkidle.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
         }
-        if let Some(rule) = self.no_unused_expressions.as_ref()
+        if let Some(rule) = self.no_playwright_page_pause.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
         }
-        if let Some(rule) = self.no_useless_catch_binding.as_ref()
+        if let Some(rule) = self.no_playwright_skipped_test.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
         }
-        if let Some(rule) = self.no_useless_undefined.as_ref()
+        if let Some(rule) = self.no_playwright_useless_await.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
         }
-        if let Some(rule) = self.no_vue_data_object_declaration.as_ref()
+        if let Some(rule) = self.no_playwright_valid_describe_callback.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
         }
-        if let Some(rule) = self.no_vue_duplicate_keys.as_ref()
+        if let Some(rule) = self.no_playwright_wait_for_navigation.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
         }
-        if let Some(rule) = self.no_vue_reserved_keys.as_ref()
+        if let Some(rule) = self.no_playwright_wait_for_selector.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
         }
-        if let Some(rule) = self.no_vue_reserved_props.as_ref()
+        if let Some(rule) = self.no_playwright_wait_for_timeout.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
         }
-        if let Some(rule) = self.use_anchor_href.as_ref()
+        if let Some(rule) = self.no_qwik_use_visible_task.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
         }
-        if let Some(rule) = self.use_consistent_arrow_return.as_ref()
+        if let Some(rule) = self.no_react_forward_ref.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
         }
-        if let Some(rule) = self.use_consistent_type_definitions.as_ref()
+        if let Some(rule) = self.no_secrets.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
         }
-        if let Some(rule) = self.use_deprecated_date.as_ref()
+        if let Some(rule) = self.no_shadow.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
         }
-        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref()
+        if let Some(rule) = self.no_unnecessary_conditions.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
         }
-        if let Some(rule) = self.use_explicit_type.as_ref()
+        if let Some(rule) = self.no_unresolved_imports.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
         }
-        if let Some(rule) = self.use_image_size.as_ref()
+        if let Some(rule) = self.no_unused_expressions.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
         }
-        if let Some(rule) = self.use_max_params.as_ref()
+        if let Some(rule) = self.no_useless_catch_binding.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
         }
-        if let Some(rule) = self.use_qwik_classlist.as_ref()
+        if let Some(rule) = self.no_useless_undefined.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
         }
-        if let Some(rule) = self.use_qwik_method_usage.as_ref()
+        if let Some(rule) = self.no_vue_data_object_declaration.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
         }
-        if let Some(rule) = self.use_qwik_valid_lexical_scope.as_ref()
+        if let Some(rule) = self.no_vue_duplicate_keys.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
         }
-        if let Some(rule) = self.use_react_function_components.as_ref()
+        if let Some(rule) = self.no_vue_reserved_keys.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref()
+        if let Some(rule) = self.no_vue_reserved_props.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
         }
-        if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
+        if let Some(rule) = self.use_anchor_href.as_ref()
             && rule.is_enabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
+        }
+        if let Some(rule) = self.use_consistent_arrow_return.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+        }
+        if let Some(rule) = self.use_consistent_type_definitions.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
+        }
+        if let Some(rule) = self.use_deprecated_date.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
+        }
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
+        }
+        if let Some(rule) = self.use_explicit_type.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+        }
+        if let Some(rule) = self.use_image_size.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
+        }
+        if let Some(rule) = self.use_max_params.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
+        }
+        if let Some(rule) = self.use_qwik_classlist.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
+        }
+        if let Some(rule) = self.use_qwik_method_usage.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+        }
+        if let Some(rule) = self.use_qwik_valid_lexical_scope.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
+        }
+        if let Some(rule) = self.use_react_function_components.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
+        }
+        if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
+            && rule.is_enabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
         }
         index_set
     }
     fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.no_deprecated_imports.as_ref()
+        if let Some(rule) = self.missing_playwright_await.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
         }
-        if let Some(rule) = self.no_duplicate_dependencies.as_ref()
+        if let Some(rule) = self.no_deprecated_imports.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
         }
-        if let Some(rule) = self.no_empty_source.as_ref()
+        if let Some(rule) = self.no_duplicate_dependencies.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
         }
-        if let Some(rule) = self.no_floating_promises.as_ref()
+        if let Some(rule) = self.no_empty_source.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
         }
-        if let Some(rule) = self.no_import_cycles.as_ref()
+        if let Some(rule) = self.no_floating_promises.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
         }
-        if let Some(rule) = self.no_jsx_literals.as_ref()
+        if let Some(rule) = self.no_import_cycles.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
         }
-        if let Some(rule) = self.no_misused_promises.as_ref()
+        if let Some(rule) = self.no_jsx_literals.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
         }
-        if let Some(rule) = self.no_next_async_client_component.as_ref()
+        if let Some(rule) = self.no_misused_promises.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
         }
-        if let Some(rule) = self.no_non_null_asserted_optional_chain.as_ref()
+        if let Some(rule) = self.no_next_async_client_component.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
         }
-        if let Some(rule) = self.no_qwik_use_visible_task.as_ref()
+        if let Some(rule) = self.no_non_null_asserted_optional_chain.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
         }
-        if let Some(rule) = self.no_react_forward_ref.as_ref()
+        if let Some(rule) = self.no_playwright_element_handle.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
         }
-        if let Some(rule) = self.no_secrets.as_ref()
+        if let Some(rule) = self.no_playwright_eval.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
         }
-        if let Some(rule) = self.no_shadow.as_ref()
+        if let Some(rule) = self.no_playwright_focused_test.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
         }
-        if let Some(rule) = self.no_unnecessary_conditions.as_ref()
+        if let Some(rule) = self.no_playwright_force_option.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
         }
-        if let Some(rule) = self.no_unresolved_imports.as_ref()
+        if let Some(rule) = self.no_playwright_networkidle.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
         }
-        if let Some(rule) = self.no_unused_expressions.as_ref()
+        if let Some(rule) = self.no_playwright_page_pause.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
         }
-        if let Some(rule) = self.no_useless_catch_binding.as_ref()
+        if let Some(rule) = self.no_playwright_skipped_test.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
         }
-        if let Some(rule) = self.no_useless_undefined.as_ref()
+        if let Some(rule) = self.no_playwright_useless_await.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
         }
-        if let Some(rule) = self.no_vue_data_object_declaration.as_ref()
+        if let Some(rule) = self.no_playwright_valid_describe_callback.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
         }
-        if let Some(rule) = self.no_vue_duplicate_keys.as_ref()
+        if let Some(rule) = self.no_playwright_wait_for_navigation.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
         }
-        if let Some(rule) = self.no_vue_reserved_keys.as_ref()
+        if let Some(rule) = self.no_playwright_wait_for_selector.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
         }
-        if let Some(rule) = self.no_vue_reserved_props.as_ref()
+        if let Some(rule) = self.no_playwright_wait_for_timeout.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
         }
-        if let Some(rule) = self.use_anchor_href.as_ref()
+        if let Some(rule) = self.no_qwik_use_visible_task.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
         }
-        if let Some(rule) = self.use_consistent_arrow_return.as_ref()
+        if let Some(rule) = self.no_react_forward_ref.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
         }
-        if let Some(rule) = self.use_consistent_type_definitions.as_ref()
+        if let Some(rule) = self.no_secrets.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
         }
-        if let Some(rule) = self.use_deprecated_date.as_ref()
+        if let Some(rule) = self.no_shadow.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
         }
-        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref()
+        if let Some(rule) = self.no_unnecessary_conditions.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
         }
-        if let Some(rule) = self.use_explicit_type.as_ref()
+        if let Some(rule) = self.no_unresolved_imports.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
         }
-        if let Some(rule) = self.use_image_size.as_ref()
+        if let Some(rule) = self.no_unused_expressions.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
         }
-        if let Some(rule) = self.use_max_params.as_ref()
+        if let Some(rule) = self.no_useless_catch_binding.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
         }
-        if let Some(rule) = self.use_qwik_classlist.as_ref()
+        if let Some(rule) = self.no_useless_undefined.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
         }
-        if let Some(rule) = self.use_qwik_method_usage.as_ref()
+        if let Some(rule) = self.no_vue_data_object_declaration.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
         }
-        if let Some(rule) = self.use_qwik_valid_lexical_scope.as_ref()
+        if let Some(rule) = self.no_vue_duplicate_keys.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
         }
-        if let Some(rule) = self.use_react_function_components.as_ref()
+        if let Some(rule) = self.no_vue_reserved_keys.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref()
+        if let Some(rule) = self.no_vue_reserved_props.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
         }
-        if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
+        if let Some(rule) = self.use_anchor_href.as_ref()
             && rule.is_disabled()
         {
             index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
+        }
+        if let Some(rule) = self.use_consistent_arrow_return.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+        }
+        if let Some(rule) = self.use_consistent_type_definitions.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
+        }
+        if let Some(rule) = self.use_deprecated_date.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
+        }
+        if let Some(rule) = self.use_exhaustive_switch_cases.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
+        }
+        if let Some(rule) = self.use_explicit_type.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+        }
+        if let Some(rule) = self.use_image_size.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
+        }
+        if let Some(rule) = self.use_max_params.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
+        }
+        if let Some(rule) = self.use_qwik_classlist.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
+        }
+        if let Some(rule) = self.use_qwik_method_usage.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+        }
+        if let Some(rule) = self.use_qwik_valid_lexical_scope.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
+        }
+        if let Some(rule) = self.use_react_function_components.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
+        }
+        if let Some(rule) = self.use_sorted_classes.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
+        }
+        if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
+            && rule.is_disabled()
+        {
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
         }
         index_set
     }
@@ -5131,6 +5339,10 @@ impl RuleGroupExt for Nursery {
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
         match rule_name {
+            "missingPlaywrightAwait" => self
+                .missing_playwright_await
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noDeprecatedImports" => self
                 .no_deprecated_imports
                 .as_ref()
@@ -5165,6 +5377,54 @@ impl RuleGroupExt for Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noNonNullAssertedOptionalChain" => self
                 .no_non_null_asserted_optional_chain
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightElementHandle" => self
+                .no_playwright_element_handle
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightEval" => self
+                .no_playwright_eval
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightFocusedTest" => self
+                .no_playwright_focused_test
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightForceOption" => self
+                .no_playwright_force_option
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightNetworkidle" => self
+                .no_playwright_networkidle
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightPagePause" => self
+                .no_playwright_page_pause
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightSkippedTest" => self
+                .no_playwright_skipped_test
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightUselessAwait" => self
+                .no_playwright_useless_await
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightValidDescribeCallback" => self
+                .no_playwright_valid_describe_callback
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightWaitForNavigation" => self
+                .no_playwright_wait_for_navigation
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightWaitForSelector" => self
+                .no_playwright_wait_for_selector
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noPlaywrightWaitForTimeout" => self
+                .no_playwright_wait_for_timeout
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noQwikUseVisibleTask" => self
@@ -5283,6 +5543,7 @@ impl From<GroupPlainConfiguration> for Nursery {
     fn from(value: GroupPlainConfiguration) -> Self {
         Self {
             recommended: None,
+            missing_playwright_await: Some(value.into()),
             no_deprecated_imports: Some(value.into()),
             no_duplicate_dependencies: Some(value.into()),
             no_empty_source: Some(value.into()),
@@ -5292,6 +5553,18 @@ impl From<GroupPlainConfiguration> for Nursery {
             no_misused_promises: Some(value.into()),
             no_next_async_client_component: Some(value.into()),
             no_non_null_asserted_optional_chain: Some(value.into()),
+            no_playwright_element_handle: Some(value.into()),
+            no_playwright_eval: Some(value.into()),
+            no_playwright_focused_test: Some(value.into()),
+            no_playwright_force_option: Some(value.into()),
+            no_playwright_networkidle: Some(value.into()),
+            no_playwright_page_pause: Some(value.into()),
+            no_playwright_skipped_test: Some(value.into()),
+            no_playwright_useless_await: Some(value.into()),
+            no_playwright_valid_describe_callback: Some(value.into()),
+            no_playwright_wait_for_navigation: Some(value.into()),
+            no_playwright_wait_for_selector: Some(value.into()),
+            no_playwright_wait_for_timeout: Some(value.into()),
             no_qwik_use_visible_task: Some(value.into()),
             no_react_forward_ref: Some(value.into()),
             no_secrets: Some(value.into()),

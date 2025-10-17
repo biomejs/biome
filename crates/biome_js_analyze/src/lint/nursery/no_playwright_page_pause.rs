@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
@@ -57,11 +57,11 @@ impl Rule for NoPlaywrightPagePause {
 
         // Check if this is a member expression (e.g., page.pause())
         let member_expr = JsStaticMemberExpression::cast_ref(callee.syntax())?;
-        
+
         // Check if the member being accessed is "pause"
         let member_name = member_expr.member().ok()?;
         let member_text = member_name.as_js_name()?.value_token().ok()?;
-        
+
         if member_text.text_trimmed() != "pause" {
             return None;
         }
@@ -69,21 +69,33 @@ impl Rule for NoPlaywrightPagePause {
         // Check if the object is "page" or "frame"
         let object = member_expr.object().ok()?;
         let object_text = match object {
-            biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => {
-                id.name().ok()?.value_token().ok()?.text_trimmed().to_string()
-            }
+            biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => id
+                .name()
+                .ok()?
+                .value_token()
+                .ok()?
+                .text_trimmed()
+                .to_string(),
             biome_js_syntax::AnyJsExpression::JsStaticMemberExpression(member) => {
                 // Handle cases like "context.page.pause()"
-                member.member().ok()?.as_js_name()?.value_token().ok()?.text_trimmed().to_string()
+                member
+                    .member()
+                    .ok()?
+                    .as_js_name()?
+                    .value_token()
+                    .ok()?
+                    .text_trimmed()
+                    .to_string()
             }
             _ => return None,
         };
 
         // Check if it's "page" or "frame" or ends with "Page" or "Frame" (for variable names)
-        if object_text == "page" 
-            || object_text == "frame" 
-            || object_text.ends_with("Page") 
-            || object_text.ends_with("Frame") {
+        if object_text == "page"
+            || object_text == "frame"
+            || object_text.ends_with("Page")
+            || object_text.ends_with("Frame")
+        {
             Some(())
         } else {
             None

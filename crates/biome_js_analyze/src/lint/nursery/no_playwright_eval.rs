@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
@@ -53,11 +53,11 @@ impl Rule for NoPlaywrightEval {
         let callee = call_expr.callee().ok()?;
 
         let member_expr = JsStaticMemberExpression::cast_ref(callee.syntax())?;
-        
+
         let member_name = member_expr.member().ok()?;
         let member_text = member_name.as_js_name()?.value_token().ok()?;
         let member_str = member_text.text_trimmed();
-        
+
         // Check if the method is $eval or $$eval
         if member_str != "$eval" && member_str != "$$eval" {
             return None;
@@ -65,19 +65,29 @@ impl Rule for NoPlaywrightEval {
 
         let object = member_expr.object().ok()?;
         let object_text = match object {
-            biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => {
-                id.name().ok()?.value_token().ok()?.text_trimmed().to_string()
-            }
-            biome_js_syntax::AnyJsExpression::JsStaticMemberExpression(member) => {
-                member.member().ok()?.as_js_name()?.value_token().ok()?.text_trimmed().to_string()
-            }
+            biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => id
+                .name()
+                .ok()?
+                .value_token()
+                .ok()?
+                .text_trimmed()
+                .to_string(),
+            biome_js_syntax::AnyJsExpression::JsStaticMemberExpression(member) => member
+                .member()
+                .ok()?
+                .as_js_name()?
+                .value_token()
+                .ok()?
+                .text_trimmed()
+                .to_string(),
             _ => return None,
         };
 
-        if object_text == "page" 
-            || object_text == "frame" 
-            || object_text.ends_with("Page") 
-            || object_text.ends_with("Frame") {
+        if object_text == "page"
+            || object_text == "frame"
+            || object_text.ends_with("Page")
+            || object_text.ends_with("Frame")
+        {
             Some(member_str.to_string())
         } else {
             None
@@ -87,7 +97,7 @@ impl Rule for NoPlaywrightEval {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         let is_eval = state == "$eval";
-        
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -105,4 +115,3 @@ impl Rule for NoPlaywrightEval {
         )
     }
 }
-

@@ -1,10 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{
-    AnyJsExpression, JsCallExpression,
-};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList};
 
 declare_lint_rule! {
@@ -78,7 +76,7 @@ impl Rule for NoPlaywrightValidDescribeCallback {
             AnyJsExpression::JsStaticMemberExpression(member) => {
                 let member_name = member.member().ok()?;
                 let member_text = member_name.as_js_name()?.value_token().ok()?;
-                
+
                 if member_text.text_trimmed() == "describe" {
                     // Check if object is "test"
                     let object = member.object().ok()?;
@@ -114,7 +112,7 @@ impl Rule for NoPlaywrightValidDescribeCallback {
                 if arrow.async_token().is_some() {
                     return Some(InvalidReason::Async);
                 }
-                
+
                 // Check if has parameters
                 if let Ok(params) = arrow.parameters() {
                     let has_params = match params {
@@ -133,7 +131,7 @@ impl Rule for NoPlaywrightValidDescribeCallback {
                 if func.async_token().is_some() {
                     return Some(InvalidReason::Async);
                 }
-                
+
                 // Check if has parameters
                 if let Ok(params) = func.parameters() {
                     if params.items().len() > 0 {
@@ -149,7 +147,7 @@ impl Rule for NoPlaywrightValidDescribeCallback {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        
+
         let (message, note) = match state {
             InvalidReason::Async => (
                 markup! { "Describe callback should not be "<Emphasis>"async"</Emphasis>"." },
@@ -161,14 +159,6 @@ impl Rule for NoPlaywrightValidDescribeCallback {
             ),
         };
 
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                message,
-            )
-            .note(note),
-        )
+        Some(RuleDiagnostic::new(rule_category!(), node.range(), message).note(note))
     }
 }
-

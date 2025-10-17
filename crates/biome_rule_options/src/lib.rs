@@ -2,6 +2,7 @@
 
 mod shared;
 pub use shared::*;
+pub mod missing_playwright_await;
 pub mod no_access_key;
 pub mod no_accumulating_spread;
 pub mod no_adjacent_spaces_in_regex;
@@ -140,6 +141,18 @@ pub mod no_nonoctal_decimal_escape;
 pub mod no_octal_escape;
 pub mod no_parameter_assign;
 pub mod no_parameter_properties;
+pub mod no_playwright_element_handle;
+pub mod no_playwright_eval;
+pub mod no_playwright_focused_test;
+pub mod no_playwright_force_option;
+pub mod no_playwright_networkidle;
+pub mod no_playwright_page_pause;
+pub mod no_playwright_skipped_test;
+pub mod no_playwright_useless_await;
+pub mod no_playwright_valid_describe_callback;
+pub mod no_playwright_wait_for_navigation;
+pub mod no_playwright_wait_for_selector;
+pub mod no_playwright_wait_for_timeout;
 pub mod no_positive_tabindex;
 pub mod no_precision_loss;
 pub mod no_private_imports;

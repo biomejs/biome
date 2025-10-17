@@ -1626,6 +1626,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Enforce Playwright async APIs to be awaited or returned.
+	 */
+	missingPlaywrightAwait?: RuleFixConfiguration_for_MissingPlaywrightAwaitOptions;
+	/**
 	 * Restrict imports of deprecated exports.
 	 */
 	noDeprecatedImports?: RuleConfiguration_for_NoDeprecatedImportsOptions;
@@ -1661,6 +1665,54 @@ export interface Nursery {
 	 * Disallow non-null assertions after optional chaining expressions.
 	 */
 	noNonNullAssertedOptionalChain?: RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions;
+	/**
+	 * Disallow usage of element handles (page.$() and page.$$()).
+	 */
+	noPlaywrightElementHandle?: RuleConfiguration_for_NoPlaywrightElementHandleOptions;
+	/**
+	 * Disallow usage of page.$eval() and page.$$eval().
+	 */
+	noPlaywrightEval?: RuleConfiguration_for_NoPlaywrightEvalOptions;
+	/**
+	 * Disallow usage of .only annotation in Playwright tests.
+	 */
+	noPlaywrightFocusedTest?: RuleConfiguration_for_NoPlaywrightFocusedTestOptions;
+	/**
+	 * Disallow usage of the { force: true } option.
+	 */
+	noPlaywrightForceOption?: RuleConfiguration_for_NoPlaywrightForceOptionOptions;
+	/**
+	 * Disallow usage of the networkidle option.
+	 */
+	noPlaywrightNetworkidle?: RuleConfiguration_for_NoPlaywrightNetworkidleOptions;
+	/**
+	 * Disallow using page.pause().
+	 */
+	noPlaywrightPagePause?: RuleConfiguration_for_NoPlaywrightPagePauseOptions;
+	/**
+	 * Disallow usage of .skip annotation in Playwright tests.
+	 */
+	noPlaywrightSkippedTest?: RuleConfiguration_for_NoPlaywrightSkippedTestOptions;
+	/**
+	 * Disallow unnecessary await for Playwright methods that don't return promises.
+	 */
+	noPlaywrightUselessAwait?: RuleFixConfiguration_for_NoPlaywrightUselessAwaitOptions;
+	/**
+	 * Enforce valid describe() callback.
+	 */
+	noPlaywrightValidDescribeCallback?: RuleConfiguration_for_NoPlaywrightValidDescribeCallbackOptions;
+	/**
+	 * Disallow using page.waitForNavigation().
+	 */
+	noPlaywrightWaitForNavigation?: RuleConfiguration_for_NoPlaywrightWaitForNavigationOptions;
+	/**
+	 * Disallow using page.waitForSelector().
+	 */
+	noPlaywrightWaitForSelector?: RuleConfiguration_for_NoPlaywrightWaitForSelectorOptions;
+	/**
+	 * Disallow using page.waitForTimeout().
+	 */
+	noPlaywrightWaitForTimeout?: RuleConfiguration_for_NoPlaywrightWaitForTimeoutOptions;
 	/**
 	 * Disallow useVisibleTask$() functions in Qwik components.
 	 */
@@ -3010,6 +3062,9 @@ export type RuleFixConfiguration_for_UseValidTypeofOptions =
 export type RuleConfiguration_for_UseYieldOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseYieldOptions;
+export type RuleFixConfiguration_for_MissingPlaywrightAwaitOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_MissingPlaywrightAwaitOptions;
 export type RuleConfiguration_for_NoDeprecatedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoDeprecatedImportsOptions;
@@ -3037,6 +3092,42 @@ export type RuleConfiguration_for_NoNextAsyncClientComponentOptions =
 export type RuleConfiguration_for_NoNonNullAssertedOptionalChainOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions;
+export type RuleConfiguration_for_NoPlaywrightElementHandleOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightElementHandleOptions;
+export type RuleConfiguration_for_NoPlaywrightEvalOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightEvalOptions;
+export type RuleConfiguration_for_NoPlaywrightFocusedTestOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightFocusedTestOptions;
+export type RuleConfiguration_for_NoPlaywrightForceOptionOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightForceOptionOptions;
+export type RuleConfiguration_for_NoPlaywrightNetworkidleOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightNetworkidleOptions;
+export type RuleConfiguration_for_NoPlaywrightPagePauseOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightPagePauseOptions;
+export type RuleConfiguration_for_NoPlaywrightSkippedTestOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightSkippedTestOptions;
+export type RuleFixConfiguration_for_NoPlaywrightUselessAwaitOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoPlaywrightUselessAwaitOptions;
+export type RuleConfiguration_for_NoPlaywrightValidDescribeCallbackOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightValidDescribeCallbackOptions;
+export type RuleConfiguration_for_NoPlaywrightWaitForNavigationOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightWaitForNavigationOptions;
+export type RuleConfiguration_for_NoPlaywrightWaitForSelectorOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightWaitForSelectorOptions;
+export type RuleConfiguration_for_NoPlaywrightWaitForTimeoutOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoPlaywrightWaitForTimeoutOptions;
 export type RuleConfiguration_for_NoQwikUseVisibleTaskOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoQwikUseVisibleTaskOptions;
@@ -5403,6 +5494,20 @@ export interface RuleWithOptions_for_UseYieldOptions {
 	 */
 	options: UseYieldOptions;
 }
+export interface RuleWithFixOptions_for_MissingPlaywrightAwaitOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: MissingPlaywrightAwaitOptions;
+}
 export interface RuleWithOptions_for_NoDeprecatedImportsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -5500,6 +5605,130 @@ export interface RuleWithOptions_for_NoNonNullAssertedOptionalChainOptions {
 	 * Rule's options
 	 */
 	options: NoNonNullAssertedOptionalChainOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightElementHandleOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightElementHandleOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightEvalOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightEvalOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightFocusedTestOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightFocusedTestOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightForceOptionOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightForceOptionOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightNetworkidleOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightNetworkidleOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightPagePauseOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightPagePauseOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightSkippedTestOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightSkippedTestOptions;
+}
+export interface RuleWithFixOptions_for_NoPlaywrightUselessAwaitOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightUselessAwaitOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightValidDescribeCallbackOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightValidDescribeCallbackOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightWaitForNavigationOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightWaitForNavigationOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightWaitForSelectorOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightWaitForSelectorOptions;
+}
+export interface RuleWithOptions_for_NoPlaywrightWaitForTimeoutOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoPlaywrightWaitForTimeoutOptions;
 }
 export interface RuleWithOptions_for_NoQwikUseVisibleTaskOptions {
 	/**
@@ -8198,6 +8427,7 @@ export interface UseUniqueElementIdsOptions {
 export interface UseValidForDirectionOptions {}
 export interface UseValidTypeofOptions {}
 export interface UseYieldOptions {}
+export interface MissingPlaywrightAwaitOptions {}
 export interface NoDeprecatedImportsOptions {}
 export interface NoDuplicateDependenciesOptions {}
 export interface NoEmptySourceOptions {
@@ -8230,6 +8460,18 @@ export interface NoJsxLiteralsOptions {
 export interface NoMisusedPromisesOptions {}
 export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
+export interface NoPlaywrightElementHandleOptions {}
+export interface NoPlaywrightEvalOptions {}
+export interface NoPlaywrightFocusedTestOptions {}
+export interface NoPlaywrightForceOptionOptions {}
+export interface NoPlaywrightNetworkidleOptions {}
+export interface NoPlaywrightPagePauseOptions {}
+export interface NoPlaywrightSkippedTestOptions {}
+export interface NoPlaywrightUselessAwaitOptions {}
+export interface NoPlaywrightValidDescribeCallbackOptions {}
+export interface NoPlaywrightWaitForNavigationOptions {}
+export interface NoPlaywrightWaitForSelectorOptions {}
+export interface NoPlaywrightWaitForTimeoutOptions {}
 export interface NoQwikUseVisibleTaskOptions {}
 export interface NoReactForwardRefOptions {}
 export interface NoSecretsOptions {
@@ -8993,7 +9235,20 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNextAsyncClientComponent"
+	| "lint/nursery/missingPlaywrightAwait"
 	| "lint/nursery/noNonNullAssertedOptionalChain"
+	| "lint/nursery/noPlaywrightElementHandle"
+	| "lint/nursery/noPlaywrightEval"
+	| "lint/nursery/noPlaywrightFocusedTest"
+	| "lint/nursery/noPlaywrightForceOption"
+	| "lint/nursery/noPlaywrightNetworkidle"
+	| "lint/nursery/noPlaywrightUselessAwait"
+	| "lint/nursery/noPlaywrightPagePause"
+	| "lint/nursery/noPlaywrightSkippedTest"
+	| "lint/nursery/noPlaywrightValidDescribeCallback"
+	| "lint/nursery/noPlaywrightWaitForNavigation"
+	| "lint/nursery/noPlaywrightWaitForSelector"
+	| "lint/nursery/noPlaywrightWaitForTimeout"
 	| "lint/nursery/noQwikUseVisibleTask"
 	| "lint/nursery/noReactForwardRef"
 	| "lint/nursery/noSecrets"

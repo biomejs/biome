@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -134,7 +134,7 @@ impl Rule for NoPlaywrightUselessAwait {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let await_expr = ctx.query();
         let argument = await_expr.argument().ok()?;
-        
+
         // Check if the awaited expression is a call expression
         let call_expr = argument.as_js_call_expression()?;
         let callee = call_expr.callee().ok()?;
@@ -190,14 +190,14 @@ impl Rule for NoPlaywrightUselessAwait {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let await_expr = ctx.query();
         let argument = await_expr.argument().ok()?;
-        
+
         let mut mutation = ctx.root().begin();
         // Replace the entire await expression with just its argument
         mutation.replace_element(
             await_expr.clone().into_syntax().into(),
             argument.into_syntax().into(),
         );
-        
+
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             Applicability::Always,
@@ -213,7 +213,7 @@ fn is_page_or_frame(expr: &AnyJsExpression) -> bool {
             if let Ok(name) = id.name() {
                 if let Ok(token) = name.value_token() {
                     let text = token.text_trimmed();
-                    return text == "page" 
+                    return text == "page"
                         || text == "frame"
                         || text.ends_with("Page")
                         || text.ends_with("Frame");
@@ -226,7 +226,7 @@ fn is_page_or_frame(expr: &AnyJsExpression) -> bool {
                 if let Some(name) = member_name.as_js_name() {
                     if let Ok(token) = name.value_token() {
                         let text = token.text_trimmed();
-                        return text == "page" 
+                        return text == "page"
                             || text == "frame"
                             || text.ends_with("Page")
                             || text.ends_with("Frame");
@@ -241,7 +241,7 @@ fn is_page_or_frame(expr: &AnyJsExpression) -> bool {
 
 fn is_sync_expect_call(call_expr: &JsCallExpression) -> bool {
     let callee = call_expr.callee().ok();
-    
+
     // Check if this is an expect().matcher() pattern
     // The call should be a member expression where the object is expect()
     let member_expr = match callee {
@@ -272,7 +272,7 @@ fn is_sync_expect_call(call_expr: &JsCallExpression) -> bool {
     let object = member_expr.object().ok();
     if let Some(AnyJsExpression::JsCallExpression(expect_call)) = object {
         let expect_callee = expect_call.callee().ok();
-        
+
         // Check if it's expect (not expect.poll or expect with resolves/rejects)
         match expect_callee {
             Some(AnyJsExpression::JsIdentifierExpression(id)) => {
@@ -310,7 +310,7 @@ fn has_async_modifier(expect_call: &JsCallExpression, final_call: &JsCallExpress
     // Walk the chain from expect_call to final_call looking for "poll", "resolves", "rejects"
     let mut current = final_call.syntax().clone();
     let expect_syntax = expect_call.syntax();
-    
+
     while current != *expect_syntax {
         if let Some(member) = JsStaticMemberExpression::cast_ref(&current) {
             if let Ok(member_name) = member.member() {
@@ -338,7 +338,6 @@ fn has_async_modifier(expect_call: &JsCallExpression, final_call: &JsCallExpress
             break;
         }
     }
-    
+
     false
 }
-

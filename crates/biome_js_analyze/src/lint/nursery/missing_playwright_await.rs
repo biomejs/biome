@@ -1,15 +1,13 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{
-    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsModule, T,
-};
+use biome_js_syntax::{AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsModule, T};
 use biome_rowan::{AstNode, BatchMutationExt};
 
-use crate::{ast_utils::is_in_async_function, JsRuleAction};
+use crate::{JsRuleAction, ast_utils::is_in_async_function};
 
 declare_lint_rule! {
     /// Enforce Playwright async APIs to be awaited or returned.
@@ -111,7 +109,7 @@ impl Rule for MissingPlaywrightAwait {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();
-        
+
         // Check for test.step() calls
         if is_test_step_call(call_expr) {
             if !is_properly_handled(call_expr) {
@@ -132,7 +130,7 @@ impl Rule for MissingPlaywrightAwait {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        
+
         let (message, note) = match state {
             MissingAwaitType::ExpectMatcher(matcher) => (
                 markup! {
@@ -160,37 +158,28 @@ impl Rule for MissingPlaywrightAwait {
             ),
         };
 
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                message,
-            )
-            .note(note),
-        )
+        Some(RuleDiagnostic::new(rule_category!(), node.range(), message).note(note))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let call_expr = ctx.query();
-        
+
         // Check if we're in an async context
         if !is_in_async_context(call_expr.syntax()) {
             return None;
         }
-        
+
         let mut mutation = ctx.root().begin();
-        
+
         // Create an await expression
-        let await_expr = make::js_await_expression(
-            make::token(T![await]),
-            call_expr.clone().into(),
-        );
-        
+        let await_expr =
+            make::js_await_expression(make::token(T![await]), call_expr.clone().into());
+
         mutation.replace_element(
             call_expr.clone().into_syntax().into(),
             await_expr.into_syntax().into(),
         );
-        
+
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             Applicability::MaybeIncorrect,
@@ -202,7 +191,7 @@ impl Rule for MissingPlaywrightAwait {
 
 fn is_test_step_call(call_expr: &JsCallExpression) -> bool {
     let callee = call_expr.callee().ok();
-    
+
     // Check for test.step pattern
     if let Some(AnyJsExpression::JsStaticMemberExpression(member)) = callee {
         if let Ok(member_name) = member.member() {
@@ -224,16 +213,16 @@ fn is_test_step_call(call_expr: &JsCallExpression) -> bool {
             }
         }
     }
-    
+
     false
 }
 
 fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwaitType> {
     let callee = call_expr.callee().ok()?;
-    
+
     // Must be a member expression (matcher call)
     let member_expr = callee.as_js_static_member_expression()?;
-    
+
     // Get the matcher name
     let member = member_expr.member().ok()?;
     let name = member.as_js_name()?;
@@ -247,12 +236,12 @@ fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwait
 
     // Walk up the chain to find if this is an expect() call
     let object = member_expr.object().ok()?;
-    
+
     // Check for expect.poll
     if has_poll_in_chain(&object) {
         return Some(MissingAwaitType::ExpectPoll);
     }
-    
+
     // Check if the chain starts with expect
     if has_expect_in_chain(&object) {
         return Some(MissingAwaitType::ExpectMatcher(matcher_name));
@@ -335,7 +324,7 @@ fn has_expect_in_chain(expr: &AnyJsExpression) -> bool {
 /// Checks if a call expression is directly awaited or returned (without checking Promise.all)
 fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
     let parent = call_expr.syntax().parent();
-    
+
     // Check if it's awaited
     if let Some(parent) = &parent {
         if parent.kind() == biome_js_syntax::JsSyntaxKind::JS_AWAIT_EXPRESSION {
@@ -357,7 +346,9 @@ fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
                         if let Some(body_expr) = body.as_any_js_expression() {
                             // Only return true if the call expression is exactly the arrow body
                             // (not just nested somewhere inside it)
-                            if call_expr.syntax().text_trimmed_range() == body_expr.syntax().text_trimmed_range() {
+                            if call_expr.syntax().text_trimmed_range()
+                                == body_expr.syntax().text_trimmed_range()
+                            {
                                 return true;
                             }
                         }
@@ -393,7 +384,7 @@ fn is_properly_handled(call_expr: &JsCallExpression) -> bool {
 
 fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpression> {
     let mut current = call_expr.syntax().parent();
-    
+
     while let Some(node) = current {
         // Check if we're in an array expression
         if node.kind() == biome_js_syntax::JsSyntaxKind::JS_ARRAY_EXPRESSION {
@@ -401,7 +392,9 @@ fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpr
             if let Some(parent) = node.parent() {
                 if parent.kind() == biome_js_syntax::JsSyntaxKind::JS_CALL_ARGUMENT_LIST {
                     if let Some(call_args_parent) = parent.parent() {
-                        if call_args_parent.kind() == biome_js_syntax::JsSyntaxKind::JS_CALL_ARGUMENTS {
+                        if call_args_parent.kind()
+                            == biome_js_syntax::JsSyntaxKind::JS_CALL_ARGUMENTS
+                        {
                             if let Some(promise_call) = call_args_parent.parent() {
                                 if let Some(call) = JsCallExpression::cast_ref(&promise_call) {
                                     if is_promise_all(&call) {
@@ -414,7 +407,7 @@ fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpr
                 }
             }
         }
-        
+
         // Stop at function boundaries
         if matches!(
             node.kind(),
@@ -423,10 +416,10 @@ fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpr
         ) {
             break;
         }
-        
+
         current = node.parent();
     }
-    
+
     None
 }
 
@@ -466,14 +459,14 @@ fn is_in_async_context(node: &biome_js_syntax::JsSyntaxNode) -> bool {
     if is_in_async_function(node) {
         return true;
     }
-    
+
     // Check if we're at module level (for top-level await)
     for ancestor in node.ancestors() {
         if JsModule::can_cast(ancestor.kind()) {
             return true;
         }
-        
-        // Stop at function boundaries (if we're in a non-async function, 
+
+        // Stop at function boundaries (if we're in a non-async function,
         // being in a module doesn't help)
         if matches!(
             ancestor.kind(),
@@ -487,7 +480,6 @@ fn is_in_async_context(node: &biome_js_syntax::JsSyntaxNode) -> bool {
             break;
         }
     }
-    
+
     false
 }
-

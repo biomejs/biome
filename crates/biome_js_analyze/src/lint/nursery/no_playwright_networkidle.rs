@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -72,7 +72,7 @@ impl Rule for NoPlaywrightNetworkidle {
             let [Some(first_arg)] = args.get_arguments_by_index([0]) else {
                 return None;
             };
-            
+
             if let Some(expr) = first_arg.as_any_js_expression() {
                 if let Some(literal) = expr.as_any_js_literal_expression() {
                     if let Some(string_lit) = literal.as_js_string_literal_expression() {
@@ -89,7 +89,7 @@ impl Rule for NoPlaywrightNetworkidle {
         // For navigation methods, check if options object has waitUntil: 'networkidle'
         if is_navigation_method {
             let args = call_expr.arguments().ok()?;
-            
+
             // Navigation methods typically have options as the second argument
             for arg in args.args().into_iter().flatten() {
                 if let Some(expr) = arg.as_any_js_expression() {
@@ -136,7 +136,9 @@ fn has_networkidle_option(obj_expr: &JsObjectExpression) -> bool {
                             // Check if value is 'networkidle'
                             if let Ok(value) = prop.value() {
                                 if let Some(literal_expr) = value.as_any_js_literal_expression() {
-                                    if let Some(string_lit) = literal_expr.as_js_string_literal_expression() {
+                                    if let Some(string_lit) =
+                                        literal_expr.as_js_string_literal_expression()
+                                    {
                                         if let Ok(inner) = string_lit.inner_string_text() {
                                             if inner.text() == "networkidle" {
                                                 return true;
@@ -151,7 +153,6 @@ fn has_networkidle_option(obj_expr: &JsObjectExpression) -> bool {
             }
         }
     }
-    
+
     false
 }
-
