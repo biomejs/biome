@@ -1,12 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: expect-async-matcher.js
 ---
 # Input
 ```js
 test('example', async ({ page }) => {
-    expect(page).toBeVisible();
+    expect(page.locator('body')).toBeVisible();
 });
 
 
@@ -19,8 +18,8 @@ expect-async-matcher.js:2:5 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━
   i Async matcher toBeVisible must be awaited or returned.
   
     1 │ test('example', async ({ page }) => {
-  > 2 │     expect(page).toBeVisible();
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │     expect(page.locator('body')).toBeVisible();
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ });
     4 │ 
   
@@ -29,9 +28,9 @@ expect-async-matcher.js:2:5 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━
   i Unsafe fix: Add await
   
     1 1 │   test('example', async ({ page }) => {
-    2   │ - ····expect(page).toBeVisible();
+    2   │ - ····expect(page.locator('body')).toBeVisible();
       2 │ + ····await
-      3 │ + ····expect(page).toBeVisible();
+      3 │ + ····expect(page.locator('body')).toBeVisible();
     3 4 │   });
     4 5 │   
   

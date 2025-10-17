@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: describe-not-awaited.js
+---
+# Input
+```js
+test('example', async ({ page }) => {
+    describe('suite', () => {
+        // test content
+    });
+});
+
+test('example', async ({ page }) => {
+    describe.only('suite', () => {
+        // test content
+    });
+});
+
+test('example', async ({ page }) => {
+    test.describe('suite', () => {
+        // test content
+    });
+});
+
+test('example', async ({ page }) => {
+    test.describe.parallel('suite', () => {
+        // test content
+    });
+});
+
+
+```
+
+# Diagnostics
+```
+describe-not-awaited.js:2:5 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i describe call must be awaited or returned.
+  
+    1 │ test('example', async ({ page }) => {
+  > 2 │     describe('suite', () => {
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │         // test content
+  > 4 │     });
+      │     ^^
+    5 │ });
+    6 │ 
+  
+  i Add await before the describe call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+     1  1 │   test('example', async ({ page }) => {
+     2    │ - ····describe('suite',·()·=>·{
+        2 │ + ····await
+        3 │ + ····describe('suite',·()·=>·{
+     3  4 │           // test content
+     4  5 │       });
+  
+
+```
+
+```
+describe-not-awaited.js:8:5 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i describe call must be awaited or returned.
+  
+     7 │ test('example', async ({ page }) => {
+   > 8 │     describe.only('suite', () => {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 9 │         // test content
+  > 10 │     });
+       │     ^^
+    11 │ });
+    12 │ 
+  
+  i Add await before the describe call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+     6  6 │   
+     7  7 │   test('example', async ({ page }) => {
+     8    │ - ····describe.only('suite',·()·=>·{
+        8 │ + ····await
+        9 │ + ····describe.only('suite',·()·=>·{
+     9 10 │           // test content
+    10 11 │       });
+  
+
+```
+
+```
+describe-not-awaited.js:14:5 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i describe call must be awaited or returned.
+  
+    13 │ test('example', async ({ page }) => {
+  > 14 │     test.describe('suite', () => {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 15 │         // test content
+  > 16 │     });
+       │     ^^
+    17 │ });
+    18 │ 
+  
+  i Add await before the describe call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+    12 12 │   
+    13 13 │   test('example', async ({ page }) => {
+    14    │ - ····test.describe('suite',·()·=>·{
+       14 │ + ····await
+       15 │ + ····test.describe('suite',·()·=>·{
+    15 16 │           // test content
+    16 17 │       });
+  
+
+```
+
+```
+describe-not-awaited.js:20:5 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i describe call must be awaited or returned.
+  
+    19 │ test('example', async ({ page }) => {
+  > 20 │     test.describe.parallel('suite', () => {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 21 │         // test content
+  > 22 │     });
+       │     ^^
+    23 │ });
+    24 │ 
+  
+  i Add await before the describe call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+    18 18 │   
+    19 19 │   test('example', async ({ page }) => {
+    20    │ - ····test.describe.parallel('suite',·()·=>·{
+       20 │ + ····await
+       21 │ + ····test.describe.parallel('suite',·()·=>·{
+    21 22 │           // test content
+    22 23 │       });
+  
+
+```

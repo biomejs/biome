@@ -1,4 +1,4 @@
 test('example', async ({ page }) => {
-    expect(page).toBeVisible();
+    expect(page.locator('body')).toBeVisible();
 });
 
