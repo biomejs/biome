@@ -11,43 +11,6 @@ use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
 
-fn is_describe_like_callee(expr: &AnyJsExpression) -> bool {
-    // Walk the member chain, collecting identifiers
-    fn collect_chain(e: &AnyJsExpression, out: &mut Vec<String>) {
-        match e {
-            AnyJsExpression::JsIdentifierExpression(id) => {
-                if let Ok(name) = id.name() {
-                    if let Ok(tok) = name.value_token() {
-                        out.push(tok.text_trimmed().to_string());
-                    }
-                }
-            }
-            AnyJsExpression::JsStaticMemberExpression(m) => {
-                if let Ok(member) = m.member() {
-                    if let Some(name) = member.as_js_name() {
-                        if let Ok(tok) = name.value_token() {
-                            out.push(tok.text_trimmed().to_string());
-                        }
-                    }
-                }
-                if let Ok(obj) = m.object() {
-                    collect_chain(&obj, out);
-                }
-            }
-            _ => {}
-        }
-    }
-    
-    let mut parts = Vec::new();
-    collect_chain(expr, &mut parts);
-    
-    // e.g. ["only", "describe", "test"] (collected from right-to-left)
-    // Check that "describe" is present and chain is rooted at "describe" or "test"
-    let has_describe = parts.iter().any(|p| p == "describe");
-    let rooted_ok = parts.iter().any(|p| p == "describe" || p == "test");
-    has_describe && rooted_ok
-}
-
 declare_lint_rule! {
     /// Enforce Playwright async APIs to be awaited or returned.
     ///
@@ -138,7 +101,6 @@ pub enum MissingAwaitType {
     ExpectMatcher(String),
     ExpectPoll,
     TestStep,
-    Describe,
 }
 
 impl Rule for MissingPlaywrightAwait {
@@ -149,16 +111,6 @@ impl Rule for MissingPlaywrightAwait {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expr = ctx.query();
-        
-        // Check for describe-like calls
-        if let Ok(callee) = call_expr.callee() {
-            if is_describe_like_callee(&callee) {
-                if !is_properly_handled(call_expr) {
-                    return Some(MissingAwaitType::Describe);
-                }
-                return None;
-            }
-        }
         
         // Check for test.step() calls
         if is_test_step_call(call_expr) {
