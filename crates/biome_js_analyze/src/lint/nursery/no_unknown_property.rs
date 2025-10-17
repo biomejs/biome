@@ -1,5 +1,5 @@
-use biome_analyze::RuleDomain;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{RuleDomain, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::AnyJsxAttributeName;
 use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
@@ -92,6 +92,10 @@ declare_lint_rule! {
         name: "noUnknownProperty",
         language: "jsx",
         domains: &[RuleDomain::React],
+        sources: &[
+            RuleSource::EslintReactX("no-unknown-property").same(),
+            RuleSource::EslintReactXyz("no-unknown-property").same(),
+        ],
         recommended: false,
     }
 }
