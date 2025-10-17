@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: simple.js
+---
+# Input
+```js
+await page.waitForNavigation();
+
+
+```
+
+# Diagnostics
+```
+simple.js:1:7 lint/nursery/noPlaywrightWaitForNavigation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.waitForNavigation().
+  
+  > 1 │ await page.waitForNavigation();
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i waitForNavigation() is deprecated. Use page.waitForURL() or page.waitForLoadState() instead.
+  
+  i These alternatives are more reliable and provide better control over navigation waiting.
+  
+
+```

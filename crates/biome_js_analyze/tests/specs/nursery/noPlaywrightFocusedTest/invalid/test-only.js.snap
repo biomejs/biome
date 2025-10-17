@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: test-only.js
+---
+# Input
+```js
+test.only('focus this test', async ({ page }) => {});
+
+
+```
+
+# Diagnostics
+```
+test-only.js:1:1 lint/nursery/noPlaywrightFocusedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected focused test using .only annotation.
+  
+  > 1 │ test.only('focus this test', async ({ page }) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Focused tests should not be committed to version control as they prevent other tests from running.
+  
+  i Remove the .only annotation to run all tests.
+  
+
+```

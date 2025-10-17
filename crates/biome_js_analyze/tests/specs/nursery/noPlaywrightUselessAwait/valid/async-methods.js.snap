@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: async-methods.js
+---
+# Input
+```js
+await page.locator('.my-element').click();
+await page.goto('https://example.com');
+await expect(page.locator('.foo')).toBeVisible();
+await expect.poll(() => foo).toBe(true);
+
+
+```

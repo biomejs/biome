@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: awaited.js
+---
+# Input
+```js
+test('example', async ({ page }) => {
+    await expect(page).toBeVisible();
+    await test.step('step', async () => {});
+    await expect.poll(() => foo).toBe(true);
+});
+
+
+```

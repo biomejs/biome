@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: page-frame.js
+---
+# Input
+```js
+await page.frame('iframe');
+await page.frames();
+await page.url();
+
+
+```
+
+# Diagnostics
+```
+page-frame.js:1:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+  > 1 │ await page.frame('iframe');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ await page.frames();
+    3 │ await page.url();
+  
+  i This method does not return a Promise.
+  
+  i Remove the await keyword.
+  
+  i Safe fix: Remove unnecessary await
+  
+    1 │ await·page.frame('iframe');
+      │ ------                     
+
+```
+
+```
+page-frame.js:2:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    1 │ await page.frame('iframe');
+  > 2 │ await page.frames();
+      │ ^^^^^^^^^^^^^^^^^^^
+    3 │ await page.url();
+    4 │ 
+  
+  i This method does not return a Promise.
+  
+  i Remove the await keyword.
+  
+  i Safe fix: Remove unnecessary await
+  
+    2 │ await·page.frames();
+      │ ------              
+
+```
+
+```
+page-frame.js:3:1 lint/nursery/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    1 │ await page.frame('iframe');
+    2 │ await page.frames();
+  > 3 │ await page.url();
+      │ ^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i This method does not return a Promise.
+  
+  i Remove the await keyword.
+  
+  i Safe fix: Remove unnecessary await
+  
+    3 │ await·page.url();
+      │ ------           
+
+```

@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: frame.js
+---
+# Input
+```js
+const element = await frame.$('#element');
+
+
+```
+
+# Diagnostics
+```
+frame.js:1:23 lint/nursery/noPlaywrightElementHandle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of element handles.
+  
+  > 1 │ const element = await frame.$('#element');
+      │                       ^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Element handles like page.$() are discouraged.
+  
+  i Use page.locator() or other locator methods like getByRole() instead.
+  
+  i Locators auto-wait and are more reliable than element handles.
+  
+
+```

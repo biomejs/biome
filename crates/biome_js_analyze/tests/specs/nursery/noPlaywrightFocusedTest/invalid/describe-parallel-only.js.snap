@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: describe-parallel-only.js
+---
+# Input
+```js
+test.describe.parallel.only('focus two tests in parallel mode', () => {
+    test('one', async ({ page }) => {});
+    test('two', async ({ page }) => {});
+});
+
+
+```
+
+# Diagnostics
+```
+describe-parallel-only.js:1:1 lint/nursery/noPlaywrightFocusedTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected focused test using .only annotation.
+  
+  > 1 │ test.describe.parallel.only('focus two tests in parallel mode', () => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │     test('one', async ({ page }) => {});
+  > 3 │     test('two', async ({ page }) => {});
+  > 4 │ });
+      │ ^^
+    5 │ 
+  
+  i Focused tests should not be committed to version control as they prevent other tests from running.
+  
+  i Remove the .only annotation to run all tests.
+  
+
+```

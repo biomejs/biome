@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: in-test.js
+---
+# Input
+```js
+test('example', async ({ page }) => {
+    await page.click('button');
+    await page.pause();
+});
+
+
+```
+
+# Diagnostics
+```
+in-test.js:3:11 lint/nursery/noPlaywrightPagePause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.pause().
+  
+    1 │ test('example', async ({ page }) => {
+    2 │     await page.click('button');
+  > 3 │     await page.pause();
+      │           ^^^^^^^^^^^^
+    4 │ });
+    5 │ 
+  
+  i page.pause() is a debugging utility and should not be committed to version control.
+  
+  i Remove the pause() call or use a proper debugging strategy.
+  
+
+```

@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: test-step.js
+---
+# Input
+```js
+test('example', async ({ page }) => {
+    test.step('clicks button', async () => {
+        await page.click('button');
+    });
+});
+
+
+```
+
+# Diagnostics
+```
+test-step.js:2:5 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i test.step must be awaited or returned.
+  
+    1 │ test('example', async ({ page }) => {
+  > 2 │     test.step('clicks button', async () => {
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │         await page.click('button');
+  > 4 │     });
+      │     ^^
+    5 │ });
+    6 │ 
+  
+  i Add await before the test.step call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+    1 1 │   test('example', async ({ page }) => {
+    2   │ - ····test.step('clicks·button',·async·()·=>·{
+      2 │ + ····await
+      3 │ + ····test.step('clicks·button',·async·()·=>·{
+    3 4 │           await page.click('button');
+    4 5 │       });
+  
+
+```

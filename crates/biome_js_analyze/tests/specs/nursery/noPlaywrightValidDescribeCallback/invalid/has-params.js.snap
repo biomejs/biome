@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: has-params.js
+---
+# Input
+```js
+test.describe('suite', (done) => {
+    test('one', async ({ page }) => {});
+});
+
+
+
+```
+
+# Diagnostics
+```
+has-params.js:1:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe callback should not have parameters.
+  
+  > 1 │ test.describe('suite', (done) => {
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │     test('one', async ({ page }) => {});
+  > 3 │ });
+      │ ^^
+    4 │ 
+  
+  i Remove parameters from the describe callback.
+  
+
+```

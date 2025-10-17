@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: in-test.js
+---
+# Input
+```js
+test('wait', async ({ page }) => {
+    await page.click('button');
+    await page.waitForTimeout(1000);
+});
+
+
+```
+
+# Diagnostics
+```
+in-test.js:3:11 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.waitForTimeout().
+  
+    1 │ test('wait', async ({ page }) => {
+    2 │     await page.click('button');
+  > 3 │     await page.waitForTimeout(1000);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ });
+    5 │ 
+  
+  i Prefer using built-in wait methods like waitForLoadState(), waitForURL(), or waitForFunction() instead.
+  
+  i Hardcoded timeouts are flaky and make tests slower. Use conditions that wait for specific events.
+  
+
+```

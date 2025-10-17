@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: eval-all.js
+---
+# Input
+```js
+const texts = await page.$$eval('.foo', els => els.map(el => el.textContent));
+
+
+```
+
+# Diagnostics
+```
+eval-all.js:1:21 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.$$eval().
+  
+  > 1 │ const texts = await page.$$eval('.foo', els => els.map(el => el.textContent));
+      │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Use locator.evaluateAll() instead.
+  
+  i Locator-based evaluation is more reliable and follows Playwright's recommended patterns.
+  
+
+```

@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 152
+expression: simple.js
+---
+# Input
+```js
+await page.waitForTimeout(5000);
+
+
+```
+
+# Diagnostics
+```
+simple.js:1:7 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.waitForTimeout().
+  
+  > 1 │ await page.waitForTimeout(5000);
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Prefer using built-in wait methods like waitForLoadState(), waitForURL(), or waitForFunction() instead.
+  
+  i Hardcoded timeouts are flaky and make tests slower. Use conditions that wait for specific events.
+  
+
+```
