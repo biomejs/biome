@@ -5,13 +5,13 @@ use std::sync::Arc;
 
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::{RuleGroup, RuleSelector};
-use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{
     Configuration, FilesConfiguration, OverrideGlobs, OverridePattern, Overrides,
 };
 use biome_diagnostics::Diagnostic;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_js_syntax::{JsFileSource, TextSize};
+use biome_plugin_loader::{PluginConfiguration, Plugins};
 use camino::Utf8PathBuf;
 use insta::{assert_debug_snapshot, assert_snapshot};
 

@@ -261,6 +261,7 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_plugin_loader",
  "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
@@ -1380,7 +1381,6 @@ name = "biome_plugin_loader"
 version = "0.0.1"
 dependencies = [
  "biome_analyze",
- "biome_configuration",
  "biome_console",
  "biome_css_syntax",
  "biome_deserialize",
@@ -1404,6 +1404,7 @@ dependencies = [
  "libc",
  "papaya",
  "rustc-hash 2.1.1",
+ "schemars",
  "serde",
  "windows",
 ]

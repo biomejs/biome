@@ -9,7 +9,6 @@ use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::HtmlConfiguration;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::max_size::MaxSize;
-use biome_configuration::plugins::Plugins;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
     BiomeDiagnostic, Configuration, CssConfiguration, FilesConfiguration,
@@ -39,6 +38,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use biome_plugin_loader::Plugins;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::borrow::Cow;
