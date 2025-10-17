@@ -4,4 +4,4 @@
 "@biomejs/js-api": patch
 ---
 
-Increase noExcessiveLinesPerFunction max line option to uint16 (up to 65 535) so JSX/front-end projects aren’t blocked by the old 255 cap
+Increased the maximum line limit for [noExcessiveLinesPerFunction](https://biomejs.dev/linter/rules/no-excessive-lines-per-function/) from 255 to 65,535 to better support large JSX/front-end components.
