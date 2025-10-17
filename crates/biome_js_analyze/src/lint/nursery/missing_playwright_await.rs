@@ -5,8 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression,
-    JsStaticMemberExpression, T,
+    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -328,7 +327,8 @@ fn has_expect_in_chain(expr: &AnyJsExpression) -> bool {
     }
 }
 
-fn is_properly_handled(call_expr: &JsCallExpression) -> bool {
+/// Checks if a call expression is directly awaited or returned (without checking Promise.all)
+fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
     let parent = call_expr.syntax().parent();
     
     // Check if it's awaited
@@ -361,9 +361,19 @@ fn is_properly_handled(call_expr: &JsCallExpression) -> bool {
         current = node.parent();
     }
 
-    // Check if it's in Promise.all
-    if is_in_promise_all(call_expr) {
+    false
+}
+
+fn is_properly_handled(call_expr: &JsCallExpression) -> bool {
+    // Check if it's directly awaited or returned
+    if is_call_awaited_or_returned(call_expr) {
         return true;
+    }
+
+    // Check if it's in Promise.all - if so, verify that the Promise.all call itself is properly handled
+    if let Some(promise_all_call) = find_enclosing_promise_all(call_expr) {
+        // Check if the Promise.all call is awaited or returned
+        return is_call_awaited_or_returned(&promise_all_call);
     }
 
     // Check if it's assigned to a variable that's later awaited
@@ -372,7 +382,7 @@ fn is_properly_handled(call_expr: &JsCallExpression) -> bool {
     false
 }
 
-fn is_in_promise_all(call_expr: &JsCallExpression) -> bool {
+fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpression> {
     let mut current = call_expr.syntax().parent();
     
     while let Some(node) = current {
@@ -386,7 +396,7 @@ fn is_in_promise_all(call_expr: &JsCallExpression) -> bool {
                             if let Some(promise_call) = call_args_parent.parent() {
                                 if let Some(call) = JsCallExpression::cast_ref(&promise_call) {
                                     if is_promise_all(&call) {
-                                        return true;
+                                        return Some(call);
                                     }
                                 }
                             }
@@ -408,7 +418,7 @@ fn is_in_promise_all(call_expr: &JsCallExpression) -> bool {
         current = node.parent();
     }
     
-    false
+    None
 }
 
 fn is_promise_all(call: &JsCallExpression) -> bool {

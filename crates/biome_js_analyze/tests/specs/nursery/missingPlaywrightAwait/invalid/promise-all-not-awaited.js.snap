@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: promise-all-not-awaited.js
+---
+# Input
+```js
+test('example', async ({ page }) => {
+    Promise.all([
+        expect(page.locator('.one')).toBeVisible(),
+        expect(page.locator('.two')).toBeVisible()
+    ]);
+});
+
+
+```
+
+# Diagnostics
+```
+promise-all-not-awaited.js:3:9 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    1 │ test('example', async ({ page }) => {
+    2 │     Promise.all([
+  > 3 │         expect(page.locator('.one')).toBeVisible(),
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │         expect(page.locator('.two')).toBeVisible()
+    5 │     ]);
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+    1 1 │   test('example', async ({ page }) => {
+    2 2 │       Promise.all([
+    3   │ - ········expect(page.locator('.one')).toBeVisible(),
+      3 │ + ········await
+      4 │ + ········expect(page.locator('.one')).toBeVisible(),
+    4 5 │           expect(page.locator('.two')).toBeVisible()
+    5 6 │       ]);
+  
+
+```
+
+```
+promise-all-not-awaited.js:4:9 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    2 │     Promise.all([
+    3 │         expect(page.locator('.one')).toBeVisible(),
+  > 4 │         expect(page.locator('.two')).toBeVisible()
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     ]);
+    6 │ });
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+    2 2 │       Promise.all([
+    3 3 │           expect(page.locator('.one')).toBeVisible(),
+    4   │ - ········expect(page.locator('.two')).toBeVisible()
+      4 │ + ········await
+      5 │ + ········expect(page.locator('.two')).toBeVisible()
+    5 6 │       ]);
+    6 7 │   });
+  
+
+```
