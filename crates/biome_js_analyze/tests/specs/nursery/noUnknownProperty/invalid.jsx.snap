@@ -64,7 +64,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unknown property 'allowTransparency' found
+  i The property 'allowTransparency' is not a valid DOM attribute.
   
     1 │ <>
   > 2 │ 	<div allowTransparency="true" />
@@ -72,13 +72,17 @@ invalid.jsx:2:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
     3 │ 	<div hasOwnProperty="should not be allowed property"></div>
     4 │ 	<div abc="should not be allowed property"></div>
   
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
 
 ```
 
 ```
 invalid.jsx:3:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unknown property 'hasOwnProperty' found
+  i The property 'hasOwnProperty' is not a valid DOM attribute.
   
     1 │ <>
     2 │ 	<div allowTransparency="true" />
@@ -87,13 +91,17 @@ invalid.jsx:3:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
     4 │ 	<div abc="should not be allowed property"></div>
     5 │ 	<div aria-fake="should not be allowed property"></div>
   
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
 
 ```
 
 ```
 invalid.jsx:4:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unknown property 'abc' found
+  i The property 'abc' is not a valid DOM attribute.
   
     2 │ 	<div allowTransparency="true" />
     3 │ 	<div hasOwnProperty="should not be allowed property"></div>
@@ -102,13 +110,17 @@ invalid.jsx:4:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
     5 │ 	<div aria-fake="should not be allowed property"></div>
     6 │ 	<div someProp="bar"></div>
   
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
 
 ```
 
 ```
 invalid.jsx:5:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unknown property 'aria-fake' found
+  i The property 'aria-fake' is not a valid DOM attribute.
   
     3 │ 	<div hasOwnProperty="should not be allowed property"></div>
     4 │ 	<div abc="should not be allowed property"></div>
@@ -117,13 +129,17 @@ invalid.jsx:5:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
     6 │ 	<div someProp="bar"></div>
     7 │ 	<div class="bar"></div>
   
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
 
 ```
 
 ```
 invalid.jsx:6:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unknown property 'someProp' found
+  i The property 'someProp' is not a valid DOM attribute.
   
     4 │ 	<div abc="should not be allowed property"></div>
     5 │ 	<div aria-fake="should not be allowed property"></div>
@@ -132,13 +148,17 @@ invalid.jsx:6:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
     7 │ 	<div class="bar"></div>
     8 │ 	<div for="bar"></div>
   
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
 
 ```
 
 ```
 invalid.jsx:7:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'class'. Did you mean 'className'?
+  i Property 'class' is not a valid React prop name.
   
     5 │ 	<div aria-fake="should not be allowed property"></div>
     6 │ 	<div someProp="bar"></div>
@@ -147,7 +167,9 @@ invalid.jsx:7:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
     8 │ 	<div for="bar"></div>
     9 │ 	<div accept-charset="bar"></div>
   
-  i React uses camelCased props like 'className' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'className' instead of 'class' for React components.
   
 
 ```
@@ -155,7 +177,7 @@ invalid.jsx:7:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 invalid.jsx:8:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'for'. Did you mean 'htmlFor'?
+  i Property 'for' is not a valid React prop name.
   
      6 │ 	<div someProp="bar"></div>
      7 │ 	<div class="bar"></div>
@@ -164,7 +186,9 @@ invalid.jsx:8:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
      9 │ 	<div accept-charset="bar"></div>
     10 │ 	<div http-equiv="bar"></div>
   
-  i React uses camelCased props like 'htmlFor' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'htmlFor' instead of 'for' for React components.
   
 
 ```
@@ -172,7 +196,7 @@ invalid.jsx:8:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 invalid.jsx:9:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'accept-charset'. Did you mean 'acceptCharset'?
+  i Property 'accept-charset' is not a valid React prop name.
   
      7 │ 	<div class="bar"></div>
      8 │ 	<div for="bar"></div>
@@ -181,7 +205,9 @@ invalid.jsx:9:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
     10 │ 	<div http-equiv="bar"></div>
     11 │ 	<div accesskey="bar"></div>
   
-  i React uses camelCased props like 'acceptCharset' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'acceptCharset' instead of 'accept-charset' for React components.
   
 
 ```
@@ -189,7 +215,7 @@ invalid.jsx:9:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 invalid.jsx:10:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'http-equiv'. Did you mean 'httpEquiv'?
+  i Property 'http-equiv' is not a valid React prop name.
   
      8 │ 	<div for="bar"></div>
      9 │ 	<div accept-charset="bar"></div>
@@ -198,7 +224,9 @@ invalid.jsx:10:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     11 │ 	<div accesskey="bar"></div>
     12 │ 	<div onclick="bar"></div>
   
-  i React uses camelCased props like 'httpEquiv' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'httpEquiv' instead of 'http-equiv' for React components.
   
 
 ```
@@ -206,7 +234,7 @@ invalid.jsx:10:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:11:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'accesskey'. Did you mean 'accessKey'?
+  i Property 'accesskey' is not a valid React prop name.
   
      9 │ 	<div accept-charset="bar"></div>
     10 │ 	<div http-equiv="bar"></div>
@@ -215,7 +243,9 @@ invalid.jsx:11:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     12 │ 	<div onclick="bar"></div>
     13 │ 	<div onmousedown="bar"></div>
   
-  i React uses camelCased props like 'accessKey' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'accessKey' instead of 'accesskey' for React components.
   
 
 ```
@@ -223,7 +253,7 @@ invalid.jsx:11:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:12:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'onclick'. Did you mean 'onClick'?
+  i Property 'onclick' is not a valid React prop name.
   
     10 │ 	<div http-equiv="bar"></div>
     11 │ 	<div accesskey="bar"></div>
@@ -232,7 +262,9 @@ invalid.jsx:12:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     13 │ 	<div onmousedown="bar"></div>
     14 │ 	<div onMousedown="bar"></div>
   
-  i React uses camelCased props like 'onClick' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onClick' instead of 'onclick' for React components.
   
 
 ```
@@ -240,7 +272,7 @@ invalid.jsx:12:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:13:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'onmousedown'. Did you mean 'onMouseDown'?
+  i Property 'onmousedown' is not a valid React prop name.
   
     11 │ 	<div accesskey="bar"></div>
     12 │ 	<div onclick="bar"></div>
@@ -249,7 +281,9 @@ invalid.jsx:13:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     14 │ 	<div onMousedown="bar"></div>
     15 │ 	<use xlink:href="bar" />
   
-  i React uses camelCased props like 'onMouseDown' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onMouseDown' instead of 'onmousedown' for React components.
   
 
 ```
@@ -257,7 +291,7 @@ invalid.jsx:13:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:14:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'onMousedown'. Did you mean 'onMouseDown'?
+  i Property 'onMousedown' is not a valid React prop name.
   
     12 │ 	<div onclick="bar"></div>
     13 │ 	<div onmousedown="bar"></div>
@@ -266,7 +300,9 @@ invalid.jsx:14:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     15 │ 	<use xlink:href="bar" />
     16 │ 	<rect clip-path="bar" />
   
-  i React uses camelCased props like 'onMouseDown' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onMouseDown' instead of 'onMousedown' for React components.
   
 
 ```
@@ -274,7 +310,7 @@ invalid.jsx:14:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:15:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'xlink:href'. Did you mean 'xlinkHref'?
+  i Property 'xlink:href' is not a valid React prop name.
   
     13 │ 	<div onmousedown="bar"></div>
     14 │ 	<div onMousedown="bar"></div>
@@ -283,7 +319,9 @@ invalid.jsx:15:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     16 │ 	<rect clip-path="bar" />
     17 │ 	<script crossorigin nomodule />
   
-  i React uses camelCased props like 'xlinkHref' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'xlinkHref' instead of 'xlink:href' for React components.
   
 
 ```
@@ -291,7 +329,7 @@ invalid.jsx:15:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:16:8 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'clip-path'. Did you mean 'clipPath'?
+  i Property 'clip-path' is not a valid React prop name.
   
     14 │ 	<div onMousedown="bar"></div>
     15 │ 	<use xlink:href="bar" />
@@ -300,7 +338,9 @@ invalid.jsx:16:8 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     17 │ 	<script crossorigin nomodule />
     18 │ 	<div crossorigin />
   
-  i React uses camelCased props like 'clipPath' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'clipPath' instead of 'clip-path' for React components.
   
 
 ```
@@ -308,7 +348,7 @@ invalid.jsx:16:8 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:17:10 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'crossorigin'. Did you mean 'crossOrigin'?
+  i Property 'crossorigin' is not a valid React prop name.
   
     15 │ 	<use xlink:href="bar" />
     16 │ 	<rect clip-path="bar" />
@@ -317,7 +357,9 @@ invalid.jsx:17:10 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     18 │ 	<div crossorigin />
     19 │ 	<div crossOrigin />
   
-  i React uses camelCased props like 'crossOrigin' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'crossOrigin' instead of 'crossorigin' for React components.
   
 
 ```
@@ -325,7 +367,7 @@ invalid.jsx:17:10 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:17:22 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'nomodule'. Did you mean 'noModule'?
+  i Property 'nomodule' is not a valid React prop name.
   
     15 │ 	<use xlink:href="bar" />
     16 │ 	<rect clip-path="bar" />
@@ -334,7 +376,9 @@ invalid.jsx:17:22 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     18 │ 	<div crossorigin />
     19 │ 	<div crossOrigin />
   
-  i React uses camelCased props like 'noModule' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'noModule' instead of 'nomodule' for React components.
   
 
 ```
@@ -342,7 +386,7 @@ invalid.jsx:17:22 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:18:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Invalid DOM property 'crossorigin'. Did you mean 'crossOrigin'?
+  i Property 'crossorigin' is not a valid React prop name.
   
     16 │ 	<rect clip-path="bar" />
     17 │ 	<script crossorigin nomodule />
@@ -351,7 +395,9 @@ invalid.jsx:18:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     19 │ 	<div crossOrigin />
     20 │ 	<div as="audio" />
   
-  i React uses camelCased props like 'crossOrigin' instead of HTML attribute names.
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'crossOrigin' instead of 'crossorigin' for React components.
   
 
 ```
@@ -367,6 +413,8 @@ invalid.jsx:19:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 	     ^^^^^^^^^^^
     20 │ 	<div as="audio" />
     21 │ 	<div
+  
+  i This attribute is restricted and cannot be used on this HTML element
   
   i This attribute is only allowed on: script,img,video,audio,link,image
   
@@ -385,6 +433,8 @@ invalid.jsx:20:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     21 │ 	<div
     22 │ 		onAbort={abort}
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: link
   
 
@@ -401,6 +451,8 @@ invalid.jsx:22:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 		^^^^^^^^^^^^^^^
     23 │ 		onDurationChange={durationChange}
     24 │ 		onEmptied={emptied}
+  
+  i This attribute is restricted and cannot be used on this HTML element
   
   i This attribute is only allowed on: audio,video
   
@@ -419,6 +471,8 @@ invalid.jsx:23:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     24 │ 		onEmptied={emptied}
     25 │ 		onEnded={end}
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: audio,video
   
 
@@ -435,6 +489,8 @@ invalid.jsx:24:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 		^^^^^^^^^^^^^^^^^^^
     25 │ 		onEnded={end}
     26 │ 		onResize={resize}
+  
+  i This attribute is restricted and cannot be used on this HTML element
   
   i This attribute is only allowed on: audio,video
   
@@ -453,6 +509,8 @@ invalid.jsx:25:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     26 │ 		onResize={resize}
     27 │ 		onError={error}
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: audio,video
   
 
@@ -469,6 +527,8 @@ invalid.jsx:26:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 		^^^^^^^^^^^^^^^^^
     27 │ 		onError={error}
     28 │ 	/>
+  
+  i This attribute is restricted and cannot be used on this HTML element
   
   i This attribute is only allowed on: audio,video
   
@@ -487,6 +547,8 @@ invalid.jsx:27:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     28 │ 	/>
     29 │ 	<div onLoad={load} />
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: audio,video,img,link,source,script,picture,iframe
   
 
@@ -503,6 +565,8 @@ invalid.jsx:29:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 	     ^^^^^^^^^^^^^
     30 │ 	<div fill="pink" />
     31 │ 	<div
+  
+  i This attribute is restricted and cannot be used on this HTML element
   
   i This attribute is only allowed on: script,img,link,picture,iframe,object,source
   
@@ -521,6 +585,8 @@ invalid.jsx:30:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     31 │ 	<div
     32 │ 		controls={controls}
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: altGlyph,circle,ellipse,g,line,marker,mask,path,polygon,polyline,rect,svg,symbol,text,textPath,tref,tspan,use,animate,animateColor,animateMotion,animateTransform,set
   
 
@@ -537,6 +603,8 @@ invalid.jsx:32:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 		^^^^^^^^^^^^^^^^^^^
     33 │ 		loop={true}
     34 │ 		muted={false}
+  
+  i This attribute is restricted and cannot be used on this HTML element
   
   i This attribute is only allowed on: audio,video
   
@@ -555,6 +623,8 @@ invalid.jsx:33:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     34 │ 		muted={false}
     35 │ 		src={videoSrc}
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: audio,video
   
 
@@ -571,6 +641,8 @@ invalid.jsx:34:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 		^^^^^^^^^^^^^
     35 │ 		src={videoSrc}
     36 │ 		playsInline={true}
+  
+  i This attribute is restricted and cannot be used on this HTML element
   
   i This attribute is only allowed on: audio,video
   
@@ -589,6 +661,8 @@ invalid.jsx:36:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     37 │ 		allowFullScreen
     38 │ 	></div>
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: video
   
 
@@ -605,6 +679,8 @@ invalid.jsx:37:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 		^^^^^^^^^^^^^^^
     38 │ 	></div>
     39 │ 	<div download="foo" />
+  
+  i This attribute is restricted and cannot be used on this HTML element
   
   i This attribute is only allowed on: iframe,video
   
@@ -623,6 +699,8 @@ invalid.jsx:39:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     40 │ 	<div imageSrcSet="someImageSrcSet" />
     41 │ 	<div imageSizes="someImageSizes" />
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: a,area
   
 
@@ -639,6 +717,8 @@ invalid.jsx:40:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     41 │ 	<div imageSizes="someImageSizes" />
     42 │ 	<div data-xml-anything="invalid" />
+  
+  i This attribute is restricted and cannot be used on this HTML element
   
   i This attribute is only allowed on: link
   
@@ -657,6 +737,8 @@ invalid.jsx:41:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     42 │ 	<div data-xml-anything="invalid" />
     43 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: link
   
 
@@ -665,7 +747,7 @@ invalid.jsx:41:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:42:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unknown property 'data-xml-anything' found
+  i The property 'data-xml-anything' is not a valid DOM attribute.
   
     40 │ 	<div imageSrcSet="someImageSrcSet" />
     41 │ 	<div imageSizes="someImageSizes" />
@@ -674,13 +756,17 @@ invalid.jsx:42:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     43 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
     44 │ 	<div abbr="abbr" />
   
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
 
 ```
 
 ```
 invalid.jsx:43:48 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unknown property 'dataNotAnDataAttribute' found
+  i The property 'dataNotAnDataAttribute' is not a valid DOM attribute.
   
     41 │ 	<div imageSizes="someImageSizes" />
     42 │ 	<div data-xml-anything="invalid" />
@@ -688,6 +774,10 @@ invalid.jsx:43:48 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 	                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │ 	<div abbr="abbr" />
     45 │ 	<div webkitDirectory="" />
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
   
 
 ```
@@ -703,6 +793,8 @@ invalid.jsx:44:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 	     ^^^^^^^^^^^
     45 │ 	<div webkitDirectory="" />
     46 │ 	<div webkitdirectory="" />
+  
+  i This attribute is restricted and cannot be used on this HTML element
   
   i This attribute is only allowed on: th,td
   
@@ -721,6 +813,8 @@ invalid.jsx:45:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     46 │ 	<div webkitdirectory="" />
     47 │ 	<div
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: input
   
 
@@ -738,6 +832,8 @@ invalid.jsx:46:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     47 │ 	<div
     48 │ 		className="App"
   
+  i This attribute is restricted and cannot be used on this HTML element
+  
   i This attribute is only allowed on: input
   
 
@@ -746,7 +842,7 @@ invalid.jsx:46:7 lint/nursery/noUnknownProperty ━━━━━━━━━━�
 ```
 invalid.jsx:49:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unknown property 'data-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash:c' found
+  i The property 'data-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash-crash:c' is not a valid DOM attribute.
   
     47 │ 	<div
     48 │ 		className="App"
@@ -754,6 +850,10 @@ invalid.jsx:49:3 lint/nursery/noUnknownProperty ━━━━━━━━━━�
        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     50 │ 	>
     51 │ 		Hello, world!
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
   
 
 ```

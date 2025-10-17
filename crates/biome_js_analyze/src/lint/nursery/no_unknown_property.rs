@@ -1,9 +1,9 @@
+use biome_analyze::RuleDomain;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::AnyJsxAttributeName;
 use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
-use biome_rowan::TextRange;
 use biome_rule_options::no_unknown_property::NoUnknownPropertyOptions;
 use regex::Regex;
 
@@ -90,34 +90,11 @@ declare_lint_rule! {
     pub NoUnknownProperty {
         version: "next",
         name: "noUnknownProperty",
-        language: "js",
+        language: "jsx",
+        domains: &[RuleDomain::React],
         recommended: false,
     }
 }
-
-const REACT_ON_PROPS: &[&str] = &[
-    "onGotPointerCapture",
-    "onGotPointerCaptureCapture",
-    "onLostPointerCapture",
-    "onLostPointerCapture",
-    "onLostPointerCaptureCapture",
-    "onPointerCancel",
-    "onPointerCancelCapture",
-    "onPointerDown",
-    "onPointerDownCapture",
-    "onPointerEnter",
-    "onPointerEnterCapture",
-    "onPointerLeave",
-    "onPointerLeaveCapture",
-    "onPointerMove",
-    "onPointerMoveCapture",
-    "onPointerOut",
-    "onPointerOutCapture",
-    "onPointerOver",
-    "onPointerOverCapture",
-    "onPointerUp",
-    "onPointerUpCapture",
-];
 
 /**
  * Popover API properties added in React 19
@@ -129,14 +106,6 @@ const REACT_ON_PROPS: &[&str] = &[
 //     "onToggle",
 //     "onBeforeToggle",
 // ];
-
-const POPOVER_API_PROPS_LOWER: &[&str] = &[
-    "popover",
-    "popovertarget",
-    "popovertargetaction",
-    "ontoggle",
-    "onbeforetoggle",
-];
 
 const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("abbr", &["th", "td"]),
@@ -420,121 +389,52 @@ const SVGDOM_ATTRIBUTE_NAMES: &[(&str, &str)] = &[
     ("xml:space", "xmlSpace"),
 ];
 
-const DOM_PROPERTY_NAMES_ONE_WORD: [&str; 190] = [
-    // Global attributes - can be used on any HTML/DOM element
-    // See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-    "dir",
-    "draggable",
-    "hidden",
-    "id",
-    "lang",
-    "nonce",
-    "part",
-    "slot",
-    "style",
-    "title",
-    "translate",
-    "inert",
-    // Element specific attributes
-    // See https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes (includes global attributes too)
-    // To be considered if these should be added also to ATTRIBUTE_TAGS_MAP
+const DOM_PROPERTY_NAMES: &[&str] = &[
+    // Single word properties
     "accept",
     "action",
-    "allow",
-    "alt",
-    "as",
-    "async",
-    "buffered",
-    "capture",
-    "challenge",
-    "cite",
-    "code",
-    "cols",
-    "content",
-    "coords",
-    "csp",
-    "data",
-    "decoding",
-    "default",
-    "defer",
-    "disabled",
-    "form",
-    "headers",
-    "height",
-    "high",
-    "href",
-    "icon",
-    "importance",
-    "integrity",
-    "kind",
-    "label",
-    "language",
-    "loading",
-    "list",
-    "loop",
-    "low",
-    "manifest",
-    "max",
-    "media",
-    "method",
-    "min",
-    "multiple",
-    "muted",
-    "name",
-    "open",
-    "optimum",
-    "pattern",
-    "ping",
-    "placeholder",
-    "poster",
-    "preload",
-    "profile",
-    "rel",
-    "required",
-    "reversed",
-    "role",
-    "rows",
-    "sandbox",
-    "scope",
-    "seamless",
-    "selected",
-    "shape",
-    "size",
-    "sizes",
-    "span",
-    "src",
-    "start",
-    "step",
-    "summary",
-    "target",
-    "type",
-    "value",
-    "width",
-    "wmode",
-    "wrap",
-    // SVG attributes
-    // See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
     "accumulate",
     "additive",
+    "allow",
     "alphabetic",
+    "alt",
     "amplitude",
+    "as",
     "ascent",
+    "async",
     "azimuth",
     "bbox",
     "begin",
     "bias",
+    "buffered",
     "by",
+    "capture",
+    "challenge",
+    "children",
+    "cite",
     "clip",
-    "color",
+    "code",
+    "cols",
+    "content",
+    "controls",
+    "coords",
+    "csp",
     "cursor",
     "cx",
     "cy",
     "d",
+    "data",
     "decelerate",
+    "decoding",
+    "default",
+    "defer",
     "descent",
+    "dir",
     "direction",
+    "disabled",
     "display",
     "divisor",
+    "draggable",
     "dur",
     "dx",
     "dy",
@@ -543,19 +443,29 @@ const DOM_PROPERTY_NAMES_ONE_WORD: [&str; 190] = [
     "exponent",
     "fill",
     "filter",
+    "form",
     "format",
-    "from",
     "fr",
+    "from",
     "fx",
     "fy",
     "g1",
     "g2",
     "hanging",
+    "headers",
     "height",
+    "hidden",
+    "high",
+    "href",
     "hreflang",
+    "icon",
+    "id",
     "ideographic",
+    "importance",
     "in",
     "in2",
+    "inert",
+    "integrity",
     "intercept",
     "k",
     "k1",
@@ -563,46 +473,99 @@ const DOM_PROPERTY_NAMES_ONE_WORD: [&str; 190] = [
     "k3",
     "k4",
     "kerning",
+    "key",
+    "kind",
+    "label",
+    "lang",
+    "language",
+    "list",
+    "loading",
     "local",
+    "loop",
+    "low",
+    "manifest",
     "mask",
+    "max",
+    "media",
+    "method",
+    "min",
     "mode",
+    "multiple",
+    "muted",
+    "name",
+    "nonce",
     "offset",
-    "opacity",
+    "open",
     "operator",
+    "optimum",
     "order",
     "orient",
     "orientation",
     "origin",
     "overflow",
+    "part",
     "path",
+    "pattern",
     "ping",
+    "placeholder",
     "points",
+    "poster",
+    "preload",
+    "profile",
+    "property",
     "r",
     "radius",
+    "ref",
     "rel",
+    "required",
+    "results",
     "restart",
-    "result",
-    "rotate",
+    "reversed",
+    "role",
+    "rows",
     "rx",
     "ry",
+    "sandbox",
     "scale",
+    "scope",
+    "seamless",
+    "security",
     "seed",
+    "selected",
+    "shape",
+    "size",
+    "sizes",
+    "slot",
     "slope",
+    "span",
     "spacing",
     "speed",
+    "src",
+    "start",
     "stemh",
     "stemv",
+    "step",
     "string",
     "stroke",
+    "style",
+    "summary",
+    "target",
+    "title",
     "to",
     "transform",
+    "translate",
+    "type",
     "u1",
     "u2",
     "unicode",
+    "value",
     "values",
     "version",
     "visibility",
+    "width",
     "widths",
+    "wmode",
+    "wrap",
     "x",
     "x1",
     "x2",
@@ -611,147 +574,60 @@ const DOM_PROPERTY_NAMES_ONE_WORD: [&str; 190] = [
     "y1",
     "y2",
     "z",
-    // OpenGraph meta tag attributes
-    "property",
-    // React specific attributes
-    "ref",
-    "key",
-    "children",
-    // Non-standard
-    "results",
-    "security",
-    // Video specific
-    "controls",
-];
-
-const DOM_PROPERTY_NAMES_TWO_WORDS: [&str; 359] = [
-    // Global attributes - can be used on any HTML/DOM element
-    // See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-    "accessKey",
-    "autoCapitalize",
-    "autoFocus",
-    "contentEditable",
-    "enterKeyHint",
-    "exportParts",
-    "inputMode",
-    "itemID",
-    "itemRef",
-    "itemProp",
-    "itemScope",
-    "itemType",
-    "spellCheck",
-    "tabIndex",
-    // Element specific attributes
-    // See https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes (includes global attributes too)
-    // To be considered if these should be added also to ATTRIBUTE_TAGS_MAP
+    // Two word properties
     "acceptCharset",
-    "autoComplete",
-    "autoPlay",
-    "border",
-    "cellPadding",
-    "cellSpacing",
-    "classID",
-    "codeBase",
-    "colSpan",
-    "contextMenu",
-    "dateTime",
-    "encType",
-    "formAction",
-    "formEncType",
-    "formMethod",
-    "formNoValidate",
-    "formTarget",
-    "frameBorder",
-    "hrefLang",
-    "httpEquiv",
-    "imageSizes",
-    "imageSrcSet",
-    "isMap",
-    "keyParams",
-    "keyType",
-    "marginHeight",
-    "marginWidth",
-    "maxLength",
-    "mediaGroup",
-    "minLength",
-    "noValidate",
-    "onAnimationEnd",
-    "onAnimationIteration",
-    "onAnimationStart",
-    "onBlur",
-    "onChange",
-    "onClick",
-    "onContextMenu",
-    "onCopy",
-    "onCompositionEnd",
-    "onCompositionStart",
-    "onCompositionUpdate",
-    "onCut",
-    "onDoubleClick",
-    "onDrag",
-    "onDragEnd",
-    "onDragEnter",
-    "onDragExit",
-    "onDragLeave",
-    "onError",
-    "onFocus",
-    "onInput",
-    "onKeyDown",
-    "onKeyPress",
-    "onKeyUp",
-    "onLoad",
-    "onWheel",
-    "onDragOver",
-    "onDragStart",
-    "onDrop",
-    "onMouseDown",
-    "onMouseEnter",
-    "onMouseLeave",
-    "onMouseMove",
-    "onMouseOut",
-    "onMouseOver",
-    "onMouseUp",
-    "onPaste",
-    "onScroll",
-    "onSelect",
-    "onSubmit",
-    "onToggle",
-    "onTransitionEnd",
-    "radioGroup",
-    "readOnly",
-    "referrerPolicy",
-    "rowSpan",
-    "srcDoc",
-    "srcLang",
-    "srcSet",
-    "useMap",
-    "fetchPriority",
-    // SVG attributes
-    // See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
-    "crossOrigin",
+    "accessKey",
     "accentHeight",
     "alignmentBaseline",
     "arabicForm",
     "attributeName",
     "attributeType",
+    "autoCapitalize",
+    "autoComplete",
+    "autoCorrect",
+    "autoFocus",
+    "autoPictureInPicture",
+    "autoPlay",
+    "autoSave",
     "baseFrequency",
-    "baselineShift",
     "baseProfile",
+    "baselineShift",
+    "border",
     "calcMode",
     "capHeight",
-    "clipPathUnits",
+    "cellPadding",
+    "cellSpacing",
+    "classID",
+    "className",
     "clipPath",
+    "clipPathUnits",
     "clipRule",
+    "codeBase",
+    "colSpan",
     "colorInterpolation",
     "colorInterpolationFilters",
     "colorProfile",
     "colorRendering",
+    "contentEditable",
     "contentScriptType",
     "contentStyleType",
+    "contextMenu",
+    "controlsList",
+    "crossOrigin",
+    "dangerouslySetInnerHTML",
+    "dateTime",
+    "defaultChecked",
+    "defaultValue",
     "diffuseConstant",
+    "disablePictureInPicture",
+    "disableRemotePlayback",
     "dominantBaseline",
     "edgeMode",
     "enableBackground",
+    "encType",
+    "enterKeyHint",
+    "exportParts",
+    "fetchPriority",
     "fillOpacity",
     "fillRule",
     "filterRes",
@@ -765,6 +641,12 @@ const DOM_PROPERTY_NAMES_TWO_WORDS: [&str; 359] = [
     "fontStyle",
     "fontVariant",
     "fontWeight",
+    "formAction",
+    "formEncType",
+    "formMethod",
+    "formNoValidate",
+    "formTarget",
+    "frameBorder",
     "glyphName",
     "glyphOrientationHorizontal",
     "glyphOrientationVertical",
@@ -773,30 +655,213 @@ const DOM_PROPERTY_NAMES_TWO_WORDS: [&str; 359] = [
     "gradientUnits",
     "horizAdvX",
     "horizOriginX",
+    "hrefLang",
+    "htmlFor",
+    "httpEquiv",
     "imageRendering",
+    "imageSizes",
+    "imageSrcSet",
+    "inputMode",
+    "isMap",
+    "itemID",
+    "itemProp",
+    "itemRef",
+    "itemScope",
+    "itemType",
     "kernelMatrix",
     "kernelUnitLength",
+    "keyParams",
     "keyPoints",
     "keySplines",
     "keyTimes",
+    "keyType",
     "lengthAdjust",
     "letterSpacing",
     "lightingColor",
     "limitingConeAngle",
+    "marginHeight",
+    "marginWidth",
     "markerEnd",
+    "markerHeight",
     "markerMid",
     "markerStart",
-    "markerHeight",
     "markerUnits",
     "markerWidth",
     "maskContentUnits",
     "maskUnits",
     "mathematical",
+    "maxLength",
+    "mediaGroup",
+    "minLength",
+    "noValidate",
     "numOctaves",
+    "onAbort",
+    "onAbortCapture",
+    "onAnimationEnd",
+    "onAnimationEndCapture",
+    "onAnimationIteration",
+    "onAnimationStart",
+    "onAnimationStartCapture",
+    "onAuxClick",
+    "onAuxClickCapture",
+    "onBeforeInput",
+    "onBeforeInputCapture",
+    "onbeforetoggle",
+    "onBlur",
+    "onBlurCapture",
+    "onCanPlay",
+    "onCanPlayCapture",
+    "onCanPlayThrough",
+    "onCanPlayThroughCapture",
+    "onChange",
+    "onChangeCapture",
+    "onClick",
+    "onClickCapture",
+    "onCompositionEnd",
+    "onCompositionEndCapture",
+    "onCompositionStart",
+    "onCompositionStartCapture",
+    "onCompositionUpdate",
+    "onCompositionUpdateCapture",
+    "onContextMenu",
+    "onContextMenuCapture",
+    "onCopy",
+    "onCopyCapture",
+    "onCut",
+    "onCutCapture",
+    "onDoubleClick",
+    "onDoubleClickCapture",
+    "onDrag",
+    "onDragCapture",
+    "onDragEnd",
+    "onDragEndCapture",
+    "onDragEnter",
+    "onDragEnterCapture",
+    "onDragExit",
+    "onDragExitCapture",
+    "onDragLeave",
+    "onDragLeaveCapture",
+    "onDragOver",
+    "onDragOverCapture",
+    "onDragStart",
+    "onDragStartCapture",
+    "onDrop",
+    "onDropCapture",
+    "onDurationChange",
+    "onDurationChangeCapture",
+    "onEmptied",
+    "onEmptiedCapture",
+    "onEncrypted",
+    "onEncryptedCapture",
+    "onEnded",
+    "onEndedCapture",
+    "onError",
+    "onErrorCapture",
+    "onFocus",
+    "onFocusCapture",
+    "onGotPointerCapture",
+    "onGotPointerCaptureCapture",
+    "onInput",
+    "onInputCapture",
+    "onInvalid",
+    "onInvalidCapture",
+    "onKeyDown",
+    "onKeyDownCapture",
+    "onKeyPress",
+    "onKeyPressCapture",
+    "onKeyUp",
+    "onKeyUpCapture",
+    "onLoad",
+    "onLoadCapture",
+    "onLoadedData",
+    "onLoadedDataCapture",
+    "onLoadedMetadata",
+    "onLoadedMetadataCapture",
+    "onLoadStart",
+    "onLoadStartCapture",
+    "onLostPointerCapture",
+    "onLostPointerCaptureCapture",
+    "onMouseDown",
+    "onMouseDownCapture",
+    "onMouseEnter",
+    "onMouseLeave",
+    "onMouseMove",
+    "onMouseMoveCapture",
+    "onMouseOut",
+    "onMouseOutCapture",
+    "onMouseOver",
+    "onMouseOverCapture",
+    "onMouseUp",
+    "onMouseUpCapture",
+    "onPaste",
+    "onPasteCapture",
+    "onPause",
+    "onPauseCapture",
+    "onPlay",
+    "onPlayCapture",
+    "onPlaying",
+    "onPlayingCapture",
+    "onPointerCancel",
+    "onPointerCancelCapture",
+    "onPointerDown",
+    "onPointerDownCapture",
+    "onPointerEnter",
+    "onPointerEnterCapture",
+    "onPointerLeave",
+    "onPointerLeaveCapture",
+    "onPointerMove",
+    "onPointerMoveCapture",
+    "onPointerOut",
+    "onPointerOutCapture",
+    "onPointerOver",
+    "onPointerOverCapture",
+    "onPointerUp",
+    "onPointerUpCapture",
+    "onProgress",
+    "onProgressCapture",
+    "onRateChange",
+    "onRateChangeCapture",
+    "onReset",
+    "onResetCapture",
+    "onResize",
+    "onScroll",
+    "onScrollCapture",
+    "onSeeked",
+    "onSeekedCapture",
+    "onSeeking",
+    "onSeekingCapture",
+    "onSelect",
+    "onSelectCapture",
+    "onStalled",
+    "onStalledCapture",
+    "onSubmit",
+    "onSubmitCapture",
+    "onSuspend",
+    "onSuspendCapture",
+    "onTimeUpdate",
+    "onTimeUpdateCapture",
+    "onToggle",
+    "ontoggle",
+    "onTouchCancel",
+    "onTouchCancelCapture",
+    "onTouchEnd",
+    "onTouchEndCapture",
+    "onTouchMove",
+    "onTouchMoveCapture",
+    "onTouchStart",
+    "onTouchStartCapture",
+    "onTransitionEnd",
+    "onTransitionEndCapture",
+    "onVolumeChange",
+    "onVolumeChangeCapture",
+    "onWaiting",
+    "onWaitingCapture",
+    "onWheel",
+    "onWheelCapture",
     "overlinePosition",
     "overlineThickness",
-    "panose1",
     "paintOrder",
+    "panose1",
     "pathLength",
     "patternContentUnits",
     "patternTransform",
@@ -805,9 +870,14 @@ const DOM_PROPERTY_NAMES_TWO_WORDS: [&str; 359] = [
     "pointsAtX",
     "pointsAtY",
     "pointsAtZ",
+    "popover",
+    "popovertarget",
+    "popovertargetaction",
     "preserveAlpha",
     "preserveAspectRatio",
     "primitiveUnits",
+    "radioGroup",
+    "readOnly",
     "referrerPolicy",
     "refX",
     "refY",
@@ -816,10 +886,15 @@ const DOM_PROPERTY_NAMES_TWO_WORDS: [&str; 359] = [
     "repeatDur",
     "requiredExtensions",
     "requiredFeatures",
+    "rowSpan",
     "shapeRendering",
     "specularConstant",
     "specularExponent",
+    "spellCheck",
     "spreadMethod",
+    "srcDoc",
+    "srcLang",
+    "srcSet",
     "startOffset",
     "stdDeviation",
     "stitchTiles",
@@ -834,21 +909,25 @@ const DOM_PROPERTY_NAMES_TWO_WORDS: [&str; 359] = [
     "strokeMiterlimit",
     "strokeOpacity",
     "strokeWidth",
+    "suppressContentEditableWarning",
+    "suppressHydrationWarning",
     "surfaceScale",
     "systemLanguage",
+    "tabIndex",
     "tableValues",
     "targetX",
     "targetY",
     "textAnchor",
     "textDecoration",
-    "textRendering",
     "textLength",
+    "textRendering",
     "transformOrigin",
     "underlinePosition",
     "underlineThickness",
     "unicodeBidi",
     "unicodeRange",
     "unitsPerEm",
+    "useMap",
     "vAlphabetic",
     "vHanging",
     "vIdeographic",
@@ -861,8 +940,8 @@ const DOM_PROPERTY_NAMES_TWO_WORDS: [&str; 359] = [
     "viewTarget",
     "wordSpacing",
     "writingMode",
-    "xHeight",
     "xChannelSelector",
+    "xHeight",
     "xlinkActuate",
     "xlinkArcrole",
     "xlinkHref",
@@ -876,157 +955,36 @@ const DOM_PROPERTY_NAMES_TWO_WORDS: [&str; 359] = [
     "xmlSpace",
     "yChannelSelector",
     "zoomAndPan",
-    // Safari/Apple specific, no listing available
-    "autoCorrect", // https://stackoverflow.com/questions/47985384/html-autocorrect-for-text-input-is-not-working
-    "autoSave", // https://stackoverflow.com/questions/25456396/what-is-autosave-attribute-supposed-to-do-how-do-i-use-it
-    // React specific attributes https://reactjs.org/docs/dom-elements.html#differences-in-attributes
-    "className",
-    "dangerouslySetInnerHTML",
-    "defaultValue",
-    "defaultChecked",
-    "htmlFor",
-    // Events' capture events
-    "onBeforeInput",
-    "onChange",
-    "onInvalid",
-    "onReset",
-    "onTouchCancel",
-    "onTouchEnd",
-    "onTouchMove",
-    "onTouchStart",
-    "suppressContentEditableWarning",
-    "suppressHydrationWarning",
-    "onAbort",
-    "onCanPlay",
-    "onCanPlayThrough",
-    "onDurationChange",
-    "onEmptied",
-    "onEncrypted",
-    "onEnded",
-    "onLoadedData",
-    "onLoadedMetadata",
-    "onLoadStart",
-    "onPause",
-    "onPlay",
-    "onPlaying",
-    "onProgress",
-    "onRateChange",
-    "onResize",
-    "onSeeked",
-    "onSeeking",
-    "onStalled",
-    "onSuspend",
-    "onTimeUpdate",
-    "onVolumeChange",
-    "onWaiting",
-    "onCopyCapture",
-    "onCutCapture",
-    "onPasteCapture",
-    "onCompositionEndCapture",
-    "onCompositionStartCapture",
-    "onCompositionUpdateCapture",
-    "onFocusCapture",
-    "onBlurCapture",
-    "onChangeCapture",
-    "onBeforeInputCapture",
-    "onInputCapture",
-    "onResetCapture",
-    "onSubmitCapture",
-    "onInvalidCapture",
-    "onLoadCapture",
-    "onErrorCapture",
-    "onKeyDownCapture",
-    "onKeyPressCapture",
-    "onKeyUpCapture",
-    "onAbortCapture",
-    "onCanPlayCapture",
-    "onCanPlayThroughCapture",
-    "onDurationChangeCapture",
-    "onEmptiedCapture",
-    "onEncryptedCapture",
-    "onEndedCapture",
-    "onLoadedDataCapture",
-    "onLoadedMetadataCapture",
-    "onLoadStartCapture",
-    "onPauseCapture",
-    "onPlayCapture",
-    "onPlayingCapture",
-    "onProgressCapture",
-    "onRateChangeCapture",
-    "onSeekedCapture",
-    "onSeekingCapture",
-    "onStalledCapture",
-    "onSuspendCapture",
-    "onTimeUpdateCapture",
-    "onVolumeChangeCapture",
-    "onWaitingCapture",
-    "onSelectCapture",
-    "onTouchCancelCapture",
-    "onTouchEndCapture",
-    "onTouchMoveCapture",
-    "onTouchStartCapture",
-    "onScrollCapture",
-    "onWheelCapture",
-    "onAnimationEndCapture",
-    "onAnimationIteration",
-    "onAnimationStartCapture",
-    "onTransitionEndCapture",
-    "onAuxClick",
-    "onAuxClickCapture",
-    "onClickCapture",
-    "onContextMenuCapture",
-    "onDoubleClickCapture",
-    "onDragCapture",
-    "onDragEndCapture",
-    "onDragEnterCapture",
-    "onDragExitCapture",
-    "onDragLeaveCapture",
-    "onDragOverCapture",
-    "onDragStartCapture",
-    "onDropCapture",
-    "onMouseDown",
-    "onMouseDownCapture",
-    "onMouseMoveCapture",
-    "onMouseOutCapture",
-    "onMouseOverCapture",
-    "onMouseUpCapture",
-    // Video specific
-    "autoPictureInPicture",
-    "controlsList",
-    "disablePictureInPicture",
-    "disableRemotePlayback",
 ];
 
 fn normalize_attribute_case(name: &str) -> &str {
     DOM_PROPERTIES_IGNORE_CASE
         .iter()
-        .find(|element| element.to_lowercase() == name.to_lowercase())
-        .copied()
-        .unwrap_or(name)
+        .find(|element| element.eq_ignore_ascii_case(name))
+        .unwrap_or(&name)
 }
 
 fn is_valid_data_attribute(name: &str) -> bool {
-    let re_data_xml = Regex::new("(?i)^data-xml").unwrap();
-    let re_data_general = Regex::new(r"^data-[^:]*$").unwrap();
+    use biome_string_case::StrOnlyExtension;
+    if !name.starts_with("data-") {
+        return false;
+    }
 
-    !re_data_xml.is_match(name) && re_data_general.is_match(name)
+    if name.to_lowercase_cow().starts_with("data-xml") {
+        return false;
+    }
+
+    let data_name = &name["data-".len()..];
+
+    if data_name.is_empty() {
+        return false;
+    }
+
+    data_name.chars().all(|c| c != ':')
 }
 
 fn is_valid_aria_attribute(name: &str) -> bool {
     ARIA_PROPERTIES.iter().any(|&element| element == name)
-}
-
-fn get_dom_property_names() -> Vec<&'static str> {
-    let mut all_dom_property_names: Vec<&str> = DOM_PROPERTY_NAMES_TWO_WORDS
-        .iter()
-        .chain(DOM_PROPERTY_NAMES_ONE_WORD.iter())
-        .copied()
-        .collect();
-
-    all_dom_property_names.extend(REACT_ON_PROPS.iter());
-    all_dom_property_names.extend(POPOVER_API_PROPS_LOWER.iter());
-
-    all_dom_property_names
 }
 
 fn is_valid_html_tag_in_jsx(node: &AnyJsxElement, tag_name: &str) -> bool {
@@ -1039,31 +997,17 @@ fn is_valid_html_tag_in_jsx(node: &AnyJsxElement, tag_name: &str) -> bool {
     false
 }
 
-fn get_tag_name(element: &AnyJsxElement) -> Option<String> {
-    match element {
-        AnyJsxElement::JsxOpeningElement(opening_element) => {
-            let name = opening_element.name().ok()?;
-            return Some(name.to_trimmed_string());
-        }
-        AnyJsxElement::JsxSelfClosingElement(self_closing_element) => {
-            let name = self_closing_element.name().ok()?;
-            return Some(name.to_trimmed_string());
-        }
-    };
+fn tag_name_has_dot(node: &AnyJsxElement) -> Option<bool> {
+    Some(matches!(
+        node.name().ok()?,
+        AnyJsxElementName::JsxMemberName(_)
+    ))
 }
 
-fn tag_name_has_dot(node: &AnyJsxElement) -> Option<bool> {
-    match node {
-        AnyJsxElement::JsxOpeningElement(element) => Some(matches!(
-            element.name().ok()?,
-            AnyJsxElementName::JsxMemberName(_)
-        )),
-        AnyJsxElement::JsxSelfClosingElement(element) => Some(matches!(
-            element.name().ok()?,
-            AnyJsxElementName::JsxMemberName(_)
-        )),
-    }
+fn has_uppercase(name: &str) -> bool {
+    name.contains(char::is_uppercase)
 }
+
 pub enum NoUnknownPropertyDiagnostic {
     UnknownProp {
         name: String,
@@ -1092,17 +1036,15 @@ fn get_standard_name(name: &str) -> Option<&'static str> {
         return Some(SVGDOM_ATTRIBUTE_NAMES[idx].1);
     }
 
-    let names = get_dom_property_names();
-
-    return names
+    DOM_PROPERTY_NAMES
         .iter()
-        .find(|&&element| element.to_lowercase() == name.to_lowercase())
-        .copied();
+        .find(|&&element| element.eq_ignore_ascii_case(name))
+        .copied()
 }
 
 impl Rule for NoUnknownProperty {
     type Query = Manifest<JsxAttribute>;
-    type State = (TextRange, NoUnknownPropertyDiagnostic);
+    type State = NoUnknownPropertyDiagnostic;
     type Signals = Option<Self::State>;
     type Options = NoUnknownPropertyOptions;
 
@@ -1140,14 +1082,11 @@ impl Rule for NoUnknownProperty {
 
         // Handle data-* attributes
         if is_valid_data_attribute(name) {
-            if options.require_data_lowercase && name.to_lowercase() != name {
-                return Some((
-                    node.range(),
-                    NoUnknownPropertyDiagnostic::DataLowercaseRequired {
-                        name: name.to_string(),
-                        lowercase_name: name.to_lowercase(),
-                    },
-                ));
+            if options.require_data_lowercase && has_uppercase(&name) {
+                return Some(NoUnknownPropertyDiagnostic::DataLowercaseRequired {
+                    name: name.to_string(),
+                    lowercase_name: name.to_lowercase(),
+                });
             }
             return None;
         }
@@ -1157,7 +1096,7 @@ impl Rule for NoUnknownProperty {
             return None;
         }
 
-        let tag_name = get_tag_name(&element)?;
+        let tag_name = element.name_value_token().ok()?.token_text_trimmed();
 
         // Special case for fbt/fbs nodes
         if tag_name == "fbt" || tag_name == "fbs" {
@@ -1172,69 +1111,67 @@ impl Rule for NoUnknownProperty {
         let allowed_tags = get_allowed_tags(&name);
 
         if let Some(allowed_tags) = allowed_tags {
-            if !allowed_tags.contains(&&tag_name.as_str()) {
-                return Some((
-                    node.range(),
-                    NoUnknownPropertyDiagnostic::InvalidPropOnTag {
-                        name: name.to_string(),
-                        tag_name: tag_name.to_string(),
-                        allowed_tags: allowed_tags.join(","),
-                    },
-                ));
+            if !allowed_tags.contains(&tag_name.trim()) {
+                return Some(NoUnknownPropertyDiagnostic::InvalidPropOnTag {
+                    name: name.to_string(),
+                    tag_name: tag_name.to_string(),
+                    allowed_tags: allowed_tags.join(","),
+                });
             }
             return None;
         }
 
         if let Some(standard_name) = get_standard_name(name) {
             if standard_name != name {
-                return Some((
-                    node.range(),
-                    NoUnknownPropertyDiagnostic::UnknownPropWithStandardName {
-                        name: name.to_string(),
-                        standard_name: standard_name.to_string(),
-                    },
-                ));
+                return Some(NoUnknownPropertyDiagnostic::UnknownPropWithStandardName {
+                    name: name.to_string(),
+                    standard_name: standard_name.to_string(),
+                });
             }
             return None;
         }
 
-        Some((
-            node.range(),
-            NoUnknownPropertyDiagnostic::UnknownProp {
-                name: name.to_string(),
-            },
-        ))
+        Some(NoUnknownPropertyDiagnostic::UnknownProp {
+            name: name.to_string(),
+        })
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let (range, diagnostic_kind) = _state;
-        match diagnostic_kind {
-            NoUnknownPropertyDiagnostic::UnknownProp { name } => Some(RuleDiagnostic::new(
-                rule_category!(),
-                *range,
-                markup! {
-                    "Unknown property '"{name}"' found"
-
-                },
-            )),
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        match state {
+            NoUnknownPropertyDiagnostic::UnknownProp { name } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        "The property '"{name}"' is not a valid DOM attribute."
+                    },
+                )
+                .note(markup! {
+                    "This property is not recognized as a valid HTML/DOM attribute or React prop."
+                })
+                .note(markup! {
+                    "Check the spelling or consider using a valid data-* attribute for custom properties."
+                }),
+            ),
             NoUnknownPropertyDiagnostic::UnknownPropWithStandardName {
                 name,
                 standard_name,
-            } => {
-                let mut diagnostic = RuleDiagnostic::new(
+            } => Some(
+                RuleDiagnostic::new(
                     rule_category!(),
-                    *range,
+                    node.range(),
                     markup! {
-                        "Invalid DOM property '" {name} "'. Did you mean '" {standard_name} "'?"
+                        "Property '"{name}"' is not a valid React prop name."
                     },
-                );
-
-                diagnostic = diagnostic.note(markup! {
-                       "React uses camelCased props like '" {standard_name} "' instead of HTML attribute names."
-                   });
-
-                Some(diagnostic)
-            }
+                )
+                .note(markup! {
+                    "React uses camelCased props, while HTML uses kebab-cased attributes."
+                })
+                .note(markup! {
+                        "Use '"{standard_name}"' instead of '"{name}"' for React components."
+                }),
+            ),
             NoUnknownPropertyDiagnostic::InvalidPropOnTag {
                 name,
                 tag_name,
@@ -1242,25 +1179,36 @@ impl Rule for NoUnknownProperty {
             } => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
-                    *range,
+                    node.range(),
                     markup! {
                         "Property '" {name} "' is not valid on a <" {tag_name} "> element."
                     },
                 )
                 .note(markup! {
-                    "This attribute is only allowed on: " {allowed_tags}
+                    "This attribute is restricted and cannot be used on this HTML element"
+                })
+                .note(markup! {
+                       "This attribute is only allowed on: "{allowed_tags}
                 }),
             ),
             NoUnknownPropertyDiagnostic::DataLowercaseRequired {
                 name,
                 lowercase_name,
-            } => Some(RuleDiagnostic::new(
-                rule_category!(),
-                *range,
-                markup! {
-                    "data-* attributes should be lowercase. Use '" {lowercase_name} "' instead of '" {name} "'."
-                },
-            )),
+            } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        "data-* attribute '"{name}"' should use lowercase naming."
+                    },
+                )
+                .note(markup! {
+                    "HTML data-* attributes must use lowercase letters to be valid."
+                })
+                .note(markup! {
+                    "Change '"{name}"' to '"{lowercase_name}"' to follow HTML standards."
+                }),
+            ),
         }
     }
 }

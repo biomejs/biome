@@ -15,13 +15,17 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i data-* attributes should be lowercase. Use 'data-testid' instead of 'data-testID'.
+  i data-* attribute 'data-testID' should use lowercase naming.
   
     1 │ <>
   > 2 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
       │ 	     ^^^^^^^^^^^^^^^^^
     3 │ 	<App data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
     4 │ </>;
+  
+  i HTML data-* attributes must use lowercase letters to be valid.
+  
+  i Change 'data-testID' to 'data-testid' to follow HTML standards.
   
 
 ```
@@ -29,7 +33,7 @@ invalid.jsx:2:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 invalid.jsx:2:25 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i data-* attributes should be lowercase. Use 'data-under_score' instead of 'data-under_sCoRe'.
+  i data-* attribute 'data-under_sCoRe' should use lowercase naming.
   
     1 │ <>
   > 2 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
@@ -37,13 +41,17 @@ invalid.jsx:2:25 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     3 │ 	<App data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
     4 │ </>;
   
+  i HTML data-* attributes must use lowercase letters to be valid.
+  
+  i Change 'data-under_sCoRe' to 'data-under_score' to follow HTML standards.
+  
 
 ```
 
 ```
 invalid.jsx:2:48 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unknown property 'dataNotAnDataAttribute' found
+  i The property 'dataNotAnDataAttribute' is not a valid DOM attribute.
   
     1 │ <>
   > 2 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
@@ -51,13 +59,17 @@ invalid.jsx:2:48 lint/nursery/noUnknownProperty ━━━━━━━━━━�
     3 │ 	<App data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
     4 │ </>;
   
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
 
 ```
 
 ```
 invalid.jsx:3:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i data-* attributes should be lowercase. Use 'data-testid' instead of 'data-testID'.
+  i data-* attribute 'data-testID' should use lowercase naming.
   
     1 │ <>
     2 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
@@ -66,13 +78,17 @@ invalid.jsx:3:7 lint/nursery/noUnknownProperty ━━━━━━━━━━━
     4 │ </>;
     5 │ 
   
+  i HTML data-* attributes must use lowercase letters to be valid.
+  
+  i Change 'data-testID' to 'data-testid' to follow HTML standards.
+  
 
 ```
 
 ```
 invalid.jsx:3:25 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i data-* attributes should be lowercase. Use 'data-under_score' instead of 'data-under_sCoRe'.
+  i data-* attribute 'data-under_sCoRe' should use lowercase naming.
   
     1 │ <>
     2 │ 	<div data-testID="bar" data-under_sCoRe="bar" dataNotAnDataAttribute="yes" />
@@ -80,6 +96,10 @@ invalid.jsx:3:25 lint/nursery/noUnknownProperty ━━━━━━━━━━�
       │ 	                       ^^^^^^^^^^^^^^^^^^^^^^
     4 │ </>;
     5 │ 
+  
+  i HTML data-* attributes must use lowercase letters to be valid.
+  
+  i Change 'data-under_sCoRe' to 'data-under_score' to follow HTML standards.
   
 
 ```
