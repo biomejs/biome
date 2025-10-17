@@ -61,7 +61,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintPlaywright("missing-playwright-await").same()],
         recommended: false,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
