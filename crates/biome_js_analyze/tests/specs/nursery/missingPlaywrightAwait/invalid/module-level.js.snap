@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: module-level.js
+---
+# Input
+```js
+// Module-level code (top-level await is supported)
+expect(page.locator('body')).toBeVisible();
+
+
+
+```
+
+# Diagnostics
+```
+module-level.js:2:1 lint/nursery/missingPlaywrightAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    1 │ // Module-level code (top-level await is supported)
+  > 2 │ expect(page.locator('body')).toBeVisible();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Add await before the expect call or return the promise.
+  
+  i Unsafe fix: Add await
+  
+    1 1 │   // Module-level code (top-level await is supported)
+      2 │ + await//·Module-level·code·(top-level·await·is·supported)
+    2 3 │   expect(page.locator('body')).toBeVisible();
+    3 4 │   
+  
+
+```

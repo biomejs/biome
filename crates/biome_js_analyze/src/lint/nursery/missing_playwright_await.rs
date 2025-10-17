@@ -5,11 +5,11 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, T,
+    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsModule, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
-use crate::JsRuleAction;
+use crate::{ast_utils::is_in_async_function, JsRuleAction};
 
 declare_lint_rule! {
     /// Enforce Playwright async APIs to be awaited or returned.
@@ -172,6 +172,11 @@ impl Rule for MissingPlaywrightAwait {
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let call_expr = ctx.query();
+        
+        // Check if we're in an async context
+        if !is_in_async_context(call_expr.syntax()) {
+            return None;
+        }
         
         let mut mutation = ctx.root().begin();
         
@@ -448,6 +453,41 @@ fn is_promise_all(call: &JsCallExpression) -> bool {
             }
         }
     }
+    false
+}
+
+/// Checks if a node is within an async context (async function or module with TLA support).
+///
+/// This checks for:
+/// - Async functions (arrow, function declaration, method)
+/// - Module context (for top-level await support)
+fn is_in_async_context(node: &biome_js_syntax::JsSyntaxNode) -> bool {
+    // First check if we're in an async function
+    if is_in_async_function(node) {
+        return true;
+    }
+    
+    // Check if we're at module level (for top-level await)
+    for ancestor in node.ancestors() {
+        if JsModule::can_cast(ancestor.kind()) {
+            return true;
+        }
+        
+        // Stop at function boundaries (if we're in a non-async function, 
+        // being in a module doesn't help)
+        if matches!(
+            ancestor.kind(),
+            biome_js_syntax::JsSyntaxKind::JS_FUNCTION_DECLARATION
+                | biome_js_syntax::JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                | biome_js_syntax::JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                | biome_js_syntax::JsSyntaxKind::JS_METHOD_CLASS_MEMBER
+                | biome_js_syntax::JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
+        ) {
+            // We're in a non-async function, stop searching
+            break;
+        }
+    }
+    
     false
 }
 

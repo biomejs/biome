@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: non-async-context.js
+---
+# Input
+```js
+test('example', ({ page }) => {
+    expect(page.locator('body')).toBeVisible();
+});
+
+
+
+```
+
+# Diagnostics
+```
+non-async-context.js:2:5 lint/nursery/missingPlaywrightAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Async matcher toBeVisible must be awaited or returned.
+  
+    1 │ test('example', ({ page }) => {
+  > 2 │     expect(page.locator('body')).toBeVisible();
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ });
+    4 │ 
+  
+  i Add await before the expect call or return the promise.
+  
+
+```
