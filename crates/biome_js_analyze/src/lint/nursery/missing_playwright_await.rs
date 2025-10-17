@@ -158,14 +158,6 @@ impl Rule for MissingPlaywrightAwait {
                     "Add "<Emphasis>"await"</Emphasis>" before the test.step call or return the promise."
                 },
             ),
-            MissingAwaitType::Describe => (
-                markup! {
-                    <Emphasis>"describe"</Emphasis>" call must be awaited or returned."
-                },
-                markup! {
-                    "Add "<Emphasis>"await"</Emphasis>" before the describe call or return the promise."
-                },
-            ),
         };
 
         Some(
