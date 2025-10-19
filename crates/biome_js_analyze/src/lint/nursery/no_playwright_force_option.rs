@@ -124,11 +124,10 @@ impl Rule for NoPlaywrightForceOption {
 fn has_force_true(obj_expr: &JsObjectExpression) -> bool {
     for member in obj_expr.members().into_iter().flatten() {
         if let Some(prop) = member.as_js_property_object_member() {
-            // Check if property name is 'force'
-            if let Ok(name) = prop.name()
-                && let Some(name_node) = name.as_js_literal_member_name()
-                && let Ok(name_token) = name_node.value()
-                && name_token.text_trimmed() == "force"
+            // Check if property name is 'force' - .name() handles both identifier and string literal
+            if let Ok(prop_name) = prop.name()
+                && let Some(name_text) = prop_name.name()
+                && name_text.text() == "force"
             {
                 // Check if value is true
                 if let Ok(value) = prop.value()

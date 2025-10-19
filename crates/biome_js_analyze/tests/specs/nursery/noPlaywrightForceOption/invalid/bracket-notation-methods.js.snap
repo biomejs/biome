@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: bracket-notation-methods.js
+---
+# Input
+```js
+// Test bracket notation for methods with force option
+await page.locator("button")["click"]({ force: true });
+
+await page.locator("button")[`click`]({ force: true });
+
+await page.locator("input")["fill"]("text", { force: true });
+
+await page.locator("input")[`fill`]("text", { force: true });
+
+await page.locator("checkbox")["check"]({ force: true });
+
+await page.locator("checkbox")[`check`]({ force: true });
+
+```

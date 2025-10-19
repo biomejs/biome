@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: in-test.js
 ---
 # Input
@@ -17,7 +16,7 @@ test('wait', async ({ page }) => {
 ```
 in-test.js:3:11 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of page.waitForTimeout().
+  i Unexpected use of waitForTimeout().
   
     1 │ test('wait', async ({ page }) => {
     2 │     await page.click('button');

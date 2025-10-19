@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: async.js
 ---
 # Input
@@ -25,6 +24,8 @@ async.js:1:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━�
   > 3 │ });
       │ ^^
     4 │ 
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
   
   i Remove the async keyword from the describe callback.
   

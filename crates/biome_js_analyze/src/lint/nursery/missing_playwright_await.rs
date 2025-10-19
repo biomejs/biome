@@ -184,9 +184,32 @@ impl Rule for MissingPlaywrightAwait {
             return None;
         }
 
-        let mut mutation = ctx.root().begin();
+        // Check if inside a Promise combinator (Promise.all, etc.) that itself isn't awaited
+        // If so, fix the outer combinator to preserve concurrency semantics
+        if let Some(promise_combinator) = find_enclosing_promise_all(call_expr) {
+            if !is_call_awaited_or_returned(&promise_combinator) {
+                let mut mutation = ctx.root().begin();
+                let await_expr = make::js_await_expression(
+                    make::token(T![await]),
+                    promise_combinator.clone().into(),
+                );
 
-        // Create an await expression
+                mutation.replace_element(
+                    promise_combinator.into_syntax().into(),
+                    await_expr.into_syntax().into(),
+                );
+
+                return Some(JsRuleAction::new(
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
+                    Applicability::MaybeIncorrect,
+                    markup! { "Add await to Promise combinator" }.to_owned(),
+                    mutation,
+                ));
+            }
+        }
+
+        // Normal case: fix the call directly
+        let mut mutation = ctx.root().begin();
         let await_expr =
             make::js_await_expression(make::token(T![await]), call_expr.clone().into());
 
@@ -252,17 +275,18 @@ fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwait
     let token = name.value_token().ok()?;
     let matcher_name = token.token_text_trimmed();
 
-    // Check if it's an async Playwright matcher
-    if !ASYNC_PLAYWRIGHT_MATCHERS.contains(&matcher_name.text()) {
-        return None;
-    }
-
     // Walk up the chain to find if this is an expect() call
     let object = member_expr.object().ok()?;
 
-    // Check for expect.poll
+    // Check for expect.poll FIRST - it's always async regardless of matcher
+    // expect.poll() converts any synchronous expect to an asynchronous polling one
     if has_poll_in_chain(&object) {
         return Some(MissingAwaitType::ExpectPoll);
+    }
+
+    // Then check if it's an async Playwright matcher
+    if !ASYNC_PLAYWRIGHT_MATCHERS.contains(&matcher_name.text()) {
+        return None;
     }
 
     // Check if the chain starts with expect
@@ -406,14 +430,14 @@ fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpr
     while let Some(node) = current {
         // Check if we're in an array expression
         if node.kind() == biome_js_syntax::JsSyntaxKind::JS_ARRAY_EXPRESSION {
-            // Check if the array is an argument to Promise.all
+            // Check if the array is an argument to Promise combinator (all, allSettled, race, any)
             if let Some(parent) = node.parent()
                 && parent.kind() == biome_js_syntax::JsSyntaxKind::JS_CALL_ARGUMENT_LIST
                 && let Some(call_args_parent) = parent.parent()
                 && call_args_parent.kind() == biome_js_syntax::JsSyntaxKind::JS_CALL_ARGUMENTS
                 && let Some(promise_call) = call_args_parent.parent()
                 && let Some(call) = JsCallExpression::cast_ref(&promise_call)
-                && is_promise_all(&call)
+                && is_promise_combinator(&call)
             {
                 return Some(call);
             }
@@ -434,8 +458,11 @@ fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpr
     None
 }
 
-fn is_promise_all(call: &JsCallExpression) -> bool {
+fn is_promise_combinator(call: &JsCallExpression) -> bool {
     is_member_call_pattern(call, "Promise", "all")
+        || is_member_call_pattern(call, "Promise", "allSettled")
+        || is_member_call_pattern(call, "Promise", "race")
+        || is_member_call_pattern(call, "Promise", "any")
 }
 
 /// Checks if a node is within an async context (async function or module with TLA support).

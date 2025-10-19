@@ -1,0 +1,91 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: multiple-arguments.js
+---
+# Input
+```js
+// Test $eval and $$eval with multiple arguments
+await page.$eval(".main-container", (e, suffix) => e.outerHTML + suffix, "hello");
+
+await page.$$eval("div", (divs, min) => divs.length >= min, 10);
+
+await page.$eval("#search", (el, prop) => el[prop], "value");
+
+await this.page.$$eval("span", (els, className) => els.filter(e => e.className === className), "active");
+
+```
+
+# Diagnostics
+```
+multiple-arguments.js:2:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.$eval().
+  
+    1 │ // Test $eval and $$eval with multiple arguments
+  > 2 │ await page.$eval(".main-container", (e, suffix) => e.outerHTML + suffix, "hello");
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ await page.$$eval("div", (divs, min) => divs.length >= min, 10);
+  
+  i Use locator.evaluate() instead.
+  
+  i Locator-based evaluation is more reliable and follows Playwright's recommended patterns.
+  
+
+```
+
+```
+multiple-arguments.js:4:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.$$eval().
+  
+    2 │ await page.$eval(".main-container", (e, suffix) => e.outerHTML + suffix, "hello");
+    3 │ 
+  > 4 │ await page.$$eval("div", (divs, min) => divs.length >= min, 10);
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ await page.$eval("#search", (el, prop) => el[prop], "value");
+  
+  i Use locator.evaluateAll() instead.
+  
+  i Locator-based evaluation is more reliable and follows Playwright's recommended patterns.
+  
+
+```
+
+```
+multiple-arguments.js:6:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.$eval().
+  
+    4 │ await page.$$eval("div", (divs, min) => divs.length >= min, 10);
+    5 │ 
+  > 6 │ await page.$eval("#search", (el, prop) => el[prop], "value");
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ await this.page.$$eval("span", (els, className) => els.filter(e => e.className === className), "active");
+  
+  i Use locator.evaluate() instead.
+  
+  i Locator-based evaluation is more reliable and follows Playwright's recommended patterns.
+  
+
+```
+
+```
+multiple-arguments.js:8:7 lint/nursery/noPlaywrightEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of page.$$eval().
+  
+    6 │ await page.$eval("#search", (el, prop) => el[prop], "value");
+    7 │ 
+  > 8 │ await this.page.$$eval("span", (els, className) => els.filter(e => e.className === className), "active");
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Use locator.evaluateAll() instead.
+  
+  i Locator-based evaluation is more reliable and follows Playwright's recommended patterns.
+  
+
+```

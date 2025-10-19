@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: bracket-notation.js
+---
+# Input
+```js
+// Test bracket notation for page.pause()
+await page["pause"]();
+
+await page[`pause`]();
+
+await this.page["pause"]();
+
+await this.page[`pause`]();
+
+```

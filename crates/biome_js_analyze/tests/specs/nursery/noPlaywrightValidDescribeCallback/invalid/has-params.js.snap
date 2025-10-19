@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: has-params.js
 ---
 # Input
@@ -25,6 +24,8 @@ has-params.js:1:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━
   > 3 │ });
       │ ^^
     4 │ 
+  
+  i Describe callbacks are invoked without arguments by the test framework.
   
   i Remove parameters from the describe callback.
   
