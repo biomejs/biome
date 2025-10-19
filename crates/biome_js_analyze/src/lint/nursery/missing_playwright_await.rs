@@ -186,26 +186,26 @@ impl Rule for MissingPlaywrightAwait {
 
         // Check if inside a Promise combinator (Promise.all, etc.) that itself isn't awaited
         // If so, fix the outer combinator to preserve concurrency semantics
-        if let Some(promise_combinator) = find_enclosing_promise_all(call_expr) {
-            if !is_call_awaited_or_returned(&promise_combinator) {
-                let mut mutation = ctx.root().begin();
-                let await_expr = make::js_await_expression(
-                    make::token(T![await]),
-                    promise_combinator.clone().into(),
-                );
+        if let Some(promise_combinator) = find_enclosing_promise_all(call_expr)
+            && !is_call_awaited_or_returned(&promise_combinator)
+        {
+            let mut mutation = ctx.root().begin();
+            let await_expr = make::js_await_expression(
+                make::token(T![await]),
+                promise_combinator.clone().into(),
+            );
 
-                mutation.replace_element(
-                    promise_combinator.into_syntax().into(),
-                    await_expr.into_syntax().into(),
-                );
+            mutation.replace_element(
+                promise_combinator.into_syntax().into(),
+                await_expr.into_syntax().into(),
+            );
 
-                return Some(JsRuleAction::new(
-                    ctx.metadata().action_category(ctx.category(), ctx.group()),
-                    Applicability::MaybeIncorrect,
-                    markup! { "Add await to Promise combinator" }.to_owned(),
-                    mutation,
-                ));
-            }
+            return Some(JsRuleAction::new(
+                ctx.metadata().action_category(ctx.category(), ctx.group()),
+                Applicability::MaybeIncorrect,
+                markup! { "Add await to Promise combinator" }.to_owned(),
+                mutation,
+            ));
         }
 
         // Normal case: fix the call directly
