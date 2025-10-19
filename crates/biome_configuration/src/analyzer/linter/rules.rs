@@ -4882,167 +4882,167 @@ impl RuleGroupExt for Nursery {
         if let Some(rule) = self.no_playwright_page_pause.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
         }
         if let Some(rule) = self.no_playwright_skipped_test.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
         }
         if let Some(rule) = self.no_playwright_useless_await.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
         }
         if let Some(rule) = self.no_playwright_valid_describe_callback.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
         }
         if let Some(rule) = self.no_playwright_wait_for_navigation.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
         }
         if let Some(rule) = self.no_playwright_wait_for_selector.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
         }
         if let Some(rule) = self.no_playwright_wait_for_timeout.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
         }
         if let Some(rule) = self.no_qwik_use_visible_task.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
         }
         if let Some(rule) = self.no_react_forward_ref.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
         }
         if let Some(rule) = self.no_secrets.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
         }
         if let Some(rule) = self.no_shadow.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
         }
         if let Some(rule) = self.no_unnecessary_conditions.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
         }
         if let Some(rule) = self.no_unresolved_imports.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
         }
         if let Some(rule) = self.no_unused_expressions.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
         }
         if let Some(rule) = self.no_useless_catch_binding.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
         }
         if let Some(rule) = self.no_useless_undefined.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
         }
         if let Some(rule) = self.no_vue_data_object_declaration.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
         }
         if let Some(rule) = self.no_vue_duplicate_keys.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
         }
         if let Some(rule) = self.no_vue_reserved_keys.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
         }
         if let Some(rule) = self.no_vue_reserved_props.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
         }
         if let Some(rule) = self.use_anchor_href.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
         }
         if let Some(rule) = self.use_consistent_arrow_return.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
         }
         if let Some(rule) = self.use_consistent_type_definitions.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
         }
         if let Some(rule) = self.use_deprecated_date.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
         }
         if let Some(rule) = self.use_exhaustive_switch_cases.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
         }
         if let Some(rule) = self.use_explicit_type.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
         }
         if let Some(rule) = self.use_image_size.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
         }
         if let Some(rule) = self.use_max_params.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
         }
         if let Some(rule) = self.use_qwik_classlist.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
         }
         if let Some(rule) = self.use_qwik_method_usage.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
         }
         if let Some(rule) = self.use_qwik_valid_lexical_scope.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
         }
         if let Some(rule) = self.use_react_function_components.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
         }
         if let Some(rule) = self.use_sorted_classes.as_ref()
             && rule.is_enabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
         }
         if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
             && rule.is_enabled()
@@ -5126,167 +5126,167 @@ impl RuleGroupExt for Nursery {
         if let Some(rule) = self.no_playwright_page_pause.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
         }
         if let Some(rule) = self.no_playwright_skipped_test.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
         }
         if let Some(rule) = self.no_playwright_useless_await.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
         }
         if let Some(rule) = self.no_playwright_valid_describe_callback.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
         }
         if let Some(rule) = self.no_playwright_wait_for_navigation.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
         }
         if let Some(rule) = self.no_playwright_wait_for_selector.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
         }
         if let Some(rule) = self.no_playwright_wait_for_timeout.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
         }
         if let Some(rule) = self.no_qwik_use_visible_task.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
         }
         if let Some(rule) = self.no_react_forward_ref.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
         }
         if let Some(rule) = self.no_secrets.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
         }
         if let Some(rule) = self.no_shadow.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
         }
         if let Some(rule) = self.no_unnecessary_conditions.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
         }
         if let Some(rule) = self.no_unresolved_imports.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
         }
         if let Some(rule) = self.no_unused_expressions.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
         }
         if let Some(rule) = self.no_useless_catch_binding.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
         }
         if let Some(rule) = self.no_useless_undefined.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
         }
         if let Some(rule) = self.no_vue_data_object_declaration.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
         }
         if let Some(rule) = self.no_vue_duplicate_keys.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
         }
         if let Some(rule) = self.no_vue_reserved_keys.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
         }
         if let Some(rule) = self.no_vue_reserved_props.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]));
         }
         if let Some(rule) = self.use_anchor_href.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
         }
         if let Some(rule) = self.use_consistent_arrow_return.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
         }
         if let Some(rule) = self.use_consistent_type_definitions.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]));
         }
         if let Some(rule) = self.use_deprecated_date.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]));
         }
         if let Some(rule) = self.use_exhaustive_switch_cases.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
         }
         if let Some(rule) = self.use_explicit_type.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
         }
         if let Some(rule) = self.use_image_size.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
         }
         if let Some(rule) = self.use_max_params.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
         }
         if let Some(rule) = self.use_qwik_classlist.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
         }
         if let Some(rule) = self.use_qwik_method_usage.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
         }
         if let Some(rule) = self.use_qwik_valid_lexical_scope.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
         }
         if let Some(rule) = self.use_react_function_components.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
         }
         if let Some(rule) = self.use_sorted_classes.as_ref()
             && rule.is_disabled()
         {
-            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
+            index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
         }
         if let Some(rule) = self.use_vue_multi_word_component_names.as_ref()
             && rule.is_disabled()
