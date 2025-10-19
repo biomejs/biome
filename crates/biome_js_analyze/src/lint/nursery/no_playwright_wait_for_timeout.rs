@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 
 declare_lint_rule! {
     /// Disallow using `page.waitForTimeout()`.
@@ -50,7 +50,7 @@ declare_lint_rule! {
 
 impl Rule for NoPlaywrightWaitForTimeout {
     type Query = Ast<JsCallExpression>;
-    type State = ();
+    type State = TokenText;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -87,24 +87,25 @@ impl Rule for NoPlaywrightWaitForTimeout {
             || object_text.ends_with("Page")
             || object_text.ends_with("Frame")
         {
-            Some(())
+            Some(object_text)
         } else {
             None
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let receiver = state.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Unexpected use of "<Emphasis>"waitForTimeout()"</Emphasis>"."
+                    "Unexpected use of "<Emphasis>{receiver}".waitForTimeout()"</Emphasis>"."
                 },
             )
             .note(markup! {
-                "Prefer using built-in wait methods like "<Emphasis>"waitForLoadState()"</Emphasis>", "<Emphasis>"waitForURL()"</Emphasis>", or "<Emphasis>"waitForFunction()"</Emphasis>" instead."
+                "Prefer using built-in wait methods like "<Emphasis>{receiver}".waitForLoadState()"</Emphasis>", "<Emphasis>{receiver}".waitForURL()"</Emphasis>", or "<Emphasis>{receiver}".waitForFunction()"</Emphasis>" instead."
             })
             .note(markup! {
                 "Hardcoded timeouts are flaky and make tests slower. Use conditions that wait for specific events."

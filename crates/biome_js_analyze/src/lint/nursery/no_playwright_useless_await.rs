@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{
-    AnyJsExpression, JsAwaitExpression, JsCallExpression, JsStaticMemberExpression,
+    AnyJsExpression, JsAwaitExpression, JsCallExpression,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
@@ -306,34 +306,60 @@ fn is_sync_expect_call(call_expr: &JsCallExpression) -> bool {
 }
 
 fn has_async_modifier(expect_call: &JsCallExpression, final_call: &JsCallExpression) -> bool {
-    // Walk the chain from expect_call to final_call looking for "poll", "resolves", "rejects"
-    let mut current = final_call.syntax().clone();
-    let expect_syntax = expect_call.syntax();
+    // Walk the chain from the final call down through the object/callee chain
+    // to the expect call, looking for "poll", "resolves", "rejects"
 
-    while current != *expect_syntax {
-        if let Some(member) = JsStaticMemberExpression::cast_ref(&current) {
-            if let Ok(member_name) = member.member()
-                && let Some(name) = member_name.as_js_name()
-                && let Ok(token) = name.value_token()
-            {
-                let text = token.text_trimmed();
-                if text == "poll" || text == "resolves" || text == "rejects" {
+    // Start from the final call's callee (the member expression)
+    let final_callee = match final_call.callee().ok() {
+        Some(AnyJsExpression::JsStaticMemberExpression(member)) => member,
+        _ => return false,
+    };
+
+    // Walk down the object chain
+    let mut current_expr = final_callee.object().ok();
+
+    while let Some(expr) = current_expr {
+        match expr {
+            // If we find a member expression, check if it's an async modifier
+            AnyJsExpression::JsStaticMemberExpression(member) => {
+                if let Ok(member_name) = member.member()
+                    && let Some(name) = member_name.as_js_name()
+                    && let Ok(token) = name.value_token()
+                {
+                    let text = token.text_trimmed();
+                    if text == "resolves" || text == "rejects" {
+                        return true;
+                    }
+                }
+                // Continue walking down
+                current_expr = member.object().ok();
+            }
+            // If we find a call expression, check if it's the expect call
+            AnyJsExpression::JsCallExpression(call) => {
+                // Check if this is the expect call we started from
+                if call.syntax() == expect_call.syntax() {
+                    // Reached the expect call, no async modifiers found
+                    return false;
+                }
+
+                // Check if it's expect.poll() by examining the callee
+                if let Ok(AnyJsExpression::JsStaticMemberExpression(callee_member)) = call.callee()
+                    && let Ok(member_name) = callee_member.member()
+                    && let Some(name) = member_name.as_js_name()
+                    && let Ok(token) = name.value_token()
+                    && token.text_trimmed() == "poll"
+                {
                     return true;
                 }
+
+                // Continue walking down the callee chain
+                if let Ok(callee) = call.callee() {
+                    current_expr = Some(callee);
+                } else {
+                    break;
+                }
             }
-            if let Some(parent) = member.syntax().parent() {
-                current = parent;
-            } else {
-                break;
-            }
-        } else if let Some(call) = JsCallExpression::cast_ref(&current) {
-            if let Some(parent) = call.syntax().parent() {
-                current = parent;
-            } else {
-                break;
-            }
-        } else {
-            break;
+            _ => break,
         }
     }
 

@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 
 declare_lint_rule! {
     /// Disallow using `page.waitForNavigation()`.
@@ -50,7 +50,7 @@ declare_lint_rule! {
 
 impl Rule for NoPlaywrightWaitForNavigation {
     type Query = Ast<JsCallExpression>;
-    type State = ();
+    type State = TokenText;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -87,24 +87,25 @@ impl Rule for NoPlaywrightWaitForNavigation {
             || object_text.ends_with("Page")
             || object_text.ends_with("Frame")
         {
-            Some(())
+            Some(object_text)
         } else {
             None
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let receiver = state.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Unexpected use of "<Emphasis>"page.waitForNavigation()"</Emphasis>"."
+                    "Unexpected use of "<Emphasis>{receiver}".waitForNavigation()"</Emphasis>"."
                 },
             )
             .note(markup! {
-                <Emphasis>"waitForNavigation()"</Emphasis>" is deprecated. Use "<Emphasis>"page.waitForURL()"</Emphasis>" or "<Emphasis>"page.waitForLoadState()"</Emphasis>" instead."
+                <Emphasis>"waitForNavigation()"</Emphasis>" is deprecated. Use "<Emphasis>{receiver}".waitForURL()"</Emphasis>" or "<Emphasis>{receiver}".waitForLoadState()"</Emphasis>" instead."
             })
             .note(markup! {
                 "These alternatives are more reliable and provide better control over navigation waiting."

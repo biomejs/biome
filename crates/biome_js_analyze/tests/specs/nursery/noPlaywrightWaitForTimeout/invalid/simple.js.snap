@@ -13,13 +13,13 @@ await page.waitForTimeout(5000);
 ```
 simple.js:1:7 lint/nursery/noPlaywrightWaitForTimeout ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of waitForTimeout().
+  i Unexpected use of page.waitForTimeout().
   
   > 1 │ await page.waitForTimeout(5000);
       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
   
-  i Prefer using built-in wait methods like waitForLoadState(), waitForURL(), or waitForFunction() instead.
+  i Prefer using built-in wait methods like page.waitForLoadState(), page.waitForURL(), or page.waitForFunction() instead.
   
   i Hardcoded timeouts are flaky and make tests slower. Use conditions that wait for specific events.
   

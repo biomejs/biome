@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 152
 expression: frame.js
 ---
 # Input
@@ -15,14 +14,14 @@ await frame.pause();
 ```
 frame.js:2:7 lint/nursery/noPlaywrightPagePause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of page.pause().
+  i Unexpected use of frame.pause().
   
     1 │ const frame = page.frame('iframe');
   > 2 │ await frame.pause();
       │       ^^^^^^^^^^^^^
     3 │ 
   
-  i page.pause() is a debugging utility and should not be committed to version control.
+  i frame.pause() is a debugging utility and should not be committed to version control.
   
   i Remove the pause() call or use a proper debugging strategy.
   

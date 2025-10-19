@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 
 declare_lint_rule! {
     /// Disallow using `page.pause()`.
@@ -48,7 +48,7 @@ declare_lint_rule! {
 
 impl Rule for NoPlaywrightPagePause {
     type Query = Ast<JsCallExpression>;
-    type State = ();
+    type State = TokenText;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -92,24 +92,25 @@ impl Rule for NoPlaywrightPagePause {
             || object_text.ends_with("Page")
             || object_text.ends_with("Frame")
         {
-            Some(())
+            Some(object_text)
         } else {
             None
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let receiver = state.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Unexpected use of "<Emphasis>"page.pause()"</Emphasis>"."
+                    "Unexpected use of "<Emphasis>{receiver}".pause()"</Emphasis>"."
                 },
             )
             .note(markup! {
-                <Emphasis>"page.pause()"</Emphasis>" is a debugging utility and should not be committed to version control."
+                <Emphasis>{receiver}".pause()"</Emphasis>" is a debugging utility and should not be committed to version control."
             })
             .note(markup! {
                 "Remove the "<Emphasis>"pause()"</Emphasis>" call or use a proper debugging strategy."

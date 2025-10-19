@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: missing-callback.js
+---
+# Input
+```js
+// Test missing callback
+test.describe("foo");
+
+describe("bar");
+
+```
+
+# Diagnostics
+```
+missing-callback.js:2:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe requires a callback function.
+  
+    1 │ // Test missing callback
+  > 2 │ test.describe("foo");
+      │ ^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ describe("bar");
+  
+  i The second argument to describe must be a function that contains the test definitions.
+  
+  i Add a callback function as the second argument to describe.
+  
+
+```
+
+```
+missing-callback.js:4:1 lint/nursery/noPlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Describe requires a callback function.
+  
+    2 │ test.describe("foo");
+    3 │ 
+  > 4 │ describe("bar");
+      │ ^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i The second argument to describe must be a function that contains the test definitions.
+  
+  i Add a callback function as the second argument to describe.
+  
+
+```

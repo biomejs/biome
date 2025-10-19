@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 
 declare_lint_rule! {
     /// Disallow using `page.waitForSelector()`.
@@ -51,7 +51,7 @@ declare_lint_rule! {
 
 impl Rule for NoPlaywrightWaitForSelector {
     type Query = Ast<JsCallExpression>;
-    type State = ();
+    type State = TokenText;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -88,24 +88,25 @@ impl Rule for NoPlaywrightWaitForSelector {
             || object_text.ends_with("Page")
             || object_text.ends_with("Frame")
         {
-            Some(())
+            Some(object_text)
         } else {
             None
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let receiver = state.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Unexpected use of "<Emphasis>"page.waitForSelector()"</Emphasis>"."
+                    "Unexpected use of "<Emphasis>{receiver}".waitForSelector()"</Emphasis>"."
                 },
             )
             .note(markup! {
-                "Use locator-based "<Emphasis>"page.locator()"</Emphasis>" or "<Emphasis>"page.getByRole()"</Emphasis>" APIs instead."
+                "Use locator-based "<Emphasis>{receiver}".locator()"</Emphasis>" or "<Emphasis>{receiver}".getByRole()"</Emphasis>" APIs instead."
             })
             .note(markup! {
                 "Locators automatically wait for elements to be ready, making explicit waits unnecessary."
