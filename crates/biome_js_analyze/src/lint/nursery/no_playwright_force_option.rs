@@ -1,9 +1,9 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsObjectExpression};
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::AstNode;
 
 declare_lint_rule! {
     /// Disallow usage of the `{ force: true }` option.
@@ -47,6 +47,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-force-option").same()],
         recommended: false,
+        domains: &[RuleDomain::Playwright],
     }
 }
 
@@ -89,12 +90,11 @@ impl Rule for NoPlaywrightForceOption {
         let args = call_expr.arguments().ok()?;
 
         for arg in args.args().into_iter().flatten() {
-            if let Some(expr) = arg.as_any_js_expression() {
-                if let AnyJsExpression::JsObjectExpression(obj_expr) = expr {
-                    if has_force_true(&obj_expr) {
-                        return Some(());
-                    }
-                }
+            if let Some(expr) = arg.as_any_js_expression()
+                && let AnyJsExpression::JsObjectExpression(obj_expr) = expr
+                && has_force_true(obj_expr)
+            {
+                return Some(());
             }
         }
 
@@ -125,26 +125,19 @@ fn has_force_true(obj_expr: &JsObjectExpression) -> bool {
     for member in obj_expr.members().into_iter().flatten() {
         if let Some(prop) = member.as_js_property_object_member() {
             // Check if property name is 'force'
-            if let Ok(name) = prop.name() {
-                if let Some(name_node) = name.as_js_literal_member_name() {
-                    if let Ok(name_token) = name_node.value() {
-                        if name_token.text_trimmed() == "force" {
-                            // Check if value is true
-                            if let Ok(value) = prop.value() {
-                                if let Some(literal) = value.as_any_js_literal_expression() {
-                                    if let Some(bool_lit) =
-                                        literal.as_js_boolean_literal_expression()
-                                    {
-                                        if let Ok(value_token) = bool_lit.value_token() {
-                                            if value_token.text_trimmed() == "true" {
-                                                return true;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+            if let Ok(name) = prop.name()
+                && let Some(name_node) = name.as_js_literal_member_name()
+                && let Ok(name_token) = name_node.value()
+                && name_token.text_trimmed() == "force"
+            {
+                // Check if value is true
+                if let Ok(value) = prop.value()
+                    && let Some(literal) = value.as_any_js_literal_expression()
+                    && let Some(bool_lit) = literal.as_js_boolean_literal_expression()
+                    && let Ok(value_token) = bool_lit.value_token()
+                    && value_token.text_trimmed() == "true"
+                {
+                    return true;
                 }
             }
         }

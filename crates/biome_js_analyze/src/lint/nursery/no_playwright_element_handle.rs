@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
@@ -50,6 +50,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-element-handle").same()],
         recommended: false,
+        domains: &[RuleDomain::Playwright],
     }
 }
 

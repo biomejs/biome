@@ -1,12 +1,13 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{
     AnyJsExpression, JsAwaitExpression, JsCallExpression, JsStaticMemberExpression,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
 use crate::JsRuleAction;
 
@@ -57,6 +58,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintPlaywright("no-useless-await").same()],
         recommended: false,
         fix_kind: FixKind::Safe,
+        domains: &[RuleDomain::Playwright],
     }
 }
 
@@ -161,7 +163,7 @@ impl Rule for NoPlaywrightUselessAwait {
         }
 
         // Check for expect calls with sync matchers
-        if is_sync_expect_call(&call_expr) {
+        if is_sync_expect_call(call_expr) {
             return Some(());
         }
 
@@ -210,28 +212,27 @@ impl Rule for NoPlaywrightUselessAwait {
 fn is_page_or_frame(expr: &AnyJsExpression) -> bool {
     match expr {
         AnyJsExpression::JsIdentifierExpression(id) => {
-            if let Ok(name) = id.name() {
-                if let Ok(token) = name.value_token() {
-                    let text = token.text_trimmed();
-                    return text == "page"
-                        || text == "frame"
-                        || text.ends_with("Page")
-                        || text.ends_with("Frame");
-                }
+            if let Ok(name) = id.name()
+                && let Ok(token) = name.value_token()
+            {
+                let text = token.text_trimmed();
+                return text == "page"
+                    || text == "frame"
+                    || text.ends_with("Page")
+                    || text.ends_with("Frame");
             }
             false
         }
         AnyJsExpression::JsStaticMemberExpression(member) => {
-            if let Ok(member_name) = member.member() {
-                if let Some(name) = member_name.as_js_name() {
-                    if let Ok(token) = name.value_token() {
-                        let text = token.text_trimmed();
-                        return text == "page"
-                            || text == "frame"
-                            || text.ends_with("Page")
-                            || text.ends_with("Frame");
-                    }
-                }
+            if let Ok(member_name) = member.member()
+                && let Some(name) = member_name.as_js_name()
+                && let Ok(token) = name.value_token()
+            {
+                let text = token.text_trimmed();
+                return text == "page"
+                    || text == "frame"
+                    || text.ends_with("Page")
+                    || text.ends_with("Frame");
             }
             false
         }
@@ -262,9 +263,9 @@ fn is_sync_expect_call(call_expr: &JsCallExpression) -> bool {
         Some(t) => t,
         None => return false,
     };
-    let matcher_name = token.text_trimmed().to_string();
+    let matcher_name: TokenText = token.token_text_trimmed();
 
-    if !SYNC_EXPECT_MATCHERS.contains(&matcher_name.as_str()) {
+    if !SYNC_EXPECT_MATCHERS.contains(&matcher_name.text()) {
         return false;
     }
 
@@ -276,26 +277,24 @@ fn is_sync_expect_call(call_expr: &JsCallExpression) -> bool {
         // Check if it's expect (not expect.poll or expect with resolves/rejects)
         match expect_callee {
             Some(AnyJsExpression::JsIdentifierExpression(id)) => {
-                if let Ok(name) = id.name() {
-                    if let Ok(token) = name.value_token() {
-                        if token.text_trimmed() == "expect" {
-                            // Make sure there's no "poll", "resolves", or "rejects" in the chain
-                            return !has_async_modifier(&expect_call, call_expr);
-                        }
-                    }
+                if let Ok(name) = id.name()
+                    && let Ok(token) = name.value_token()
+                    && token.text_trimmed() == "expect"
+                {
+                    // Make sure there's no "poll", "resolves", or "rejects" in the chain
+                    return !has_async_modifier(&expect_call, call_expr);
                 }
             }
             Some(AnyJsExpression::JsStaticMemberExpression(expect_member)) => {
                 // Check for expect.soft, but not expect.poll
-                if let Ok(member) = expect_member.member() {
-                    if let Some(name) = member.as_js_name() {
-                        if let Ok(token) = name.value_token() {
-                            let member_text = token.text_trimmed();
-                            // soft is OK, poll makes it async
-                            if member_text == "soft" {
-                                return !has_async_modifier(&expect_call, call_expr);
-                            }
-                        }
+                if let Ok(member) = expect_member.member()
+                    && let Some(name) = member.as_js_name()
+                    && let Ok(token) = name.value_token()
+                {
+                    let member_text = token.text_trimmed();
+                    // soft is OK, poll makes it async
+                    if member_text == "soft" {
+                        return !has_async_modifier(&expect_call, call_expr);
                     }
                 }
             }
@@ -313,14 +312,13 @@ fn has_async_modifier(expect_call: &JsCallExpression, final_call: &JsCallExpress
 
     while current != *expect_syntax {
         if let Some(member) = JsStaticMemberExpression::cast_ref(&current) {
-            if let Ok(member_name) = member.member() {
-                if let Some(name) = member_name.as_js_name() {
-                    if let Ok(token) = name.value_token() {
-                        let text = token.text_trimmed();
-                        if text == "poll" || text == "resolves" || text == "rejects" {
-                            return true;
-                        }
-                    }
+            if let Ok(member_name) = member.member()
+                && let Some(name) = member_name.as_js_name()
+                && let Ok(token) = name.value_token()
+            {
+                let text = token.text_trimmed();
+                if text == "poll" || text == "resolves" || text == "rejects" {
+                    return true;
                 }
             }
             if let Some(parent) = member.syntax().parent() {

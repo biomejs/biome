@@ -143,7 +143,6 @@ pub mod no_parameter_assign;
 pub mod no_parameter_properties;
 pub mod no_playwright_element_handle;
 pub mod no_playwright_eval;
-pub mod no_playwright_focused_test;
 pub mod no_playwright_force_option;
 pub mod no_playwright_networkidle;
 pub mod no_playwright_page_pause;

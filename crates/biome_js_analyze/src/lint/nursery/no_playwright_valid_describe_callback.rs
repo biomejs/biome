@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression};
@@ -48,6 +48,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintPlaywright("valid-describe-callback").same()],
         recommended: false,
+        domains: &[RuleDomain::Playwright],
     }
 }
 
@@ -133,10 +134,10 @@ impl Rule for NoPlaywrightValidDescribeCallback {
                 }
 
                 // Check if has parameters
-                if let Ok(params) = func.parameters() {
-                    if params.items().len() > 0 {
-                        return Some(InvalidReason::HasParameters);
-                    }
+                if let Ok(params) = func.parameters()
+                    && !params.items().is_empty()
+                {
+                    return Some(InvalidReason::HasParameters);
                 }
             }
             _ => return None, // Not a function, but we won't report this
@@ -148,17 +149,23 @@ impl Rule for NoPlaywrightValidDescribeCallback {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
-        let (message, note) = match state {
+        let (message, note, explanation) = match state {
             InvalidReason::Async => (
                 markup! { "Describe callback should not be "<Emphasis>"async"</Emphasis>"." },
+                markup! { "Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks." },
                 markup! { "Remove the "<Emphasis>"async"</Emphasis>" keyword from the describe callback." },
             ),
             InvalidReason::HasParameters => (
                 markup! { "Describe callback should not have parameters." },
+                markup! { "Describe callbacks are invoked without arguments by the test framework." },
                 markup! { "Remove parameters from the describe callback." },
             ),
         };
 
-        Some(RuleDiagnostic::new(rule_category!(), node.range(), message).note(note))
+        Some(
+            RuleDiagnostic::new(rule_category!(), node.range(), message)
+                .note(note)
+                .note(explanation),
+        )
     }
 }

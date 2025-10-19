@@ -1,11 +1,12 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsModule, T};
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function};
 
@@ -59,6 +60,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintPlaywright("missing-playwright-await").same()],
         recommended: false,
         fix_kind: FixKind::Unsafe,
+        domains: &[RuleDomain::Playwright],
     }
 }
 
@@ -96,7 +98,7 @@ const ASYNC_PLAYWRIGHT_MATCHERS: &[&str] = &[
 ];
 
 pub enum MissingAwaitType {
-    ExpectMatcher(String),
+    ExpectMatcher(TokenText),
     ExpectPoll,
     TestStep,
 }
@@ -119,10 +121,10 @@ impl Rule for MissingPlaywrightAwait {
         }
 
         // Check for expect calls with async matchers
-        if let Some(matcher_name) = get_async_expect_matcher(call_expr) {
-            if !is_properly_handled(call_expr) {
-                return Some(matcher_name);
-            }
+        if let Some(matcher_name) = get_async_expect_matcher(call_expr)
+            && !is_properly_handled(call_expr)
+        {
+            return Some(matcher_name);
         }
 
         None
@@ -131,34 +133,47 @@ impl Rule for MissingPlaywrightAwait {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
-        let (message, note) = match state {
-            MissingAwaitType::ExpectMatcher(matcher) => (
-                markup! {
-                    "Async matcher "<Emphasis>{{matcher}}</Emphasis>" must be awaited or returned."
-                },
-                markup! {
+        match state {
+            MissingAwaitType::ExpectMatcher(matcher) => {
+                let matcher_text = matcher.text();
+                Some(
+                    RuleDiagnostic::new(
+                        rule_category!(),
+                        node.range(),
+                        markup! {
+                            "Async matcher "<Emphasis>{matcher_text}</Emphasis>" must be awaited or returned."
+                        },
+                    )
+                    .note(markup! {
+                        "Add "<Emphasis>"await"</Emphasis>" before the expect call or return the promise."
+                    }),
+                )
+            }
+            MissingAwaitType::ExpectPoll => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        <Emphasis>"expect.poll"</Emphasis>" must be awaited or returned."
+                    },
+                )
+                .note(markup! {
                     "Add "<Emphasis>"await"</Emphasis>" before the expect call or return the promise."
-                },
+                }),
             ),
-            MissingAwaitType::ExpectPoll => (
-                markup! {
-                    <Emphasis>"expect.poll"</Emphasis>" must be awaited or returned."
-                },
-                markup! {
-                    "Add "<Emphasis>"await"</Emphasis>" before the expect call or return the promise."
-                },
-            ),
-            MissingAwaitType::TestStep => (
-                markup! {
-                    <Emphasis>"test.step"</Emphasis>" must be awaited or returned."
-                },
-                markup! {
+            MissingAwaitType::TestStep => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        <Emphasis>"test.step"</Emphasis>" must be awaited or returned."
+                    },
+                )
+                .note(markup! {
                     "Add "<Emphasis>"await"</Emphasis>" before the test.step call or return the promise."
-                },
+                }),
             ),
-        };
-
-        Some(RuleDiagnostic::new(rule_category!(), node.range(), message).note(note))
+        }
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
@@ -189,32 +204,40 @@ impl Rule for MissingPlaywrightAwait {
     }
 }
 
-fn is_test_step_call(call_expr: &JsCallExpression) -> bool {
-    let callee = call_expr.callee().ok();
+/// Generic helper to check if a call expression matches a pattern like `object.member()`
+/// where both the object identifier and member name match expected values.
+fn is_member_call_pattern(
+    call_expr: &JsCallExpression,
+    object_name: &str,
+    member_name: &str,
+) -> bool {
+    // Helper closure using ? operator for cleaner control flow
+    let check = || -> Option<bool> {
+        let callee = call_expr.callee().ok()?;
+        let member_expr = callee.as_js_static_member_expression()?;
 
-    // Check for test.step pattern
-    if let Some(AnyJsExpression::JsStaticMemberExpression(member)) = callee {
-        if let Ok(member_name) = member.member() {
-            if let Some(name) = member_name.as_js_name() {
-                if let Ok(token) = name.value_token() {
-                    if token.text_trimmed() == "step" {
-                        // Check if object is "test"
-                        if let Ok(object) = member.object() {
-                            if let AnyJsExpression::JsIdentifierExpression(id) = object {
-                                if let Ok(name) = id.name() {
-                                    if let Ok(token) = name.value_token() {
-                                        return token.text_trimmed() == "test";
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        // Check member name
+        let member_node = member_expr.member().ok()?;
+        let name = member_node.as_js_name()?;
+        let token = name.value_token().ok()?;
+        if token.text_trimmed() != member_name {
+            return Some(false);
         }
-    }
 
-    false
+        // Check object name
+        let object = member_expr.object().ok()?;
+        let id = object.as_js_identifier_expression()?;
+        let obj_name = id.name().ok()?;
+        let obj_token = obj_name.value_token().ok()?;
+
+        Some(obj_token.text_trimmed() == object_name)
+    };
+
+    check().unwrap_or(false)
+}
+
+fn is_test_step_call(call_expr: &JsCallExpression) -> bool {
+    is_member_call_pattern(call_expr, "test", "step")
 }
 
 fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwaitType> {
@@ -227,10 +250,10 @@ fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwait
     let member = member_expr.member().ok()?;
     let name = member.as_js_name()?;
     let token = name.value_token().ok()?;
-    let matcher_name = token.text_trimmed().to_string();
+    let matcher_name = token.token_text_trimmed();
 
     // Check if it's an async Playwright matcher
-    if !ASYNC_PLAYWRIGHT_MATCHERS.contains(&matcher_name.as_str()) {
+    if !ASYNC_PLAYWRIGHT_MATCHERS.contains(&matcher_name.text()) {
         return None;
     }
 
@@ -253,14 +276,12 @@ fn get_async_expect_matcher(call_expr: &JsCallExpression) -> Option<MissingAwait
 fn has_poll_in_chain(expr: &AnyJsExpression) -> bool {
     match expr {
         AnyJsExpression::JsStaticMemberExpression(member) => {
-            if let Ok(member_name) = member.member() {
-                if let Some(name) = member_name.as_js_name() {
-                    if let Ok(token) = name.value_token() {
-                        if token.text_trimmed() == "poll" {
-                            return true;
-                        }
-                    }
-                }
+            if let Ok(member_name) = member.member()
+                && let Some(name) = member_name.as_js_name()
+                && let Ok(token) = name.value_token()
+                && token.text_trimmed() == "poll"
+            {
+                return true;
             }
             if let Ok(object) = member.object() {
                 return has_poll_in_chain(&object);
@@ -284,23 +305,21 @@ fn has_expect_in_chain(expr: &AnyJsExpression) -> bool {
             if let Ok(callee) = call.callee() {
                 match callee {
                     AnyJsExpression::JsIdentifierExpression(id) => {
-                        if let Ok(name) = id.name() {
-                            if let Ok(token) = name.value_token() {
-                                return token.text_trimmed() == "expect";
-                            }
+                        if let Ok(name) = id.name()
+                            && let Ok(token) = name.value_token()
+                        {
+                            return token.text_trimmed() == "expect";
                         }
                         false
                     }
                     AnyJsExpression::JsStaticMemberExpression(member) => {
                         // Could be expect.soft or similar
-                        if let Ok(object) = member.object() {
-                            if let AnyJsExpression::JsIdentifierExpression(id) = object {
-                                if let Ok(name) = id.name() {
-                                    if let Ok(token) = name.value_token() {
-                                        return token.text_trimmed() == "expect";
-                                    }
-                                }
-                            }
+                        if let Ok(object) = member.object()
+                            && let AnyJsExpression::JsIdentifierExpression(id) = object
+                            && let Ok(name) = id.name()
+                            && let Ok(token) = name.value_token()
+                        {
+                            return token.text_trimmed() == "expect";
                         }
                         false
                     }
@@ -326,10 +345,10 @@ fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
     let parent = call_expr.syntax().parent();
 
     // Check if it's awaited
-    if let Some(parent) = &parent {
-        if parent.kind() == biome_js_syntax::JsSyntaxKind::JS_AWAIT_EXPRESSION {
-            return true;
-        }
+    if let Some(parent) = &parent
+        && parent.kind() == biome_js_syntax::JsSyntaxKind::JS_AWAIT_EXPRESSION
+    {
+        return true;
     }
 
     // Check if it's in a return statement
@@ -341,17 +360,16 @@ fn is_call_awaited_or_returned(call_expr: &JsCallExpression) -> bool {
             }
             biome_js_syntax::JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => {
                 // If it's an arrow function with expression body, check if our call is exactly the body
-                if let Some(arrow) = JsArrowFunctionExpression::cast_ref(&node) {
-                    if let Ok(body) = arrow.body() {
-                        if let Some(body_expr) = body.as_any_js_expression() {
-                            // Only return true if the call expression is exactly the arrow body
-                            // (not just nested somewhere inside it)
-                            if call_expr.syntax().text_trimmed_range()
-                                == body_expr.syntax().text_trimmed_range()
-                            {
-                                return true;
-                            }
-                        }
+                if let Some(arrow) = JsArrowFunctionExpression::cast_ref(&node)
+                    && let Ok(body) = arrow.body()
+                    && let Some(body_expr) = body.as_any_js_expression()
+                {
+                    // Only return true if the call expression is exactly the arrow body
+                    // (not just nested somewhere inside it)
+                    if call_expr.syntax().text_trimmed_range()
+                        == body_expr.syntax().text_trimmed_range()
+                    {
+                        return true;
                     }
                 }
                 break;
@@ -389,22 +407,15 @@ fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpr
         // Check if we're in an array expression
         if node.kind() == biome_js_syntax::JsSyntaxKind::JS_ARRAY_EXPRESSION {
             // Check if the array is an argument to Promise.all
-            if let Some(parent) = node.parent() {
-                if parent.kind() == biome_js_syntax::JsSyntaxKind::JS_CALL_ARGUMENT_LIST {
-                    if let Some(call_args_parent) = parent.parent() {
-                        if call_args_parent.kind()
-                            == biome_js_syntax::JsSyntaxKind::JS_CALL_ARGUMENTS
-                        {
-                            if let Some(promise_call) = call_args_parent.parent() {
-                                if let Some(call) = JsCallExpression::cast_ref(&promise_call) {
-                                    if is_promise_all(&call) {
-                                        return Some(call);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            if let Some(parent) = node.parent()
+                && parent.kind() == biome_js_syntax::JsSyntaxKind::JS_CALL_ARGUMENT_LIST
+                && let Some(call_args_parent) = parent.parent()
+                && call_args_parent.kind() == biome_js_syntax::JsSyntaxKind::JS_CALL_ARGUMENTS
+                && let Some(promise_call) = call_args_parent.parent()
+                && let Some(call) = JsCallExpression::cast_ref(&promise_call)
+                && is_promise_all(&call)
+            {
+                return Some(call);
             }
         }
 
@@ -424,29 +435,7 @@ fn find_enclosing_promise_all(call_expr: &JsCallExpression) -> Option<JsCallExpr
 }
 
 fn is_promise_all(call: &JsCallExpression) -> bool {
-    if let Ok(callee) = call.callee() {
-        if let Some(member) = callee.as_js_static_member_expression() {
-            if let Ok(member_name) = member.member() {
-                if let Some(name) = member_name.as_js_name() {
-                    if let Ok(token) = name.value_token() {
-                        if token.text_trimmed() == "all" {
-                            // Check if object is Promise
-                            if let Ok(object) = member.object() {
-                                if let AnyJsExpression::JsIdentifierExpression(id) = object {
-                                    if let Ok(name) = id.name() {
-                                        if let Ok(token) = name.value_token() {
-                                            return token.text_trimmed() == "Promise";
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    false
+    is_member_call_pattern(call, "Promise", "all")
 }
 
 /// Checks if a node is within an async context (async function or module with TLA support).

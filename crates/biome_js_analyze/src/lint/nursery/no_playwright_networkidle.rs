@@ -1,11 +1,11 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, JsCallExpression, JsObjectExpression, JsStaticMemberExpression,
 };
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::AstNode;
 
 declare_lint_rule! {
     /// Disallow usage of the `networkidle` option.
@@ -42,6 +42,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-networkidle").same()],
         recommended: false,
+        domains: &[RuleDomain::Playwright],
     }
 }
 
@@ -73,14 +74,13 @@ impl Rule for NoPlaywrightNetworkidle {
                 return None;
             };
 
-            if let Some(expr) = first_arg.as_any_js_expression() {
-                if let Some(literal) = expr.as_any_js_literal_expression() {
-                    if let Some(string_lit) = literal.as_js_string_literal_expression() {
-                        let value = string_lit.inner_string_text().ok()?;
-                        if value.text() == "networkidle" {
-                            return Some(());
-                        }
-                    }
+            if let Some(expr) = first_arg.as_any_js_expression()
+                && let Some(literal) = expr.as_any_js_literal_expression()
+                && let Some(string_lit) = literal.as_js_string_literal_expression()
+            {
+                let value = string_lit.inner_string_text().ok()?;
+                if value.text() == "networkidle" {
+                    return Some(());
                 }
             }
             return None;
@@ -92,12 +92,11 @@ impl Rule for NoPlaywrightNetworkidle {
 
             // Navigation methods typically have options as the second argument
             for arg in args.args().into_iter().flatten() {
-                if let Some(expr) = arg.as_any_js_expression() {
-                    if let AnyJsExpression::JsObjectExpression(obj_expr) = expr {
-                        if has_networkidle_option(&obj_expr) {
-                            return Some(());
-                        }
-                    }
+                if let Some(expr) = arg.as_any_js_expression()
+                    && let AnyJsExpression::JsObjectExpression(obj_expr) = expr
+                    && has_networkidle_option(obj_expr)
+                {
+                    return Some(());
                 }
             }
         }
@@ -129,26 +128,19 @@ fn has_networkidle_option(obj_expr: &JsObjectExpression) -> bool {
     for member in obj_expr.members().into_iter().flatten() {
         if let Some(prop) = member.as_js_property_object_member() {
             // Check if property name is 'waitUntil'
-            if let Ok(name) = prop.name() {
-                if let Some(name_node) = name.as_js_literal_member_name() {
-                    if let Ok(name_token) = name_node.value() {
-                        if name_token.text_trimmed() == "waitUntil" {
-                            // Check if value is 'networkidle'
-                            if let Ok(value) = prop.value() {
-                                if let Some(literal_expr) = value.as_any_js_literal_expression() {
-                                    if let Some(string_lit) =
-                                        literal_expr.as_js_string_literal_expression()
-                                    {
-                                        if let Ok(inner) = string_lit.inner_string_text() {
-                                            if inner.text() == "networkidle" {
-                                                return true;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+            if let Ok(name) = prop.name()
+                && let Some(name_node) = name.as_js_literal_member_name()
+                && let Ok(name_token) = name_node.value()
+                && name_token.text_trimmed() == "waitUntil"
+            {
+                // Check if value is 'networkidle'
+                if let Ok(value) = prop.value()
+                    && let Some(literal_expr) = value.as_any_js_literal_expression()
+                    && let Some(string_lit) = literal_expr.as_js_string_literal_expression()
+                    && let Ok(inner) = string_lit.inner_string_text()
+                    && inner.text() == "networkidle"
+                {
+                    return true;
                 }
             }
         }

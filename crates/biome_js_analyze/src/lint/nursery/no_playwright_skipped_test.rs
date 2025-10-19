@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
@@ -43,6 +43,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-skipped-test").same()],
         recommended: false,
+        domains: &[RuleDomain::Playwright],
     }
 }
 
@@ -73,26 +74,25 @@ impl Rule for NoPlaywrightSkippedTest {
         fn is_test_or_describe_object(expr: &biome_js_syntax::AnyJsExpression) -> bool {
             match expr {
                 biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => {
-                    if let Ok(name) = id.name() {
-                        if let Ok(token) = name.value_token() {
-                            let text = token.text_trimmed();
-                            return text == "test" || text == "describe";
-                        }
+                    if let Ok(name) = id.name()
+                        && let Ok(token) = name.value_token()
+                    {
+                        let text = token.text_trimmed();
+                        return text == "test" || text == "describe";
                     }
                     false
                 }
                 biome_js_syntax::AnyJsExpression::JsStaticMemberExpression(member) => {
                     // Handle test.describe.skip or similar chains
-                    if let Ok(member_name) = member.member() {
-                        if let Some(name) = member_name.as_js_name() {
-                            if let Ok(token) = name.value_token() {
-                                let text = token.text_trimmed();
-                                if text == "describe" || text == "serial" || text == "parallel" {
-                                    if let Ok(obj) = member.object() {
-                                        return is_test_or_describe_object(&obj);
-                                    }
-                                }
-                            }
+                    if let Ok(member_name) = member.member()
+                        && let Some(name) = member_name.as_js_name()
+                        && let Ok(token) = name.value_token()
+                    {
+                        let text = token.text_trimmed();
+                        if (text == "describe" || text == "serial" || text == "parallel")
+                            && let Ok(obj) = member.object()
+                        {
+                            return is_test_or_describe_object(&obj);
                         }
                     }
                     false

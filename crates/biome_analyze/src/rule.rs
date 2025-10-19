@@ -453,6 +453,8 @@ pub enum RuleDomain {
     Solid,
     /// Next.js framework rules
     Next,
+    /// Playwright testing library rules
+    Playwright,
     /// Qwik framework rules
     Qwik,
     /// Vue.js framework rules
@@ -471,6 +473,7 @@ impl Display for RuleDomain {
             Self::Test => fmt.write_str("test"),
             Self::Solid => fmt.write_str("solid"),
             Self::Next => fmt.write_str("next"),
+            Self::Playwright => fmt.write_str("playwright"),
             Self::Qwik => fmt.write_str("qwik"),
             Self::Vue => fmt.write_str("vue"),
             Self::Project => fmt.write_str("project"),
@@ -507,6 +510,7 @@ impl RuleDomain {
             ],
             Self::Solid => &[&("solid", ">=1.0.0")],
             Self::Next => &[&("next", ">=14.0.0")],
+            Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Qwik => &[
                 &("@builder.io/qwik", ">=1.0.0"),
                 &("@qwik.dev/core", ">=2.0.0"),
@@ -535,6 +539,7 @@ impl RuleDomain {
             ],
             Self::Solid => &[],
             Self::Next => &[],
+            Self::Playwright => &["test", "expect"],
             Self::Qwik => &[],
             Self::Vue => &[],
             Self::Project => &[],
