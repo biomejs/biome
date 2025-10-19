@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsStaticMemberExpression};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 
 declare_lint_rule! {
     /// Disallow usage of element handles (`page.$()` and `page.$$()`).
@@ -56,7 +56,7 @@ declare_lint_rule! {
 
 impl Rule for NoPlaywrightElementHandle {
     type Query = Ast<JsCallExpression>;
-    type State = String;
+    type State = TokenText;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -67,8 +67,11 @@ impl Rule for NoPlaywrightElementHandle {
         let member_expr = JsStaticMemberExpression::cast_ref(callee.syntax())?;
 
         let member_name = member_expr.member().ok()?;
-        let member_text = member_name.as_js_name()?.value_token().ok()?;
-        let member_str = member_text.text_trimmed();
+        let member_str = member_name
+            .as_js_name()?
+            .value_token()
+            .ok()?
+            .token_text_trimmed();
 
         // Check if the method is $ or $$
         if member_str != "$" && member_str != "$$" {
@@ -77,21 +80,16 @@ impl Rule for NoPlaywrightElementHandle {
 
         let object = member_expr.object().ok()?;
         let object_text = match object {
-            biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => id
-                .name()
-                .ok()?
-                .value_token()
-                .ok()?
-                .text_trimmed()
-                .to_string(),
+            biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => {
+                id.name().ok()?.value_token().ok()?.token_text_trimmed()
+            }
             biome_js_syntax::AnyJsExpression::JsStaticMemberExpression(member) => member
                 .member()
                 .ok()?
                 .as_js_name()?
                 .value_token()
                 .ok()?
-                .text_trimmed()
-                .to_string(),
+                .token_text_trimmed(),
             _ => return None,
         };
 
@@ -101,7 +99,7 @@ impl Rule for NoPlaywrightElementHandle {
             || object_text.ends_with("Page")
             || object_text.ends_with("Frame")
         {
-            Some(member_str.to_string())
+            Some(member_str)
         } else {
             None
         }
@@ -109,6 +107,7 @@ impl Rule for NoPlaywrightElementHandle {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let state_text = state.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -118,7 +117,7 @@ impl Rule for NoPlaywrightElementHandle {
                 },
             )
             .note(markup! {
-                "Element handles like "<Emphasis>"page."{{state}}"()"</Emphasis>" are discouraged."
+                "Element handles like "<Emphasis>"page."{{state_text}}"()"</Emphasis>" are discouraged."
             })
             .note(markup! {
                 "Use "<Emphasis>"page.locator()"</Emphasis>" or other locator methods like "<Emphasis>"getByRole()"</Emphasis>" instead."

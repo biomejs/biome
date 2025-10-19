@@ -70,13 +70,9 @@ impl Rule for NoPlaywrightPagePause {
         // Check if the object is "page" or "frame"
         let object = member_expr.object().ok()?;
         let object_text = match object {
-            biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => id
-                .name()
-                .ok()?
-                .value_token()
-                .ok()?
-                .text_trimmed()
-                .to_string(),
+            biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => {
+                id.name().ok()?.value_token().ok()?.token_text_trimmed()
+            }
             biome_js_syntax::AnyJsExpression::JsStaticMemberExpression(member) => {
                 // Handle cases like "context.page.pause()"
                 member
@@ -85,8 +81,7 @@ impl Rule for NoPlaywrightPagePause {
                     .as_js_name()?
                     .value_token()
                     .ok()?
-                    .text_trimmed()
-                    .to_string()
+                    .token_text_trimmed()
             }
             _ => return None,
         };

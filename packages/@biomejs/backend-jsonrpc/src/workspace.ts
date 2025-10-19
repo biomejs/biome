@@ -909,7 +909,8 @@ export type RuleDomain =
 	| "qwik"
 	| "vue"
 	| "project"
-	| "tailwind";
+	| "tailwind"
+	| "playwright";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =

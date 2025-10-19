@@ -70,21 +70,16 @@ impl Rule for NoPlaywrightWaitForSelector {
 
         let object = member_expr.object().ok()?;
         let object_text = match object {
-            biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => id
-                .name()
-                .ok()?
-                .value_token()
-                .ok()?
-                .text_trimmed()
-                .to_string(),
+            biome_js_syntax::AnyJsExpression::JsIdentifierExpression(id) => {
+                id.name().ok()?.value_token().ok()?.token_text_trimmed()
+            }
             biome_js_syntax::AnyJsExpression::JsStaticMemberExpression(member) => member
                 .member()
                 .ok()?
                 .as_js_name()?
                 .value_token()
                 .ok()?
-                .text_trimmed()
-                .to_string(),
+                .token_text_trimmed(),
             _ => return None,
         };
 
