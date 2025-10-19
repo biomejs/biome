@@ -3947,16 +3947,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoPlaywrightFocusedTestConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoPlaywrightFocusedTestOptions" }
-			]
-		},
-		"NoPlaywrightFocusedTestOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoPlaywrightForceOptionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -5224,13 +5214,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noPlaywrightFocusedTest": {
-					"description": "Disallow usage of .only annotation in Playwright tests.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoPlaywrightFocusedTestConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noPlaywrightForceOption": {
 					"description": "Disallow usage of the { force: true } option.",
 					"anyOf": [
@@ -6027,6 +6010,11 @@
 					"description": "Next.js framework rules",
 					"type": "string",
 					"enum": ["next"]
+				},
+				{
+					"description": "Playwright testing library rules",
+					"type": "string",
+					"enum": ["playwright"]
 				},
 				{
 					"description": "Qwik framework rules",
@@ -8462,21 +8450,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoPlaywrightEvalOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithNoPlaywrightFocusedTestOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoPlaywrightFocusedTestOptions" }]
 				}
 			},
 			"additionalProperties": false

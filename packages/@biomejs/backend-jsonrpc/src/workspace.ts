@@ -906,11 +906,11 @@ export type RuleDomain =
 	| "test"
 	| "solid"
 	| "next"
+	| "playwright"
 	| "qwik"
 	| "vue"
 	| "project"
-	| "tailwind"
-	| "playwright";
+	| "tailwind";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
@@ -1674,10 +1674,6 @@ export interface Nursery {
 	 * Disallow usage of page.$eval() and page.$$eval().
 	 */
 	noPlaywrightEval?: RuleConfiguration_for_NoPlaywrightEvalOptions;
-	/**
-	 * Disallow usage of .only annotation in Playwright tests.
-	 */
-	noPlaywrightFocusedTest?: RuleConfiguration_for_NoPlaywrightFocusedTestOptions;
 	/**
 	 * Disallow usage of the { force: true } option.
 	 */
@@ -3099,9 +3095,6 @@ export type RuleConfiguration_for_NoPlaywrightElementHandleOptions =
 export type RuleConfiguration_for_NoPlaywrightEvalOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoPlaywrightEvalOptions;
-export type RuleConfiguration_for_NoPlaywrightFocusedTestOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoPlaywrightFocusedTestOptions;
 export type RuleConfiguration_for_NoPlaywrightForceOptionOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoPlaywrightForceOptionOptions;
@@ -5626,16 +5619,6 @@ export interface RuleWithOptions_for_NoPlaywrightEvalOptions {
 	 * Rule's options
 	 */
 	options: NoPlaywrightEvalOptions;
-}
-export interface RuleWithOptions_for_NoPlaywrightFocusedTestOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoPlaywrightFocusedTestOptions;
 }
 export interface RuleWithOptions_for_NoPlaywrightForceOptionOptions {
 	/**
@@ -8463,7 +8446,6 @@ export interface NoNextAsyncClientComponentOptions {}
 export interface NoNonNullAssertedOptionalChainOptions {}
 export interface NoPlaywrightElementHandleOptions {}
 export interface NoPlaywrightEvalOptions {}
-export interface NoPlaywrightFocusedTestOptions {}
 export interface NoPlaywrightForceOptionOptions {}
 export interface NoPlaywrightNetworkidleOptions {}
 export interface NoPlaywrightPagePauseOptions {}
