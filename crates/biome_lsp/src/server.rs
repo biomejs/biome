@@ -407,7 +407,8 @@ impl LanguageServer for LSPServer {
             }
         }
 
-        self.session.update_workspace_folders(params.event.added, params.event.removed);
+        self.session
+            .update_workspace_folders(params.event.added, params.event.removed);
         self.session.load_workspace_settings(true).await;
     }
 
