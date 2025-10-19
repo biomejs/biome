@@ -595,10 +595,27 @@ impl Session {
         self.workspace_folders.read().unwrap().clone()
     }
 
-    pub(crate) fn update_workspace_folders(&self, folders: Vec<WorkspaceFolder>) {
+    pub(crate) fn update_workspace_folders(
+        &self,
+        added: Vec<WorkspaceFolder>,
+        removed: Vec<WorkspaceFolder>,
+    ) {
         let mut workspace_folders = self.workspace_folders.write().unwrap();
-        *workspace_folders = Some(folders);
+
+        if let Some(ref mut folders) = *workspace_folders {
+            if !removed.is_empty() {
+                folders.retain(|folder| !removed.contains(folder));
+            }
+
+            if !added.is_empty() {
+                folders.extend(added);
+            }
+        } else {
+            *workspace_folders = Some(added);
+        }
     }
+
+
 
     /// Returns the base path of the workspace on the filesystem if it has one
     pub(crate) fn base_path(&self) -> Option<Utf8PathBuf> {
