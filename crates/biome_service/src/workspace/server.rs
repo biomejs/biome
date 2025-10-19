@@ -981,6 +981,7 @@ impl Workspace for WorkspaceServer {
 
         self.module_graph.unload_path(&project_path);
         self.project_layout.unload_folder(&project_path);
+        self.plugin_caches.pin().remove(&project_path);
 
         Ok(())
     }
