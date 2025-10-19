@@ -5,7 +5,6 @@ use biome_js_syntax::AnyJsxAttributeName;
 use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
 use biome_rule_options::no_unknown_property::NoUnknownPropertyOptions;
-use regex::Regex;
 
 use crate::services::manifest::Manifest;
 
@@ -992,9 +991,15 @@ fn is_valid_aria_attribute(name: &str) -> bool {
 }
 
 fn is_valid_html_tag_in_jsx(node: &AnyJsxElement, tag_name: &str) -> bool {
-    let tag_convention = Regex::new(r"^[a-z][^-]*$").unwrap();
+    let matches_tag_convention = tag_name.char_indices().all(|(i, c)| {
+        if i == 0 {
+            c.is_ascii_lowercase()
+        } else {
+            c != '-'
+        }
+    });
 
-    if tag_convention.is_match(&tag_name) {
+    if matches_tag_convention {
         return node.attributes().find_by_name("is").is_none();
     }
 
