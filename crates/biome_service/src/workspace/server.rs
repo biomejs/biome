@@ -19,8 +19,6 @@ use crate::workspace::document::AnyEmbeddedSnippet;
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::{AnalyzerPluginVec, RuleCategory};
 use biome_configuration::bool::Bool;
-use biome_configuration::max_size::MaxSize;
-use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
 use biome_deserialize::json::deserialize_from_json_str;
@@ -39,6 +37,7 @@ use biome_module_graph::{ModuleDependencies, ModuleDiagnostic, ModuleGraph};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
+use biome_plugin_loader::{PluginConfiguration, Plugins};
 use biome_project_layout::ProjectLayout;
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AstNode, NodeCache, SendNode};
@@ -1068,6 +1067,7 @@ impl Workspace for WorkspaceServer {
 
         self.module_graph.unload_path(&project_path);
         self.project_layout.unload_folder(&project_path);
+        self.plugin_caches.pin().remove(&project_path);
 
         Ok(())
     }
