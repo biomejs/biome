@@ -173,15 +173,28 @@ fn get_nesting_depth_js(value: &AnyJsExpression) -> u8 {
                 0
             }
         }
+        // Function and class expressions are treated as nested
+        AnyJsExpression::JsArrowFunctionExpression(_)
+        | AnyJsExpression::JsFunctionExpression(_)
+        | AnyJsExpression::JsClassExpression(_) => 1,
         _ => 0,
     }
 }
 
-/// Extracts the value expression from an object member
-fn get_member_value(node: &AnyJsObjectMember) -> Option<AnyJsExpression> {
+/// Determines the nesting depth for an object member:
+/// - properties: based on value expression;
+/// - methods/getters/setters: treat as nested (1);
+/// - spreads/computed or unnamed: non-sortable (None).
+fn get_member_depth(node: &AnyJsObjectMember) -> Option<u8> {
     match node {
-        AnyJsObjectMember::JsPropertyObjectMember(prop) => prop.value().ok(),
-        _ => None, // Getters, setters, methods, etc. treated as non-nested
+        AnyJsObjectMember::JsPropertyObjectMember(prop) => {
+            let value = prop.value().ok()?;
+            Some(get_nesting_depth_js(&value))
+        }
+        AnyJsObjectMember::JsMethodObjectMember(_)
+        | AnyJsObjectMember::JsGetterObjectMember(_)
+        | AnyJsObjectMember::JsSetterObjectMember(_) => Some(1),
+        _ => None,
     }
 }
 
@@ -203,8 +216,7 @@ impl Rule for UseSortedKeys {
             is_separated_list_sorted_by(
                 ctx.query(),
                 |node| {
-                    let value = get_member_value(node)?;
-                    let depth = get_nesting_depth_js(&value);
+                    let depth = get_member_depth(node)?;
                     let name = node.name().map(ComparableToken::new)?;
                     Some((depth, name))
                 },
@@ -256,8 +268,7 @@ impl Rule for UseSortedKeys {
             sorted_separated_list_by(
                 list,
                 |node| {
-                    let value = get_member_value(node)?;
-                    let depth = get_nesting_depth_js(&value);
+                    let depth = get_member_depth(node)?;
                     let name = node.name().map(ComparableToken::new)?;
                     Some((depth, name))
                 },
