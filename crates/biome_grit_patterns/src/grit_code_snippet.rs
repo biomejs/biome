@@ -54,7 +54,7 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
         // This handles wrapper nodes like JS_IDENTIFIER_EXPRESSION wrapping JS_REFERENCE_IDENTIFIER
         if node.kind() == GritTargetSyntaxKind::JsSyntaxKind(JsSyntaxKind::JS_IDENTIFIER_EXPRESSION)
             && let Some(child) = node.first_child()
-            && node.children().count() == 1
+            && child.next_sibling().is_none()
         {
             let child_binding = GritResolvedPattern::from_node_binding(child);
             for (_, pattern) in &self.patterns {
