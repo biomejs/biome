@@ -6,7 +6,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: crate-publish
     permissions:
-      id-token: write     # Required for OIDC token exchange
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
