@@ -10,7 +10,9 @@ use biome_console::markup;
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Applicability, category};
 use biome_js_factory::make;
-use biome_js_syntax::{JsObjectExpression, JsObjectMemberList, T};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsObjectMember, JsObjectExpression, JsObjectMemberList, T,
+};
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
@@ -129,6 +131,26 @@ declare_source_rule! {
     /// };
     /// ```
     ///
+    /// ### `groupByNesting`
+    /// When enabled, groups object keys by their value's nesting depth before sorting alphabetically.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "groupByNesting": true
+    ///     }
+    /// }
+    /// ```
+    /// ```js,use_options,expect_diagnostic
+    /// const obj = {
+    ///     name: "Sample",
+    ///     details: {
+    ///         description: "nested"
+    ///     },
+    ///     id: "123"
+    /// };
+    /// ```
+    ///
     pub UseSortedKeys {
         version: "2.0.0",
         name: "useSortedKeys",
@@ -136,6 +158,30 @@ declare_source_rule! {
         recommended: false,
         sources: &[RuleSource::EslintPerfectionist("sort-objects").inspired()],
         fix_kind: FixKind::Safe,
+    }
+}
+
+/// Determines the nesting depth of a JavaScript expression for grouping purposes.
+fn get_nesting_depth_js(value: &AnyJsExpression) -> u8 {
+    match value {
+        AnyJsExpression::JsObjectExpression(_) => 1,
+        AnyJsExpression::JsArrayExpression(array) => {
+            // Check if array spans multiple lines by looking for newlines
+            if array.syntax().text_trimmed().contains_char('\n') {
+                1
+            } else {
+                0
+            }
+        }
+        _ => 0,
+    }
+}
+
+/// Extracts the value expression from an object member
+fn get_member_value(node: &AnyJsObjectMember) -> Option<AnyJsExpression> {
+    match node {
+        AnyJsObjectMember::JsPropertyObjectMember(prop) => prop.value().ok(),
+        _ => None, // Getters, setters, methods, etc. treated as non-nested
     }
 }
 
@@ -153,14 +199,30 @@ impl Rule for UseSortedKeys {
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         };
 
-        is_separated_list_sorted_by(
-            ctx.query(),
-            |node| node.name().map(ComparableToken::new),
-            comparator,
-        )
-        .ok()?
-        .not()
-        .then_some(())
+        if options.group_by_nesting {
+            is_separated_list_sorted_by(
+                ctx.query(),
+                |node| {
+                    let value = get_member_value(node)?;
+                    let depth = get_nesting_depth_js(&value);
+                    let name = node.name().map(ComparableToken::new)?;
+                    Some((depth, name))
+                },
+                |(d1, n1), (d2, n2)| d1.cmp(d2).then_with(|| comparator(n1, n2)),
+            )
+            .ok()?
+            .not()
+            .then_some(())
+        } else {
+            is_separated_list_sorted_by(
+                ctx.query(),
+                |node| node.name().map(ComparableToken::new),
+                comparator,
+            )
+            .ok()?
+            .not()
+            .then_some(())
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -190,13 +252,28 @@ impl Rule for UseSortedKeys {
             SortOrder::Lexicographic => ComparableToken::lexicographic_cmp,
         };
 
-        let new_list = sorted_separated_list_by(
-            list,
-            |node| node.name().map(ComparableToken::new),
-            || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            comparator,
-        )
-        .ok()?;
+        let new_list = if options.group_by_nesting {
+            sorted_separated_list_by(
+                list,
+                |node| {
+                    let value = get_member_value(node)?;
+                    let depth = get_nesting_depth_js(&value);
+                    let name = node.name().map(ComparableToken::new)?;
+                    Some((depth, name))
+                },
+                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                |(d1, n1), (d2, n2)| d1.cmp(d2).then_with(|| comparator(n1, n2)),
+            )
+            .ok()?
+        } else {
+            sorted_separated_list_by(
+                list,
+                |node| node.name().map(ComparableToken::new),
+                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                comparator,
+            )
+            .ok()?
+        };
 
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(list.clone(), new_list);

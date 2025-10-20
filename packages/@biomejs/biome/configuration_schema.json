@@ -12470,6 +12470,11 @@
 		"UseSortedKeysOptions": {
 			"type": "object",
 			"properties": {
+				"groupByNesting": {
+					"description": "When enabled, groups object keys by their value's nesting depth before sorting. Simple values (primitives, single-line arrays) are sorted first, followed by nested values (objects, multi-line arrays).",
+					"default": false,
+					"type": "boolean"
+				},
 				"sortOrder": {
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}
