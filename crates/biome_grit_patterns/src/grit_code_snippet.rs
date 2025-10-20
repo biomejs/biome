@@ -51,7 +51,12 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
 
         // If node has a single child, try matching against the child
         // This handles wrapper nodes like JS_IDENTIFIER_EXPRESSION wrapping JS_REFERENCE_IDENTIFIER
-        if let Some(child) = node.first_child() {
+        if node.kind()
+            == GritTargetSyntaxKind::JsSyntaxKind(
+                biome_js_syntax::JsSyntaxKind::JS_IDENTIFIER_EXPRESSION,
+            )
+            && let Some(child) = node.first_child()
+        {
             if node.children().count() == 1 {
                 let child_binding = GritResolvedPattern::from_node_binding(child);
                 for (_, pattern) in &self.patterns {
