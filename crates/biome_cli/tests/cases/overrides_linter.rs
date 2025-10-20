@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const FIX_BEFORE: &str = "(1 >= -0)";
@@ -41,7 +40,7 @@ fn does_handle_included_file_and_disable_linter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["lint", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -84,7 +83,7 @@ fn does_include_file_with_different_rules() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--unsafe", test.as_str(), test2.as_str()].as_slice()),
+        &["lint", "--write", "--unsafe", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -150,7 +149,7 @@ fn does_include_file_with_different_linting_and_applies_all_of_them() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--unsafe", test.as_str(), test2.as_str()].as_slice()),
+        &["lint", "--write", "--unsafe", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -216,7 +215,7 @@ fn does_include_file_with_different_overrides() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--unsafe", test.as_str(), test2.as_str()].as_slice()),
+        &["lint", "--write", "--unsafe", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -270,7 +269,7 @@ fn does_override_the_rules() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--unsafe", test.as_str(), test2.as_str()].as_slice()),
+        &["lint", "--write", "--unsafe", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -320,7 +319,7 @@ fn does_not_change_linting_settings() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--unsafe", test.as_str(), test2.as_str()].as_slice()),
+        &["lint", "--write", "--unsafe", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -373,7 +372,7 @@ fn does_override_recommended() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
+        &["lint", "--write", "--unsafe", "."],
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -429,7 +428,7 @@ fn does_override_groupe_recommended() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
+        &["lint", "--write", "--unsafe", "."],
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -483,7 +482,7 @@ fn does_preserve_group_recommended_when_override_global_recommended() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
+        &["lint", "--write", "--unsafe", "."],
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -537,7 +536,7 @@ fn does_preserve_individually_disabled_rules_in_overrides() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
+        &["lint", "--write", "--unsafe", "."],
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -602,7 +601,7 @@ fn does_merge_all_overrides() {
     let test3 = Utf8Path::new("test3.js");
     fs.insert(test3.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "."].as_slice()));
+    let (fs, result) = run_cli(fs, &mut console, &["lint", "."]);
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -644,7 +643,7 @@ fn does_not_conceal_overrides_globals() {
     let test = Utf8Path::new("test.js");
     fs.insert(test.into(), "export { GLOBAL_VAR };".as_bytes());
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "."].as_slice()));
+    let (fs, result) = run_cli(fs, &mut console, &["lint", "."]);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -686,7 +685,7 @@ fn takes_last_linter_enabled_into_account() {
     let test = Utf8Path::new("test.js");
     fs.insert(test.into(), "export { GLOBAL_VAR };".as_bytes());
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "."].as_slice()));
+    let (fs, result) = run_cli(fs, &mut console, &["lint", "."]);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

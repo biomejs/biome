@@ -7,12 +7,12 @@ mod snap_test;
 #[cfg(test)]
 use snap_test::assert_cli_snapshot;
 
-use biome_cli::{CliDiagnostic, CliSession, biome_command};
+use biome_cli::{BiomeCli, BiomeCommand, CliDiagnostic, CliSession};
 use biome_console::{BufferConsole, Console, ConsoleExt, markup};
 use biome_fs::{MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
 use biome_service::App;
-use bpaf::ParseFailure;
+use clap::Parser;
 use std::sync::Arc;
 
 const UNFORMATTED: &str = "  statement(  )  ";
@@ -29,18 +29,13 @@ return { something }
 
 mod help {
     use super::*;
-    use bpaf::Args;
 
     #[test]
     fn unknown_command() {
         let mut console = BufferConsole::default();
         let fs = MemoryFileSystem::default();
 
-        let (_, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["unknown", "--help"].as_slice()),
-        );
+        let (_, result) = run_cli(fs, &mut console, &["unknown", "--help"]);
 
         assert!(result.is_ok(), "run_cli returned {result:?}");
     }
@@ -48,14 +43,13 @@ mod help {
 
 mod main {
     use super::*;
-    use bpaf::Args;
 
     #[test]
     fn unknown_command() {
         let mut console = BufferConsole::default();
         let fs = MemoryFileSystem::default();
 
-        let (_, result) = run_cli(fs, &mut console, Args::from(["unknown"].as_slice()));
+        let (_, result) = run_cli(fs, &mut console, &["unknown"]);
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
 
@@ -64,11 +58,7 @@ mod main {
         let mut console = BufferConsole::default();
         let fs = MemoryFileSystem::default();
 
-        let (_, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["format", "--unknown", "file.js"].as_slice()),
-        );
+        let (_, result) = run_cli(fs, &mut console, &["format", "--unknown", "file.js"]);
 
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
@@ -78,7 +68,7 @@ mod main {
         let mut console = BufferConsole::default();
         let fs = MemoryFileSystem::default();
 
-        let (_, result) = run_cli(fs, &mut console, Args::from(["format"].as_slice()));
+        let (_, result) = run_cli(fs, &mut console, &["format"]);
 
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
@@ -88,11 +78,7 @@ mod main {
         let mut console = BufferConsole::default();
         let fs = MemoryFileSystem::default();
 
-        let (_, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["format", "--write"].as_slice()),
-        );
+        let (_, result) = run_cli(fs, &mut console, &["format", "--write"]);
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
 
@@ -101,11 +87,7 @@ mod main {
         let mut console = BufferConsole::default();
         let fs = MemoryFileSystem::default();
 
-        let (_, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["check", "--max-diagnostics=foo"].as_slice()),
-        );
+        let (_, result) = run_cli(fs, &mut console, &["check", "--max-diagnostics=foo"]);
 
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
@@ -115,18 +97,14 @@ mod main {
         let mut console = BufferConsole::default();
         let fs = MemoryFileSystem::default();
 
-        let (_, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["check", "--max-diagnostics=500"].as_slice()),
-        );
+        let (_, result) = run_cli(fs, &mut console, &["check", "--max-diagnostics=500"]);
 
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
     //
     // #[test]
     // fn no_colors() {
-    //     let mut args = Args::from(["--colors=off"]);
+    //     let mut args = ["--colors=off"]);
     //     let result = color_from_arguments(&mut args);
     //
     //     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -134,7 +112,7 @@ mod main {
     //
     // #[test]
     // fn force_colors() {
-    //     let mut args = Args::from(["--colors=force"]);
+    //     let mut args = ["--colors=force"]);
     //     let result = color_from_arguments(&mut args);
     //
     //     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -142,7 +120,7 @@ mod main {
     //
     // #[test]
     // fn invalid_colors() {
-    //     let mut args = Args::from(["--colors=other"]);
+    //     let mut args = ["--colors=other"]);
     //     let result = color_from_arguments(&mut args);
     //     assert!(result.is_err(), "run_cli returned {result:?}");
     // }
@@ -157,7 +135,7 @@ mod configuration {
     use crate::snap_test::SnapshotPayload;
     use biome_console::BufferConsole;
     use biome_fs::MemoryFileSystem;
-    use bpaf::Args;
+
     use camino::Utf8Path;
 
     #[test]
@@ -167,11 +145,7 @@ mod configuration {
         let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_ALL_FIELDS.as_bytes());
 
-        let (fs, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["format", "file.js"].as_slice()),
-        );
+        let (fs, result) = run_cli(fs, &mut console, &["format", "file.js"]);
 
         assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -192,11 +166,7 @@ mod configuration {
         let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_BAD_LINE_WIDTH.as_bytes());
 
-        let (fs, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["format", "file.js"].as_slice()),
-        );
+        let (fs, result) = run_cli(fs, &mut console, &["format", "file.js"]);
 
         assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -217,11 +187,7 @@ mod configuration {
         let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_LINTER_WRONG_RULE.as_bytes());
 
-        let (fs, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["check", "file.js"].as_slice()),
-        );
+        let (fs, result) = run_cli(fs, &mut console, &["check", "file.js"]);
 
         assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -242,11 +208,7 @@ mod configuration {
         let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_INCORRECT_GLOBALS.as_bytes());
 
-        let (fs, result) = run_cli(
-            fs,
-            &mut console,
-            Args::from(["check", "file.js"].as_slice()),
-        );
+        let (fs, result) = run_cli(fs, &mut console, &["check", "file.js"]);
 
         assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -270,7 +232,7 @@ mod configuration {
         );
         fs.insert(Utf8Path::new("file.js").into(), UNFORMATTED.as_bytes());
 
-        let (_, result) = run_cli(fs, &mut console, Args::from(&["check", "file.js"]));
+        let (_, result) = run_cli(fs, &mut console, &["check", "file.js"]);
 
         assert!(result.is_err(), "run_cli returned {result:?}");
     }
@@ -313,7 +275,7 @@ mod configuration {
                 .as_bytes(),
         );
 
-        let (fs, result) = run_cli(fs, &mut console, Args::from(&["lint", "tests/test.js"]));
+        let (fs, result) = run_cli(fs, &mut console, &["lint", "tests/test.js"]);
 
         assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -332,7 +294,7 @@ mod configuration {
 pub(crate) fn run_cli(
     fs: MemoryFileSystem,
     console: &mut dyn Console,
-    args: bpaf::Args,
+    args: &[&str],
 ) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
     let files = fs.files.clone();
 
@@ -351,7 +313,7 @@ pub(crate) fn run_cli(
 pub(crate) fn run_cli_with_dyn_fs(
     fs: Box<dyn FsWithResolverProxy>,
     console: &mut dyn Console,
-    args: bpaf::Args,
+    args: &[&str],
 ) -> Result<(), CliDiagnostic> {
     use biome_cli::SocketTransport;
     use biome_lsp::ServerFactory;
@@ -379,16 +341,16 @@ pub(crate) fn run_cli_with_dyn_fs(
     let app = App::new(console, WorkspaceRef::Owned(workspace));
 
     let mut session = CliSession { app };
-    let command = biome_command().run_inner(args);
-    match command {
-        Ok(command) => session.run(command),
+    let cli = BiomeCli::try_parse_from(args);
+    match cli {
+        Ok(cli) => session.run(cli),
         Err(failure) => {
-            if let ParseFailure::Stdout(help, _) = &failure {
+            if let clap::error::ErrorKind::DisplayHelp = failure.kind() {
                 let console = &mut session.app.console;
-                console.log(markup! {{help.to_string()}});
+                console.log(markup! {{failure.to_string()}});
                 Ok(())
             } else {
-                Err(CliDiagnostic::parse_error_bpaf(failure))
+                Err(CliDiagnostic::parse_error_clap(failure))
             }
         }
     }
@@ -399,7 +361,7 @@ pub(crate) fn run_cli_with_dyn_fs(
 pub(crate) fn run_cli_with_server_workspace(
     fs: MemoryFileSystem,
     console: &mut dyn Console,
-    args: bpaf::Args,
+    args: &[&str],
 ) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
     use biome_service::{WorkspaceRef, workspace};
 
@@ -409,16 +371,16 @@ pub(crate) fn run_cli_with_server_workspace(
     let app = App::new(console, WorkspaceRef::Owned(workspace));
 
     let mut session = CliSession { app };
-    let command = biome_command().run_inner(args);
-    let result = match command {
-        Ok(command) => session.run(command),
+    let cli = BiomeCli::try_parse_from(args);
+    let result = match cli {
+        Ok(cli) => session.run(cli),
         Err(failure) => {
-            if let ParseFailure::Stdout(help, _) = &failure {
+            if let clap::error::ErrorKind::DisplayHelp = failure.kind() {
                 let console = &mut session.app.console;
-                console.log(markup! {{help.to_string()}});
+                console.log(markup! {{failure.to_string()}});
                 Ok(())
             } else {
-                Err(CliDiagnostic::parse_error_bpaf(failure))
+                Err(CliDiagnostic::parse_error_clap(failure))
             }
         }
     };

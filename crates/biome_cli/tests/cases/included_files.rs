@@ -2,7 +2,6 @@ use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_content
 use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::BufferConsole;
 use biome_fs::{MemoryFileSystem, TemporaryFs};
-use bpaf::Args;
 use camino::Utf8Path;
 
 const UNFORMATTED: &str = "  statement(  )  ";
@@ -37,7 +36,7 @@ fn does_handle_only_included_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -74,7 +73,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -111,7 +110,7 @@ fn does_not_handle_included_files_if_overridden_by_forced_ignore() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -148,7 +147,7 @@ fn does_not_handle_files_inside_force_ignored_folders() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", root_a.as_str(), nested_a.as_str()].as_slice()),
+        &["format", "--write", root_a.as_str(), nested_a.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -188,7 +187,7 @@ fn errors_on_ignored_nested_biome_json() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format", fs.cli_path()].as_slice()),
+        &["format", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -224,7 +223,7 @@ fn can_force_ignore_biome_json() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format", fs.cli_path()].as_slice()),
+        &["format", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -260,7 +259,7 @@ fn does_not_handle_files_in_ignored_folder() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -296,7 +295,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_formatter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -335,7 +334,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_linter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["lint", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -377,7 +376,7 @@ fn does_not_handle_included_files_if_overridden_by_organize_imports() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["check", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

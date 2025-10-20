@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const VUE_IMPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script>
@@ -96,7 +95,7 @@ fn format_vue_implicit_js_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", vue_file_path.as_str()].as_slice()),
+        &["format", vue_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -124,7 +123,7 @@ fn format_vue_implicit_js_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
+        &["format", "--write", vue_file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -152,7 +151,7 @@ fn format_vue_explicit_js_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", vue_file_path.as_str()].as_slice()),
+        &["format", vue_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -180,7 +179,7 @@ fn format_vue_explicit_js_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
+        &["format", "--write", vue_file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -205,7 +204,7 @@ fn format_empty_vue_js_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
+        &["format", "--write", vue_file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -230,7 +229,7 @@ fn format_vue_ts_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", vue_file_path.as_str()].as_slice()),
+        &["format", vue_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -255,7 +254,7 @@ fn format_vue_ts_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
+        &["format", "--write", vue_file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -280,7 +279,7 @@ fn format_empty_vue_ts_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
+        &["format", "--write", vue_file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -308,7 +307,7 @@ fn format_vue_carriage_return_line_feed_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", vue_file_path.as_str()].as_slice()),
+        &["format", vue_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -336,7 +335,7 @@ fn format_vue_generic_component_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", vue_file_path.as_str()].as_slice()),
+        &["format", vue_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -361,7 +360,7 @@ fn lint_vue_js_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", vue_file_path.as_str()].as_slice()),
+        &["lint", vue_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -386,7 +385,7 @@ fn lint_vue_ts_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", vue_file_path.as_str()].as_slice()),
+        &["lint", vue_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -411,15 +410,12 @@ fn sorts_imports_check() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 vue_file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -444,16 +440,13 @@ fn sorts_imports_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 "--write",
                 vue_file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -501,7 +494,7 @@ schema + sure()
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+        &["check", "--write", "--unsafe", astro_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -554,7 +547,7 @@ const props: Props = { title: "Hello" };
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+        &["check", "--write", "--unsafe", astro_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -578,7 +571,7 @@ fn format_stdin_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--stdin-file-path", "file.vue"].as_slice()),
+        &["format", "--stdin-file-path", "file.vue"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -602,7 +595,7 @@ fn format_stdin_write_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", "--stdin-file-path", "file.vue"].as_slice()),
+        &["format", "--write", "--stdin-file-path", "file.vue"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -626,7 +619,7 @@ fn lint_stdin_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--stdin-file-path", "file.svelte"].as_slice()),
+        &["lint", "--stdin-file-path", "file.svelte"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -650,7 +643,7 @@ fn lint_stdin_write_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--stdin-file-path", "file.svelte"].as_slice()),
+        &["lint", "--write", "--stdin-file-path", "file.svelte"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -674,16 +667,13 @@ fn lint_stdin_write_unsafe_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "lint",
                 "--write",
                 "--unsafe",
                 "--stdin-file-path",
                 "file.svelte",
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -707,7 +697,7 @@ fn check_stdin_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--stdin-file-path", "file.vue"].as_slice()),
+        &["check", "--stdin-file-path", "file.vue"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -731,7 +721,7 @@ fn check_stdin_write_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", "--stdin-file-path", "file.vue"].as_slice()),
+        &["check", "--write", "--stdin-file-path", "file.vue"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -755,16 +745,13 @@ fn check_stdin_write_unsafe_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--write",
                 "--unsafe",
                 "--stdin-file-path",
                 "file.vue",
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -789,7 +776,7 @@ fn vue_compiler_macros_as_globals() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", vue_file_path.as_str()].as_slice()),
+        &["lint", vue_file_path.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

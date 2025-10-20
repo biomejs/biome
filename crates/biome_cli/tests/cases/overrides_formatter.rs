@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const UNFORMATTED: &str = "  statement(  )  ";
@@ -54,7 +53,7 @@ fn does_handle_included_file_and_disable_formatter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -95,7 +94,7 @@ fn does_include_file_with_different_formatting() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -139,7 +138,7 @@ fn does_include_file_with_different_formatting_and_all_of_them() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -183,7 +182,7 @@ fn does_include_file_with_different_overrides() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -245,15 +244,12 @@ fn complex_enable_disable_overrides() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "format",
                 "--write",
                 formatted.as_str(),
                 unformatted.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_file_contents(&fs, formatted, FORMATTED_LINE_WIDTH_OVERRIDDEN);
@@ -297,16 +293,13 @@ fn does_include_file_with_different_languages() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "format",
                 "--write",
                 test.as_str(),
                 test2.as_str(),
                 test_css.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -368,17 +361,14 @@ fn does_include_file_with_different_languages_and_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "format",
                 "--write",
                 test.as_str(),
                 test2.as_str(),
                 json_file.as_str(),
                 css_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -424,7 +414,7 @@ fn does_not_change_formatting_settings() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -468,7 +458,7 @@ fn does_not_change_formatting_language_settings() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -512,7 +502,7 @@ fn does_not_change_formatting_language_settings_2() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
+        &["format", "--write", test.as_str(), test2.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -555,7 +545,7 @@ fn does_not_conceal_previous_overrides() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", test.as_str(), test2.as_str()].as_slice()),
+        &["format", test.as_str(), test2.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -594,7 +584,7 @@ fn takes_last_formatter_enabled_into_account() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", test.as_str()].as_slice()),
+        &["format", test.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -646,7 +636,7 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", other_json.as_str(), tsconfig.as_str()].as_slice()),
+        &["check", other_json.as_str(), tsconfig.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -714,7 +704,7 @@ fn allow_trailing_commas_on_well_known_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", other_json.as_str(), tsconfig.as_str(), ".vscode/"].as_slice()),
+        &["check", other_json.as_str(), tsconfig.as_str(), ".vscode/"],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -762,7 +752,7 @@ fn disallow_comments_on_well_known_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", tsconfig.as_str()].as_slice()),
+        &["check", tsconfig.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -799,7 +789,7 @@ fn overrides_default_formatter_for_package_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        &["format", file_path.as_os_str().to_str().unwrap()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -846,7 +836,7 @@ fn overrides_grit_formatting_options() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", js_file.as_str(), grit_file.as_str()].as_slice()),
+        &["format", js_file.as_str(), grit_file.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -940,15 +930,12 @@ function MyComponent() {return <><div autoFocus data-attribute="test">no self cl
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "format",
                 "--write",
                 base_js_fle.as_str(),
                 overrides_js_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_file_contents(
@@ -1082,15 +1069,12 @@ fn overrides_json_formatting_options() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "format",
                 "--write",
                 base_json_file.as_str(),
                 overrides_json_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_file_contents(

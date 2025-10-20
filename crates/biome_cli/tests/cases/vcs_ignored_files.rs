@@ -2,7 +2,6 @@ use crate::run_cli_with_dyn_fs;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::TemporaryFs;
-use bpaf::Args;
 
 const UNFORMATTED: &str = "  statement(  )  ";
 
@@ -46,7 +45,7 @@ fn include_vcs_ignore_cascade() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format", fs.cli_path(), "--write"].as_slice()),
+        &["format", fs.cli_path(), "--write"],
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -84,7 +83,7 @@ fn ignore_vcs_os_independent_parse() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["check", "--write", fs.cli_path()].as_slice()),
+        &["check", "--write", fs.cli_path()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -122,17 +121,14 @@ file2.js
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(
-            [
+        &[
                 "lint",
                 "--vcs-enabled=true",
                 "--vcs-client-kind=git",
                 "--vcs-use-ignore-file=true",
                 "--vcs-root=.",
                 fs.cli_path(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -165,8 +161,7 @@ fn ignores_file_inside_directory() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--vcs-enabled=true",
                 "--vcs-client-kind=git",
@@ -175,9 +170,7 @@ fn ignores_file_inside_directory() {
                 "--write",
                 "--unsafe",
                 fs.cli_path(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -219,7 +212,7 @@ fn use_root_gitignore_when_running_from_subdirectory() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format"].as_slice()),
+        &["format"],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -250,7 +243,7 @@ fn should_fail_when_ignore_file_is_absent() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format"].as_slice()),
+        &["format"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -285,7 +278,7 @@ fn should_ignore_absolute_paths_in_ignore_file_with_glob() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format", out_path.as_str()].as_slice()),
+        &["format", out_path.as_str()],
     );
 
     // No files processed, which is what we want

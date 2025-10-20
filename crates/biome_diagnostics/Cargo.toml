@@ -34,7 +34,7 @@ biome_diagnostics_macros     = { workspace = true }
 biome_rowan                  = { workspace = true }
 biome_text_edit              = { workspace = true, features = ["serde"] }
 biome_text_size              = { workspace = true, features = ["serde"] }
-bpaf                         = { workspace = true, optional = true }
+clap                         = { workspace = true, optional = true }
 camino                       = { workspace = true, optional = true }
 enumflags2                   = { workspace = true, features = ["serde"] }
 schemars                     = { workspace = true, optional = true }
@@ -45,7 +45,7 @@ terminal_size                = { workspace = true }
 unicode-width                = { workspace = true }
 
 [features]
-bpaf   = ["dep:bpaf"]
+clap   = ["dep:clap"]
 camino = ["dep:camino"]
 schema = ["dep:schemars", "biome_text_edit/schema", "biome_diagnostics_categories/schema", "biome_console/schema"]
 std    = []

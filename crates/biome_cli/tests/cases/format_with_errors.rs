@@ -2,7 +2,6 @@ use crate::snap_test::SnapshotPayload;
 use crate::{assert_cli_snapshot, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -17,7 +16,7 @@ fn check_format_with_errors_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--format-with-errors=true", file_path.as_str()].as_slice()),
+        &["check", "--format-with-errors=true", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -43,7 +42,7 @@ fn check_format_with_errors_false() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--format-with-errors=false", file_path.as_str()].as_slice()),
+        &["check", "--format-with-errors=false", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -69,7 +68,7 @@ fn ci_format_with_errors_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--format-with-errors=true", file_path.as_str()].as_slice()),
+        &["ci", "--format-with-errors=true", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -95,7 +94,7 @@ fn ci_format_with_errors_false() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--format-with-errors=false", file_path.as_str()].as_slice()),
+        &["ci", "--format-with-errors=false", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -121,7 +120,7 @@ fn format_format_with_errors_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--format-with-errors=true", file_path.as_str()].as_slice()),
+        &["format", "--format-with-errors=true", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -147,7 +146,7 @@ fn format_format_with_errors_false() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--format-with-errors=false", file_path.as_str()].as_slice()),
+        &["format", "--format-with-errors=false", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -184,7 +183,7 @@ fn check_format_with_errors_overrides_config() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--format-with-errors=true", file_path.as_str()].as_slice()),
+        &["check", "--format-with-errors=true", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -221,7 +220,7 @@ fn check_format_with_errors_respects_config_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_str()].as_slice()),
+        &["check", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -258,7 +257,7 @@ fn check_format_with_errors_respects_config_false() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_str()].as_slice()),
+        &["check", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

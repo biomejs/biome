@@ -1,4 +1,3 @@
-use bpaf::Args;
 
 use crate::snap_test::SnapshotPayload;
 use crate::{assert_cli_snapshot, run_cli};
@@ -13,7 +12,7 @@ fn explain_help() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["explain", "--help"].as_slice()),
+        &["explain", "--help"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -35,7 +34,7 @@ fn explain_valid_rule() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["explain", "noBlankTarget"].as_slice()),
+        &["explain", "noBlankTarget"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -57,7 +56,7 @@ fn explain_valid_rule_domain_rule() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["explain", "noFocusedTests"].as_slice()),
+        &["explain", "noFocusedTests"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -79,7 +78,7 @@ fn explain_valid_rule_multiple_domains() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["explain", "useHookAtTopLevel"].as_slice()),
+        &["explain", "useHookAtTopLevel"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -101,7 +100,7 @@ fn explain_not_found() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["explain", "dontExists"].as_slice()),
+        &["explain", "dontExists"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -123,7 +122,7 @@ fn explain_logs() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["explain", "daemon-logs"].as_slice()),
+        &["explain", "daemon-logs"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

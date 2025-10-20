@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -45,7 +44,7 @@ fn migrate_eslintrcjson() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -98,7 +97,7 @@ fn migrate_eslintrc() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -151,7 +150,7 @@ fn migrate_eslintrcjson_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint", "--write"].as_slice()),
+        &["migrate", "eslint", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -204,7 +203,7 @@ fn migrate_eslintrcjson_fix() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint", "--fix"].as_slice()),
+        &["migrate", "eslint", "--fix"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -230,7 +229,7 @@ fn migrate_eslintrcjson_override_existing_config() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -256,7 +255,7 @@ fn migrate_eslintrcjson_exclude_inspired() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -282,7 +281,7 @@ fn migrate_eslintrcjson_include_inspired() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint", "--include-inspired"].as_slice()),
+        &["migrate", "eslint", "--include-inspired"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -384,7 +383,7 @@ fn migrate_eslintrcjson_rule_options() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint", "--include-inspired"].as_slice()),
+        &["migrate", "eslint", "--include-inspired"],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -410,7 +409,7 @@ fn migrate_eslintrcjson_empty() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -434,7 +433,7 @@ fn migrate_eslintrcjson_missing_biomejson() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -460,7 +459,7 @@ fn migrate_eslintrcyaml_unsupported() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -495,7 +494,7 @@ fn migrate_eslint_config_packagejson() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -524,7 +523,7 @@ fn migrate_no_eslint_config_packagejson() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -561,7 +560,7 @@ test/main.js
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -595,7 +594,7 @@ fn migrate_eslintignore_and_ignore_patterns() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -629,7 +628,7 @@ a/**
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -662,7 +661,7 @@ fn migrate_eslintrcjson_extended_rules() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -701,7 +700,7 @@ fn migrate_merge_with_overrides() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "eslint"].as_slice()),
+        &["migrate", "eslint"],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

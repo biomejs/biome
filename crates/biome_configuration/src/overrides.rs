@@ -13,7 +13,7 @@ use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
     LineEnding, LineWidth,
 };
-use bpaf::Bpaf;
+use clap::Args;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
@@ -109,60 +109,60 @@ impl schemars::JsonSchema for OverrideGlobs {
     }
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Args, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideFormatterConfiguration {
     // if `false`, it disables the feature. `true` by default
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
+    #[clap(skip)]
     pub enabled: Option<FormatterEnabled>,
 
     /// Stores whether formatting should be allowed to proceed if a given file
     /// has syntax errors
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
+    #[clap(skip)]
     pub format_with_errors: Option<FormatWithErrorsEnabled>,
 
     /// The indent style.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("indent-style"), argument("tab|space"))]
+    #[arg(long = "indent-style", value_name = "tab|space")]
     pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
     #[serde(skip_serializing_if = "Option::is_none")]
     #[deserializable(deprecated(use_instead = "formatter.indentWidth"))]
-    #[bpaf(long("indent-size"), argument("NUMBER"))]
+    #[arg(long = "indent-size", value_name = "NUMBER")]
     pub indent_size: Option<IndentWidth>,
 
     /// The size of the indentation, 2 by default
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("indent-width"), argument("NUMBER"))]
+    #[arg(long = "indent-width", value_name = "NUMBER")]
     pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("line-ending"), argument("lf|crlf|cr|auto"))]
+    #[arg(long = "line-ending", value_name = "lf|crlf|cr|auto")]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line. Defaults to 80.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("line-width"), argument("NUMBER"))]
+    #[arg(long = "line-width", value_name = "NUMBER")]
     pub line_width: Option<LineWidth>,
 
     /// The attribute position style.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("attribute-position"), argument("multiline|auto"))]
+    #[arg(long = "attribute-position", value_name = "multiline|auto")]
     pub attribute_position: Option<AttributePosition>,
 
     /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("bracket-same-line"), argument("true|false"))]
+    #[arg(long = "bracket-same-line", value_name = "true|false")]
     pub bracket_same_line: Option<BracketSameLine>,
 
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("bracket-spacing"), argument("true|false"))]
+    #[arg(long = "bracket-spacing", value_name = "true|false")]
     pub bracket_spacing: Option<BracketSpacing>,
 
     /// Whether to expand arrays and objects on multiple lines.
@@ -172,27 +172,27 @@ pub struct OverrideFormatterConfiguration {
     /// When set to `never`, these literals are formatted on a single line if it fits in the line.
     /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("object-wrap"), argument("auto|always|never"))]
+    #[arg(long = "object-wrap", value_name = "auto|always|never")]
     pub expand: Option<Expand>,
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Args, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideLinterConfiguration {
     /// if `false`, it disables the feature and the linter won't be executed. `true` by default
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
+    #[clap(skip)]
     pub enabled: Option<LinterEnabled>,
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(Default::default()), hide)]
+    #[clap(skip)]
     pub rules: Option<Rules>,
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(Default::default()), optional, hide)]
+    #[clap(skip)]
     pub domains: Option<RuleDomains>,
 }
 
@@ -205,17 +205,17 @@ pub struct OverrideFilesConfiguration {
     pub max_size: Option<MaxSize>,
 }
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Args, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideAssistConfiguration {
     /// if `false`, it disables the feature and the assist won't be executed. `true` by default
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
+    #[clap(skip)]
     pub enabled: Option<AssistEnabled>,
 
     /// List of actions
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(crate::analyzer::assist::Actions::default()), optional, hide)]
+    #[clap(skip)]
     pub actions: Option<crate::analyzer::assist::Actions>,
 }

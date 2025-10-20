@@ -4,7 +4,6 @@ use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::BufferConsole;
 use biome_fs::{MemoryFileSystem, TemporaryFs};
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -144,7 +143,7 @@ fn should_successfully_migrate_knip() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "--write"].as_slice()),
+        &["migrate", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -229,7 +228,7 @@ fn should_successfully_migrate_ariakit() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "--write"].as_slice()),
+        &["migrate", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -450,7 +449,7 @@ fn should_successfully_migrate_sentry() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "--write"].as_slice()),
+        &["migrate", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -521,7 +520,7 @@ fn should_migrate_issue_5465() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "--write"].as_slice()),
+        &["migrate", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -591,7 +590,7 @@ fn should_migrate_aws_config() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "--write"].as_slice()),
+        &["migrate", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -625,7 +624,7 @@ fn should_migrate_nested_config() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["migrate"].as_slice()),
+        &["migrate"],
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 

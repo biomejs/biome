@@ -1,6 +1,5 @@
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 use crate::{
@@ -29,15 +28,12 @@ fn search_css_pattern() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "search",
                 "--language=css",
                 "`color: green`",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -62,7 +58,7 @@ fn search_css_pattern_shorthand() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["search", "-lcss", "`color: green`", file_path.as_str()].as_slice()),
+        &["search", "-lcss", "`color: green`", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -87,7 +83,7 @@ fn search_js_pattern() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["search", "`\"foo\"`", file_path.as_str()].as_slice()),
+        &["search", "`\"foo\"`", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -114,15 +110,12 @@ fn search_js_pattern_skips_css_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "search",
                 "`\"foo\"`",
                 js_file_path.as_str(),
                 css_file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -148,16 +141,13 @@ fn search_css_pattern_skips_js_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "search",
                 "--language=css",
                 "`color: green`",
                 js_file_path.as_str(),
                 css_file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

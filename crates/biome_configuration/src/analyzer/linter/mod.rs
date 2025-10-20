@@ -3,7 +3,7 @@ mod rules;
 use crate::bool::Bool;
 use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
-use bpaf::Bpaf;
+use clap::Args;
 pub use rules::*;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -12,29 +12,29 @@ use std::ops::Deref;
 pub type LinterEnabled = Bool<true>;
 
 #[derive(
-    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
+    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Args, Deserializable, Merge,
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct LinterConfiguration {
     /// if `false`, it disables the feature and the linter won't be executed. `true` by default
-    #[bpaf(hide)]
+    // #[arg(long = "linter-enabled", value_name = "true|false")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<LinterEnabled>,
 
     /// List of rules
-    #[bpaf(pure(Default::default()), optional, hide)]
+    #[clap(skip)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rules: Option<Rules>,
 
     /// A list of glob patterns. The analyzer will handle only those files/folders that will
     /// match these patterns.
-    #[bpaf(pure(Default::default()), hide)]
+    #[clap(skip)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
 
     /// An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
-    #[bpaf(hide, pure(Default::default()))]
+    #[clap(skip)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub domains: Option<RuleDomains>,
 }

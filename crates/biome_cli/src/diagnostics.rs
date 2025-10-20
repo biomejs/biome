@@ -2,10 +2,10 @@ use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{
-    Advices, Category, Diagnostic, Error, LogCategory, MessageAndDescription, Severity, Visit,
-    category,
+    Advices, Category, ClapError, Diagnostic, Error, LogCategory, MessageAndDescription, Severity,
+    Visit, category,
 };
-use biome_diagnostics::{BpafError, IoError, SerdeJsonError};
+use biome_diagnostics::{IoError, SerdeJsonError};
 use biome_service::WorkspaceError;
 use std::process::{ExitCode, Termination};
 use std::{env::current_exe, fmt::Debug};
@@ -307,9 +307,9 @@ impl CliDiagnostic {
     }
 
     /// To throw when there's been an error while parsing an argument
-    pub fn parse_error_bpaf(source: bpaf::ParseFailure) -> Self {
+    pub fn parse_error_clap(source: clap::Error) -> Self {
         Self::ParseError(ParseDiagnostic {
-            source: Some(Error::from(BpafError::from(source))),
+            source: Some(Error::from(ClapError::from(source))),
             message: MessageAndDescription::from("Failed to parse CLI arguments.".to_string()),
         })
     }

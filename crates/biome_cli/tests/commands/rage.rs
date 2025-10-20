@@ -3,7 +3,6 @@ use crate::snap_test::{CliSnapshot, SnapshotPayload, assert_cli_snapshot};
 use biome_cli::CliDiagnostic;
 use biome_console::{BufferConsole, Console};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::{Mutex, MutexGuard};
 use std::{env, fs};
@@ -13,7 +12,7 @@ fn rage_help() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["rage", "--help"].as_slice()));
+    let (fs, result) = run_cli(fs, &mut console, &["rage", "--help"]);
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -31,7 +30,7 @@ fn ok() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+    let (fs, result) = run_rage(fs, &mut console, &["rage"]);
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -57,7 +56,7 @@ fn with_configuration() {
 }"#,
     );
 
-    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+    let (fs, result) = run_rage(fs, &mut console, &["rage"]);
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -75,7 +74,7 @@ fn with_no_configuration() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+    let (fs, result) = run_rage(fs, &mut console, &["rage"]);
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -102,7 +101,7 @@ fn with_jsonc_configuration() {
 }"#,
     );
 
-    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+    let (fs, result) = run_rage(fs, &mut console, &["rage"]);
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -128,7 +127,7 @@ fn with_malformed_configuration() {
 }"#,
     );
 
-    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+    let (fs, result) = run_rage(fs, &mut console, &["rage"]);
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -194,7 +193,7 @@ Not most recent log file
         run_cli(
             fs,
             &mut console,
-            Args::from(["rage", "--daemon-logs"].as_slice()),
+            &["rage", "--daemon-logs"],
         )
     };
 
@@ -262,7 +261,7 @@ fn with_formatter_configuration() {
     let (fs, result) = run_rage(
         fs,
         &mut console,
-        Args::from(["rage", "--formatter"].as_slice()),
+        &["rage", "--formatter"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -310,7 +309,7 @@ fn with_linter_configuration() {
     let (fs, result) = run_rage(
         fs,
         &mut console,
-        Args::from(["rage", "--linter"].as_slice()),
+        &["rage", "--linter"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -328,7 +327,7 @@ fn with_linter_configuration() {
 fn run_rage(
     fs: MemoryFileSystem,
     console: &mut dyn Console,
-    args: Args,
+    args: &[&str],
 ) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
     let _test_dir = TestLogDir::new("biome-rage-test");
     run_cli(fs, console, args)

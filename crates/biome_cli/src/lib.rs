@@ -30,7 +30,7 @@ use crate::commands::ci::CiCommandPayload;
 use crate::commands::format::FormatCommandPayload;
 use crate::commands::lint::LintCommandPayload;
 use crate::commands::migrate::MigrateCommandPayload;
-pub use crate::commands::{BiomeCommand, biome_command};
+pub use crate::commands::{BiomeCli, BiomeCommand};
 pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
 pub use diagnostics::CliDiagnostic;
 pub use execute::{Execution, TraversalMode, VcsTargeted, execute_mode};
@@ -64,12 +64,15 @@ impl<'app> CliSession<'app> {
     }
 
     /// Main function to run Biome CLI
-    pub fn run(self, command: BiomeCommand) -> Result<(), CliDiagnostic> {
-        match command {
-            BiomeCommand::Version(_) => commands::version::full_version(self),
-            BiomeCommand::Rage(_, daemon_logs, formatter, linter) => {
-                commands::rage::rage(self, daemon_logs, formatter, linter)
-            }
+    pub fn run(self, cli: BiomeCli) -> Result<(), CliDiagnostic> {
+        match cli.command {
+            BiomeCommand::Version { .. } => commands::version::full_version(self),
+            BiomeCommand::Rage {
+                daemon_logs,
+                formatter,
+                linter,
+                ..
+            } => commands::rage::rage(self, daemon_logs, formatter, linter),
             BiomeCommand::Clean => commands::clean::clean(self),
             BiomeCommand::Start {
                 log_path,
@@ -171,14 +174,11 @@ impl<'app> CliSession<'app> {
                 formatter_enabled,
                 assist_enabled,
                 enforce_assist,
-                configuration,
                 paths,
                 cli_options,
                 changed,
                 since,
-                format_with_errors,
-                css_parser,
-                json_parser,
+                // format_with_errors,
                 ..
             } => run_command(
                 self,
@@ -188,13 +188,13 @@ impl<'app> CliSession<'app> {
                     formatter_enabled,
                     assist_enabled,
                     enforce_assist,
-                    configuration,
+                    configuration: None,
                     paths,
                     changed,
                     since,
-                    format_with_errors,
-                    css_parser,
-                    json_parser,
+                    format_with_errors: None,
+                    css_parser: None,
+                    json_parser: None,
                 },
             ),
             BiomeCommand::Format {
@@ -240,7 +240,7 @@ impl<'app> CliSession<'app> {
                 },
             ),
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
-            BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
+            BiomeCommand::Init { jsonc } => commands::init::init(self, jsonc),
             BiomeCommand::LspProxy {
                 log_path,
                 log_prefix_name,

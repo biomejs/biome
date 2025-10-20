@@ -2,7 +2,6 @@ use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use crate::{UNFORMATTED, run_cli};
 use biome_console::{BufferConsole, LogLevel};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 
 const TEST_CONTENTS: &str = "debugger;";
@@ -37,7 +36,7 @@ fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--diagnostic-level=error", test.as_str()].as_slice()),
+        &["lint", "--diagnostic-level=error", test.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -79,7 +78,7 @@ fn max_diagnostics_no_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--max-diagnostics", "10", "src"].as_slice()),
+        &["ci", "--max-diagnostics", "10", "src"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -113,7 +112,7 @@ fn should_fail_when_max_diagnostics_is_zero() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--max-diagnostics", "0", "src"].as_slice()),
+        &["ci", "--max-diagnostics", "0", "src"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -147,7 +146,7 @@ fn max_diagnostics_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--max-diagnostics=10", "--verbose", "src"].as_slice()),
+        &["ci", "--max-diagnostics=10", "--verbose", "src"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -199,7 +198,7 @@ import { FC, memo, useCallback } from "react";
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--diagnostic-level=error", "src"].as_slice()),
+        &["check", "--diagnostic-level=error", "src"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -244,7 +243,7 @@ fn max_diagnostics_are_lifted() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--max-diagnostics", "none", file_path.as_str()].as_slice()),
+        &["ci", "--max-diagnostics", "none", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

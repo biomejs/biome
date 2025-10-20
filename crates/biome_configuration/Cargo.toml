@@ -31,8 +31,8 @@ biome_json_syntax        = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
 biome_rule_options       = { workspace = true }
-bpaf                     = { workspace = true }
 camino                   = { workspace = true }
+clap                     = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }

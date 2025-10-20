@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -22,7 +21,7 @@ fn prettier_migrate() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier"].as_slice()),
+        &["migrate", "prettier"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -53,7 +52,7 @@ fn prettier_migrate_end_of_line() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier"].as_slice()),
+        &["migrate", "prettier"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -95,7 +94,7 @@ generated/*.spec.js
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier"].as_slice()),
+        &["migrate", "prettier"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -126,7 +125,7 @@ fn prettier_migrate_jsonc() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier"].as_slice()),
+        &["migrate", "prettier"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -153,7 +152,7 @@ fn prettier_migrate_no_file() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier"].as_slice()),
+        &["migrate", "prettier"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -184,7 +183,7 @@ fn prettier_migrate_yml_file() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier"].as_slice()),
+        &["migrate", "prettier"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -215,7 +214,7 @@ fn prettier_migrate_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier", "--write"].as_slice()),
+        &["migrate", "prettier", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -246,7 +245,7 @@ fn prettier_migrate_fix() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier", "--fix"].as_slice()),
+        &["migrate", "prettier", "--fix"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -277,7 +276,7 @@ fn prettierjson_migrate_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier", "--write"].as_slice()),
+        &["migrate", "prettier", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -312,7 +311,7 @@ fn prettier_migrate_write_packagejson() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier", "--write"].as_slice()),
+        &["migrate", "prettier", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -354,7 +353,7 @@ generated/*.spec.js
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier", "--write"].as_slice()),
+        &["migrate", "prettier", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -385,7 +384,7 @@ fn prettier_migrate_write_biome_jsonc() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier", "--write"].as_slice()),
+        &["migrate", "prettier", "--write"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -427,7 +426,7 @@ fn prettier_migrate_overrides() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier"].as_slice()),
+        &["migrate", "prettier"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -463,7 +462,7 @@ fn prettier_migrate_override_with_bad_print_width() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier"].as_slice()),
+        &["migrate", "prettier"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -494,7 +493,7 @@ fn prettier_migrate_with_bad_top_level_print_width() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["migrate", "prettier"].as_slice()),
+        &["migrate", "prettier"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

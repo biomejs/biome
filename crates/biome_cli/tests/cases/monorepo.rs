@@ -2,7 +2,6 @@ use crate::run_cli_with_dyn_fs;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::TemporaryFs;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const ROOT: &str = r#"
@@ -29,7 +28,7 @@ fn should_fail_for_nested_roots() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format", fs.cli_path()].as_slice()),
+        &["format", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -92,7 +91,7 @@ fn should_format_nested_files_differently() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format", fs.cli_path()].as_slice()),
+        &["format", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -161,7 +160,7 @@ fn should_extend_from_the_root_config() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format", fs.cli_path()].as_slice()),
+        &["format", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -225,7 +224,7 @@ fn when_running_from_a_subdirectory_should_extend_from_the_root_config() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format", fs.cli_path()].as_slice()),
+        &["format", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -288,7 +287,7 @@ fn should_error_when_no_root_config_is_found() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["format", fs.cli_path()].as_slice()),
+        &["format", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -339,7 +338,7 @@ fn should_ignore_files_in_nested_projects() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["check", fs.cli_path()].as_slice()),
+        &["check", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -372,7 +371,7 @@ fn should_not_lint_when_root_is_disabled_but_nested_is_enabled() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", fs.cli_path()].as_slice()),
+        &["lint", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -424,7 +423,7 @@ fn should_find_settings_when_run_from_nested_dir() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", fs.cli_path()].as_slice()),
+        &["lint", fs.cli_path()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -473,7 +472,7 @@ fn should_find_settings_when_targeting_file_in_nested_dir() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", &format!("{}/packages/lib/file.js", fs.cli_path())].as_slice()),
+        &["lint", &format!("{}/packages/lib/file.js", fs.cli_path())],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -522,7 +521,7 @@ fn should_find_settings_when_targeting_nested_dir() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", &format!("{}/packages/lib", fs.cli_path())].as_slice()),
+        &["lint", &format!("{}/packages/lib", fs.cli_path())],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -571,7 +570,7 @@ fn should_find_settings_when_targeting_parent_of_nested_dir() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", &format!("{}/packages", fs.cli_path())].as_slice()),
+        &["lint", &format!("{}/packages", fs.cli_path())],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -622,7 +621,7 @@ fn should_ignore_nested_configuration_in_ignored_directory() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint"].as_slice()),
+        &["lint"],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -665,7 +664,7 @@ fn should_ignore_linter_nested_file() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint"].as_slice()),
+        &["lint"],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

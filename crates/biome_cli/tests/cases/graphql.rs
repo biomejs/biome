@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const UNFORMATTED: &str = r#"type Query {
@@ -31,7 +30,7 @@ fn format_graphql_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_str()].as_slice()),
+        &["format", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -58,7 +57,7 @@ fn format_and_write_graphql_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+        &["format", "--write", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -85,14 +84,11 @@ fn lint_single_rule() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "lint",
                 "--only=style/useDeprecatedReason",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

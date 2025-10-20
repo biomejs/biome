@@ -3,7 +3,6 @@ use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_content
 use crate::{UNFORMATTED, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 
 const CUSTOM_CONFIGURATION_BEFORE: &str = r#"function f() {
@@ -32,20 +31,17 @@ fn formatter_biome_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--line-width",
-                "10",
-                "--indent-style",
-                "space",
-                "--indent-width",
-                "8",
-                "--write",
-                file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+        &[
+            "format",
+            "--line-width",
+            "10",
+            "--indent-style",
+            "space",
+            "--indent-width",
+            "8",
+            "--write",
+            file_path.as_str(),
+        ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -87,7 +83,7 @@ fn linter_biome_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
+        &["lint", "--write", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -136,7 +132,7 @@ fn check_biome_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+        &["check", "--write", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -181,7 +177,7 @@ fn ci_biome_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", input_file.as_str()].as_slice()),
+        &["ci", input_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -222,7 +218,7 @@ fn biome_json_is_not_ignored() {
 
     fs.insert(input_file.into(), "  statement(  )  ".as_bytes());
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["ci", "./"].as_slice()));
+    let (fs, result) = run_cli(fs, &mut console, &["ci", "./"]);
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -258,7 +254,7 @@ fn always_disable_trailing_commas_biome_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", "."].as_slice()),
+        &["check", "--write", "."],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

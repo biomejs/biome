@@ -3,7 +3,6 @@ use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_cli::CliDiagnostic;
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const FORMATTED: &str = "statement();\n";
@@ -54,7 +53,7 @@ fn setup_test(
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from([cli_command, test_file.as_str()].as_slice()),
+        &[cli_command, test_file.as_str()],
     );
 
     (fs, console, result)

@@ -3,7 +3,6 @@ use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_formatter::LineWidth;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -30,7 +29,7 @@ fn extends_config_ok_formatter_no_linter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", test_file.as_str()].as_slice()),
+        &["check", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -89,7 +88,7 @@ fn extends_config_ok_from_npm_package() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", test_file.as_str()].as_slice()),
+        &["check", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -150,7 +149,7 @@ fn extends_config_ok_from_npm_package_with_author_field() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", test_file.as_str()].as_slice()),
+        &["check", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -213,7 +212,7 @@ fn extends_config_ok_from_npm_package_with_condition_names() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", test_file.as_str()].as_slice()),
+        &["check", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -260,7 +259,7 @@ fn extends_config_ok_linter_not_formatter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", test_file.as_str()].as_slice()),
+        &["check", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -298,7 +297,7 @@ fn extends_should_raise_an_error_for_unresolved_configuration() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", test_file.as_str()].as_slice()),
+        &["check", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -336,7 +335,7 @@ fn extends_should_raise_an_error_for_unresolved_configuration_and_show_verbose()
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--verbose", test_file.as_str()].as_slice()),
+        &["check", "--verbose", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -374,7 +373,7 @@ fn extends_resolves_when_using_config_path() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--config-path=config/", test_file.as_str()].as_slice()),
+        &["check", "--config-path=config/", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -414,7 +413,7 @@ fn applies_extended_values_in_current_config() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test_file.as_str()].as_slice()),
+        &["format", "--write", test_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -451,7 +450,7 @@ fn respects_unaffected_values_from_extended_config() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test_file.as_str()].as_slice()),
+        &["format", "--write", test_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -491,7 +490,7 @@ fn allows_reverting_fields_in_extended_config_to_default() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test_file.as_str()].as_slice()),
+        &["format", "--write", test_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -539,7 +538,7 @@ fn extends_config_merge_overrides() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", test_file.as_str()].as_slice()),
+        &["lint", test_file.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

@@ -6,7 +6,7 @@ version = "0.0.0"
 
 [dependencies]
 anyhow         = { workspace = true }
-bpaf           = { workspace = true, features = ["derive"] }
+clap           = { workspace = true }
 git2           = { version = "0.20.2", default-features = false }
 proc-macro2    = { workspace = true, features = ["span-locations"] }
 pulldown-cmark = { version = "0.13.0", default-features = false, optional = true }

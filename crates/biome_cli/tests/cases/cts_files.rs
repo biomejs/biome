@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -19,7 +18,7 @@ fn should_allow_using_export_statements() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_str()].as_slice()),
+        &["lint", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

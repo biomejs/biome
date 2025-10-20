@@ -4,7 +4,6 @@ use crate::run_cli_with_dyn_fs;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::TemporaryFs;
-use bpaf::Args;
 
 #[test]
 fn enables_react_rules_via_dependencies() {
@@ -35,7 +34,7 @@ function Component2() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", fs.cli_path()].as_slice()),
+        &["lint", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -79,7 +78,7 @@ describe("foo", () => {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", fs.cli_path()].as_slice()),
+        &["lint", fs.cli_path()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -136,7 +135,7 @@ function Component2() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", fs.cli_path()].as_slice()),
+        &["lint", fs.cli_path()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -183,7 +182,7 @@ export default IndexPage;
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", fs.cli_path()].as_slice()),
+        &["lint", fs.cli_path()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -237,7 +236,7 @@ function Component2() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", fs.cli_path()].as_slice()),
+        &["lint", fs.cli_path()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

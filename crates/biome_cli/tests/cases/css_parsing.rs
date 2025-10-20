@@ -2,7 +2,6 @@ use crate::snap_test::SnapshotPayload;
 use crate::{assert_cli_snapshot, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 // Tests for --css-parse-css-modules flag
@@ -22,7 +21,7 @@ fn check_css_parse_css_modules_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--css-parse-css-modules=true", file_path.as_str()].as_slice()),
+        &["check", "--css-parse-css-modules=true", file_path.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -49,7 +48,7 @@ fn check_css_parse_css_modules_false() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--css-parse-css-modules=false", file_path.as_str()].as_slice()),
+        &["check", "--css-parse-css-modules=false", file_path.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -76,7 +75,7 @@ fn format_css_parse_css_modules_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--css-parse-css-modules=true", file_path.as_str()].as_slice()),
+        &["format", "--css-parse-css-modules=true", file_path.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -103,7 +102,7 @@ fn lint_css_parse_css_modules_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--css-parse-css-modules=true", file_path.as_str()].as_slice()),
+        &["lint", "--css-parse-css-modules=true", file_path.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -132,14 +131,11 @@ fn check_css_parse_tailwind_directives_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--css-parse-tailwind-directives=true",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -166,14 +162,11 @@ fn check_css_parse_tailwind_directives_false() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--css-parse-tailwind-directives=false",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -200,14 +193,11 @@ fn format_css_parse_tailwind_directives_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "format",
                 "--css-parse-tailwind-directives=true",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -234,14 +224,11 @@ fn ci_css_parse_tailwind_directives_true() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "ci",
                 "--css-parse-tailwind-directives=true",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -271,15 +258,12 @@ fn check_combined_css_parser_flags() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--css-parse-css-modules=true",
                 "--css-parse-tailwind-directives=true",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -306,15 +290,12 @@ fn check_combined_format_with_errors_and_css_modules() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--format-with-errors=true",
                 "--css-parse-css-modules=true",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -356,7 +337,7 @@ fn check_css_parser_flags_override_config() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--css-parse-css-modules=true", file_path.as_str()].as_slice()),
+        &["check", "--css-parse-css-modules=true", file_path.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -396,7 +377,7 @@ fn check_css_parse_respects_config_css_modules() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_str()].as_slice()),
+        &["check", file_path.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -436,7 +417,7 @@ fn check_css_parse_respects_config_tailwind_directives() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_str()].as_slice()),
+        &["check", file_path.as_str()],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

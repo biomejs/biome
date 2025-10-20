@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -32,7 +31,7 @@ fn should_error_when_interpolation_is_disabled() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", html_file.as_str()].as_slice()),
+        &["format", html_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -77,7 +76,7 @@ fn should_not_error_when_interpolation_is_enabled() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", html_file.as_str()].as_slice()),
+        &["format", html_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -121,7 +120,7 @@ fn should_format_indent_embedded_languages() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", html_file.as_str()].as_slice()),
+        &["format", "--write", html_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -170,7 +169,7 @@ fn should_format_indent_embedded_languages_with_language_options() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", html_file.as_str()].as_slice()),
+        &["format", "--write", html_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -214,7 +213,7 @@ fn should_pull_diagnostics_from_embedded_languages_when_formatting() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", html_file.as_str()].as_slice()),
+        &["format", "--write", html_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -262,7 +261,7 @@ fn should_pull_diagnostics_from_embedded_languages_when_linting() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", html_file.as_str()].as_slice()),
+        &["lint", html_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -318,7 +317,7 @@ fn should_apply_fixes_to_embedded_languages() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", "--unsafe", html_file.as_str()].as_slice()),
+        &["check", "--write", "--unsafe", html_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -360,7 +359,7 @@ fn should_lint_a_html_file() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", html_file.as_str()].as_slice()),
+        &["lint", html_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

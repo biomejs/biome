@@ -9,7 +9,6 @@ use crate::{
 };
 use biome_console::{BufferConsole, MarkupBuf};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 
 const INCORRECT_CODE: &str = "let a = !b || !c";
@@ -35,7 +34,7 @@ fn ci_help() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["ci", "--help"].as_slice()));
+    let (fs, result) = run_cli(fs, &mut console, &["ci", "--help"]);
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -59,7 +58,7 @@ fn ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", file_path.as_str()].as_slice()),
+        &["ci", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -90,7 +89,7 @@ fn formatting_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", file_path.as_str()].as_slice()),
+        &["ci", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -115,7 +114,7 @@ fn ci_parse_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", file_path.as_str()].as_slice()),
+        &["ci", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -139,7 +138,7 @@ fn ci_lint_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", file_path.as_str()].as_slice()),
+        &["ci", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -170,7 +169,7 @@ fn ci_does_not_run_formatter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", input_file.as_str()].as_slice()),
+        &["ci", input_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -203,7 +202,7 @@ fn ci_does_not_run_formatter_biome_jsonc() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", input_file.as_str()].as_slice()),
+        &["ci", input_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -230,7 +229,7 @@ fn ci_does_not_run_formatter_via_cli() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--formatter-enabled=false", input_file.as_str()].as_slice()),
+        &["ci", "--formatter-enabled=false", input_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -262,7 +261,7 @@ fn ci_does_not_run_linter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", file_path.as_str()].as_slice()),
+        &["ci", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -289,7 +288,7 @@ fn ci_does_not_run_linter_via_cli() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--linter-enabled=false", file_path.as_str()].as_slice()),
+        &["ci", "--linter-enabled=false", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -320,7 +319,7 @@ import * as something from "../something";
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--assist-enabled=false", file_path.as_str()].as_slice()),
+        &["ci", "--assist-enabled=false", file_path.as_str()],
     );
 
     // assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -350,16 +349,13 @@ fn ci_errors_for_all_disabled_checks() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "ci",
                 "--linter-enabled=false",
                 "--formatter-enabled=false",
                 "--assist-enabled=false",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -386,7 +382,7 @@ fn file_too_large() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", file_path.as_str()].as_slice()),
+        &["ci", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -416,7 +412,7 @@ fn file_too_large_config_limit() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", file_path.as_str()].as_slice()),
+        &["ci", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -441,7 +437,7 @@ fn file_too_large_cli_limit() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--files-max-size=16", file_path.as_str()].as_slice()),
+        &["ci", "--files-max-size=16", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -466,7 +462,7 @@ fn files_max_size_parse_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--files-max-size=-1", file_path.as_str()].as_slice()),
+        &["ci", "--files-max-size=-1", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -494,7 +490,7 @@ fn ci_runs_linter_not_formatter_issue_3495() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", file_path.as_str()].as_slice()),
+        &["ci", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -518,7 +514,7 @@ fn max_diagnostics_default() {
         fs.insert(file_path, UNFORMATTED.as_bytes());
     }
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["ci", "src"].as_slice()));
+    let (fs, result) = run_cli(fs, &mut console, &["ci", "src"]);
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -573,7 +569,7 @@ fn max_diagnostics() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--max-diagnostics", "10", "src"].as_slice()),
+        &["ci", "--max-diagnostics", "10", "src"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -626,7 +622,7 @@ fn print_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--verbose", file_path.as_str()].as_slice()),
+        &["ci", "--verbose", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -682,7 +678,7 @@ something( )
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", file_path.as_str()].as_slice()),
+        &["ci", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -712,15 +708,12 @@ fn ignores_unknown_file() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "ci",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 "--files-ignore-unknown=true",
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -765,15 +758,12 @@ fn correctly_handles_ignored_and_not_ignored_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "ci",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 file_path3.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -793,7 +783,7 @@ fn doesnt_error_if_no_files_were_processed() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--no-errors-on-unmatched", "file.js"].as_slice()),
+        &["ci", "--no-errors-on-unmatched", "file.js"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -843,7 +833,7 @@ A = 0;
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--error-on-warnings", file_path.as_str()].as_slice()),
+        &["ci", "--error-on-warnings", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -865,7 +855,7 @@ fn does_formatting_error_without_file_paths() {
     let file_path = Utf8Path::new("ci.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
-    let (fs, result) = run_cli(fs, &mut console, Args::from(["ci", ""].as_slice()));
+    let (fs, result) = run_cli(fs, &mut console, &["ci", ""]);
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -890,7 +880,7 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--changed", "--since=main"].as_slice()),
+        &["check", "--changed", "--since=main"],
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
@@ -916,15 +906,12 @@ fn ci_skip_parse_errors() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "ci",
                 "--skip-parse-errors",
                 valid.as_str(),
                 invalid.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -953,7 +940,7 @@ fn ci_does_not_enable_assist() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--assist-enabled=false", file.as_str()].as_slice()),
+        &["ci", "--assist-enabled=false", file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

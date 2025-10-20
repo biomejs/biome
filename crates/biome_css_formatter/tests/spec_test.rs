@@ -34,7 +34,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
             configuration: Configuration {
                 css: Some(CssConfiguration {
                     formatter: Some(CssFormatterConfiguration {
-                        enabled: Some(true.into()),
+                        css_formatter_enabled: Some(true.into()),
                         ..Default::default()
                     }),
                     ..Default::default()

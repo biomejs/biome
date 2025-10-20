@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -35,7 +34,7 @@ fn assist_emit_diagnostic_but_doesnt_block() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--enforce-assist=false", file.as_str()].as_slice()),
+        &["check", "--enforce-assist=false", file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -79,7 +78,7 @@ fn assist_emit_diagnostic_and_blocks() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file.as_str()].as_slice()),
+        &["check", file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -123,7 +122,7 @@ fn assist_emit_diagnostic_and_blocks_ci() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", file.as_str()].as_slice()),
+        &["ci", file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -167,7 +166,7 @@ fn assist_writes() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file.as_str()].as_slice()),
+        &["check", "--write", file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

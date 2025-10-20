@@ -2,98 +2,89 @@ use crate::LoggingLevel;
 use crate::logging::LoggingKind;
 use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
-use bpaf::Bpaf;
 use camino::Utf8PathBuf;
+use clap::Args;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 /// Global options applied to all commands
-#[derive(Debug, Clone, Bpaf)]
+#[derive(Debug, Clone, Args)]
 pub struct CliOptions {
     /// Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
-    #[bpaf(long("colors"), argument("off|force"))]
+    #[arg(long, value_name = "off|force")]
     pub colors: Option<ColorsArg>,
 
     /// Connect to a running instance of the Biome daemon server.
-    #[bpaf(long("use-server"), switch, fallback(false))]
+    #[arg(long = "use-server", default_value_t = false)]
     pub use_server: bool,
 
     /// Print additional diagnostics, and some diagnostics show more information. Also, print out what files were processed and which ones were modified.
-    #[bpaf(long("verbose"), switch, fallback(false))]
+    #[arg(long, default_value_t = false)]
     pub verbose: bool,
 
     /// Set the file path to the configuration file, or the directory path to find `biome.json` or `biome.jsonc`.
     /// If used, it disables the default configuration file resolution.
-    #[bpaf(
-        long("config-path"),
-        env("BIOME_CONFIG_PATH"),
-        argument("PATH"),
-        optional
-    )]
+    #[arg(long = "config-path", env = "BIOME_CONFIG_PATH", value_name = "PATH")]
     pub config_path: Option<String>,
 
     /// Cap the amount of diagnostics displayed. When `none` is provided, the limit is lifted.
-    #[bpaf(
-        long("max-diagnostics"),
-        argument("none|<NUMBER>"),
-        fallback(MaxDiagnostics::default()),
-        display_fallback
+    #[arg(
+        long = "max-diagnostics",
+        value_name = "none|<NUMBER>",
+        default_value_t = MaxDiagnostics::default()
     )]
     pub max_diagnostics: MaxDiagnostics,
 
     /// Skip over files containing syntax errors instead of emitting an error diagnostic.
-    #[bpaf(long("skip-parse-errors"), switch)]
+    #[arg(long = "skip-parse-errors", default_value_t = false)]
     pub skip_parse_errors: bool,
 
     /// Silence errors that would be emitted in case no files were processed during the execution of the command.
-    #[bpaf(long("no-errors-on-unmatched"), switch)]
+    #[arg(long = "no-errors-on-unmatched", default_value_t = false)]
     pub no_errors_on_unmatched: bool,
 
     /// Tell Biome to exit with an error code if some diagnostics emit warnings.
-    #[bpaf(long("error-on-warnings"), switch)]
+    #[arg(long = "error-on-warnings", default_value_t = false)]
     pub error_on_warnings: bool,
 
     /// Allows to change how diagnostics and summary are reported.
-    #[bpaf(
-        long("reporter"),
-        argument("json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson"),
-        fallback(CliReporter::default())
+    #[arg(
+        long,
+        value_name = "json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson",
+        default_value_t = CliReporter::default()
     )]
     pub reporter: CliReporter,
 
     /// Optional path to redirect log messages to.
     ///
     /// If omitted, logs are printed to stdout.
-    #[bpaf(long("log-file"))]
+    #[arg(long = "log-file")]
     pub log_file: Option<String>,
 
     /// The level of logging. In order, from the most verbose to the least
     /// verbose: debug, info, warn, error.
     ///
     /// The value `none` won't show any logging.
-    #[bpaf(
-        long("log-level"),
-        argument("none|debug|info|warn|error"),
-        fallback(LoggingLevel::default()),
-        display_fallback
+    #[arg(
+        long = "log-level",
+        value_name = "none|debug|info|warn|error",
+        default_value_t = LoggingLevel::default()
     )]
     pub log_level: LoggingLevel,
 
     /// How the log should look like.
-    #[bpaf(
-        long("log-kind"),
-        argument("pretty|compact|json"),
-        fallback(LoggingKind::default()),
-        display_fallback
+    #[arg(
+        long = "log-kind",
+        value_name = "pretty|compact|json",
+        default_value_t = LoggingKind::default()
     )]
     pub log_kind: LoggingKind,
 
     /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
-    #[bpaf(
-        long("diagnostic-level"),
-        argument("info|warn|error"),
-        fallback(Severity::default()),
-        display_fallback
+    #[arg(
+        long = "diagnostic-level",
+        value_name = "info|warn|error",
+        default_value_t = Severity::default()
     )]
     pub diagnostic_level: Severity,
 }
@@ -206,7 +197,7 @@ impl Display for CliReporter {
     }
 }
 
-#[derive(Debug, Clone, Copy, Bpaf)]
+#[derive(Debug, Clone, Copy)]
 pub enum MaxDiagnostics {
     None,
     Limit(u32),

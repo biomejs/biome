@@ -2,7 +2,6 @@ use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use crate::{run_cli, run_cli_with_server_workspace};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const PLUGIN: &str = r#"
@@ -92,16 +91,13 @@ fn reports_diagnostics_summary_check_command() {
     let (fs, result) = run_cli_with_server_workspace(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--reporter=summary",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 file_path3.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -132,16 +128,13 @@ fn reports_diagnostics_summary_ci_command() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "ci",
                 "--reporter=summary",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 file_path3.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -183,16 +176,13 @@ fn reports_diagnostics_summary_lint_command() {
     let (fs, result) = run_cli_with_server_workspace(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "lint",
                 "--reporter=summary",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 file_path3.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -223,16 +213,13 @@ fn reports_diagnostics_summary_format_command() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "format",
                 "--reporter=summary",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 file_path3.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -263,17 +250,14 @@ fn reports_diagnostics_summary_check_verbose_command() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--reporter=summary",
                 "--verbose",
                 file_path1.as_str(),
                 file_path2.as_str(),
                 file_path3.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

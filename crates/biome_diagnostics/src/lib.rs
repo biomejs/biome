@@ -17,8 +17,8 @@ pub mod serde;
 #[cfg(feature = "camino")]
 pub use adapters::CaminoError;
 
-#[cfg(feature = "bpaf")]
-pub use adapters::BpafError;
+#[cfg(feature = "clap")]
+pub use adapters::ClapError;
 
 #[cfg(feature = "std")]
 pub use adapters::{IoError, StdError};

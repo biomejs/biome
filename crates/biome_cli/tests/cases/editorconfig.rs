@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -30,15 +29,12 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "format",
                 "--write",
                 "--use-editorconfig=true",
                 test_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -77,15 +73,12 @@ indent_size = 2
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "format",
                 "--write",
                 "--use-editorconfig=false",
                 test_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -135,7 +128,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test_file.as_str()].as_slice()),
+        &["format", "--write", test_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -174,7 +167,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--use-editorconfig=true", test_file.as_str()].as_slice()),
+        &["check", "--use-editorconfig=true", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -224,7 +217,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", test_file.as_str()].as_slice()),
+        &["check", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -273,15 +266,12 @@ indent_style = tab
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "format",
                 "--write",
                 "--use-editorconfig=true",
                 test_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -334,7 +324,7 @@ indent_size = 2
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", "--config-path=foo", test_file.as_str()].as_slice()),
+        &["format", "--write", "--config-path=foo", test_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -375,15 +365,12 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--use-editorconfig=true",
                 "--indent-width=4",
                 test_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -436,15 +423,12 @@ indent_style = space
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--use-editorconfig=true",
                 test_file.as_str(),
                 test_file2.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -483,7 +467,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--use-editorconfig=true", test_file.as_str()].as_slice()),
+        &["ci", "--use-editorconfig=true", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -531,7 +515,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", test_file.as_str()].as_slice()),
+        &["ci", test_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -563,7 +547,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+        &["format", "--use-editorconfig=true"],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -591,7 +575,7 @@ root = on
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+        &["format", "--use-editorconfig=true"],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -620,7 +604,7 @@ end_of_line = lfcr
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+        &["format", "--use-editorconfig=true"],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -641,7 +625,7 @@ fn indent_size_parse_error() {
     fs.insert(
         editorconfig.into(),
         r#"
-  [*]
+  &[*]
   indent_size = 1000
 "#,
     );
@@ -649,7 +633,7 @@ fn indent_size_parse_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--use-editorconfig=true"].as_slice()),
+        &["format", "--use-editorconfig=true"],
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -670,7 +654,7 @@ fn indent_size_can_set_to_tab() {
     fs.insert(
         editorconfig.into(),
         r#"
-        [*]
+        &[*]
         indent_size = tab
         "#,
     );
@@ -685,7 +669,7 @@ fn indent_size_can_set_to_tab() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test_file.as_str()].as_slice()),
+        &["format", "--write", test_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

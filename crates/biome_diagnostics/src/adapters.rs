@@ -80,22 +80,22 @@ impl Diagnostic for IoError {
     }
 }
 
-/// Implements [Diagnostic] over for [bpaf::ParseFailure].
-#[cfg(feature = "bpaf")]
+/// Implements [Diagnostic] over for [clap::error::Error].
+#[cfg(feature = "clap")]
 #[derive(Debug)]
-pub struct BpafError {
-    error: bpaf::ParseFailure,
+pub struct ClapError {
+    error: clap::error::Error,
 }
 
-#[cfg(feature = "bpaf")]
-impl From<bpaf::ParseFailure> for BpafError {
-    fn from(error: bpaf::ParseFailure) -> Self {
+#[cfg(feature = "clap")]
+impl From<clap::error::Error> for ClapError {
+    fn from(error: clap::error::Error) -> Self {
         Self { error }
     }
 }
 
-#[cfg(feature = "bpaf")]
-impl Diagnostic for BpafError {
+#[cfg(feature = "clap")]
+impl Diagnostic for ClapError {
     fn category(&self) -> Option<&'static Category> {
         Some(category!("flags/invalid"))
     }
@@ -105,17 +105,14 @@ impl Diagnostic for BpafError {
     }
 
     fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if let bpaf::ParseFailure::Stderr(reason) = &self.error {
-            write!(fmt, "{reason}")?;
-        }
+        let error = self.error.to_string();
+        write!(fmt, "{error}")?;
         Ok(())
     }
 
     fn message(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        if let bpaf::ParseFailure::Stderr(reason) = &self.error {
-            let error = reason.to_string();
-            fmt.write_str(&error)?;
-        }
+        let error = self.error.to_string();
+        write!(fmt, "{error}")?;
         Ok(())
     }
 }

@@ -2,7 +2,6 @@ use crate::snap_test::SnapshotPayload;
 use crate::{FORMATTED, assert_cli_snapshot, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use bpaf::Args;
 use camino::Utf8Path;
 
 const SUPPRESS_BEFORE: &str = "(1 >= -0)";
@@ -23,7 +22,7 @@ fn ok() {
     let (_, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
+        &["lint", "--suppress", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -40,7 +39,7 @@ fn err_when_both_write_and_suppress_are_passed() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--suppress", file_path.as_str()].as_slice()),
+        &["lint", "--write", "--suppress", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -64,7 +63,7 @@ fn suppress_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
+        &["lint", "--suppress", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -100,7 +99,7 @@ fn suppress_multiple_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
+        &["lint", "--suppress", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -133,15 +132,12 @@ fn suppress_only_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "lint",
                 "--suppress",
                 "--only=lint/suspicious/noCompareNegZero",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -174,15 +170,12 @@ fn suppress_skip_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "lint",
                 "--suppress",
                 "--skip=lint/suspicious/noCompareNegZero",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -215,7 +208,7 @@ fn err_when_only_reason() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--reason", file_path.as_str()].as_slice()),
+        &["lint", "--reason", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -248,15 +241,12 @@ fn custom_explanation_with_reason() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "lint",
                 "--suppress",
                 "--reason=We love Biome",
                 file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -301,7 +291,7 @@ let bar = 33;",
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_str()].as_slice()),
+        &["lint", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -336,7 +326,7 @@ let bar = 33;",
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_str()].as_slice()),
+        &["lint", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -370,7 +360,7 @@ a == b;
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_str()].as_slice()),
+        &["lint", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -404,7 +394,7 @@ function sommething(chalk: ChalkInstance) {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_str()].as_slice()),
+        &["lint", file_path.as_str()],
     );
 
     if let Result::Err(e) = &result {
@@ -444,7 +434,7 @@ function sommething(chalk: ChalkInstance) {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_str()].as_slice()),
+        &["lint", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -479,7 +469,7 @@ function sommething(chalk: ChalkInstance) {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_str()].as_slice()),
+        &["lint", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -514,7 +504,7 @@ function sommething(chalk: ChalkInstance) {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_str()].as_slice()),
+        &["lint", file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -545,7 +535,7 @@ var bar = 33;",
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_str()].as_slice()),
+        &["lint", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

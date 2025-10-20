@@ -5,13 +5,14 @@
 //! [website]: https://biomejs.dev
 
 use biome_cli::{
-    BiomeCommand, CliDiagnostic, CliSession, biome_command, open_transport, setup_panic_handler,
+    BiomeCli, BiomeCommand, CliDiagnostic, CliSession, open_transport, setup_panic_handler,
     to_color_mode,
 };
 use biome_console::{ConsoleExt, EnvConsole, markup};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, set_bottom_frame};
 use biome_fs::OsFileSystem;
 use biome_service::workspace;
+use clap::Parser;
 use std::process::{ExitCode, Termination};
 use std::sync::Arc;
 use tokio::runtime::Runtime;
@@ -37,12 +38,12 @@ fn main() -> ExitCode {
     set_bottom_frame(main as usize);
 
     let mut console = EnvConsole::default();
-    let command = biome_command().fallback_to_usage().run();
+    let cli = BiomeCli::parse();
 
-    console.set_color(to_color_mode(command.get_color()));
+    console.set_color(to_color_mode(cli.get_color()));
 
-    let is_verbose = command.is_verbose();
-    let result = run_workspace(&mut console, command);
+    let is_verbose = cli.is_verbose();
+    let result = run_workspace(&mut console, cli);
     match result {
         Err(termination) => {
             if termination.tags().is_verbose() && is_verbose {
@@ -56,21 +57,21 @@ fn main() -> ExitCode {
     }
 }
 
-fn run_workspace(console: &mut EnvConsole, command: BiomeCommand) -> Result<(), CliDiagnostic> {
+fn run_workspace(console: &mut EnvConsole, cli: BiomeCli) -> Result<(), CliDiagnostic> {
     // If the `--use-server` CLI flag is set, try to open a connection to an
     // existing Biome server socket
     let fs = OsFileSystem::default();
-    let workspace = if command.should_use_server() {
+    let workspace = if cli.should_use_server() {
         let runtime = Runtime::new()?;
         match open_transport(runtime)? {
             Some(transport) => workspace::client(transport, Box::new(fs))?,
             None => return Err(CliDiagnostic::server_not_running()),
         }
     } else {
-        let threads = command.get_threads();
+        let threads = cli.get_threads();
         workspace::server(Arc::new(fs), threads)
     };
 
     let session = CliSession::new(&*workspace, console)?;
-    session.run(command)
+    session.run(cli)
 }

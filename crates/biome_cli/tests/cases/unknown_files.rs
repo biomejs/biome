@@ -2,7 +2,6 @@ use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use crate::{UNFORMATTED, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -19,7 +18,7 @@ fn should_print_a_diagnostic_unknown_file() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path1.as_str(), file_path2.as_str()].as_slice()),
+        &["format", file_path1.as_str(), file_path2.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -53,7 +52,7 @@ fn should_not_print_a_diagnostic_unknown_file_because_ignored() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path1.as_str(), file_path2.as_str()].as_slice()),
+        &["format", file_path1.as_str(), file_path2.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

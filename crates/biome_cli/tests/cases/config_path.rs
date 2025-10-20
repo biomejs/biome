@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -38,7 +37,7 @@ fn set_config_path_to_directory() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--config-path=config", "src"].as_slice()),
+        &["check", "--config-path=config", "src"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -85,7 +84,7 @@ fn set_config_path_to_file() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--config-path=config/a.jsonc", "src"].as_slice()),
+        &["check", "--config-path=config/a.jsonc", "src"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -110,7 +109,7 @@ fn raises_an_error_when_the_config_file_is_not_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--config-path=biome.yml", "src"].as_slice()),
+        &["check", "--config-path=biome.yml", "src"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -138,7 +137,7 @@ fn raises_an_error_for_no_configuration_file_found() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--config-path=config", file.as_str()].as_slice()),
+        &["check", "--config-path=config", file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

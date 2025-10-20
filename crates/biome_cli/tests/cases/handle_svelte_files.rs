@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const SVELTE_FILE_IMPORTS_BEFORE: &str = r#"<script lang="ts">
@@ -54,15 +53,12 @@ fn sorts_imports_check() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 svelte_file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -92,16 +88,13 @@ fn sorts_imports_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 "--write",
                 svelte_file_path.as_str(),
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -131,7 +124,7 @@ fn format_svelte_ts_context_module_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", svelte_file_path.as_str()].as_slice()),
+        &["format", svelte_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -165,7 +158,7 @@ fn format_svelte_ts_context_module_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", svelte_file_path.as_str()].as_slice()),
+        &["format", "--write", svelte_file_path.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -193,7 +186,7 @@ fn format_svelte_carriage_return_line_feed_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", svelte_file_path.as_str()].as_slice()),
+        &["format", svelte_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -247,7 +240,7 @@ schema + sure()
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+        &["check", "--write", "--unsafe", astro_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -300,7 +293,7 @@ const props: Props = { title: "Hello" };
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
+        &["check", "--write", "--unsafe", astro_file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -326,7 +319,7 @@ fn format_stdin_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--stdin-file-path", "file.svelte"].as_slice()),
+        &["format", "--stdin-file-path", "file.svelte"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -352,7 +345,7 @@ fn format_stdin_write_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", "--stdin-file-path", "file.svelte"].as_slice()),
+        &["format", "--write", "--stdin-file-path", "file.svelte"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -378,7 +371,7 @@ fn lint_stdin_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--stdin-file-path", "file.svelte"].as_slice()),
+        &["lint", "--stdin-file-path", "file.svelte"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -404,7 +397,7 @@ fn lint_stdin_write_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", "--stdin-file-path", "file.svelte"].as_slice()),
+        &["lint", "--write", "--stdin-file-path", "file.svelte"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -430,16 +423,13 @@ fn lint_stdin_write_unsafe_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "lint",
                 "--write",
                 "--unsafe",
                 "--stdin-file-path",
                 "file.svelte",
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -465,7 +455,7 @@ fn check_stdin_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--stdin-file-path", "file.svelte"].as_slice()),
+        &["check", "--stdin-file-path", "file.svelte"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -491,7 +481,7 @@ fn check_stdin_write_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", "--stdin-file-path", "file.svelte"].as_slice()),
+        &["check", "--write", "--stdin-file-path", "file.svelte"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -517,16 +507,13 @@ fn check_stdin_write_unsafe_successfully() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
+        &[
                 "check",
                 "--write",
                 "--unsafe",
                 "--stdin-file-path",
                 "file.svelte",
-            ]
-            .as_slice(),
-        ),
+            ],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

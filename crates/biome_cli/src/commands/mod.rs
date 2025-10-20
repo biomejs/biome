@@ -1,5 +1,5 @@
 use crate::changed::{get_changed_files, get_staged_files};
-use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
+use crate::cli_options::{CliOptions, CliReporter, ColorsArg};
 use crate::commands::scan_kind::derive_best_scan_kind;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
@@ -14,27 +14,14 @@ use biome_configuration::css::{
 };
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
-use biome_configuration::html::{HtmlFormatterConfiguration, html_formatter_configuration};
+use biome_configuration::html::HtmlFormatterConfiguration;
 use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use biome_configuration::json::{
     JsonFormatterConfiguration, JsonLinterConfiguration, JsonParserConfiguration,
 };
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{BiomeDiagnostic, Configuration};
-use biome_configuration::{
-    FilesConfiguration, FormatterConfiguration, LinterConfiguration, configuration,
-    css::{css_formatter_configuration, css_linter_configuration, css_parser_configuration},
-    files_configuration, formatter_configuration,
-    graphql::graphql_formatter_configuration,
-    graphql::graphql_linter_configuration,
-    javascript::js_formatter_configuration,
-    javascript::js_linter_configuration,
-    json::json_formatter_configuration,
-    json::json_linter_configuration,
-    json::json_parser_configuration,
-    linter_configuration,
-    vcs::vcs_configuration,
-};
+use biome_configuration::{FilesConfiguration, FormatterConfiguration, LinterConfiguration};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::Merge;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
@@ -50,8 +37,8 @@ use biome_service::workspace::{
     FixFileMode, OpenProjectParams, ScanKind, ScanProjectParams, UpdateSettingsParams,
 };
 use biome_service::{Workspace, WorkspaceError};
-use bpaf::Bpaf;
 use camino::{Utf8Path, Utf8PathBuf};
+use clap::{Parser, Subcommand};
 use std::ffi::OsString;
 use std::time::Duration;
 use tracing::info;
@@ -70,194 +57,197 @@ mod scan_kind;
 pub(crate) mod search;
 pub(crate) mod version;
 
-#[derive(Debug, Clone, Bpaf)]
-#[bpaf(options, version(VERSION))]
+#[derive(Debug, Parser)] // requires `derive` feature
+#[command(name = "biome")]
+#[command(about = "Biome CLI", long_about = None)]
+pub struct BiomeCli {
+    #[command(subcommand)]
+    pub command: BiomeCommand,
+}
+
 /// Biome official CLI. Use it to check the health of your project or run it to check single files.
+#[derive(Debug, Clone, Subcommand)]
 pub enum BiomeCommand {
     /// Shows the Biome version information and quit.
-    #[bpaf(command)]
-    Version(#[bpaf(external(cli_options), hide_usage)] CliOptions),
+    Version {
+        #[command(flatten)]
+        cli_options: CliOptions,
+    },
 
-    #[bpaf(command)]
     /// Prints information for debugging.
-    Rage(
-        #[bpaf(external(cli_options), hide_usage)] CliOptions,
+    Rage {
+        #[command(flatten)]
+        cli_options: CliOptions,
+
         /// Prints the Biome daemon server logs
-        #[bpaf(long("daemon-logs"), switch)]
-        bool,
+        #[arg(long = "daemon-logs")]
+        daemon_logs: bool,
+
         /// Prints the formatter options applied
-        #[bpaf(long("formatter"), switch)]
-        bool,
+        #[arg(long)]
+        formatter: bool,
+
         /// Prints the linter options applied
-        #[bpaf(long("linter"), switch)]
-        bool,
-    ),
+        #[arg(long)]
+        linter: bool,
+    },
+
     /// Starts the Biome daemon server process.
-    #[bpaf(command)]
     Start {
         /// Allows to change the prefix applied to the file name of the logs.
-        #[bpaf(
-            env("BIOME_LOG_PREFIX_NAME"),
-            long("log-prefix-name"),
-            argument("STRING"),
-            hide_usage,
-            fallback(String::from("server.log")),
-            display_fallback
+        #[arg(
+            long = "log-prefix-name",
+            env = "BIOME_LOG_PREFIX_NAME",
+            value_name = "STRING",
+            hide = true,
+            default_value = "server.log"
         )]
         log_prefix_name: String,
 
         /// Allows to change the folder where logs are stored.
-        #[bpaf(
-            env("BIOME_LOG_PATH"),
-            long("log-path"),
-            argument("PATH"),
-            hide_usage,
-            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+        #[arg(
+            long = "log-path",
+            env = "BIOME_LOG_PATH",
+            value_name = "PATH",
+            hide = true,
+            default_value_t = biome_fs::ensure_cache_dir().join("biome-logs")
         )]
         log_path: Utf8PathBuf,
     },
 
     /// Stops the Biome daemon server process.
-    #[bpaf(command)]
     Stop,
 
     /// Runs formatter, linter and import sorting to the requested files.
-    #[bpaf(command)]
+    #[command(about = "Runs formatter, linter and assist to the requested files.")]
     Check {
-        /// Apply safe fixes, formatting and import sorting
-        #[bpaf(long("write"), switch)]
+        /// Apply safe fixes, formatting and assist
+        #[arg(long, help = "Apply safe fixes, formatting and assist")]
         write: bool,
 
         /// Apply unsafe fixes. Should be used with `--write` or `--fix`
-        #[bpaf(long("unsafe"), switch)]
+        #[arg(long = "unsafe")]
         unsafe_: bool,
 
         /// Alias for `--write`, writes safe fixes, formatting and import sorting
-        #[bpaf(long("fix"), switch, hide_usage)]
+        #[arg(long, hide = true)]
         fix: bool,
 
         /// Allow enabling or disabling the formatter check.
-        #[bpaf(
-            long("formatter-enabled"),
-            argument("true|false"),
-            optional,
-            hide_usage
-        )]
+        #[arg(long = "formatter-enabled", value_name = "true|false", hide = true)]
         formatter_enabled: Option<FormatterEnabled>,
+
         /// Allow enabling or disabling the linter check.
-        #[bpaf(long("linter-enabled"), argument("true|false"), optional, hide_usage)]
+        #[arg(long = "linter-enabled", value_name = "true|false", hide = true)]
         linter_enabled: Option<LinterEnabled>,
 
         /// Allow enabling or disabling the assist.
-        #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
+        #[arg(long = "assist-enabled", value_name = "true|false")]
         assist_enabled: Option<AssistEnabled>,
 
         /// Allows enforcing assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
-        #[bpaf(long("enforce-assist"), argument("true|false"), fallback(true))]
+        #[arg(
+            long = "enforce-assist",
+            value_name = "true|false",
+            default_value_t = true
+        )]
         enforce_assist: bool,
 
-        /// Whether formatting should be allowed to proceed if a given file
-        /// has syntax errors
-        #[bpaf(long("format-with-errors"), argument("true|false"))]
+        /// Whether formatting should be allowed to proceed if a given file has syntax errors
+        #[arg(long = "format-with-errors", value_name = "true|false")]
         format_with_errors: Option<FormatWithErrorsEnabled>,
 
-        #[bpaf(external(json_parser_configuration), optional, hide_usage)]
+        #[command(flatten)]
         json_parser: Option<JsonParserConfiguration>,
 
-        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
+        #[command(flatten)]
         css_parser: Option<CssParserConfiguration>,
 
-        #[bpaf(external(configuration), hide_usage, optional)]
+        #[command(flatten)]
         configuration: Option<Configuration>,
-        #[bpaf(external, hide_usage)]
+
+        #[command(flatten)]
         cli_options: CliOptions,
-        /// Use this option when you want to format code piped from `stdin`, and
-        /// print the output to `stdout`.
+
+        /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
         ///
-        /// The file doesn't need to exist on disk, what matters is the
-        /// extension of the file. Based on the extension, Biome knows how to
-        /// check the code.
+        /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to check the code.
         ///
-        /// Also, if you have overrides configured and/or nested configurations,
-        /// the path may determine the settings being applied.
+        /// Also, if you have overrides configured and/or nested configurations, the path may determine the settings being applied.
         ///
         /// Example:
         /// ```shell
         /// echo 'let a;' | biome check --stdin-file-path=file.js --write
         /// ```
-        #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
+        #[arg(long = "stdin-file-path", value_name = "PATH", hide = true)]
         stdin_file_path: Option<String>,
 
-        /// When set to true, only the files that have been staged (the ones prepared to be committed)
-        /// will be linted. This option should be used when working locally.
-        #[bpaf(long("staged"), switch)]
+        /// When set to true, only the files that have been staged (the ones prepared to be committed) will be linted. This option should be used when working locally.
+        #[arg(long, conflicts_with = "changed")]
         staged: bool,
 
-        /// When set to true, only the files that have been changed compared to your `defaultBranch`
-        /// configuration will be linted. This option should be used in CI environments.
-        #[bpaf(long("changed"), switch)]
+        /// When set to true, only the files that have been changed compared to your `defaultBranch` configuration will be linted. This option should be used in CI environments.
+        #[arg(long)]
         changed: bool,
 
-        /// Use this to specify the base branch to compare against when you're using the --changed
-        /// flag and the `defaultBranch` is not set in your `biome.json`
-        #[bpaf(long("since"), argument("REF"))]
+        /// Use this to specify the base branch to compare against when you're using the --changed flag and the `defaultBranch` is not set in your `biome.json`
+        #[arg(long, requires = "changed", value_name = "REF")]
         since: Option<String>,
 
         /// Single file, single path or list of paths
-        #[bpaf(positional("PATH"), many)]
+        #[arg(value_name = "PATH")]
         paths: Vec<OsString>,
     },
     /// Run various checks on a set of files.
-    #[bpaf(command)]
     Lint {
         /// Writes safe fixes
-        #[bpaf(long("write"), switch)]
+        #[arg(long, conflicts_with_all = ["suppress", "fix"])]
         write: bool,
 
         /// Apply unsafe fixes. Should be used with `--write` or `--fix`
-        #[bpaf(long("unsafe"), switch)]
+        #[arg(long = "unsafe")]
         unsafe_: bool,
 
         /// Alias for `--write`, writes safe fixes
-        #[bpaf(long("fix"), switch, hide_usage)]
+        #[arg(long, hide = true, conflicts_with_all = ["suppress", "write"])]
         fix: bool,
 
         /// Fixes lint rule violations with comment suppressions instead of using a rule code action (fix)
-        #[bpaf(long("suppress"))]
+        #[arg(long, conflicts_with_all = ["write", "fix"])]
         suppress: bool,
 
         /// Explanation for suppressing diagnostics with `--suppress`
-        #[bpaf(long("reason"), argument("STRING"))]
+        #[arg(long, requires = "suppress", value_name = "STRING")]
         suppression_reason: Option<String>,
 
-        #[bpaf(external(json_parser_configuration), optional, hide_usage)]
-        json_parser: Option<JsonParserConfiguration>,
-
-        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
-        css_parser: Option<CssParserConfiguration>,
-
-        #[bpaf(external(linter_configuration), hide_usage, optional)]
+        #[command(flatten)]
         linter_configuration: Option<LinterConfiguration>,
 
-        #[bpaf(external(vcs_configuration), optional, hide_usage)]
+        #[command(flatten)]
         vcs_configuration: Option<VcsConfiguration>,
 
-        #[bpaf(external(files_configuration), optional, hide_usage)]
+        #[command(flatten)]
         files_configuration: Option<FilesConfiguration>,
 
-        #[bpaf(external(js_linter_configuration), optional, hide_usage)]
-        javascript_linter: Option<JsLinterConfiguration>,
-
-        #[bpaf(external(json_linter_configuration), optional, hide_usage)]
-        json_linter: Option<JsonLinterConfiguration>,
-
-        #[bpaf(external(css_linter_configuration), optional, hide_usage, hide)]
+        #[command(flatten)]
         css_linter: Option<CssLinterConfiguration>,
 
-        #[bpaf(external(graphql_linter_configuration), optional, hide_usage, hide)]
+        #[command(flatten)]
+        javascript_linter: Option<JsLinterConfiguration>,
+
+        #[command(flatten)]
+        json_linter: Option<JsonLinterConfiguration>,
+
+        #[command(flatten)]
         graphql_linter: Option<GraphqlLinterConfiguration>,
 
-        #[bpaf(external, hide_usage)]
+        #[command(flatten)]
+        css_parser: Option<CssParserConfiguration>,
+
+        #[command(flatten)]
+        json_parser: Option<JsonParserConfiguration>,
+
+        #[command(flatten)]
         cli_options: CliOptions,
 
         /// Run only the given rule, group of rules or domain.
@@ -269,7 +259,7 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome lint --only=correctness/noUnusedVariables --only=suspicious --only=test
         /// ```
-        #[bpaf(long("only"), argument("GROUP|RULE|DOMAIN"))]
+        #[arg(long, value_name = "GROUP|RULE|DOMAIN")]
         only: Vec<AnalyzerSelector>,
 
         /// Skip the given rule, group of rules or domain by setting the severity level of the rules to `off`.
@@ -280,7 +270,7 @@ pub enum BiomeCommand {
         /// ```shell
         /// biome lint --skip=correctness/noUnusedVariables --skip=suspicious --skip=project
         /// ```
-        #[bpaf(long("skip"), argument("GROUP|RULE|DOMAIN"))]
+        #[arg(long, value_name = "GROUP|RULE|DOMAIN")]
         skip: Vec<AnalyzerSelector>,
 
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
@@ -291,56 +281,27 @@ pub enum BiomeCommand {
         /// ```shell
         /// echo 'let a;' | biome lint --stdin-file-path=file.js --write
         /// ```
-        #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
+        #[arg(long = "stdin-file-path", value_name = "PATH", hide = true)]
         stdin_file_path: Option<String>,
-        /// When set to true, only the files that have been staged (the ones prepared to be committed)
-        /// will be linted.
-        #[bpaf(long("staged"), switch)]
+
+        /// When set to true, only the files that have been staged (the ones prepared to be committed) will be linted.
+        #[arg(long, conflicts_with = "changed")]
         staged: bool,
-        /// When set to true, only the files that have been changed compared to your `defaultBranch`
-        /// configuration will be linted.
-        #[bpaf(long("changed"), switch)]
+
+        /// When set to true, only the files that have been changed compared to your `defaultBranch` configuration will be linted.
+        #[arg(long)]
         changed: bool,
-        /// Use this to specify the base branch to compare against when you're using the --changed
-        /// flag and the `defaultBranch` is not set in your biome.json
-        #[bpaf(long("since"), argument("REF"))]
+
+        /// Use this to specify the base branch to compare against when you're using the --changed flag and the `defaultBranch` is not set in your biome.json
+        #[arg(long, requires = "changed", value_name = "REF")]
         since: Option<String>,
+
         /// Single file, single path or list of paths
-        #[bpaf(positional("PATH"), many)]
+        #[arg(value_name = "PATH")]
         paths: Vec<OsString>,
     },
     /// Run the formatter on a set of files.
-    #[bpaf(command)]
     Format {
-        #[bpaf(external(formatter_configuration), optional, hide_usage)]
-        formatter_configuration: Option<FormatterConfiguration>,
-
-        #[bpaf(external(js_formatter_configuration), optional, hide_usage)]
-        javascript_formatter: Option<JsFormatterConfiguration>,
-
-        #[bpaf(external(json_formatter_configuration), optional, hide_usage)]
-        json_formatter: Option<JsonFormatterConfiguration>,
-
-        #[bpaf(external(json_parser_configuration), optional, hide_usage)]
-        json_parser: Option<JsonParserConfiguration>,
-
-        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
-        css_parser: Option<CssParserConfiguration>,
-
-        #[bpaf(external(graphql_formatter_configuration), optional, hide_usage, hide)]
-        graphql_formatter: Option<GraphqlFormatterConfiguration>,
-
-        #[bpaf(external(css_formatter_configuration), optional, hide_usage, hide)]
-        css_formatter: Option<CssFormatterConfiguration>,
-
-        #[bpaf(external(html_formatter_configuration), optional, hide_usage, hide)]
-        html_formatter: Option<HtmlFormatterConfiguration>,
-
-        #[bpaf(external(vcs_configuration), optional, hide_usage)]
-        vcs_configuration: Option<VcsConfiguration>,
-
-        #[bpaf(external(files_configuration), optional, hide_usage)]
-        files_configuration: Option<FilesConfiguration>,
         /// Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
         ///
         /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to format the code.
@@ -349,149 +310,166 @@ pub enum BiomeCommand {
         /// ```shell
         /// echo 'let a;' | biome format --stdin-file-path=file.js --write
         /// ```
-        #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
+        #[arg(long = "stdin-file-path", value_name = "PATH", hide = true)]
         stdin_file_path: Option<String>,
 
-        #[bpaf(external, hide_usage)]
-        cli_options: CliOptions,
-
         /// Writes formatted files to a file system.
-        #[bpaf(long("write"), switch)]
+        #[arg(long, conflicts_with = "fix")]
         write: bool,
 
         /// Alias of `--write`, writes formatted files to a file system.
-        #[bpaf(long("fix"), switch, hide_usage)]
+        #[arg(long, hide = true)]
         fix: bool,
 
-        /// When set to true, only the files that have been staged (the ones prepared to be committed)
-        /// will be linted.
-        #[bpaf(long("staged"), switch)]
+        #[command(flatten)]
+        javascript_formatter: Option<JsFormatterConfiguration>,
+
+        #[command(flatten)]
+        formatter_configuration: Option<FormatterConfiguration>,
+
+        #[command(flatten)]
+        vcs_configuration: Option<VcsConfiguration>,
+
+        #[command(flatten)]
+        files_configuration: Option<FilesConfiguration>,
+
+        #[command(flatten)]
+        json_formatter: Option<JsonFormatterConfiguration>,
+
+        #[command(flatten)]
+        css_formatter: Option<CssFormatterConfiguration>,
+
+        #[command(flatten)]
+        graphql_formatter: Option<GraphqlFormatterConfiguration>,
+
+        #[command(flatten)]
+        html_formatter: Option<HtmlFormatterConfiguration>,
+
+        #[command(flatten)]
+        css_parser: Option<CssParserConfiguration>,
+
+        #[command(flatten)]
+        json_parser: Option<JsonParserConfiguration>,
+
+        #[command(flatten)]
+        cli_options: CliOptions,
+
+        /// When set to true, only the files that have been staged (the ones prepared to be committed) will be linted.
+        #[arg(long, conflicts_with = "changed")]
         staged: bool,
 
-        /// When set to true, only the files that have been changed compared to your `defaultBranch`
-        /// configuration will be linted.
-        #[bpaf(long("changed"), switch)]
+        /// When set to true, only the files that have been changed compared to your `defaultBranch` configuration will be linted.
+        #[arg(long)]
         changed: bool,
 
-        /// Use this to specify the base branch to compare against when you're using the --changed
-        /// flag, and the `defaultBranch` is not set in your biome.json
-        #[bpaf(long("since"), argument("REF"))]
+        /// Use this to specify the base branch to compare against when you're using the --changed flag, and the `defaultBranch` is not set in your biome.json
+        #[arg(long, requires = "changed", value_name = "REF")]
         since: Option<String>,
 
         /// Single file, single path or list of paths.
-        #[bpaf(positional("PATH"), many)]
+        #[arg(value_name = "PATH")]
         paths: Vec<OsString>,
     },
     /// Command to use in CI environments. Runs formatter, linter and import sorting to the requested files.
     ///
     /// Files won't be modified, the command is a read-only operation.
-    #[bpaf(command)]
     Ci {
         /// Allow enabling or disabling the formatter check.
-        #[bpaf(long("formatter-enabled"), argument("true|false"), optional)]
+        #[arg(long = "formatter-enabled", value_name = "true|false", hide = true)]
         formatter_enabled: Option<FormatterEnabled>,
         /// Allow enabling or disable the linter check.
-        #[bpaf(long("linter-enabled"), argument("true|false"), optional)]
+        #[arg(long = "linter-enabled", value_name = "true|false")]
         linter_enabled: Option<LinterEnabled>,
 
         /// Allow enabling or disabling the assist.
-        #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
+        #[arg(long = "assist-enabled", value_name = "true|false")]
         assist_enabled: Option<AssistEnabled>,
 
-        /// Whether formatting should be allowed to proceed if a given file
-        /// has syntax errors
-        #[bpaf(long("format-with-errors"), argument("true|false"))]
-        format_with_errors: Option<FormatWithErrorsEnabled>,
-
-        #[bpaf(external(json_parser_configuration), optional, hide_usage)]
-        json_parser: Option<JsonParserConfiguration>,
-
-        #[bpaf(external(css_parser_configuration), optional, hide_usage, hide)]
-        css_parser: Option<CssParserConfiguration>,
+        /// Whether formatting should be allowed to proceed if a given file has syntax errors
+        // #[arg(long = "format-with-errors", value_name = "true|false")]
+        // format_with_errors: Option<FormatWithErrorsEnabled>,
 
         /// Allows enforcing assist, and make the CLI fail if some actions aren't applied. Defaults to `true`.
-        #[bpaf(long("enforce-assist"), argument("true|false"), fallback(true))]
+        #[arg(
+            long = "enforce-assist",
+            value_name = "true|false",
+            default_value_t = true
+        )]
         enforce_assist: bool,
 
-        #[bpaf(external(configuration), hide_usage, optional)]
-        configuration: Option<Configuration>,
-        #[bpaf(external, hide_usage)]
+        #[command(flatten)]
+        json_parser: JsonParserConfiguration,
+
+        #[command(flatten)]
+        css_parser: CssParserConfiguration,
+
+        #[command(flatten)]
         cli_options: CliOptions,
 
-        /// When set to true, only the files that have been changed compared to your `defaultBranch`
-        /// configuration will be linted.
-        #[bpaf(long("changed"), switch)]
+        /// When set to true, only the files that have been changed compared to your `defaultBranch` configuration will be linted.
+        #[arg(long)]
         changed: bool,
 
-        /// Use this to specify the base branch to compare against when you're using the --changed
-        /// flag and the `defaultBranch` is not set in your biome.json
-        #[bpaf(long("since"), argument("REF"))]
+        /// Use this to specify the base branch to compare against when you're using the --changed flag and the `defaultBranch` is not set in your biome.json
+        #[arg(long, requires = "changed", value_name = "REF")]
         since: Option<String>,
 
-        /// The number of threads to use. This is useful when running the CLI in environments
-        /// with limited resource, for example CI.
-        #[bpaf(
-            long("threads"),
-            argument("NUMBER"),
-            env("BIOME_THREADS"),
-            optional,
-            hide_usage
-        )]
+        /// The number of threads to use. This is useful when running the CLI in environments with limited resource, for example CI.
+        #[arg(long, env = "BIOME_THREADS", value_name = "NUMBER", hide = true)]
         threads: Option<usize>,
 
         /// Single file, single path or list of paths
-        #[bpaf(positional("PATH"), many)]
+        #[arg(value_name = "PATH")]
         paths: Vec<OsString>,
     },
 
     /// Bootstraps a new biome project. Creates a configuration file with some defaults.
-    #[bpaf(command)]
-    Init(
+    Init {
         /// Tells Biome to emit a `biome.jsonc` file.
-        #[bpaf(long("jsonc"), switch)]
-        bool,
-    ),
+        #[arg(long)]
+        jsonc: bool,
+    },
     /// Acts as a server for the Language Server Protocol over stdin/stdout.
-    #[bpaf(command("lsp-proxy"))]
+    #[command(name = "lsp-proxy")]
     LspProxy {
         /// Allows to change the prefix applied to the file name of the logs.
-        #[bpaf(
-            env("BIOME_LOG_PREFIX_NAME"),
-            long("log-prefix-name"),
-            argument("STRING"),
-            hide_usage,
-            fallback(String::from("server.log")),
-            display_fallback
+        #[arg(
+            long = "log-prefix-name",
+            env = "BIOME_LOG_PREFIX_NAME",
+            value_name = "STRING",
+            hide = true,
+            default_value = "server.log"
         )]
         log_prefix_name: String,
+
         /// Allows to change the folder where logs are stored.
-        #[bpaf(
-            env("BIOME_LOG_PATH"),
-            long("log-path"),
-            argument("PATH"),
-            hide_usage,
-            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+        #[arg(
+            long = "log-path",
+            env = "BIOME_LOG_PATH",
+            value_name = "PATH",
+            hide = true,
+            default_value_t = biome_fs::ensure_cache_dir().join("biome-logs")
         )]
         log_path: Utf8PathBuf,
+
         /// Bogus argument to make the command work with vscode-languageclient
-        #[bpaf(long("stdio"), hide, hide_usage, switch)]
+        #[arg(long, hide = true)]
         stdio: bool,
     },
     /// Updates the configuration when there are breaking changes.
-    #[bpaf(command)]
     Migrate {
-        #[bpaf(external, hide_usage)]
+        #[command(flatten)]
         cli_options: CliOptions,
 
         /// Writes the new configuration file to disk
-        #[bpaf(long("write"), switch)]
+        #[arg(long)]
         write: bool,
 
         /// Alias of `--write`, writes the new configuration file to disk
-        #[bpaf(long("fix"), switch, hide_usage)]
+        #[arg(long, hide = true)]
         fix: bool,
 
-        #[bpaf(external(migrate_sub_command), optional)]
+        #[command(subcommand)]
         sub_command: Option<MigrateSubCommand>,
     },
 
@@ -506,49 +484,43 @@ pub enum BiomeCommand {
     /// ```shell
     /// biome search '`console.log($message)`' # find all `console.log` invocations
     /// ```
-    #[bpaf(command)]
     Search {
-        #[bpaf(external, hide_usage)]
-        cli_options: CliOptions,
-
-        #[bpaf(external(files_configuration), optional, hide_usage)]
+        #[command(flatten)]
         files_configuration: Option<FilesConfiguration>,
 
-        #[bpaf(external(vcs_configuration), optional, hide_usage)]
+        #[command(flatten)]
         vcs_configuration: Option<VcsConfiguration>,
 
-        /// Use this option when you want to search through code piped from
-        /// `stdin`, and print the output to `stdout`.
+        #[command(flatten)]
+        cli_options: CliOptions,
+
+        /// Use this option when you want to search through code piped from `stdin`, and print the output to `stdout`.
         ///
-        /// The file doesn't need to exist on disk, what matters is the
-        /// extension of the file. Based on the extension, Biome knows how to
-        /// parse the code.
+        /// The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to parse the code.
         ///
         /// Example:
         /// ```shell
         /// echo 'let a;' | biome search '`let $var`' --stdin-file-path=file.js
         /// ```
-        #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
+        #[arg(long = "stdin-file-path", value_name = "PATH", hide = true)]
         stdin_file_path: Option<String>,
 
         /// The language to which the pattern applies.
         ///
-        /// Grit queries are specific to the grammar of the language they
-        /// target, so we currently do not support writing queries that apply
-        /// to multiple languages at once.
+        /// Grit queries are specific to the grammar of the language they target, so we currently do not support writing queries that apply to multiple languages at once.
         ///
         /// When none, the default language is JavaScript.
-        #[bpaf(long("language"), short('l'))]
+        #[arg(long, short = 'l')]
         language: Option<GritTargetLanguage>,
 
         /// The GritQL pattern to search for.
         ///
         /// Note that the search command (currently) does not support rewrites.
-        #[bpaf(positional("PATTERN"))]
+        #[arg(value_name = "PATTERN")]
         pattern: String,
 
         /// Single file, single path or list of paths.
-        #[bpaf(positional("PATH"), many)]
+        #[arg(value_name = "PATH")]
         paths: Vec<OsString>,
     },
 
@@ -563,64 +535,61 @@ pub enum BiomeCommand {
     /// ```shell
     /// biome explain daemon-logs
     /// ```
-    #[bpaf(command)]
     Explain {
         /// Single name to display documentation for.
-        #[bpaf(positional("NAME"))]
+        #[arg(value_name = "NAME")]
         doc: Doc,
     },
 
-    #[bpaf(command)]
     /// Cleans the logs emitted by the daemon.
     Clean,
 
-    #[bpaf(command("__run_server"), hide)]
+    #[command(name = "__run_server", hide = true)]
     RunServer {
         /// Allows changing the prefix applied to the file name of the logs.
-        #[bpaf(
-            env("BIOME_LOG_PREFIX_NAME"),
-            long("log-prefix-name"),
-            argument("STRING"),
-            hide_usage,
-            fallback(String::from("server.log")),
-            display_fallback
+        #[arg(
+            long = "log-prefix-name",
+            env = "BIOME_LOG_PREFIX_NAME",
+            value_name = "STRING",
+            hide = true,
+            default_value = "server.log"
         )]
         log_prefix_name: String,
+
         /// Allows changing the folder where logs are stored.
-        #[bpaf(
-            env("BIOME_LOG_PATH"),
-            long("log-path"),
-            argument("PATH"),
-            hide_usage,
-            fallback(
-                biome_fs::ensure_cache_dir().join("biome-logs")
-            ),
+        #[arg(
+            long = "log-path",
+            env = "BIOME_LOG_PATH",
+            value_name = "PATH",
+            hide = true,
+            default_value_t = biome_fs::ensure_cache_dir().join("biome-logs")
         )]
         log_path: Utf8PathBuf,
 
-        #[bpaf(long("stop-on-disconnect"), hide_usage)]
+        #[arg(long = "stop-on-disconnect", hide = true)]
         stop_on_disconnect: bool,
     },
-    #[bpaf(command("__print_socket"), hide)]
+
+    #[command(name = "__print_socket", hide = true)]
     PrintSocket,
 
-    #[bpaf(command("__where_am_i"), hide)]
+    #[command(name = "__where_am_i", hide = true)]
     WhereAmI,
 }
 
-#[derive(Debug, Bpaf, Clone)]
+#[derive(Debug, Clone, Subcommand)]
 pub enum MigrateSubCommand {
     /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map the Prettier's configuration into Biome's configuration file.
-    #[bpaf(command)]
     Prettier,
+
     /// It attempts to find the ESLint configuration file in the working directory, and update the Biome's configuration file as a result.
-    #[bpaf(command)]
     Eslint {
         /// Includes rules inspired from an eslint rule in the migration
-        #[bpaf(long("include-inspired"))]
+        #[arg(long = "include-inspired")]
         include_inspired: bool,
+
         /// Includes nursery rules in the migration
-        #[bpaf(long("include-nursery"))]
+        #[arg(long = "include-nursery")]
         include_nursery: bool,
     },
 }
@@ -631,26 +600,26 @@ impl MigrateSubCommand {
     }
 }
 
-impl BiomeCommand {
+impl BiomeCli {
     const fn cli_options(&self) -> Option<&CliOptions> {
-        match self {
-            Self::Version(cli_options)
-            | Self::Rage(cli_options, ..)
-            | Self::Check { cli_options, .. }
-            | Self::Lint { cli_options, .. }
-            | Self::Ci { cli_options, .. }
-            | Self::Format { cli_options, .. }
-            | Self::Migrate { cli_options, .. }
-            | Self::Search { cli_options, .. } => Some(cli_options),
-            Self::LspProxy { .. }
-            | Self::Start { .. }
-            | Self::Stop
-            | Self::Init(_)
-            | Self::Explain { .. }
-            | Self::RunServer { .. }
-            | Self::Clean { .. }
-            | Self::PrintSocket => None,
-            Self::WhereAmI => None,
+        match &self.command {
+            BiomeCommand::Version { cli_options }
+            | BiomeCommand::Rage { cli_options, .. }
+            | BiomeCommand::Check { cli_options, .. }
+            | BiomeCommand::Lint { cli_options, .. }
+            | BiomeCommand::Ci { cli_options, .. }
+            | BiomeCommand::Format { cli_options, .. }
+            | BiomeCommand::Migrate { cli_options, .. }
+            | BiomeCommand::Search { cli_options, .. } => Some(cli_options),
+            BiomeCommand::LspProxy { .. }
+            | BiomeCommand::Start { .. }
+            | BiomeCommand::Stop
+            | BiomeCommand::Init { .. }
+            | BiomeCommand::Explain { .. }
+            | BiomeCommand::RunServer { .. }
+            | BiomeCommand::Clean { .. }
+            | BiomeCommand::PrintSocket => None,
+            BiomeCommand::WhereAmI => None,
         }
     }
 
@@ -663,7 +632,7 @@ impl BiomeCommand {
                 }
                 // We want force colors in CI, to give e better UX experience
                 // Unless users explicitly set the colors flag
-                if matches!(self, Self::Ci { .. }) && cli_options.colors.is_none() {
+                if matches!(self.command, BiomeCommand::Ci { .. }) && cli_options.colors.is_none() {
                     return Some(&ColorsArg::Force);
                 }
                 // Normal behaviors
@@ -674,8 +643,8 @@ impl BiomeCommand {
     }
 
     pub const fn get_threads(&self) -> Option<usize> {
-        match self {
-            Self::Ci { threads, .. } => *threads,
+        match &self.command {
+            BiomeCommand::Ci { threads, .. } => *threads,
             _ => None,
         }
     }
@@ -1292,9 +1261,10 @@ mod tests {
         );
     }
 
-    /// Tests that all CLI options adhere to the invariants expected by `bpaf`.
+    /// Tests that all CLI options adhere to the invariants expected by `clap`.
     #[test]
     fn check_options() {
-        biome_command().check_invariants(false);
+        use clap::CommandFactory;
+        BiomeCli::command().debug_assert();
     }
 }

@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -33,7 +32,7 @@ fn enables_all_rules_when_group_is_on_with_default_severity() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", test1.as_str()].as_slice()),
+        &["lint", test1.as_str()],
     );
 
     // style rules have warnings
@@ -76,7 +75,7 @@ fn enables_all_rules_when_group_is_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", test1.as_str()].as_slice()),
+        &["lint", test1.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -119,7 +118,7 @@ fn disable_all_rules_when_group_is_off() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", test1.as_str()].as_slice()),
+        &["lint", test1.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

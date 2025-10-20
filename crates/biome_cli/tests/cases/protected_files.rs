@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, markup_to_string};
 use biome_console::{BufferConsole, markup};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -15,7 +14,7 @@ fn not_process_file_from_stdin_format() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--stdin-file-path=package-lock.json"].as_slice()),
+        &["format", "--stdin-file-path=package-lock.json"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -39,7 +38,7 @@ fn not_process_file_from_stdin_lint() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--stdin-file-path=package.json"].as_slice()),
+        &["lint", "--stdin-file-path=package.json"],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -63,7 +62,7 @@ fn not_process_file_from_stdin_verbose_format() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--verbose", "--stdin-file-path=package-lock.json"].as_slice()),
+        &["format", "--verbose", "--stdin-file-path=package-lock.json"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -87,7 +86,7 @@ fn not_process_file_from_stdin_verbose_lint() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--verbose", "--stdin-file-path=package-lock.json"].as_slice()),
+        &["format", "--verbose", "--stdin-file-path=package-lock.json"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -112,7 +111,7 @@ fn not_process_file_from_cli() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_str()].as_slice()),
+        &["format", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -137,7 +136,7 @@ fn not_process_file_from_cli_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--verbose", file_path.as_str()].as_slice()),
+        &["format", "--verbose", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -171,7 +170,7 @@ fn not_process_ignored_file_from_cli_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--verbose", file_path.as_str()].as_slice()),
+        &["format", "--verbose", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -205,7 +204,7 @@ fn not_process_file_linter_disabled_from_cli_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--verbose", file_path.as_str()].as_slice()),
+        &["format", "--verbose", file_path.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -230,7 +229,7 @@ fn should_return_the_content_of_protected_files_via_stdin() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--stdin-file-path", "package-lock.json"].as_slice()),
+        &["format", "--stdin-file-path", "package-lock.json"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

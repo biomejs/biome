@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -33,7 +32,7 @@ fn should_parse_tailwind_directive() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--css-formatter-enabled=true", css_file.as_str()].as_slice()),
+        &["format", "--css-formatter-enabled=true", css_file.as_str()],
     );
 
     // should format the file
@@ -76,7 +75,7 @@ fn should_not_parse_tailwind_directive_when_disabled() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", css_file.as_str()].as_slice()),
+        &["format", css_file.as_str()],
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -124,7 +123,7 @@ fn tw_should_not_show_unknown_at_rule_diagnostic() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", css_file.as_str()].as_slice()),
+        &["lint", css_file.as_str()],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

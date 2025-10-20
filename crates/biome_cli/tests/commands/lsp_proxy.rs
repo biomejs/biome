@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 
 #[test]
 fn lsp_proxy_help() {
@@ -12,7 +11,7 @@ fn lsp_proxy_help() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lsp-proxy", "--help"].as_slice()),
+        &["lsp-proxy", "--help"],
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
