@@ -5,7 +5,6 @@ expression: objectLiteral
 SnapshotResult {
     messages: [],
     matched_ranges: [
-        "3:13-6:6",
         "3:15-6:6",
     ],
     rewritten_files: [],
