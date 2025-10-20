@@ -73,7 +73,7 @@ useVisibleTask$(({ track, cleanup }) => {
 ```
 invalid.js:1:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
   > 1 │ useVisibleTask$(() => {
       │ ^^^^^^^^^^^^^^^
@@ -93,7 +93,7 @@ invalid.js:1:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━
 ```
 invalid.js:5:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
     3 │ });
     4 │ 
@@ -115,7 +115,7 @@ invalid.js:5:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━
 ```
 invalid.js:10:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
      8 │ });
      9 │ 
@@ -137,7 +137,7 @@ invalid.js:10:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━�
 ```
 invalid.js:15:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
     14 │ const MyComponent = component$(() => {
   > 15 │   useVisibleTask$(() => {
@@ -158,7 +158,7 @@ invalid.js:15:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━�
 ```
 invalid.js:22:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
     21 │ export const App = component$(() => {
   > 22 │   useVisibleTask$(({ track }) => {
@@ -179,7 +179,7 @@ invalid.js:22:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━�
 ```
 invalid.js:30:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
     29 │ function setupComponent() {
   > 30 │   useVisibleTask$(() => {
@@ -200,7 +200,7 @@ invalid.js:30:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━�
 ```
 invalid.js:36:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
     35 │ const setup = () => {
   > 36 │   useVisibleTask$(() => {
@@ -221,7 +221,7 @@ invalid.js:36:3 lint/correctness/noQwikUseVisibleTask ━━━━━━━━�
 ```
 invalid.js:43:5 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
     41 │ class MyClass {
     42 │   constructor() {
@@ -243,7 +243,7 @@ invalid.js:43:5 lint/correctness/noQwikUseVisibleTask ━━━━━━━━�
 ```
 invalid.js:49:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
     47 │ }
     48 │ 
@@ -265,7 +265,7 @@ invalid.js:49:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━�
 ```
 invalid.js:53:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
     51 │ });
     52 │ 
@@ -287,7 +287,7 @@ invalid.js:53:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━�
 ```
 invalid.js:57:1 lint/correctness/noQwikUseVisibleTask ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid useVisibleTask$ for non-interactive initialization
+  × Avoid useVisibleTask$ for non-interactive initialization
   
     55 │ });
     56 │ 

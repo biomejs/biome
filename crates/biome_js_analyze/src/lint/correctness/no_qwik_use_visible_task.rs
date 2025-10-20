@@ -37,7 +37,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintQwik("no-use-visible-task").same()],
         recommended: true,
-        severity: Severity::Warning,
+        severity: Severity::Error,
         domains: &[RuleDomain::Qwik],
     }
 }
