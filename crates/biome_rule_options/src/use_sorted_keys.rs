@@ -7,4 +7,8 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseSortedKeysOptions {
     pub sort_order: SortOrder,
+    /// When enabled, groups object keys by their value's nesting depth before sorting.
+    /// Simple values (primitives, single-line arrays) are sorted first,
+    /// followed by nested values (objects, multi-line arrays).
+    pub group_by_nesting: bool,
 }
