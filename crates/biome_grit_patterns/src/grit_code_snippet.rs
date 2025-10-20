@@ -43,8 +43,8 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
         };
 
         // First, try to match with the exact kind (fast path)
-        if let Some((_, pattern)) = self.patterns.iter().find(|(kind, _)| *kind == node.kind()) {
-            if pattern.execute(resolved, state, context, logs)? {
+        if let Some((_, pattern)) = self.patterns.iter().find(|(kind, _)| *kind == node.kind())
+            && pattern.execute(resolved, state, context, logs)? {
                 return Ok(true);
             }
         }
@@ -60,13 +60,12 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
 
         // If node has a single child, try matching against the child
         // This handles wrapper nodes like JS_IDENTIFIER_EXPRESSION wrapping JS_REFERENCE_IDENTIFIER
-        if let Some(child) = node.first_child() {
-            if node.children().count() == 1 {
-                let child_binding = GritResolvedPattern::from_node_binding(child);
-                for (_, pattern) in &self.patterns {
-                    if pattern.execute(&child_binding, state, context, logs)? {
-                        return Ok(true);
-                    }
+
+        if let Some(child) = node.first_child()  && node.children().count() == 1 {
+            let child_binding = GritResolvedPattern::from_node_binding(child);
+            for (_, pattern) in &self.patterns {
+                if pattern.execute(&child_binding, state, context, logs)? {
+                    return Ok(true);
                 }
             }
         }
