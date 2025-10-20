@@ -4,7 +4,9 @@ expression: matchBacktickSnippet
 ---
 SnapshotResult {
     messages: [],
-    matched_ranges: [],
+    matched_ranges: [
+        "1:1-1:28",
+    ],
     rewritten_files: [],
     created_files: [],
 }
