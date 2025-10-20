@@ -3,8 +3,9 @@ use biome_analyze::{RuleDomain, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::AnyJsxAttributeName;
 use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_unknown_property::NoUnknownPropertyOptions;
+use biome_string_case::StrOnlyExtension;
 
 use crate::services::manifest::Manifest;
 
@@ -1017,22 +1018,21 @@ fn has_uppercase(name: &str) -> bool {
     name.contains(char::is_uppercase)
 }
 
-pub enum NoUnknownPropertyDiagnostic {
+pub enum NoUnknownPropertyState {
     UnknownProp {
-        name: String,
+        name: Box<str>,
     },
     UnknownPropWithStandardName {
-        name: String,
-        standard_name: String,
+        name: Box<str>,
+        standard_name: Box<str>,
     },
     InvalidPropOnTag {
-        name: String,
-        tag_name: String,
-        allowed_tags: String,
+        name: Box<str>,
+        tag_name: TokenText,
+        allowed_tags: &'static [&'static str],
     },
     DataLowercaseRequired {
-        name: String,
-        lowercase_name: String,
+        name: Box<str>,
     },
 }
 
@@ -1053,7 +1053,7 @@ fn get_standard_name(name: &str) -> Option<&'static str> {
 
 impl Rule for NoUnknownProperty {
     type Query = Manifest<JsxAttribute>;
-    type State = NoUnknownPropertyDiagnostic;
+    type State = NoUnknownPropertyState;
     type Signals = Option<Self::State>;
     type Options = NoUnknownPropertyOptions;
 
@@ -1092,10 +1092,7 @@ impl Rule for NoUnknownProperty {
         // Handle data-* attributes
         if is_valid_data_attribute(name) {
             if options.require_data_lowercase && has_uppercase(&name) {
-                return Some(NoUnknownPropertyDiagnostic::DataLowercaseRequired {
-                    name: name.to_string(),
-                    lowercase_name: name.to_lowercase(),
-                });
+                return Some(NoUnknownPropertyState::DataLowercaseRequired { name: name.into() });
             }
             return None;
         }
@@ -1121,10 +1118,10 @@ impl Rule for NoUnknownProperty {
 
         if let Some(allowed_tags) = allowed_tags {
             if !allowed_tags.contains(&tag_name.trim()) {
-                return Some(NoUnknownPropertyDiagnostic::InvalidPropOnTag {
-                    name: name.to_string(),
-                    tag_name: tag_name.to_string(),
-                    allowed_tags: allowed_tags.join(","),
+                return Some(NoUnknownPropertyState::InvalidPropOnTag {
+                    name: name.into(),
+                    tag_name,
+                    allowed_tags,
                 });
             }
             return None;
@@ -1132,23 +1129,21 @@ impl Rule for NoUnknownProperty {
 
         if let Some(standard_name) = get_standard_name(name) {
             if standard_name != name {
-                return Some(NoUnknownPropertyDiagnostic::UnknownPropWithStandardName {
-                    name: name.to_string(),
-                    standard_name: standard_name.to_string(),
+                return Some(NoUnknownPropertyState::UnknownPropWithStandardName {
+                    name: name.into(),
+                    standard_name: name.into(),
                 });
             }
             return None;
         }
 
-        Some(NoUnknownPropertyDiagnostic::UnknownProp {
-            name: name.to_string(),
-        })
+        Some(NoUnknownPropertyState::UnknownProp { name: name.into() })
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         match state {
-            NoUnknownPropertyDiagnostic::UnknownProp { name } => Some(
+            NoUnknownPropertyState::UnknownProp { name } => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     node.range(),
@@ -1163,7 +1158,7 @@ impl Rule for NoUnknownProperty {
                     "Check the spelling or consider using a valid data-* attribute for custom properties."
                 }),
             ),
-            NoUnknownPropertyDiagnostic::UnknownPropWithStandardName {
+            NoUnknownPropertyState::UnknownPropWithStandardName {
                 name,
                 standard_name,
             } => Some(
@@ -1181,7 +1176,7 @@ impl Rule for NoUnknownProperty {
                         "Use '"{standard_name}"' instead of '"{name}"' for React components."
                 }),
             ),
-            NoUnknownPropertyDiagnostic::InvalidPropOnTag {
+            NoUnknownPropertyState::InvalidPropOnTag {
                 name,
                 tag_name,
                 allowed_tags,
@@ -1190,19 +1185,18 @@ impl Rule for NoUnknownProperty {
                     rule_category!(),
                     node.range(),
                     markup! {
-                        "Property '" {name} "' is not valid on a <" {tag_name} "> element."
+                        "Property '" {name} "' is not valid on a <" {tag_name.text()} "> element."
                     },
                 )
                 .note(markup! {
                     "This attribute is restricted and cannot be used on this HTML element"
                 })
                 .note(markup! {
-                       "This attribute is only allowed on: "{allowed_tags}
+                       "This attribute is only allowed on: "{allowed_tags.join(",")}
                 }),
             ),
-            NoUnknownPropertyDiagnostic::DataLowercaseRequired {
+            NoUnknownPropertyState::DataLowercaseRequired {
                 name,
-                lowercase_name,
             } => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
@@ -1215,7 +1209,7 @@ impl Rule for NoUnknownProperty {
                     "HTML data-* attributes must use lowercase letters to be valid."
                 })
                 .note(markup! {
-                    "Change '"{name}"' to '"{lowercase_name}"' to follow HTML standards."
+                    "Change '"{name}"' to '"{name.to_lowercase_cow()}"' to follow HTML standards."
                 }),
             ),
         }
