@@ -1,3 +1,0 @@
-`$fn($args)` where {
-    $fn <: `buildConfig`,
-}
