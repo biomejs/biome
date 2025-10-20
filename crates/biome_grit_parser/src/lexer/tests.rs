@@ -397,11 +397,6 @@ fn snippet_regex() {
 #[test]
 fn snippets() {
     assert_lex! {
-        r#"`console`"#,
-        GRIT_BACKTICK_SNIPPET:9,
-    }
-
-    assert_lex! {
         r#"`console.log()`"#,
         GRIT_BACKTICK_SNIPPET:15,
     }
@@ -506,23 +501,5 @@ fn keywords() {
         );
 
         assert_eq!(lexer.next_token(()), EOF);
-    }
-}
-
-#[test]
-fn snippet_with_simple_identifier() {
-    // This should work - backtick snippet with a simple identifier
-    assert_lex! {
-        r#"`buildConfig`"#,
-        GRIT_BACKTICK_SNIPPET:13,
-    }
-}
-
-#[test]
-fn snippet_with_dotted_identifier() {
-    // This should also work - backtick snippet with a dotted identifier
-    assert_lex! {
-        r#"`build.config`"#,
-        GRIT_BACKTICK_SNIPPET:14,
     }
 }

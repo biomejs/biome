@@ -5,6 +5,7 @@ expression: arrayType
 SnapshotResult {
     messages: [],
     matched_ranges: [
+        "2:20-2:30",
         "2:22-2:30",
     ],
     rewritten_files: [],

@@ -495,6 +495,25 @@ mod tests {
     use regex::Regex;
 
     #[test]
+    fn test_snippet_node_from_tree() {
+        let snippet: SnippetTree<GritTargetTree> =
+            GritJsParser.parse_snippet("", "buildConfig", "");
+        let node = node_from_tree(&snippet).expect("no node found");
+        let formatted = format!("{node:#?}");
+        insta::assert_snapshot!(&formatted, @r#"
+        GritTargetNode {
+            node: JsLanguage(
+                Node(
+                    0: JS_REFERENCE_IDENTIFIER@0..11
+                      0: IDENT@0..11 "buildConfig" [] []
+                    ,
+                ),
+            ),
+        }
+        "#);
+    }
+
+    #[test]
     fn test_node_from_tree() {
         let snippet = GritJsParser.parse_snippet("", "console.log('hello')", "");
         let node = node_from_tree(&snippet).expect("no node found");
