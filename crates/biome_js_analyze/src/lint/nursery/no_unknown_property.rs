@@ -1131,7 +1131,7 @@ impl Rule for NoUnknownProperty {
             if standard_name != name {
                 return Some(NoUnknownPropertyState::UnknownPropWithStandardName {
                     name: name.into(),
-                    standard_name: name.into(),
+                    standard_name: standard_name.into(),
                 });
             }
             return None;
