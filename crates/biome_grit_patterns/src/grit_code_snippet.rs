@@ -49,14 +49,18 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
             }
         }
 
+        // If no exact kind match succeeded, try all patterns
+        // This handles cases where the snippet was parsed in different contexts
+        // (e.g., `buildConfig` parsed as identifier vs expression)
+        for (_, pattern) in &self.patterns {
+            if pattern.execute(resolved, state, context, logs)? {
+                return Ok(true);
+            }
+        }
+
         // If node has a single child, try matching against the child
         // This handles wrapper nodes like JS_IDENTIFIER_EXPRESSION wrapping JS_REFERENCE_IDENTIFIER
-        if node.kind()
-            == GritTargetSyntaxKind::JsSyntaxKind(
-                biome_js_syntax::JsSyntaxKind::JS_IDENTIFIER_EXPRESSION,
-            )
-            && let Some(child) = node.first_child()
-        {
+        if let Some(child) = node.first_child() {
             if node.children().count() == 1 {
                 let child_binding = GritResolvedPattern::from_node_binding(child);
                 for (_, pattern) in &self.patterns {
