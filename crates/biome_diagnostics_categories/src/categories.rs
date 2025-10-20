@@ -410,6 +410,7 @@ define_categories! {
     "check",
     "ci",
     "stdin",
+    "init",
     "configuration",
     "assist",
     "migrate",

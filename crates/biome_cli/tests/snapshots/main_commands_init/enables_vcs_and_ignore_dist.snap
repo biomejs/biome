@@ -2,18 +2,18 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `biome.jsonc`
+## `biome.json`
 
 ```json
 {
   "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
   "vcs": {
-    "enabled": false,
+    "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": false
+    "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false
+    "includes": ["**", "!!**/dist"]
   },
   "formatter": {
     "enabled": true,
@@ -41,6 +41,18 @@ expression: redactor(content)
 }
 ```
 
+## `.gitignore`
+
+```gitignore
+
+```
+
+## `dist`
+
+```dist
+
+```
+
 # Emitted Messages
 
 ```block
@@ -50,8 +62,12 @@ init ━━━━━━━━━━━━━━━━━━━━━━━━━
     
     Files created 
     
-      - biome.jsonc
+      - biome.json
         Your project configuration. See https://biomejs.dev/reference/configuration
+    
+    Found an ignore file. Biome enabled VCS integration.
+    
+    Found a dist/ folder. Biome ignored it using the double-exclude syntax.
     
     Next Steps 
     

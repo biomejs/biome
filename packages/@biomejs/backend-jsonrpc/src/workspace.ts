@@ -9252,6 +9252,7 @@ export type Category =
 	| "check"
 	| "ci"
 	| "stdin"
+	| "init"
 	| "configuration"
 	| "assist"
 	| "migrate"
