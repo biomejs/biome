@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoEmptySource {
-        version: "next",
+        version: "2.2.7",
         name: "noEmptySource",
         language: "css",
         sources: &[RuleSource::Stylelint("no-empty-source").same()],
