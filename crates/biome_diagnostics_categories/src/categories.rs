@@ -196,6 +196,7 @@ define_categories! {
     "lint/nursery/useDeprecatedDate": "https://biomejs.dev/linter/rules/use-deprecated-date",
     "lint/nursery/useExhaustiveSwitchCases": "https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
     "lint/nursery/useExplicitFunctionReturnType": "https://biomejs.dev/linter/rules/use-explicit-type",
+    "lint/nursery/useExplicitTestAssertions": "https://biomejs.dev/linter/rules/use-explicit-test-assertions",
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-type",
     "lint/nursery/useImageSize": "https://biomejs.dev/linter/rules/use-image-size",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",

@@ -5203,6 +5203,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExplicitTestAssertions": {
+					"description": "Require each test function (test(), it()) to have an assertion (expect(), assert(), etc.).",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseExplicitTestAssertionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExplicitType": {
 					"description": "Enforce types in functions, methods, variables, and parameters.",
 					"anyOf": [
@@ -10610,6 +10617,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseExplicitTestAssertionsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseExplicitTestAssertionsOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseExplicitTypeOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -14032,6 +14056,16 @@
 			]
 		},
 		"UseExplicitLengthCheckOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseExplicitTestAssertionsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseExplicitTestAssertionsOptions" }
+			]
+		},
+		"UseExplicitTestAssertionsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

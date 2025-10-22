@@ -1738,6 +1738,10 @@ export interface Nursery {
 	 */
 	useExhaustiveSwitchCases?: RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions;
 	/**
+	 * Require each test function (test(), it()) to have an assertion (expect(), assert(), etc.).
+	 */
+	useExplicitTestAssertions?: RuleConfiguration_for_UseExplicitTestAssertionsOptions;
+	/**
 	 * Enforce types in functions, methods, variables, and parameters.
 	 */
 	useExplicitType?: RuleConfiguration_for_UseExplicitTypeOptions;
@@ -3091,6 +3095,9 @@ export type RuleConfiguration_for_UseDeprecatedDateOptions =
 export type RuleFixConfiguration_for_UseExhaustiveSwitchCasesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions;
+export type RuleConfiguration_for_UseExplicitTestAssertionsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseExplicitTestAssertionsOptions;
 export type RuleConfiguration_for_UseExplicitTypeOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseExplicitTypeOptions;
@@ -5709,6 +5716,16 @@ export interface RuleWithFixOptions_for_UseExhaustiveSwitchCasesOptions {
 	 */
 	options: UseExhaustiveSwitchCasesOptions;
 }
+export interface RuleWithOptions_for_UseExplicitTestAssertionsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseExplicitTestAssertionsOptions;
+}
 export interface RuleWithOptions_for_UseExplicitTypeOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8274,6 +8291,7 @@ export interface UseDeprecatedDateOptions {
 	argumentName?: string;
 }
 export interface UseExhaustiveSwitchCasesOptions {}
+export interface UseExplicitTestAssertionsOptions {}
 export interface UseExplicitTypeOptions {}
 export type UseImageSizeOptions = null;
 export interface UseMaxParamsOptions {
@@ -9017,6 +9035,7 @@ export type Category =
 	| "lint/nursery/useDeprecatedDate"
 	| "lint/nursery/useExhaustiveSwitchCases"
 	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExplicitTestAssertions"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useImageSize"
 	| "lint/nursery/useImportRestrictions"

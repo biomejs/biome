@@ -43,6 +43,51 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+test.js:2:1 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+   > 2 │ describe("foo", () => {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ 	beforeEach(() => {
+   > 4 │ 	});
+        ...
+   > 8 │ 		someFn();
+   > 9 │ 	});
+  > 10 │ });
+       │ ^^
+    11 │     
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```block
+test.js:7:2 lint/nursery/useExplicitTestAssertions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Missing assertion in test body.
+  
+     5 │ 	beforeEach(() => {
+     6 │ 	});
+   > 7 │ 	test("bar", () => {
+       │ 	^^^^^^^^^^^^^^^^^^^
+   > 8 │ 		someFn();
+   > 9 │ 	});
+       │ 	^^
+    10 │ });
+    11 │     
+  
+  i This could cause false positives where the test always passes but isn’t testing anything.
+  
+  i Add an expect() (Vitest/Jest) or assert() (node:assert) assertion to this test.
+  
+
+```
+
+```block
 test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The test hook beforeEach is used multiple times in the same test block.

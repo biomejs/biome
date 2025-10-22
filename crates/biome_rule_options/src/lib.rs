@@ -281,6 +281,7 @@ pub mod use_error_message;
 pub mod use_exhaustive_dependencies;
 pub mod use_exhaustive_switch_cases;
 pub mod use_explicit_length_check;
+pub mod use_explicit_test_assertions;
 pub mod use_explicit_type;
 pub mod use_exponentiation_operator;
 pub mod use_export_type;
