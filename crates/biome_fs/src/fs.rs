@@ -143,15 +143,19 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     ) -> Option<AutoSearchResult> {
         let mut current_search_dir = search_dir.to_path_buf();
         let mut is_searching_in_parent_dir = false;
-
+        let mut search_files = search_files.iter().peekable();
         loop {
             // Iterate all possible file names
-            for file_name in search_files {
+            while let Some(file_name) = search_files.next() {
                 let file_path = current_search_dir.join(file_name);
                 match self.read_file_from_path(&file_path) {
                     Ok(content) => {
                         if !predicate(&file_path, &content) {
-                            break;
+                            if search_files.peek().is_none() {
+                                break;
+                            } else {
+                                continue;
+                            }
                         }
                         if is_searching_in_parent_dir {
                             info!(
