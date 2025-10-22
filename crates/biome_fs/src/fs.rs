@@ -11,7 +11,7 @@ use std::panic::RefUnwindSafe;
 use std::path::Path;
 use std::sync::Arc;
 use std::{fmt, io};
-use tracing::{error, info};
+use tracing::info;
 
 mod memory;
 mod os;
@@ -191,32 +191,20 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                 let mut content = String::new();
                 match file.read_to_string(&mut content) {
                     Ok(_) => Ok(content),
-                    Err(err) => {
-                        error!(
-                            "Biome couldn't read the file {:?}, reason:\n{:?}",
-                            file_path, err
-                        );
-                        Err(FileSystemDiagnostic {
-                            path: file_path.to_string(),
-                            severity: Severity::Error,
-                            error_kind: FsErrorKind::CantReadFile,
-                            source: Some(Error::from(IoError::from(err))),
-                        })
-                    }
+                    Err(err) => Err(FileSystemDiagnostic {
+                        path: file_path.to_string(),
+                        severity: Severity::Error,
+                        error_kind: FsErrorKind::CantReadFile,
+                        source: Some(Error::from(IoError::from(err))),
+                    }),
                 }
             }
-            Err(err) => {
-                error!(
-                    "Biome couldn't open the file {:?}, reason:\n{:?}",
-                    file_path, err
-                );
-                Err(FileSystemDiagnostic {
-                    path: file_path.to_string(),
-                    severity: Severity::Error,
-                    error_kind: FsErrorKind::CantReadFile,
-                    source: Some(Error::from(IoError::from(err))),
-                })
-            }
+            Err(err) => Err(FileSystemDiagnostic {
+                path: file_path.to_string(),
+                severity: Severity::Error,
+                error_kind: FsErrorKind::CantReadFile,
+                source: Some(Error::from(IoError::from(err))),
+            }),
         }
     }
 
