@@ -65,6 +65,15 @@ impl VcsConfiguration {
     pub fn should_use_ignore_file(&self) -> bool {
         self.use_ignore_file.unwrap_or_default().into()
     }
+    pub fn new_git_ignore() -> Self {
+        Self {
+            enabled: Some(true.into()),
+            client_kind: Some(VcsClientKind::Git),
+            use_ignore_file: Some(true.into()),
+            root: None,
+            default_branch: None,
+        }
+    }
 }
 
 impl DeserializableValidator for VcsConfiguration {
