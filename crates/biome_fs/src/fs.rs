@@ -148,21 +148,29 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
             // Iterate all possible file names
             for file_name in search_files {
                 let file_path = current_search_dir.join(file_name);
-                if let Ok(content) = self.read_file_from_path(&file_path) {
-                    if !predicate(&file_path, &content) {
-                        break;
+                match self.read_file_from_path(&file_path) {
+                    Ok(content) => {
+                        if !predicate(&file_path, &content) {
+                            break;
+                        }
+                        if is_searching_in_parent_dir {
+                            info!(
+                                "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
+                                current_search_dir
+                            );
+                        }
+                        return Some(AutoSearchResult {
+                            content,
+                            file_path,
+                            directory_path: current_search_dir,
+                        });
                     }
-                    if is_searching_in_parent_dir {
+                    Err(err) => {
                         info!(
-                            "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
-                            current_search_dir
+                            "Couldn't find the configuration file at {}.",
+                            file_path.as_str()
                         );
                     }
-                    return Some(AutoSearchResult {
-                        content,
-                        file_path,
-                        directory_path: current_search_dir,
-                    });
                 }
             }
 
