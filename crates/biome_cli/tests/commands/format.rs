@@ -3416,7 +3416,7 @@ fn applies_custom_bracket_spacing_for_graphql() {
 }
 
 #[test]
-fn html_enabled_by_default() {
+fn html_disabled_by_default() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -3433,7 +3433,7 @@ fn html_enabled_by_default() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "html_enabled_by_default",
+        "html_disabled_by_default",
         fs,
         console,
         result,

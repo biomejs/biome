@@ -33,11 +33,10 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 });
 static QWIK_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("correctness", "noQwikUseVisibleTask"),
+        RuleFilter::Rule("correctness", "useImageSize"),
         RuleFilter::Rule("correctness", "useJsxKeyInIterable"),
-        RuleFilter::Rule("nursery", "noQwikUseVisibleTask"),
-        RuleFilter::Rule("nursery", "useAnchorHref"),
-        RuleFilter::Rule("nursery", "useImageSize"),
-        RuleFilter::Rule("nursery", "useQwikClasslist"),
+        RuleFilter::Rule("correctness", "useQwikClasslist"),
         RuleFilter::Rule("nursery", "useQwikMethodUsage"),
         RuleFilter::Rule("nursery", "useQwikValidLexicalScope"),
         RuleFilter::Rule("suspicious", "noReactSpecificProps"),
@@ -54,10 +53,10 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useJsxKeyInIterable"),
         RuleFilter::Rule("correctness", "useUniqueElementIds"),
         RuleFilter::Rule("nursery", "noReactForwardRef"),
-        RuleFilter::Rule("nursery", "useReactFunctionComponents"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtmlWithChildren"),
         RuleFilter::Rule("style", "useComponentExportOnlyModules"),
+        RuleFilter::Rule("style", "useReactFunctionComponents"),
         RuleFilter::Rule("suspicious", "noArrayIndexKey"),
     ]
 });

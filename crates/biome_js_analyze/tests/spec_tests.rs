@@ -133,7 +133,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
         analyze_and_snap(
             &mut snapshot,
-            &input_code,
+            input_code,
             source_type,
             filter,
             file_name,

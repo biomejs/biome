@@ -974,6 +974,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noQwikUseVisibleTask": {
+					"description": "Disallow useVisibleTask$() functions in Qwik components.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactPropAssignments": {
 					"description": "Disallow assigning to React component props.",
 					"anyOf": [
@@ -1204,6 +1211,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useImageSize": {
+					"description": "Enforces that \\<img> elements have both width and height attributes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useImportExtensions": {
 					"description": "Enforce file extensions for relative imports.",
 					"anyOf": [
@@ -1236,6 +1250,13 @@
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikClasslist": {
+					"description": "Prefer using the class prop as a classlist over the classnames helper.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5116,33 +5137,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noNonNullAssertedOptionalChain": {
-					"description": "Disallow non-null assertions after optional chaining expressions.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
-						},
-						{ "type": "null" }
-					]
-				},
-				"noQwikUseVisibleTask": {
-					"description": "Disallow useVisibleTask$() functions in Qwik components.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoQwikUseVisibleTaskConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noReactForwardRef": {
 					"description": "Replaces usages of forwardRef with passing ref as a prop.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoReactForwardRefConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noSecrets": {
-					"description": "Disallow usage of sensitive data such as API keys and tokens.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoSecretsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5220,26 +5218,10 @@
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
 				},
-				"useAnchorHref": {
-					"description": "Enforces href attribute for \\<a> elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseAnchorHrefConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useConsistentArrowReturn": {
 					"description": "Enforce consistent arrow function bodies.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseConsistentArrowReturnConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useConsistentTypeDefinitions": {
-					"description": "Enforce type definitions to consistently use either interface or type.",
-					"anyOf": [
-						{
-							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
-						},
 						{ "type": "null" }
 					]
 				},
@@ -5264,24 +5246,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useImageSize": {
-					"description": "Enforces that \\<img> elements have both width and height attributes.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseImageSizeConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useMaxParams": {
 					"description": "Enforce a maximum number of parameters in function definitions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseMaxParamsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useQwikClasslist": {
-					"description": "Prefer using the class prop as a classlist over the classnames helper.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseQwikClasslistConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -5296,13 +5264,6 @@
 					"description": "Disallow unserializable expressions in Qwik dollar ($) scopes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseQwikValidLexicalScopeConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useReactFunctionComponents": {
-					"description": "Enforce that components are defined as functions and never as classes.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseReactFunctionComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10046,21 +10007,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseAnchorHrefOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseAnchorHrefOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithUseAriaActivedescendantWithTabindexOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -12212,6 +12158,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSecrets": {
+					"description": "Disallow usage of sensitive data such as API keys and tokens.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoSecretsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "Enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -12668,6 +12621,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentTypeDefinitions": {
+					"description": "Enforce type definitions to consistently use either interface or type.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseConsistentTypeDefinitionsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useConst": {
 					"description": "Require const declarations for variables that are only assigned once.",
 					"anyOf": [
@@ -12819,6 +12781,13 @@
 					"description": "Prefer object spread over Object.assign() when constructing new objects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseObjectSpreadConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReactFunctionComponents": {
+					"description": "Enforce that components are defined as functions and never as classes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseReactFunctionComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13335,6 +13304,15 @@
 						{ "type": "null" }
 					]
 				},
+				"noNonNullAssertedOptionalChain": {
+					"description": "Disallow non-null assertions after optional chaining expressions.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/NoNonNullAssertedOptionalChainConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noOctalEscape": {
 					"description": "Disallow octal escape sequences in string literals",
 					"anyOf": [
@@ -13668,13 +13646,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseAnchorHrefConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseAnchorHrefOptions" }
-			]
-		},
-		"UseAnchorHrefOptions": { "type": "null" },
 		"UseAriaActivedescendantWithTabindexConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
