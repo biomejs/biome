@@ -1770,6 +1770,10 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UseSortedClassesOptions;
 	/**
+	 * Enforce specific order of Vue compiler macros.
+	 */
+	useVueDefineMacrosOrder?: RuleFixConfiguration_for_UseVueDefineMacrosOrderOptions;
+	/**
 	 * Enforce multi-word component names in Vue components.
 	 */
 	useVueMultiWordComponentNames?: RuleConfiguration_for_UseVueMultiWordComponentNamesOptions;
@@ -3115,6 +3119,9 @@ export type RuleConfiguration_for_UseReactFunctionComponentsOptions =
 export type RuleFixConfiguration_for_UseSortedClassesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSortedClassesOptions;
+export type RuleFixConfiguration_for_UseVueDefineMacrosOrderOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseVueDefineMacrosOrderOptions;
 export type RuleConfiguration_for_UseVueMultiWordComponentNamesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseVueMultiWordComponentNamesOptions;
@@ -5793,6 +5800,20 @@ export interface RuleWithFixOptions_for_UseSortedClassesOptions {
 	 */
 	options: UseSortedClassesOptions;
 }
+export interface RuleWithFixOptions_for_UseVueDefineMacrosOrderOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseVueDefineMacrosOrderOptions;
+}
 export interface RuleWithOptions_for_UseVueMultiWordComponentNamesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -8296,6 +8317,12 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export interface UseVueDefineMacrosOrderOptions {
+	/**
+	 * The order of the Vue define macros.
+	 */
+	order?: string[];
+}
 export interface UseVueMultiWordComponentNamesOptions {
 	/**
 	 * Component names to ignore (allowed to be single-word).
@@ -9027,6 +9054,7 @@ export type Category =
 	| "lint/nursery/useQwikValidLexicalScope"
 	| "lint/nursery/useReactFunctionComponents"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useVueDefineMacrosOrder"
 	| "lint/nursery/useVueMultiWordComponentNames"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"

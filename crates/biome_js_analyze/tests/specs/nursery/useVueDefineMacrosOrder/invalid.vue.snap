@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```ts
+import { ref } from 'vue'
+
+interface Foo {}
+
+type Bar = 1
+
+export type FooBar = Foo & Bar
+
+debugger
+
+// Define the props and emits
+const emit = defineEmits([])
+/** Props */
+defineProps({})
+
+const count = ref(0)
+
+```
+
+# Diagnostics
+```
+invalid.vue:14:1 lint/nursery/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i defineProps macro is out of order.
+  
+    12 │ const emit = defineEmits([])
+    13 │ /** Props */
+  > 14 │ defineProps({})
+       │ ^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ const count = ref(0)
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder macro defineProps.
+  
+     8  8 │   
+     9  9 │   debugger
+       10 │ + /**·Props·*/
+       11 │ + defineProps({})
+       12 │ + 
+    10 13 │   
+    11 14 │   // Define the props and emits
+    12    │ - const·emit·=·defineEmits([])
+    13    │ - /**·Props·*/
+    14    │ - defineProps({})
+       15 │ + const·emit·=·defineEmits([])
+    15 16 │   
+    16 17 │   const count = ref(0)
+  
+
+```
