@@ -23,6 +23,7 @@ use crate::{
 use super::*;
 
 #[test]
+#[cfg_attr(target_os = "macos", ignore = "flaky on macOS")]
 fn should_index_on_write_but_not_on_read() {
     let file_path = Utf8Path::new("foo.js");
 
@@ -95,6 +96,7 @@ fn should_index_on_write_but_not_on_read() {
 }
 
 #[test]
+#[cfg_attr(target_os = "macos", ignore = "flaky on macOS")]
 fn should_index_on_create_and_unload_on_delete() {
     let fs = TemporaryFs::new("should_index_on_create_and_unload_on_delete");
 

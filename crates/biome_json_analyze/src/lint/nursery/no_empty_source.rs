@@ -1,9 +1,7 @@
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsStatement, JsModule};
-use biome_rowan::{AstNode, AstNodeList};
+use biome_json_syntax::JsonRoot;
+use biome_rowan::AstNode;
 use biome_rule_options::no_empty_source::NoEmptySourceOptions;
 
 declare_lint_rule! {
@@ -12,64 +10,23 @@ declare_lint_rule! {
     /// A source containing only the following is considered empty:
     ///   - Whitespace (spaces, tabs or newlines)
     ///   - Comments
-    ///   - Directives
-    ///   - Empty statements
-    ///   - Empty block statements
-    ///   - Hashbang
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```json,expect_diagnostic
     ///
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```jsonc,expect_diagnostic
     /// // Only comments
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// /* Only comments */
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// 'use strict';
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// ;
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// {
-    /// }
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// #!/usr/bin/env node
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
-    /// const x = 0;
-    /// ```
-    ///
-    /// ```js
-    /// 'use strict';
-    /// const x = 0;
-    /// ```
-    ///
-    /// ```js
-    /// ;;
-    /// const x = 0;
-    /// ```
-    ///
-    /// ```js
-    /// {
-    ///   const x = 0;
-    /// }
+    /// ```json
+    /// { }
     /// ```
     ///
     /// ## Options
@@ -91,52 +48,38 @@ declare_lint_rule! {
     ///
     /// #### Invalid
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```jsonc,expect_diagnostic,use_options
     ///
     /// ```
     ///
     /// #### Valid
     ///
-    /// ```js,use_options
-    /// /* Only comments */
+    /// ```jsonc,ignore,use_options
+    /// // Only comments
     /// ```
     ///
     pub NoEmptySource {
         version: "2.2.7",
         name: "noEmptySource",
-        language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-empty-file").same()],
+        language: "json",
         recommended: false,
     }
 }
 
 impl Rule for NoEmptySource {
-    type Query = Ast<JsModule>;
+    type Query = Ast<JsonRoot>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoEmptySourceOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        if node.items().iter().any(|i| {
-            let Some(body) = i.as_any_js_statement() else {
-                return true;
-            };
-
-            match body {
-                AnyJsStatement::JsEmptyStatement(_) => false,
-                AnyJsStatement::JsBlockStatement(block) => block.statements().len() > 0,
-                _ => true,
-            }
-        }) {
+        if node.value().ok().is_some() {
             return None;
         }
 
-        if ctx.options().allow_comments
-            && (node.syntax().has_comments_direct()
-                || node.eof_token().ok()?.has_leading_comments())
-        {
+        if ctx.options().allow_comments && node.syntax().has_comments_direct() {
             return None;
         }
 

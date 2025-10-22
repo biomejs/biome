@@ -9,7 +9,6 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 const __filename = import.meta.filename;
@@ -49,7 +48,9 @@ function getCratePublishStatus(cargoTomlPath) {
 
 	// Extract crate name for error messages
 	const nameMatch = /^name\s*=\s*"([^"]+)"$/gm.exec(content);
-	const crateName = nameMatch ? nameMatch[1] : path.basename(path.dirname(cargoTomlPath));
+	const crateName = nameMatch
+		? nameMatch[1]
+		: path.basename(path.dirname(cargoTomlPath));
 
 	// Check if publish field exists
 	CARGO_PUBLISH_FIELD_REGEX.lastIndex = 0;
@@ -79,9 +80,10 @@ function getPublishableCrates() {
 	const publishableCrates = [];
 	const errors = [];
 
-	const crateDirs = fs.readdirSync(cratesDir, { withFileTypes: true })
-		.filter(dirent => dirent.isDirectory())
-		.map(dirent => dirent.name);
+	const crateDirs = fs
+		.readdirSync(cratesDir, { withFileTypes: true })
+		.filter((dirent) => dirent.isDirectory())
+		.map((dirent) => dirent.name);
 
 	for (const crateName of crateDirs) {
 		const cargoTomlPath = path.join(cratesDir, crateName, "Cargo.toml");
@@ -107,11 +109,15 @@ function getPublishableCrates() {
 	}
 
 	if (errors.length > 0) {
-		console.error("\nError: The following crates are missing the 'publish' field:");
+		console.error(
+			"\nError: The following crates are missing the 'publish' field:",
+		);
 		for (const errorPath of errors) {
 			console.error(`  - ${errorPath}`);
 		}
-		console.error("\nAll crates must have a 'publish = true' or 'publish = false' field.");
+		console.error(
+			"\nAll crates must have a 'publish = true' or 'publish = false' field.",
+		);
 		process.exit(1);
 	}
 
@@ -168,15 +174,17 @@ function updateCargoToml(filePath, newVersion, dryRun = false) {
  * @param {Array<{name: string, path: string}>} publishableCrates - List of publishable crates
  * @param {string} newVersion - New version string
  * @param {boolean} dryRun - If true, don't write changes
- * @returns {{success: boolean, changes: Array<{crate: string, oldVersion: string, newVersion: string}>}}
  */
-function updateWorkspaceDependencies(publishableCrates, newVersion, dryRun = false) {
+function updateWorkspaceDependencies(
+	publishableCrates,
+	newVersion,
+	dryRun = false,
+) {
 	const rootCargoPath = path.join(__dirname, "..", "Cargo.toml");
 	const content = fs.readFileSync(rootCargoPath, "utf8");
 
 	// For each publishable crate, update its version in workspace dependencies
 	let updatedContent = content;
-	const changes = [];
 
 	for (const crate of publishableCrates) {
 		const regex = new RegExp(
@@ -186,23 +194,15 @@ function updateWorkspaceDependencies(publishableCrates, newVersion, dryRun = fal
 
 		const match = regex.exec(updatedContent);
 		if (match) {
-			const oldVersion = match[2];
-			changes.push({ crate: crate.name, oldVersion, newVersion });
-
 			// Reset regex for replacement
 			regex.lastIndex = 0;
 			updatedContent = updatedContent.replace(regex, `$1"${newVersion}"`);
 		}
 	}
 
-	if (content !== updatedContent) {
-		if (!dryRun) {
-			fs.writeFileSync(rootCargoPath, updatedContent, "utf8");
-		}
-		return { success: true, changes };
+	if (content !== updatedContent && !dryRun) {
+		fs.writeFileSync(rootCargoPath, updatedContent, "utf8");
 	}
-
-	return { success: false, changes: [] };
 }
 
 /**
@@ -233,9 +233,13 @@ function main() {
 	const { values, positionals } = parsedArgs;
 
 	if (values.help) {
-		console.info("Usage: node scripts/update-crates-versions.mjs <version> [--dry-run]");
+		console.info(
+			"Usage: node scripts/update-crates-versions.mjs <version> [--dry-run]",
+		);
 		console.info("\nOptions:");
-		console.info("  --dry-run    Show what would be updated without making changes");
+		console.info(
+			"  --dry-run    Show what would be updated without making changes",
+		);
 		console.info("  --help       Show this help message");
 		console.info("\nExamples:");
 		console.info("  node scripts/update-crates-versions.mjs 0.6.0");
@@ -245,7 +249,9 @@ function main() {
 
 	if (positionals.length === 0) {
 		console.error("Error: Missing version argument");
-		console.error("Usage: node scripts/update-crates-versions.mjs <version> [--dry-run]");
+		console.error(
+			"Usage: node scripts/update-crates-versions.mjs <version> [--dry-run]",
+		);
 		console.error("Run with --help for more information");
 		process.exit(1);
 	}
@@ -256,9 +262,7 @@ function main() {
 	// Validate version format (basic semver check)
 	if (!SEMVER_REGEX.test(newVersion)) {
 		console.error(`Error: Invalid version format: ${newVersion}`);
-		console.error(
-			"Expected format: X.Y.Z (e.g., 0.6.0, 1.0.0, 2.1.3)",
-		);
+		console.error("Expected format: X.Y.Z (e.g., 0.6.0, 1.0.0, 2.1.3)");
 		process.exit(1);
 	}
 
@@ -275,8 +279,8 @@ function main() {
 
 	console.info(`Found ${publishableCrates.length} publishable crate(s)\n`);
 
-	// Update workspace dependencies
-	const workspaceResult = updateWorkspaceDependencies(publishableCrates, newVersion, dryRun);
+	// Update workspace dependencies in root Cargo.toml
+	updateWorkspaceDependencies(publishableCrates, newVersion, dryRun);
 
 	// Update individual crate Cargo.toml files
 	let updatedCount = 0;
@@ -286,7 +290,7 @@ function main() {
 		if (result.success) {
 			if (dryRun) {
 				console.info(
-					`${crate.name}: ${result.oldVersion} -> ${result.newVersion}`,
+					`  ${crate.name}: ${result.oldVersion} -> ${result.newVersion}`,
 				);
 			}
 			updatedCount++;
@@ -298,9 +302,7 @@ function main() {
 	);
 
 	if (dryRun) {
-		console.info(
-			"\nRun without --dry-run to apply these changes:",
-		);
+		console.info("\nRun without --dry-run to apply these changes:");
 		console.info(`   node scripts/update-crates-versions.mjs ${newVersion}`);
 	}
 }
