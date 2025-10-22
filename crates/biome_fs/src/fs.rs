@@ -165,7 +165,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                             directory_path: current_search_dir,
                         });
                     }
-                    Err(err) => {
+                    Err(_) => {
                         info!(
                             "Couldn't find the configuration file at {}.",
                             file_path.as_str()
